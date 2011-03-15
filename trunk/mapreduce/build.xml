@@ -1,0 +1,272 @@
+<project name="Mapreduce Build" default="package">
+	<!-- Global definitions -->
+	<property name="xcc.jar" value="../xcc/buildtmp/java/xcc.jar"/>
+	<property name="mapreduce.app.name" value="mapreduce"/>
+	<property name="mapreduce.product.name" value="MarkLogic Hadoop MapReduce Connector"/>
+	<property name="mapreduce.product.name.short" value="MapReduce Connector"/>
+	<property name="version.definition.file" value="../xcc/VERSION"/>
+	<loadfile property="version.number.string" srcfile="${version.definition.file}">
+		<filterchain>
+			<headfilter lines="1"/>
+			<striplinebreaks/>
+		</filterchain>
+	</loadfile>
+        <loadfile property="jar.version.number.string" srcfile="${version.definition.file}">
+                <filterchain>
+                        <headfilter lines="1"/>
+                        <striplinebreaks/>
+                        <replaceregex pattern="-" replace="."/>
+                </filterchain>
+        </loadfile>
+	<property name="version.number.string" value="X.X-X"/>  <!-- This is a no-op, only here to suppress a warning -->
+	<property name="mapreduce.bundle.name" value="marklogic-mapreduce-${version.number.string}"/>
+	<tstamp><format property="date-string" pattern="MMMM dd, yyyy"/></tstamp>
+
+	<!-- Static definitions of where things are relative to the root -->
+	<property name="java.source" value="src/java"/>
+	<property name="junit.source" value="src/junit"/>
+	<property name="buildtmp" value="buildtmp"/>
+	<property name="stagedir" value="${buildtmp}/stage"/>
+	<property name="mapreduce.stagedir" value="${buildtmp}/stage/mapreduce"/>
+	<property name="compiled.classes.dir" value="${buildtmp}/classes"/>
+	<property name="test.data.dir" value="src/testdata"/>
+	<property name="java.intermediate.dir" value="${buildtmp}/java"/>
+	<property name="javadocdir" value="${buildtmp}/javadoc"/>
+	<property name="docs.src.dir" value="docs"/>
+
+	<!-- Definitions related to Javadocs -->
+	<tstamp><format property="thisyear" pattern="yyyy"></format></tstamp>
+	<property name="mapreduce.javadoc.included.packages" value="com.marklogic.mapreduce,com.marklogic.mapreduce.examples"/>
+	<property name="javadoc.copyright.message" value="Copyright &amp;copy; 2003-${thisyear} MarkLogic Corporation, All Rights Reserved."/>
+	<property name="javadoc.custom.css" value="${java.source}/stylesheet.css"/>
+	<property name="javadoc.jdk.javadoc.base" value="http://java.sun.com/j2se/1.4.2/docs/api/"/>
+	<property name="mapreduce.examples.dir" value="${java.source}/com/marklogic/mapreduce/examples"/>
+	<property name="mapreduce.javadoc.examples.dir" value="${javadocdir}/mapreduce/com/marklogic/mapreduce/examples/doc-files"/>
+	<property name="mapreduce.javadoc.logging.props.dir" value="${javadocdir}/mapreduce/com/marklogic/mapreduce/doc-files"/>
+	<property name="mapreduce.javadoczip.name" value="${mapreduce.app.name}_apidocs.zip"/>
+
+	<!-- Jar files that are under source control in this tree -->
+	<property name="jarlib" value="src/lib"/>
+	<property name="junit.jar" value="${jarlib}/junit.jar"/>
+	<property name="servlet.jar" value="${jarlib}/servlet.jar"/>
+
+	<!-- Products of this build -->
+	<property name="products" value="deliverable"/>
+	<property name="mapreduce.jar.name" value="marklogic-mapreduce-${jar.version.number.string}.jar"/>
+	<property name="mapreduce.examples.jar.name" value="marklogic-${mapreduce.app.name}-examples-${jar.version.number.string}.jar"/>
+	<property name="mapreduce.output.jar" value="${java.intermediate.dir}/${mapreduce.jar.name}"/>
+	<property name="mapreduce.javadoczip" value="${java.intermediate.dir}/${mapreduce.javadoczip.name}"/>
+	<property name="mapreduce.bundle.zip" value="${products}/${mapreduce.bundle.name}.zip"/>
+
+	<!-- Configurable flags that will affect how targets run -->
+	<property name="junit.output.format" value="plain"/>	<!-- plain | brief | xml -->
+	<property name="junit.output.dir" value="${buildtmp}/junit.test.output"/>
+	<property name="compile.debug.symbols.flag" value="true"/>	<!-- on | off -->
+	<property name="junit.halt.on.error" value="on"/>		<!-- on | off -->
+	<property name="junit.halt.on.failure" value="on"/>		<!-- on | off -->
+
+<!--
+	Leave this property undefined to run junit impl tests in the build
+	<property name="junit.disabled" value="false"/>
+-->
+
+	<!-- ************************************************************** -->
+	<!-- Initialization and cleanup -->
+
+	<target name="init">
+		<mkdir dir="${buildtmp}"/>
+		<mkdir dir="${compiled.classes.dir}"/>
+		<mkdir dir="${java.intermediate.dir}"/>
+		<mkdir dir="${products}"/>
+	</target>
+
+	<target name="clean">
+		<delete dir="${buildtmp}"/>
+	</target>
+
+	<target name="cleanest" depends="clean">
+		<delete dir="${products}"/>
+	</target>
+
+	<!-- ************************************************************** -->
+	<!-- Produce the XCC Jar file product -->
+
+        <path id="mapreduce.classpath">
+                <pathelement path="${xcc.jar}"/>
+                <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
+                <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
+                <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
+                <pathelement path="${jarlib}/hadoop-common-0.21.0.jar"/>
+                <pathelement path="${jarlib}/hadoop-mapred-0.21.0.jar"/>
+                <pathelement path="${jarlib}/log4j-1.2.15.jar"/>
+                <pathelement path="${jarlib}/apache-mime4j-0.6.jar"/>
+                <pathelement path="${jarlib}/commons-codec-1.3.jar"/>
+                <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
+                <pathelement path="${jarlib}/httpclient-4.0.3.jar"/>
+                <pathelement path="${jarlib}/httpcore-4.0.1.jar"/>
+                <pathelement path="${jarlib}/httpmime-4.0.3.jar"/>
+        </path>
+
+	<path id="mapreduce.compile.classpath">
+		<pathelement path="${compiled.classes.dir}"/>
+                <path refid="mapreduce.classpath"/>
+	</path>
+
+	<path id="mapreduce.testcases.classpath">
+		<pathelement path="${compiled.classes.dir}"/>
+		<pathelement path="${junit.jar}"/>
+		<pathelement path="${test.data.dir}"/>
+	</path>
+
+	<target name="compile.mapreduce">
+		<javac classpathref="mapreduce.compile.classpath" srcdir="${java.source}"
+			destdir="${compiled.classes.dir}" deprecation="on"
+			debug="${compile.debug.symbols.flag}" failonerror="on"
+			source="1.5" target="1.5">
+			<compilerarg value="-Xlint"/>
+		</javac>
+	</target>
+
+	<target name="compile.mapreduce.tests" depends="compile.mapreduce">
+		<javac classpathref="mapreduce.testcases.classpath" srcdir="${junit.source}"
+			destdir="${compiled.classes.dir}" deprecation="on"
+			debug="${compile.debug.symbols.flag}" failonerror="on"
+			source="1.5" target="1.5">
+			<compilerarg value="-Xlint"/>
+		</javac>
+	</target>
+
+	<target name="test.mapreduce" depends="compile.mapreduce.tests" unless="junit.disabled" >
+		<mkdir dir="${junit.output.dir}"/>
+		<junit printsummary="on" showoutput="true"
+		       haltonerror="${junit.halt.on.error}" haltonfailure="${junit.halt.on.failure}">
+			<classpath refid="mapreduce.testcases.classpath"/>
+
+			<formatter type="${junit.output.format}" usefile="true"/>
+
+			<batchtest fork="yes" todir="${junit.output.dir}">
+				<fileset dir="${junit.source}" includes="**/Test*.java"/>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="check.classes">
+		<uptodate property="classes.current" targetfile="${mapreduce.output.jar}">
+			<srcfiles dir="${compiled.classes.dir}" includes="**/*.class"/>
+			<srcfiles dir="${compiled.classes.dir}" includes="**/*.properties"/>
+		</uptodate>
+	</target>
+
+	<target name="mapreduce.jar" depends="compile.mapreduce" unless="classes.current">
+		<jar jarfile="${mapreduce.output.jar}" basedir="${compiled.classes.dir}"
+			includes="com/marklogic/mapreduce/*">
+			<manifest>
+				<section name="mapreduce">
+					<attribute name="Vendor" value="MarkLogic Corporation"/>
+					<attribute name="Description" value="Hadoop Connector for Java"/>
+					<attribute name="Build-Version" value="${version.number.string}"/>
+					<attribute name="Build-Date" value="${date-string}"/>
+				</section>
+			</manifest>
+		</jar>
+	</target>
+
+
+
+	<!-- ************************************************************** -->
+	<!-- Gen the JavaDocs -->
+
+	<path id="mapreduce.javadoc.sourcepath">
+		<pathelement path="${java.source}"/>
+	</path>
+
+	<target name="javadoc.mapreduce" depends="mapreduce.jar" unless="classes.current">
+		<mkdir dir="${javadocdir}/mapreduce"/>
+		<javadoc sourcepathref="mapreduce.javadoc.sourcepath" destdir="${javadocdir}/mapreduce"
+			packagenames="${mapreduce.javadoc.included.packages}" version="true"
+			windowtitle="${mapreduce.product.name} v${version.number.string}"
+			doctitle="${mapreduce.product.name} Version ${version.number.string}"
+			overview="${java.source}/overview.html" author="false"
+			header="${mapreduce.product.name.short} ${version.number.string}"
+			link="${javadoc.jdk.javadoc.base}"
+		>
+			<classpath>
+				<pathelement path="${compiled.classes.dir}"/>
+				<pathelement path="${junit.jar}"/>
+				<path refid="mapreduce.classpath"/>
+			</classpath>
+			<bottom><![CDATA[
+				<i>${javadoc.copyright.message}</i>
+				<p>Complete online documentation for MarkLogic Server,
+				XQuery and related components may be found at
+				<a href="http://developer.marklogic.com/pubs/"
+					target="mldocs">developer.marklogic.com</a><p>
+			]]></bottom>
+		</javadoc>
+		<copy file="${javadoc.custom.css}" todir="${javadocdir}/mapreduce" overwrite="true"/>
+		<copy todir="${mapreduce.javadoc.examples.dir}"  overwrite="true">
+			<fileset dir="${mapreduce.examples.dir}" includes="*.java"/>
+		</copy>
+		<move todir="${mapreduce.javadoc.examples.dir}">
+			<fileset dir="${mapreduce.javadoc.examples.dir}" includes="*.java"/>
+			<mapper type="glob" from="*" to="*.txt"/>
+		</move>
+
+		<mkdir dir="${mapreduce.javadoc.logging.props.dir}"/>
+		<copy todir="${mapreduce.javadoc.logging.props.dir}"  overwrite="true">
+			<fileset file="${mapreduce.logging.props.file.path}"/>
+		</copy>
+		<move todir="${mapreduce.javadoc.logging.props.dir}">
+			<fileset dir="${mapreduce.javadoc.logging.props.dir}" includes="*.properties"/>
+			<mapper type="glob" from="*" to="*.txt"/>
+		</move>
+		<echo file="${javadocdir}/mapreduce/default.xqy">xdmp:redirect-response ("index.html")</echo>
+		<zip zipfile="${mapreduce.javadoczip}" basedir="${javadocdir}/mapreduce"/>
+	</target>
+
+	<!-- ************************************************************** -->
+
+	<property name="mapreduce.stage.lib" value="${mapreduce.stagedir}/lib"/>
+	<property name="mapreduce.stage.src" value="${mapreduce.stagedir}/src"/>
+	<property name="mapreduce.stage.docs" value="${mapreduce.stagedir}/docs"/>
+	<property name="mapreduce.stage.api.docs" value="${mapreduce.stage.docs}/api"/>
+
+	<target name="mapreduce.stage" depends="mapreduce.jar,javadoc.mapreduce">
+		<delete dir="${mapreduce.stagedir}"/>
+		<mkdir dir="${mapreduce.stagedir}"/>
+
+		<mkdir dir="${mapreduce.stage.lib}"/>
+		<copy todir="${mapreduce.stage.lib}"  file="${mapreduce.output.jar}"/>
+		<jar jarfile="${mapreduce.stage.lib}/${mapreduce.examples.jar.name}" basedir="${compiled.classes.dir}"
+			includes="com/marklogic/mapreduce/examples/*"/>
+
+		<mkdir dir="${mapreduce.stage.docs}"/>
+		<copy todir="${mapreduce.stage.docs}" file="${mapreduce.javadoczip}"/>
+
+		<mkdir dir="${mapreduce.stage.api.docs}"/>
+		<copy todir="${mapreduce.stage.api.docs}">
+			<fileset dir="${javadocdir}/mapreduce"/>
+		</copy>
+
+		<mkdir dir="${mapreduce.stage.src}"/>
+		<copy todir="${mapreduce.stage.src}">
+			<fileset dir="${java.source}">
+				<include name="com/marklogic/mapreduce/examples/*.java"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<target name="mapreduce.package" depends="mapreduce.stage">
+		<delete file="${mapreduce.bundle.zip}"/>
+		<zip zipfile="${mapreduce.bundle.zip}">
+			<fileset dir="${mapreduce.stagedir}"/>
+		</zip>
+	</target>
+
+	<!-- ************************************************************** -->
+
+        <target name="mapreduce" depends="mapreduce.package"/>
+	<target name="all" depends="mapreduce"/>
+
+</project>
+
