@@ -118,7 +118,7 @@
 		<pathelement path="${test.data.dir}"/>
 	</path>
 
-	<target name="compile.mapreduce">
+	<target name="compile.mapreduce" depends="init">
 		<javac classpathref="mapreduce.compile.classpath" srcdir="${java.source}"
 			destdir="${compiled.classes.dir}" deprecation="on"
 			debug="${compile.debug.symbols.flag}" failonerror="on"
