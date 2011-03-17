@@ -3,12 +3,15 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 import java.net.URI;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.ContentSourceFactory;
 import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
@@ -19,7 +22,8 @@ import com.marklogic.xcc.exceptions.XccConfigException;
  */
 public abstract class MarkLogicRecordWriter<K>
 extends RecordWriter<K, MarkLogicNode> {
-
+	public static final Log LOG =
+	    LogFactory.getLog(MarkLogicRecordWriter.class);
 	/**
 	 * Server URI.
 	 */
@@ -37,7 +41,11 @@ extends RecordWriter<K, MarkLogicNode> {
 	public void close(TaskAttemptContext context) throws IOException,
 			InterruptedException {
 		if (session != null) {
-			session.close();
+			try {
+	            session.close();
+            } catch (RequestException e) {
+            	LOG.error(e);
+            }
 		}
 	}
 	
