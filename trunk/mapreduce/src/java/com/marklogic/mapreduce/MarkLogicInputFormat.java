@@ -32,11 +32,11 @@ import com.marklogic.xcc.types.XSString;
  * 
  * @author jchen
  */
-public abstract class MarkLogicInputFormat<K> extends InputFormat<K, MarkLogicRecord> 
+public abstract class MarkLogicInputFormat<KEYIN, VALUEIN> extends InputFormat<KEYIN, VALUEIN> 
 implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicInputFormat.class);
-	
+	/* save later after is-searchable is available
 	static final String SPLIT_QUERY_TEMPLATE = 
     	"xquery version \"1.0-ml\"; \n" + 
     	NAMESPACE_TEMPLATE + 
@@ -49,7 +49,18 @@ implements MarkLogicConstants {
         "let $cnt := xdmp:estimate(cts:search(" + PATH_EXPRESSION_TEMPLATE + ", \n" +
         "                          cts:and-query(()), (), 0.0, $forest)) \n" +
         "return ($forest, $cnt, $host_name)";    
-    	
+    */
+	static final String SPLIT_QUERY_TEMPLATE =
+		"xquery version \"1.0-ml\"; \n" + 
+        "import module namespace admin = \"http://marklogic.com/xdmp/admin\" \n" +
+                 " at \"/MarkLogic/admin.xqy\"; \n" +
+        "let $conf := admin:get-configuration() \n" +
+        "for $forest in xdmp:database-forests(xdmp:database()) \n" +         
+        "let $host_id := admin:forest-get-host($conf, $forest) \n" +
+        "let $host_name := admin:host-get-name($conf, $host_id) \n" +
+        "let $cnt := xdmp:estimate(cts:search(fn:doc(), \n" +
+        "                          cts:and-query(()), (), 0.0, $forest)) \n" +
+        "return ($forest, $cnt, $host_name)";    
     /**
      * get server URI from the configuration.
      * 
@@ -97,6 +108,7 @@ implements MarkLogicConstants {
 		String pathExpr;
 		String nameSpace;
 		float recordToFragRatio;
+		String splitQuery;
 		try {
 			serverUri = getServerUri(jobConf);
 			pathExpr = jobConf.get(PATH_EXPRESSION, "");
@@ -105,6 +117,7 @@ implements MarkLogicConstants {
 					DEFAULT_MAX_SPLIT_SIZE);
 			recordToFragRatio = jobConf.getFloat(RECORD_TO_FRAGMENT_RATIO, 
 					getDefaultRecordFragRatio());
+			splitQuery = jobConf.get(SPLIT_QUERY, "");
 		} catch (URISyntaxException e) {
 			LOG.error(e);
 			throw new IOException(e);
@@ -114,16 +127,18 @@ implements MarkLogicConstants {
 		List<ForestSplit> forestSplits = null;
 		Session session = null;
 		ResultSequence result = null;
-		String queryText = SPLIT_QUERY_TEMPLATE
+		if (splitQuery.isEmpty()) {
+		    splitQuery = SPLIT_QUERY_TEMPLATE
 	        .replace(PATH_EXPRESSION_TEMPLATE, pathExpr)
 	        .replace(NAMESPACE_TEMPLATE, nameSpace);
+		}
 		if (LOG.isDebugEnabled()) {
-		    LOG.debug("query: " + queryText);
+		    LOG.debug("query: " + splitQuery);
 		}
 		try {
 			ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
 			session = cs.newSession();
-			AdhocQuery query = session.newAdhocQuery(queryText);
+			AdhocQuery query = session.newAdhocQuery(splitQuery);
 			RequestOptions options = new RequestOptions();
 			options.setCacheResult(false);
 			query.setOptions(options);
@@ -160,19 +175,14 @@ implements MarkLogicConstants {
 			throw new IOException(e);
 		} catch (RequestException e) {
 			LOG.error(e);
-			LOG.error("Query: " + queryText);
+			LOG.error("Query: " + splitQuery);
 			throw new IOException(e);
 		} finally {
-			try {
-				if (result != null) {
-					result.close();
-				}
-				if (session != null) {
-					session.close();
-				}
-			} catch (RequestException e) {
-				LOG.error(e);
-				throw new IOException(e);
+			if (result != null) {
+				result.close();
+			}
+			if (session != null) {
+				session.close();
 			}
 		}
 		

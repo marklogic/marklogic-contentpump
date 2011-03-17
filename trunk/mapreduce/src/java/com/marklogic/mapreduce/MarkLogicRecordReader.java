@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -19,16 +20,18 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
-
 /**
  * A RecordReader that fetches data from MarkLogic server and generates 
- * <K, MarkLogicRecord> key value pairs.
+ * <K, V> key value pairs.
  * 
  * @author jchen
+ * 
+ * @param <KEYIN, VALUEIN>
  */
-public abstract class MarkLogicRecordReader<K> 
-extends RecordReader<K, MarkLogicRecord> 
+public abstract class MarkLogicRecordReader<KEYIN, VALUEIN> 
+extends RecordReader<KEYIN, VALUEIN>
 implements MarkLogicConstants {
+
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicRecordReader.class);
 	static final String FOREST_ID_TEMPLATE = "{forest_id}";
@@ -50,7 +53,7 @@ implements MarkLogicConstants {
 	/**
 	 * Count of records fetched
 	 */
-	private int count;
+	private long count;
 	/**
 	 * URI of the MarkLogic server with host to be filled in.
 	 */
@@ -71,37 +74,31 @@ implements MarkLogicConstants {
 	 * ResultSequence from the MarkLogic server.
 	 */
 	private ResultSequence result;
-
 	/**
-	 * Current value.
+	 * Job configuration.
 	 */
-	private MarkLogicRecord currentValue;
+	private Configuration conf;
 	
-	public MarkLogicRecordReader(String serverUri, String pathExpr, String nameSpace) {
-		this.serverUriTemp = serverUri;
-		this.pathExpr = pathExpr;
-		this.nameSpace = nameSpace;
+	public MarkLogicRecordReader(Configuration conf, String serverUriTemp) {
+		this.conf = conf;
+		this.serverUriTemp = serverUriTemp;
+		this.pathExpr = conf.get(PATH_EXPRESSION);
+		this.nameSpace = conf.get(PATH_NAMESPACE);
 	}
 
 	@Override
 	public void close() throws IOException {
-		try {
-			if (result != null) {
-				result.close();
-			}
-			if (session != null) {
-				session.close();
-			}
-		} catch(RequestException e) {
-			LOG.error(e);
-			throw new IOException(e);
+		if (result != null) {
+			result.close();
+		}
+		if (session != null) {
+			session.close();
 		}
 	}
 
-	@Override
-	public MarkLogicRecord getCurrentValue() throws IOException, InterruptedException {
-		return currentValue;
-	}
+	public Configuration getConf() {
+    	return conf;
+    }
 
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
@@ -160,16 +157,31 @@ implements MarkLogicConstants {
 	public boolean nextKeyValue() throws IOException, InterruptedException {
 		if (result != null && result.hasNext()) {
 			ResultItem item = result.next();
-			setCurrentKey(item);
-			currentValue = new MarkLogicRecord(item);
 			count++;
-			return true;
+			return nextResult(item);
 		} else {
-			setCurrentKey(null);
-			currentValue = null;
+			endOfResult();
 			return false;
 		}
 	}
-	
-    abstract protected void setCurrentKey(ResultItem item);
+
+	abstract protected void endOfResult();
+
+	abstract protected boolean nextResult(ResultItem result);
+
+	public long getCount() {
+		return count;
+	}
+
+	public String getServerUriTemp() {
+		return serverUriTemp;
+	}
+
+	public String getPathExpr() {
+		return pathExpr;
+	}
+
+	public String getNameSpace() {
+		return nameSpace;
+	}
 }

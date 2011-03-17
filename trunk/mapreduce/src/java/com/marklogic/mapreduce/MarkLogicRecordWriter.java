@@ -9,7 +9,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.ContentSourceFactory;
 import com.marklogic.xcc.Session;
-import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
@@ -19,7 +18,7 @@ import com.marklogic.xcc.exceptions.XccConfigException;
  *
  */
 public abstract class MarkLogicRecordWriter<K>
-extends RecordWriter<K, MarkLogicRecord> {
+extends RecordWriter<K, MarkLogicNode> {
 
 	/**
 	 * Server URI.
@@ -37,12 +36,8 @@ extends RecordWriter<K, MarkLogicRecord> {
 	@Override
 	public void close(TaskAttemptContext context) throws IOException,
 			InterruptedException {
-		try {
-			if (session != null) {
-				session.close();
-			}
-		} catch (RequestException e) {
-			throw new IOException(e);
+		if (session != null) {
+			session.close();
 		}
 	}
 	
