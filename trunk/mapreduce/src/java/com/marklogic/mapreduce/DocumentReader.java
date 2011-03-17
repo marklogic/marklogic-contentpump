@@ -2,6 +2,8 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 
+import org.apache.hadoop.conf.Configuration;
+
 import com.marklogic.xcc.ResultItem;
 
 /**
@@ -9,14 +11,19 @@ import com.marklogic.xcc.ResultItem;
  * 
  * @author jchen
  */
-public class DocumentReader extends MarkLogicRecordReader<DocumentURI> {
+// TODO: Change to MarkLogicDocument when 12964 is fixed.
+public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogicNode> {
 	/**
 	 * Current key.
 	 */
 	private DocumentURI currentKey;
+	/**
+	 * Current value.
+	 */
+	private MarkLogicNode currentValue;
 	
-	public DocumentReader(String serverUri, String pathExpr, String nameSpace) {
-		super(serverUri, pathExpr, nameSpace);
+	public DocumentReader(Configuration conf, String serverUri) {
+		super(conf, serverUri);
 	}
 
 	@Override
@@ -31,4 +38,23 @@ public class DocumentReader extends MarkLogicRecordReader<DocumentURI> {
     		currentKey = null;
     	}
 	}
+
+	@Override
+    protected void endOfResult() {
+	    currentKey = null;
+	    currentValue = null;
+    }
+
+	@Override
+    protected boolean nextResult(ResultItem result) {
+		currentKey = new DocumentURI(result.getDocumentURI());
+		currentValue = new MarkLogicNode(result);
+	    return true;
+    }
+
+	@Override
+    public MarkLogicNode getCurrentValue() throws IOException,
+            InterruptedException {
+	    return currentValue;
+    }
 }

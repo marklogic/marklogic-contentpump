@@ -12,20 +12,17 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * 
  * @author jchen
  */
-public class DocumentInputFormat extends MarkLogicInputFormat<DocumentURI> {
+public class DocumentInputFormat extends MarkLogicInputFormat<DocumentURI, MarkLogicNode> {
 
 	static final float DOCUMENT_TO_FRAGMENT_RATIO = 1;
 	
 	@Override
-	public RecordReader<DocumentURI, MarkLogicRecord> createRecordReader(
-			InputSplit arg0, TaskAttemptContext context) throws IOException,
+	public RecordReader<DocumentURI, MarkLogicNode> createRecordReader(
+			InputSplit split, TaskAttemptContext context) throws IOException,
 			InterruptedException {
 		Configuration conf = context.getConfiguration();
 		String serverUri = getServerUriTemp(conf);
-		String pathExpr = conf.get(PATH_EXPRESSION, "");
-		String nameSpace = conf.get(PATH_NAMESPACE, "");
-   
-		return new DocumentReader(serverUri, pathExpr, nameSpace);
+		return new DocumentReader(conf, serverUri);
 	}
 	
 	@Override

@@ -20,7 +20,7 @@ public class NodeOutputFormat extends MarkLogicOutputFormat<NodePath> {
 	    LogFactory.getLog(NodeOutputFormat.class);
 	
 	@Override
-	public RecordWriter<NodePath, MarkLogicRecord> getRecordWriter(
+	public RecordWriter<NodePath, MarkLogicNode> getRecordWriter(
 			TaskAttemptContext context) throws IOException, InterruptedException {
 		Configuration conf = context.getConfiguration();
 		try {

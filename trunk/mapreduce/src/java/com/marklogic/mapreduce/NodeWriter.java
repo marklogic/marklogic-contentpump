@@ -33,7 +33,7 @@ implements MarkLogicConstants {
 	}
 
 	@Override
-	public void write(NodePath path, MarkLogicRecord record) 
+	public void write(NodePath path, MarkLogicNode record) 
 	throws IOException, InterruptedException {
 		String query = 
 			queryTemp.replace(NODE_PATH_TEMPLATE, path.getFullPath())

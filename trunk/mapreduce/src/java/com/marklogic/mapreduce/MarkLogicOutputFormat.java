@@ -28,7 +28,7 @@ import com.marklogic.xcc.exceptions.XccConfigException;
  * 
  * @author jchen
  */
-public abstract class MarkLogicOutputFormat<K> extends OutputFormat<K, MarkLogicRecord> 
+public abstract class MarkLogicOutputFormat<K> extends OutputFormat<K, MarkLogicNode> 
 implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicOutputFormat.class);
@@ -104,16 +104,11 @@ implements MarkLogicConstants {
 		} catch (RequestException e) {
 			LOG.error(e);
 		} finally {
-			try {
-				if (result != null) {
-					result.close();
-				}
-				if (session != null) {
-					session.close();
-				}
-			} catch (RequestException e) {
-				LOG.error(e);
-				throw new IOException(e);
+			if (result != null) {
+				result.close();
+			}
+			if (session != null) {
+				session.close();
 			}
 		}	
 	}

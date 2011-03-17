@@ -68,7 +68,7 @@ public class DocumentWriter extends MarkLogicRecordWriter<DocumentURI> {
 	}
 
 	@Override
-	public void write(DocumentURI key, MarkLogicRecord value) 
+	public void write(DocumentURI key, MarkLogicNode value) 
 	throws IOException, InterruptedException {
 		Session session = getSession();
 		try {
