@@ -15,8 +15,10 @@ import org.apache.hadoop.util.ReflectionUtils;
 import com.marklogic.xcc.ResultItem;
 
 /**
- * A RecordReader that fetches data from MarkLogic server and generates 
- * an integer key for each value fetched.
+ * <p>A RecordReader that fetches data from MarkLogic server and generates 
+ * an integer key for each value fetched.</p>
+ * 
+ * <p>Currently only support Text as ValueClass.</p>
  * 
  * @author jchen
  * 
@@ -68,6 +70,10 @@ implements MarkLogicConstants {
 		}
 		if (valueClass.equals(Text.class)) {
 			((Text)value).set(result.asString());
+		} else {
+			throw new UnsupportedOperationException("Value class " +  
+					valueClass + " is unsupported for result type: " + 
+					result.getValueType());
 		}
 		return true;
 	}
