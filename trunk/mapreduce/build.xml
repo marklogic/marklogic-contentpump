@@ -27,13 +27,13 @@
 	<property name="junit.source" value="src/junit"/>
 	<property name="buildtmp" value="buildtmp"/>
 	<property name="stagedir" value="${buildtmp}/stage"/>
-	<property name="mapreduce.stagedir" value="${buildtmp}/stage/mapreduce"/>
+	<property name="mapreduce.stagedir" value="${buildtmp}/stage"/>
 	<property name="compiled.classes.dir" value="${buildtmp}/classes"/>
 	<property name="test.data.dir" value="src/testdata"/>
 	<property name="java.intermediate.dir" value="${buildtmp}/java"/>
 	<property name="javadocdir" value="${buildtmp}/javadoc"/>
 	<property name="docs.src.dir" value="docs"/>
-	<property name="conf.dir" value="conf"/>
+	<property name="conf.dir" value="src/conf"/>
 
 	<!-- Definitions related to Javadocs -->
 	<tstamp><format property="thisyear" pattern="yyyy"></format></tstamp>
@@ -95,17 +95,10 @@
         <path id="mapreduce.classpath">
                 <pathelement path="${xcc.jar}"/>
                 <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
-                <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
+                <pathelement path="${jarlib}/commons-logging-1.0.4.jar"/>
                 <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
-                <pathelement path="${jarlib}/hadoop-common-0.21.0.jar"/>
-                <pathelement path="${jarlib}/hadoop-mapred-0.21.0.jar"/>
+                <pathelement path="${jarlib}/hadoop-0.20.2-core.jar"/>
                 <pathelement path="${jarlib}/log4j-1.2.15.jar"/>
-                <pathelement path="${jarlib}/apache-mime4j-0.6.jar"/>
-                <pathelement path="${jarlib}/commons-codec-1.3.jar"/>
-                <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
-                <pathelement path="${jarlib}/httpclient-4.0.3.jar"/>
-                <pathelement path="${jarlib}/httpcore-4.0.1.jar"/>
-                <pathelement path="${jarlib}/httpmime-4.0.3.jar"/>
         </path>
 
 	<path id="mapreduce.compile.classpath">
@@ -239,6 +232,7 @@
 
 		<mkdir dir="${mapreduce.stage.lib}"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${mapreduce.output.jar}"/>
+		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-modeler-2.0.1.jar"/>
 		<jar jarfile="${mapreduce.stage.lib}/${mapreduce.examples.jar.name}" basedir="${compiled.classes.dir}"
 			includes="com/marklogic/mapreduce/examples/*"/>
 
