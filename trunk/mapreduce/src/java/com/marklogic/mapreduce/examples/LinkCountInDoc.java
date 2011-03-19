@@ -21,7 +21,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
-import com.marklogic.mapreduce.MarkLogicRecord;
+import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.NodeInputFormat;
 import com.marklogic.mapreduce.NodeOutputFormat;
 import com.marklogic.mapreduce.NodePath;
@@ -29,13 +29,13 @@ import com.marklogic.mapreduce.NodePath;
 @SuppressWarnings("deprecation")
 public class LinkCountInDoc {
 	public static class RefMapper 
-	extends Mapper<NodePath, MarkLogicRecord, Text, IntWritable> {
+	extends Mapper<NodePath, MarkLogicNode, Text, IntWritable> {
 		
 		private final static IntWritable one = new IntWritable(1);
 		private final static String TITLE_ATTR_NAME = "title";
 		private Text refURI = new Text();
 		
-		public void map(NodePath key, MarkLogicRecord value, Context context) 
+		public void map(NodePath key, MarkLogicNode value, Context context) 
 		throws IOException, InterruptedException {
 			Element element = (Element)value.getNode();
 			String href = element.getAttribute(TITLE_ATTR_NAME);
@@ -49,14 +49,14 @@ public class LinkCountInDoc {
 	}
 	
 	public static class IntSumReducer
-	extends Reducer<Text, IntWritable, NodePath, MarkLogicRecord> {
+	extends Reducer<Text, IntWritable, NodePath, MarkLogicNode> {
 		private final static String TEMPLATE = "<ref-count>0</ref-count>";
 		private final static String ROOT_ELEMENT_NAME = "//wp:page";
 		private final static String BASE_URI_PARAM_NAME = "mapreduce.linkcount.baseuri";
 		
 		private NodePath nodePath = new NodePath();
 		private Element element;
-		private MarkLogicRecord result;
+		private MarkLogicNode result;
 		private String baseUri;
 		
 		protected void setup(Context context) 
@@ -66,7 +66,7 @@ public class LinkCountInDoc {
 					DocumentBuilderFactory.newInstance().newDocumentBuilder();
 				InputStream sbis = new StringBufferInputStream(TEMPLATE);
 				element = docBuilder.parse(sbis).getDocumentElement();
-				result = new MarkLogicRecord(element);
+				result = new MarkLogicNode(element);
 				baseUri = context.getConfiguration().get(BASE_URI_PARAM_NAME);
 			} catch (ParserConfigurationException e) {
 				// TODO Auto-generated catch block
@@ -115,7 +115,7 @@ public class LinkCountInDoc {
 		job.setReducerClass(IntSumReducer.class);
 		job.setOutputFormatClass(NodeOutputFormat.class);
 		job.setOutputKeyClass(NodePath.class);
-	    job.setOutputValueClass(MarkLogicRecord.class);
+	    job.setOutputValueClass(MarkLogicNode.class);
 		
 		conf = job.getConfiguration();
 		conf.addResource(otherArgs[0]);

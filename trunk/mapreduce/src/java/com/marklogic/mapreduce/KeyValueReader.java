@@ -9,6 +9,16 @@ import org.apache.hadoop.conf.Configuration;
 
 import com.marklogic.xcc.ResultItem;
 
+/**
+ * MarkLogicRecordReader that fetches data from MarkLogic server and generates 
+ * key value pairs, with the key being a system generated integer and value 
+ * in user specified type.
+ * 
+ * @author jchen
+ *
+ * @param <KEYIN>
+ * @param <VALUEIN>
+ */
 public class KeyValueReader<KEYIN, VALUEIN>
 extends MarkLogicRecordReader<KEYIN, VALUEIN>
 implements MarkLogicConstants {
@@ -16,12 +26,12 @@ implements MarkLogicConstants {
 	/**
 	 * Current key.
 	 */
-	private KEYIN currentKey;
+	private KEYIN key;
 
 	/**
 	 * Current value.
 	 */
-	private VALUEIN currentValue;
+	private VALUEIN value;
 	
 	public KeyValueReader(Configuration conf, String serverUri) {
 		super(conf, serverUri);
@@ -29,19 +39,18 @@ implements MarkLogicConstants {
 
 	@Override
 	public VALUEIN getCurrentValue() throws IOException, InterruptedException {
-		return currentValue;
+		return value;
 	}
 
 	@Override
 	public KEYIN getCurrentKey() throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
-		return null;
+		return key;
 	}
 
 	@Override
 	protected void endOfResult() {
-		// TODO Auto-generated method stub
-		
+		key = null;
+		value = null;		
 	}
 
 	@Override

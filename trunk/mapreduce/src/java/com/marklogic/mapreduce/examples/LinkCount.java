@@ -16,18 +16,18 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-import com.marklogic.mapreduce.MarkLogicRecord;
+import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.NodeInputFormat;
 import com.marklogic.mapreduce.NodePath;
 
 public class LinkCount {
 	public static class RefMapper 
-	extends Mapper<NodePath, MarkLogicRecord, Text, IntWritable> {
+	extends Mapper<NodePath, MarkLogicNode, Text, IntWritable> {
 		
 		private final static IntWritable one = new IntWritable(1);
 		private Text refURI = new Text();
 		
-		public void map(NodePath key, MarkLogicRecord value, Context context
+		public void map(NodePath key, MarkLogicNode value, Context context
 		) throws IOException, InterruptedException {
 			refURI.set(value.toString());
 			context.write(refURI, one);
