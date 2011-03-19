@@ -91,7 +91,7 @@ public interface MarkLogicConstants {
      * Type of operation for node output.  See {@link NodeOpType}.
      */
     static final String NODE_OPERATION_TYPE = 
-    	"mapreduce.marklogic.output.nodetype";
+    	"mapreduce.marklogic.output.nodeOpType";
     static final String USER_TEMPLATE = "{user}";
     static final String PASSWORD_TEMPLATE = "{password}";
     static final String HOST_TEMPLATE = "{host}";
