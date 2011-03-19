@@ -6,13 +6,16 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.xcc.ResultItem;
 
 /**
- * MarkLogicRecordReader that fetches data from MarkLogic server and generates 
- * key value pairs, with the key being a system generated integer and value 
- * in user specified type.
+ * <p>MarkLogicRecordReader that fetches data from MarkLogic server and generates 
+ * key value pairs in user specified types.</p>
+ * 
+ * <p>Currently only support Text as KEYIN and VALUEIN class.</p>
  * 
  * @author jchen
  *
@@ -32,9 +35,18 @@ implements MarkLogicConstants {
 	 * Current value.
 	 */
 	private VALUEIN value;
+	private Class<?> keyClass;
+	private Class<?> valueClass;
+	
+	/**
+	 * Indicate whether a key has been fetched, and is waiting to fetch value
+	 * from the next result.
+	 */
+	private boolean keyFetched;
 	
 	public KeyValueReader(Configuration conf, String serverUri) {
 		super(conf, serverUri);
+		valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class);
 	}
 
 	@Override
@@ -50,12 +62,39 @@ implements MarkLogicConstants {
 	@Override
 	protected void endOfResult() {
 		key = null;
-		value = null;		
+		value = null;
+		keyFetched = false;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected boolean nextResult(ResultItem result) {
-		// TODO Auto-generated method stub
-		return false;
+		if (!keyFetched) {
+			if (key == null) {
+				key = (KEYIN)ReflectionUtils.newInstance(keyClass, 
+						getConf());
+			}
+			if (keyClass.equals(Text.class)) {
+				((Text)key).set(result.asString());
+			} else {
+				throw new UnsupportedOperationException("Key class " +  
+						keyClass + " is unsupported for result type: " + 
+						result.getValueType());
+			}
+		} else {
+			if (value == null) {
+				value = (VALUEIN)ReflectionUtils.newInstance(valueClass, 
+						getConf());
+			}
+			if (valueClass.equals(Text.class)) {
+				((Text)value).set(result.asString());
+			} else {
+				throw new UnsupportedOperationException("Value class " +  
+						valueClass + " is unsupported for result type: " + 
+						result.getValueType());
+			}
+		}
+		keyFetched = !keyFetched;
+		return true;
 	}
 }

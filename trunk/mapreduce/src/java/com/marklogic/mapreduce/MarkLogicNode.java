@@ -80,7 +80,6 @@ public class MarkLogicNode implements Writable {
 		this.node = node;
 	}
 	
-	@Override
 	public void readFields(DataInput in) throws IOException {
         try {
 			node = DomUtil.readXml((DataInputStream)in);
@@ -93,7 +92,6 @@ public class MarkLogicNode implements Writable {
 		}
 	}
 
-	@Override
 	public void write(DataOutput out) throws IOException {
 		if (node != null) {
 			try {
