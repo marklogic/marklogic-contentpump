@@ -18,7 +18,7 @@ import com.marklogic.xcc.ResultItem;
  * <p>A RecordReader that fetches data from MarkLogic server and generates 
  * an integer key for each value fetched.</p>
  * 
- * <p>Currently only support Text as ValueClass.</p>
+ * <p>Currently only support Text as VALUEIN class.</p>
  * 
  * @author jchen
  * 
@@ -37,7 +37,7 @@ implements MarkLogicConstants {
 
 	public ValueReader(Configuration conf, String serverUriTemp) {
 		super(conf, serverUriTemp);
-		valueClass = conf.getClass(INPUT_KEY_CLASS, Text.class);
+		valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class);
 	}
 
 	@Override

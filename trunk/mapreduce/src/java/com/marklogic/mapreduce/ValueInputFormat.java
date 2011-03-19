@@ -15,7 +15,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * <p>MarkLogicInputFormat for a value other than document or node with 
  * system-generated key.</p>
  * 
- * <p>Currently only support Text as ValueClass.</p>
+ * <p>Currently only support Text as VALUEIN class.</p>
  * 
  * @author jchen
  *
