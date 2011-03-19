@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) 2003-2011 MarkLogic Corporation. All rights reserved.
+ */
 package com.marklogic.mapreduce.examples;
 
 import java.io.IOException;
