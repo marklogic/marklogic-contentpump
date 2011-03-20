@@ -44,7 +44,8 @@ implements MarkLogicConstants {
     static final String END_TEMPLATE = "{end}";
 	static final String QUERY_TEMPLATE =
     	"xquery version \"1.0-ml\"; \n" + 
-    	"(xdmp:eval('xdmp:with-namespaces(({NAMESPACE_TEMPLATE}),fn:unordered(" +
+    	"(xdmp:eval('xdmp:with-namespaces((" + NAMESPACE_TEMPLATE +
+    	"),fn:unordered(" +
     	PATH_EXPRESSION_TEMPLATE + "))[" + START_TEMPLATE + " to " + 
     	END_TEMPLATE + "] ',  (), \n" +
   		"  <options xmlns=\"xdmp:eval\"> <database>" + FOREST_ID_TEMPLATE +
