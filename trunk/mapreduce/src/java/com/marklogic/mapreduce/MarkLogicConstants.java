@@ -55,8 +55,8 @@ public interface MarkLogicConstants {
     static final String INPUT_VALUE_CLASS = 
     	"mapreduce.marklogic.input.valueClass";
     /**
-     * Mode “basic” enables “pathexpression” and “namespace”.  Mode “advanced” 
-     * enables “query” and “splitquery”.
+     * Mode "basic" enables "pathexpression" and "namespace".  Mode "advanced" 
+     * enables "query" and "splitquery".
      */
     static final String INPUT_MODE = 
     	"mapreduce.marklogic.input.mode";
