@@ -162,13 +162,13 @@ implements MarkLogicConstants {
 		long end = start + mlSplit.getLength() - 1;
 		String queryText;
 		if (advancedMode) {
-			queryText = BASIC_QUERY_TEMPLATE
+			queryText = ADV_QUERY_TEMPLATE
 				.replace(QUERY_TEMPLATE, userQuery)
 		        .replace(FOREST_ID_TEMPLATE, mlSplit.getForestId().toString())
 		        .replace(START_TEMPLATE, Long.toString(start))
 	            .replace(END_TEMPLATE, Long.toString(end));
 		} else {
-			queryText = ADV_QUERY_TEMPLATE
+			queryText = BASIC_QUERY_TEMPLATE
 				.replace(PATH_EXPRESSION_TEMPLATE, pathExpr)
 		        .replace(NAMESPACE_TEMPLATE, nameSpace)
 		        .replace(FOREST_ID_TEMPLATE, mlSplit.getForestId().toString())
