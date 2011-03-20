@@ -42,7 +42,7 @@ implements MarkLogicConstants {
 	static final String FOREST_ID_TEMPLATE = "{forest_id}";
 	static final String START_TEMPLATE = "{start}";
     static final String END_TEMPLATE = "{end}";
-	static final String QUERY_TEMPLATE =
+	static final String BASIC_QUERY_TEMPLATE =
     	"xquery version \"1.0-ml\"; \n" + 
     	"(xdmp:eval('xdmp:with-namespaces((" + NAMESPACE_TEMPLATE +
     	"),fn:unordered(" +
@@ -51,7 +51,14 @@ implements MarkLogicConstants {
   		"  <options xmlns=\"xdmp:eval\"> <database>" + FOREST_ID_TEMPLATE +
   		"</database> \n" +
   		"  </options>))";
-
+    static final String ADV_QUERY_TEMPLATE =
+    	"xquery version \"1.0-ml\"; \n" + 
+    	"(xdmp:eval('" + QUERY_TEMPLATE + "[" + START_TEMPLATE + " to " + 
+    	END_TEMPLATE + "] ',  (), \n" +
+  		"  <options xmlns=\"xdmp:eval\"> <database>" + FOREST_ID_TEMPLATE +
+  		"</database> \n" +
+  		"  </options>))";
+    
 	/**
 	 * Input split for this record reader
 	 */
@@ -64,14 +71,6 @@ implements MarkLogicConstants {
 	 * URI of the MarkLogic server with host to be filled in.
 	 */
 	private String serverUriTemp;
-	/**
-	 * Path expression specified in the job configuration.
-	 */
-	private String pathExpr;
-	/**
-	 * Namespaces specified in the job configuration.
-	 */
-	private String nameSpace;
 	/**
 	 * Session to the MarkLogic server.
 	 */
@@ -88,21 +87,6 @@ implements MarkLogicConstants {
 	public MarkLogicRecordReader(Configuration conf, String serverUriTemp) {
 		this.conf = conf;
 		this.serverUriTemp = serverUriTemp;
-		this.pathExpr = conf.get(PATH_EXPRESSION);
-		Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
-		StringBuilder buf = new StringBuilder();
-		buf.append('(');
-		if (nsCol != null) {
-			for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
-				String ns = nsIt.next();
-				buf.append('"').append(ns).append('"');
-				if (nsIt.hasNext()) {
-					buf.append(',');
-				}
-			}
-		}
-		buf.append(')');
-		nameSpace = buf.toString();
 	}
 
 	@Override
@@ -147,15 +131,50 @@ implements MarkLogicConstants {
 			throw new IOException(e);
 		} 
 		
+		// get job config properties
+		boolean advancedMode = 
+			conf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
+		String userQuery = "";
+		String pathExpr = "";
+		String nameSpace = "";
+		if (advancedMode) {
+			userQuery = conf.get(INPUT_QUERY);
+		} else {
+			pathExpr = conf.get(PATH_EXPRESSION);
+			Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
+			StringBuilder buf = new StringBuilder();
+			buf.append('(');
+			if (nsCol != null) {
+				for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
+					String ns = nsIt.next();
+					buf.append('"').append(ns).append('"');
+					if (nsIt.hasNext()) {
+						buf.append(',');
+					}
+				}
+			}
+			buf.append(')');
+			nameSpace = buf.toString();
+		}
+		
 		// generate the query
 		long start = mlSplit.getStart() + 1;
 		long end = start + mlSplit.getLength() - 1;
-		String queryText = QUERY_TEMPLATE
-		        .replace(PATH_EXPRESSION_TEMPLATE, pathExpr)
+		String queryText;
+		if (advancedMode) {
+			queryText = BASIC_QUERY_TEMPLATE
+				.replace(QUERY_TEMPLATE, userQuery)
+		        .replace(FOREST_ID_TEMPLATE, mlSplit.getForestId().toString())
+		        .replace(START_TEMPLATE, Long.toString(start))
+	            .replace(END_TEMPLATE, Long.toString(end));
+		} else {
+			queryText = ADV_QUERY_TEMPLATE
+				.replace(PATH_EXPRESSION_TEMPLATE, pathExpr)
 		        .replace(NAMESPACE_TEMPLATE, nameSpace)
 		        .replace(FOREST_ID_TEMPLATE, mlSplit.getForestId().toString())
 		        .replace(START_TEMPLATE, Long.toString(start))
-	            .replace(END_TEMPLATE, Long.toString(end));	 
+	            .replace(END_TEMPLATE, Long.toString(end));
+		}		        	 
 		
 		// set up a connection to the server
 		try {
@@ -194,17 +213,5 @@ implements MarkLogicConstants {
 
 	public long getCount() {
 		return count;
-	}
-
-	public String getServerUriTemp() {
-		return serverUriTemp;
-	}
-
-	public String getPathExpr() {
-		return pathExpr;
-	}
-
-	public String getNameSpace() {
-		return nameSpace;
 	}
 }

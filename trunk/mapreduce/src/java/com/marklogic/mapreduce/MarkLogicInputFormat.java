@@ -229,7 +229,6 @@ implements MarkLogicConstants {
 			    }
 			}
 		}
-		LOG.info("Made " + splits.size() + " splits.");
 		return splits;
 	}
 	
