@@ -31,7 +31,7 @@ import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XSString;
 
 /**
- * MarkLogic-based InputFormat, taking a generic key class.
+ * MarkLogic-based InputFormat, taking a generic key and value class.
  * 
  * @author jchen
  */
@@ -61,7 +61,7 @@ implements MarkLogicConstants {
         "for $forest in xdmp:database-forests(xdmp:database()) \n" +         
         "let $host_id := admin:forest-get-host($conf, $forest) \n" +
         "let $host_name := admin:host-get-name($conf, $host_id) \n" +
-        "let $cnt := xdmp:estimate(cts:search(fn:doc(), \n" +
+        "let $cnt := xdmp:estimate(cts:search(fn:collection(), \n" +
         "                          cts:and-query(()), (), 0.0, $forest)) \n" +
         "return ($forest, $cnt, $host_name)";    
     /**

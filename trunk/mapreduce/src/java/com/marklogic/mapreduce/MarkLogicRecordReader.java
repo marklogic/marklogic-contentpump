@@ -6,6 +6,8 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,8 +44,8 @@ implements MarkLogicConstants {
     static final String END_TEMPLATE = "{end}";
 	static final String QUERY_TEMPLATE =
     	"xquery version \"1.0-ml\"; \n" + 
-    	"(xdmp:eval('" + NAMESPACE_TEMPLATE + "fn:unordered(" + 
-    	PATH_EXPRESSION_TEMPLATE + ")[" + START_TEMPLATE + " to " + 
+    	"(xdmp:eval('xdmp:with-namespaces(({NAMESPACE_TEMPLATE}),fn:unordered(" +
+    	PATH_EXPRESSION_TEMPLATE + "))[" + START_TEMPLATE + " to " + 
     	END_TEMPLATE + "] ',  (), \n" +
   		"  <options xmlns=\"xdmp:eval\"> <database>" + FOREST_ID_TEMPLATE +
   		"</database> \n" +
@@ -66,7 +68,7 @@ implements MarkLogicConstants {
 	 */
 	private String pathExpr;
 	/**
-	 * Namespace specified in the job configuration.
+	 * Namespaces specified in the job configuration.
 	 */
 	private String nameSpace;
 	/**
@@ -86,7 +88,20 @@ implements MarkLogicConstants {
 		this.conf = conf;
 		this.serverUriTemp = serverUriTemp;
 		this.pathExpr = conf.get(PATH_EXPRESSION);
-		this.nameSpace = conf.get(PATH_NAMESPACE);
+		Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
+		StringBuilder buf = new StringBuilder();
+		buf.append('(');
+		if (nsCol != null) {
+			for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
+				String ns = nsIt.next();
+				buf.append('"').append(ns).append('"');
+				if (nsIt.hasNext()) {
+					buf.append(',');
+				}
+			}
+		}
+		buf.append(')');
+		nameSpace = buf.toString();
 	}
 
 	@Override
