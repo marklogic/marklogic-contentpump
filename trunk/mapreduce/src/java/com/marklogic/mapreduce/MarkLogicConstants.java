@@ -54,6 +54,26 @@ public interface MarkLogicConstants {
      */
     static final String INPUT_VALUE_CLASS = 
     	"mapreduce.marklogic.input.valueClass";
+    /**
+     * Mode “basic” enables “pathexpression” and “namespace”.  Mode “advanced” 
+     * enables “query” and “splitquery”.
+     */
+    static final String INPUT_MODE = 
+    	"mapreduce.marklogic.input.mode";
+    /**
+     * Value string of basic mode.
+     */
+    static final String BASIC_MODE = "basic";
+    /**
+     * Value string of advanced mode.
+     */
+    static final String ADVANCED_MODE = "advanced";
+    /**
+     * Query used to retrieve records from the server.
+     */
+    static final String INPUT_QUERY =
+    	"mapreduce.marklogic.input.query";
+    
     // output-related config property names
     static final String OUTPUT_USERNAME = 
     	"mapreduce.marklogic.output.username";
@@ -95,6 +115,8 @@ public interface MarkLogicConstants {
      */
     static final String NODE_OPERATION_TYPE = 
     	"mapreduce.marklogic.output.nodeOpType";
+    
+    // internal constants
     static final String USER_TEMPLATE = "{user}";
     static final String PASSWORD_TEMPLATE = "{password}";
     static final String HOST_TEMPLATE = "{host}";
@@ -105,4 +127,5 @@ public interface MarkLogicConstants {
 	static final String PATH_EXPRESSION_TEMPLATE = "{path_expression}";
 	static final String NAMESPACE_TEMPLATE = "{namespace}";
 	static final String DATABASENAME_TEMPLATE = "{database_name}";
+	static final String QUERY_TEMPLATE = "{query}";
 }
