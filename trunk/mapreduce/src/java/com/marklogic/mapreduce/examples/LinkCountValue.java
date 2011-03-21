@@ -63,7 +63,7 @@ public class LinkCountValue {
 		}
 
 		Job job = new Job(conf);
-		job.setJarByClass(LinkCount.class);
+		job.setJarByClass(LinkCountValue.class);
 		job.setInputFormatClass(ValueInputFormat.class);
 		job.setMapperClass(RefMapper.class);
 		job.setMapOutputKeyClass(Text.class);

@@ -26,7 +26,7 @@
     </property>
     <property>
         <name>mapreduce.marklogic.input.namespace</name>
-        <value>declare namespace wp="http://www.mediawiki.org/xml/export-0.4/";</value>
+        <value>wp,http://www.mediawiki.org/xml/export-0.4/</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.username</name>
@@ -61,8 +61,12 @@
         <value>10</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.nodetype</name>
+        <name>mapreduce.marklogic.output.nodeOpType</name>
         <value>INSERT_CHILD</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.namespace</name>
+        <value>wp,http://www.mediawiki.org/xml/export-0.4/</value>
     </property>
     <property>
         <name>mapreduce.linkcount.baseuri</name>

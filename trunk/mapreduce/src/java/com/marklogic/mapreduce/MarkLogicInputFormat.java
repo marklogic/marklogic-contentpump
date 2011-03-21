@@ -172,7 +172,7 @@ implements MarkLogicConstants {
 				}
 				count++;
 			}
-			LOG.info("Fetched " + forestSplits.size() + " splits.");
+			LOG.info("Fetched " + forestSplits.size() + " forest splits.");
 		} catch (XccConfigException e) {
 			LOG.error(e);
 			throw new IOException(e);
@@ -229,6 +229,7 @@ implements MarkLogicConstants {
 			    }
 			}
 		}
+		LOG.info("Made " + splits.size() + " splits.");
 		return splits;
 	}
 	
