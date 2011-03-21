@@ -106,7 +106,7 @@ public class LinkCountInDoc {
 		}
 
 		Job job = new Job(conf);
-		job.setJarByClass(LinkCount.class);
+		job.setJarByClass(LinkCountInDoc.class);
 		job.setInputFormatClass(NodeInputFormat.class);
 		job.setMapperClass(RefMapper.class);
 		job.setMapOutputKeyClass(Text.class);
