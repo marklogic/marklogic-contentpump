@@ -115,6 +115,11 @@ public interface MarkLogicConstants {
      */
     static final String NODE_OPERATION_TYPE = 
     	"mapreduce.marklogic.output.nodeOpType";
+    /**
+     * Namespace used for output.
+     */
+    static final String OUTPUT_NAMESPACE = 
+    	"mapreduce.marklogic.output.namespace";
     
     // internal constants
     static final String USER_TEMPLATE = "{user}";
@@ -128,4 +133,6 @@ public interface MarkLogicConstants {
 	static final String NAMESPACE_TEMPLATE = "{namespace}";
 	static final String DATABASENAME_TEMPLATE = "{database_name}";
 	static final String QUERY_TEMPLATE = "{query}";
+	static final String NODE_PATH_TEMPLATE = "{node_path}";
+    static final String NODE_STRING_TEMPLATE = "{node_string}";
 }

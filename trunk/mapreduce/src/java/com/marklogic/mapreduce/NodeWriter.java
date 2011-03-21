@@ -5,6 +5,8 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -23,16 +25,24 @@ extends MarkLogicRecordWriter<NodePath>
 implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(NodeWriter.class);
-    static final String NODE_PATH_TEMPLATE = "{node_path}";
-    static final String NODE_STRING_TEMPLATE = "{node_string}";
     
 	private String queryTemp;
 	private String namespace;
 	
-	public NodeWriter(URI serverUri, String namespace, String nodeOpType) {
+	public NodeWriter(URI serverUri, Collection<String> nsCol, String nodeOpType) {
 		super(serverUri);
 		queryTemp = NodeOpType.valueOf(nodeOpType).getQueryTemplate();
-		this.namespace = namespace;
+		StringBuilder buf = new StringBuilder();
+		if (nsCol != null) {
+			for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
+				String ns = nsIt.next();
+				buf.append('"').append(ns).append('"');
+				if (nsIt.hasNext()) {
+					buf.append(',');
+				}
+			}
+		}
+		this.namespace = buf.toString();
 	}
 
 	@Override

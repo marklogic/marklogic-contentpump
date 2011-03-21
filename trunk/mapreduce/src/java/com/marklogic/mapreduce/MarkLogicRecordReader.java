@@ -143,7 +143,6 @@ implements MarkLogicConstants {
 			pathExpr = conf.get(PATH_EXPRESSION);
 			Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
 			StringBuilder buf = new StringBuilder();
-			buf.append('(');
 			if (nsCol != null) {
 				for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
 					String ns = nsIt.next();
@@ -153,7 +152,6 @@ implements MarkLogicConstants {
 					}
 				}
 			}
-			buf.append(')');
 			nameSpace = buf.toString();
 		}
 		

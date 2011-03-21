@@ -35,9 +35,15 @@ public enum NodeOpType {
     public String getQueryTemplate() {
     	StringBuilder buf = new StringBuilder();
     	buf.append("xquery version \"1.0-ml\"; \n");
-    	buf.append("{namespace}");
+    	buf.append("xdmp:with-namespaces((");
+    	buf.append(MarkLogicConstants.NAMESPACE_TEMPLATE);
+    	buf.append("),");
     	buf.append(getFunctionName());
-    	buf.append("({node_path}, {node_string})");
-    	return buf.toString();    
+    	buf.append("(");
+    	buf.append(MarkLogicConstants.NODE_PATH_TEMPLATE);
+    	buf.append(",");
+    	buf.append(MarkLogicConstants.NODE_STRING_TEMPLATE);
+    	buf.append("))");
+    	return buf.toString(); 
     }
 }

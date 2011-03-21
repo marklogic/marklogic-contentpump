@@ -10,6 +10,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -49,22 +50,34 @@ public class MarkLogicNode implements Writable {
 		this.node = node;
 	}
 	
+	private static final ThreadLocal<DocumentBuilder> builderLocal = 
+		new ThreadLocal<DocumentBuilder>() {         
+		@Override protected DocumentBuilder initialValue() {
+			try {
+				return 
+				DocumentBuilderFactory.newInstance().newDocumentBuilder();
+			} catch (ParserConfigurationException e) {
+				LOG.error(e);
+				return null;
+			} 
+		}     
+	}; 
+	
 	static DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 	
 	public MarkLogicNode(ResultItem item) {
 		ItemType type =	item.getItemType();
+		DocumentBuilder docBuilder = builderLocal.get();
 	    try {
 			if (type == ItemType.BINARY) {
-				node = ((XdmBinary)item.getItem()).asW3cNode();
+				node = ((XdmBinary)item.getItem()).asW3cNode(docBuilder);
 			} else if (type == ItemType.ELEMENT) {
-				node = ((XdmElement)item.getItem()).asW3cElement();
+				node = ((XdmElement)item.getItem()).asW3cElement(docBuilder);
 			} else if (type == ItemType.TEXT) {
-			    node = ((XdmText)item.getItem()).asW3cText();
+			    node = ((XdmText)item.getItem()).asW3cText(docBuilder);
 			} else {
 				LOG.error("Unexpected item type: " + item.getItemType());
 			}
-		} catch (ParserConfigurationException e) {
-			LOG.error(e);
 		} catch (IOException e) {
 			LOG.error(e);
 		} catch (SAXException e) {
