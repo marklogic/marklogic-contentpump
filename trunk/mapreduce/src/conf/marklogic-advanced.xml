@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Used with com.marklogic.mapreduce.examples.LinkCount.class -->
+
+<configuration>
+    <property>
+        <name>mapreduce.marklogic.input.username</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.password</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.host</name>
+        <value>jchen</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.port</name>
+        <value>5275</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.query</name>
+        <value><![CDATA[declare namespace wp="http://www.mediawiki.org/xml/export-0.4/";
+declare variable $M := cts:element-attribute-value-co-occurrences(
+  xs:QName("wp:a"),
+    xs:QName("href"),
+      xs:QName("wp:a"),
+        xs:QName("title"),
+          ("proximity=0", "map", "collation=http://marklogic.com/collation/codepoint"),
+            cts:and-query(())) ;
+            for $k in map:keys($M)[
+              not(starts-with(., "#") or starts-with(., "http://")) ]
+              let $v := map:get($M, $k)
+              where $v != ""
+              return 
+                for $each in $v
+                  return ($each, cts:frequency($each))]]></value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.mode</name>
+        <value>advanced</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.maxSplitSize</name>
+        <value>100000</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.keyClass</name>
+        <value>org.apache.hadoop.io.Text</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.valueClass</name>
+        <value>org.apache.hadoop.io.IntWritable</value>
+    </property>
+</configuration>

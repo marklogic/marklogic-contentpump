@@ -207,6 +207,7 @@ implements MarkLogicConstants {
 					new MarkLogicInputSplit(0, recordCount, 
 							fsplit.forestId, fsplit.hostName);
 				splits.add(split);
+				LOG.info("Added split " + split);
 			} else {
 				long splitCount = recordCount / maxSplitSize;
 				long remainder = recordCount % maxSplitSize;
@@ -226,10 +227,10 @@ implements MarkLogicConstants {
 								fsplit.hostName);
 			    	splits.add(split);
 			    	remainingCount -= length;
+			    	LOG.info("Added split " + split);
 			    }
 			}
 		}
-		LOG.info("Made " + splits.size() + " splits.");
 		return splits;
 	}
 	
