@@ -96,7 +96,6 @@ public class LinkCountInDoc {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws Exception {
 		Configuration conf = new Configuration();
 		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();

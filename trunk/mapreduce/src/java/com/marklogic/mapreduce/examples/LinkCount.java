@@ -1,16 +1,13 @@
-/*
- * Copyright (c) 2003-2011 MarkLogic Corporation. All rights reserved.
- */
 package com.marklogic.mapreduce.examples;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -18,22 +15,20 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
-import com.marklogic.mapreduce.ValueInputFormat;
+import com.marklogic.mapreduce.KeyValueInputFormat;
 
-public class LinkCountValue {
+public class LinkCount {
 	public static class RefMapper 
-	extends Mapper<LongWritable, Text, Text, IntWritable> {
-
-	    private final static IntWritable one = new IntWritable(1);
-		private Text refURI = new Text();
-
-		public void map(LongWritable key, Text value, Context context) 
+	extends Mapper<Text, IntWritable, Text, IntWritable> {
+		public static final Log LOG =
+		    LogFactory.getLog(RefMapper.class);
+		public void map(Text key, IntWritable value, Context context) 
 		throws IOException, InterruptedException {
-			refURI.set(value);
-			context.write(refURI, one);
-
-	    	// TODO: if the base URI needs to be extracted from the key, 
-			// do it here.
+			if (key != null && value != null) {
+			    context.write(key, value);
+			} else {
+				LOG.error("key: " + key + ", value: " + value);
+			}
 		}
 	}
 	
@@ -62,8 +57,8 @@ public class LinkCountValue {
 		}
 
 		Job job = new Job(conf);
-		job.setJarByClass(LinkCountValue.class);
-		job.setInputFormatClass(ValueInputFormat.class);
+		job.setJarByClass(LinkCount.class);
+		job.setInputFormatClass(KeyValueInputFormat.class);
 		job.setMapperClass(RefMapper.class);
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(IntWritable.class);
@@ -76,8 +71,6 @@ public class LinkCountValue {
 
 		conf = job.getConfiguration();
 		conf.addResource(otherArgs[0]);
-		conf.setClass("mapreduce.marklogic.input.valueClass", Text.class, 
-				Writable.class);
 
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}

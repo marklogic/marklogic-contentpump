@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
-<!-- Put site-specific property overrides in this file.-->
+<!-- Used with com.marklogic.mapreduce.examples.LinkCountInDoc.class -->
 
 <configuration>
     <property>
@@ -43,22 +43,6 @@
     <property>
         <name>mapreduce.marklogic.output.port</name>
         <value>5275</value>
-    </property>
-    <property>
-        <name>mapreduce.marklogic.output.directory</name>
-        <value>mr</value>
-    </property>
-    <property>
-        <name>mapreduce.marklogic.output.collection</name>
-        <value>foo,bar</value>
-    </property>
-    <property>
-        <name>mapreduce.marklogic.output.permission</name>
-        <value>dls-user,update,dls-user,read</value>
-    </property>
-    <property>
-        <name>mapreduce.marklogic.output.quality</name>
-        <value>10</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.nodeOpType</name>
