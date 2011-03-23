@@ -116,7 +116,7 @@
 		<javac classpathref="mapreduce.compile.classpath" srcdir="${java.source}"
 			destdir="${compiled.classes.dir}" deprecation="on"
 			debug="${compile.debug.symbols.flag}" failonerror="on"
-			source="1.5" target="1.5">
+			source="1.6" target="1.6">
 			<compilerarg value="-Xlint"/>
 		</javac>
 	</target>
