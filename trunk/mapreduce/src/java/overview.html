@@ -1,0 +1,51 @@
+<html xmlns="hsttp://www.w3.org/1999/xhtml">
+<head><title>Overview of MarkLogic Hadoop MapReduce Connector</title</head>
+<body>
+<h2>MarkLogic Hadoop MapReduce Connector for Java</h2>
+<p>
+  This bundle is provides an API for a MarkLogic Server content
+  connector for Apache Hadoop MapReduce. Using this API, you can
+  use MarkLogic Server as either or both a Hadoop MapReduce
+  input source or output store. 
+</p>
+<p>
+  The following classes are provided for defining key and
+  value types for your MapReduce key-value pairs:
+</p>
+<ul>
+  <li>{@link com.marklogic.mapreduce.NodePath} for keys</li>
+  <li>{@link com.marklogic.mapreduce.DocumentURI} for keys</li>
+  <li>{@link com.marklogic.mapreduce.MarkLogicNode} for values</li>
+  <li>
+</ul>
+<p>
+  The following classes are provided for defining your
+  MapReduce input and output formats. Input and output formats
+  need not be the same type.
+</p>
+<ul>
+  <li>{@link com.marklogic.mapreduce.DocumentInputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.DocumentOutputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.NodeInputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.NodeOutputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.ValueInputFormat}</li>
+</ul>
+<h2>Configuration</h2>
+<p>
+  Configure the connector using the standard Hadoop configuration
+  mechanism. That is, using a Hadoop configuration file to define
+  property values, or setting properties programmatically on your
+  Job's {@link org.apache.hadoop.conf.Configuration} object.
+</p>
+<p>
+  The configuration properties available for the connector are
+  described in {@link org.marklogic.mapreduce.MarkLogicConstants}.
+</p>
+<h2>Samples</h2>
+<p>
+   Sample code is included in {@link ccom.marklog.mapreduce.examples},
+   with corresponding example config files under the conf/ directory
+   in the connector distribution.
+</p>
+</body>
+</html>
