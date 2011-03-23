@@ -219,7 +219,7 @@ implements MarkLogicConstants {
 				long splitSize = recordCount / splitCount;
 			    long remainingCount = recordCount;
 			    while (remainingCount > 0) {
-			    	long start = fsplit.recordCount - remainingCount;
+			    	long start = recordCount - remainingCount;
 			    	// assign length to max value when it is the last split,
 			    	// since the record count is not accurate
 			    	long length = remainingCount < maxSplitSize ? 
