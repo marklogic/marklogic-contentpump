@@ -16,9 +16,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * @author jchen
  */
 public class NodeInputFormat extends MarkLogicInputFormat<NodePath, MarkLogicNode> {
-    
-	static final float NODE_TO_FRAGMENT_RATIO = 100;
-	
+   	
 	@Override
 	public RecordReader<NodePath, MarkLogicNode> createRecordReader(
 			InputSplit arg0, TaskAttemptContext context) throws IOException,
@@ -27,10 +25,4 @@ public class NodeInputFormat extends MarkLogicInputFormat<NodePath, MarkLogicNod
 		String serverUri = getServerUriTemp(conf);
 		return new NodeReader(conf, serverUri);
 	}
-
-	@Override
-	public float getDefaultRecordFragRatio() {
-		return NODE_TO_FRAGMENT_RATIO;
-	}
-
 }
