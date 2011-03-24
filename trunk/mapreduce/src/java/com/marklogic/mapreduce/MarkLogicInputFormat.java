@@ -39,7 +39,9 @@ public abstract class MarkLogicInputFormat<KEYIN, VALUEIN> extends InputFormat<K
 implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicInputFormat.class);
-	/* save later after is-searchable is available
+	/* TODO: re-enable when is-searchable is available
+	 * TODO: use document selector
+	 * TODO: use with-namespaces if 13118 is fixed
 	static final String SPLIT_QUERY_TEMPLATE = 
     	"xquery version \"1.0-ml\"; \n" + 
     	NAMESPACE_TEMPLATE + 
@@ -114,12 +116,11 @@ implements MarkLogicConstants {
 		String splitQuery;
 		try {
 			serverUri = getServerUri(jobConf);
-			pathExpr = jobConf.get(PATH_EXPRESSION, "");
-			nameSpace = jobConf.get(PATH_NAMESPACE, "");
+			// TODO: re-enable when is-searchable becomes available
+			//pathExpr = jobConf.get(PATH_EXPRESSION, "");
+			//nameSpace = jobConf.get(PATH_NAMESPACE, "");
 			maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, 
 					DEFAULT_MAX_SPLIT_SIZE);
-			recordToFragRatio = jobConf.getFloat(RECORD_TO_FRAGMENT_RATIO, 
-					getDefaultRecordFragRatio());
 			splitQuery = jobConf.get(SPLIT_QUERY, "");
 		} catch (URISyntaxException e) {
 			LOG.error(e);
@@ -130,11 +131,14 @@ implements MarkLogicConstants {
 		List<ForestSplit> forestSplits = null;
 		Session session = null;
 		ResultSequence result = null;
+		
 		if (splitQuery.isEmpty()) {
-		    splitQuery = SPLIT_QUERY_TEMPLATE
+		    splitQuery = SPLIT_QUERY_TEMPLATE;
+		    /* TODO: re-enable when is-searchable becomes available
 	        .replace(PATH_EXPRESSION_TEMPLATE, pathExpr)
-	        .replace(NAMESPACE_TEMPLATE, nameSpace);
-		}
+	        .replace(NAMESPACE_TEMPLATE, nameSpace); */
+		} 
+		
 		if (LOG.isDebugEnabled()) {
 		    LOG.debug("query: " + splitQuery);
 		}
@@ -200,26 +204,24 @@ implements MarkLogicConstants {
 		}
 		
 		for (ForestSplit fsplit : forestSplits) {
-			long recordCount = 
-				(long) (fsplit.recordCount * recordToFragRatio);
-			if (recordCount < maxSplitSize) {
+			if (fsplit.recordCount < maxSplitSize) {
 				MarkLogicInputSplit split = 
-					new MarkLogicInputSplit(0, recordCount, 
+					new MarkLogicInputSplit(0, fsplit.recordCount, 
 							fsplit.forestId, fsplit.hostName);
 				splits.add(split);
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("Added split " + split);
 				}	
 			} else {
-				long splitCount = recordCount / maxSplitSize;
-				long remainder = recordCount % maxSplitSize;
+				long splitCount = fsplit.recordCount / maxSplitSize;
+				long remainder = fsplit.recordCount % maxSplitSize;
 				if (remainder != 0) {
 					splitCount++;
 				}
-				long splitSize = recordCount / splitCount;
-			    long remainingCount = recordCount;
+				long splitSize = fsplit.recordCount / splitCount;
+			    long remainingCount = fsplit.recordCount;
 			    while (remainingCount > 0) {
-			    	long start = recordCount - remainingCount;
+			    	long start = fsplit.recordCount - remainingCount;
 			    	// assign length to max value when it is the last split,
 			    	// since the record count is not accurate
 			    	long length = remainingCount < maxSplitSize ? 
@@ -249,7 +251,4 @@ implements MarkLogicConstants {
 		String hostName;
 		long recordCount;
 	}
-
-	public abstract float getDefaultRecordFragRatio();
-
 }

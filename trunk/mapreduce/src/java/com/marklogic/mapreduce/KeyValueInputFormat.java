@@ -25,12 +25,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 public class KeyValueInputFormat<KEYIN, VALUEIN> 
 extends MarkLogicInputFormat<KEYIN, VALUEIN>
 implements MarkLogicConstants {
-	static final float VALUE_TO_FRAGMENT_RATIO = 100;
-
-	@Override
-	public float getDefaultRecordFragRatio() {
-		return VALUE_TO_FRAGMENT_RATIO;
-	}
 
 	@Override
 	public RecordReader<KEYIN, VALUEIN> createRecordReader(InputSplit split,

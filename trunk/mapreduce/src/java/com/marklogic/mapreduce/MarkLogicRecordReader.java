@@ -45,9 +45,9 @@ implements MarkLogicConstants {
 	static final String BASIC_QUERY_TEMPLATE =
     	"xquery version \"1.0-ml\"; \n" + 
     	"(xdmp:eval('xdmp:with-namespaces((" + NAMESPACE_TEMPLATE +
-    	"),fn:unordered(" +
-    	PATH_EXPRESSION_TEMPLATE + "))[" + START_TEMPLATE + " to " + 
-    	END_TEMPLATE + "] ',  (), \n" +
+    	"),fn:unordered(fn:unordered(" +
+    	DOCUMENT_SELECTOR_TEMPLATE + ")[" + START_TEMPLATE + " to " + 
+    	END_TEMPLATE + "]" + SUBDOCUMENT_EXPR_TEMPLATE + "))',  (), \n" +
   		"  <options xmlns=\"xdmp:eval\"> <database>" + FOREST_ID_TEMPLATE +
   		"</database> \n" +
   		"  </options>))";
@@ -135,12 +135,17 @@ implements MarkLogicConstants {
 		boolean advancedMode = 
 			conf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
 		String userQuery = "";
-		String pathExpr = "";
+		String docExpr = "";
+		String subExpr = "";
 		String nameSpace = "";
 		if (advancedMode) {
 			userQuery = conf.get(INPUT_QUERY);
 		} else {
-			pathExpr = conf.get(PATH_EXPRESSION);
+			docExpr = conf.get(DOCUMENT_SELECTOR);
+			if (docExpr == null || docExpr.isEmpty()) {
+				docExpr = "fn:collection()";
+			}
+			subExpr = conf.get(SUBDOCUMENT_EXPRESSION);
 			Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
 			StringBuilder buf = new StringBuilder();
 			if (nsCol != null) {
@@ -157,7 +162,8 @@ implements MarkLogicConstants {
 		
 		// generate the query
 		long start = mlSplit.getStart() + 1;
-		long end = start + mlSplit.getLength() - 1;
+		long end = mlSplit.getLength() == Long.MAX_VALUE ? 
+				   mlSplit.getLength() : start + mlSplit.getLength() - 1;
 		String queryText;
 		if (advancedMode) {
 			queryText = ADV_QUERY_TEMPLATE
@@ -167,7 +173,8 @@ implements MarkLogicConstants {
 	            .replace(END_TEMPLATE, Long.toString(end));
 		} else {
 			queryText = BASIC_QUERY_TEMPLATE
-				.replace(PATH_EXPRESSION_TEMPLATE, pathExpr)
+				.replace(DOCUMENT_SELECTOR_TEMPLATE, docExpr)
+				.replace(SUBDOCUMENT_EXPR_TEMPLATE, subExpr)
 		        .replace(NAMESPACE_TEMPLATE, nameSpace)
 		        .replace(FOREST_ID_TEMPLATE, mlSplit.getForestId().toString())
 		        .replace(START_TEMPLATE, Long.toString(start))

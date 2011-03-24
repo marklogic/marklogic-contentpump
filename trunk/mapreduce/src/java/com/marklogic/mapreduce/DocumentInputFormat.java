@@ -16,8 +16,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * @author jchen
  */
 public class DocumentInputFormat extends MarkLogicInputFormat<DocumentURI, MarkLogicNode> {
-
-	static final float DOCUMENT_TO_FRAGMENT_RATIO = 1;
 	
 	@Override
 	public RecordReader<DocumentURI, MarkLogicNode> createRecordReader(
@@ -27,10 +25,4 @@ public class DocumentInputFormat extends MarkLogicInputFormat<DocumentURI, MarkL
 		String serverUri = getServerUriTemp(conf);
 		return new DocumentReader(conf, serverUri);
 	}
-	
-	@Override
-	public float getDefaultRecordFragRatio() {
-		return DOCUMENT_TO_FRAGMENT_RATIO;
-	}
-
 }

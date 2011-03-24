@@ -53,9 +53,9 @@ public interface MarkLogicConstants {
     static final String INPUT_PORT = 
     	"mapreduce.marklogic.input.port";
     /**
-     * The config property name (<code>mapreduce.marklogic.input.pathexpression</code>)
+     * The config property name (<code>mapreduce.marklogic.input.documentSelector</code>)
      * which, if set, specifies the path expression used to retrieve 
-     * records from the server. Required if using MarkLogic Server for
+     * documents from the server. Required if using MarkLogic Server for
      * input in <code>basic</code> mode.
      * 
      * <p>
@@ -71,12 +71,39 @@ public interface MarkLogicConstants {
      * <pre class="codesample">
      * &lt;property&gt;
      *   &lt;name&gt;mapreduce.marklogic.input.pathexpression&lt;/name&gt;
-     *   &lt;value&gt;fn:collection()//wp:a[@href]&lt;/value&gt;
+     *   &lt;value&gt;fn:collection()&lt;/value&gt;
      * &lt;/property&gt;
      * </pre>
      */
-    static final String PATH_EXPRESSION = 
-    	"mapreduce.marklogic.input.pathexpression";
+    static final String DOCUMENT_SELECTOR = 
+    	"mapreduce.marklogic.input.documentSelector";
+    /**
+     * The config property name 
+     * (<code>mapreduce.marklogic.input.subDocumentExpression</code>)
+     * which, if set, specifies the path expression used to retrieve 
+     * sub-document records from the server. Required if using MarkLogic 
+     * Server for input in <code>basic</code> mode and retrieving non-document 
+     * items.
+     * 
+     * <p>
+     *  This property is only usable when <code>basic</code> mode is 
+     *  specified with the {@link #INPUT_MODE input.mode} property. If
+     *  more powerful input customization is needed, use 
+     *  <code>advanced</code> mode and specify a complete input query 
+     *  with the {@link #INPUT_QUERY input.query} property.
+     * </p>
+     * 
+     * <p>The following would select all documents containing hrefs:</p>
+     * 
+     * <pre class="codesample">
+     * &lt;property&gt;
+     *   &lt;name&gt;mapreduce.marklogic.input.pathexpression&lt;/name&gt;
+     *   &lt;value&gt;//wp:a[@href]&lt;/value&gt;
+     * &lt;/property&gt;
+     * </pre>
+     */
+    static final String SUBDOCUMENT_EXPRESSION = 
+    	"mapreduce.marklogic.input.subDocumentExpr";
     /**
      * The config property name (<code>mapreduce.marklogic.input.namespace</code>)
      * which, if set, specifies a list of namespaces to use when
@@ -141,20 +168,6 @@ public interface MarkLogicConstants {
      */
     static final String INPUT_DATABASE_NAME = 
     	"mapreduce.marklogic.input.databasename";
-    /**
-     * The config property name (<code>mapreduce.marklogic.input.recordToFragmentRatio</code>)
-     * which, if set, specifies the ratio of the number of retrieved 
-     * records to the number of accessed fragments. Optional.
-     * Default: 1.0 (one record per fragment).
-     * 
-     * <p>
-     *  The record to fragment ratio can be used in conjunction
-     *  with {@link #MAX_SPLIT_SIZE input.maxSplitSize} to
-     *  influence the number of map tasks generated. 
-     * </p>
-     */ 
-    static final String RECORD_TO_FRAGMENT_RATIO =
-    	"mapreduce.marklogic.input.recordToFragmentRatio";
     /**
      * The config property name (<code>mapreduce.marklogic.input.keyClass</code>)
      * which, if set, specifies the name of the class of the map 
@@ -358,7 +371,8 @@ public interface MarkLogicConstants {
     static final long DEFAULT_MAX_SPLIT_SIZE = 1000;
 	static final String SERVER_URI_TEMPLATE =
     	"xcc://{user}:{password}@{host}:{port}";
-	static final String PATH_EXPRESSION_TEMPLATE = "{path_expression}";
+	static final String DOCUMENT_SELECTOR_TEMPLATE = "{document_selector}";
+	static final String SUBDOCUMENT_EXPR_TEMPLATE = "{subdocument-expr}";
 	static final String NAMESPACE_TEMPLATE = "{namespace}";
 	static final String DATABASENAME_TEMPLATE = "{database_name}";
 	static final String QUERY_TEMPLATE = "{query}";
