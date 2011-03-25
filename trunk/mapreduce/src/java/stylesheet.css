@@ -38,6 +38,12 @@ th, table {
   border-collapse: collapse; border-color: #E6E7E8;
 }
 
+/* This is the only way to control the text in the upper right corner */
+td em {
+  font-weight: bold;
+  font-style: normal;
+}
+
 .TableHeadingColor     { 
 	background:#000000 url(doc-files/bg_blkheader.png) repeat-x scroll left top;
     color: #FFFFFF;
@@ -52,6 +58,7 @@ th, table {
 
 .TableSubHeadingColor  { background: #FFEEEE }
 .TableRowColor         { background: #FFFFFF } /* White */
+
 
 /* Font used in left-hand frame lists */
 .FrameTitleFont   { font-size: 100%; font-family: Helvetica, Arial, sans-serif }
