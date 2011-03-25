@@ -40,6 +40,64 @@
   The configuration properties available for the connector are
   described in {@link com.marklogic.mapreduce.MarkLogicConstants}.
 </p>
+<h3>Configuring the Input Query in Basic Mode</h3>
+<p>
+ When using MarkLogic Server as an input source for MapReduce
+ tasks, you may use either basic or advanced mode. The default 
+ is <code>basic</code> mode. The mode is controlled through
+ the {@link com.marklogic.mapreduce.MarkLogicConstants#INPUT_MODE
+ mapreduce.marklogic.input.mode} property.
+</p>
+<p>
+ In basic mode, you supply components of an XQuery path expression
+ which the connector uses to build a query and create the splits.
+ To allow MarkLogic Server to optimize the input query, the path
+ expression is constructed from two components: A 
+ {@link com.marklogic.mapreduce.MarkLogicConstants#DOCUMENT_SELECTOR 
+ document node selector} and a
+ {@link com.marklogic.mapreduce.MarkLogicConstants#SUBDOCUMENT_EXPRESSION
+ sub-document expression}.
+</p>
+<p>
+ Conceptually, the input splits are constructed from a path expression
+ similar to:
+</p>
+<pre class="codesample"><code>
+$document-selector/$subdocument-expression
+</code></pre>
+<p>
+ Both components of the input path expression are optional. If no 
+ document selector is given, <code>fn:collection()</code> is used.
+ If no subdocument expression is given, the document nodes returned
+ by the document selector are used as the input values.
+</p>
+<p>Examples:</p>
+<pre class="codesample"><code>
+document selector: none
+subdocument expression: none
+  =&gt; All document nodes in fn:collection()
+
+document selector: fn:collection("wiki-topics")
+subdocument expression: none
+  =&gt; All document nodes in the "wiki-topics" collection
+
+document selector: fn:collection("wiki-topics")
+subdocument expression: //wp:a[@href]
+  =&gt; All elements in the "wiki-topics" collection containing hrefs
+
+document selector: fn:collection("wiki-topics")
+subdocument expression: //wp:a[@href]/@title
+  =&gt; The titles of all documents in the "wiki-topics" collection 
+     containing hrefs
+</code></pre>
+ 
+<h3>Configuring the Input Query in Advanced Mode</h3>
+<p>
+ In advanced input mode, you must supply the entire input query
+ module. The module should return a sequence of the type of
+ values configured for your tasks (document, nodes or atomic values).
+</p>
+
 <h2>Samples</h2>
 <p>
    Sample code is included in {@link com.marklogic.mapreduce.examples},
@@ -48,3 +106,4 @@
 </p>
 </body>
 </html>
+
