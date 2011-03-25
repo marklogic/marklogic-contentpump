@@ -61,14 +61,15 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the document selection portion of the
-     * path expression used to retrieve data from the server. Required
-     * if using MarkLogic Server for input in <code>basic</code> mode.
+     * path expression used to retrieve data from the server. Only
+     * used if using MarkLogic Server for input in <code>basic</code> mode.
      * 
      * <p>
      *  The XQuery path expression step given in this property must
      *  select a sequence of document nodes. To further refine the
      *  input selection to nodes or values within the documents, use 
-     *  {@link #SUBDOCUMENT_EXPRESSION input.subDocumentExpr}.
+     *  {@link #SUBDOCUMENT_EXPRESSION input.subDocumentExpr}. If 
+     *  this property is not set, <code>fn:collection()</code> is used.
      *  For more information, see the overview.
      * </p>
      * 
@@ -92,12 +93,12 @@ public interface MarkLogicConstants {
     static final String DOCUMENT_SELECTOR = 
     	"mapreduce.marklogic.input.documentSelector";
     /**
-     * The config property name 
-     * (<code>{@value}</code>)
+     * The config property name (<code>{@value}</code>)
      * which, if set, specifies the path expression used to retrieve 
-     * sub-document records from the server. Required if using MarkLogic 
-     * Server for input in <code>basic</code> mode and retrieving 
-     * non-document items.
+     * sub-document records from the server. Used only if using MarkLogic 
+     * Server for input in <code>basic</code> mode. If not set,
+     * the document nodes selected by the {@link #DOCUMENT_SELECTOR
+     * document selector} are used.
      * 
      * <p>
      *  The XQuery path expression step given in this property should
@@ -106,7 +107,6 @@ public interface MarkLogicConstants {
      *  {@link #DOCUMENT_SELECTOR input.documentSelector} property. 
      *  For more information, see the overview.
      * </p>
-
      * <p>
      *  This property is only usable when <code>basic</code> mode is 
      *  specified with the {@link #INPUT_MODE input.mode} property. If
