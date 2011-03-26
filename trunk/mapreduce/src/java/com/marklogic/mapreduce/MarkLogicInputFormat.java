@@ -8,6 +8,8 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -39,22 +41,7 @@ public abstract class MarkLogicInputFormat<KEYIN, VALUEIN> extends InputFormat<K
 implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicInputFormat.class);
-	/* TODO: re-enable when is-searchable is available
-	 * TODO: use document selector
-	 * TODO: use with-namespaces if 13118 is fixed
-	static final String SPLIT_QUERY_TEMPLATE = 
-    	"xquery version \"1.0-ml\"; \n" + 
-    	NAMESPACE_TEMPLATE + 
-        "import module namespace admin = \"http://marklogic.com/xdmp/admin\" \n" +
-                 " at \"/MarkLogic/admin.xqy\"; \n" +
-        "let $conf := admin:get-configuration() \n" +
-        "for $forest in xdmp:database-forests(xdmp:database()) \n" +         
-        "let $host_id := admin:forest-get-host($conf, $forest) \n" +
-        "let $host_name := admin:host-get-name($conf, $host_id) \n" +
-        "let $cnt := xdmp:estimate(cts:search(" + PATH_EXPRESSION_TEMPLATE + ", \n" +
-        "                          cts:and-query(()), (), 0.0, $forest)) \n" +
-        "return ($forest, $cnt, $host_name)";    
-    */
+	
 	static final String SPLIT_QUERY_TEMPLATE =
 		"xquery version \"1.0-ml\"; \n" + 
         "import module namespace admin = \"http://marklogic.com/xdmp/admin\" \n" +
@@ -63,8 +50,9 @@ implements MarkLogicConstants {
         "for $forest in xdmp:database-forests(xdmp:database()) \n" +         
         "let $host_id := admin:forest-get-host($conf, $forest) \n" +
         "let $host_name := admin:host-get-name($conf, $host_id) \n" +
-        "let $cnt := xdmp:estimate(cts:search(fn:collection(), \n" +
-        "                          cts:and-query(()), (), 0.0, $forest)) \n" +
+        "let $cnt := xdmp:with-namespaces((" + NAMESPACE_TEMPLATE + 
+        "), xdmp:estimate(cts:search(" + DOCUMENT_SELECTOR_TEMPLATE + ",\n" +
+        "                          cts:and-query(()), (), 0.0, $forest))) \n" +
         "return ($forest, $cnt, $host_name)";    
     /**
      * get server URI from the configuration.
@@ -110,15 +98,11 @@ implements MarkLogicConstants {
 		Configuration jobConf = jobContext.getConfiguration();
 		long maxSplitSize;
 		URI serverUri = null;
-		String pathExpr;
-		String nameSpace;
-		float recordToFragRatio;
+		String docSelector;
 		String splitQuery;
 		try {
 			serverUri = getServerUri(jobConf);
-			// TODO: re-enable when is-searchable becomes available
-			//pathExpr = jobConf.get(PATH_EXPRESSION, "");
-			//nameSpace = jobConf.get(PATH_NAMESPACE, "");
+			docSelector = jobConf.get(DOCUMENT_SELECTOR, "fn:collection()");	
 			maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, 
 					DEFAULT_MAX_SPLIT_SIZE);
 			splitQuery = jobConf.get(SPLIT_QUERY, "");
@@ -133,14 +117,25 @@ implements MarkLogicConstants {
 		ResultSequence result = null;
 		
 		if (splitQuery.isEmpty()) {
-		    splitQuery = SPLIT_QUERY_TEMPLATE;
-		    /* TODO: re-enable when is-searchable becomes available
-	        .replace(PATH_EXPRESSION_TEMPLATE, pathExpr)
-	        .replace(NAMESPACE_TEMPLATE, nameSpace); */
+			Collection<String> nsCol = 
+				jobConf.getStringCollection(PATH_NAMESPACE);
+			StringBuilder buf = new StringBuilder();
+			if (nsCol != null) {
+				for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
+					String ns = nsIt.next();
+					buf.append('"').append(ns).append('"');
+					if (nsIt.hasNext()) {
+						buf.append(',');
+					}
+				}
+			}
+		    splitQuery = SPLIT_QUERY_TEMPLATE
+		        .replace(DOCUMENT_SELECTOR_TEMPLATE, docSelector)
+		        .replace(NAMESPACE_TEMPLATE, buf.toString()); 
 		} 
 		
 		if (LOG.isDebugEnabled()) {
-		    LOG.debug("query: " + splitQuery);
+		    LOG.debug("Split query: " + splitQuery);
 		}
 		try {
 			ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
