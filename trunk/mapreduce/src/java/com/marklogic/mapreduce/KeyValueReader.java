@@ -34,6 +34,9 @@ implements MarkLogicConstants {
 	
 	public static final Log LOG =
 	    LogFactory.getLog(KeyValueReader.class);
+	
+	static final float VALUE_TO_FRAGMENT_RATIO = 100;
+	
 	/**
 	 * Current key.
 	 */
@@ -112,4 +115,9 @@ implements MarkLogicConstants {
 		keyFetched = !keyFetched;
 		return true;
 	}
+
+	@Override
+    protected float getDefaultRatio() {
+	    return VALUE_TO_FRAGMENT_RATIO;
+    }
 }

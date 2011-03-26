@@ -81,6 +81,11 @@ public interface MarkLogicConstants {
      *  with the {@link #INPUT_QUERY input.query} property.
      * </p>
      * 
+     * <p>
+     *  In EA1, this property is required to be a searchable 
+     *  expression.
+     * </p>
+     * 
      * <p>The following selects all documents:</p>
      * 
      * <pre class="codesample">
@@ -91,7 +96,7 @@ public interface MarkLogicConstants {
      * </pre>
      */
     static final String DOCUMENT_SELECTOR = 
-    	"mapreduce.marklogic.input.documentSelector";
+    	"mapreduce.marklogic.input.documentselector";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the path expression used to retrieve 
@@ -129,7 +134,7 @@ public interface MarkLogicConstants {
      * </pre>
      */
     static final String SUBDOCUMENT_EXPRESSION = 
-    	"mapreduce.marklogic.input.subDocumentExpr";
+    	"mapreduce.marklogic.input.subdocumentexpr";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a list of namespaces to use when
@@ -186,7 +191,7 @@ public interface MarkLogicConstants {
      *  The default should be suitable for most applications.
      */  
     static final String MAX_SPLIT_SIZE =
-    	"mapreduce.marklogic.input.maxSplitSize";
+    	"mapreduce.marklogic.input.maxsplitsize";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the MarkLogic Server 
@@ -201,14 +206,14 @@ public interface MarkLogicConstants {
      * input keys. Optional. Default: {@link org.apache.hadoop.io.Text}.
      */
     static final String INPUT_KEY_CLASS = 
-    	"mapreduce.marklogic.input.keyClass";
+    	"mapreduce.marklogic.input.keyclass";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class of the map 
      * input value. Optional. Default: {@link org.apache.hadoop.io.Text}.
      */
     static final String INPUT_VALUE_CLASS = 
-    	"mapreduce.marklogic.input.valueClass";
+    	"mapreduce.marklogic.input.valueclass";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the whether to use basic or advanced
@@ -251,6 +256,21 @@ public interface MarkLogicConstants {
      */
     static final String INPUT_QUERY =
     	"mapreduce.marklogic.input.query";
+    
+    /**      
+     * The config property name (<code>mapreduce.marklogic.input.recordToFragmentRatio</code>)      
+     * which, if set, specifies the ratio of the number of retrieved       
+     * records to the number of accessed fragments. Optional.      
+     * Default: 1.0 (one record per fragment) for documents, 100 for nodes and
+     * values.      
+     *       
+     * <p>      
+     *  The record to fragment ratio is used for progress estimate.       
+     * </p>      
+     */       
+     static final String RECORD_TO_FRAGMENT_RATIO =      
+         "mapreduce.marklogic.input.recordtofragmentratio"; 
+
     
     // output-related config property names
 	/**
@@ -384,7 +404,7 @@ public interface MarkLogicConstants {
      * @see NodeWriter
      */
     static final String NODE_OPERATION_TYPE = 
-    	"mapreduce.marklogic.output.nodeOpType";
+    	"mapreduce.marklogic.output.nodeoptype";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates the namespace used for output.

@@ -24,11 +24,12 @@ import com.marklogic.xcc.ResultItem;
  * 
  * @param <VALUEIN>
  */
-@SuppressWarnings("deprecation")
 public class ValueReader<VALUEIN> 
 extends MarkLogicRecordReader<LongWritable, VALUEIN>
 implements MarkLogicConstants {
 
+	static final float VALUE_TO_FRAGMENT_RATIO = 100; 
+	
 	public static final Log LOG =
 	    LogFactory.getLog(ValueReader.class);
 	private LongWritable key;
@@ -77,5 +78,10 @@ implements MarkLogicConstants {
 		}
 		return true;
 	}
+
+	@Override
+    protected float getDefaultRatio() {
+	    return VALUE_TO_FRAGMENT_RATIO;
+    }
 
 }

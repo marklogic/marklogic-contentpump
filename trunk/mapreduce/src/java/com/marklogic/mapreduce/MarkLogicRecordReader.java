@@ -83,6 +83,10 @@ implements MarkLogicConstants {
 	 * Job configuration.
 	 */
 	private Configuration conf;
+	/**
+	 * Total expected count of the records in a split.
+	 */
+	private float length;
 	
 	public MarkLogicRecordReader(Configuration conf, String serverUriTemp) {
 		this.conf = conf;
@@ -109,7 +113,7 @@ implements MarkLogicConstants {
 
 	@Override
 	public float getProgress() throws IOException, InterruptedException {
-		return count/(float)mlSplit.getLength();
+		return count/length;
 	}
 
 	@Override
@@ -141,10 +145,7 @@ implements MarkLogicConstants {
 		if (advancedMode) {
 			userQuery = conf.get(INPUT_QUERY);
 		} else {
-			docExpr = conf.get(DOCUMENT_SELECTOR);
-			if (docExpr == null || docExpr.isEmpty()) {
-				docExpr = "fn:collection()";
-			}
+			docExpr = conf.get(DOCUMENT_SELECTOR, "fn:collection()");
 			subExpr = conf.get(SUBDOCUMENT_EXPRESSION);
 			Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
 			StringBuilder buf = new StringBuilder();
@@ -159,6 +160,11 @@ implements MarkLogicConstants {
 			}
 			nameSpace = buf.toString();
 		}
+		
+		// initialize the total length
+		float recToFragRatio = conf.getFloat(RECORD_TO_FRAGMENT_RATIO, 
+				getDefaultRatio());
+		length = mlSplit.getLength() * recToFragRatio;
 		
 		// generate the query
 		long start = mlSplit.getStart() + 1;
@@ -199,7 +205,7 @@ implements MarkLogicConstants {
 			throw new IOException(e);
 		}
 	}
-	
+
 	@Override
 	public boolean nextKeyValue() throws IOException, InterruptedException {
 		if (result != null && result.hasNext()) {
@@ -215,6 +221,8 @@ implements MarkLogicConstants {
 	abstract protected void endOfResult();
 
 	abstract protected boolean nextResult(ResultItem result);
+	
+	protected abstract float getDefaultRatio();
 
 	public long getCount() {
 		return count;

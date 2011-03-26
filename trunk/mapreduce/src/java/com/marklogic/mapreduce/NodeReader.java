@@ -15,6 +15,8 @@ import com.marklogic.xcc.ResultItem;
  */
 public class NodeReader extends MarkLogicRecordReader<NodePath, MarkLogicNode> {
 
+	static final float NODE_TO_FRAGMENT_RATIO = 100;
+	
 	public NodeReader(Configuration conf, String serverUriTemp) {
 	    super(conf, serverUriTemp);
     }
@@ -52,5 +54,10 @@ public class NodeReader extends MarkLogicRecordReader<NodePath, MarkLogicNode> {
     public MarkLogicNode getCurrentValue() throws IOException,
             InterruptedException {
 	    return currentValue;
+    }
+
+	@Override
+    protected float getDefaultRatio() {
+	    return NODE_TO_FRAGMENT_RATIO;
     }
 }

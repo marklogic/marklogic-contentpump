@@ -16,6 +16,9 @@ import com.marklogic.xcc.ResultItem;
  */
 // TODO: Change to MarkLogicDocument when 12964 is fixed.
 public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogicNode> {
+	
+	static final float DOCUMENT_TO_FRAGMENT_RATIO = 1; 
+	
 	/**
 	 * Current key.
 	 */
@@ -59,5 +62,10 @@ public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogic
     public MarkLogicNode getCurrentValue() throws IOException,
             InterruptedException {
 	    return currentValue;
+    }
+
+	@Override
+    protected float getDefaultRatio() {
+	    return DOCUMENT_TO_FRAGMENT_RATIO;
     }
 }

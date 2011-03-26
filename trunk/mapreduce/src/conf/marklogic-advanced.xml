@@ -43,15 +43,15 @@ declare variable $M := cts:element-attribute-value-co-occurrences(
         <value>advanced</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.maxSplitSize</name>
+        <name>mapreduce.marklogic.input.maxsplitsize</name>
         <value>100000</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.keyClass</name>
+        <name>mapreduce.marklogic.input.keyclass</name>
         <value>org.apache.hadoop.io.Text</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.valueClass</name>
+        <name>mapreduce.marklogic.input.valueclass</name>
         <value>org.apache.hadoop.io.IntWritable</value>
     </property>
 </configuration>
