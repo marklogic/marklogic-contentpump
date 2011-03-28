@@ -68,7 +68,7 @@ public interface MarkLogicConstants {
      *  The XQuery path expression step given in this property must
      *  select a sequence of document nodes. To further refine the
      *  input selection to nodes or values within the documents, use 
-     *  {@link #SUBDOCUMENT_EXPRESSION input.subDocumentExpr}. If 
+     *  {@link #SUBDOCUMENT_EXPRESSION input.subdocumentexpr}. If 
      *  this property is not set, <code>fn:collection()</code> is used.
      *  For more information, see the overview.
      * </p>
@@ -82,15 +82,18 @@ public interface MarkLogicConstants {
      * </p>
      * 
      * <p>
-     *  In EA1, this property is required to be a searchable 
-     *  expression.
+     *  The path expression step given in this property must be 
+     *  <em>searchable</em>. A searchable expression is one which can
+     *  be optimized using indexes. See the <em>Query and Performance
+     *  Tuning Guide</em> for more information on searchable path
+     *  expressions.
      * </p>
      * 
      * <p>The following selects all documents:</p>
      * 
      * <pre class="codesample">
      * &lt;property&gt;
-     *   &lt;name&gt;mapreduce.marklogic.input.documentSelector&lt;/name&gt;
+     *   &lt;name&gt;mapreduce.marklogic.input.documentselector&lt;/name&gt;
      *   &lt;value&gt;fn:collection()&lt;/value&gt;
      * &lt;/property&gt;
      * </pre>
@@ -109,7 +112,7 @@ public interface MarkLogicConstants {
      *  The XQuery path expression step given in this property should
      *  select a sequence of nodes or atomic values from the set of
      *  documents selected by the path step given in the
-     *  {@link #DOCUMENT_SELECTOR input.documentSelector} property. 
+     *  {@link #DOCUMENT_SELECTOR input.documentselector} property. 
      *  For more information, see the overview.
      * </p>
      * <p>
@@ -124,11 +127,11 @@ public interface MarkLogicConstants {
      * 
      * <pre class="codesample">
      * &lt;property&gt;
-     *   &lt;name&gt;mapreduce.marklogic.input.documentSelector&lt;/name&gt;
+     *   &lt;name&gt;mapreduce.marklogic.input.documentselector&lt;/name&gt;
      *   &lt;value&gt;fn:collection()&lt;/value&gt;
      * &lt;/property&gt;
      * &lt;property&gt;
-     *   &lt;name&gt;mapreduce.marklogic.input.subDocumentExpr&lt;/name&gt;
+     *   &lt;name&gt;mapreduce.marklogic.input.subdocumentexpr&lt;/name&gt;
      *   &lt;value&gt;//wp:a[@href]&lt;/value&gt;
      * &lt;/property&gt;
      * </pre>
@@ -139,8 +142,8 @@ public interface MarkLogicConstants {
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a list of namespaces to use when
      * evaluating the path expression constructed from the
-     * {@link #DOCUMENT_SELECTOR input.documentSelector} and
-     * {@link #SUBDOCUMENT_EXPRESSION input.subDocumentExpr} properties.
+     * {@link #DOCUMENT_SELECTOR input.documentselector} and
+     * {@link #SUBDOCUMENT_EXPRESSION input.subdocumentexpr} properties.
      * Required if using MarkLogic Server for input and running in
      * <code>basic</code> mode; see the 
      * {@link #INPUT_MODE input.mode} property.
@@ -222,8 +225,8 @@ public interface MarkLogicConstants {
      * 
      * <p>
      *  Basic mode enables use of the 
-     *  {@link #DOCUMENT_SELECTOR input.documentSelector},
-     *  {@link #SUBDOCUMENT_EXPRESSION input.subDocumentExpr}, and
+     *  {@link #DOCUMENT_SELECTOR input.documentselector},
+     *  {@link #SUBDOCUMENT_EXPRESSION input.subdocumentexpr}, and
      *  {@link #PATH_NAMESPACE input.namespace} properties. Advanced
      *  mode enables use of the {@link #INPUT_QUERY input.query} and
      *  {@link #SPLIT_QUERY input.splitquery} properties.
@@ -250,19 +253,19 @@ public interface MarkLogicConstants {
      *  The value of this property must be a fully formed query,
      *  suitable for evaluation by <code>xdmp:eval</code>, and
      *  must return a sequence of key-value pairs consistent with
-     *  the classes used in {@link #INPUT_KEY_CLASS input.keyClass}
-     *  and {@link #INPUT_VALUE_CLASS input.valueClass}.
+     *  the classes used in {@link #INPUT_KEY_CLASS input.keyclass}
+     *  and {@link #INPUT_VALUE_CLASS input.valueclass}.
      * </p>
      */
     static final String INPUT_QUERY =
     	"mapreduce.marklogic.input.query";
     
     /**      
-     * The config property name (<code>mapreduce.marklogic.input.recordToFragmentRatio</code>)      
-     * which, if set, specifies the ratio of the number of retrieved       
+     * The config property name (<code>{@value}</code>) which, if   
+     * set, specifies the ratio of the number of retrieved       
      * records to the number of accessed fragments. Optional.      
-     * Default: 1.0 (one record per fragment) for documents, 100 for nodes and
-     * values.      
+     * Default: 1.0 (one record per fragment) for documents, 
+     * 100 for nodes and values.      
      *       
      * <p>      
      *  The record to fragment ratio is used for progress estimate.       
@@ -423,7 +426,7 @@ public interface MarkLogicConstants {
     static final String PORT_TEMPLATE = "{port}";
     /** 
      * The default maximum split size for input splits, used if
-     * {@link #MAX_SPLIT_SIZE input.maxSplitSize} is not specified.
+     * {@link #MAX_SPLIT_SIZE input.maxsplitsize} is not specified.
      */
     static final long DEFAULT_MAX_SPLIT_SIZE = 1000;
     /** Internal Use Only */
