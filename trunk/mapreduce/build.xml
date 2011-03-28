@@ -99,6 +99,7 @@
                 <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
                 <pathelement path="${jarlib}/hadoop-0.20.2-core.jar"/>
                 <pathelement path="${jarlib}/log4j-1.2.15.jar"/>
+                <pathelement path="${jarlib}/saxon9he.jar"/>
         </path>
 
 	<path id="mapreduce.compile.classpath">
@@ -233,6 +234,7 @@
 		<mkdir dir="${mapreduce.stage.lib}"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${mapreduce.output.jar}"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-modeler-2.0.1.jar"/>
+		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-license.txt"/>
 		<jar jarfile="${mapreduce.stage.lib}/${mapreduce.examples.jar.name}" basedir="${compiled.classes.dir}"
 			includes="com/marklogic/mapreduce/examples/*"/>
 

@@ -15,5 +15,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/hadoop 0.20.2"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/xcc"/>
 	<classpathentry kind="lib" path="src/lib/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="src/lib/saxon9he.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
