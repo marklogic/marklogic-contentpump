@@ -78,6 +78,12 @@ td em {
 .NavBarCell2    { font-family: Arial, Helvetica, sans-serif; background-color:#FFFFFF;}
 .NavBarCell3    { font-family: Arial, Helvetica, sans-serif; background-color:#FFFFFF;}
 
+/* For tables in the body vs. the class/method/field tables built by javadoc */
+.simple-table td {
+  padding: 10px;
+  vertical-align: top;
+}
+
 .codesample {
 	font-family: Courier, CourierNew, Courier-New, monospaced;
 	background: #D1EFFF;
