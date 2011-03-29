@@ -77,6 +77,9 @@ implements MarkLogicConstants {
 			session = cs.newSession();
 			
 			String outputDir = conf.get(OUTPUT_DIRECTORY);
+			if (outputDir == null || outputDir.isEmpty()) {
+				return;
+			}
 			if (conf.getBoolean(OUTPUT_CLEAN_DIR, false)) { 
 				// delete directory if exists
 				String queryText = DELETE_DIRECTORY_TEMPLATE.replace(

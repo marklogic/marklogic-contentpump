@@ -22,14 +22,10 @@
     </property>
     <property>
         <name>mapreduce.marklogic.input.subdocumentexpr</name>
-        <value>//wp:a[@title and @href and not (fn:starts-with(@href, "#") or fn:starts-with(@href, "http://") or fn:starts-with(@href, "File:"))]/@title</value>
+        <value>//wp:a[@title and @href and not (fn:starts-with(@href, "#") or fn:starts-with(@href, "http://") or fn:starts-with(@href, "File:") or fn:starts-with(@href, "Image:"))]/@title</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.namespace</name>
         <value>wp,http://www.mediawiki.org/xml/export-0.4/</value>
-    </property>
-    <property>
-        <name>mapreduce.marklogic.input.maxsplitsize</name>
-        <value>10000</value>
     </property>
 </configuration>

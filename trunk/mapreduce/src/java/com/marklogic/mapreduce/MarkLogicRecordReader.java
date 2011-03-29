@@ -53,11 +53,10 @@ implements MarkLogicConstants {
   		"  </options>))";
     static final String ADV_QUERY_TEMPLATE =
     	"xquery version \"1.0-ml\"; \n" + 
-    	"(xdmp:eval('" + QUERY_TEMPLATE + "[" + START_TEMPLATE + " to " + 
-    	END_TEMPLATE + "] ',  (), \n" +
+    	"(xdmp:eval('" + QUERY_TEMPLATE + "',  (), \n" +
   		"  <options xmlns=\"xdmp:eval\"> <database>" + FOREST_ID_TEMPLATE +
   		"</database> \n" +
-  		"  </options>))";
+  		"  </options>)[" + START_TEMPLATE + " to " + END_TEMPLATE + "]";
     
 	/**
 	 * Input split for this record reader
