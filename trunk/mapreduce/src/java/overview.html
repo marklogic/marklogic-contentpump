@@ -56,28 +56,36 @@
   The configuration properties available for the connector are
   described in {@link com.marklogic.mapreduce.MarkLogicConstants}.
 </p>
+<p>
+ When using MarkLogic Server as an input source for MapReduce
+ tasks, you may use either basic or advanced input mode. The default 
+ is <code>basic</code> mode. The mode is controlled through
+ the {@link com.marklogic.mapreduce.MarkLogicConstants#INPUT_MODE
+ mapreduce.marklogic.input.mode} property. The following sections
+ describe the input modes in more detail.
+</p>
+
 
 <h3>Configuring the Input Query in Basic Mode</h3>
 <p>
- When using MarkLogic Server as an input source for MapReduce
- tasks, you may use either basic or advanced mode. The default 
- is <code>basic</code> mode. The mode is controlled through
- the {@link com.marklogic.mapreduce.MarkLogicConstants#INPUT_MODE
- mapreduce.marklogic.input.mode} property.
-</p>
-<p>
  In basic mode, you supply components of an XQuery path expression
- which the connector uses to build a query and create the splits.
- To allow MarkLogic Server to optimize the input query, the path
- expression is constructed from two components: A 
+ which the connector uses generate input data. To allow MarkLogic Server 
+ to optimize the input query, the path expression is constructed from 
+ two components: A 
  {@link com.marklogic.mapreduce.MarkLogicConstants#DOCUMENT_SELECTOR 
  document node selector} and a
  {@link com.marklogic.mapreduce.MarkLogicConstants#SUBDOCUMENT_EXPRESSION
  sub-document expression}.
 </p>
 <p>
- Conceptually, the input splits are constructed from a path expression
- similar to:
+  The input split is not configurable in <code>basic</code> mode. The
+  splits are based on a rough count of the number of fragments in
+  each forest. Use <code>advanced</code> input mode for more control
+  over input split generation.
+</p>
+<p>
+ Conceptually, the input data for each task is constructed from a 
+ path expression similar to:
 </p>
 <pre class="codesample"><code>
 $document-selector/$subdocument-expression
@@ -110,9 +118,22 @@ subdocument expression: //wp:a[@href]/@title
  
 <h3>Configuring the Input Query in Advanced Mode</h3>
 <p>
- In advanced input mode, you must supply the entire input query
- module. The module should return a sequence of the type of
- values configured for your tasks (document, nodes or atomic values).
+ In <code>advanced</code> input mode, you must supply an 
+ {@link com.marklogic.mapreduce.MarkLogicConstants#SPLIT_QUERY 
+ input split query} and an 
+ {@link com.marklogic.mapreduce.MarkLogicConstants#INPUT_QUERY
+ input query}.
+ </p>
+ <p>
+  The split query is used to generate meta-data for Hadoop's
+  input splits. This query must return a sequence of triples, 
+  each of which includes a forest id, record (fragment) count, 
+  and list of host names. The count may be an estimate.
+</p>
+<p>
+ The input query is used to fetch the input data for each map task.
+ The input query must return a sequence of the type of values
+ configured for your tasks (document, nodes or atomic values).  
 </p>
 
 <h2 id="Samples">Samples</h2>
