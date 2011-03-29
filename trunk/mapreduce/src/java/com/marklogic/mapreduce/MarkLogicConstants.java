@@ -167,39 +167,40 @@ public interface MarkLogicConstants {
     static final String PATH_NAMESPACE =
     	"mapreduce.marklogic.input.namespace";
     /**
-     * Not yet implemented.
-     * <p>
      *  The config property name (<code>{@value}</code>)
      *  which, if set, specifies the query MarkLogic Server uses 
-     *  to generate input splits. Optional.
+     *  to generate input splits. This property is required (and only 
+     *  usable) in <code>advanced</code> mode; see the
+     *  {@link #INPUT_MODE input.mode} property for details.
      * <p>
-     *  This property is only usable in <code>advanced</code> mode; 
-     *  see the {@link #INPUT_MODE input.mode} property for details.
+     *  The split query must return a sequence of (forest id, record 
+     *  count, and hostname list) triples.
      * </p>
      * <p>
-     *  The default split query uses a rough estimate based on the
-     *  number of documents in the database.
+     *  The default split query used in <code>basic</code> input mode
+     *  computes a rough estimate based on the number of documents in 
+     *  the database.
      * </p> 
-     * <p>
-     *  The query must return a sequence containing forest id, record 
-     *  count, and a list of host names.
-     * </p>
      */
     static final String SPLIT_QUERY = 
     	"mapreduce.marklogic.input.splitquery";
     /**
      *  The config property name (<code>{@value}</code>)
-     *  which, if set, specifies the maximum number of records per 
+     *  which, if set, specifies the maximum number of fragments per 
      *  input split. Optional. Default: {@value #DEFAULT_MAX_SPLIT_SIZE}. 
      *  The default should be suitable for most applications.
      */  
     static final String MAX_SPLIT_SIZE =
     	"mapreduce.marklogic.input.maxsplitsize";
     /**
-     * The config property name (<code>{@value}</code>)
-     * which, if set, specifies the name of the MarkLogic Server 
-     * database from which to create input splits. Required if using
-     * MarkLogic Server for input.
+     * Not yet Implemented.
+     * 
+     * <p>
+     *   The config property name (<code>{@value}</code>)
+     *   which, if set, specifies the name of the MarkLogic Server 
+     *   database from which to create input splits. Required if using
+     *   MarkLogic Server for input.
+     * </p>
      */
     static final String INPUT_DATABASE_NAME = 
     	"mapreduce.marklogic.input.databasename";
@@ -219,7 +220,7 @@ public interface MarkLogicConstants {
     	"mapreduce.marklogic.input.valueclass";
     /**
      * The config property name (<code>{@value}</code>)
-     * which, if set, specifies the whether to use basic or advanced
+     * which, if set, specifies whether to use basic or advanced
      * input query mode. Allowable values are <code>basic</code> and
      * <code>advanced</code>. Optional. Default: <code>basic</code>.
      * 
