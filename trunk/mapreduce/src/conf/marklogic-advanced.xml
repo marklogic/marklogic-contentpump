@@ -22,21 +22,35 @@
     </property>
     <property>
         <name>mapreduce.marklogic.input.query</name>
-        <value><![CDATA[declare namespace wp="http://www.mediawiki.org/xml/export-0.4/";
-declare variable $M := cts:element-attribute-value-co-occurrences(
-  xs:QName("wp:a"),
-    xs:QName("href"),
-      xs:QName("wp:a"),
-        xs:QName("title"),
-          ("proximity=0", "map", "collation=http://marklogic.com/collation/codepoint"),
-            cts:and-query(())) ;
-            for $k in map:keys($M)[
-              not(starts-with(., "#") or starts-with(., "http://")) ]
-              let $v := map:get($M, $k)
-              where $v != ""
-              return 
-                for $each in $v
-                  return ($each, cts:frequency($each))]]></value>
+        <value><![CDATA[
+        declare namespace wp="http://www.mediawiki.org/xml/export-0.4/";
+        declare variable $M := cts:element-attribute-value-co-occurrences(
+            xs:QName("wp:a"),
+            xs:QName("href"),
+            xs:QName("wp:a"),
+            xs:QName("title"),
+            ("proximity=0", "map", "collation=http://marklogic.com/collation/codepoint"),
+            cts:directory-query("/space/wikipedia/enwiki/", "infinity")) ;
+        for $k in map:keys($M)[
+            not(starts-with(., "#") or starts-with(., "http://") or
+                starts-with(., "File:") or starts-with(., "Image:")) ]
+        let $v := map:get($M, $k)
+        where $v != ""
+        return 
+            for $each in $v
+            return ($each, cts:frequency($each))]]></value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.splitquery</name>
+        <value><![CDATA[
+        declare namespace wp="http://www.mediawiki.org/xml/export-0.4/";
+        import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy"; 
+        let $conf := admin:get-configuration() 
+        for $forest in xdmp:database-forests(xdmp:database()) 
+          let $host_id := admin:forest-get-host($conf, $forest) 
+          let $host_name := admin:host-get-name($conf, $host_id) 
+          let $cnt := xdmp:estimate(cts:search(fn:doc(), cts:and-query(()), (), 0.0, $forest)) 
+          return ($forest, $cnt, $host_name)]]></value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.mode</name>
