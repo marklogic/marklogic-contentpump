@@ -38,9 +38,42 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
 	public String getUri() {
 		return uri;
 	}
+	
+	public String getUnparsedUri() {
+		return unparse(uri);
+	}
+	
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
 
 	@Override
 	public int compareTo(DocumentURI o) {
 		return uri.compareTo(o.getUri());
 	}
+	
+	protected static String unparse(String s) {
+        int len = s.length();
+        StringBuilder buf = new StringBuilder(len * 2);
+        for (int i = 0; i < len; i++) {
+            char c = s.charAt(i);
+            if ((c >= 0x20) && (c < 0x80)) switch (c) {
+            case '"':
+                buf.append("&quot;");
+                break;
+            case '&':
+                buf.append("&amp;");
+                break;
+            default:
+                buf.append(c);
+                break;
+            }
+            else {
+                buf.append("&#x");
+                buf.append(Integer.toString(c, 16));
+                buf.append(';');
+            }
+        }
+        return buf.toString();
+    }
 }

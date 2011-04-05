@@ -23,8 +23,8 @@ import com.marklogic.xcc.exceptions.XccConfigException;
  * @author jchen
  *
  */
-public abstract class MarkLogicRecordWriter<K>
-extends RecordWriter<K, MarkLogicNode> {
+public abstract class MarkLogicRecordWriter<KEYOUT, VALUEOUT>
+extends RecordWriter<KEYOUT, VALUEOUT> {
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicRecordWriter.class);
 	/**
@@ -59,7 +59,7 @@ extends RecordWriter<K, MarkLogicNode> {
 				ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
 			    session = cs.newSession(); 
 			} catch (XccConfigException e) {
-				e.printStackTrace();
+				LOG.error("Error creating a new session: ", e);
 				throw new IOException(e);
 			}    
 		}

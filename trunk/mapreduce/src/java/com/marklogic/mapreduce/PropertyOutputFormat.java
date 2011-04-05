@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2003-2011 MarkLogic Corporation. All rights reserved.
- */
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
@@ -14,28 +11,26 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 /**
- * MarkLogicOutputFormat for Document.
- *
+ * MarkLogicOutputFormat for Document Property.
+ * 
  * @author jchen
  */
-public class DocumentOutputFormat extends MarkLogicOutputFormat<DocumentURI> {
+public class PropertyOutputFormat 
+extends MarkLogicOutputFormat<DocumentURI, MarkLogicNode> {
 	public static final Log LOG =
-	    LogFactory.getLog(DocumentOutputFormat.class);
+	    LogFactory.getLog(PropertyOutputFormat.class);
 	
 	@Override
 	public RecordWriter<DocumentURI, MarkLogicNode> getRecordWriter(
-			TaskAttemptContext context) throws IOException, InterruptedException {
+			TaskAttemptContext context) throws IOException, InterruptedException {		
 		Configuration conf = context.getConfiguration();
 		try {
 			URI serverUri = getServerUri(conf);
-			return new DocumentWriter(serverUri, 
-					conf.get(OUTPUT_DIRECTORY),
-					conf.getStrings(OUTPUT_COLLECTION), 
-					conf.getStrings(OUTPUT_PERMISSION),
-					conf.get(OUTPUT_QUALITY));
+			return new PropertyWriter(serverUri);
 		} catch (URISyntaxException e) {
 			LOG.error(e);
 			throw new IOException(e);
 		}
 	}
+
 }

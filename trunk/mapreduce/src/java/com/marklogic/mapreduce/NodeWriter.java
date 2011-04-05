@@ -21,7 +21,7 @@ import com.marklogic.xcc.exceptions.RequestException;
  * @author jchen
  */
 public class NodeWriter 
-extends MarkLogicRecordWriter<NodePath> 
+extends MarkLogicRecordWriter<NodePath, MarkLogicNode> 
 implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(NodeWriter.class);
@@ -51,10 +51,12 @@ implements MarkLogicConstants {
 		String query = 
 			queryTemp.replace(NODE_PATH_TEMPLATE, path.getFullPath())
 			         .replace(NAMESPACE_TEMPLATE, namespace);
-		String recordString = record == null ? "{}" :
+		String recordString = record == null ? "()" :
 			record.toString();
 		query = query.replace(NODE_STRING_TEMPLATE, recordString);
-		LOG.info(query);
+		if (LOG.isDebugEnabled()) {
+		    LOG.info(query);
+		}
 		Session session = getSession();
 		try {
 			AdhocQuery request = session.newAdhocQuery(query);
@@ -62,7 +64,7 @@ implements MarkLogicConstants {
 		} catch (RequestException e) {	
 			LOG.error(e);
 			LOG.error(query);
-			throw new IOException(e);
+			//throw new IOException(e);
 		}
 	}
 
