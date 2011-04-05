@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Used with com.marklogic.mapreduce.examples.LinkCountInDoc.class -->
+
+<configuration>
+    <property>
+        <name>mapreduce.marklogic.output.username</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.password</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.host</name>
+        <value>jchen</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.port</name>
+        <value>5275</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.directory</name>
+        <value>temp</value>
+    </property>
+    <property>
+        <name>mapred.reduce.tasks</name>
+        <value>0</value>
+    </property>
+</configuration>

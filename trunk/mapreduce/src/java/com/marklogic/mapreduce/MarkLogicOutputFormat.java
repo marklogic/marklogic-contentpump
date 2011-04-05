@@ -31,7 +31,8 @@ import com.marklogic.xcc.exceptions.XccConfigException;
  * 
  * @author jchen
  */
-public abstract class MarkLogicOutputFormat<K> extends OutputFormat<K, MarkLogicNode> 
+public abstract class MarkLogicOutputFormat<KEYOUT, VALUEOUT> 
+extends OutputFormat<KEYOUT, VALUEOUT> 
 implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicOutputFormat.class);

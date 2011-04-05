@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Used with com.marklogic.mapreduce.examples.LinkCountInDoc.class -->
+
+<configuration>
+    <property>
+        <name>mapreduce.marklogic.input.username</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.password</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.host</name>
+        <value>jchen</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.port</name>
+        <value>5275</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.subdocumentexpr</name>
+        <value>//wp:a[@href and @title and not (fn:starts-with(@href, "#") or fn:starts-with(@href, "http://") or fn:starts-with(@href, "File:") or fn:starts-with(@href, "Image:"))]/@title</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.namespace</name>
+        <value>wp,http://www.mediawiki.org/xml/export-0.4/</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.username</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.password</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.host</name>
+        <value>jchen</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.port</name>
+        <value>5275</value>
+    </property>
+    <property>
+        <name>mapreduce.linkcount.baseuri</name>
+        <value>/space/wikipedia/enwiki/</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.maxsplitsize</name>
+        <value>400</value>
+    </property>
+</configuration>

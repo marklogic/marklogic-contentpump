@@ -1,6 +1,3 @@
-/*
- * Copyright (c) 2003-2011 MarkLogic Corporation. All rights reserved.
- */
 package com.marklogic.mapreduce.examples;
 
 import java.io.IOException;
@@ -13,7 +10,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -21,26 +20,21 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
+import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicNode;
-import com.marklogic.mapreduce.NodeInputFormat;
-import com.marklogic.mapreduce.NodeOutputFormat;
-import com.marklogic.mapreduce.NodePath;
+import com.marklogic.mapreduce.PropertyOutputFormat;
+import com.marklogic.mapreduce.ValueInputFormat;
 
-@SuppressWarnings("deprecation")
-public class LinkCountInDoc {
+public class LinkCountInProperty {
 	public static class RefMapper 
-	extends Mapper<NodePath, MarkLogicNode, Text, IntWritable> {
+	extends Mapper<LongWritable, Text, Text, IntWritable> {
 		
 		private final static IntWritable one = new IntWritable(1);
-		private final static String TITLE_ATTR_NAME = "title";
 		private Text refURI = new Text();
 		
-		public void map(NodePath key, MarkLogicNode value, Context context) 
+		public void map(LongWritable key, Text value, Context context) 
 		throws IOException, InterruptedException {
-			Element element = (Element)value.getNode();
-			String href = element.getAttribute(TITLE_ATTR_NAME);
-			
-			refURI.set(href);
+			refURI.set(value);
 			context.write(refURI, one);
 			
 			// TODO: if the base URI needs to be extracted from the key, 
@@ -49,12 +43,11 @@ public class LinkCountInDoc {
 	}
 	
 	public static class IntSumReducer
-	extends Reducer<Text, IntWritable, NodePath, MarkLogicNode> {
+	extends Reducer<Text, IntWritable, DocumentURI, MarkLogicNode> {
 		private final static String TEMPLATE = "<ref-count>0</ref-count>";
-		private final static String ROOT_ELEMENT_NAME = "//wp:page";
 		private final static String BASE_URI_PARAM_NAME = "mapreduce.linkcount.baseuri";
 		
-		private NodePath nodePath = new NodePath();
+		private DocumentURI docUri = new DocumentURI();
 		private Element element;
 		private MarkLogicNode result;
 		private String baseUri;
@@ -92,10 +85,9 @@ public class LinkCountInDoc {
 			}
 			StringBuilder buf = new StringBuilder();
 			buf.append(baseUri).append(key);
-			nodePath.setDocumentUri(buf.toString());
-			nodePath.setRelativePath(ROOT_ELEMENT_NAME);
+			docUri.setUri(buf.toString());
 			element.setTextContent(Integer.toString(sum));
-			context.write(nodePath, result);
+			context.write(docUri, result);
 		}
 		
 		// exclude key that is invalid for a document URI
@@ -115,21 +107,21 @@ public class LinkCountInDoc {
 		}
 
 		Job job = new Job(conf);
-		job.setJarByClass(LinkCountInDoc.class);
-		job.setInputFormatClass(NodeInputFormat.class);
+		job.setJarByClass(LinkCountInProperty.class);
+		job.setInputFormatClass(ValueInputFormat.class);
 		job.setMapperClass(RefMapper.class);
 		job.setMapOutputKeyClass(Text.class);
 		job.setMapOutputValueClass(IntWritable.class);
 		job.setReducerClass(IntSumReducer.class);
-		job.setOutputFormatClass(NodeOutputFormat.class);
-		job.setOutputKeyClass(NodePath.class);
+		job.setOutputFormatClass(PropertyOutputFormat.class);
+		job.setOutputKeyClass(DocumentURI.class);
 	    job.setOutputValueClass(MarkLogicNode.class);
 		
 		conf = job.getConfiguration();
 		conf.addResource(otherArgs[0]);
+		conf.setClass("mapreduce.marklogic.input.valueClass", Text.class, 
+				Writable.class);
 	
 		System.exit(job.waitForCompletion(true) ? 0 : 1);
 	}
 }
-
-

@@ -18,7 +18,8 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * 
  * @author jchen
  */
-public class NodeOutputFormat extends MarkLogicOutputFormat<NodePath> {
+public class NodeOutputFormat 
+extends MarkLogicOutputFormat<NodePath, MarkLogicNode> {
 	public static final Log LOG =
 	    LogFactory.getLog(NodeOutputFormat.class);
 	
