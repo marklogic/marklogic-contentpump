@@ -85,7 +85,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> {
 			Content content = null;
 			if (value instanceof Text) {
 				content = ContentFactory.newContent(uri, 
-			    		((Text) value).getBytes(), options);
+			    		((Text) value).toString(), options);
 			} else if (value instanceof MarkLogicNode) {
 				content = ContentFactory.newContent(uri, 
 			    		((MarkLogicNode)value).getNode(), options);	    
