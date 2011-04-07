@@ -1,6 +1,8 @@
 package com.marklogic.mapreduce.examples;
 
 import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -20,9 +22,8 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 
-public class ContentLoader {
-
-	public static class ContentMapper 
+public class ZipContentLoader {
+	public static class ZipContentMapper 
 	extends Mapper<Text, Text, DocumentURI, Text> {
 		
 		private DocumentURI uri = new DocumentURI();
@@ -43,9 +44,9 @@ public class ContentLoader {
 		}
 		
 		Job job = new Job(conf);
-		job.setJarByClass(ContentLoader.class);
-		job.setInputFormatClass(ContentInputFormat.class);
-		job.setMapperClass(ContentMapper.class);
+		job.setJarByClass(ZipContentLoader.class);
+		job.setInputFormatClass(ZipContentInputFormat.class);
+		job.setMapperClass(ZipContentMapper.class);
 		job.setMapOutputKeyClass(DocumentURI.class);
 		job.setMapOutputValueClass(Text.class);
 		job.setOutputFormatClass(ContentOutputFormat.class);
@@ -59,7 +60,7 @@ public class ContentLoader {
 	}
 }
 
-class ContentInputFormat extends FileInputFormat<Text, Text> {
+class ZipContentInputFormat extends FileInputFormat<Text, Text> {
 
 	@Override
 	protected boolean isSplitable(JobContext context, Path filename) {
@@ -69,23 +70,25 @@ class ContentInputFormat extends FileInputFormat<Text, Text> {
 	@Override
     public RecordReader<Text, Text> createRecordReader(InputSplit split,
             TaskAttemptContext context) throws IOException, InterruptedException {
-	    return new ContentReader();
-    }	
+	    return new ZipContentReader();
+    }
+	
 }
 
-class ContentReader extends RecordReader<Text, Text> {
+class ZipContentReader extends RecordReader<Text, Text> {
 
 	private Text key = new Text();
 	private Text value = new Text();
-	private long bytesRead;
+	private ZipInputStream zipIn;
+	private long bytesRead = 0;
 	private long bytesTotal;
-	private boolean hasNext;
+	private byte[] buf = new byte[65536];
 	
-	public ContentReader() {
-    }
-
 	@Override
     public void close() throws IOException {
+		if (zipIn != null) {
+			zipIn.close();
+		}
     }
 
 	@Override
@@ -110,24 +113,27 @@ class ContentReader extends RecordReader<Text, Text> {
 		Path file = ((FileSplit)inSplit).getPath();
 		FileSystem fs = file.getFileSystem(context.getConfiguration());
 		FSDataInputStream fileIn = fs.open(file);
-	    key.set(file.toString());
-	    byte[] buf = new byte[(int)inSplit.getLength()];
-	    try {
-	        fileIn.readFully(buf);
-		    value.set(buf);
-		    hasNext = true;    
-	    } catch (Exception e) {
-	    	hasNext = false;
-	    } finally {
-	    	fileIn.close();
-	    }
+		zipIn = new ZipInputStream(fileIn);
     }
 
 	@Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-	    if (hasNext) {
-	    	hasNext = false;
-	    	return true;
+	    if (zipIn != null) {
+	    	ZipEntry zipEntry;
+	    	while ((zipEntry = zipIn.getNextEntry()) != null) {
+	    	    if (zipEntry != null && !zipEntry.isDirectory()) {
+	    		    key.set(zipEntry.getName());
+	    		    StringBuilder entry = new StringBuilder();
+	    		    long size;
+	    	    	while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
+	    	    		entry.append(new String(buf, 0, (int) size));
+	    	    	}
+	    		    value.set(entry.toString());
+	    		    System.out.println(entry);
+	    		    return true;
+	    	    }
+	    	}
+	    	return false;
 	    }
 	    return false;
     }
