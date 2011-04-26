@@ -51,7 +51,7 @@ public class ZipContentLoader {
 		job.setMapOutputValueClass(Text.class);
 		job.setOutputFormatClass(ContentOutputFormat.class);
 		
-		ContentInputFormat.setInputPaths(job, new Path(otherArgs[1]));
+		ZipContentInputFormat.setInputPaths(job, new Path(otherArgs[1]));
 
 		conf = job.getConfiguration();
 		conf.addResource(otherArgs[0]);
@@ -80,9 +80,8 @@ class ZipContentReader extends RecordReader<Text, Text> {
 	private Text key = new Text();
 	private Text value = new Text();
 	private ZipInputStream zipIn;
-	private long bytesRead = 0;
-	private long bytesTotal;
 	private byte[] buf = new byte[65536];
+	private boolean hasNext = true;
 	
 	@Override
     public void close() throws IOException {
@@ -103,13 +102,12 @@ class ZipContentReader extends RecordReader<Text, Text> {
 
 	@Override
     public float getProgress() throws IOException, InterruptedException {
-	    return bytesRead / (float)bytesTotal;
+	    return hasNext ? 0 : 1;
     }
 
 	@Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
             throws IOException, InterruptedException {
-		bytesTotal = inSplit.getLength();
 		Path file = ((FileSplit)inSplit).getPath();
 		FileSystem fs = file.getFileSystem(context.getConfiguration());
 		FSDataInputStream fileIn = fs.open(file);
@@ -129,12 +127,13 @@ class ZipContentReader extends RecordReader<Text, Text> {
 	    	    		entry.append(new String(buf, 0, (int) size));
 	    	    	}
 	    		    value.set(entry.toString());
-	    		    System.out.println(entry);
 	    		    return true;
 	    	    }
 	    	}
+	    	hasNext = false;
 	    	return false;
 	    }
+	    hasNext = false;
 	    return false;
     }
 	

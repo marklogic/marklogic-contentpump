@@ -25,8 +25,12 @@ extends MarkLogicOutputFormat<DocumentURI, MarkLogicNode> {
 			TaskAttemptContext context) throws IOException, InterruptedException {		
 		Configuration conf = context.getConfiguration();
 		try {
-			URI serverUri = getServerUri(conf);
-			return new PropertyWriter(serverUri);
+			String host = getHost(conf, context.getTaskAttemptID().getId());
+			URI serverUri = getServerUri(conf, host);
+			String propOpType = conf.get(PROPERTY_OPERATION_TYPE, 
+					DEFAULT_PROPERTY_OPERATION_TYPE);
+			return new PropertyWriter(serverUri, 
+					PropertyOpType.valueOf(propOpType));
 		} catch (URISyntaxException e) {
 			LOG.error(e);
 			throw new IOException(e);

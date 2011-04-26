@@ -110,7 +110,7 @@ public class LinkCountInDoc {
 		Configuration conf = new Configuration();
 		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		if (otherArgs.length < 1) {
-			System.err.println("Usage: OutputTestMR configFile");
+			System.err.println("Usage: LinkCountInDoc configFile");
 			System.exit(2);
 		}
 

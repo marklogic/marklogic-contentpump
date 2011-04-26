@@ -26,12 +26,12 @@ implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(NodeWriter.class);
     
-	private String queryTemp;
+	private NodeOpType opType;
 	private String namespace;
 	
-	public NodeWriter(URI serverUri, Collection<String> nsCol, String nodeOpType) {
+	public NodeWriter(URI serverUri, Collection<String> nsCol, NodeOpType nodeOpType) {
 		super(serverUri);
-		queryTemp = NodeOpType.valueOf(nodeOpType).getQueryTemplate();
+		opType = nodeOpType;
 		StringBuilder buf = new StringBuilder();
 		if (nsCol != null) {
 			for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
@@ -48,12 +48,9 @@ implements MarkLogicConstants {
 	@Override
 	public void write(NodePath path, MarkLogicNode record) 
 	throws IOException, InterruptedException {
-		String query = 
-			queryTemp.replace(NODE_PATH_TEMPLATE, path.getFullPath())
-			         .replace(NAMESPACE_TEMPLATE, namespace);
 		String recordString = record == null ? "()" :
 			record.toString();
-		query = query.replace(NODE_STRING_TEMPLATE, recordString);
+		String query = opType.getQuery(recordString, path, namespace);
 		if (LOG.isDebugEnabled()) {
 		    LOG.info(query);
 		}
@@ -64,7 +61,6 @@ implements MarkLogicConstants {
 		} catch (RequestException e) {	
 			LOG.error(e);
 			LOG.error(query);
-			//throw new IOException(e);
 		}
 	}
 

@@ -13,7 +13,7 @@
         <value>admin</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.host</name>
+        <name>mapreduce.marklogic.input.hosts</name>
         <value>jchen</value>
     </property>
     <property>

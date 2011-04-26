@@ -20,9 +20,11 @@ extends MarkLogicRecordWriter<DocumentURI, MarkLogicNode> {
 
 	public static final Log LOG =
 	    LogFactory.getLog(PropertyWriter.class);
+	private PropertyOpType opType;
 	
-	public PropertyWriter(URI serverUri) {
+	public PropertyWriter(URI serverUri, PropertyOpType propOpType) {
 		super(serverUri);
+		opType = propOpType;
 	}
 
 	@Override
@@ -30,14 +32,7 @@ extends MarkLogicRecordWriter<DocumentURI, MarkLogicNode> {
 			throws IOException, InterruptedException {
 		// construct query
 		String recordString = record == null ? "()" : record.toString();
-		StringBuilder buf = new StringBuilder();
-		buf.append("xquery version \"1.0-ml\"; \n");
-		buf.append("xdmp:document-set-property( \n\"");
-		buf.append(uri.getUnparsedUri());
-		buf.append("\", ");
-		buf.append(recordString);
-		buf.append(")");
-		String query = buf.toString();
+		String query = opType.getQuery(uri, recordString);
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(query);
 		}
@@ -50,7 +45,6 @@ extends MarkLogicRecordWriter<DocumentURI, MarkLogicNode> {
 		} catch (RequestException e) {	
 			LOG.error(e);
 			LOG.error(query);
-			//throw new IOException(e);
 		}
 	}
 

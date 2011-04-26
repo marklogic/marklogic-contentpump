@@ -28,10 +28,11 @@ extends MarkLogicOutputFormat<NodePath, MarkLogicNode> {
 			TaskAttemptContext context) throws IOException, InterruptedException {
 		Configuration conf = context.getConfiguration();
 		try {
-			URI serverUri = getServerUri(conf);
+			String host = getHost(conf, context.getTaskAttemptID().getId());
+			URI serverUri = getServerUri(conf, host);
 			return new NodeWriter(serverUri, 
 					conf.getStringCollection(OUTPUT_NAMESPACE),
-					conf.get(NODE_OPERATION_TYPE));
+					NodeOpType.valueOf(conf.get(NODE_OPERATION_TYPE)));
 		} catch (URISyntaxException e) {
 			LOG.error(e);
 			throw new IOException(e);
