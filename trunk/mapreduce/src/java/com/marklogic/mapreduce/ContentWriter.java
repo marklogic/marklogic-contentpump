@@ -2,6 +2,7 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,12 +33,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> {
 	 * Content options of the output documents.
 	 */
 	private ContentCreateOptions options;
+	//private List<Long> forestIds;
+	int index = 0;
 
 	public ContentWriter(URI serverUri, String outputDir, String[] collections,
-            String[] perms, String quality) {
+            String[] perms, String quality, ContentType contentType,
+            List<Long> forestIds) {
 		super(serverUri);
 		this.outputDir = outputDir;
-		
+		//this.forestIds = forestIds;
 		ContentPermission[] permissions = null;
 		if (perms != null && perms.length > 0) {
 	    	permissions = new ContentPermission[perms.length / 2];
@@ -66,10 +70,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> {
 		
 		options = ContentCreateOptions.newXmlInstance();
 	    options.setCollections(collections);
-            if (quality != null) {
+        if (quality != null) {
 	        options.setQuality(Integer.parseInt(quality));
-            }
+        }
 	    options.setPermissions(permissions);
+	    options.setFormat(contentType.getDocumentFormat());
+	    /* TODO: set option to do in-forest eval when 13333 is fixed.
+	     * long[] forests = new long[forestIds.size()];
+	    for (int i = 0; i < forestIds.size(); i++) {
+	    	forests[i] = forestIds.get(i);
+	    }
+	    options.setPlaceKeys(forests); */
     }
 
 	@Override

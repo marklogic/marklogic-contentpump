@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
-<!-- Used with com.marklogic.mapreduce.examples.LinkCountInDoc.class -->
+<!-- Used with com.marklogic.mapreduce.examples.ContentLoader.class -->
 
 <configuration>
     <property>
@@ -13,7 +13,7 @@
         <value>admin</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.host</name>
+        <name>mapreduce.marklogic.output.hosts</name>
         <value>jchen</value>
     </property>
     <property>

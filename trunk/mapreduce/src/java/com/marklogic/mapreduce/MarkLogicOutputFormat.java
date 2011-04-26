@@ -44,17 +44,24 @@ implements MarkLogicConstants {
 		"exists(xdmp:document-properties(\"" + DIRECTORY_TEMPLATE + 
 		"\")//prop:directory)";
 	
+	protected static String getHost(Configuration conf, int taskId) {
+		String[] hosts = conf.getStrings(OUTPUT_HOSTS);
+		return hosts[taskId % hosts.length];
+	}
+	
 	/**
      * get server URI from the configuration.
      * 
      * @param conf job configuration
+	 * @param taskAttemptID 
      * @return server URI
      * @throws URISyntaxException 
      */
-    protected URI getServerUri(Configuration conf) throws URISyntaxException {
+    protected static URI getServerUri(Configuration conf, String host)
+    throws URISyntaxException {
+    	
 		String user = conf.get(OUTPUT_USERNAME, "");
-		String password = conf.get(OUTPUT_PASSWORD, "");
-		String host = conf.get(OUTPUT_HOST, "");
+		String password = conf.get(OUTPUT_PASSWORD, "");		
 		String port = conf.get(OUTPUT_PORT, "");
 		
 		String serverUriStr = 
@@ -72,7 +79,8 @@ implements MarkLogicConstants {
 		Session session = null;
 		ResultSequence result = null;
 		try {
-			URI serverUri = getServerUri(conf);
+			String host = getHost(conf, 0);
+			URI serverUri = getServerUri(conf, host);
 		    // try getting a connection
 			ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
 			session = cs.newSession();

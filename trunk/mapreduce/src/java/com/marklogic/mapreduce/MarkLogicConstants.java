@@ -19,7 +19,7 @@ package com.marklogic.mapreduce;
  * @author jchen
  */
 
-public interface MarkLogicConstants {
+public interface MarkLogicConstants extends MarkLogicInternalConstants {
 	// input-related config property names
 	/**
 	 * The config property name (<code>{@value}</code>)
@@ -295,12 +295,15 @@ public interface MarkLogicConstants {
     	"mapreduce.marklogic.output.password";
     /**
      * The config property name (<code>{@value}</code>)
-     * which, if set, specifies the MarkLogic Server host to use for
+     * which, if set, specifies the MarkLogic Server host(s) to use for
      * output operations. Required if using MarkLogic Server for
      * output.
      */
-    static final String OUTPUT_HOST = 
-    	"mapreduce.marklogic.output.host";
+    static final String OUTPUT_HOSTS = 
+    	"mapreduce.marklogic.output.hosts";
+    
+    static final String OUTPUT_HOST_FORESTS = 
+    	"mapreduce.marklogic.output.hostforests";   
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the port number of the output MarkLogic
@@ -401,7 +404,8 @@ public interface MarkLogicConstants {
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates what node operation to perform
      * during output. Required if using MarkLogic Server for output
-     * with node output format.
+     * with NodeOutputFormat.  Valid choices: INSERT_BEFORE, INSERT_AFTER,
+     * INSERT_CHILD, REPLACE.
      * 
      * @see NodeOpType
      * @see NodeOutputFormat
@@ -416,35 +420,39 @@ public interface MarkLogicConstants {
     static final String OUTPUT_NAMESPACE = 
     	"mapreduce.marklogic.output.namespace";
     
-    // internal constants
-    /** Internal Use Only */
-    static final String USER_TEMPLATE = "{user}";
-    /** Internal Use Only */
-    static final String PASSWORD_TEMPLATE = "{password}";
-    /** Internal Use Only */
-    static final String HOST_TEMPLATE = "{host}";
-    /** Internal Use Only */
-    static final String PORT_TEMPLATE = "{port}";
     /** 
      * The default maximum split size for input splits, used if
      * {@link #MAX_SPLIT_SIZE input.maxsplitsize} is not specified.
      */
-    static final long DEFAULT_MAX_SPLIT_SIZE = 1000;
-    /** Internal Use Only */
-	static final String SERVER_URI_TEMPLATE =
-    	"xcc://{user}:{password}@{host}:{port}";
-    /** Internal Use Only */
-	static final String DOCUMENT_SELECTOR_TEMPLATE = "{document_selector}";
-    /** Internal Use Only */
-	static final String SUBDOCUMENT_EXPR_TEMPLATE = "{subdocument-expr}";
-    /** Internal Use Only */
-	static final String NAMESPACE_TEMPLATE = "{namespace}";
-    /** Internal Use Only */
-	static final String DATABASENAME_TEMPLATE = "{database_name}";
-    /** Internal Use Only */
-	static final String QUERY_TEMPLATE = "{query}";
-    /** Internal Use Only */
-	static final String NODE_PATH_TEMPLATE = "{node_path}";
-    /** Internal Use Only */
-    static final String NODE_STRING_TEMPLATE = "{node_string}";
+    static final long DEFAULT_MAX_SPLIT_SIZE = 50000;
+    
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, indicates what property operation to perform
+     * during output when using PropertyOutputFormat. Ignored if not using
+     * PropertyOutputFormat.  Optional.  Valid choices: SET_PROPERTY, 
+     * ADD_PROPERTY.  Default: SET_PROPERTY.
+     * 
+     * @see PropertyOpType
+     * @see PropertyOutputFormat
+     * @see PropertyWriter
+     */
+    static final String PROPERTY_OPERATION_TYPE = 
+        "mapreduce.marklogic.output.propertyoptype";
+    /**
+     * Default property operation type.
+     */
+    static final String DEFAULT_PROPERTY_OPERATION_TYPE = "SET_PROPERTY";
+    /**
+     * The config property name (<code>{@value}</code>
+     * which, if set, indicates type of content to be inserted when using 
+     * ContentOutputFormat.  Optional.  Valid choices: XML, TEXT, BINARY.
+     * Default: XML.
+     */
+    static final String CONTENT_TYPE = 
+    	"mapreduce.marklogic.output.contenttype";
+    /**
+     * Default content type.
+     */
+    static final String DEFAULT_CONTENT_TYPE = "XML";
 }
