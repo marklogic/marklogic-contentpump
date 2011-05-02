@@ -27,10 +27,7 @@ extends MarkLogicOutputFormat<DocumentURI, MarkLogicNode> {
 		try {
 			String host = getHost(conf, context.getTaskAttemptID().getId());
 			URI serverUri = getServerUri(conf, host);
-			String propOpType = conf.get(PROPERTY_OPERATION_TYPE, 
-					DEFAULT_PROPERTY_OPERATION_TYPE);
-			return new PropertyWriter(serverUri, 
-					PropertyOpType.valueOf(propOpType));
+			return new PropertyWriter(serverUri, conf);
 		} catch (URISyntaxException e) {
 			LOG.error(e);
 			throw new IOException(e);

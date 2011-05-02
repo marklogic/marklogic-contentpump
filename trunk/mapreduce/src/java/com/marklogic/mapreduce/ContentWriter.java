@@ -2,10 +2,10 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 
 import com.marklogic.xcc.Content;
@@ -23,7 +23,7 @@ import com.marklogic.xcc.exceptions.RequestException;
  *
  */
 public class ContentWriter<VALUEOUT> 
-extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> {
+extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstants {
 	public static final Log LOG = LogFactory.getLog(ContentWriter.class);
 	/**
 	 * Directory of the output documents.
@@ -36,12 +36,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> {
 	//private List<Long> forestIds;
 	int index = 0;
 
-	public ContentWriter(URI serverUri, String outputDir, String[] collections,
-            String[] perms, String quality, ContentType contentType,
-            List<Long> forestIds) {
-		super(serverUri);
-		this.outputDir = outputDir;
-		//this.forestIds = forestIds;
+	public ContentWriter(URI serverUri, Configuration conf) {
+		super(serverUri, conf);
+		this.outputDir = conf.get(OUTPUT_DIRECTORY);
+		
+		String[] perms = conf.getStrings(OUTPUT_PERMISSION);
 		ContentPermission[] permissions = null;
 		if (perms != null && perms.length > 0) {
 	    	permissions = new ContentPermission[perms.length / 2];
@@ -69,11 +68,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> {
 		}
 		
 		options = ContentCreateOptions.newXmlInstance();
-	    options.setCollections(collections);
-        if (quality != null) {
-	        options.setQuality(Integer.parseInt(quality));
-        }
+	    options.setCollections(conf.getStrings(OUTPUT_COLLECTION));
+	    options.setQuality(conf.getInt(OUTPUT_QUALITY, 0));
 	    options.setPermissions(permissions);
+	    String contentTypeStr = conf.get(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
+	    ContentType contentType = ContentType.valueOf(contentTypeStr);
 	    options.setFormat(contentType.getDocumentFormat());
 	    /* TODO: set option to do in-forest eval when 13333 is fixed.
 	     * long[] forests = new long[forestIds.size()];
@@ -105,6 +104,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> {
 						" is not supported.");
 			}		
 			session.insertContent(content);
+			commitIfNecessary();
 		} catch (RequestException e) {
 			LOG.error(e);
 			throw new IOException(e);
