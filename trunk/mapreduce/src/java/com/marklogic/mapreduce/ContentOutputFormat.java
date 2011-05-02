@@ -3,8 +3,6 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -28,8 +26,8 @@ public class ContentOutputFormat<VALUEOUT> extends
 		try {
 			String host = getHost(conf, context.getTaskAttemptID().getId());
 			URI serverUri = getServerUri(conf, host);
-			List<Long> forestIds = null;
 			/* TODO: get host->forest mapping when 13333 is done.
+			List<Long> forestIds = null;
 			Collection<String> hostForests = conf.getStringCollection(OUTPUT_HOST_FORESTS); 			
 			for (String entry : hostForests) {
 				if (forestIds == null) {
@@ -45,14 +43,7 @@ public class ContentOutputFormat<VALUEOUT> extends
 					}
 				} 
 			} */
-			String contentType = conf.get(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
-			return new ContentWriter<VALUEOUT>(serverUri, 
-					conf.get(OUTPUT_DIRECTORY),
-					conf.getStrings(OUTPUT_COLLECTION), 
-					conf.getStrings(OUTPUT_PERMISSION),
-					conf.get(OUTPUT_QUALITY),
-					ContentType.valueOf(contentType),
-					forestIds);
+			return new ContentWriter<VALUEOUT>(serverUri, conf);
 		} catch (URISyntaxException e) {
 			LOG.error(e);
 			throw new IOException(e);

@@ -455,4 +455,14 @@ public interface MarkLogicConstants extends MarkLogicInternalConstants {
      * Default content type.
      */
     static final String DEFAULT_CONTENT_TYPE = "XML";
+    /**
+     * The config property name (<code>{@value}</code>
+     * which, if set, indicates batch size for output.  Optional.
+     */
+    static final String BATCH_SIZE = 
+    	"mapreduce.marklogic.output.batchsize";
+    /**
+     * Default batch size.
+     */
+    static final int DEFAULT_BATCH_SIZE = 1000;
 }
