@@ -20,6 +20,10 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.ValueInputFormat;
 
+/**
+ * Read title attributes in links as text and write summary of link counts to 
+ * HDFS.  Used with config file conf/marklogic-textin-textout.xml.
+ */
 public class LinkCountValue {
 	public static class RefMapper 
 	extends Mapper<LongWritable, Text, Text, IntWritable> {
@@ -31,9 +35,6 @@ public class LinkCountValue {
 		throws IOException, InterruptedException {
 			refURI.set(value);
 			context.write(refURI, one);
-
-	    	// TODO: if the base URI needs to be extracted from the key, 
-			// do it here.
 		}
 	}
 	

@@ -18,6 +18,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.GenericOptionsParser;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
@@ -26,25 +27,26 @@ import com.marklogic.mapreduce.NodeInputFormat;
 import com.marklogic.mapreduce.NodeOutputFormat;
 import com.marklogic.mapreduce.NodePath;
 
+/**
+ * Read link title as attribute node from MarkLogic Server and insert a child
+ * node to the referenced document.  Used with config file 
+ * conf/marklogic-nodein-nodeout.xml.
+ */
 @SuppressWarnings("deprecation")
 public class LinkCountInDoc {
 	public static class RefMapper 
 	extends Mapper<NodePath, MarkLogicNode, Text, IntWritable> {
 		
 		private final static IntWritable one = new IntWritable(1);
-		private final static String TITLE_ATTR_NAME = "title";
 		private Text refURI = new Text();
 		
 		public void map(NodePath key, MarkLogicNode value, Context context) 
 		throws IOException, InterruptedException {
-			Element element = (Element)value.getNode();
-			String href = element.getAttribute(TITLE_ATTR_NAME);
+			Attr title = (Attr)value.getNode();
+			String href = title.getValue();
 			
 			refURI.set(href);
 			context.write(refURI, one);
-			
-			// TODO: if the base URI needs to be extracted from the key, 
-			// do it here.
 		}
 	}
 	

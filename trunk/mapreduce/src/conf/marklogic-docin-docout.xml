@@ -1,24 +1,28 @@
 <?xml version="1.0"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
-<!-- Used with com.marklogic.mapreduce.examples.ContentLoader.class -->
+<!-- Used with com.marklogic.mapreduce.examples.ContentReader.class -->
 
 <configuration>
     <property>
-        <name>mapreduce.marklogic.output.username</name>
+        <name>mapreduce.marklogic.input.username</name>
         <value>admin</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.password</name>
+        <name>mapreduce.marklogic.input.password</name>
         <value>admin</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.host</name>
+        <name>mapreduce.marklogic.input.host</name>
         <value>jchen</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.port</name>
-        <value>5275</value>
+        <name>mapreduce.marklogic.input.port</name>
+        <value>5276</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.maxsplitsize</name>
+        <value>100</value>
     </property>
     <property>
         <name>mapred.reduce.tasks</name>

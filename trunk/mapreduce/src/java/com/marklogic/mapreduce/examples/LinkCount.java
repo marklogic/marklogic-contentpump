@@ -17,6 +17,10 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.KeyValueInputFormat;
 
+/**
+ * Read link titles as text and their frequencies and write link count summary 
+ * to HDFS.  Used with config file conf/marklogic-advanced.xml.
+ */
 public class LinkCount {
 	public static class RefMapper 
 	extends Mapper<Text, IntWritable, Text, IntWritable> {
@@ -52,7 +56,7 @@ public class LinkCount {
 		Configuration conf = new Configuration();
 		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		if (otherArgs.length < 1) {
-			System.err.println("Usage: LinkCountValue configFile outputDir");
+			System.err.println("Usage: LinkCount configFile outputDir");
 			System.exit(2);
 		}
 

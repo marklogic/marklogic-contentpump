@@ -145,7 +145,7 @@ implements MarkLogicConstants {
 			userQuery = conf.get(INPUT_QUERY);
 		} else {
 			docExpr = conf.get(DOCUMENT_SELECTOR, "fn:collection()");
-			subExpr = conf.get(SUBDOCUMENT_EXPRESSION);
+			subExpr = conf.get(SUBDOCUMENT_EXPRESSION, subExpr);
 			Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
 			StringBuilder buf = new StringBuilder();
 			if (nsCol != null) {
@@ -184,7 +184,10 @@ implements MarkLogicConstants {
 		        .replace(FOREST_ID_TEMPLATE, mlSplit.getForestId().toString())
 		        .replace(START_TEMPLATE, Long.toString(start))
 	            .replace(END_TEMPLATE, Long.toString(end));
-		}		        	 
+		}		
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(queryText);
+		}
 		
 		// set up a connection to the server
 		try {
