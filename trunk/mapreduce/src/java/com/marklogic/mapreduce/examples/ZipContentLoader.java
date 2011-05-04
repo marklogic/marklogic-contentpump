@@ -22,6 +22,11 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * Load documents as Text from zip files to MarkLogicServer.  Used with config
+ * file conf/marklogic-textin-docout.xml.
+ *
+ */
 public class ZipContentLoader {
 	public static class ZipContentMapper 
 	extends Mapper<Text, Text, DocumentURI, Text> {
@@ -39,7 +44,7 @@ public class ZipContentLoader {
 		Configuration conf = new Configuration();
 		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		if (otherArgs.length < 2) {
-			System.err.println("Usage: ContentLoader configFile inputDir");
+			System.err.println("Usage: ZipContentLoader configFile inputDir");
 			System.exit(2);
 		}
 		

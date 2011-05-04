@@ -20,6 +20,10 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * Load documents as Text to MarkLogicServer.  Used with config file 
+ * conf/marklogic-textin-docout.xml.
+ */
 public class ContentLoader {
 
 	public static class ContentMapper 
@@ -69,11 +73,11 @@ class ContentInputFormat extends FileInputFormat<Text, Text> {
 	@Override
     public RecordReader<Text, Text> createRecordReader(InputSplit split,
             TaskAttemptContext context) throws IOException, InterruptedException {
-	    return new ContentReader();
+	    return new FileReader();
     }	
 }
 
-class ContentReader extends RecordReader<Text, Text> {
+class FileReader extends RecordReader<Text, Text> {
 
 	private Text key = new Text();
 	private Text value = new Text();
@@ -81,7 +85,7 @@ class ContentReader extends RecordReader<Text, Text> {
 	private long bytesTotal;
 	private boolean hasNext;
 	
-	public ContentReader() {
+	public FileReader() {
     }
 
 	@Override

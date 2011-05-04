@@ -52,6 +52,11 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
 		return uri.compareTo(o.getUri());
 	}
 	
+	@Override
+	public String toString() {
+		return uri;
+	}
+	
 	protected static String unparse(String s) {
         int len = s.length();
         StringBuilder buf = new StringBuilder(len * 2);

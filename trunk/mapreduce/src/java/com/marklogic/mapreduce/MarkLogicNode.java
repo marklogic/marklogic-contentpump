@@ -29,7 +29,9 @@ import org.xml.sax.SAXException;
 
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.types.ItemType;
+import com.marklogic.xcc.types.XdmAttribute;
 import com.marklogic.xcc.types.XdmBinary;
+import com.marklogic.xcc.types.XdmDocument;
 import com.marklogic.xcc.types.XdmElement;
 import com.marklogic.xcc.types.XdmText;
 
@@ -75,13 +77,17 @@ public class MarkLogicNode implements Writable {
 				node = ((XdmElement)item.getItem()).asW3cElement(docBuilder);
 			} else if (type == ItemType.TEXT) {
 			    node = ((XdmText)item.getItem()).asW3cText(docBuilder);
+			} else if (type == ItemType.DOCUMENT) {
+				node = ((XdmDocument)item.getItem()).asW3cDocument(docBuilder);
+			} else if (type == ItemType.ATTRIBUTE) {
+				node = ((XdmAttribute)item.getItem()).asW3cAttr(docBuilder);
 			} else {
 				LOG.error("Unexpected item type: " + item.getItemType());
 			}
 		} catch (IOException e) {
 			LOG.error(e);
 		} catch (SAXException e) {
-			LOG.error(e);
+			LOG.error("error parsing result", e);
 		}
 	}
 	

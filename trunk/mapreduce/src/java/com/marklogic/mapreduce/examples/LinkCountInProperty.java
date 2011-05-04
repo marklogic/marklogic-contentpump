@@ -25,6 +25,10 @@ import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.PropertyOutputFormat;
 import com.marklogic.mapreduce.ValueInputFormat;
 
+/**
+ * Read title attributes in links as text and write summary as property to
+ * referenced documents.  Used with config file conf/marklogic-textin-propout.xml.
+ */
 public class LinkCountInProperty {
 	public static class RefMapper 
 	extends Mapper<LongWritable, Text, Text, IntWritable> {
@@ -36,9 +40,6 @@ public class LinkCountInProperty {
 		throws IOException, InterruptedException {
 			refURI.set(value);
 			context.write(refURI, one);
-			
-			// TODO: if the base URI needs to be extracted from the key, 
-			// do it here.
 		}
 	}
 	
@@ -102,7 +103,7 @@ public class LinkCountInProperty {
 		Configuration conf = new Configuration();
 		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 		if (otherArgs.length < 1) {
-			System.err.println("Usage: OutputTestMR configFile");
+			System.err.println("Usage: LinkCountInProperty configFile");
 			System.exit(2);
 		}
 
