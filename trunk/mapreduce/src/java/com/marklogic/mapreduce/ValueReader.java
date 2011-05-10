@@ -10,6 +10,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.xcc.ResultItem;
@@ -17,8 +18,6 @@ import com.marklogic.xcc.ResultItem;
 /**
  * <p>A RecordReader that fetches data from MarkLogic server and generates 
  * an integer key for each value fetched.</p>
- * 
- * <p>Currently only support Text as VALUEIN class.</p>
  * 
  * @author jchen
  * 
@@ -34,11 +33,12 @@ implements MarkLogicConstants {
 	    LogFactory.getLog(ValueReader.class);
 	private LongWritable key;
 	private VALUEIN value;
-	private Class<?> valueClass;
+	private Class<? extends Writable> valueClass;
 
 	public ValueReader(Configuration conf) {
 		super(conf);
-		valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class);
+		valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class, 
+				Writable.class);
 	}
 
 	@Override
@@ -69,13 +69,8 @@ implements MarkLogicConstants {
 			value = (VALUEIN)ReflectionUtils.newInstance(valueClass, 
 					getConf());
 		}
-		if (valueClass.equals(Text.class)) {
-			((Text)value).set(result.asString());
-		} else {
-			throw new UnsupportedOperationException("Value class " +  
-					valueClass + " is unsupported for result type: " + 
-					result.getValueType());
-		}
+		InternalUtilities.assignResultValue(valueClass, result, value);
+		
 		return true;
 	}
 

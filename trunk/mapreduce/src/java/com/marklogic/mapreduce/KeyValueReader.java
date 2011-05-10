@@ -8,20 +8,16 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.xcc.ResultItem;
-import com.marklogic.xcc.types.ValueType;
-import com.marklogic.xcc.types.XSInteger;
 
 /**
  * <p>MarkLogicRecordReader that fetches data from MarkLogic server and generates 
  * key value pairs in user specified types.</p>
- * 
- * <p>Currently only support Text as KEYIN, and only support Text and 
- * IntWritable as VALUEIN class.</p>
  * 
  * @author jchen
  *
@@ -46,8 +42,9 @@ implements MarkLogicConstants {
 	 * Current value.
 	 */
 	private VALUEIN value;
-	private Class<?> keyClass;
-	private Class<?> valueClass;
+	@SuppressWarnings("unchecked")
+    private Class<? extends WritableComparable> keyClass;
+	private Class<? extends Writable> valueClass;
 	
 	/**
 	 * Indicate whether a key has been fetched, and is waiting to fetch value
@@ -57,8 +54,10 @@ implements MarkLogicConstants {
 	
 	public KeyValueReader(Configuration conf) {
 		super(conf);
-		keyClass = conf.getClass(INPUT_KEY_CLASS, Text.class);
-		valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class);
+		keyClass = conf.getClass(INPUT_KEY_CLASS, Text.class, 
+				WritableComparable.class);
+		valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class, 
+				Writable.class);	
 	}
 
 	@Override
@@ -86,29 +85,13 @@ implements MarkLogicConstants {
 				key = (KEYIN)ReflectionUtils.newInstance(keyClass, 
 						getConf());
 			}
-			if (keyClass.equals(Text.class)) {
-				((Text)key).set(result.asString());
-			} else {
-				throw new UnsupportedOperationException("Key class " +  
-						keyClass + " is unsupported for result type: " + 
-						result.getValueType());
-			}
+			InternalUtilities.assignResultValue(keyClass, result, key);
 		} else {
 			if (value == null) {
 				value = (VALUEIN)ReflectionUtils.newInstance(valueClass, 
 						getConf());
 			}
-			if (valueClass.equals(Text.class)) {
-				((Text)value).set(result.asString());
-			} else if (valueClass.equals(IntWritable.class) &&
-					result.getValueType() == ValueType.XS_INTEGER) {
-				XSInteger intItem = (XSInteger)result.getItem();
-				((IntWritable)value).set(intItem.asInteger());
-			} else {
-				throw new UnsupportedOperationException("Value class " +  
-						valueClass + " is unsupported for result type: " + 
-						result.getValueType());
-			}
+			InternalUtilities.assignResultValue(valueClass, result, value);
 		}
 		keyFetched = !keyFetched;
 		return true;

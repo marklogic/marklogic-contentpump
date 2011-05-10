@@ -130,7 +130,7 @@ implements MarkLogicConstants {
 	    	buf.append(userQuery);
 	    	buf.append("',  (), \n  <options xmlns=\"xdmp:eval\"> <database>");
 	  		buf.append(forestId);
-	  		buf.append("</database> \n  </options>)[");
+	  		buf.append("</database> \n  </options>))[");
 	  		buf.append(Long.toString(start));
 	  		buf.append(" to ");
 	  		buf.append(Long.toString(end));

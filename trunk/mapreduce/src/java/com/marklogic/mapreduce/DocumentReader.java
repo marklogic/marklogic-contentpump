@@ -36,14 +36,6 @@ public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogic
 		return currentKey;
 	}
 	
-    protected void setCurrentKey(ResultItem item) {
-    	if (item != null) {
-		    currentKey = new DocumentURI(item.getDocumentURI());
-    	} else {
-    		currentKey = null;
-    	}
-	}
-
 	@Override
     protected void endOfResult() {
 	    currentKey = null;
@@ -52,8 +44,16 @@ public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogic
 
 	@Override
     protected boolean nextResult(ResultItem result) {
-		currentKey = new DocumentURI(result.getDocumentURI());
-		currentValue = new MarkLogicNode(result);
+		if (currentKey != null) {
+			currentKey.setUri(result.getDocumentURI());
+		} else {
+		    currentKey = new DocumentURI(result.getDocumentURI());
+		}
+		if (currentValue != null) {
+			currentValue.set(result);
+		} else {
+			currentValue = new MarkLogicNode(result);
+		}
 	    return true;
     }
 
