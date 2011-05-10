@@ -5,12 +5,30 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BooleanWritable;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.FloatWritable;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.VIntWritable;
+import org.apache.hadoop.io.VLongWritable;
+import org.apache.hadoop.io.Writable;
 
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.ContentSourceFactory;
+import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.SecurityOptions;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.ValueType;
+import com.marklogic.xcc.types.XSBase64Binary;
+import com.marklogic.xcc.types.XSBoolean;
+import com.marklogic.xcc.types.XSDouble;
+import com.marklogic.xcc.types.XSFloat;
+import com.marklogic.xcc.types.XSHexBinary;
+import com.marklogic.xcc.types.XSInteger;
 
 /**
  * Internal utilities shared by the package.  No need to document.
@@ -175,5 +193,64 @@ public class InternalUtilities implements MarkLogicConstants {
 				serverUri, options);		
  
     	return contentSource;
+	}
+	
+	/**
+	 * Assign value in Writable type from XCC result item.
+	 * @param <VALUEIN>
+	 * @param valueClass
+	 * @param result
+	 * @param value
+	 */
+	static <VALUEIN> void assignResultValue(Class<? extends Writable> valueClass, 
+			ResultItem result, VALUEIN value) {
+		if (valueClass.equals(Text.class)) {
+			((Text)value).set(result.asString());
+		} else if (valueClass.equals(IntWritable.class) &&
+				result.getValueType() == ValueType.XS_INTEGER) {
+			XSInteger intItem = (XSInteger)result.getItem();
+			((IntWritable)value).set(intItem.asPrimitiveInt());
+		} else if (valueClass.equals(VIntWritable.class) &&
+				result.getValueType() == ValueType.XS_INTEGER) {
+			XSInteger intItem = (XSInteger)result.getItem();
+			((VIntWritable)value).set(intItem.asPrimitiveInt());
+		} else if (valueClass.equals(LongWritable.class) &&
+				result.getValueType() == ValueType.XS_INTEGER) {
+			XSInteger intItem = (XSInteger)result.getItem();
+			((LongWritable)value).set(intItem.asLong());
+		} else if (valueClass.equals(VLongWritable.class) &&
+				result.getValueType() == ValueType.XS_INTEGER) {
+			XSInteger intItem = (XSInteger)result.getItem();
+			((VLongWritable)value).set(intItem.asLong());
+		} else if (valueClass.equals(BooleanWritable.class) &&
+				result.getValueType() == ValueType.XS_BOOLEAN) {
+			XSBoolean boolItem = (XSBoolean)result.getItem();
+			((BooleanWritable)value).set(boolItem.asPrimitiveBoolean());
+		} else if (valueClass.equals(FloatWritable.class) &&
+				result.getValueType() == ValueType.XS_FLOAT) {
+			XSFloat floatItem = (XSFloat)result.getItem();
+			((FloatWritable)value).set(floatItem.asPrimitiveFloat());
+		} else if (valueClass.equals(DoubleWritable.class) &&
+				result.getValueType() == ValueType.XS_DOUBLE) {
+			XSDouble doubleItem = (XSDouble)result.getItem();
+			((DoubleWritable)value).set(doubleItem.asPrimitiveDouble());
+		} else if (valueClass.equals(BytesWritable.class) &&
+				result.getValueType() == ValueType.XS_BASE64_BINARY) {
+			XSHexBinary binItem = (XSHexBinary)result.getItem();
+			byte[] bytes = binItem.asBinaryData();
+			((BytesWritable)value).set(bytes, 0, bytes.length);
+		} else if (valueClass.equals(BytesWritable.class) &&
+				result.getValueType() == ValueType.XS_HEX_BINARY) {
+			XSBase64Binary binItem = (XSBase64Binary)result.getItem();
+			byte[] bytes = binItem.asBinaryData();
+			((BytesWritable)value).set(bytes, 0, bytes.length);
+		} else if (valueClass.equals(MarkLogicNode.class) &&
+				result.getValueType() == ValueType.NODE) {
+			((MarkLogicNode)value).set(result);
+		} else {
+			throw new UnsupportedOperationException("Value class " +  
+					valueClass + " is unsupported for result type: " + 
+					result.getValueType());
+		}
 	}
 }

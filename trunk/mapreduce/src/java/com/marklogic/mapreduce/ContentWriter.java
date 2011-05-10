@@ -98,7 +98,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
 			    		((Text) value).toString(), options);
 			} else if (value instanceof MarkLogicNode) {
 				content = ContentFactory.newContent(uri, 
-			    		((MarkLogicNode)value).getNode(), options);	    
+			    		((MarkLogicNode)value).get(), options);	    
 			} else {
 				throw new UnsupportedOperationException(value.getClass() + 
 						" is not supported.");

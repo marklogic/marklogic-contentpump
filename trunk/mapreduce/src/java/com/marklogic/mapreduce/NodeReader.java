@@ -45,8 +45,17 @@ public class NodeReader extends MarkLogicRecordReader<NodePath, MarkLogicNode> {
     protected boolean nextResult(ResultItem result) {
 		String uri = result.getDocumentURI();
 		String path = result.getNodePath();
-	    currentKey = new NodePath(uri, path);
-		currentValue = new MarkLogicNode(result);
+	    if (currentKey != null) {
+	    	currentKey.set(uri, path);
+	    } else {
+	    	currentKey = new NodePath(uri, path);
+	    }
+		if (currentValue != null) {
+			currentValue.set(result);
+		} else {
+			currentValue = new MarkLogicNode(result);
+		}
+		
 		return true;
     }
 

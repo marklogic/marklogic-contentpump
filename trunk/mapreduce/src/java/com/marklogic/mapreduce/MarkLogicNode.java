@@ -46,12 +46,6 @@ public class MarkLogicNode implements Writable {
 	
 	private Node node;
 	
-	public MarkLogicNode() {}
-	
-	public MarkLogicNode(Node node) {
-		this.node = node;
-	}
-	
 	private static final ThreadLocal<DocumentBuilder> builderLocal = 
 		new ThreadLocal<DocumentBuilder>() {         
 		@Override protected DocumentBuilder initialValue() {
@@ -67,7 +61,25 @@ public class MarkLogicNode implements Writable {
 	
 	static DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 	
+    public MarkLogicNode() {}
+	
+	public MarkLogicNode(Node node) {
+		this.node = node;
+	}
+	
 	public MarkLogicNode(ResultItem item) {
+		set(item);
+	}
+	
+	public Node get() {
+		return node;
+	}
+	
+	public void set(Node node) {
+		this.node = node;
+	}
+	
+	public void set(ResultItem item) {
 		ItemType type =	item.getItemType();
 		DocumentBuilder docBuilder = builderLocal.get();
 	    try {
@@ -89,14 +101,6 @@ public class MarkLogicNode implements Writable {
 		} catch (SAXException e) {
 			LOG.error("error parsing result", e);
 		}
-	}
-	
-	public Node getNode() {
-		return node;
-	}
-	
-	public void setNode(Node node) {
-		this.node = node;
 	}
 	
 	public void readFields(DataInput in) throws IOException {

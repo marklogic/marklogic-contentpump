@@ -28,6 +28,11 @@ public class NodePath implements WritableComparable<NodePath> {
 		this.path = path;
 	}
 	
+	public void set(String uri, String path) {
+		docUri = uri;
+		this.path = path;
+	}
+	
 	@Override
 	public void readFields(DataInput in) throws IOException {
 		docUri = Text.readString(in);
