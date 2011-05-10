@@ -5,7 +5,6 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -15,14 +14,13 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * 
  * @author jchen
  */
-public class DocumentInputFormat extends MarkLogicInputFormat<DocumentURI, MarkLogicNode> {
+public class DocumentInputFormat 
+extends MarkLogicInputFormat<DocumentURI, MarkLogicNode> {
 	
 	@Override
 	public RecordReader<DocumentURI, MarkLogicNode> createRecordReader(
 			InputSplit split, TaskAttemptContext context) throws IOException,
 			InterruptedException {
-		Configuration conf = context.getConfiguration();
-		String serverUri = getServerUriTemp(conf);
-		return new DocumentReader(conf, serverUri);
+		return new DocumentReader(context.getConfiguration());
 	}
 }

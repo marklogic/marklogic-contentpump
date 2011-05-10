@@ -17,5 +17,8 @@
 	<classpathentry kind="lib" path="src/lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="src/lib/saxon9he.jar"/>
 	<classpathentry kind="lib" path="src/lib/hadoop-0.20.2-core.jar"/>
+	<classpathentry kind="lib" path="src/lib/bliki-core-3.0.14-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="src/lib/xpp3-1.1.4c.jar"/>
+	<classpathentry kind="lib" path="/space/projects/xcc/mapreduce/src/lib/cpox.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

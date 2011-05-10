@@ -15,6 +15,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -41,75 +42,26 @@ public abstract class MarkLogicInputFormat<KEYIN, VALUEIN> extends InputFormat<K
 implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicInputFormat.class);
-	
-	static final String SPLIT_QUERY_TEMPLATE =
-		"xquery version \"1.0-ml\"; \n" + 
-        "import module namespace admin = \"http://marklogic.com/xdmp/admin\" \n" +
-                 " at \"/MarkLogic/admin.xqy\"; \n" +
-        "let $conf := admin:get-configuration() \n" +
-        "for $forest in xdmp:database-forests(xdmp:database()) \n" +         
-        "let $host_id := admin:forest-get-host($conf, $forest) \n" +
-        "let $host_name := admin:host-get-name($conf, $host_id) \n" +
-        "let $cnt := xdmp:with-namespaces((" + NAMESPACE_TEMPLATE + 
-        "), xdmp:estimate(cts:search(" + DOCUMENT_SELECTOR_TEMPLATE + ",\n" +
-        "                          cts:and-query(()), (), 0.0, $forest))) \n" +
-        "return ($forest, $cnt, $host_name)";    
-    /**
-     * get server URI from the configuration.
-     * 
-     * @param conf job configuration
-     * @return server URI
-     * @throws URISyntaxException 
-     */
-    private URI getServerUri(Configuration conf) throws URISyntaxException {
-		String user = conf.get(INPUT_USERNAME, "");
-		String password = conf.get(INPUT_PASSWORD, "");
-		String host = conf.get(INPUT_HOST, "");
-		String port = conf.get(INPUT_PORT, "");
-		
-		String serverUriStr = 
-			SERVER_URI_TEMPLATE.replace(USER_TEMPLATE, user)
-			.replace(PASSWORD_TEMPLATE, password)
-			.replace(HOST_TEMPLATE, host)
-			.replace(PORT_TEMPLATE, port);
-		return new URI(serverUriStr);
-    }
-    
-    /**
-     * get server URI leaving out the host from the configuration.
-     * 
-     * @param conf job configuration
-     * @return server URI template
-     */
-    protected String getServerUriTemp(Configuration conf) {
-    	String user = conf.get(INPUT_USERNAME, "");
-		String password = conf.get(INPUT_PASSWORD, "");
-		String port = conf.get(INPUT_PORT, "");
-		return
-			SERVER_URI_TEMPLATE.replace(USER_TEMPLATE, user)
-			.replace(PASSWORD_TEMPLATE, password)
-			.replace(PORT_TEMPLATE, port);
-    }
 
+
+    /**
+     * Get input splits.
+     * @param jobContext job context
+     * @return list of input splits    
+     */
 	@Override
 	public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
 			InterruptedException {
 		// get input from job configuration
 		Configuration jobConf = jobContext.getConfiguration();
 		long maxSplitSize;
-		URI serverUri = null;
+
 		String docSelector;
 		String splitQuery;
-		try {
-			serverUri = getServerUri(jobConf);
-			docSelector = jobConf.get(DOCUMENT_SELECTOR, "fn:collection()");	
-			maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, 
-					DEFAULT_MAX_SPLIT_SIZE);
-			splitQuery = jobConf.get(SPLIT_QUERY, "");
-		} catch (URISyntaxException e) {
-			LOG.error(e);
-			throw new IOException(e);
-		} 
+		docSelector = jobConf.get(DOCUMENT_SELECTOR, "fn:collection()");	
+		maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, 
+				DEFAULT_MAX_SPLIT_SIZE);
+		splitQuery = jobConf.get(SPLIT_QUERY, "");
 		
 		// fetch data from server
 		List<ForestSplit> forestSplits = null;
@@ -120,6 +72,15 @@ implements MarkLogicConstants {
 			Collection<String> nsCol = 
 				jobConf.getStringCollection(PATH_NAMESPACE);
 			StringBuilder buf = new StringBuilder();
+			buf.append("xquery version \"1.0-ml\"; \n");
+			buf.append("import module namespace admin = ");
+			buf.append("\"http://marklogic.com/xdmp/admin\" \n");
+            buf.append(" at \"/MarkLogic/admin.xqy\"; \n");
+            buf.append("let $conf := admin:get-configuration() \n");
+            buf.append("for $forest in xdmp:database-forests(xdmp:database())\n");        
+            buf.append("let $host_id := admin:forest-get-host($conf, $forest)\n");
+            buf.append("let $host_name := admin:host-get-name($conf, $host_id)\n");
+            buf.append("let $cnt := xdmp:with-namespaces((");
 			if (nsCol != null) {
 				for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
 					String ns = nsIt.next();
@@ -129,16 +90,18 @@ implements MarkLogicConstants {
 					}
 				}
 			}
-		    splitQuery = SPLIT_QUERY_TEMPLATE
-		        .replace(DOCUMENT_SELECTOR_TEMPLATE, docSelector)
-		        .replace(NAMESPACE_TEMPLATE, buf.toString()); 
-		} 
+			buf.append("), xdmp:estimate(cts:search(");
+			buf.append(docSelector);
+			buf.append(",\n    cts:and-query(()), (), 0.0, $forest))) \n");
+            buf.append("return ($forest, $cnt, $host_name)"); 
+            splitQuery = buf.toString();
+		} 		
 		
 		if (LOG.isDebugEnabled()) {
 		    LOG.debug("Split query: " + splitQuery);
 		}
 		try {
-			ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
+			ContentSource cs = InternalUtilities.getInputContentSource(jobConf);
 			session = cs.newSession();
 			AdhocQuery query = session.newAdhocQuery(splitQuery);
 			RequestOptions options = new RequestOptions();
@@ -178,6 +141,9 @@ implements MarkLogicConstants {
 		} catch (RequestException e) {
 			LOG.error(e);
 			LOG.error("Query: " + splitQuery);
+			throw new IOException(e);
+		} catch (URISyntaxException e) {
+			LOG.error(e);
 			throw new IOException(e);
 		} finally {
 			if (result != null) {

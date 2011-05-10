@@ -19,7 +19,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
-import com.marklogic.xcc.ContentSourceFactory;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
@@ -48,29 +47,6 @@ implements MarkLogicConstants {
 		String[] hosts = conf.getStrings(OUTPUT_HOSTS);
 		return hosts[taskId % hosts.length];
 	}
-	
-	/**
-     * get server URI from the configuration.
-     * 
-     * @param conf job configuration
-	 * @param taskAttemptID 
-     * @return server URI
-     * @throws URISyntaxException 
-     */
-    protected static URI getServerUri(Configuration conf, String host)
-    throws URISyntaxException {
-    	
-		String user = conf.get(OUTPUT_USERNAME, "");
-		String password = conf.get(OUTPUT_PASSWORD, "");		
-		String port = conf.get(OUTPUT_PORT, "");
-		
-		String serverUriStr = 
-			SERVER_URI_TEMPLATE.replace(USER_TEMPLATE, user)
-			.replace(PASSWORD_TEMPLATE, password)
-			.replace(HOST_TEMPLATE, host)
-			.replace(PORT_TEMPLATE, port);
-		return new URI(serverUriStr);
-    }
     
 	@Override
 	public void checkOutputSpecs(JobContext context) throws IOException,
@@ -80,9 +56,10 @@ implements MarkLogicConstants {
 		ResultSequence result = null;
 		try {
 			String host = getHost(conf, 0);
-			URI serverUri = getServerUri(conf, host);
+			URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
 		    // try getting a connection
-			ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
+			ContentSource cs = InternalUtilities.getOutputContentSource(conf, 
+					serverUri);
 			session = cs.newSession();
 			
 			String outputDir = conf.get(OUTPUT_DIRECTORY);

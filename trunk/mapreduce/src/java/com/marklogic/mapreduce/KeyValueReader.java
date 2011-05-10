@@ -55,12 +55,10 @@ implements MarkLogicConstants {
 	 */
 	private boolean keyFetched;
 	
-	public KeyValueReader(Configuration conf, String serverUri) {
-		super(conf, serverUri);
+	public KeyValueReader(Configuration conf) {
+		super(conf);
 		keyClass = conf.getClass(INPUT_KEY_CLASS, Text.class);
-		LOG.info("Key class " + keyClass);
 		valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class);
-		LOG.info("Value class " + valueClass);
 	}
 
 	@Override

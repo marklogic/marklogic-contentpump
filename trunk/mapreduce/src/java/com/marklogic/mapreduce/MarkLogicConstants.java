@@ -19,7 +19,7 @@ package com.marklogic.mapreduce;
  * @author jchen
  */
 
-public interface MarkLogicConstants extends MarkLogicInternalConstants {
+public interface MarkLogicConstants {
 	// input-related config property names
 	/**
 	 * The config property name (<code>{@value}</code>)
@@ -58,6 +58,29 @@ public interface MarkLogicConstants extends MarkLogicInternalConstants {
      */
     static final String INPUT_PORT = 
     	"mapreduce.marklogic.input.port";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether the connection to the input server is 
+     * SSL enabled; false is assumed if not set.
+     */
+    static final String INPUT_USE_SSL = "mapreduce.marklogic.input.usessl";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the name of the class implementing 
+     * SslConfigOptions which will be used to de-serialize property value
+     * (<code>@INPUT_SSL_OPTIONS</code>).
+     */
+    static final String INPUT_SSL_OPTIONS_CLASS = 
+    	"mapreduce.marklogic.input.ssloptionsclass"; 
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies SSL connection options to the input server.
+     * The property will be de-serialized to 
+     * (<code>@INPUT_SSL_OPTIONS_CLASS</code>) and will be used if 
+     * (<code>@INPUT_USE_SSL</code>) is set to true.
+     */
+    static final String INPUT_SSL_OPTIONS = 
+    	"mapreduce.marklogic.input.ssloptions";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the document selection portion of the
@@ -312,6 +335,28 @@ public interface MarkLogicConstants extends MarkLogicInternalConstants {
      */
     static final String OUTPUT_PORT = 
     	"mapreduce.marklogic.output.port";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether the connection to the output server is
+     * SSL enabled; false is assumed if not set.
+     */
+    static final String OUTPUT_USE_SSL = "mapreduce.marklogic.output.usessl";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the name of the class implementing 
+     * SslConfigOptions which will be used to de-serialize property value
+     * (<code>@OUTPUT_SSL_OPTIONS</code>).
+     */
+    static final String OUTPUT_SSL_OPTIONS_CLASS = 
+    	"mapreduce.marklogic.input.ssloptionsclass"; 
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies SSL connection options to the output server.
+     * The property will be de-serialized to 
+     * (<code>@OUTPUT_SSL_OPTIONS_CLASS</code>) and will be used if 
+     * (<code>@OUTPUT_USE_SSL</code>) is set to true.
+     */
+    static final String OUTPUT_SSL_OPTIONS = "mapreduce.marklogic.output.ssloptions";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the MarkLogic Server database directory

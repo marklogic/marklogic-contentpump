@@ -36,8 +36,8 @@ implements MarkLogicConstants {
 	private VALUEIN value;
 	private Class<?> valueClass;
 
-	public ValueReader(Configuration conf, String serverUriTemp) {
-		super(conf, serverUriTemp);
+	public ValueReader(Configuration conf) {
+		super(conf);
 		valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class);
 	}
 
