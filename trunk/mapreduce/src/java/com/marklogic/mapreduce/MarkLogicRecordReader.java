@@ -18,7 +18,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
-import com.marklogic.xcc.ContentSourceFactory;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
@@ -39,24 +38,6 @@ implements MarkLogicConstants {
 
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicRecordReader.class);
-	static final String FOREST_ID_TEMPLATE = "{forest_id}";
-	static final String START_TEMPLATE = "{start}";
-    static final String END_TEMPLATE = "{end}";
-	static final String BASIC_QUERY_TEMPLATE =
-    	"xquery version \"1.0-ml\"; \n" + 
-    	"(xdmp:eval('xdmp:with-namespaces((" + NAMESPACE_TEMPLATE +
-    	"),fn:unordered(fn:unordered(" +
-    	DOCUMENT_SELECTOR_TEMPLATE + ")[" + START_TEMPLATE + " to " + 
-    	END_TEMPLATE + "]" + SUBDOCUMENT_EXPR_TEMPLATE + "))',  (), \n" +
-  		"  <options xmlns=\"xdmp:eval\"> <database>" + FOREST_ID_TEMPLATE +
-  		"</database> \n" +
-  		"  </options>))";
-    static final String ADV_QUERY_TEMPLATE =
-    	"xquery version \"1.0-ml\"; \n" + 
-    	"(xdmp:eval('" + QUERY_TEMPLATE + "',  (), \n" +
-  		"  <options xmlns=\"xdmp:eval\"> <database>" + FOREST_ID_TEMPLATE +
-  		"</database> \n" +
-  		"  </options>)[" + START_TEMPLATE + " to " + END_TEMPLATE + "]";
     
 	/**
 	 * Input split for this record reader
@@ -66,10 +47,6 @@ implements MarkLogicConstants {
 	 * Count of records fetched
 	 */
 	private long count;
-	/**
-	 * URI of the MarkLogic server with host to be filled in.
-	 */
-	private String serverUriTemp;
 	/**
 	 * Session to the MarkLogic server.
 	 */
@@ -87,9 +64,8 @@ implements MarkLogicConstants {
 	 */
 	private float length;
 	
-	public MarkLogicRecordReader(Configuration conf, String serverUriTemp) {
+	public MarkLogicRecordReader(Configuration conf) {
 		this.conf = conf;
-		this.serverUriTemp = serverUriTemp;
 	}
 
 	@Override
@@ -125,10 +101,8 @@ implements MarkLogicConstants {
 		URI serverUri;
 		try {
 			String[] hostNames = mlSplit.getLocations();
-			assert hostNames != null && hostNames.length == 1;
-			String serverUriStr = serverUriTemp.replace(
-					MarkLogicInputFormat.HOST_TEMPLATE, hostNames[0]);
-			serverUri = new URI(serverUriStr);
+			assert hostNames != null && hostNames.length >= 1;
+			serverUri = InternalUtilities.getInputServerUri(conf, hostNames[0]);
 		} catch (URISyntaxException e) {
 			LOG.error(e);
 			throw new IOException(e);
@@ -137,28 +111,6 @@ implements MarkLogicConstants {
 		// get job config properties
 		boolean advancedMode = 
 			conf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
-		String userQuery = "";
-		String docExpr = "";
-		String subExpr = "";
-		String nameSpace = "";
-		if (advancedMode) {
-			userQuery = conf.get(INPUT_QUERY);
-		} else {
-			docExpr = conf.get(DOCUMENT_SELECTOR, "fn:collection()");
-			subExpr = conf.get(SUBDOCUMENT_EXPRESSION, subExpr);
-			Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
-			StringBuilder buf = new StringBuilder();
-			if (nsCol != null) {
-				for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
-					String ns = nsIt.next();
-					buf.append('"').append(ns).append('"');
-					if (nsIt.hasNext()) {
-						buf.append(',');
-					}
-				}
-			}
-			nameSpace = buf.toString();
-		}
 		
 		// initialize the total length
 		float recToFragRatio = conf.getFloat(RECORD_TO_FRAGMENT_RATIO, 
@@ -169,30 +121,59 @@ implements MarkLogicConstants {
 		long start = mlSplit.getStart() + 1;
 		long end = mlSplit.getLength() == Long.MAX_VALUE ? 
 				   mlSplit.getLength() : start + mlSplit.getLength() - 1;
-		String queryText;
+				  
+		String forestId = mlSplit.getForestId().toString();
+		StringBuilder buf = new StringBuilder();
 		if (advancedMode) {
-			queryText = ADV_QUERY_TEMPLATE
-				.replace(QUERY_TEMPLATE, userQuery)
-		        .replace(FOREST_ID_TEMPLATE, mlSplit.getForestId().toString())
-		        .replace(START_TEMPLATE, Long.toString(start))
-	            .replace(END_TEMPLATE, Long.toString(end));
+			String userQuery = conf.get(INPUT_QUERY, "");
+			buf.append("xquery version \"1.0-ml\"; \n(xdmp:eval('"); 
+	    	buf.append(userQuery);
+	    	buf.append("',  (), \n  <options xmlns=\"xdmp:eval\"> <database>");
+	  		buf.append(forestId);
+	  		buf.append("</database> \n  </options>)[");
+	  		buf.append(Long.toString(start));
+	  		buf.append(" to ");
+	  		buf.append(Long.toString(end));
+	  		buf.append("]");
 		} else {
-			queryText = BASIC_QUERY_TEMPLATE
-				.replace(DOCUMENT_SELECTOR_TEMPLATE, docExpr)
-				.replace(SUBDOCUMENT_EXPR_TEMPLATE, subExpr)
-		        .replace(NAMESPACE_TEMPLATE, nameSpace)
-		        .replace(FOREST_ID_TEMPLATE, mlSplit.getForestId().toString())
-		        .replace(START_TEMPLATE, Long.toString(start))
-	            .replace(END_TEMPLATE, Long.toString(end));
-		}		
+			String docExpr = conf.get(DOCUMENT_SELECTOR, "fn:collection()");
+			String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
+			Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
+			
+			buf.append("xquery version \"1.0-ml\"; \n");
+			buf.append("(xdmp:eval('xdmp:with-namespaces(("); 
+			if (nsCol != null) {
+				for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
+					String ns = nsIt.next();
+					buf.append('"').append(ns).append('"');
+					if (nsIt.hasNext()) {
+						buf.append(',');
+					}
+				}
+			}
+			buf.append("),fn:unordered(fn:unordered(");
+			buf.append(docExpr);
+    	    buf.append(")[");
+    	    buf.append(Long.toString(start));
+    	    buf.append(" to ");
+    	    buf.append(Long.toString(end));
+    	    buf.append("]");
+    	    buf.append(subExpr);
+    	    buf.append("))', (), \n <options xmlns=\"xdmp:eval\"> <database>");
+  		    buf.append(forestId);
+  		    buf.append("</database> \n  </options>))");
+		}
+		
+		String queryText = buf.toString();
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(queryText);
 		}
 		
 		// set up a connection to the server
 		try {
-			ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
-		    Session session = cs.newSession(); 
+			ContentSource cs = InternalUtilities.getInputContentSource(conf, 
+					serverUri);
+		    session = cs.newSession(); 
 		    AdhocQuery query = session.newAdhocQuery(queryText);
 		    RequestOptions options = new RequestOptions();
 			options.setCacheResult(false);

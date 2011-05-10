@@ -13,7 +13,6 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.xcc.ContentSource;
-import com.marklogic.xcc.ContentSourceFactory;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
@@ -39,9 +38,11 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
 	private Session session;
 	private int batchSize;
 	private int count = 0;
+	private Configuration conf;
 	
 	public MarkLogicRecordWriter(URI serverUri, Configuration conf) {
 		this.serverUri = serverUri;
+		this.conf = conf;
 		this.batchSize = conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
 	}
 	
@@ -64,7 +65,8 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
 		if (session == null) {
 			// start a session
 			try {
-				ContentSource cs = ContentSourceFactory.newContentSource(serverUri);
+				ContentSource cs = InternalUtilities.getOutputContentSource(
+						conf, serverUri);
 			    session = cs.newSession(); 
 			    if (batchSize > 1) {
 			        session.setTransactionMode(TransactionMode.UPDATE);

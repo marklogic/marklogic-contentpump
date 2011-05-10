@@ -17,8 +17,8 @@ public class NodeReader extends MarkLogicRecordReader<NodePath, MarkLogicNode> {
 
 	static final float NODE_TO_FRAGMENT_RATIO = 100;
 	
-	public NodeReader(Configuration conf, String serverUriTemp) {
-	    super(conf, serverUriTemp);
+	public NodeReader(Configuration conf) {
+	    super(conf);
     }
 
 	/**

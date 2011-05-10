@@ -28,9 +28,9 @@ implements MarkLogicConstants {
 
 	@Override
 	public RecordReader<KEYIN, VALUEIN> createRecordReader(InputSplit split,
-			TaskAttemptContext context) throws IOException, InterruptedException {
-		Configuration conf = context.getConfiguration();
-		return new KeyValueReader<KEYIN, VALUEIN>(conf, getServerUriTemp(conf));
+			TaskAttemptContext context) 
+	throws IOException, InterruptedException {
+		return new KeyValueReader<KEYIN, VALUEIN>(context.getConfiguration());
 	}
 
 }

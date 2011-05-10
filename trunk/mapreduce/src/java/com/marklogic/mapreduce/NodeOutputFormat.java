@@ -29,7 +29,7 @@ extends MarkLogicOutputFormat<NodePath, MarkLogicNode> {
 		Configuration conf = context.getConfiguration();
 		try {
 			String host = getHost(conf, context.getTaskAttemptID().getId());
-			URI serverUri = getServerUri(conf, host);
+			URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
 			return new NodeWriter(serverUri, conf);
 		} catch (URISyntaxException e) {
 			LOG.error(e);
