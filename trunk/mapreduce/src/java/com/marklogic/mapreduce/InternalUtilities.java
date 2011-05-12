@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.FloatWritable;
 import org.apache.hadoop.io.IntWritable;
@@ -16,6 +15,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.VIntWritable;
 import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.ContentSourceFactory;
@@ -137,8 +137,8 @@ public class InternalUtilities implements MarkLogicConstants {
 				null, SslConfigOptions.class);
     	    if (sslOptionClass != null) {
     	        SslConfigOptions sslOptions = 
-				    (SslConfigOptions)DefaultStringifier.load(conf, 
-						INPUT_SSL_OPTIONS, sslOptionClass);
+				    (SslConfigOptions)ReflectionUtils.newInstance(
+				    		sslOptionClass, conf);
     	        return getSecureContentSource(serverUri, sslOptions);
     	    } else {
     	    	return ContentSourceFactory.newContentSource(serverUri);
@@ -168,9 +168,9 @@ public class InternalUtilities implements MarkLogicConstants {
     	    	conf.getClass(OUTPUT_SSL_OPTIONS_CLASS, 
 				null, SslConfigOptions.class);
     	    if (sslOptionClass != null) {
-    	        SslConfigOptions sslOptions = 
-				    (SslConfigOptions)DefaultStringifier.load(conf, 
-						OUTPUT_SSL_OPTIONS, sslOptionClass);
+    	    	SslConfigOptions sslOptions = 
+				    (SslConfigOptions)ReflectionUtils.newInstance(
+				    		sslOptionClass, conf);
     	        return getSecureContentSource(serverUri, sslOptions);
     	    } else {
     	    	return ContentSourceFactory.newContentSource(serverUri);
