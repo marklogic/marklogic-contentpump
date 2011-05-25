@@ -316,7 +316,7 @@ public interface MarkLogicConstants {
     static final String OUTPUT_HOSTS = 
     	"mapreduce.marklogic.output.hosts";
     
-    static final String OUTPUT_HOST_FORESTS = 
+    static final String OUTPUT_FOREST_HOST = 
     	"mapreduce.marklogic.output.hostforests";   
     /**
      * The config property name (<code>{@value}</code>)
@@ -492,5 +492,5 @@ public interface MarkLogicConstants {
     /**
      * Default batch size.
      */
-    static final int DEFAULT_BATCH_SIZE = 1000;
+    static final int DEFAULT_BATCH_SIZE = 0;
 }

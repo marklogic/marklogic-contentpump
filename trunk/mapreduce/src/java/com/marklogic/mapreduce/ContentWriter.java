@@ -1,7 +1,7 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.net.URI;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -13,6 +13,7 @@ import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
+import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 
@@ -25,19 +26,35 @@ import com.marklogic.xcc.exceptions.RequestException;
 public class ContentWriter<VALUEOUT> 
 extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstants {
 	public static final Log LOG = LogFactory.getLog(ContentWriter.class);
+	
 	/**
 	 * Directory of the output documents.
 	 */
 	private String outputDir;
+	
 	/**
 	 * Content options of the output documents.
 	 */
 	private ContentCreateOptions options;
-	//private List<Long> forestIds;
-	int index = 0;
+	
+	/**
+	 * A map from a forestId to a ContentSource. 
+	 */
+	private Map<String, ContentSource> forestSourceMap;
+	
+	/**
+	 * An array of forest ids
+	 */
+	private String[] forestIds;
 
-	public ContentWriter(URI serverUri, Configuration conf) {
-		super(serverUri, conf);
+	public ContentWriter(Configuration conf, 
+			Map<String, ContentSource> forestSourceMap) {
+		super(null, conf);
+		
+		this.forestSourceMap = forestSourceMap;
+		forestIds = new String[forestSourceMap.size()];
+		forestIds = forestSourceMap.keySet().toArray(forestIds);
+		
 		this.outputDir = conf.get(OUTPUT_DIRECTORY);
 		
 		String[] perms = conf.getStrings(OUTPUT_PERMISSION);
@@ -74,19 +91,18 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
 	    String contentTypeStr = conf.get(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
 	    ContentType contentType = ContentType.valueOf(contentTypeStr);
 	    options.setFormat(contentType.getDocumentFormat());
-	    /* TODO: set option to do in-forest eval when 13333 is fixed.
-	     * long[] forests = new long[forestIds.size()];
-	    for (int i = 0; i < forestIds.size(); i++) {
-	    	forests[i] = forestIds.get(i);
-	    }
-	    options.setPlaceKeys(forests); */
     }
 
 	@Override
     public void write(DocumentURI key, VALUEOUT value) 
 	throws IOException, InterruptedException {
-		Session session = getSession();
+		long hashCode = (long)key.getUri().hashCode() + Integer.MAX_VALUE;
+		int fId = (int)(hashCode % forestSourceMap.size());
+		String forestId = forestIds[fId];
+		ContentSource cs = forestSourceMap.get(forestId);
+		Session session = null;
 		try {
+			session = cs.newSession(forestId);
 			String uri = key.getUri();
 			if (outputDir != null && !outputDir.isEmpty()) {
 			    uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
@@ -108,6 +124,14 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
 		} catch (RequestException e) {
 			LOG.error(e);
 			throw new IOException(e);
+		} finally {
+			try {
+				if (session != null) {
+	                session.close();
+				}
+            } catch (RequestException e) {
+	            LOG.error("Error closing session", e);
+            }
 		}
 	    
     }
