@@ -1,12 +1,18 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.*;
 
-import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.MapWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
  * MarkLogicOutputFormat for Content.
@@ -17,36 +23,43 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  */
 public class ContentOutputFormat<VALUEOUT> extends
         MarkLogicOutputFormat<DocumentURI, VALUEOUT> {
-
+	
 	@Override
     public RecordWriter<DocumentURI, VALUEOUT> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
-		Configuration conf = context.getConfiguration();
-		try {
-			String host = getHost(conf, context.getTaskAttemptID().getId());
-			URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
-			/* TODO: get host->forest mapping when 13333 is done.
-			List<Long> forestIds = null;
-			Collection<String> hostForests = conf.getStringCollection(OUTPUT_HOST_FORESTS); 			
-			for (String entry : hostForests) {
-				if (forestIds == null) {
-					if (entry.equals(host)) {
-						forestIds = new ArrayList<Long>();
-					}
-				} else {
-					try {
-					    long forestId = Long.parseLong(entry);
-					    forestIds.add(forestId);
-					} catch (NumberFormatException ex) {
-						break; // stop looking
-					}
-				} 
-			} */
-			return new ContentWriter<VALUEOUT>(serverUri, conf);
-		} catch (URISyntaxException e) {
-			LOG.error(e);
-			throw new IOException(e);
+		MapWritable forestHostMap = 
+			DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
+					MapWritable.class);
+		
+		// get host->contentSource mapping
+        Map<Writable, ContentSource> hostSourceMap = 
+        	new HashMap<Writable, ContentSource>();
+        for (Writable hostName : forestHostMap.values()) {
+        	if (hostSourceMap.get(hostName) == null) {
+        		try {
+        	        ContentSource cs = InternalUtilities.getOutputContentSource(
+        	    		conf, hostName.toString());
+        	        hostSourceMap.put(hostName, cs);
+        		} catch (XccConfigException e) {
+        			throw new IOException(e);
+        		} catch (URISyntaxException e) {
+        			throw new IOException(e);
+        		}
+        	}
+        }
+		
+		// consolidate forest->host map and host-contentSource map to 
+        // forest-contentSource map
+        Map<String, ContentSource> forestSourceMap = 
+        	new HashMap<String, ContentSource>();
+		for (Writable forestId : forestHostMap.keySet()) {
+			String forest = ((Text)forestId).toString();
+			Writable hostName = forestHostMap.get(forestId);
+			ContentSource cs = hostSourceMap.get(hostName);
+			forestSourceMap.put("#" + forest, cs);
 		}
-    }
-
+		
+		// construct the ContentWriter
+		return new ContentWriter<VALUEOUT>(conf, forestSourceMap);
+    } 
 }

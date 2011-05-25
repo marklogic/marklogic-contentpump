@@ -25,7 +25,8 @@ extends MarkLogicOutputFormat<DocumentURI, MarkLogicNode> {
 			TaskAttemptContext context) throws IOException, InterruptedException {		
 		Configuration conf = context.getConfiguration();
 		try {
-			String host = getHost(conf, context.getTaskAttemptID().getId());
+			int taskId = context.getTaskAttemptID().getTaskID().getId();
+			String host = getHost(conf, taskId);
 			URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
 			return new PropertyWriter(serverUri, conf);
 		} catch (URISyntaxException e) {

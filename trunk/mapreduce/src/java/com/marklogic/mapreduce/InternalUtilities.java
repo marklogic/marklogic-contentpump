@@ -253,4 +253,11 @@ public class InternalUtilities implements MarkLogicConstants {
 					result.getValueType());
 		}
 	}
+
+	public static ContentSource getOutputContentSource(Configuration conf,
+            String hostName) 
+	throws URISyntaxException, XccConfigException, IOException {
+	    URI serverUri = getOutputServerUri(conf, hostName);
+	    return getOutputContentSource(conf, serverUri);
+    }
 }

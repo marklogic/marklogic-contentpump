@@ -28,6 +28,7 @@ public abstract class MarkLogicRecordWriter<KEYOUT, VALUEOUT>
 extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
 	public static final Log LOG =
 	    LogFactory.getLog(MarkLogicRecordWriter.class);
+
 	/**
 	 * Server URI.
 	 */
@@ -61,13 +62,39 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
 		}
 	}
 	
+	/**
+	 * Get the session for this writer.  One writer only maintains one session.
+	 * @return Session for this writer.
+	 * @throws IOException
+	 */
 	protected Session getSession() throws IOException {
+		if (session == null) {
+			getSession(0);
+		}
+		return session;
+	}
+	
+	/**
+	 * Get the session for this writer.  One writer only maintains one session.
+	 * If a forest id is specified, this writer only talks to this forest
+	 * for the entire task attempt.
+	 * @param forestId Id of the targeted forest.
+	 * @return Session for this writer.
+	 * @throws IOException
+	 */
+	protected Session getSession(long forestId) throws IOException {
 		if (session == null) {
 			// start a session
 			try {
 				ContentSource cs = InternalUtilities.getOutputContentSource(
 						conf, serverUri);
-			    session = cs.newSession(); 
+				if (forestId > 0) {
+					// set forest id if provided
+					String forest = "#" + Long.toString(forestId);
+					session = cs.newSession(forest);
+				} else {
+			        session = cs.newSession();
+				}
 			    if (batchSize > 1) {
 			        session.setTransactionMode(TransactionMode.UPDATE);
 			    }
