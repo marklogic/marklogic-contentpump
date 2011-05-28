@@ -99,6 +99,10 @@
                 <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
                 <pathelement path="${jarlib}/hadoop-0.20.2-core.jar"/>
                 <pathelement path="${jarlib}/log4j-1.2.15.jar"/>
+                <pathelement path="${jarlib}/saxon9he.jar"/>
+                <pathelement path="${jarlib}/cpox.jar"/>
+                <pathelement path="${jarlib}/bliki-core-3.0.14-SNAPSHOT.jar"/>
+                <pathelement path="${jarlib}/xpp3-1.1.4c.jar"/>
         </path>
 
 	<path id="mapreduce.compile.classpath">
@@ -125,7 +129,7 @@
 		<javac classpathref="mapreduce.testcases.classpath" srcdir="${junit.source}"
 			destdir="${compiled.classes.dir}" deprecation="on"
 			debug="${compile.debug.symbols.flag}" failonerror="on"
-			source="1.5" target="1.5">
+			source="1.6" target="1.6">
 			<compilerarg value="-Xlint"/>
 		</javac>
 	</target>
