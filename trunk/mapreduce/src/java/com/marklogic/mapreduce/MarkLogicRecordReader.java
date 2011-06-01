@@ -74,11 +74,7 @@ implements MarkLogicConstants {
 			result.close();
 		}
 		if (session != null) {
-			try {
-	            session.close();
-            } catch (RequestException e) {
-	            LOG.error(e);
-            }
+	        session.close();
 		}
 	}
 
