@@ -125,13 +125,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
 			LOG.error(e);
 			throw new IOException(e);
 		} finally {
-			try {
-				if (session != null) {
-	                session.close();
-				}
-            } catch (RequestException e) {
-	            LOG.error("Error closing session", e);
-            }
+			if (session != null) {
+                session.close();
+			}
 		}
 	    
     }
