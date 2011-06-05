@@ -159,8 +159,10 @@ implements MarkLogicConstants {
 		
 		for (ForestSplit fsplit : forestSplits) {
 			if (fsplit.recordCount < maxSplitSize) {
+			    // assign length to max value when it is the last split,
+			    // since the record count is not accurate
 				MarkLogicInputSplit split = 
-					new MarkLogicInputSplit(0, fsplit.recordCount, 
+					new MarkLogicInputSplit(0, Long.MAX_VALUE, 
 							fsplit.forestId, fsplit.hostName);
 				splits.add(split);
 				if (LOG.isDebugEnabled()) {
@@ -178,7 +180,7 @@ implements MarkLogicConstants {
 			    	long start = fsplit.recordCount - remainingCount;
 			    	// assign length to max value when it is the last split,
 			    	// since the record count is not accurate
-			    	long length = remainingCount < maxSplitSize ? 
+			    	long length = remainingCount <= maxSplitSize ? 
 			    		   	      Long.MAX_VALUE : splitSize; 
 			    	MarkLogicInputSplit split = 
 						new MarkLogicInputSplit(start, length, fsplit.forestId,
