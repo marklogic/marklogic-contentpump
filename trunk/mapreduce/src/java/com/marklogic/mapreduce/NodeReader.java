@@ -15,58 +15,58 @@ import com.marklogic.xcc.ResultItem;
  */
 public class NodeReader extends MarkLogicRecordReader<NodePath, MarkLogicNode> {
 
-	static final float NODE_TO_FRAGMENT_RATIO = 100;
-	
-	public NodeReader(Configuration conf) {
-	    super(conf);
+    static final float NODE_TO_FRAGMENT_RATIO = 100;
+    
+    public NodeReader(Configuration conf) {
+        super(conf);
     }
 
-	/**
-	 * Current key.
-	 */
-	private NodePath currentKey;
-	/**
-	 * Current value.
-	 */
-	private MarkLogicNode currentValue;
+    /**
+     * Current key.
+     */
+    private NodePath currentKey;
+    /**
+     * Current value.
+     */
+    private MarkLogicNode currentValue;
 
-	@Override
-	public NodePath getCurrentKey() throws IOException, InterruptedException {
-		return currentKey;
-	}
+    @Override
+    public NodePath getCurrentKey() throws IOException, InterruptedException {
+        return currentKey;
+    }
 
-	@Override
+    @Override
     protected void endOfResult() {
-	    currentKey = null;
-	    currentValue = null;
+        currentKey = null;
+        currentValue = null;
     }
 
-	@Override
+    @Override
     protected boolean nextResult(ResultItem result) {
-		String uri = result.getDocumentURI();
-		String path = result.getNodePath();
-	    if (currentKey != null) {
-	    	currentKey.set(uri, path);
-	    } else {
-	    	currentKey = new NodePath(uri, path);
-	    }
-		if (currentValue != null) {
-			currentValue.set(result);
-		} else {
-			currentValue = new MarkLogicNode(result);
-		}
-		
-		return true;
+        String uri = result.getDocumentURI();
+        String path = result.getNodePath();
+        if (currentKey != null) {
+            currentKey.set(uri, path);
+        } else {
+            currentKey = new NodePath(uri, path);
+        }
+        if (currentValue != null) {
+            currentValue.set(result);
+        } else {
+            currentValue = new MarkLogicNode(result);
+        }
+        
+        return true;
     }
 
-	@Override
+    @Override
     public MarkLogicNode getCurrentValue() throws IOException,
             InterruptedException {
-	    return currentValue;
+        return currentValue;
     }
 
-	@Override
+    @Override
     protected float getDefaultRatio() {
-	    return NODE_TO_FRAGMENT_RATIO;
+        return NODE_TO_FRAGMENT_RATIO;
     }
 }

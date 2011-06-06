@@ -17,61 +17,61 @@ import org.apache.hadoop.io.WritableComparable;
  */
 public class NodePath implements WritableComparable<NodePath> {
     // TODO: revisit -- is it faster to use Text or String?
-	private String docUri;
+    private String docUri;
 
-	private String path; // relative path
-	
-	public NodePath() {}
-	
-	public NodePath(String uri, String path) {
-		docUri = uri;
-		this.path = path;
-	}
-	
-	public void set(String uri, String path) {
-		docUri = uri;
-		this.path = path;
-	}
-	
-	@Override
-	public void readFields(DataInput in) throws IOException {
-		docUri = Text.readString(in);
+    private String path; // relative path
+    
+    public NodePath() {}
+    
+    public NodePath(String uri, String path) {
+        docUri = uri;
+        this.path = path;
+    }
+    
+    public void set(String uri, String path) {
+        docUri = uri;
+        this.path = path;
+    }
+    
+    @Override
+    public void readFields(DataInput in) throws IOException {
+        docUri = Text.readString(in);
         path = Text.readString(in);
-	}
+    }
 
-	@Override
-	public void write(DataOutput out) throws IOException {
-		Text.writeString(out, docUri);
+    @Override
+    public void write(DataOutput out) throws IOException {
+        Text.writeString(out, docUri);
         Text.writeString(out, path);
-	}
+    }
 
-	public String getDocumentUri() {
-		return docUri;
-	}
-	
-	public void setDocumentUri(String docUri) {
-		this.docUri = docUri;
-	}
-	
-	public String getRelativePath() {
-		return path;
-	}
-	
-	public void setRelativePath(String path) {
-		this.path = path;
-	}
-	
-	public String getFullPath() {
-	    StringBuilder buf = new StringBuilder();
-	    buf.append("fn:doc(\"");
-	    buf.append(DocumentURI.unparse(docUri));
-	    buf.append("\")");
-	    buf.append(path);
-		return buf.toString();
-	}
+    public String getDocumentUri() {
+        return docUri;
+    }
+    
+    public void setDocumentUri(String docUri) {
+        this.docUri = docUri;
+    }
+    
+    public String getRelativePath() {
+        return path;
+    }
+    
+    public void setRelativePath(String path) {
+        this.path = path;
+    }
+    
+    public String getFullPath() {
+        StringBuilder buf = new StringBuilder();
+        buf.append("fn:doc(\"");
+        buf.append(DocumentURI.unparse(docUri));
+        buf.append("\")");
+        buf.append(path);
+        return buf.toString();
+    }
 
-	@Override
-	public int compareTo(NodePath o) {
-		return (docUri + path).compareTo(o.getDocumentUri() + o.getRelativePath());
-	}
+    @Override
+    public int compareTo(NodePath o) {
+        return (docUri + path).compareTo(o.getDocumentUri() + o.getRelativePath());
+    }
 }

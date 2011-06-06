@@ -37,227 +37,227 @@ import com.marklogic.xcc.types.XSInteger;
  */
 public class InternalUtilities implements MarkLogicConstants {
 
-	/**
-	 * Get input server URI based on the job configuration.
-	 * @param conf job configuration
-	 * @return server URI
-	 * @throws URISyntaxException
-	 */
-	static URI getInputServerUri(Configuration conf) throws URISyntaxException {
-		String host = conf.get(INPUT_HOST, "");
-		return getInputServerUri(conf, host);
+    /**
+     * Get input server URI based on the job configuration.
+     * @param conf job configuration
+     * @return server URI
+     * @throws URISyntaxException
+     */
+    static URI getInputServerUri(Configuration conf) throws URISyntaxException {
+        String host = conf.get(INPUT_HOST, "");
+        return getInputServerUri(conf, host);
     }
-	
-	/**
-	 * Get input server URI based on the job configuration and server host 
-	 * name.
-	 * @param conf job configuration
-	 * @param hostName name of targeted input server host
-	 * @return server URI
-	 * @throws URISyntaxException
-	 */
-	static URI getInputServerUri(Configuration conf, String hostName) 
-	throws URISyntaxException {
-		String user = conf.get(INPUT_USERNAME, "");
-		String password = conf.get(INPUT_PASSWORD, "");
-		String port = conf.get(INPUT_PORT, "");
-		boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
-		return getServerUri(user, password, hostName, port, useSsl);
-	}
-	
-	/**
-	 * Get output server URI based on the job configuration and server host 
-	 * name.
-	 * @param conf job configuration
-	 * @param hostName name of targeted output server host
-	 * @return server URI
-	 * @throws URISyntaxException
-	 */
-	static URI getOutputServerUri(Configuration conf, String hostName)
-	throws URISyntaxException {
-		String user = conf.get(OUTPUT_USERNAME, "");
-		String password = conf.get(OUTPUT_PASSWORD, "");
-		String port = conf.get(OUTPUT_PORT, "");
-		boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
-		return getServerUri(user, password, hostName, port, useSsl);
-	}
-	
-	static URI getServerUri(String user, String password, String hostName, 
-			String port, boolean useSsl) throws URISyntaxException {		
-		StringBuilder buf = new StringBuilder();
-		if (useSsl) {
-			buf.append("xccs://");
-		} else {
-			buf.append("xcc://");
-		}
-		buf.append(user);
-		buf.append(":");
-		buf.append(password);
-		buf.append("@");
-		buf.append(hostName);
-		buf.append(":");
-		buf.append(port);
-		
-		return new URI(buf.toString());
-	}
-	
-	/**
-	 * Get content source for input server.
-	 * @param conf job configuration.
-	 * @return ContentSource for input server.
-	 * @throws URISyntaxException
-	 * @throws XccConfigException
-	 * @throws IOException
-	 */
-	static ContentSource getInputContentSource(Configuration conf) 
-	throws URISyntaxException, XccConfigException, IOException {
-		return getInputContentSource(conf, getInputServerUri(conf));
-	}
-	
-	/**
+    
+    /**
+     * Get input server URI based on the job configuration and server host 
+     * name.
+     * @param conf job configuration
+     * @param hostName name of targeted input server host
+     * @return server URI
+     * @throws URISyntaxException
+     */
+    static URI getInputServerUri(Configuration conf, String hostName) 
+    throws URISyntaxException {
+        String user = conf.get(INPUT_USERNAME, "");
+        String password = conf.get(INPUT_PASSWORD, "");
+        String port = conf.get(INPUT_PORT, "");
+        boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
+        return getServerUri(user, password, hostName, port, useSsl);
+    }
+    
+    /**
+     * Get output server URI based on the job configuration and server host 
+     * name.
+     * @param conf job configuration
+     * @param hostName name of targeted output server host
+     * @return server URI
+     * @throws URISyntaxException
+     */
+    static URI getOutputServerUri(Configuration conf, String hostName)
+    throws URISyntaxException {
+        String user = conf.get(OUTPUT_USERNAME, "");
+        String password = conf.get(OUTPUT_PASSWORD, "");
+        String port = conf.get(OUTPUT_PORT, "");
+        boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
+        return getServerUri(user, password, hostName, port, useSsl);
+    }
+    
+    static URI getServerUri(String user, String password, String hostName, 
+            String port, boolean useSsl) throws URISyntaxException {        
+        StringBuilder buf = new StringBuilder();
+        if (useSsl) {
+            buf.append("xccs://");
+        } else {
+            buf.append("xcc://");
+        }
+        buf.append(user);
+        buf.append(":");
+        buf.append(password);
+        buf.append("@");
+        buf.append(hostName);
+        buf.append(":");
+        buf.append(port);
+        
+        return new URI(buf.toString());
+    }
+    
+    /**
+     * Get content source for input server.
+     * @param conf job configuration.
+     * @return ContentSource for input server.
+     * @throws URISyntaxException
+     * @throws XccConfigException
+     * @throws IOException
+     */
+    static ContentSource getInputContentSource(Configuration conf) 
+    throws URISyntaxException, XccConfigException, IOException {
+        return getInputContentSource(conf, getInputServerUri(conf));
+    }
+    
+    /**
      * Get input content source.
      *
      * @param conf job configuration
      * @param serverUri server URI
      * @return content source
-	 * @throws IOException 
+     * @throws IOException 
      * @throws XccConfigException
      * @throws URISyntaxException 
      * @throws IOException 
      */
     static ContentSource getInputContentSource(Configuration conf, 
-    		URI serverUri)
-	throws IOException, XccConfigException { 
-    	boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
-    	if (!useSsl) {
-    		return ContentSourceFactory.newContentSource(serverUri);
-    	} else {
-    		Class<? extends SslConfigOptions> sslOptionClass = 
-    			conf.getClass(INPUT_SSL_OPTIONS_CLASS, 
-				null, SslConfigOptions.class);
-    	    if (sslOptionClass != null) {
-    	        SslConfigOptions sslOptions = 
-				    (SslConfigOptions)ReflectionUtils.newInstance(
-				    		sslOptionClass, conf);
-    	        return getSecureContentSource(serverUri, sslOptions);
-    	    } else {
-    	    	return ContentSourceFactory.newContentSource(serverUri);
-    	    }
-    	}
-	}
-	
-	/**
+            URI serverUri)
+    throws IOException, XccConfigException { 
+        boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
+        if (!useSsl) {
+            return ContentSourceFactory.newContentSource(serverUri);
+        } else {
+            Class<? extends SslConfigOptions> sslOptionClass = 
+                conf.getClass(INPUT_SSL_OPTIONS_CLASS, 
+                null, SslConfigOptions.class);
+            if (sslOptionClass != null) {
+                SslConfigOptions sslOptions = 
+                    (SslConfigOptions)ReflectionUtils.newInstance(
+                            sslOptionClass, conf);
+                return getSecureContentSource(serverUri, sslOptions);
+            } else {
+                return ContentSourceFactory.newContentSource(serverUri);
+            }
+        }
+    }
+    
+    /**
      * Get output content source.
      *
      * @param conf job configuration
      * @param serverUri server URI
      * @return content source
-	 * @throws IOException 
+     * @throws IOException 
      * @throws XccConfigException
      * @throws URISyntaxException 
      * @throws IOException 
      */
-	static ContentSource getOutputContentSource(Configuration conf,
-			URI serverUri)
-	throws IOException, XccConfigException { 
-    	boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
-    	if (!useSsl) {
-    		return ContentSourceFactory.newContentSource(serverUri);
-    	} else {
-    	    Class<? extends SslConfigOptions> sslOptionClass = 
-    	    	conf.getClass(OUTPUT_SSL_OPTIONS_CLASS, 
-				null, SslConfigOptions.class);
-    	    if (sslOptionClass != null) {
-    	    	SslConfigOptions sslOptions = 
-				    (SslConfigOptions)ReflectionUtils.newInstance(
-				    		sslOptionClass, conf);
-    	        return getSecureContentSource(serverUri, sslOptions);
-    	    } else {
-    	    	return ContentSourceFactory.newContentSource(serverUri);
-    	    }
-    	}
-	}
-	
-	static ContentSource getSecureContentSource(URI serverUri, 
-			SslConfigOptions sslOptions) throws XccConfigException {
-    	ContentSource contentSource = null;
+    static ContentSource getOutputContentSource(Configuration conf,
+            URI serverUri)
+    throws IOException, XccConfigException { 
+        boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
+        if (!useSsl) {
+            return ContentSourceFactory.newContentSource(serverUri);
+        } else {
+            Class<? extends SslConfigOptions> sslOptionClass = 
+                conf.getClass(OUTPUT_SSL_OPTIONS_CLASS, 
+                null, SslConfigOptions.class);
+            if (sslOptionClass != null) {
+                SslConfigOptions sslOptions = 
+                    (SslConfigOptions)ReflectionUtils.newInstance(
+                            sslOptionClass, conf);
+                return getSecureContentSource(serverUri, sslOptions);
+            } else {
+                return ContentSourceFactory.newContentSource(serverUri);
+            }
+        }
+    }
+    
+    static ContentSource getSecureContentSource(URI serverUri, 
+            SslConfigOptions sslOptions) throws XccConfigException {
+        ContentSource contentSource = null;
       
-		// construct XCC SecurityOptions
-		SecurityOptions options = 
-			new SecurityOptions(sslOptions.getSslContext());
-		options.setEnabledProtocols(sslOptions.getEnabledCipherSuites());
-	    options.setEnabledProtocols(sslOptions.getEnabledProtocols());
+        // construct XCC SecurityOptions
+        SecurityOptions options = 
+            new SecurityOptions(sslOptions.getSslContext());
+        options.setEnabledProtocols(sslOptions.getEnabledCipherSuites());
+        options.setEnabledProtocols(sslOptions.getEnabledProtocols());
   
-	    // construct content source
-		contentSource = ContentSourceFactory.newContentSource(
-				serverUri, options);		
+        // construct content source
+        contentSource = ContentSourceFactory.newContentSource(
+                serverUri, options);        
  
-    	return contentSource;
-	}
-	
-	/**
-	 * Assign value in Writable type from XCC result item.
-	 * @param <VALUEIN>
-	 * @param valueClass
-	 * @param result
-	 * @param value
-	 */
-	static <VALUEIN> void assignResultValue(Class<? extends Writable> valueClass, 
-			ResultItem result, VALUEIN value) {
-		if (valueClass.equals(Text.class)) {
-			((Text)value).set(result.asString());
-		} else if (valueClass.equals(IntWritable.class) &&
-				result.getValueType() == ValueType.XS_INTEGER) {
-			XSInteger intItem = (XSInteger)result.getItem();
-			((IntWritable)value).set(intItem.asPrimitiveInt());
-		} else if (valueClass.equals(VIntWritable.class) &&
-				result.getValueType() == ValueType.XS_INTEGER) {
-			XSInteger intItem = (XSInteger)result.getItem();
-			((VIntWritable)value).set(intItem.asPrimitiveInt());
-		} else if (valueClass.equals(LongWritable.class) &&
-				result.getValueType() == ValueType.XS_INTEGER) {
-			XSInteger intItem = (XSInteger)result.getItem();
-			((LongWritable)value).set(intItem.asLong());
-		} else if (valueClass.equals(VLongWritable.class) &&
-				result.getValueType() == ValueType.XS_INTEGER) {
-			XSInteger intItem = (XSInteger)result.getItem();
-			((VLongWritable)value).set(intItem.asLong());
-		} else if (valueClass.equals(BooleanWritable.class) &&
-				result.getValueType() == ValueType.XS_BOOLEAN) {
-			XSBoolean boolItem = (XSBoolean)result.getItem();
-			((BooleanWritable)value).set(boolItem.asPrimitiveBoolean());
-		} else if (valueClass.equals(FloatWritable.class) &&
-				result.getValueType() == ValueType.XS_FLOAT) {
-			XSFloat floatItem = (XSFloat)result.getItem();
-			((FloatWritable)value).set(floatItem.asPrimitiveFloat());
-		} else if (valueClass.equals(DoubleWritable.class) &&
-				result.getValueType() == ValueType.XS_DOUBLE) {
-			XSDouble doubleItem = (XSDouble)result.getItem();
-			((DoubleWritable)value).set(doubleItem.asPrimitiveDouble());
-		} else if (valueClass.equals(BytesWritable.class) &&
-				result.getValueType() == ValueType.XS_BASE64_BINARY) {
-			XSHexBinary binItem = (XSHexBinary)result.getItem();
-			byte[] bytes = binItem.asBinaryData();
-			((BytesWritable)value).set(bytes, 0, bytes.length);
-		} else if (valueClass.equals(BytesWritable.class) &&
-				result.getValueType() == ValueType.XS_HEX_BINARY) {
-			XSBase64Binary binItem = (XSBase64Binary)result.getItem();
-			byte[] bytes = binItem.asBinaryData();
-			((BytesWritable)value).set(bytes, 0, bytes.length);
-		} else if (valueClass.equals(MarkLogicNode.class) &&
-				result.getValueType() == ValueType.NODE) {
-			((MarkLogicNode)value).set(result);
-		} else {
-			throw new UnsupportedOperationException("Value class " +  
-					valueClass + " is unsupported for result type: " + 
-					result.getValueType());
-		}
-	}
+        return contentSource;
+    }
+    
+    /**
+     * Assign value in Writable type from XCC result item.
+     * @param <VALUEIN>
+     * @param valueClass
+     * @param result
+     * @param value
+     */
+    static <VALUEIN> void assignResultValue(Class<? extends Writable> valueClass, 
+            ResultItem result, VALUEIN value) {
+        if (valueClass.equals(Text.class)) {
+            ((Text)value).set(result.asString());
+        } else if (valueClass.equals(IntWritable.class) &&
+                result.getValueType() == ValueType.XS_INTEGER) {
+            XSInteger intItem = (XSInteger)result.getItem();
+            ((IntWritable)value).set(intItem.asPrimitiveInt());
+        } else if (valueClass.equals(VIntWritable.class) &&
+                result.getValueType() == ValueType.XS_INTEGER) {
+            XSInteger intItem = (XSInteger)result.getItem();
+            ((VIntWritable)value).set(intItem.asPrimitiveInt());
+        } else if (valueClass.equals(LongWritable.class) &&
+                result.getValueType() == ValueType.XS_INTEGER) {
+            XSInteger intItem = (XSInteger)result.getItem();
+            ((LongWritable)value).set(intItem.asLong());
+        } else if (valueClass.equals(VLongWritable.class) &&
+                result.getValueType() == ValueType.XS_INTEGER) {
+            XSInteger intItem = (XSInteger)result.getItem();
+            ((VLongWritable)value).set(intItem.asLong());
+        } else if (valueClass.equals(BooleanWritable.class) &&
+                result.getValueType() == ValueType.XS_BOOLEAN) {
+            XSBoolean boolItem = (XSBoolean)result.getItem();
+            ((BooleanWritable)value).set(boolItem.asPrimitiveBoolean());
+        } else if (valueClass.equals(FloatWritable.class) &&
+                result.getValueType() == ValueType.XS_FLOAT) {
+            XSFloat floatItem = (XSFloat)result.getItem();
+            ((FloatWritable)value).set(floatItem.asPrimitiveFloat());
+        } else if (valueClass.equals(DoubleWritable.class) &&
+                result.getValueType() == ValueType.XS_DOUBLE) {
+            XSDouble doubleItem = (XSDouble)result.getItem();
+            ((DoubleWritable)value).set(doubleItem.asPrimitiveDouble());
+        } else if (valueClass.equals(BytesWritable.class) &&
+                result.getValueType() == ValueType.XS_BASE64_BINARY) {
+            XSHexBinary binItem = (XSHexBinary)result.getItem();
+            byte[] bytes = binItem.asBinaryData();
+            ((BytesWritable)value).set(bytes, 0, bytes.length);
+        } else if (valueClass.equals(BytesWritable.class) &&
+                result.getValueType() == ValueType.XS_HEX_BINARY) {
+            XSBase64Binary binItem = (XSBase64Binary)result.getItem();
+            byte[] bytes = binItem.asBinaryData();
+            ((BytesWritable)value).set(bytes, 0, bytes.length);
+        } else if (valueClass.equals(MarkLogicNode.class) &&
+                result.getValueType() == ValueType.NODE) {
+            ((MarkLogicNode)value).set(result);
+        } else {
+            throw new UnsupportedOperationException("Value class " +  
+                    valueClass + " is unsupported for result type: " + 
+                    result.getValueType());
+        }
+    }
 
-	public static ContentSource getOutputContentSource(Configuration conf,
+    public static ContentSource getOutputContentSource(Configuration conf,
             String hostName) 
-	throws URISyntaxException, XccConfigException, IOException {
-	    URI serverUri = getOutputServerUri(conf, hostName);
-	    return getOutputContentSource(conf, serverUri);
+    throws URISyntaxException, XccConfigException, IOException {
+        URI serverUri = getOutputServerUri(conf, hostName);
+        return getOutputContentSource(conf, serverUri);
     }
 }

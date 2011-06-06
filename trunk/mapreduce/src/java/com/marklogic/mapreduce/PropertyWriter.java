@@ -20,38 +20,38 @@ public class PropertyWriter
 extends MarkLogicRecordWriter<DocumentURI, MarkLogicNode> 
 implements MarkLogicConstants {
 
-	public static final Log LOG =
-	    LogFactory.getLog(PropertyWriter.class);
-	private PropertyOpType opType;
-	
-	public PropertyWriter(URI serverUri, Configuration conf) {
-		super(serverUri, conf);
-		String propOpType = conf.get(PROPERTY_OPERATION_TYPE, 
-				DEFAULT_PROPERTY_OPERATION_TYPE);
-		opType = PropertyOpType.valueOf(propOpType);
-	}
+    public static final Log LOG =
+        LogFactory.getLog(PropertyWriter.class);
+    private PropertyOpType opType;
+    
+    public PropertyWriter(URI serverUri, Configuration conf) {
+        super(serverUri, conf);
+        String propOpType = conf.get(PROPERTY_OPERATION_TYPE, 
+                DEFAULT_PROPERTY_OPERATION_TYPE);
+        opType = PropertyOpType.valueOf(propOpType);
+    }
 
-	@Override
-	public void write(DocumentURI uri, MarkLogicNode record)
-			throws IOException, InterruptedException {
-		// construct query
-		String recordString = record == null ? "()" : record.toString();
-		String query = opType.getQuery(uri, recordString);
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(query);
-		}
+    @Override
+    public void write(DocumentURI uri, MarkLogicNode record)
+            throws IOException, InterruptedException {
+        // construct query
+        String recordString = record == null ? "()" : record.toString();
+        String query = opType.getQuery(uri, recordString);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(query);
+        }
 
         // execute query
-		Session session = getSession();
-		try {
-			AdhocQuery request = session.newAdhocQuery(query);
-			session.submitRequest(request);
-			commitIfNecessary();
-		} catch (RequestException e) {	
-			LOG.error(e);
-			LOG.error(query);
-			throw new IOException(e);
-		}
-	}
+        Session session = getSession();
+        try {
+            AdhocQuery request = session.newAdhocQuery(query);
+            session.submitRequest(request);
+            commitIfNecessary();
+        } catch (RequestException e) {    
+            LOG.error(e);
+            LOG.error(query);
+            throw new IOException(e);
+        }
+    }
 
 }

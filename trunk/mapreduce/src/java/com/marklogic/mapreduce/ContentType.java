@@ -9,19 +9,19 @@ import com.marklogic.xcc.DocumentFormat;
  */
 public enum ContentType {
     XML {
-    	public DocumentFormat getDocumentFormat() {
-    		return DocumentFormat.XML;
-    	}
+        public DocumentFormat getDocumentFormat() {
+            return DocumentFormat.XML;
+        }
     },
     TEXT {
-    	public DocumentFormat getDocumentFormat() {
-    		return DocumentFormat.TEXT;
-    	}
+        public DocumentFormat getDocumentFormat() {
+            return DocumentFormat.TEXT;
+        }
     },
     BINARY {
-    	public DocumentFormat getDocumentFormat() {
-    		return DocumentFormat.BINARY;
-    	}
+        public DocumentFormat getDocumentFormat() {
+            return DocumentFormat.BINARY;
+        }
     };
     
     public abstract DocumentFormat getDocumentFormat();

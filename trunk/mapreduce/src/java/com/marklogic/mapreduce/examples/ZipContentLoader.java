@@ -28,118 +28,118 @@ import com.marklogic.mapreduce.DocumentURI;
  *
  */
 public class ZipContentLoader {
-	public static class ZipContentMapper 
-	extends Mapper<Text, Text, DocumentURI, Text> {
-		
-		private DocumentURI uri = new DocumentURI();
-		
-		public void map(Text fileName, Text fileContent, Context context) 
-		throws IOException, InterruptedException {
-			uri.setUri(fileName.toString());
-			context.write(uri, fileContent);
-		}
-	}
-	
-	public static void main(String[] args) throws Exception {
-		Configuration conf = new Configuration();
-		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-		if (otherArgs.length < 2) {
-			System.err.println("Usage: ZipContentLoader configFile inputDir");
-			System.exit(2);
-		}
-		
-		Job job = new Job(conf);
-		job.setJarByClass(ZipContentLoader.class);
-		job.setInputFormatClass(ZipContentInputFormat.class);
-		job.setMapperClass(ZipContentMapper.class);
-		job.setMapOutputKeyClass(DocumentURI.class);
-		job.setMapOutputValueClass(Text.class);
-		job.setOutputFormatClass(ContentOutputFormat.class);
-		
-		ZipContentInputFormat.setInputPaths(job, new Path(otherArgs[1]));
+    public static class ZipContentMapper 
+    extends Mapper<Text, Text, DocumentURI, Text> {
+        
+        private DocumentURI uri = new DocumentURI();
+        
+        public void map(Text fileName, Text fileContent, Context context) 
+        throws IOException, InterruptedException {
+            uri.setUri(fileName.toString());
+            context.write(uri, fileContent);
+        }
+    }
+    
+    public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+        if (otherArgs.length < 2) {
+            System.err.println("Usage: ZipContentLoader configFile inputDir");
+            System.exit(2);
+        }
+        
+        Job job = new Job(conf);
+        job.setJarByClass(ZipContentLoader.class);
+        job.setInputFormatClass(ZipContentInputFormat.class);
+        job.setMapperClass(ZipContentMapper.class);
+        job.setMapOutputKeyClass(DocumentURI.class);
+        job.setMapOutputValueClass(Text.class);
+        job.setOutputFormatClass(ContentOutputFormat.class);
+        
+        ZipContentInputFormat.setInputPaths(job, new Path(otherArgs[1]));
 
-		conf = job.getConfiguration();
-		conf.addResource(otherArgs[0]);
-	 	
-		System.exit(job.waitForCompletion(true) ? 0 : 1);
-	}
+        conf = job.getConfiguration();
+        conf.addResource(otherArgs[0]);
+         
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
 }
 
 class ZipContentInputFormat extends FileInputFormat<Text, Text> {
 
-	@Override
-	protected boolean isSplitable(JobContext context, Path filename) {
-	    return false;
-	}
-	
-	@Override
+    @Override
+    protected boolean isSplitable(JobContext context, Path filename) {
+        return false;
+    }
+    
+    @Override
     public RecordReader<Text, Text> createRecordReader(InputSplit split,
             TaskAttemptContext context) throws IOException, InterruptedException {
-	    return new ZipContentReader();
+        return new ZipContentReader();
     }
-	
+    
 }
 
 class ZipContentReader extends RecordReader<Text, Text> {
 
-	private Text key = new Text();
-	private Text value = new Text();
-	private ZipInputStream zipIn;
-	private byte[] buf = new byte[65536];
-	private boolean hasNext = true;
-	
-	@Override
+    private Text key = new Text();
+    private Text value = new Text();
+    private ZipInputStream zipIn;
+    private byte[] buf = new byte[65536];
+    private boolean hasNext = true;
+    
+    @Override
     public void close() throws IOException {
-		if (zipIn != null) {
-			zipIn.close();
-		}
+        if (zipIn != null) {
+            zipIn.close();
+        }
     }
 
-	@Override
+    @Override
     public Text getCurrentKey() throws IOException, InterruptedException {
-	    return key;
+        return key;
     }
 
-	@Override
+    @Override
     public Text getCurrentValue() throws IOException, InterruptedException {
-	    return value;
+        return value;
     }
 
-	@Override
+    @Override
     public float getProgress() throws IOException, InterruptedException {
-	    return hasNext ? 0 : 1;
+        return hasNext ? 0 : 1;
     }
 
-	@Override
+    @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
             throws IOException, InterruptedException {
-		Path file = ((FileSplit)inSplit).getPath();
-		FileSystem fs = file.getFileSystem(context.getConfiguration());
-		FSDataInputStream fileIn = fs.open(file);
-		zipIn = new ZipInputStream(fileIn);
+        Path file = ((FileSplit)inSplit).getPath();
+        FileSystem fs = file.getFileSystem(context.getConfiguration());
+        FSDataInputStream fileIn = fs.open(file);
+        zipIn = new ZipInputStream(fileIn);
     }
 
-	@Override
+    @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-	    if (zipIn != null) {
-	    	ZipEntry zipEntry;
-	    	while ((zipEntry = zipIn.getNextEntry()) != null) {
-	    	    if (zipEntry != null && !zipEntry.isDirectory()) {
-	    		    key.set(zipEntry.getName());
-	    		    StringBuilder entry = new StringBuilder();
-	    		    long size;
-	    	    	while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
-	    	    		entry.append(new String(buf, 0, (int) size));
-	    	    	}
-	    		    value.set(entry.toString());
-	    		    return true;
-	    	    }
-	    	}
-	    	hasNext = false;
-	    	return false;
-	    }
-	    hasNext = false;
-	    return false;
+        if (zipIn != null) {
+            ZipEntry zipEntry;
+            while ((zipEntry = zipIn.getNextEntry()) != null) {
+                if (zipEntry != null && !zipEntry.isDirectory()) {
+                    key.set(zipEntry.getName());
+                    StringBuilder entry = new StringBuilder();
+                    long size;
+                    while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
+                        entry.append(new String(buf, 0, (int) size));
+                    }
+                    value.set(entry.toString());
+                    return true;
+                }
+            }
+            hasNext = false;
+            return false;
+        }
+        hasNext = false;
+        return false;
     }
-	
+    
 }

@@ -26,114 +26,114 @@ import com.marklogic.mapreduce.DocumentURI;
  */
 public class ContentLoader {
 
-	public static class ContentMapper 
-	extends Mapper<Text, Text, DocumentURI, Text> {
-		
-		private DocumentURI uri = new DocumentURI();
-		
-		public void map(Text fileName, Text fileContent, Context context) 
-		throws IOException, InterruptedException {
-			uri.setUri(fileName.toString());
-			context.write(uri, fileContent);
-		}
-	}
-	
-	public static void main(String[] args) throws Exception {
-		Configuration conf = new Configuration();
-		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-		if (otherArgs.length < 2) {
-			System.err.println("Usage: ContentLoader configFile inputDir");
-			System.exit(2);
-		}
-		
-		Job job = new Job(conf);
-		job.setJarByClass(ContentLoader.class);
-		job.setInputFormatClass(ContentInputFormat.class);
-		job.setMapperClass(ContentMapper.class);
-		job.setMapOutputKeyClass(DocumentURI.class);
-		job.setMapOutputValueClass(Text.class);
-		job.setOutputFormatClass(ContentOutputFormat.class);
-		
-		ContentInputFormat.setInputPaths(job, new Path(otherArgs[1]));
+    public static class ContentMapper 
+    extends Mapper<Text, Text, DocumentURI, Text> {
+        
+        private DocumentURI uri = new DocumentURI();
+        
+        public void map(Text fileName, Text fileContent, Context context) 
+        throws IOException, InterruptedException {
+            uri.setUri(fileName.toString());
+            context.write(uri, fileContent);
+        }
+    }
+    
+    public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+        if (otherArgs.length < 2) {
+            System.err.println("Usage: ContentLoader configFile inputDir");
+            System.exit(2);
+        }
+        
+        Job job = new Job(conf);
+        job.setJarByClass(ContentLoader.class);
+        job.setInputFormatClass(ContentInputFormat.class);
+        job.setMapperClass(ContentMapper.class);
+        job.setMapOutputKeyClass(DocumentURI.class);
+        job.setMapOutputValueClass(Text.class);
+        job.setOutputFormatClass(ContentOutputFormat.class);
+        
+        ContentInputFormat.setInputPaths(job, new Path(otherArgs[1]));
 
-		conf = job.getConfiguration();
-		conf.addResource(otherArgs[0]);
-	 	
-		System.exit(job.waitForCompletion(true) ? 0 : 1);
-	}
+        conf = job.getConfiguration();
+        conf.addResource(otherArgs[0]);
+         
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
 }
 
 class ContentInputFormat extends FileInputFormat<Text, Text> {
 
-	@Override
-	protected boolean isSplitable(JobContext context, Path filename) {
-	    return false;
-	}
-	
-	@Override
+    @Override
+    protected boolean isSplitable(JobContext context, Path filename) {
+        return false;
+    }
+    
+    @Override
     public RecordReader<Text, Text> createRecordReader(InputSplit split,
             TaskAttemptContext context) throws IOException, InterruptedException {
-	    return new FileReader();
-    }	
+        return new FileReader();
+    }    
 }
 
 class FileReader extends RecordReader<Text, Text> {
 
-	private Text key = new Text();
-	private Text value = new Text();
-	private long bytesRead;
-	private long bytesTotal;
-	private boolean hasNext;
-	
-	public FileReader() {
+    private Text key = new Text();
+    private Text value = new Text();
+    private long bytesRead;
+    private long bytesTotal;
+    private boolean hasNext;
+    
+    public FileReader() {
     }
 
-	@Override
+    @Override
     public void close() throws IOException {
     }
 
-	@Override
+    @Override
     public Text getCurrentKey() throws IOException, InterruptedException {
-	    return key;
+        return key;
     }
 
-	@Override
+    @Override
     public Text getCurrentValue() throws IOException, InterruptedException {
-	    return value;
+        return value;
     }
 
-	@Override
+    @Override
     public float getProgress() throws IOException, InterruptedException {
-	    return bytesRead / (float)bytesTotal;
+        return bytesRead / (float)bytesTotal;
     }
 
-	@Override
+    @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
             throws IOException, InterruptedException {
-		bytesTotal = inSplit.getLength();
-		Path file = ((FileSplit)inSplit).getPath();
-		FileSystem fs = file.getFileSystem(context.getConfiguration());
-		FSDataInputStream fileIn = fs.open(file);
-	    key.set(file.toString());
-	    byte[] buf = new byte[(int)inSplit.getLength()];
-	    try {
-	        fileIn.readFully(buf);
-		    value.set(buf);
-		    hasNext = true;    
-	    } catch (Exception e) {
-	    	hasNext = false;
-	    } finally {
-	    	fileIn.close();
-	    }
+        bytesTotal = inSplit.getLength();
+        Path file = ((FileSplit)inSplit).getPath();
+        FileSystem fs = file.getFileSystem(context.getConfiguration());
+        FSDataInputStream fileIn = fs.open(file);
+        key.set(file.toString());
+        byte[] buf = new byte[(int)inSplit.getLength()];
+        try {
+            fileIn.readFully(buf);
+            value.set(buf);
+            hasNext = true;    
+        } catch (Exception e) {
+            hasNext = false;
+        } finally {
+            fileIn.close();
+        }
     }
 
-	@Override
+    @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-	    if (hasNext) {
-	    	hasNext = false;
-	    	return true;
-	    }
-	    return false;
+        if (hasNext) {
+            hasNext = false;
+            return true;
+        }
+        return false;
     }
-	
+    
 }

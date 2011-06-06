@@ -20,15 +20,15 @@ package com.marklogic.mapreduce;
  */
 
 public interface MarkLogicConstants {
-	// input-related config property names
-	/**
-	 * The config property name (<code>{@value}</code>)
-	 * which, if set, specifies the MarkLogic Server user name
-	 * under which input queries and operations run. Required if using
-	 * MarkLogic Server for input.
-	 */
+    // input-related config property names
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the MarkLogic Server user name
+     * under which input queries and operations run. Required if using
+     * MarkLogic Server for input.
+     */
     static final String INPUT_USERNAME = 
-    	"mapreduce.marklogic.input.username";
+        "mapreduce.marklogic.input.username";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the cleartext password to use for 
@@ -36,14 +36,14 @@ public interface MarkLogicConstants {
      * Required if using MarkLogic Server for input.
      */
     static final String INPUT_PASSWORD = 
-    	"mapreduce.marklogic.input.password";
+        "mapreduce.marklogic.input.password";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the MarkLogic Server host to use for
      * input operations. Required if using MarkLogic Server for input.
      */
     static final String INPUT_HOST = 
-    	"mapreduce.marklogic.input.host";
+        "mapreduce.marklogic.input.host";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the port number of the input XDBC 
@@ -57,7 +57,7 @@ public interface MarkLogicConstants {
      * </p>
      */
     static final String INPUT_PORT = 
-    	"mapreduce.marklogic.input.port";
+        "mapreduce.marklogic.input.port";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies whether the connection to the input server is 
@@ -71,7 +71,7 @@ public interface MarkLogicConstants {
      * (<code>@INPUT_USE_SSL</code>) is set to true.
      */
     static final String INPUT_SSL_OPTIONS_CLASS = 
-    	"mapreduce.marklogic.input.ssloptionsclass"; 
+        "mapreduce.marklogic.input.ssloptionsclass"; 
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the document selection portion of the
@@ -113,7 +113,7 @@ public interface MarkLogicConstants {
      * </pre>
      */
     static final String DOCUMENT_SELECTOR = 
-    	"mapreduce.marklogic.input.documentselector";
+        "mapreduce.marklogic.input.documentselector";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the path expression used to retrieve 
@@ -151,7 +151,7 @@ public interface MarkLogicConstants {
      * </pre>
      */
     static final String SUBDOCUMENT_EXPRESSION = 
-    	"mapreduce.marklogic.input.subdocumentexpr";
+        "mapreduce.marklogic.input.subdocumentexpr";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a list of namespaces to use when
@@ -179,7 +179,7 @@ public interface MarkLogicConstants {
      * </p>
      */
     static final String PATH_NAMESPACE =
-    	"mapreduce.marklogic.input.namespace";
+        "mapreduce.marklogic.input.namespace";
     /**
      *  The config property name (<code>{@value}</code>)
      *  which, if set, specifies the query MarkLogic Server uses 
@@ -197,7 +197,7 @@ public interface MarkLogicConstants {
      * </p> 
      */
     static final String SPLIT_QUERY = 
-    	"mapreduce.marklogic.input.splitquery";
+        "mapreduce.marklogic.input.splitquery";
     /**
      *  The config property name (<code>{@value}</code>)
      *  which, if set, specifies the maximum number of fragments per 
@@ -205,7 +205,7 @@ public interface MarkLogicConstants {
      *  The default should be suitable for most applications.
      */  
     static final String MAX_SPLIT_SIZE =
-    	"mapreduce.marklogic.input.maxsplitsize";
+        "mapreduce.marklogic.input.maxsplitsize";
     /**
      * Not yet Implemented.
      * 
@@ -217,21 +217,21 @@ public interface MarkLogicConstants {
      * </p>
      */
     static final String INPUT_DATABASE_NAME = 
-    	"mapreduce.marklogic.input.databasename";
+        "mapreduce.marklogic.input.databasename";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class of the map 
      * input keys. Optional. Default: {@link org.apache.hadoop.io.Text}.
      */
     static final String INPUT_KEY_CLASS = 
-    	"mapreduce.marklogic.input.keyclass";
+        "mapreduce.marklogic.input.keyclass";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class of the map 
      * input value. Optional. Default: {@link org.apache.hadoop.io.Text}.
      */
     static final String INPUT_VALUE_CLASS = 
-    	"mapreduce.marklogic.input.valueclass";
+        "mapreduce.marklogic.input.valueclass";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies whether to use basic or advanced
@@ -248,7 +248,7 @@ public interface MarkLogicConstants {
      * </p>
      */
     static final String INPUT_MODE = 
-    	"mapreduce.marklogic.input.mode";
+        "mapreduce.marklogic.input.mode";
     /**
      * Value string of basic mode for {@link #INPUT_MODE input.mode}.
      */
@@ -273,7 +273,7 @@ public interface MarkLogicConstants {
      * </p>
      */
     static final String INPUT_QUERY =
-    	"mapreduce.marklogic.input.query";
+        "mapreduce.marklogic.input.query";
     
     /**      
      * The config property name (<code>{@value}</code>) which, if   
@@ -291,14 +291,14 @@ public interface MarkLogicConstants {
 
     
     // output-related config property names
-	/**
-	 * The config property name (<code>{@value}</code>)
-	 * which, if set, specifies the MarkLogic Server user name
-	 * under which output operations run. Required if using MarkLogic
-	 * Server for output.
-	 */
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the MarkLogic Server user name
+     * under which output operations run. Required if using MarkLogic
+     * Server for output.
+     */
     static final String OUTPUT_USERNAME = 
-    	"mapreduce.marklogic.output.username";
+        "mapreduce.marklogic.output.username";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the cleartext password to use for 
@@ -306,7 +306,7 @@ public interface MarkLogicConstants {
      * Required if using MarkLogic Server for output.
      */
     static final String OUTPUT_PASSWORD = 
-    	"mapreduce.marklogic.output.password";
+        "mapreduce.marklogic.output.password";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the MarkLogic Server host(s) to use for
@@ -314,10 +314,10 @@ public interface MarkLogicConstants {
      * output.
      */
     static final String OUTPUT_HOSTS = 
-    	"mapreduce.marklogic.output.hosts";
+        "mapreduce.marklogic.output.hosts";
     
     static final String OUTPUT_FOREST_HOST = 
-    	"mapreduce.marklogic.output.hostforests";   
+        "mapreduce.marklogic.output.hostforests";   
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the port number of the output MarkLogic
@@ -325,7 +325,7 @@ public interface MarkLogicConstants {
      * Required if using MarkLogic Server for output.
      */
     static final String OUTPUT_PORT = 
-    	"mapreduce.marklogic.output.port";
+        "mapreduce.marklogic.output.port";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies whether the connection to the output server is
@@ -339,7 +339,7 @@ public interface MarkLogicConstants {
      * (<code>@OUTPUT_USE_SSL</code>) is set to true.
      */
     static final String OUTPUT_SSL_OPTIONS_CLASS = 
-    	"mapreduce.marklogic.input.ssloptionsclass"; 
+        "mapreduce.marklogic.input.ssloptionsclass"; 
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the MarkLogic Server database directory
@@ -347,7 +347,7 @@ public interface MarkLogicConstants {
      * Server for output with document output format.
      */
     static final String OUTPUT_DIRECTORY = 
-    	"mapreduce.marklogic.output.directory";
+        "mapreduce.marklogic.output.directory";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a comma-separated list of collections
@@ -365,7 +365,7 @@ public interface MarkLogicConstants {
      * </pre>
      */
     static final String OUTPUT_COLLECTION =
-    	"mapreduce.marklogic.output.collection";
+        "mapreduce.marklogic.output.collection";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a comma-separated list role-capability
@@ -397,7 +397,7 @@ public interface MarkLogicConstants {
      *  </p>
      */
     static final String OUTPUT_PERMISSION = 
-    	"mapreduce.marklogic.output.permission";
+        "mapreduce.marklogic.output.permission";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the document quality for created
@@ -413,7 +413,7 @@ public interface MarkLogicConstants {
      * </p>
      */
     static final String OUTPUT_QUALITY = 
-    	"mapreduce.marklogic.output.quality";
+        "mapreduce.marklogic.output.quality";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates whether or not to remove the output
@@ -427,7 +427,7 @@ public interface MarkLogicConstants {
      * </p>
      */
     static final String OUTPUT_CLEAN_DIR = 
-    	"mapreduce.marklogic.output.cleandir";
+        "mapreduce.marklogic.output.cleandir";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates what node operation to perform
@@ -440,13 +440,13 @@ public interface MarkLogicConstants {
      * @see NodeWriter
      */
     static final String NODE_OPERATION_TYPE = 
-    	"mapreduce.marklogic.output.nodeoptype";
+        "mapreduce.marklogic.output.nodeoptype";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates the namespace used for output.
      */
     static final String OUTPUT_NAMESPACE = 
-    	"mapreduce.marklogic.output.namespace";
+        "mapreduce.marklogic.output.namespace";
     
     /** 
      * The default maximum split size for input splits, used if
@@ -478,7 +478,7 @@ public interface MarkLogicConstants {
      * Default: XML.
      */
     static final String CONTENT_TYPE = 
-    	"mapreduce.marklogic.output.contenttype";
+        "mapreduce.marklogic.output.contenttype";
     /**
      * Default content type.
      */
@@ -488,7 +488,7 @@ public interface MarkLogicConstants {
      * which, if set, indicates batch size for output.  Optional.
      */
     static final String BATCH_SIZE = 
-    	"mapreduce.marklogic.output.batchsize";
+        "mapreduce.marklogic.output.batchsize";
     /**
      * Default batch size.
      */
