@@ -16,11 +16,11 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  */
 public class NodeInputFormat 
 extends MarkLogicInputFormat<NodePath, MarkLogicNode> {
-   	
-	@Override
-	public RecordReader<NodePath, MarkLogicNode> createRecordReader(
-			InputSplit arg0, TaskAttemptContext context) throws IOException,
-			InterruptedException {
-		return new NodeReader(context.getConfiguration());
-	}
+       
+    @Override
+    public RecordReader<NodePath, MarkLogicNode> createRecordReader(
+            InputSplit arg0, TaskAttemptContext context) throws IOException,
+            InterruptedException {
+        return new NodeReader(context.getConfiguration());
+    }
 }

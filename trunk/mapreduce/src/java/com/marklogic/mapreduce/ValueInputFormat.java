@@ -24,11 +24,11 @@ public class ValueInputFormat<VALUEIN>
 extends MarkLogicInputFormat<LongWritable, VALUEIN> 
 implements MarkLogicConstants {
 
-	@Override
-	public RecordReader<LongWritable, VALUEIN> createRecordReader(
-			InputSplit split, TaskAttemptContext context)
-	throws IOException, InterruptedException {
-		return new ValueReader<VALUEIN>(context.getConfiguration());
-	}
+    @Override
+    public RecordReader<LongWritable, VALUEIN> createRecordReader(
+            InputSplit split, TaskAttemptContext context)
+    throws IOException, InterruptedException {
+        return new ValueReader<VALUEIN>(context.getConfiguration());
+    }
 
 }

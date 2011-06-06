@@ -9,9 +9,9 @@ import javax.net.ssl.SSLContext;
  */
 public abstract interface SslConfigOptions {
     
-	public SSLContext getSslContext();
-	
-	public String[] getEnabledProtocols();
-	
-	public String[] getEnabledCipherSuites();
+    public SSLContext getSslContext();
+    
+    public String[] getEnabledProtocols();
+    
+    public String[] getEnabledCipherSuites();
 }

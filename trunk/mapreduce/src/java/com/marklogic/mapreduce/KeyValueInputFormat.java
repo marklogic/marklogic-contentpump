@@ -26,11 +26,11 @@ public class KeyValueInputFormat<KEYIN, VALUEIN>
 extends MarkLogicInputFormat<KEYIN, VALUEIN>
 implements MarkLogicConstants {
 
-	@Override
-	public RecordReader<KEYIN, VALUEIN> createRecordReader(InputSplit split,
-			TaskAttemptContext context) 
-	throws IOException, InterruptedException {
-		return new KeyValueReader<KEYIN, VALUEIN>(context.getConfiguration());
-	}
+    @Override
+    public RecordReader<KEYIN, VALUEIN> createRecordReader(InputSplit split,
+            TaskAttemptContext context) 
+    throws IOException, InterruptedException {
+        return new KeyValueReader<KEYIN, VALUEIN>(context.getConfiguration());
+    }
 
 }

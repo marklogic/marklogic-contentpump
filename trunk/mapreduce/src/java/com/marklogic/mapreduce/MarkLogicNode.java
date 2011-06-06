@@ -41,108 +41,108 @@ import com.marklogic.xcc.types.XdmText;
  * @author jchen
  */
 public class MarkLogicNode implements Writable {
-	public static final Log LOG =
-	    LogFactory.getLog(MarkLogicNode.class);
-	
-	private Node node;
-	
-	private static final ThreadLocal<DocumentBuilder> builderLocal = 
-		new ThreadLocal<DocumentBuilder>() {         
-		@Override protected DocumentBuilder initialValue() {
-			try {
-				return 
-				DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			} catch (ParserConfigurationException e) {
-				LOG.error(e);
-				return null;
-			} 
-		}     
-	}; 
-	
-	static DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-	
+    public static final Log LOG =
+        LogFactory.getLog(MarkLogicNode.class);
+    
+    private Node node;
+    
+    private static final ThreadLocal<DocumentBuilder> builderLocal = 
+        new ThreadLocal<DocumentBuilder>() {         
+        @Override protected DocumentBuilder initialValue() {
+            try {
+                return 
+                DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            } catch (ParserConfigurationException e) {
+                LOG.error(e);
+                return null;
+            } 
+        }     
+    }; 
+    
+    static DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+    
     public MarkLogicNode() {}
-	
-	public MarkLogicNode(Node node) {
-		this.node = node;
-	}
-	
-	public MarkLogicNode(ResultItem item) {
-		set(item);
-	}
-	
-	public Node get() {
-		return node;
-	}
-	
-	public void set(Node node) {
-		this.node = node;
-	}
-	
-	public void set(ResultItem item) {
-		ItemType type =	item.getItemType();
-		DocumentBuilder docBuilder = builderLocal.get();
-	    try {
-			if (type == ItemType.BINARY) {
-				node = ((XdmBinary)item.getItem()).asW3cNode(docBuilder);
-			} else if (type == ItemType.ELEMENT) {
-				node = ((XdmElement)item.getItem()).asW3cElement(docBuilder);
-			} else if (type == ItemType.TEXT) {
-			    node = ((XdmText)item.getItem()).asW3cText(docBuilder);
-			} else if (type == ItemType.DOCUMENT) {
-				node = ((XdmDocument)item.getItem()).asW3cDocument(docBuilder);
-			} else if (type == ItemType.ATTRIBUTE) {
-				node = ((XdmAttribute)item.getItem()).asW3cAttr(docBuilder);
-			} else {
-				LOG.error("Unexpected item type: " + item.getItemType());
-			}
-		} catch (IOException e) {
-			LOG.error(e);
-		} catch (SAXException e) {
-			LOG.error("error parsing result", e);
-		}
-	}
-	
-	public void readFields(DataInput in) throws IOException {
+    
+    public MarkLogicNode(Node node) {
+        this.node = node;
+    }
+    
+    public MarkLogicNode(ResultItem item) {
+        set(item);
+    }
+    
+    public Node get() {
+        return node;
+    }
+    
+    public void set(Node node) {
+        this.node = node;
+    }
+    
+    public void set(ResultItem item) {
+        ItemType type =    item.getItemType();
+        DocumentBuilder docBuilder = builderLocal.get();
         try {
-			node = DomUtil.readXml((DataInputStream)in);
-		} catch (ParserConfigurationException e) {
-			LOG.error(e);
-			throw new IOException(e);
-		} catch (SAXException e) {
-			LOG.error(e);
-			throw new IOException(e);
-		}
-	}
+            if (type == ItemType.BINARY) {
+                node = ((XdmBinary)item.getItem()).asW3cNode(docBuilder);
+            } else if (type == ItemType.ELEMENT) {
+                node = ((XdmElement)item.getItem()).asW3cElement(docBuilder);
+            } else if (type == ItemType.TEXT) {
+                node = ((XdmText)item.getItem()).asW3cText(docBuilder);
+            } else if (type == ItemType.DOCUMENT) {
+                node = ((XdmDocument)item.getItem()).asW3cDocument(docBuilder);
+            } else if (type == ItemType.ATTRIBUTE) {
+                node = ((XdmAttribute)item.getItem()).asW3cAttr(docBuilder);
+            } else {
+                LOG.error("Unexpected item type: " + item.getItemType());
+            }
+        } catch (IOException e) {
+            LOG.error(e);
+        } catch (SAXException e) {
+            LOG.error("error parsing result", e);
+        }
+    }
+    
+    public void readFields(DataInput in) throws IOException {
+        try {
+            node = DomUtil.readXml((DataInputStream)in);
+        } catch (ParserConfigurationException e) {
+            LOG.error(e);
+            throw new IOException(e);
+        } catch (SAXException e) {
+            LOG.error(e);
+            throw new IOException(e);
+        }
+    }
 
-	public void write(DataOutput out) throws IOException {
-		if (node != null) {
-			try {
-				DomUtil.writeXml(node, (DataOutputStream)out);
-			} catch (TransformerException e) {
-				LOG.error(e);
-			}
-		} else {
-		    LOG.error("Node to write is null.");
-		}
-	}
-	
-	@Override
-	public String toString() {
-		if (node != null) {
-			try {
-				ByteArrayOutputStream bos = new ByteArrayOutputStream();
-				TransformerFactory tf = TransformerFactory.newInstance();
-				Transformer t = tf.newTransformer();
-				t.setOutputProperty(OutputKeys.INDENT, "yes");
+    public void write(DataOutput out) throws IOException {
+        if (node != null) {
+            try {
+                DomUtil.writeXml(node, (DataOutputStream)out);
+            } catch (TransformerException e) {
+                LOG.error(e);
+            }
+        } else {
+            LOG.error("Node to write is null.");
+        }
+    }
+    
+    @Override
+    public String toString() {
+        if (node != null) {
+            try {
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                TransformerFactory tf = TransformerFactory.newInstance();
+                Transformer t = tf.newTransformer();
+                t.setOutputProperty(OutputKeys.INDENT, "yes");
                 t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
                 t.transform(new DOMSource(node), new StreamResult(bos));
-				return bos.toString();
-			} catch (TransformerException e) {
-				LOG.error(e);
-			}
-		}
-		return null;
-	}
+                return bos.toString();
+            } catch (TransformerException e) {
+                LOG.error(e);
+            }
+        }
+        return null;
+    }
 
 }

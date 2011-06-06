@@ -15,56 +15,56 @@ import com.marklogic.xcc.ResultItem;
  * @author jchen
  */
 public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogicNode> {
-	
-	static final float DOCUMENT_TO_FRAGMENT_RATIO = 1; 
-	
-	/**
-	 * Current key.
-	 */
-	private DocumentURI currentKey;
-	/**
-	 * Current value.
-	 */
-	private MarkLogicNode currentValue;
-	
-	public DocumentReader(Configuration conf) {
-		super(conf);
-	}
+    
+    static final float DOCUMENT_TO_FRAGMENT_RATIO = 1; 
+    
+    /**
+     * Current key.
+     */
+    private DocumentURI currentKey;
+    /**
+     * Current value.
+     */
+    private MarkLogicNode currentValue;
+    
+    public DocumentReader(Configuration conf) {
+        super(conf);
+    }
 
-	@Override
-	public DocumentURI getCurrentKey() throws IOException, InterruptedException {
-		return currentKey;
-	}
-	
-	@Override
+    @Override
+    public DocumentURI getCurrentKey() throws IOException, InterruptedException {
+        return currentKey;
+    }
+    
+    @Override
     protected void endOfResult() {
-	    currentKey = null;
-	    currentValue = null;
+        currentKey = null;
+        currentValue = null;
     }
 
-	@Override
+    @Override
     protected boolean nextResult(ResultItem result) {
-		if (currentKey != null) {
-			currentKey.setUri(result.getDocumentURI());
-		} else {
-		    currentKey = new DocumentURI(result.getDocumentURI());
-		}
-		if (currentValue != null) {
-			currentValue.set(result);
-		} else {
-			currentValue = new MarkLogicNode(result);
-		}
-	    return true;
+        if (currentKey != null) {
+            currentKey.setUri(result.getDocumentURI());
+        } else {
+            currentKey = new DocumentURI(result.getDocumentURI());
+        }
+        if (currentValue != null) {
+            currentValue.set(result);
+        } else {
+            currentValue = new MarkLogicNode(result);
+        }
+        return true;
     }
 
-	@Override
+    @Override
     public MarkLogicNode getCurrentValue() throws IOException,
             InterruptedException {
-	    return currentValue;
+        return currentValue;
     }
 
-	@Override
+    @Override
     protected float getDefaultRatio() {
-	    return DOCUMENT_TO_FRAGMENT_RATIO;
+        return DOCUMENT_TO_FRAGMENT_RATIO;
     }
 }

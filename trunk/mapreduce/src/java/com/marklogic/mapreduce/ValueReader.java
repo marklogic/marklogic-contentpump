@@ -27,56 +27,56 @@ public class ValueReader<VALUEIN>
 extends MarkLogicRecordReader<LongWritable, VALUEIN>
 implements MarkLogicConstants {
 
-	static final float VALUE_TO_FRAGMENT_RATIO = 100; 
-	
-	public static final Log LOG =
-	    LogFactory.getLog(ValueReader.class);
-	private LongWritable key;
-	private VALUEIN value;
-	private Class<? extends Writable> valueClass;
+    static final float VALUE_TO_FRAGMENT_RATIO = 100; 
+    
+    public static final Log LOG =
+        LogFactory.getLog(ValueReader.class);
+    private LongWritable key;
+    private VALUEIN value;
+    private Class<? extends Writable> valueClass;
 
-	public ValueReader(Configuration conf) {
-		super(conf);
-		valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class, 
-				Writable.class);
-	}
+    public ValueReader(Configuration conf) {
+        super(conf);
+        valueClass = conf.getClass(INPUT_VALUE_CLASS, Text.class, 
+                Writable.class);
+    }
 
-	@Override
-	public LongWritable getCurrentKey() throws IOException, InterruptedException {
-		return key;
-	}
+    @Override
+    public LongWritable getCurrentKey() throws IOException, InterruptedException {
+        return key;
+    }
 
-	@Override
-	public VALUEIN getCurrentValue() throws IOException, InterruptedException {
-		return value;
-	}
+    @Override
+    public VALUEIN getCurrentValue() throws IOException, InterruptedException {
+        return value;
+    }
 
-	@Override
-	protected void endOfResult() {
-		key = null;
-		value = null;
-	}
+    @Override
+    protected void endOfResult() {
+        key = null;
+        value = null;
+    }
 
     @SuppressWarnings("unchecked")
     @Override
-	protected boolean nextResult(ResultItem result) {
-		if (key == null) {
-			key = new LongWritable(getCount());
-		} else {
-			key.set(getCount());
-		}
-		if (value == null) {
-			value = (VALUEIN)ReflectionUtils.newInstance(valueClass, 
-					getConf());
-		}
-		InternalUtilities.assignResultValue(valueClass, result, value);
-		
-		return true;
-	}
+    protected boolean nextResult(ResultItem result) {
+        if (key == null) {
+            key = new LongWritable(getCount());
+        } else {
+            key.set(getCount());
+        }
+        if (value == null) {
+            value = (VALUEIN)ReflectionUtils.newInstance(valueClass, 
+                    getConf());
+        }
+        InternalUtilities.assignResultValue(valueClass, result, value);
+        
+        return true;
+    }
 
-	@Override
+    @Override
     protected float getDefaultRatio() {
-	    return VALUE_TO_FRAGMENT_RATIO;
+        return VALUE_TO_FRAGMENT_RATIO;
     }
 
 }

@@ -16,48 +16,48 @@ import org.apache.hadoop.io.WritableComparable;
  * @author jchen
  */
 public class DocumentURI implements WritableComparable<DocumentURI> {
-	// TODO: revisit -- is it faster to use Text or String?
-	private String uri;
+    // TODO: revisit -- is it faster to use Text or String?
+    private String uri;
 
-	public DocumentURI() {}
-	
-	public DocumentURI(String uri) {
-		this.uri = uri;
-	}
+    public DocumentURI() {}
+    
+    public DocumentURI(String uri) {
+        this.uri = uri;
+    }
 
-	@Override
-	public void readFields(DataInput in) throws IOException {
-		uri = Text.readString(in);
-	}
+    @Override
+    public void readFields(DataInput in) throws IOException {
+        uri = Text.readString(in);
+    }
 
-	@Override
-	public void write(DataOutput out) throws IOException {
-		Text.writeString(out, uri);
-	}
+    @Override
+    public void write(DataOutput out) throws IOException {
+        Text.writeString(out, uri);
+    }
 
-	public String getUri() {
-		return uri;
-	}
-	
-	public String getUnparsedUri() {
-		return unparse(uri);
-	}
-	
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
+    public String getUri() {
+        return uri;
+    }
+    
+    public String getUnparsedUri() {
+        return unparse(uri);
+    }
+    
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 
-	@Override
-	public int compareTo(DocumentURI o) {
-		return uri.compareTo(o.getUri());
-	}
-	
-	@Override
-	public String toString() {
-		return uri;
-	}
-	
-	protected static String unparse(String s) {
+    @Override
+    public int compareTo(DocumentURI o) {
+        return uri.compareTo(o.getUri());
+    }
+    
+    @Override
+    public String toString() {
+        return uri;
+    }
+    
+    protected static String unparse(String s) {
         int len = s.length();
         StringBuilder buf = new StringBuilder(len * 2);
         for (int i = 0; i < len; i++) {

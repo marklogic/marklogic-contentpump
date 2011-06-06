@@ -34,104 +34,104 @@ import com.marklogic.mapreduce.NodePath;
  */
 @SuppressWarnings("deprecation")
 public class LinkCountInDoc {
-	public static class RefMapper 
-	extends Mapper<NodePath, MarkLogicNode, Text, IntWritable> {
-		
-		private final static IntWritable one = new IntWritable(1);
-		private Text refURI = new Text();
-		
-		public void map(NodePath key, MarkLogicNode value, Context context) 
-		throws IOException, InterruptedException {
-			Attr title = (Attr)value.get();
-			String href = title.getValue();
-			
-			refURI.set(href);
-			context.write(refURI, one);
-		}
-	}
-	
-	public static class IntSumReducer
-	extends Reducer<Text, IntWritable, NodePath, MarkLogicNode> {
-		private final static String TEMPLATE = "<ref-count>0</ref-count>";
-		private final static String ROOT_ELEMENT_NAME = "//wp:page";
-		private final static String BASE_URI_PARAM_NAME = "mapreduce.linkcount.baseuri";
-		
-		private NodePath nodePath = new NodePath();
-		private Element element;
-		private MarkLogicNode result;
-		private String baseUri;
-		
-		protected void setup(Context context) 
-		throws IOException, InterruptedException {
-			try {
-				DocumentBuilder docBuilder = 
-					DocumentBuilderFactory.newInstance().newDocumentBuilder();
-				InputStream sbis = new StringBufferInputStream(TEMPLATE);
-				element = docBuilder.parse(sbis).getDocumentElement();
-				result = new MarkLogicNode(element);
-				baseUri = context.getConfiguration().get(BASE_URI_PARAM_NAME);
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		public void reduce(Text key, Iterable<IntWritable> values, 
-				Context context
-				) throws IOException, InterruptedException {		
-			int sum = 0;
-			if (isInvalidName(key)) {
-				return;
-			}
-			for (IntWritable val : values) {
-				sum += val.get();
-			}
-			StringBuilder buf = new StringBuilder();
-			buf.append(baseUri).append(key);
-			nodePath.setDocumentUri(buf.toString());
-			nodePath.setRelativePath(ROOT_ELEMENT_NAME);
-			element.setTextContent(Integer.toString(sum));
-			context.write(nodePath, result);
-		}
-		
-		// exclude key that is invalid for a document URI
-		private boolean isInvalidName(Text key) {
-			String keyString = key.toString();
-			return keyString == null || keyString.isEmpty() || 
-					keyString.matches("( )*");
-		}
-	}
-	
-	public static void main(String[] args) throws Exception {
-		Configuration conf = new Configuration();
-		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-		if (otherArgs.length < 1) {
-			System.err.println("Usage: LinkCountInDoc configFile");
-			System.exit(2);
-		}
+    public static class RefMapper 
+    extends Mapper<NodePath, MarkLogicNode, Text, IntWritable> {
+        
+        private final static IntWritable one = new IntWritable(1);
+        private Text refURI = new Text();
+        
+        public void map(NodePath key, MarkLogicNode value, Context context) 
+        throws IOException, InterruptedException {
+            Attr title = (Attr)value.get();
+            String href = title.getValue();
+            
+            refURI.set(href);
+            context.write(refURI, one);
+        }
+    }
+    
+    public static class IntSumReducer
+    extends Reducer<Text, IntWritable, NodePath, MarkLogicNode> {
+        private final static String TEMPLATE = "<ref-count>0</ref-count>";
+        private final static String ROOT_ELEMENT_NAME = "//wp:page";
+        private final static String BASE_URI_PARAM_NAME = "mapreduce.linkcount.baseuri";
+        
+        private NodePath nodePath = new NodePath();
+        private Element element;
+        private MarkLogicNode result;
+        private String baseUri;
+        
+        protected void setup(Context context) 
+        throws IOException, InterruptedException {
+            try {
+                DocumentBuilder docBuilder = 
+                    DocumentBuilderFactory.newInstance().newDocumentBuilder();
+                InputStream sbis = new StringBufferInputStream(TEMPLATE);
+                element = docBuilder.parse(sbis).getDocumentElement();
+                result = new MarkLogicNode(element);
+                baseUri = context.getConfiguration().get(BASE_URI_PARAM_NAME);
+            } catch (ParserConfigurationException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (SAXException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+        
+        public void reduce(Text key, Iterable<IntWritable> values, 
+                Context context
+                ) throws IOException, InterruptedException {        
+            int sum = 0;
+            if (isInvalidName(key)) {
+                return;
+            }
+            for (IntWritable val : values) {
+                sum += val.get();
+            }
+            StringBuilder buf = new StringBuilder();
+            buf.append(baseUri).append(key);
+            nodePath.setDocumentUri(buf.toString());
+            nodePath.setRelativePath(ROOT_ELEMENT_NAME);
+            element.setTextContent(Integer.toString(sum));
+            context.write(nodePath, result);
+        }
+        
+        // exclude key that is invalid for a document URI
+        private boolean isInvalidName(Text key) {
+            String keyString = key.toString();
+            return keyString == null || keyString.isEmpty() || 
+                    keyString.matches("( )*");
+        }
+    }
+    
+    public static void main(String[] args) throws Exception {
+        Configuration conf = new Configuration();
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+        if (otherArgs.length < 1) {
+            System.err.println("Usage: LinkCountInDoc configFile");
+            System.exit(2);
+        }
 
-		Job job = new Job(conf);
-		job.setJarByClass(LinkCountInDoc.class);
-		job.setInputFormatClass(NodeInputFormat.class);
-		job.setMapperClass(RefMapper.class);
-		job.setMapOutputKeyClass(Text.class);
-		job.setMapOutputValueClass(IntWritable.class);
-		job.setReducerClass(IntSumReducer.class);
-		job.setOutputFormatClass(NodeOutputFormat.class);
-		job.setOutputKeyClass(NodePath.class);
-	    job.setOutputValueClass(MarkLogicNode.class);
-		
-		conf = job.getConfiguration();
-		conf.addResource(otherArgs[0]);
-	
-		System.exit(job.waitForCompletion(true) ? 0 : 1);
-	}
+        Job job = new Job(conf);
+        job.setJarByClass(LinkCountInDoc.class);
+        job.setInputFormatClass(NodeInputFormat.class);
+        job.setMapperClass(RefMapper.class);
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(IntWritable.class);
+        job.setReducerClass(IntSumReducer.class);
+        job.setOutputFormatClass(NodeOutputFormat.class);
+        job.setOutputKeyClass(NodePath.class);
+        job.setOutputValueClass(MarkLogicNode.class);
+        
+        conf = job.getConfiguration();
+        conf.addResource(otherArgs[0]);
+    
+        System.exit(job.waitForCompletion(true) ? 0 : 1);
+    }
 }
 
 
