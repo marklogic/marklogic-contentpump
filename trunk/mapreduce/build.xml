@@ -99,6 +99,10 @@
                 <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
                 <pathelement path="${jarlib}/hadoop-0.20.2-core.jar"/>
                 <pathelement path="${jarlib}/log4j-1.2.15.jar"/>
+                <pathelement path="${jarlib}/saxon9he.jar"/>
+                <pathelement path="${jarlib}/cpox.jar"/>
+                <pathelement path="${jarlib}/bliki-core-3.0.14-SNAPSHOT.jar"/>
+                <pathelement path="${jarlib}/xpp3-1.1.4c.jar"/>
         </path>
 
 	<path id="mapreduce.compile.classpath">
@@ -234,8 +238,14 @@
 		<copy todir="${mapreduce.stage.lib}"  file="${mapreduce.output.jar}"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-modeler-2.0.1.jar"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-license.txt"/>
-		<jar jarfile="${mapreduce.stage.lib}/${mapreduce.examples.jar.name}" basedir="${compiled.classes.dir}"
-			includes="com/marklogic/mapreduce/examples/*"/>
+		<jar jarfile="${mapreduce.stage.lib}/${mapreduce.examples.jar.name}" basedir="${compiled.classes.dir}">
+			 <fileset dir="${compiled.classes.dir}">
+			     <include name="com/marklogic/mapreduce/examples/*.class"/>
+				 <exclude name="com/marklogic/mapreduce/examples/LinkCount*.class"/>
+				 <exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS*.class"/>
+				 <exclude name="com/marklogic/mapreduce/examples/WikiLoader*.class"/>
+			 </fileset>
+		</jar>
 
 		<mkdir dir="${mapreduce.stage.docs}"/>
 		<copy todir="${mapreduce.stage.docs}" file="${mapreduce.javadoczip}"/>
@@ -247,13 +257,20 @@
 
 		<mkdir dir="${mapreduce.stage.src}"/>
 		<copy todir="${mapreduce.stage.src}">
-			<fileset dir="${java.source}">
-				<include name="com/marklogic/mapreduce/examples/*.java"/>
+		    <fileset dir="${java.source}">
+		        <include name="com/marklogic/mapreduce/examples/*.java"/>
+		        <exclude name="com/marklogic/mapreduce/examples/LinkCount.java"/>
+		        <exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS.java"/>
+		        <exclude name="com/marklogic/mapreduce/examples/WikiLoader.java"/>
 			</fileset>
 		</copy>
 		<mkdir dir="${mapreduce.stage.conf}"/>
 		<copy todir="${mapreduce.stage.conf}">
-		        <fileset dir="${conf.dir}"></fileset>
+		    <fileset dir="${conf.dir}">
+		        <include name="*.xml"/>
+		        <exclude name="marklogic-advanced.xml"/>
+		        <exclude name="marklogic-wiki.xml"/>
+		    </fileset>
 		</copy>
 	</target>
 
