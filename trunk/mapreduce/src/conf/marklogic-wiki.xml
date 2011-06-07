@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Used with com.marklogic.mapreduce.examples.WikiLoader.class -->
+
+<configuration>
+    <property>
+        <name>mapreduce.marklogic.output.username</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.password</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.hosts</name>
+        <value>jchen</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.port</name>
+        <value>5276</value>
+    </property>
+    <property>
+        <name>mapred.reduce.tasks</name>
+        <value>0</value>
+    </property>
+    <property>
+        <name>mapred.max.split.size</name>
+        <value>600000</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.batchsize</name>
+        <value>10</value>
+    </property>
+</configuration>
