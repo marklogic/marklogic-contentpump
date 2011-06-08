@@ -181,11 +181,15 @@ public interface MarkLogicConstants {
     static final String PATH_NAMESPACE =
         "mapreduce.marklogic.input.namespace";
     /**
+     * Not yet implemented.
+     * 
+     * <p>
      *  The config property name (<code>{@value}</code>)
      *  which, if set, specifies the query MarkLogic Server uses 
      *  to generate input splits. This property is required (and only 
      *  usable) in <code>advanced</code> mode; see the
      *  {@link #INPUT_MODE input.mode} property for details.
+     * </p>
      * <p>
      *  The split query must return a sequence of (forest id, record 
      *  count, and hostname list) triples.
@@ -238,6 +242,8 @@ public interface MarkLogicConstants {
      * input query mode. Allowable values are <code>basic</code> and
      * <code>advanced</code>. Optional. Default: <code>basic</code>.
      * 
+     * <p><em>Only basic mode is supported at this time.</em></p>
+     * 
      * <p>
      *  Basic mode enables use of the 
      *  {@link #DOCUMENT_SELECTOR input.documentselector},
@@ -258,11 +264,15 @@ public interface MarkLogicConstants {
      */
     static final String ADVANCED_MODE = "advanced";
     /**
-     * The config property name (<code>{@value}</code>)
-     * which, if set, specifies the query used to retrieve input
-     * records from MarkLogic Server. This property is only usable
-     * when <code>advanced</code> is specified in the
-     * {@link #INPUT_MODE input.mode} property.
+     * Not yet implemented.
+     * 
+     * <p>
+     *  The config property name (<code>{@value}</code>)
+     *  which, if set, specifies the query used to retrieve input
+     *  records from MarkLogic Server. This property is only usable
+     *  when <code>advanced</code> is specified in the
+     *  {@link #INPUT_MODE input.mode} property.
+     * </p>
      * 
      * <p>
      *  The value of this property must be a fully formed query,
