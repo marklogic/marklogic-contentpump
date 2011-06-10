@@ -13,7 +13,7 @@
         <value>admin</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.hosts</name>
+        <name>mapreduce.marklogic.input.host</name>
         <value>jchen</value>
     </property>
     <property>
@@ -37,7 +37,7 @@
         <value>admin</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.host</name>
+        <name>mapreduce.marklogic.output.hosts</name>
         <value>jchen</value>
     </property>
     <property>
