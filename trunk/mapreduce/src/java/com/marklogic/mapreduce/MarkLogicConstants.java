@@ -482,7 +482,7 @@ public interface MarkLogicConstants {
      */
     static final String DEFAULT_PROPERTY_OPERATION_TYPE = "SET_PROPERTY";
     /**
-     * The config property name (<code>{@value}</code>
+     * The config property name (<code>{@value}</code>)
      * which, if set, indicates type of content to be inserted when using 
      * ContentOutputFormat.  Optional.  Valid choices: XML, TEXT, BINARY.
      * Default: XML.
@@ -494,7 +494,7 @@ public interface MarkLogicConstants {
      */
     static final String DEFAULT_CONTENT_TYPE = "XML";
     /**
-     * The config property name (<code>{@value}</code>
+     * The config property name (<code>{@value}</code>)
      * which, if set, indicates batch size for output.  Optional.
      */
     static final String BATCH_SIZE = 
