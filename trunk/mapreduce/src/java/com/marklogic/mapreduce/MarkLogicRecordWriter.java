@@ -37,7 +37,7 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
      * Session to the MarkLogic server.
      */
     private Session session;
-    private int batchSize;
+    protected int batchSize;
     private int count = 0;
     private Configuration conf;
     

@@ -1,12 +1,16 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCapability;
@@ -38,9 +42,14 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     private ContentCreateOptions options;
     
     /**
-     * A map from a forestId to a ContentSource. 
+     * A map from a forest id to a ContentSource. 
      */
     private Map<String, ContentSource> forestSourceMap;
+    
+    /**
+     * A map from a forest id to a Session.
+     */
+    private Map<String, List<Content>> forestContentMap;
     
     /**
      * An array of forest ids
@@ -56,6 +65,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         forestIds = forestSourceMap.keySet().toArray(forestIds);
         
         this.outputDir = conf.get(OUTPUT_DIRECTORY);
+        
+        if (batchSize > 1) {
+            forestContentMap = new HashMap<String, List<Content>>();
+        }
         
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
         ContentPermission[] permissions = null;
@@ -102,7 +115,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         ContentSource cs = forestSourceMap.get(forestId);
         Session session = null;
         try {
-            session = cs.newSession(forestId);
             String uri = key.getUri();
             if (outputDir != null && !outputDir.isEmpty()) {
                 uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
@@ -118,17 +130,54 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             } else {
                 throw new UnsupportedOperationException(value.getClass() + 
                         " is not supported.");
-            }        
-            session.insertContent(content);
-            commitIfNecessary();
+            }
+            session = cs.newSession(forestId);
+            if (batchSize > 1) {
+                List<Content> contentList = forestContentMap.get(forestId);
+                if (contentList == null) {
+                    contentList = new ArrayList<Content>();
+                    forestContentMap.put(forestId, contentList);
+                }
+                contentList.add(content);
+                if (contentList.size() == batchSize) {
+                    Content[] contents = contentList.toArray(
+                            new Content[batchSize]);
+                    session.insertContent(contents);
+                    contentList.clear();
+                }
+            } else {
+                session.insertContent(content);
+            }
         } catch (RequestException e) {
             LOG.error(e);
             throw new IOException(e);
         } finally {
             if (session != null) {
                 session.close();
+            } 
+        }      
+    }
+    
+    @Override
+    public void close(TaskAttemptContext context) throws IOException,
+    InterruptedException {
+        for (String forestId : forestContentMap.keySet()) {
+            List<Content> contentList = forestContentMap.get(forestId);
+            if (contentList != null && !contentList.isEmpty()) {
+                Session session = forestSourceMap.get(forestId).newSession();
+                Content[] contents = contentList.toArray(
+                        new Content[contentList.size()]);
+                try {
+                    session.insertContent(contents);
+                } catch (RequestException e) {
+                    LOG.error(e);
+                    throw new IOException(e);
+                } finally {
+                    if (session != null) {
+                        session.close();
+                    } 
+                } 
             }
         }
-        
     }
 }

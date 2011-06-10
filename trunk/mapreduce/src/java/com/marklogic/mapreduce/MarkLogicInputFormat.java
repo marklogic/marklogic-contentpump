@@ -70,13 +70,11 @@ implements MarkLogicConstants {
                 jobConf.getStringCollection(PATH_NAMESPACE);
             StringBuilder buf = new StringBuilder();
             buf.append("xquery version \"1.0-ml\"; \n");
-            buf.append("import module namespace admin = ");
-            buf.append("\"http://marklogic.com/xdmp/admin\" \n");
-            buf.append(" at \"/MarkLogic/admin.xqy\"; \n");
-            buf.append("let $conf := admin:get-configuration() \n");
-            buf.append("for $forest in xdmp:database-forests(xdmp:database())\n");        
-            buf.append("let $host_id := admin:forest-get-host($conf, $forest)\n");
-            buf.append("let $host_name := admin:host-get-name($conf, $host_id)\n");
+            buf.append("declare namespace fs = ");
+            buf.append("\"http://marklogic.com/xdmp/status/forest\";\n");
+            buf.append("for $f in xdmp:database-forests(xdmp:database())\n");  
+            buf.append("let $fs := xdmp:forest-status($f)");
+            buf.append("let $host_name := xdmp:host-name(data($fs//fs:host-id))\n");
             buf.append("let $cnt := xdmp:with-namespaces((");
             if (nsCol != null) {
                 for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
@@ -89,8 +87,8 @@ implements MarkLogicConstants {
             }
             buf.append("), xdmp:estimate(cts:search(");
             buf.append(docSelector);
-            buf.append(",\n    cts:and-query(()), (), 0.0, $forest))) \n");
-            buf.append("return ($forest, $cnt, $host_name)"); 
+            buf.append(",\n    cts:and-query(()), (), 0.0, $f))) \n");
+            buf.append("return ($f, $cnt, $host_name)"); 
             splitQuery = buf.toString();
         }         
         
