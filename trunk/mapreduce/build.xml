@@ -4,7 +4,7 @@
 	<property name="mapreduce.app.name" value="mapreduce"/>
 	<property name="mapreduce.product.name" value="MarkLogic Hadoop MapReduce Connector"/>
 	<property name="mapreduce.product.name.short" value="MapReduce Connector"/>
-	<property name="version.definition.file" value="../xcc/VERSION"/>
+	<property name="version.definition.file" value="VERSION"/>
 	<loadfile property="version.number.string" srcfile="${version.definition.file}">
 		<filterchain>
 			<headfilter lines="1"/>
