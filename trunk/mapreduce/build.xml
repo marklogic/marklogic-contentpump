@@ -19,7 +19,7 @@
                 </filterchain>
         </loadfile>
 	<property name="version.number.string" value="X.X-X"/>  <!-- This is a no-op, only here to suppress a warning -->
-	<property name="mapreduce.bundle.name" value="marklogic-mapreduce-${version.number.string}"/>
+	<property name="mapreduce.bundle.name" value="MarkLogic-MapReduce-${version.number.string}"/>
 	<tstamp><format property="date-string" pattern="MMMM dd, yyyy"/></tstamp>
 
 	<!-- Static definitions of where things are relative to the root -->
