@@ -29,7 +29,7 @@ import com.marklogic.mapreduce.SslConfigOptions;
 /**
  * Read documents from MarkLogic Server using an SSL-enabled connection and 
  * write them out to HDFS.  Used with config file 
- * conf/marklogic-docin-docout.xml.
+ * conf/marklogic-docin-textout.xml.
  */
 public class ContentReader {
     public static class DocMapper 
