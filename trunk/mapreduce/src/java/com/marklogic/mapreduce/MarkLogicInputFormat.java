@@ -59,13 +59,15 @@ implements MarkLogicConstants {
         maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, 
                 DEFAULT_MAX_SPLIT_SIZE);
         splitQuery = jobConf.get(SPLIT_QUERY, "");
+        boolean advancedMode = 
+            jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
         
         // fetch data from server
         List<ForestSplit> forestSplits = null;
         Session session = null;
         ResultSequence result = null;
         
-        if (splitQuery.isEmpty()) {
+        if (!advancedMode) {
             Collection<String> nsCol = 
                 jobConf.getStringCollection(PATH_NAMESPACE);
             StringBuilder buf = new StringBuilder();
@@ -90,7 +92,12 @@ implements MarkLogicConstants {
             buf.append(",\n    cts:and-query(()), (), 0.0, $f))) \n");
             buf.append("return ($f, $cnt, $host_name)"); 
             splitQuery = buf.toString();
-        }         
+        } else {
+            if (splitQuery.isEmpty()) {
+                throw new IllegalStateException(
+                        "Split query is required but not defined.");
+            }
+        }
         
         if (LOG.isDebugEnabled()) {
             LOG.debug("Split query: " + splitQuery);
