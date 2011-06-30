@@ -238,12 +238,12 @@ public class InternalUtilities implements MarkLogicConstants {
             XSDouble doubleItem = (XSDouble)result.getItem();
             ((DoubleWritable)value).set(doubleItem.asPrimitiveDouble());
         } else if (valueClass.equals(BytesWritable.class) &&
-                result.getValueType() == ValueType.XS_BASE64_BINARY) {
+                result.getValueType() == ValueType.XS_HEX_BINARY) {
             XSHexBinary binItem = (XSHexBinary)result.getItem();
             byte[] bytes = binItem.asBinaryData();
             ((BytesWritable)value).set(bytes, 0, bytes.length);
         } else if (valueClass.equals(BytesWritable.class) &&
-                result.getValueType() == ValueType.XS_HEX_BINARY) {
+                result.getValueType() == ValueType.XS_BASE64_BINARY) {
             XSBase64Binary binItem = (XSBase64Binary)result.getItem();
             byte[] bytes = binItem.asBinaryData();
             ((BytesWritable)value).set(bytes, 0, bytes.length);
