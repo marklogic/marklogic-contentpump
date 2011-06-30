@@ -67,7 +67,7 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class implementing 
-     * SslConfigOptions which will be used if 
+     * {@link SslConfigOptions} which will be used if 
      * {@link #INPUT_USE_SSL input.ssl} is set to true.
      */
     static final String INPUT_SSL_OPTIONS_CLASS = 
@@ -192,7 +192,9 @@ public interface MarkLogicConstants {
      * </p>
      * <p>
      *  The split query must return a sequence of (forest id, record 
-     *  count, and hostname list) triples.
+     *  count, hostname) tuples. The host name and forest id identify
+     *  the forest associated with the split. The count is an estimate
+     *  of the number of key-value pairs in the split.
      * </p>
      * <p>
      *  The default split query used in <code>basic</code> input mode
@@ -225,14 +227,16 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class of the map 
-     * input keys. Optional. Default: {@link org.apache.hadoop.io.Text}.
+     * input keys for {@link KeyValueInputFormat}. Optional. 
+     * Default: {@link org.apache.hadoop.io.Text}.
      */
     static final String INPUT_KEY_CLASS = 
         "mapreduce.marklogic.input.keyclass";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class of the map 
-     * input value. Optional. Default: {@link org.apache.hadoop.io.Text}.
+     * input value for {@link KeyValueInputFormat} and {@link ValueInputFormat}. 
+     * Optional. Default: {@link org.apache.hadoop.io.Text}.
      */
     static final String INPUT_VALUE_CLASS = 
         "mapreduce.marklogic.input.valueclass";
@@ -277,9 +281,11 @@ public interface MarkLogicConstants {
      * <p>
      *  The value of this property must be a fully formed query,
      *  suitable for evaluation by <code>xdmp:eval</code>, and
-     *  must return a sequence of key-value pairs consistent with
-     *  the classes used in {@link #INPUT_KEY_CLASS input.keyclass}
-     *  and {@link #INPUT_VALUE_CLASS input.valueclass}.
+     *  must return a sequence. The items in the sequence depend
+     *  on the {@link org.apache.hadoop.mapreduce.InputFormat InputFormat}
+     *  subclass configured for the job. For details, see 
+     *  "Advanced Input Mode" in the <em>Hadoop MapReduce Connector
+     *  Developer's Guide</em>.
      * </p>
      */
     static final String INPUT_QUERY =
@@ -326,6 +332,7 @@ public interface MarkLogicConstants {
     static final String OUTPUT_HOSTS = 
         "mapreduce.marklogic.output.hosts";
     
+    /** Internal use only. */
     static final String OUTPUT_FOREST_HOST = 
         "mapreduce.marklogic.output.hostforests";   
     /**
@@ -345,7 +352,7 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class implementing 
-     * SslConfigOptions which will be used if 
+     * {@link SslConfigOptions} which will be used if 
      * {@link #OUTPUT_USE_SSL output.usessl} is set to true.
      */
     static final String OUTPUT_SSL_OPTIONS_CLASS = 
@@ -354,7 +361,8 @@ public interface MarkLogicConstants {
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the MarkLogic Server database directory
      * where output documents are created. Required if using MarkLogic
-     * Server for output with document output format.
+     * Server for output with document output format. The directory
+     * must already exist.
      */
     static final String OUTPUT_DIRECTORY = 
         "mapreduce.marklogic.output.directory";
