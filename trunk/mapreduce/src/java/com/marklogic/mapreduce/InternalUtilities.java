@@ -251,7 +251,7 @@ public class InternalUtilities implements MarkLogicConstants {
                 result.getValueType() == ValueType.NODE) {
             ((MarkLogicNode)value).set(result);
         } else {
-            throw new UnsupportedOperationException("Value class " +  
+            throw new UnsupportedOperationException("Value " +  
                     valueClass + " is unsupported for result type: " + 
                     result.getValueType());
         }

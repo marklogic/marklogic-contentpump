@@ -95,7 +95,7 @@ implements MarkLogicConstants {
         } else {
             if (splitQuery.isEmpty()) {
                 throw new IllegalStateException(
-                        "Split query is required but not defined.");
+                  "Split query is required in advanced mode but not defined.");
             }
         }
         

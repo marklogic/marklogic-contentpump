@@ -11,13 +11,13 @@
 			<striplinebreaks/>
 		</filterchain>
 	</loadfile>
-        <loadfile property="jar.version.number.string" srcfile="${version.definition.file}">
-                <filterchain>
-                        <headfilter lines="1"/>
-                        <striplinebreaks/>
-                        <replaceregex pattern="-" replace="."/>
-                </filterchain>
-        </loadfile>
+    <loadfile property="jar.version.number.string" srcfile="${version.definition.file}">
+        <filterchain>
+            <headfilter lines="1"/>
+            <striplinebreaks/>
+            <replaceregex pattern="-" replace="."/>
+        </filterchain>
+    </loadfile>
 	<property name="version.number.string" value="X.X-X"/>  <!-- This is a no-op, only here to suppress a warning -->
 	<property name="mapreduce.bundle.name" value="MarkLogic-MapReduce-${version.number.string}"/>
 	<tstamp><format property="date-string" pattern="MMMM dd, yyyy"/></tstamp>
@@ -92,22 +92,22 @@
 	<!-- ************************************************************** -->
 	<!-- Produce the XCC Jar file product -->
 
-        <path id="mapreduce.classpath">
-                <pathelement path="${xcc.jar}"/>
-                <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
-                <pathelement path="${jarlib}/commons-logging-1.0.4.jar"/>
-                <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
-                <pathelement path="${jarlib}/hadoop-0.20.2-core.jar"/>
-                <pathelement path="${jarlib}/log4j-1.2.15.jar"/>
-                <pathelement path="${jarlib}/saxon9he.jar"/>
-                <pathelement path="${jarlib}/cpox.jar"/>
-                <pathelement path="${jarlib}/bliki-core-3.0.14-SNAPSHOT.jar"/>
-                <pathelement path="${jarlib}/xpp3-1.1.4c.jar"/>
-        </path>
+    <path id="mapreduce.classpath">
+        <pathelement path="${xcc.jar}"/>
+        <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
+        <pathelement path="${jarlib}/commons-logging-1.0.4.jar"/>
+        <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
+        <pathelement path="${jarlib}/hadoop-0.20.2-core.jar"/>
+        <pathelement path="${jarlib}/log4j-1.2.15.jar"/>
+        <pathelement path="${jarlib}/saxon9he.jar"/>
+        <pathelement path="${jarlib}/cpox.jar"/>
+        <pathelement path="${jarlib}/bliki-core-3.0.14-SNAPSHOT.jar"/>
+        <pathelement path="${jarlib}/xpp3-1.1.4c.jar"/>
+    </path>
 
 	<path id="mapreduce.compile.classpath">
 		<pathelement path="${compiled.classes.dir}"/>
-                <path refid="mapreduce.classpath"/>
+        <path refid="mapreduce.classpath"/>
 	</path>
 
 	<path id="mapreduce.testcases.classpath">
@@ -139,9 +139,7 @@
 		<junit printsummary="on" showoutput="true"
 		       haltonerror="${junit.halt.on.error}" haltonfailure="${junit.halt.on.failure}">
 			<classpath refid="mapreduce.testcases.classpath"/>
-
 			<formatter type="${junit.output.format}" usefile="true"/>
-
 			<batchtest fork="yes" todir="${junit.output.dir}">
 				<fileset dir="${junit.source}" includes="**/Test*.java"/>
 			</batchtest>
@@ -238,20 +236,23 @@
 		<copy todir="${mapreduce.stage.lib}"  file="${mapreduce.output.jar}"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-modeler-2.0.1.jar"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-license.txt"/>
-		<jar jarfile="${mapreduce.stage.lib}/${mapreduce.examples.jar.name}" basedir="${compiled.classes.dir}">
-			 <fileset dir="${compiled.classes.dir}">
-			     <include name="com/marklogic/mapreduce/examples/*.class"/>
-				 <exclude name="com/marklogic/mapreduce/examples/LinkCount*.class"/>
-				 <exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS*.class"/>
-				 <exclude name="com/marklogic/mapreduce/examples/WikiLoader*.class"/>
-			 </fileset>
+		<jar jarfile="${mapreduce.stage.lib}/${mapreduce.examples.jar.name}">
+			<fileset dir="${compiled.classes.dir}" 
+				includes="com/marklogic/mapreduce/examples/*.class"
+				excludes="com/marklogic/mapreduce/examples/*HDFS*.class"/>
+			<!--fileset dir="${compiled.classes.dir}">
+				<include name="com/marklogic/mapreduce/examples/*.class"/>
+				<exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS*.class"/>
+				<exclude name="com/marklogic/mapreduce/examples/HDFS*.class"/>
+				<exclude name="com/marklogic/mapreduce/examples/LinkRecordReader.class"/>
+				<exclude name="com/marklogic/mapreduce/examples/WikiLoader*.class"/>
+			</fileset-->
 		</jar>
 
-		<mkdir dir="${mapreduce.stage.docs}"/>
-		<copy todir="${mapreduce.stage.docs}" file="${mapreduce.javadoczip}"/>
-
-		<mkdir dir="${mapreduce.stage.api.docs}"/>
-		<copy todir="${mapreduce.stage.api.docs}">
+	  <mkdir dir="${mapreduce.stage.docs}"/>
+	  <copy todir="${mapreduce.stage.docs}" file="${mapreduce.javadoczip}"/>
+            <mkdir dir="${mapreduce.stage.api.docs}"/>
+	    <copy todir="${mapreduce.stage.api.docs}">
 			<fileset dir="${javadocdir}/mapreduce"/>
 		</copy>
 
@@ -259,7 +260,6 @@
 		<copy todir="${mapreduce.stage.src}">
 		    <fileset dir="${java.source}">
 		        <include name="com/marklogic/mapreduce/examples/*.java"/>
-		        <exclude name="com/marklogic/mapreduce/examples/LinkCount.java"/>
 		        <exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS.java"/>
 		        <exclude name="com/marklogic/mapreduce/examples/WikiLoader.java"/>
 			</fileset>
@@ -268,7 +268,6 @@
 		<copy todir="${mapreduce.stage.conf}">
 		    <fileset dir="${conf.dir}">
 		        <include name="*.xml"/>
-		        <exclude name="marklogic-advanced.xml"/>
 		        <exclude name="marklogic-wiki.xml"/>
 		    </fileset>
 		</copy>
