@@ -114,30 +114,18 @@ implements MarkLogicConstants {
         length = mlSplit.getLength() * recToFragRatio;
         
         // generate the query
+        String queryText;
         long start = mlSplit.getStart() + 1;
         long end = mlSplit.getLength() == Long.MAX_VALUE ? 
                    mlSplit.getLength() : start + mlSplit.getLength() - 1;
-                  
-        String forestId = mlSplit.getForestId().toString();
-        StringBuilder buf = new StringBuilder();
-        if (advancedMode) {
-            String userQuery = conf.get(INPUT_QUERY, "");
-            buf.append("xquery version \"1.0-ml\"; \n(xdmp:eval('"); 
-            buf.append(userQuery);
-            buf.append("',  (), \n  <options xmlns=\"xdmp:eval\"> <database>");
-            buf.append(forestId);
-            buf.append("</database> \n  </options>))[");
-            buf.append(Long.toString(start));
-            buf.append(" to ");
-            buf.append(Long.toString(end));
-            buf.append("]");
-        } else {
+        if (!advancedMode) {         
+            StringBuilder buf = new StringBuilder();
             String docExpr = conf.get(DOCUMENT_SELECTOR, "fn:collection()");
             String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
             Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
             
             buf.append("xquery version \"1.0-ml\"; \n");
-            buf.append("(xdmp:eval('xdmp:with-namespaces(("); 
+            buf.append("xdmp:with-namespaces(("); 
             if (nsCol != null) {
                 for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
                     String ns = nsIt.next();
@@ -155,12 +143,16 @@ implements MarkLogicConstants {
             buf.append(Long.toString(end));
             buf.append("]");
             buf.append(subExpr);
-            buf.append("))', (), \n <options xmlns=\"xdmp:eval\"> <database>");
-            buf.append(forestId);
-            buf.append("</database> \n  </options>))");
+            buf.append("))");
+            queryText = buf.toString();
+        } else {
+            queryText = conf.get(MarkLogicConstants.INPUT_QUERY);
+            if (queryText == null) {
+                throw new IllegalStateException(
+                  "Input query is required in advanced mode but not defined.");
+            }
         }
         
-        String queryText = buf.toString();
         if (LOG.isDebugEnabled()) {
             LOG.debug(queryText);
         }
@@ -169,8 +161,12 @@ implements MarkLogicConstants {
         try {
             ContentSource cs = InternalUtilities.getInputContentSource(conf, 
                     serverUri);
-            session = cs.newSession(); 
+            session = cs.newSession("#"+mlSplit.getForestId().toString());
             AdhocQuery query = session.newAdhocQuery(queryText);
+            if (advancedMode) {
+                query.setPosition(start);
+                query.setCount(mlSplit.getLength());
+            }
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
             query.setOptions(options);

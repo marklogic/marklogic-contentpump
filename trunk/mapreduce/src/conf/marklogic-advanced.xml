@@ -18,27 +18,15 @@
     </property>
     <property>
         <name>mapreduce.marklogic.input.port</name>
-        <value>5275</value>
+        <value>5276</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.query</name>
         <value><![CDATA[
+        xquery version "1.0-ml"; 
         declare namespace wp="http://www.mediawiki.org/xml/export-0.4/";
-        declare variable $M := cts:element-attribute-value-co-occurrences(
-            xs:QName("wp:a"),
-            xs:QName("href"),
-            xs:QName("wp:a"),
-            xs:QName("title"),
-            ("proximity=0", "map", "collation=http://marklogic.com/collation/codepoint"),
-            cts:directory-query("/space/wikipedia/enwiki/", "infinity")) ;
-        for $k in map:keys($M)[
-            not(starts-with(., "#") or starts-with(., "http://") or
-                starts-with(., "File:") or starts-with(., "Image:")) ]
-        let $v := map:get($M, $k)
-        where $v != ""
-        return 
-            for $each in $v
-            return ($each, cts:frequency($each))]]></value>
+        //wp:a[@title and @href and not (fn:starts-with(@href, "#") or fn:starts-with(@href, "http://") or fn:starts-with(@href, "File:") or fn:starts-with(@href, "Image:"))]/@title
+            ]]></value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.splitquery</name>
@@ -58,14 +46,6 @@
     </property>
     <property>
         <name>mapreduce.marklogic.input.maxsplitsize</name>
-        <value>100000</value>
-    </property>
-    <property>
-        <name>mapreduce.marklogic.input.keyclass</name>
-        <value>org.apache.hadoop.io.Text</value>
-    </property>
-    <property>
-        <name>mapreduce.marklogic.input.valueclass</name>
-        <value>org.apache.hadoop.io.IntWritable</value>
+        <value>1000</value>
     </property>
 </configuration>
