@@ -12,6 +12,14 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 /**
  * MarkLogicInputFormat for Document.
  * 
+ * <p>
+ *  Use this class when using documents in a MarkLogic Database as input
+ *  in a MapReduce job. This format produces key-value pairs where the
+ *  key is the {@link DocumentURI} and the value is the {@link MarkLogicNode}
+ *  at the given URI. 
+ * </p>
+ * 
+ * @see com.marklogic.mapreduce.examples.ContentReader
  * @author jchen
  */
 public class DocumentInputFormat 

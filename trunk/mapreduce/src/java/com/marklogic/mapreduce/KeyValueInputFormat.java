@@ -12,10 +12,18 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 /**
  * <p>MarkLogicInputFormat for a value other than document or node with
- * user specified key and value type. </p>
+ * user specified key and value type.</p>
  * 
- * <p>Currently only support Text as KEYIN and VALUEIN class.</p>
+ * <p>
+ *  That is, your job may gather input data from a MarkLogic database
+ *  and produce key-value pairs with type such as {@link org.apache.hadoop.io.Text}
+ *  and {@link org.apache.hadoop.io.IntWritable} through implicit conversions
+ *  performed by the connector. For details on the supported conversions, see
+ *  "Using KeyValueInputFormat and ValueInputFormat" in the 
+ *  <em>Hadoop MapReduce Connector Developer's Guide</em>.
+ * </p>
  * 
+ * @see com.marklogic.mapreduce.examples.LinkCount
  * @author jchen
  *
  * @param <KEYIN>

@@ -30,7 +30,8 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
- * MarkLogic-based OutputFormat.
+ * MarkLogic-based OutputFormat. Use the provided subclasses, such as
+ * {@link PropertyOutputFormat} to configure your job.
  * 
  * @author jchen
  */

@@ -12,6 +12,13 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 /**
  * MarkLogicInputFormat for Node.
  * 
+ * <p>
+ *  Use this class when using XML nodes in a MarkLogic database as input
+ *  to a MapReduce job. This format produces key-value pairs where the
+ *  key is {@link NodePath} to the {@link MarkLogicNode} value.
+ * </p>
+ * 
+ * @see com.marklogic.mapreduce.examples.LinkCountInDoc
  * @author jchen
  */
 public class NodeInputFormat 
