@@ -13,6 +13,21 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 /**
  * MarkLogicOutputFormat for Document Property.
  * 
+ * <p>
+ *  Use this class to store MapReduce results as properties on documents
+ *  in a MarkLogic database. This class expects output key-value pairs
+ *  where the key is a {@link DocumentURI} and the value is a {@link MarkLogicNode}
+ *  describing the property to be added to the document at the key URI.
+ * </p>
+ * <p>
+ *  Control whether the inserted property replaces or adds to existing
+ *  document properties by setting the configuration property
+ *  <code>mapreduce.marklogic.output.propertyoptype</code>.
+ *  By default, any existing properties are replaced with the new one.
+ * </p>
+ * 
+ * @see PropertyOpType
+ * 
  * @author jchen
  */
 public class PropertyOutputFormat 

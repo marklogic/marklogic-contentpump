@@ -16,6 +16,20 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 /**
  * MarkLogicOutputFormat for Node.
  * 
+ * <p>
+ *  Use this class to store MapReduce results as XML nodes in a MarkLogic
+ *  database. Use this class with output key-value pairs where the key is
+ *  {@link NodePath} and the value is a {@link MarkLogicNode} to be 
+ *  inserted into the database relative to the node path in the key.
+ * </p>
+ * <p>
+ *  Where the node is inserted relative to the path is controlled by the
+ *  <code>mapreduce.marklogic.output.nodeoptype</code> configuration
+ *  property. You must set this property when using NodeOutputFormat.
+ * </p>
+ * 
+ * @see NodeOpType
+ * @see MarkLogicConstants#NODE_OPERATION_TYPE
  * @author jchen
  */
 public class NodeOutputFormat 

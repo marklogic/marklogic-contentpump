@@ -455,7 +455,6 @@ public interface MarkLogicConstants {
      * 
      * @see NodeOpType
      * @see NodeOutputFormat
-     * @see NodeWriter
      */
     static final String NODE_OPERATION_TYPE = 
         "mapreduce.marklogic.output.nodeoptype";

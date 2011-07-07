@@ -12,9 +12,24 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 /**
  * <p>MarkLogicInputFormat for a value other than document or node with 
- * system-generated key.</p>
+ * user specified key and connector-generated key.</p>
  * 
- * <p>Currently only support Text as VALUEIN class.</p>
+ * <p>
+ *  Use this class to get input data from a MarkLogic database and produce
+ *  key-value pairs with value types such as {@link org.apache.hadoop.io.Text}
+ *  and {@link org.apache.hadoop.io.IntWritable} through implicit conversions
+ *  performed by the connector. For details on the supported conversions, see
+ *  "Using KeyValueInputFormat and ValueInputFormat" in the 
+ *  <em>Hadoop MapReduce Connector Developer's Guide</em>.
+ * </p>
+ * <p>
+ *  The LongWritable key created with this class is not intended to be a
+ *  meaningful value. Use this class when only the content in the value
+ *  is interesting. The key is simply the number of values seen at the
+ *  time a key-value pair is generated.
+ * </p>
+ * 
+ * @see com.marklogic.mapreduce.examples.LinkCount
  * 
  * @author jchen
  *
