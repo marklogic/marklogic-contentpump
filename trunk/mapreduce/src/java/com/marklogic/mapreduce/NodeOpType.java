@@ -54,18 +54,23 @@ public enum NodeOpType {
     
     abstract public String getFunctionName();
     
-    public String getQuery(String recordString, NodePath path, 
-            String namespace) {
+    public String getQuery(String namespace) {
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
+        buf.append("declare variable $");
+        buf.append(NodeWriter.PATH_VARIABLE_NAME);
+        buf.append(" as xs:string external;\n");
+        buf.append("declare variable $");
+        buf.append(NodeWriter.NODE_VARIABLE_NAME);
+        buf.append(" as element() external;\n");
         buf.append("xdmp:with-namespaces((");
         buf.append(namespace);
         buf.append("),");
         buf.append(getFunctionName());
-        buf.append("(");
-        buf.append(path.getFullPath());
-        buf.append(",");
-        buf.append(recordString);
+        buf.append("(xdmp:unpath($");
+        buf.append(NodeWriter.PATH_VARIABLE_NAME);
+        buf.append("), $");
+        buf.append(NodeWriter.NODE_VARIABLE_NAME);
         buf.append("))");
         return buf.toString(); 
     }

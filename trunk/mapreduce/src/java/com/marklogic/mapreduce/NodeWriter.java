@@ -15,6 +15,7 @@ import org.apache.hadoop.conf.Configuration;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.types.ValueType;
 
 /**
  * MarkLogicRecordWriter to insert/replace a node to MarkLogic Server.
@@ -26,6 +27,8 @@ extends MarkLogicRecordWriter<NodePath, MarkLogicNode>
 implements MarkLogicConstants {
     public static final Log LOG =
         LogFactory.getLog(NodeWriter.class);
+    public static final String NODE_VARIABLE_NAME = "node";
+    public static final String PATH_VARIABLE_NAME = "path";
     
     private NodeOpType opType;
     private String namespace;
@@ -52,13 +55,16 @@ implements MarkLogicConstants {
     throws IOException, InterruptedException {
         String recordString = record == null ? "()" :
             record.toString();
-        String query = opType.getQuery(recordString, path, namespace);
+        String query = opType.getQuery(namespace);
         if (LOG.isDebugEnabled()) {
             LOG.info(query);
         }
         Session session = getSession();
         try {
             AdhocQuery request = session.newAdhocQuery(query);
+            request.setNewStringVariable(PATH_VARIABLE_NAME, path.getFullPath());
+            request.setNewVariable(NODE_VARIABLE_NAME, ValueType.ELEMENT, 
+                    recordString);
             session.submitRequest(request);
             commitIfNecessary();
         } catch (RequestException e) {    
