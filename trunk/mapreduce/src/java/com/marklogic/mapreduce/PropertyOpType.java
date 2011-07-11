@@ -34,20 +34,26 @@ public enum PropertyOpType {
     },
     ADD_PROPERTY {
         public String getFunctionName() {
-            return "xdmp:document-add-property";
+            return "xdmp:document-add-properties";
         }
     };
     
     abstract public String getFunctionName();
     
-    public String getQuery(DocumentURI uri, String recordString) {
+    public String getQuery() {
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
+        buf.append("declare variable $");
+        buf.append(PropertyWriter.DOCURI_VARIABLE_NAME);
+        buf.append(" as xs:string external;\n");
+        buf.append("declare variable $");
+        buf.append(PropertyWriter.NODE_VARIABLE_NAME);
+        buf.append(" as element() external;\n");
         buf.append(getFunctionName());
-        buf.append("(\n\"");
-        buf.append(uri.getUnparsedUri());
-        buf.append("\", ");
-        buf.append(recordString);
+        buf.append("($");
+        buf.append(PropertyWriter.DOCURI_VARIABLE_NAME);
+        buf.append(", $");
+        buf.append(PropertyWriter.NODE_VARIABLE_NAME);
         buf.append(")");
         return buf.toString();
     }
