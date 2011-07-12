@@ -28,6 +28,7 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.XSBoolean;
 
 /**
  * MarkLogic-based OutputFormat. Use the provided subclasses, such as
@@ -45,8 +46,15 @@ implements MarkLogicConstants, Configurable {
     static final String DELETE_DIRECTORY_TEMPLATE = 
         "xdmp:directory-delete(\"" + DIRECTORY_TEMPLATE + "\")";
     static final String CHECK_DIRECTORY_EXIST_TEMPLATE = 
-        "exists(xdmp:document-properties(\"" + DIRECTORY_TEMPLATE + 
-        "\")//prop:directory)";
+        "exists(xdmp:directory(\"" + DIRECTORY_TEMPLATE + 
+        "\", \"infinity\"))";
+    static final String DIRECTORY_CREATE_TEMPLATE = 
+        "import module namespace admin = \"http://marklogic.com/xdmp/admin\"" +
+        " at \"/MarkLogic/admin.xqy\";\n" +
+        "let $config := admin:get-configuration()\n" +
+        "return admin:database-get-directory-creation($config, " +
+        "xdmp:database())";
+    static final String MANUAL_DIRECTORY_MODE = "manual";
     
     protected Configuration conf;
     
@@ -61,52 +69,86 @@ implements MarkLogicConstants, Configurable {
         Session session = null;
         ResultSequence result = null;
         try {
+            if (!context.getOutputFormatClass().equals(
+                    ContentOutputFormat.class)) {
+                return;
+            }
+            
             String host = getHost(conf, 0);
             URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
             // try getting a connection
             ContentSource cs = InternalUtilities.getOutputContentSource(conf, 
                     serverUri);
-            session = cs.newSession();
+            session = cs.newSession();            
             
             // clear output dir if specified
             String outputDir = conf.get(OUTPUT_DIRECTORY);
-            if (outputDir != null && 
-                conf.getBoolean(OUTPUT_CLEAN_DIR, false)) {
-                // delete directory if exists
-                String queryText = DELETE_DIRECTORY_TEMPLATE.replace(
-                        DIRECTORY_TEMPLATE, outputDir);
-                AdhocQuery query = session.newAdhocQuery(queryText);
-                result = session.submitRequest(query);
-            } 
-            
-            // query forest host mapping
-            if (context.getOutputFormatClass().equals(
-                    ContentOutputFormat.class)) {
-                StringBuilder buf = new StringBuilder();
-                buf.append("declare namespace fs=\"");
-                buf.append("http://marklogic.com/xdmp/status/forest\";");
-                buf.append("for $f in xdmp:database-forests(xdmp:database())");
-                buf.append("let $fs := xdmp:forest-status($f)");
-                buf.append("return (data($fs//fs:forest-id), ");
-                buf.append("xdmp:host-name(data($fs//fs:host-id)))");
-                AdhocQuery query = session.newAdhocQuery(buf.toString());
-                result = session.submitRequest(query);
-                MapWritable forestHostMap = new MapWritable();
-                Text forest = null;
-                while (result.hasNext()) {
-                    ResultItem item = result.next();
-                    if (forest == null) {
-                        forest = new Text(item.asString());            
+            if (outputDir != null) {
+                outputDir = outputDir.endsWith("/") ? 
+                        outputDir : outputDir + "/";
+                if (conf.getBoolean(OUTPUT_CLEAN_DIR, false)) {
+                    // delete directory if exists
+                    String queryText = DELETE_DIRECTORY_TEMPLATE.replace(
+                            DIRECTORY_TEMPLATE, outputDir);
+                    AdhocQuery query = session.newAdhocQuery(queryText);
+                    result = session.submitRequest(query);
+                } else { // ensure nothing exists under output dir
+                    String queryText = CHECK_DIRECTORY_EXIST_TEMPLATE.replace(
+                            DIRECTORY_TEMPLATE, outputDir);
+                    AdhocQuery query = session.newAdhocQuery(queryText);
+                    result = session.submitRequest(query);
+                    if (result.hasNext()) {
+                        ResultItem item = result.next();
+                        if (((XSBoolean)(item.getItem())).asBoolean()) {
+                            throw new IllegalStateException("Directory " + 
+                                    outputDir + " already exists");
+                        }
                     } else {
-                        Text hostName = new Text(item.asString());
-                        forestHostMap.put(forest, hostName);
-                        forest = null;
+                        throw new IOException("Failed to query directory content.");
                     }
                 }
-                // store it into config system
-                DefaultStringifier.store(conf, 
-                        forestHostMap, OUTPUT_FOREST_HOST);
             } 
+            
+            // ensure manual directory creation 
+            String queryText = DIRECTORY_CREATE_TEMPLATE;
+            AdhocQuery query = session.newAdhocQuery(queryText);
+            result = session.submitRequest(query);
+            if (result.hasNext()) {
+                ResultItem item = result.next();
+                String dirMode = item.asString();
+                if (!dirMode.equals(MANUAL_DIRECTORY_MODE)) {
+                    throw new IllegalStateException(
+                            "Manual directory creation mode is required. " +
+                            "The current creation mode is " + dirMode + ".");
+                }
+            } else {
+                throw new IOException("Failed to query directory creation mode.");
+            }
+            
+            // query forest host mapping
+            StringBuilder buf = new StringBuilder();
+            buf.append("declare namespace fs=\"");
+            buf.append("http://marklogic.com/xdmp/status/forest\";");
+            buf.append("for $f in xdmp:database-forests(xdmp:database())");
+            buf.append("let $fs := xdmp:forest-status($f)");
+            buf.append("return (data($fs//fs:forest-id), ");
+            buf.append("xdmp:host-name(data($fs//fs:host-id)))");
+            query = session.newAdhocQuery(buf.toString());
+            result = session.submitRequest(query);
+            MapWritable forestHostMap = new MapWritable();
+            Text forest = null;
+            while (result.hasNext()) {
+                ResultItem item = result.next();
+                if (forest == null) {
+                    forest = new Text(item.asString());            
+                } else {
+                    Text hostName = new Text(item.asString());
+                    forestHostMap.put(forest, hostName);
+                    forest = null;
+                }
+            }
+            // store it into config system
+            DefaultStringifier.store(conf, forestHostMap, OUTPUT_FOREST_HOST);           
         } catch (URISyntaxException e) {
             throw new IOException(e);
         } catch (XccConfigException e) {
