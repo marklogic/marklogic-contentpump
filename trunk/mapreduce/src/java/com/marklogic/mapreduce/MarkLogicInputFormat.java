@@ -59,6 +59,11 @@ implements MarkLogicConstants {
         docSelector = jobConf.get(DOCUMENT_SELECTOR, "fn:collection()");    
         maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, 
                 DEFAULT_MAX_SPLIT_SIZE);
+        if (maxSplitSize <= 0) {
+            throw new IllegalStateException(
+                "Max split size is required to be positive. It is set to " +
+                maxSplitSize);
+        }
         splitQuery = jobConf.get(SPLIT_QUERY, "");
         boolean advancedMode = 
             jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
