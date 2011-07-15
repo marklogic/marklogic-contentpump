@@ -161,6 +161,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     @Override
     public void close(TaskAttemptContext context) throws IOException,
     InterruptedException {
+        if (forestContentMap == null) {
+            return;
+        }       
         for (String forestId : forestContentMap.keySet()) {
             List<Content> contentList = forestContentMap.get(forestId);
             if (contentList != null && !contentList.isEmpty()) {
