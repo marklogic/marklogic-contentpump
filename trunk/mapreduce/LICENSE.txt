@@ -1,0 +1,47 @@
+IMPORTANT:  READ CAREFULLY - BY DOWNLOADING, INSTALLING, COPYING, ACCESSING, OR
+USING THE PROGRAM YOU AGREE TO THE TERMS OF THIS SUPPLEMENTAL EULA. IF YOU ARE
+ACCEPTING THESE TERMS ON BEHALF OF ANOTHER PERSON OR A COMPANY OR OTHER LEGAL
+ENTITY, YOU REPRESENT AND WARRANT THAT YOU HAVE FULL AUTHORITY TO BIND THAT
+PERSON, COMPANY, OR LEGAL ENTITY TO THESE TERMS.  IF YOU DO NOT AGREE TO THESE
+TERMS AND CONDITIONS, DO NOT INSTALL, COPY, OR USE THE PROGRAM.  As used herein,
+"Program" means MarkLogic Connector for Hadoop, in object code form, including
+any "online" or electronic documentation, and updates.
+
+Selecting the "Accept" button is a confirmation of your agreement that:  
+
+ 1/ You have lawfully obtained from MarkLogic or its authorized distributors,
+    a valid and fully paid-up license to the MarkLogic Server. IF YOU DO NOT
+    HAVE A VALID LICENSE AGREEMENT FOR THE MARKLOGIC SERVER, YOU ARE NOT
+    AUTHORIZED TO INSTALL, COPY, OR OTHERWISE USE THIS PROGRAM AND YOU HAVE NO
+    RIGHTS UNDER THIS SUPPLEMENTAL EULA. 
+  
+ 2/ Use of the Program is subject to the terms and conditions of the
+    agreement under which you have licensed the MarkLogic Server ("End User
+    License Agreement" or "EULA") and the terms and conditions of this
+    Supplemental EULA.  
+ 
+ 3/ All rights not expressly granted in the EULA or this Supplemental EULA
+    are reserved by MarkLogic. The Program is protected by copyright and other
+    intellectual property laws and treaties. MarkLogic retains sole and
+    exclusive ownership of the Program and all intellectual property rights in,
+    to and/or embodied in or associated with the Program, and all copies and
+    derivative works thereof.  You acknowledge that no source code of the
+    Program will be provided to you. You shall not remove or modify any Program
+    markings or any notice of MarkLogic's or its suppliers proprietary rights.  
+    
+ 4/ REGARDLESS OF ANY WARRANTY PROVISIONS SET FORTH IN THE EULA, THE PROGRAM
+    IS PROVIDED “AS IS” AND MARKLOGIC MAKES NO WARRANTIES, EXPRESS, IMPLIED OR
+    OTHERWISE, REGARDING ITS ACCURACY, COMPLETENESS OR PERFORMANCE. 
+    5/ If you are a United States government agency or acquired the license to
+    the Program pursuant to a government contract or with government funds, then
+    as defined in FAR section 2.101, DFAR section 252.227-7014(a)(1) and DFAR
+    section 252.227-7014(a)(5) or otherwise, all Programs provided hereunder are
+    "commercial items," "commercial computer software" and/or "commercial
+    computer software documentation." Consistent with DFAR section 227.7202 and
+    FAR section 12.212, any use, modification, reproduction, release,
+    performance, display, disclosure or distribution thereof by or for the
+    United States government shall be governed solely by the terms of the EULA
+    and this Supplemental EULA and shall be prohibited except to the extent
+    expressly permitted by the terms herein. You shall ensure that each copy
+    used or possessed by or for the United States government is labeled to
+    reflect the foregoing. 
