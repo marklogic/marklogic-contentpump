@@ -60,6 +60,10 @@ implements MarkLogicConstants, Configurable {
     
     protected static String getHost(Configuration conf, int taskId) {
         String[] hosts = conf.getStrings(OUTPUT_HOSTS);
+        if (hosts == null || hosts.length == 0) {
+            throw new IllegalArgumentException(OUTPUT_HOSTS + 
+            " is not specified.");
+        }
         return hosts[taskId % hosts.length];
     }
     

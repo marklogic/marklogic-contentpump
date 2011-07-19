@@ -47,7 +47,11 @@ public class InternalUtilities implements MarkLogicConstants {
      * @throws URISyntaxException
      */
     static URI getInputServerUri(Configuration conf) throws URISyntaxException {
-        String host = conf.get(INPUT_HOST, "");
+        String host = conf.get(INPUT_HOST);
+        if (host == null) {
+            throw new IllegalArgumentException(INPUT_HOST + 
+                    " is not specified.");
+        }
         return getInputServerUri(conf, host);
     }
     
@@ -63,7 +67,11 @@ public class InternalUtilities implements MarkLogicConstants {
     throws URISyntaxException {
         String user = conf.get(INPUT_USERNAME, "");
         String password = conf.get(INPUT_PASSWORD, "");
-        String port = conf.get(INPUT_PORT, "");
+        String port = conf.get(INPUT_PORT);
+        if (port == null) {
+            throw new IllegalArgumentException(INPUT_PORT + 
+            " is not specified.");
+        }
         boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
         return getServerUri(user, password, hostName, port, useSsl);
     }
@@ -80,7 +88,11 @@ public class InternalUtilities implements MarkLogicConstants {
     throws URISyntaxException {
         String user = conf.get(OUTPUT_USERNAME, "");
         String password = conf.get(OUTPUT_PASSWORD, "");
-        String port = conf.get(OUTPUT_PORT, "");
+        String port = conf.get(OUTPUT_PORT);
+        if (port == null) {
+            throw new IllegalArgumentException(OUTPUT_PORT + 
+            " is not specified.");
+        }
         boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
         return getServerUri(user, password, hostName, port, useSsl);
     }
