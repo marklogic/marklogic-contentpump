@@ -25,6 +25,10 @@
         <value>100</value>
     </property>
     <property>
+        <name>mapreduce.marklogic.input.usessl</name>
+        <value>true</value>
+    </property>
+    <property>
         <name>mapred.reduce.tasks</name>
         <value>0</value>
     </property>
