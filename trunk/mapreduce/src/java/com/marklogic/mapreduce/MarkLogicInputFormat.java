@@ -31,7 +31,7 @@ import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XSString;
 
 /**
- * MarkLogic-based InputFormat, taking a generic key and value class. Use the
+ * MarkLogic-based InputFormat superclass, taking a generic key and value class. Use the
  * provided subclasses to configure your job, such as {@link DocumentInputFormat}.
  * 
  * @author jchen

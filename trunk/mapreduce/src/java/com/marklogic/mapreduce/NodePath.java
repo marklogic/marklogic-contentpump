@@ -11,7 +11,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
- * Node path usable as a key for a node record.
+ * Node path usable as a key for a node record. Use with
+ * {@link NodeInputFormat} and {@link NodeOutputFormat}.
  * 
  * @author jchen
  */

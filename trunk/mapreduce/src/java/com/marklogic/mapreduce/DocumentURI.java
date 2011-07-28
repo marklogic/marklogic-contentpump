@@ -11,7 +11,8 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
 /**
- * Document URI used as a key for a document record.
+ * Document URI, used as a key for a document record. Use with
+ * {@link DocumentInputFormat} and {@link ContentOutputFormat}.
  * 
  * @author jchen
  */

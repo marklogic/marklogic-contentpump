@@ -18,8 +18,9 @@ import org.apache.hadoop.util.GenericOptionsParser;
 import com.marklogic.mapreduce.ValueInputFormat;
 
 /**
- * Read link titles as text and their frequencies and write link count summary 
- * to HDFS.  Used with config file conf/marklogic-advanced.xml.
+ * Count the frequency of occurrences of link titles in documents in
+ * MarkLogic Server, and write a link count summary to HDFS. 
+ * Use with the configuration file conf/marklogic-advanced.xml.
  */
 public class LinkCount {
     public static class RefMapper 
