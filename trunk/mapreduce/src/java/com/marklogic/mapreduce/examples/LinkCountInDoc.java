@@ -28,8 +28,9 @@ import com.marklogic.mapreduce.NodeOutputFormat;
 import com.marklogic.mapreduce.NodePath;
 
 /**
- * Read link title as attribute node from MarkLogic Server and insert a child
- * node to the referenced document.  Used with config file 
+ * Count the number of occurrences of each link title in documents in
+ * MarkLogic Server, and save the link count as a child node of each
+ * referenced document. Use with the configuration file 
  * conf/marklogic-nodein-nodeout.xml.
  */
 @SuppressWarnings("deprecation")

@@ -36,7 +36,9 @@ import com.marklogic.xcc.types.XdmElement;
 import com.marklogic.xcc.types.XdmText;
 
 /**
- * A record returned by MarkLogic, used to represent an XML node.
+ * A record returned by MarkLogic, used to represent an XML node. Use with
+ * {@link NodeInputFormat} and {@link NodeOutputFormat}. May also be used
+ * with {@link KeyValueInputFormat} and {@link ValueInputFormat}.
  * 
  * @author jchen
  */

@@ -23,8 +23,8 @@ import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 
 /**
- * Load documents as Text from zip files to MarkLogicServer.  Used with config
- * file conf/marklogic-textin-docout.xml.
+ * Read zip file stored in HDFS and load their contents into MarkLogic Server.
+ * Use with the configuration file conf/marklogic-textin-docout.xml.
  *
  */
 public class ZipContentLoader {

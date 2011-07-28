@@ -21,7 +21,7 @@ import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 
 /**
- * Load documents as Text to MarkLogicServer.  Used with config file 
+ * Load documents from HDFS into MarkLogicServer.  Used with config file 
  * conf/marklogic-textin-docout.xml.
  */
 public class ContentLoader {

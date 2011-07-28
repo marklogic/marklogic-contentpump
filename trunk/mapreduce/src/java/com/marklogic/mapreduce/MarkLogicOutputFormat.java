@@ -31,7 +31,7 @@ import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.XSBoolean;
 
 /**
- * MarkLogic-based OutputFormat. Use the provided subclasses, such as
+ * MarkLogic-based OutputFormat supeclass. Use the provided subclasses, such as
  * {@link PropertyOutputFormat} to configure your job.
  * 
  * @author jchen

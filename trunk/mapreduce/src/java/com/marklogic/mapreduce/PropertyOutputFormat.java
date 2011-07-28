@@ -22,7 +22,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * <p>
  *  Control whether the inserted property replaces or adds to existing
  *  document properties by setting the configuration property
- *  <code>mapreduce.marklogic.output.propertyoptype</code>.
+ *  {@link MarkLogicConstants#DEFAULT_PROPERTY_OPERATION_TYPE output.propertyopttype}.
  *  By default, any existing properties are replaced with the new one.
  * </p>
  * 
