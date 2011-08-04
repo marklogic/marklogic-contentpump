@@ -109,8 +109,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     @Override
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
-        long hashCode = (long)key.getUri().hashCode() + Integer.MAX_VALUE;
-        int fId = (int)(hashCode % forestSourceMap.size());
+        int fId = key.getPlacementId(forestIds.length);
         String forestId = forestIds[fId];
         ContentSource cs = forestSourceMap.get(forestId);
         Session session = null;

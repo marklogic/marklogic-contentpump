@@ -6,6 +6,7 @@ package com.marklogic.mapreduce;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.math.BigInteger;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -17,7 +18,10 @@ import org.apache.hadoop.io.WritableComparable;
  * @author jchen
  */
 public class DocumentURI implements WritableComparable<DocumentURI> {
-    // TODO: revisit -- is it faster to use Text or String?
+    private static final long HASH64_STEP = 15485863;
+    private static final long HASH64_SEED = 0x39a51471f80aabf7l;
+    private static final BigInteger URI_KEY_HASH = hash64("uri()");
+    
     private String uri;
 
     public DocumentURI() {}
@@ -58,6 +62,59 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
         return uri;
     }
     
+    private static BigInteger hash64(String str) {
+        BigInteger value = BigInteger.valueOf(HASH64_SEED);
+        for (int i = 0; i < str.length(); i++) {
+            value = value.add(BigInteger.valueOf(str.codePointAt(i))).multiply(
+                    BigInteger.valueOf(HASH64_STEP));
+        }
+        byte[] valueBytes = value.toByteArray();
+        byte[] longBytes = new byte[8];
+        System.arraycopy(valueBytes, valueBytes.length - longBytes.length, 
+                longBytes, 0, longBytes.length);
+        BigInteger hash = new BigInteger(1, longBytes);
+        return hash;
+    }
+    
+    private static long rotl(BigInteger value, int shift) {
+        return value.shiftLeft(shift).xor(
+                value.shiftRight(64-shift)).longValue();
+    }
+    
+    protected BigInteger getUriKey() {       
+        BigInteger value = 
+            hash64(uri).multiply(BigInteger.valueOf(5)).add(URI_KEY_HASH);
+        byte[] valueBytes = value.toByteArray();
+        byte[] longBytes = new byte[8];
+        System.arraycopy(valueBytes, valueBytes.length - longBytes.length, 
+                longBytes, 0, longBytes.length);
+        BigInteger key = new BigInteger(1, longBytes);
+        return key;
+    }
+    
+    /**
+     * Assign a forest based on the URI key and the number of forests.  Return
+     * a zero-based index to the forest list.
+     * 
+     * @param size size 
+     * @return
+     */
+    protected int getPlacementId(int size) {
+        switch (size) {
+            case 0: 
+                throw new IllegalArgumentException("getPlacementId(size = 0)");
+            case 1: return 1;
+            default:
+                BigInteger uriKey = getUriKey();
+                long u = uriKey.longValue();
+                for (int i = 8; i <= 56; i += 8) {
+                    u += rotl(uriKey, i);
+                }
+                long v = (0xffff + size) / size;
+                return (int) ((u & 0xffff) / v);
+        }
+    }
+    
     protected static String unparse(String s) {
         int len = s.length();
         StringBuilder buf = new StringBuilder(len * 2);
@@ -81,5 +138,10 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
             }
         }
         return buf.toString();
+    }
+    
+    public static void main(String[] args) {
+        DocumentURI uri = new DocumentURI(args[0]);
+        System.out.println("id: " + uri.getPlacementId(Integer.valueOf(args[1])));
     }
 }
