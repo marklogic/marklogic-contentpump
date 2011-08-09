@@ -12,7 +12,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
@@ -139,7 +138,7 @@ implements MarkLogicConstants, Configurable {
             buf.append("xdmp:host-name(data($fs//fs:host-id)))");
             query = session.newAdhocQuery(buf.toString());
             result = session.submitRequest(query);
-            MapWritable forestHostMap = new MapWritable();
+            LinkedMapWritable forestHostMap = new LinkedMapWritable();
             Text forest = null;
             while (result.hasNext()) {
                 ResultItem item = result.next();

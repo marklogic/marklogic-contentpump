@@ -119,6 +119,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
                       outputDir + uri : outputDir + '/' + uri;
             }    
+            DocumentURI.validate(uri);
             Content content = null;
             if (value instanceof Text) {
                 content = ContentFactory.newContent(uri, 
@@ -166,7 +167,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         for (String forestId : forestContentMap.keySet()) {
             List<Content> contentList = forestContentMap.get(forestId);
             if (contentList != null && !contentList.isEmpty()) {
-                Session session = forestSourceMap.get(forestId).newSession();
+                Session session = 
+                    forestSourceMap.get(forestId).newSession(forestId);
                 Content[] contents = contentList.toArray(
                         new Content[contentList.size()]);
                 try {
