@@ -7,6 +7,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.text.Normalizer;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -81,6 +82,10 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
                 value.shiftRight(64-shift)).longValue();
     }
     
+    protected void normalize() {
+        uri = Normalizer.normalize(uri, Normalizer.Form.NFC);
+    }
+    
     protected BigInteger getUriKey() {       
         BigInteger value = 
             hash64(uri).multiply(BigInteger.valueOf(5)).add(URI_KEY_HASH);
@@ -105,6 +110,7 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
                 throw new IllegalArgumentException("getPlacementId(size = 0)");
             case 1: return 1;
             default:
+                normalize();
                 BigInteger uriKey = getUriKey();
                 long u = uriKey.longValue();
                 for (int i = 8; i <= 56; i += 8) {
@@ -138,6 +144,14 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
             }
         }
         return buf.toString();
+    }
+    
+    protected static void validate(String uri) {
+        if (uri.isEmpty() || 
+            Character.isWhitespace(uri.charAt(0)) ||
+            Character.isWhitespace(uri.charAt(uri.length() - 1))) {
+            throw new IllegalStateException("Invalid URI Format: " + uri);
+        }
     }
     
     public static void main(String[] args) {
