@@ -108,7 +108,7 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
         switch (size) {
             case 0: 
                 throw new IllegalArgumentException("getPlacementId(size = 0)");
-            case 1: return 1;
+            case 1: return 0;
             default:
                 normalize();
                 BigInteger uriKey = getUriKey();
