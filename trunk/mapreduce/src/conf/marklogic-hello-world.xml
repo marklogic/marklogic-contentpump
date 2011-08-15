@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Used with com.marklogic.mapreduce.examples.HelloWorld.class -->
+
+<configuration>
+    <property>
+        <name>mapreduce.marklogic.input.username</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.password</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.hosts</name>
+        <value>localhost</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.port</name>
+        <value>5275</value>
+    </property>
+    <property>
+    	<name>mapreduce.marklogic.input.mode</name>
+    	<value>basic</basic>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.username</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.password</name>
+        <value>admin</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.hosts</name>
+        <value>localhost</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.port</name>
+        <value>5275</value>
+    </property>
+</configuration>
