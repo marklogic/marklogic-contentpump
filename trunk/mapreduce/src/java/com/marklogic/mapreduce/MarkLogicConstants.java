@@ -181,9 +181,6 @@ public interface MarkLogicConstants {
     static final String PATH_NAMESPACE =
         "mapreduce.marklogic.input.namespace";
     /**
-     * Not yet implemented.
-     * 
-     * <p>
      *  The config property name (<code>{@value}</code>)
      *  which, if set, specifies the query MarkLogic Server uses 
      *  to generate input splits. This property is required (and only 
@@ -268,9 +265,6 @@ public interface MarkLogicConstants {
      */
     static final String ADVANCED_MODE = "advanced";
     /**
-     * Not yet implemented.
-     * 
-     * <p>
      *  The config property name (<code>{@value}</code>)
      *  which, if set, specifies the query used to retrieve input
      *  records from MarkLogic Server. This property is only usable
