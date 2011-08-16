@@ -13,16 +13,16 @@
         <value>admin</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.hosts</name>
+        <name>mapreduce.marklogic.input.host</name>
         <value>localhost</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.port</name>
-        <value>5275</value>
+        <value>9001</value>
     </property>
     <property>
     	<name>mapreduce.marklogic.input.mode</name>
-    	<value>basic</basic>
+    	<value>basic</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.username</name>
@@ -38,6 +38,10 @@
     </property>
     <property>
         <name>mapreduce.marklogic.output.port</name>
-        <value>5275</value>
+        <value>9001</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.contenttype</name>
+        <value>TEXT</value>
     </property>
 </configuration>
