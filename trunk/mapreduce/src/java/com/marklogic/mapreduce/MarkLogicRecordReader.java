@@ -15,7 +15,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.mapreduce.functions.LexiconFunction;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
@@ -119,32 +121,42 @@ implements MarkLogicConstants {
         long end = mlSplit.getLength() == Long.MAX_VALUE ? 
                    mlSplit.getLength() : start + mlSplit.getLength() - 1;
         if (!advancedMode) {         
-            StringBuilder buf = new StringBuilder();
-            String docExpr = conf.get(DOCUMENT_SELECTOR, "fn:collection()");
-            String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
-            Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
-            
-            buf.append("xquery version \"1.0-ml\"; \n");
-            buf.append("xdmp:with-namespaces(("); 
-            if (nsCol != null) {
-                for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
-                    String ns = nsIt.next();
-                    buf.append('"').append(ns).append('"');
-                    if (nsIt.hasNext()) {
-                        buf.append(',');
+            LexiconFunction function = null;
+            Class<? extends LexiconFunction> lexiconClass = 
+                conf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
+                        LexiconFunction.class);
+            Collection<String> nsCol = 
+                conf.getStringCollection(PATH_NAMESPACE);
+            if (lexiconClass != null) {
+                function = ReflectionUtils.newInstance(lexiconClass, conf);
+                queryText = function.getInputQuery(nsCol, start, end);
+            } else {
+                String docExpr = conf.get(DOCUMENT_SELECTOR, 
+                        MarkLogicInputFormat.DEFAULT_DOCUMENT_SELECTOR);
+                String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
+                StringBuilder buf = new StringBuilder();      
+                buf.append("xquery version \"1.0-ml\"; \n");
+                buf.append("xdmp:with-namespaces(("); 
+                if (nsCol != null) {
+                    for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
+                        String ns = nsIt.next();
+                        buf.append('"').append(ns).append('"');
+                        if (nsIt.hasNext()) {
+                            buf.append(',');
+                        }
                     }
                 }
+                buf.append("),fn:unordered(fn:unordered(");
+                buf.append(docExpr);
+                buf.append(")[");
+                buf.append(Long.toString(start));
+                buf.append(" to ");
+                buf.append(Long.toString(end));
+                buf.append("]");
+                buf.append(subExpr);
+                buf.append("))");
+                queryText = buf.toString();
             }
-            buf.append("),fn:unordered(fn:unordered(");
-            buf.append(docExpr);
-            buf.append(")[");
-            buf.append(Long.toString(start));
-            buf.append(" to ");
-            buf.append(Long.toString(end));
-            buf.append("]");
-            buf.append(subExpr);
-            buf.append("))");
-            queryText = buf.toString();
         } else {
             queryText = conf.get(MarkLogicConstants.INPUT_QUERY);
             if (queryText == null) {

@@ -17,7 +17,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.mapreduce.functions.LexiconFunction;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
@@ -40,7 +42,8 @@ public abstract class MarkLogicInputFormat<KEYIN, VALUEIN> extends InputFormat<K
 implements MarkLogicConstants {
     public static final Log LOG =
         LogFactory.getLog(MarkLogicInputFormat.class);
-
+    static final String DEFAULT_DOCUMENT_SELECTOR = "fn:collection()";
+    static final String DEFAULT_CTS_QUERY = "cts:and-query(())";
 
     /**
      * Get input splits.
@@ -56,7 +59,18 @@ implements MarkLogicConstants {
 
         String docSelector;
         String splitQuery;
-        docSelector = jobConf.get(DOCUMENT_SELECTOR, "fn:collection()");    
+        LexiconFunction function = null;
+        Class<? extends LexiconFunction> lexiconClass = 
+            jobConf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
+                    LexiconFunction.class);
+        if (lexiconClass != null) {
+            // ignore setting for DOCUMENT_SELECTOR
+            docSelector = DEFAULT_DOCUMENT_SELECTOR;
+            function = ReflectionUtils.newInstance(lexiconClass, jobConf);
+        } else {
+            docSelector = jobConf.get(DOCUMENT_SELECTOR, 
+                    DEFAULT_DOCUMENT_SELECTOR);
+        }
         maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, 
                 DEFAULT_MAX_SPLIT_SIZE);
         if (maxSplitSize <= 0) {
@@ -75,7 +89,8 @@ implements MarkLogicConstants {
         
         if (!advancedMode) {
             Collection<String> nsCol = 
-                jobConf.getStringCollection(PATH_NAMESPACE);
+                jobConf.getStringCollection(PATH_NAMESPACE);        
+            
             StringBuilder buf = new StringBuilder();
             buf.append("xquery version \"1.0-ml\"; \n");
             buf.append("declare namespace fs = ");
@@ -95,7 +110,13 @@ implements MarkLogicConstants {
             }
             buf.append("), xdmp:estimate(cts:search(");
             buf.append(docSelector);
-            buf.append(",\n    cts:and-query(()), (), 0.0, $f))) \n");
+            buf.append(",\n    ");
+            if (function != null) {
+                buf.append(function.getLexiconQuery());
+            } else {
+                buf.append(DEFAULT_CTS_QUERY);
+            }
+            buf.append(", (), 0.0, $f))) \n");
             buf.append("return ($f, $cnt, $host_name)"); 
             splitQuery = buf.toString();
         } else {

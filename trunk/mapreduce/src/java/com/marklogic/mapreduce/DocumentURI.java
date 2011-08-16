@@ -102,7 +102,7 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
      * a zero-based index to the forest list.
      * 
      * @param size size 
-     * @return
+     * @return index to the forest list.
      */
     protected int getPlacementId(int size) {
         switch (size) {
