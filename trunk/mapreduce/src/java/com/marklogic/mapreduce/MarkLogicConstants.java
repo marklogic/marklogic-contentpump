@@ -154,6 +154,13 @@ public interface MarkLogicConstants {
         "mapreduce.marklogic.input.subdocumentexpr";
     /**
      * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the name of the class implementing 
+     * LexiconFunction which will be used to generate input. 
+     */
+    static final String INPUT_LEXICON_FUNCTION_CLASS =
+        "mapreduce.marklogic.input.lexiconfunctionclass";
+    /**
+     * The config property name (<code>{@value}</code>)
      * which, if set, specifies a list of namespaces to use when
      * evaluating the path expression constructed from the
      * {@link #DOCUMENT_SELECTOR input.documentselector} and

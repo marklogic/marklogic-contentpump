@@ -56,6 +56,7 @@
 	<property name="mapreduce.jar.name" value="marklogic-mapreduce-${jar.version.number.string}.jar"/>
 	<property name="mapreduce.examples.jar.name" value="marklogic-${mapreduce.app.name}-examples-${jar.version.number.string}.jar"/>
 	<property name="mapreduce.output.jar" value="${java.intermediate.dir}/${mapreduce.jar.name}"/>
+	<property name="mapreduce.test.jar" value="${java.intermediate.dir}/mapreduce.test.jar"/>
 	<property name="mapreduce.javadoczip" value="${java.intermediate.dir}/${mapreduce.javadoczip.name}"/>
 	<property name="mapreduce.bundle.zip" value="${products}/${mapreduce.bundle.name}.zip"/>
 
@@ -110,12 +111,6 @@
         <path refid="mapreduce.classpath"/>
 	</path>
 
-	<path id="mapreduce.testcases.classpath">
-		<pathelement path="${compiled.classes.dir}"/>
-		<pathelement path="${junit.jar}"/>
-		<pathelement path="${test.data.dir}"/>
-	</path>
-
 	<target name="compile.mapreduce" depends="init">
 		<javac classpathref="mapreduce.compile.classpath" srcdir="${java.source}"
 			destdir="${compiled.classes.dir}" deprecation="on"
@@ -125,37 +120,9 @@
 		</javac>
 	</target>
 
-	<target name="compile.mapreduce.tests" depends="compile.mapreduce">
-		<javac classpathref="mapreduce.testcases.classpath" srcdir="${junit.source}"
-			destdir="${compiled.classes.dir}" deprecation="on"
-			debug="${compile.debug.symbols.flag}" failonerror="on"
-			source="1.6" target="1.6">
-			<compilerarg value="-Xlint"/>
-		</javac>
-	</target>
-
-	<target name="test.mapreduce" depends="compile.mapreduce.tests" unless="junit.disabled" >
-		<mkdir dir="${junit.output.dir}"/>
-		<junit printsummary="on" showoutput="true"
-		       haltonerror="${junit.halt.on.error}" haltonfailure="${junit.halt.on.failure}">
-			<classpath refid="mapreduce.testcases.classpath"/>
-			<formatter type="${junit.output.format}" usefile="true"/>
-			<batchtest fork="yes" todir="${junit.output.dir}">
-				<fileset dir="${junit.source}" includes="**/Test*.java"/>
-			</batchtest>
-		</junit>
-	</target>
-
-	<target name="check.classes">
-		<uptodate property="classes.current" targetfile="${mapreduce.output.jar}">
-			<srcfiles dir="${compiled.classes.dir}" includes="**/*.class"/>
-			<srcfiles dir="${compiled.classes.dir}" includes="**/*.properties"/>
-		</uptodate>
-	</target>
-
 	<target name="mapreduce.jar" depends="compile.mapreduce" unless="classes.current">
 		<jar jarfile="${mapreduce.output.jar}" basedir="${compiled.classes.dir}"
-			includes="com/marklogic/mapreduce/*">
+			includes="com/marklogic/mapreduce/*,com/marklogic/mapreduce/functions/*">
 			<manifest>
 				<section name="mapreduce">
 					<attribute name="Vendor" value="MarkLogic Corporation"/>
@@ -167,7 +134,19 @@
 		</jar>
 	</target>
 
-
+	<target name="mapreduce.test.jar" depends="compile.mapreduce" unless="classes.current">
+		<jar jarfile="${mapreduce.test.jar}" basedir="${compiled.classes.dir}"
+			includes="com/marklogic/mapreduce/test/*">
+			<manifest>
+				<section name="mapreduce-test">
+					<attribute name="Vendor" value="MarkLogic Corporation"/>
+					<attribute name="Description" value="Hadoop Connector for Java"/>
+					<attribute name="Build-Version" value="${version.number.string}"/>
+					<attribute name="Build-Date" value="${date-string}"/>
+				</section>
+			</manifest>
+		</jar>
+	</target>
 
 	<!-- ************************************************************** -->
 	<!-- Gen the JavaDocs -->
@@ -188,7 +167,6 @@
 		>
 			<classpath>
 				<pathelement path="${compiled.classes.dir}"/>
-				<pathelement path="${junit.jar}"/>
 				<path refid="mapreduce.classpath"/>
 			</classpath>
 			<bottom><![CDATA[
@@ -284,7 +262,7 @@
 	<!-- ************************************************************** -->
 
         <target name="mapreduce" depends="mapreduce.package"/>
-	<target name="all" depends="mapreduce"/>
+	<target name="all" depends="mapreduce,mapreduce.test.jar"/>
 
 </project>
 
