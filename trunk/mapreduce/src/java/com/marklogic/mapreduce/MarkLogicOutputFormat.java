@@ -48,6 +48,7 @@ implements MarkLogicConstants, Configurable {
         "exists(xdmp:directory(\"" + DIRECTORY_TEMPLATE + 
         "\", \"infinity\"))";
     static final String DIRECTORY_CREATE_TEMPLATE = 
+        "xquery version \"1.0-ml\"; \n" +
         "import module namespace admin = \"http://marklogic.com/xdmp/admin\"" +
         " at \"/MarkLogic/admin.xqy\";\n" +
         "let $config := admin:get-configuration()\n" +
