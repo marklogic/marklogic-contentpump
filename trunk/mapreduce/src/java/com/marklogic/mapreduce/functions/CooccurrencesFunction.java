@@ -18,7 +18,8 @@ public abstract class CooccurrencesFunction extends LexiconFunction {
     abstract void appendNamesParams(StringBuilder buf);
     
     @Override
-    public String getInputQuery(Collection<String> nsCol, long start, long end) {
+    public String getInputQuery(Collection<String> nsCol, long start, 
+            long count) {
         StringBuilder buf = new StringBuilder();      
         
         buf.append("xquery version \"1.0-ml\";\n");
@@ -40,7 +41,7 @@ public abstract class CooccurrencesFunction extends LexiconFunction {
         appendNamesParams(buf);
         // options
         buf.append("(\"skip=").append(start);
-        buf.append("\",\"truncate=").append(end).append("\"");
+        buf.append("\",\"truncate=").append(count).append("\"");
         buf.append(",\"map\"");
         String[] userOptions = getUserDefinedOptions();
         if (userOptions != null) {

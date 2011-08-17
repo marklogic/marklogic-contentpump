@@ -129,7 +129,8 @@ implements MarkLogicConstants {
                 conf.getStringCollection(PATH_NAMESPACE);
             if (lexiconClass != null) {
                 function = ReflectionUtils.newInstance(lexiconClass, conf);
-                queryText = function.getInputQuery(nsCol, start, end);
+                queryText = function.getInputQuery(nsCol, start, 
+                        mlSplit.getLength());
             } else {
                 String docExpr = conf.get(DOCUMENT_SELECTOR, 
                         MarkLogicInputFormat.DEFAULT_DOCUMENT_SELECTOR);
