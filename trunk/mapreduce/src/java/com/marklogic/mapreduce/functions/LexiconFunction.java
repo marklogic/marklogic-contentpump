@@ -26,14 +26,14 @@ public abstract class LexiconFunction {
     
     /**
      * Get the input query used by a record reader.
-     * @param nsCol 
-     * @param end 
-     * @param start 
+     * @param nsCol alias-URI pairs of namespace specs
+     * @param start start of the split
+     * @param count count of the split
      * 
      * @return input query.
      */
     public abstract String getInputQuery(Collection<String> nsCol, 
-            long start, long end);
+            long start, long count);
     
     /**
      * Get user-defined options for the lexicon function.
