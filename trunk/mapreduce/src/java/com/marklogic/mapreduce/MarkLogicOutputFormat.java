@@ -22,6 +22,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
@@ -48,7 +49,6 @@ implements MarkLogicConstants, Configurable {
         "exists(xdmp:directory(\"" + DIRECTORY_TEMPLATE + 
         "\", \"infinity\"))";
     static final String DIRECTORY_CREATE_TEMPLATE = 
-        "xquery version \"1.0-ml\"; \n" +
         "import module namespace admin = \"http://marklogic.com/xdmp/admin\"" +
         " at \"/MarkLogic/admin.xqy\";\n" +
         "let $config := admin:get-configuration()\n" +
@@ -116,6 +116,9 @@ implements MarkLogicConstants, Configurable {
             // ensure manual directory creation 
             String queryText = DIRECTORY_CREATE_TEMPLATE;
             AdhocQuery query = session.newAdhocQuery(queryText);
+            RequestOptions options = new RequestOptions();
+            options.setDefaultXQueryVersion("1.0-ml");
+            query.setOptions(options);
             result = session.submitRequest(query);
             if (result.hasNext()) {
                 ResultItem item = result.next();
@@ -137,7 +140,7 @@ implements MarkLogicConstants, Configurable {
             buf.append("let $fs := xdmp:forest-status($f)");
             buf.append("return (data($fs//fs:forest-id), ");
             buf.append("xdmp:host-name(data($fs//fs:host-id)))");
-            query = session.newAdhocQuery(buf.toString());
+            query.setQuery(buf.toString());
             result = session.submitRequest(query);
             LinkedMapWritable forestHostMap = new LinkedMapWritable();
             Text forest = null;
