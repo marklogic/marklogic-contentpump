@@ -100,7 +100,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             LOG.debug("no permissions");
         }
         
-        options = ContentCreateOptions.newXmlInstance();
+        options = new ContentCreateOptions();
         options.setCollections(conf.getStrings(OUTPUT_COLLECTION));
         options.setQuality(conf.getInt(OUTPUT_QUALITY, 0));
         options.setPermissions(permissions);
@@ -126,7 +126,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             Content content = null;
             if (value instanceof Text) {
                 content = ContentFactory.newContent(uri, 
-                        ((Text) value).toString(), options);
+                        ((Text)value).toString(), options);
             } else if (value instanceof MarkLogicNode) {
                 content = ContentFactory.newContent(uri, 
                         ((MarkLogicNode)value).get(), options);        
