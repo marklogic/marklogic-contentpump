@@ -6,19 +6,19 @@
 <configuration>
     <property>
         <name>mapreduce.marklogic.output.username</name>
-        <value>admin</value>
+        <value>username</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.password</name>
-        <value>admin</value>
+        <value>password</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.hosts</name>
-        <value>jchen</value>
+        <value>hostname</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.port</name>
-        <value>5276</value>
+        <value>port</value>
     </property>
     <property>
         <name>mapred.reduce.tasks</name>
