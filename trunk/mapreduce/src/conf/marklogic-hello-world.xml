@@ -6,19 +6,19 @@
 <configuration>
     <property>
         <name>mapreduce.marklogic.input.username</name>
-        <value>admin</value>
+        <value>username</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.password</name>
-        <value>admin</value>
+        <value>password</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.host</name>
-        <value>localhost</value>
+        <value>hostname</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.port</name>
-        <value>9001</value>
+        <value>port</value>
     </property>
     <property>
     	<name>mapreduce.marklogic.input.mode</name>
@@ -26,19 +26,19 @@
     </property>
     <property>
         <name>mapreduce.marklogic.output.username</name>
-        <value>admin</value>
+        <value>username</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.password</name>
-        <value>admin</value>
+        <value>password</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.hosts</name>
-        <value>localhost</value>
+        <value>hostname1,hostname2</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.port</name>
-        <value>9001</value>
+        <value>port</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.contenttype</name>

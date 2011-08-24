@@ -6,19 +6,19 @@
 <configuration>
     <property>
         <name>mapreduce.marklogic.input.username</name>
-        <value>admin</value>
+        <value>username</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.password</name>
-        <value>admin</value>
+        <value>password</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.host</name>
-        <value>jchen</value>
+        <value>hostname</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.port</name>
-        <value>2575</value>
+        <value>port</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.namespace</name>
