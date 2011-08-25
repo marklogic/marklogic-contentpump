@@ -63,9 +63,8 @@ public class HelloWorld {
         throws IOException, InterruptedException {
             if (key != null && value != null && value.get() != null) {
                 // grab the first word from the document text
-                Document doc = (Document)value.get();
                 firstWord.set(
-                   doc.getDocumentElement().getTextContent().split(" ", 2)[0]);
+                   value.get().getTextContent().split(" ", 2)[0]);
                 context.write(one, firstWord);
             } else {
                 LOG.error("key: " + key + ", value: " + value);
