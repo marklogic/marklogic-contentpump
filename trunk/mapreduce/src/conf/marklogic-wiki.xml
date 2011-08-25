@@ -13,7 +13,7 @@
         <value>password</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.hosts</name>
+        <name>mapreduce.marklogic.output.host</name>
         <value>hostname</value>
     </property>
     <property>

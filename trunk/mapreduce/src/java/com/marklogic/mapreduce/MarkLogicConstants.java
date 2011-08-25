@@ -330,8 +330,8 @@ public interface MarkLogicConstants {
      * output operations. Required if using MarkLogic Server for
      * output.
      */
-    static final String OUTPUT_HOSTS = 
-        "mapreduce.marklogic.output.hosts";
+    static final String OUTPUT_HOST = 
+        "mapreduce.marklogic.output.host";
     
     /** Internal use only. */
     static final String OUTPUT_FOREST_HOST = 

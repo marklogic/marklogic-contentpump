@@ -48,7 +48,7 @@ public class InternalUtilities implements MarkLogicConstants {
      */
     static URI getInputServerUri(Configuration conf) throws URISyntaxException {
         String host = conf.get(INPUT_HOST);
-        if (host == null) {
+        if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException(INPUT_HOST + 
                     " is not specified.");
         }
@@ -68,7 +68,7 @@ public class InternalUtilities implements MarkLogicConstants {
         String user = conf.get(INPUT_USERNAME, "");
         String password = conf.get(INPUT_PASSWORD, "");
         String port = conf.get(INPUT_PORT);
-        if (port == null) {
+        if (port == null || port.isEmpty()) {
             throw new IllegalArgumentException(INPUT_PORT + 
             " is not specified.");
         }
@@ -80,7 +80,6 @@ public class InternalUtilities implements MarkLogicConstants {
      * Get output server URI based on the job configuration and server host 
      * name.
      * @param conf job configuration
-     * @param hostName name of targeted output server host
      * @return server URI
      * @throws URISyntaxException
      */
@@ -274,5 +273,27 @@ public class InternalUtilities implements MarkLogicConstants {
     throws URISyntaxException, XccConfigException, IOException {
         URI serverUri = getOutputServerUri(conf, hostName);
         return getOutputContentSource(conf, serverUri);
+    }
+
+    /**
+     * Return the host from the forestHostMap based on the task id in a round
+     * robin fashion.
+     * 
+     * @param taskId
+     * @param forestHostMap
+     * @return
+     */
+    public static String getHost(int taskId,
+            LinkedMapWritable forestHostMap) {
+        int count = forestHostMap.size();
+        int position = taskId % count;
+        int i = 0;
+        for (Writable hostName : forestHostMap.values()) {
+            if (i++ == position) {
+                return hostName.toString();
+            }
+        }
+        throw new IllegalStateException("No host found while taskId = " + 
+                taskId + ", forestHostMap.size() = " + count);
     }
 }
