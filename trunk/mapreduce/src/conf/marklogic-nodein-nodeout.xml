@@ -37,8 +37,8 @@
         <value>password</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.hosts</name>
-        <value>hostname1,hostname2</value>
+        <name>mapreduce.marklogic.output.host</name>
+        <value>hostname</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.port</name>

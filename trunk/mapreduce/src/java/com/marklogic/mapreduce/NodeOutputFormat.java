@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
@@ -41,9 +42,12 @@ extends MarkLogicOutputFormat<NodePath, MarkLogicNode> {
     public RecordWriter<NodePath, MarkLogicNode> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
+        LinkedMapWritable forestHostMap = 
+            DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
+                    LinkedMapWritable.class);
         try {
             int taskId = context.getTaskAttemptID().getTaskID().getId();
-            String host = getHost(conf, taskId);
+            String host = InternalUtilities.getHost(taskId, forestHostMap);
             URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
             return new NodeWriter(serverUri, conf);
         } catch (URISyntaxException e) {

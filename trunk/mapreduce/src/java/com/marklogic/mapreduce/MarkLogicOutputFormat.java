@@ -58,32 +58,60 @@ implements MarkLogicConstants, Configurable {
     
     protected Configuration conf;
     
-    protected static String getHost(Configuration conf, int taskId) {
-        String[] hosts = conf.getStrings(OUTPUT_HOSTS);
-        if (hosts == null || hosts.length == 0) {
-            throw new IllegalArgumentException(OUTPUT_HOSTS + 
-            " is not specified.");
-        }
-        return hosts[taskId % hosts.length];
-    }
-    
     @Override
     public void checkOutputSpecs(JobContext context) throws IOException,
             InterruptedException {
         Session session = null;
         ResultSequence result = null;
         try {
-            if (!context.getOutputFormatClass().equals(
-                    ContentOutputFormat.class)) {
-                return;
-            }
+            String host = conf.get(OUTPUT_HOST);
+
+            if (host == null || host.isEmpty()) {
+                throw new IllegalStateException(OUTPUT_HOST +
+                        " is not specified.");
+            }                     
             
-            String host = getHost(conf, 0);
             URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
             // try getting a connection
             ContentSource cs = InternalUtilities.getOutputContentSource(conf, 
                     serverUri);
-            session = cs.newSession();            
+            session = cs.newSession();   
+            
+            // query forest host mapping
+            StringBuilder buf = new StringBuilder();
+            buf.append("declare namespace fs=\"");
+            buf.append("http://marklogic.com/xdmp/status/forest\";");
+            buf.append("for $f in xdmp:database-forests(xdmp:database())");
+            buf.append("let $fs := xdmp:forest-status($f)");
+            buf.append("return (data($fs//fs:forest-id), ");
+            buf.append("xdmp:host-name(data($fs//fs:host-id)))");
+            
+            AdhocQuery query = session.newAdhocQuery(buf.toString());
+            query.setQuery(buf.toString());
+            RequestOptions options = new RequestOptions();
+            options.setDefaultXQueryVersion("1.0-ml");
+            query.setOptions(options);
+            
+            result = session.submitRequest(query);
+            LinkedMapWritable forestHostMap = new LinkedMapWritable();
+            Text forest = null;
+            while (result.hasNext()) {
+                ResultItem item = result.next();
+                if (forest == null) {
+                    forest = new Text(item.asString());            
+                } else {
+                    Text hostName = new Text(item.asString());
+                    forestHostMap.put(forest, hostName);
+                    forest = null;
+                }
+            }
+            // store it into config system
+            DefaultStringifier.store(conf, forestHostMap, OUTPUT_FOREST_HOST); 
+            
+            if (!context.getOutputFormatClass().equals(
+                    ContentOutputFormat.class)) { 
+                return;
+            }
             
             // clear output dir if specified
             String outputDir = conf.get(OUTPUT_DIRECTORY);
@@ -94,12 +122,12 @@ implements MarkLogicConstants, Configurable {
                     // delete directory if exists
                     String queryText = DELETE_DIRECTORY_TEMPLATE.replace(
                             DIRECTORY_TEMPLATE, outputDir);
-                    AdhocQuery query = session.newAdhocQuery(queryText);
+                    query.setQuery(queryText);
                     result = session.submitRequest(query);
                 } else { // ensure nothing exists under output dir
                     String queryText = CHECK_DIRECTORY_EXIST_TEMPLATE.replace(
                             DIRECTORY_TEMPLATE, outputDir);
-                    AdhocQuery query = session.newAdhocQuery(queryText);
+                    query.setQuery(queryText);
                     result = session.submitRequest(query);
                     if (result.hasNext()) {
                         ResultItem item = result.next();
@@ -115,10 +143,7 @@ implements MarkLogicConstants, Configurable {
             
             // ensure manual directory creation 
             String queryText = DIRECTORY_CREATE_TEMPLATE;
-            AdhocQuery query = session.newAdhocQuery(queryText);
-            RequestOptions options = new RequestOptions();
-            options.setDefaultXQueryVersion("1.0-ml");
-            query.setOptions(options);
+            query.setQuery(queryText);
             result = session.submitRequest(query);
             if (result.hasNext()) {
                 ResultItem item = result.next();
@@ -132,30 +157,7 @@ implements MarkLogicConstants, Configurable {
                 throw new IOException("Failed to query directory creation mode.");
             }
             
-            // query forest host mapping
-            StringBuilder buf = new StringBuilder();
-            buf.append("declare namespace fs=\"");
-            buf.append("http://marklogic.com/xdmp/status/forest\";");
-            buf.append("for $f in xdmp:database-forests(xdmp:database())");
-            buf.append("let $fs := xdmp:forest-status($f)");
-            buf.append("return (data($fs//fs:forest-id), ");
-            buf.append("xdmp:host-name(data($fs//fs:host-id)))");
-            query.setQuery(buf.toString());
-            result = session.submitRequest(query);
-            LinkedMapWritable forestHostMap = new LinkedMapWritable();
-            Text forest = null;
-            while (result.hasNext()) {
-                ResultItem item = result.next();
-                if (forest == null) {
-                    forest = new Text(item.asString());            
-                } else {
-                    Text hostName = new Text(item.asString());
-                    forestHostMap.put(forest, hostName);
-                    forest = null;
-                }
-            }
-            // store it into config system
-            DefaultStringifier.store(conf, forestHostMap, OUTPUT_FOREST_HOST);           
+                      
         } catch (URISyntaxException e) {
             throw new IOException(e);
         } catch (XccConfigException e) {
