@@ -7,7 +7,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Super class for all supported co-occurrences functions.
+ * Supper class of wrapper classes for supported co-occurrences lexicon
+ * functions, such as <code>cts:element-value-co-occurrences</code>.
  * 
  * @author jchen
  */

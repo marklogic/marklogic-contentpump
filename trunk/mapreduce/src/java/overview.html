@@ -13,8 +13,8 @@
 </ul>
 
 <p>
-  For detailed information, see the <em>Hadoop MapReduce MarkLogic Connector 
-  for Hadoop Developer's Guide</em>.
+  For detailed information, see the <em>MarkLogic Connector for
+  Hadoop Developer's Guide</em>.
 </p>
 
 <h2 id="Introduction">Introduction</h2>
@@ -35,6 +35,13 @@
 <p>
   You may also use Apache Hadoop MapReduce types such as Text in
   certain circumstances. See {@link com.marklogic.mapreduce.ValueInputFormat}
+  {@link com.marklogic.mapreduce.KeyValueInputFormat}.
+</p>
+<p>
+  You may generate input data using MarkLogic Server lexicon functions
+  by subclassing one of the lexicon function wrapper classes in 
+  {@link com.marklogic.mapreduce.functions}. Use lexicon functions
+  with {@link com.marklogic.mapreduce.ValueInputFormat} and 
   {@link com.marklogic.mapreduce.KeyValueInputFormat}.
 </p>
 <p>
@@ -73,12 +80,14 @@
  <em>MarkLogic Connector for Hadoop Developer's Guide</em>.
 </p>
 
-<h3>Configuring the Input Query in Basic Mode</h3>
+<h3>Configuring the Input Query With a Path Expression</h3>
 <p>
- In basic mode, you supply components of an XQuery path expression
- which the connector uses to generate input data. To allow MarkLogic 
- Server to optimize the input query, the path expression is  
- constructed from two components: A 
+ In basic mode, you may supply components of an XQuery path expression
+ which the connector uses to generate input data. You may not use this
+ option along with a lexicon function class.
+</p>
+<p>To allow MarkLogic Server to optimize the input query, the path 
+ expression is constructed from two components: A 
  {@link com.marklogic.mapreduce.MarkLogicConstants#DOCUMENT_SELECTOR 
  document node selector} and a
  {@link com.marklogic.mapreduce.MarkLogicConstants#SUBDOCUMENT_EXPRESSION
@@ -122,7 +131,27 @@ subdocument expression: //wp:a[@href]/@title
   =&gt; The titles of all documents in the "wiki-topics" collection 
      containing hrefs
 </code></pre>
- 
+
+<h3>Configuring the Input Query with a Lexicon Function</h3>
+<p>
+ In basic mode, you may gather input data using a MarkLogicServer
+ lexicon function. This option may not be used with the XPath
+ based configuration properties described above. If both are
+ configured for a job, the lexicon function takes precedence.
+</p>
+<p>
+ To use a lexicon function for input, implement a subclass of
+ one of the lexicon wrapper functions in com.marklogic.mapreduce.functions.
+ For example, to use <code>cts:element-values</code>, implement a
+ subclass of {@link com.marklogic.mapreduce.functions.ElementValues}.
+ Override the methods corresponding to the function parameter value
+ you want to include in the call.
+</p>
+<p>
+ For details, see "Using a Lexicon to Generate Key-Value Pairs" in
+ the <em>MarkLogic Connector for Hadoop Developer's Guide</em>.
+</p>
+
 <h3>Configuring the Input Query in Advanced Mode</h3>
 <p>
  In <code>advanced</code> input mode, you must supply an 
@@ -177,6 +206,16 @@ subdocument expression: //wp:a[@href]/@title
        basic input mode with {@link com.marklogic.mapreduce.PropertyOutputFormat}.
        Results are stored in a document property. See the
       <code>marklogic-textin-propout.xml</code> config file.
+    </td>
+  </tr>
+  <tr>
+    <td>{@link com.marklogic.mapreduce.examples.LinkCountCooccurrences}</td>
+    <td>
+      Analyzes links between documents in a Wikipedia collection, using the
+      lexicon function <code>cts:element-attribute-value-co-occurrences</code>
+      and {@link com.marklogic.mapreduce.KeyValueInputFormat}. Results are
+      saved as text in HDFS. See the <code>marklogic-lexicon.xml</code>
+      config file.
     </td>
   </tr>
   <tr>

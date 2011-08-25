@@ -7,7 +7,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Super class for all supported values functions and words function.
+ * Super class for wrapper classes for supported values and words
+ * lexicon functions, such as cts:element-values.
  * 
  * @author jchen
  */
@@ -15,6 +16,11 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
 
     /**
      * Get the starting value for the function.
+     * <p>
+     *   This method corresponds to the $start parameter value of
+     *   a lexicon function. Override the method to specify a
+     *   lexicon starting position other than the default.
+     * </p>
      * 
      * @return the starting value for the function.
      */

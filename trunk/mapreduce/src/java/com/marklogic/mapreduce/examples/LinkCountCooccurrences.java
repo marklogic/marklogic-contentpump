@@ -23,7 +23,8 @@ import com.marklogic.mapreduce.functions.ElemAttrValueCooccurrences;
 
 /**
  * Count the occurrences of each link title in documents stored in MarkLogic
- * Server, then write the link count summary to HDFS. Use with the
+ * Server, using the lexicon function cts:element-attribute-co-occurrences, 
+ * then write the link count summary to HDFS. Use with the
  * configuration file conf/marklogic-lexicon.xml.
  */
 public class LinkCountCooccurrences {
