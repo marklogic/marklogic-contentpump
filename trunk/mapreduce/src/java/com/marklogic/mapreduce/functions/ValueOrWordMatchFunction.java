@@ -7,7 +7,8 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /**
- * Super class for all supported value or word match functions.
+ * Super class for wrapper classes for lexicon word and value match
+ * functions, such as cts:element-value-match or cts:field-word-match.
  * 
  * @author jchen
  */
@@ -18,7 +19,17 @@ public abstract class ValueOrWordMatchFunction extends LexiconFunction {
     abstract void appendNamesParams(StringBuilder buf);
     
     /**
-     * Get the pattern to match.
+     * Get the value for the $pattern parameter to a lexicon function call.
+     * <p>
+     *   This method corresponds to the $pattern parameter value of a 
+     *   lexicon function call. Override this function to supply a
+     *   pattern other than the default.
+     * </p>
+     * <p>
+     *   When evaluated as XQuery, the returned string must resolve to
+     *   an atomic type matching the type of the lexicon. String patterns
+     *   may include wildcard characters.
+     * </p>
      * 
      * @return the pattern to match.
      */

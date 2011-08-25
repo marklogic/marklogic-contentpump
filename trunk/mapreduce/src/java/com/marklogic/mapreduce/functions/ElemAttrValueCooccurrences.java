@@ -4,8 +4,26 @@
 package com.marklogic.mapreduce.functions;
 
 /**
- * Class to encapsulate input and generate query based on 
- * cts:element-attribute-value-co-occurrences() function.
+ * Wrapper class for the <code>cts:element-attribute-value-co-occurrences</code>
+ * lexicon function. Subclass this class to generate map input based 
+ * on a lexicon.
+ * 
+ * <p>
+ *   Use this class with {@link com.marklogic.mapreduce.KeyValueInputFormat}
+ *   or {@link com.marklogic.mapreduce.ValueInputFormat}.
+ * </p>
+ * <p>
+ *   To generate map input using the lexicon function,
+ *   create a subclass of this class and provide implementations
+ *   of the methods that correspond to the function parameters you
+ *   want to include in the call.
+ * </p>
+ * <p>
+ *   For details, see "Using a Lexicon to Generate Key-Value Pairs"
+ *   in the <em>MarkLogic Connector for Hadoop Developer's Guide</em>.
+ *   For an example, see 
+ *   {@link com.marklogic.mapreduce.examples.LinkCountCooccurrences}.
+ * </p>
  * 
  * @author jchen
  */
@@ -13,32 +31,48 @@ public abstract class ElemAttrValueCooccurrences
 extends CooccurrencesFunction {
 
     /**
-     * Get first element QName.
+     * Get the value for the $element-name-1 parameter to the
+     * lexicon function call, as a string. The returned string
+     * must evaluate to an xs:QName when evaluated as XQuery.
+     * For example: "xs:QName(\"wp:a\")".
      * 
      * @return first element QName.
      */
     public abstract String getElementName1();
     
     /**
-     * Get first attribute QName or empty sequence. The empty sequence 
-     * specifies an element lexicon. 
+     * Get the value for the $attribute-name-1 parameter to the
+     * lexicon function call, as a string. 
+     * <p>
+     *   The returned string must evaluate to an xs:QName when evaluated 
+     *   as XQuery. For example: "xs:QName(\"wp:a\")". Returning
+     *   the empty sequence ("()") specifies an element sequence.
+     * </p>
      * 
-     * @return first attribute QName.
+     * @return second attribute QName.
      */
     public String getAttributeName1() {
         return "()";
     }
     
     /**
-     * Get second element QName.
+     * Get the value for the $element-name-2 parameter to the
+     * lexicon function call, as a string. The returned string
+     * must evaluate to an xs:QName when evaluated as XQuery
+     * For example: "xs:QName(\"wp:a\")".
      * 
      * @return second element QName.
      */
     public abstract String getElementName2();
     
     /**
-     * Get second attribute QName or empty sequence. The empty sequence 
-     * specifies an element lexicon. 
+     * Get the value for the $attribute-name-2 parameter to the
+     * lexicon function call, as a string. 
+     * <p>
+     *   The returned string must evaluate to an xs:QName when evaluated as 
+     *   XQuery. For example: "xs:QName(\"wp:a\")". Returning
+     *   the empty sequence ("()") specifies an element sequence.
+     * </p>
      * 
      * @return second attribute QName.
      */
