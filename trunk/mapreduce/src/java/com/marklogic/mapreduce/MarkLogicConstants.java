@@ -326,7 +326,7 @@ public interface MarkLogicConstants {
         "mapreduce.marklogic.output.password";
     /**
      * The config property name (<code>{@value}</code>)
-     * which, if set, specifies the MarkLogic Server host(s) to use for
+     * which, if set, specifies the MarkLogic Server host to use for
      * output operations. Required if using MarkLogic Server for
      * output.
      */
