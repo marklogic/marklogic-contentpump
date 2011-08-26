@@ -8,7 +8,7 @@ import java.util.Iterator;
 
 /**
  * Super class for wrapper classes for supported values and words
- * lexicon functions, such as cts:element-values.
+ * lexicon functions, such as <code>cts:element-values</code>.
  * 
  * @author jchen
  */

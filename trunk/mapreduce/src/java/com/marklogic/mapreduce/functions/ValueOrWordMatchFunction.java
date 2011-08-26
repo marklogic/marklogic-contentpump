@@ -8,7 +8,8 @@ import java.util.Iterator;
 
 /**
  * Super class for wrapper classes for lexicon word and value match
- * functions, such as cts:element-value-match or cts:field-word-match.
+ * functions, such as <code>cts:element-value-match</code> or 
+ * <code>cts:field-word-match</code>.
  * 
  * @author jchen
  */

@@ -4,7 +4,7 @@
 package com.marklogic.mapreduce.functions;
 
 /**
- * Wrapper class for the cts:uris lexicon function.
+ * Wrapper class for the <code>cts:uris</code> lexicon function.
  * Subclass this class to generate map input based on a lexicon.
  * 
  * <p>
