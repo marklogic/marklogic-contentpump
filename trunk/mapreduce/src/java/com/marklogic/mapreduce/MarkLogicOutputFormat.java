@@ -31,8 +31,8 @@ import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.XSBoolean;
 
 /**
- * MarkLogic-based OutputFormat supeclass. Use the provided subclasses, such as
- * {@link PropertyOutputFormat} to configure your job.
+ * MarkLogic-based OutputFormat superclass. Use the provided subclasses, such
+ * as {@link PropertyOutputFormat} to configure your job.
  * 
  * @author jchen
  */
@@ -48,12 +48,14 @@ implements MarkLogicConstants, Configurable {
     static final String CHECK_DIRECTORY_EXIST_TEMPLATE = 
         "exists(xdmp:directory(\"" + DIRECTORY_TEMPLATE + 
         "\", \"infinity\"))";
-    static final String DIRECTORY_CREATE_TEMPLATE = 
-        "import module namespace admin = \"http://marklogic.com/xdmp/admin\"" +
-        " at \"/MarkLogic/admin.xqy\";\n" +
-        "let $config := admin:get-configuration()\n" +
-        "return admin:database-get-directory-creation($config, " +
-        "xdmp:database())";
+    static final String FOREST_HOST_MAP_QUERY =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "hadoop:get-forest-host-map()";
+    static final String DIRECTORY_CREATE_QUERY = 
+        "import module namespace hadoop = " + 
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "hadoop:get-directory-creation()";
     static final String MANUAL_DIRECTORY_MODE = "manual";
     
     protected Configuration conf;
@@ -77,17 +79,8 @@ implements MarkLogicConstants, Configurable {
                     serverUri);
             session = cs.newSession();   
             
-            // query forest host mapping
-            StringBuilder buf = new StringBuilder();
-            buf.append("declare namespace fs=\"");
-            buf.append("http://marklogic.com/xdmp/status/forest\";");
-            buf.append("for $f in xdmp:database-forests(xdmp:database())");
-            buf.append("let $fs := xdmp:forest-status($f)");
-            buf.append("return (data($fs//fs:forest-id), ");
-            buf.append("xdmp:host-name(data($fs//fs:host-id)))");
-            
-            AdhocQuery query = session.newAdhocQuery(buf.toString());
-            query.setQuery(buf.toString());
+            // query forest host mapping            
+            AdhocQuery query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
             query.setOptions(options);
@@ -142,8 +135,7 @@ implements MarkLogicConstants, Configurable {
             } 
             
             // ensure manual directory creation 
-            String queryText = DIRECTORY_CREATE_TEMPLATE;
-            query.setQuery(queryText);
+            query.setQuery(DIRECTORY_CREATE_QUERY);
             result = session.submitRequest(query);
             if (result.hasNext()) {
                 ResultItem item = result.next();
