@@ -28,13 +28,13 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
-import com.marklogic.xcc.types.ItemType;
 import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XSString;
 
 /**
- * MarkLogic-based InputFormat superclass, taking a generic key and value class. Use the
- * provided subclasses to configure your job, such as {@link DocumentInputFormat}.
+ * MarkLogic-based InputFormat superclass, taking a generic key and value 
+ * class. Use the provided subclasses to configure your job, such as 
+ * {@link DocumentInputFormat}.
  * 
  * @author jchen
  */
@@ -92,32 +92,41 @@ implements MarkLogicConstants {
                 jobConf.getStringCollection(PATH_NAMESPACE);        
             
             StringBuilder buf = new StringBuilder();
-            buf.append("xquery version \"1.0-ml\"; \n");
-            buf.append("declare namespace fs = ");
-            buf.append("\"http://marklogic.com/xdmp/status/forest\";\n");
-            buf.append("for $f in xdmp:database-forests(xdmp:database())\n");  
-            buf.append("let $fs := xdmp:forest-status($f)");
-            buf.append("let $host_name := xdmp:host-name(data($fs//fs:host-id))\n");
-            buf.append("let $cnt := xdmp:with-namespaces((");
+            buf.append("xquery version \"1.0-ml\";\n");
+            buf.append("import module namespace hadoop = ");
+            buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
+            buf.append("\"/MarkLogic/hadoop.xqy\";\n");
+            buf.append("hadoop:get-splits(");  
+            
             if (nsCol != null) {
+                boolean isAlias = true;
                 for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
                     String ns = nsIt.next();
-                    buf.append('"').append(ns).append('"');
-                    if (nsIt.hasNext()) {
-                        buf.append(',');
+                    if (isAlias) {
+                        buf.append("\'declare namespace ");
+                        buf.append(ns);
+                        buf.append("=\"");
+                        isAlias = false;
+                    } else {
+                        buf.append(ns);
+                        buf.append("\";");
+                        isAlias = true;
+                    }
+                    if (nsIt.hasNext() && isAlias) {
+                        buf.append('\n');
                     }
                 }
             }
-            buf.append("), xdmp:estimate(cts:search(");
+            buf.append("\', \'");
             buf.append(docSelector);
-            buf.append(",\n    ");
+            buf.append("\', \'");
             if (function != null) {
                 buf.append(function.getLexiconQuery());
             } else {
                 buf.append(DEFAULT_CTS_QUERY);
             }
-            buf.append(", (), 0.0, $f))) \n");
-            buf.append("return ($f, $cnt, $host_name)"); 
+            buf.append("\')");
+            
             splitQuery = buf.toString();
         } else {
             if (splitQuery.isEmpty()) {
@@ -146,18 +155,13 @@ implements MarkLogicConstants {
                 }
                 int index = count % 3;
                 if (index == 0) {
-                    assert item.getItemType() == ItemType.XS_INTEGER;
                     ForestSplit split = new ForestSplit();
                     split.forestId = ((XSInteger)item.getItem()).asBigInteger();
                     forestSplits.add(split);
                 } else if (index == 1) {
-                    assert item.getItemType() == ItemType.XS_INTEGER;
-                    assert forestSplits.size() > 0;
                     forestSplits.get(forestSplits.size() - 1).recordCount = 
                         ((XSInteger)item.getItem()).asLong();
                 } else if (index == 2) {
-                    assert item.getItemType() == ItemType.XS_STRING;
-                    assert forestSplits.size() > 0;
                     forestSplits.get(forestSplits.size() - 1).hostName = 
                         ((XSString)item.getItem()).asString();
                 }
