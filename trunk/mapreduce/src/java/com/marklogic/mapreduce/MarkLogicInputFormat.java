@@ -98,7 +98,7 @@ implements MarkLogicConstants {
             buf.append("\"/MarkLogic/hadoop.xqy\";\n");
             buf.append("hadoop:get-splits(");  
             
-            if (nsCol != null) {
+            if (nsCol != null && !nsCol.isEmpty()) {
                 boolean isAlias = true;
                 for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
                     String ns = nsIt.next();
@@ -116,8 +116,11 @@ implements MarkLogicConstants {
                         buf.append('\n');
                     }
                 }
+                buf.append("\', \'");
+            } else {
+                buf.append("'', \'");
             }
-            buf.append("\', \'");
+            
             buf.append(docSelector);
             buf.append("\', \'");
             if (function != null) {
