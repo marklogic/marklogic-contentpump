@@ -80,7 +80,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             int i = 0;
             while (i + 1 < perms.length) {
                 String roleName = perms[i++];
-                String perm = perms[i];
+                String perm = perms[i].trim();
                 ContentCapability capability = null;
                 if (perm.equalsIgnoreCase(ContentCapability.READ.toString())) {
                     capability = ContentCapability.READ;
