@@ -74,9 +74,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
-        ContentPermission[] permissions = null;
+        List<ContentPermission> permissions = null;
         if (perms != null && perms.length > 0) {
-            permissions = new ContentPermission[perms.length / 2];
             int i = 0;
             while (i + 1 < perms.length) {
                 String roleName = perms[i++];
@@ -93,7 +92,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 } else {
                     LOG.error("Illegal permission: " + perm);
                 }
-                permissions[i/2] = new ContentPermission(capability, roleName);
+                if (capability != null) {
+                    if (permissions == null) {
+                        permissions = new ArrayList<ContentPermission>();
+                    }
+                    permissions.add(new ContentPermission(capability, roleName));
+                }
                 i++;
             }
         } else {
@@ -103,7 +107,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         options = new ContentCreateOptions();
         options.setCollections(conf.getStrings(OUTPUT_COLLECTION));
         options.setQuality(conf.getInt(OUTPUT_QUALITY, 0));
-        options.setPermissions(permissions);
+        if (permissions != null) {
+            options.setPermissions(permissions.toArray(new ContentPermission[permissions.size()]));
+        } 
         String contentTypeStr = conf.get(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
         ContentType contentType = ContentType.valueOf(contentTypeStr);
         options.setFormat(contentType.getDocumentFormat());
