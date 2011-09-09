@@ -82,7 +82,7 @@ public class MarkLogicNode implements Writable {
     }
     
     public void set(ResultItem item) {
-        ItemType type =    item.getItemType();
+        ItemType type = item.getItemType();
         DocumentBuilder docBuilder = builderLocal.get();
         try {
             if (type == ItemType.BINARY) {

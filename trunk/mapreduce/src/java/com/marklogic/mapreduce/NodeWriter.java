@@ -56,8 +56,9 @@ implements MarkLogicConstants {
         String recordString = record == null ? "()" :
             record.toString();
         String query = opType.getQuery(namespace);
+ 
         if (LOG.isDebugEnabled()) {
-            LOG.info(query);
+            LOG.debug(query);
         }
         Session session = getSession();
         try {

@@ -43,11 +43,13 @@ public class LinkCountInDoc {
         
         public void map(NodePath key, MarkLogicNode value, Context context) 
         throws IOException, InterruptedException {
-            Attr title = (Attr)value.get();
-            String href = title.getValue();
+            if (value != null && value.get() != null) {
+                Attr title = (Attr)value.get();
+                String href = title.getValue();
             
-            refURI.set(href);
-            context.write(refURI, one);
+                refURI.set(href);
+                context.write(refURI, one);
+            } 
         }
     }
     
