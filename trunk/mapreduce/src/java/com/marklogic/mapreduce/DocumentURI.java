@@ -136,7 +136,7 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
                         buf.append("&amp;");
                         break;
                     default:
-                        buf.append(cp);
+                        buf.append(s.charAt(i));
                 }
             } else {
                 buf.append("&#x");
