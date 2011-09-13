@@ -49,7 +49,7 @@
         <value>INSERT_CHILD</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.namespace</name>
+        <name>mapreduce.marklogic.output.node.namespace</name>
         <value>wp,http://www.mediawiki.org/xml/export-0.4/</value>
     </property>
     <property>

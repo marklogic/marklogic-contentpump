@@ -459,12 +459,23 @@ public interface MarkLogicConstants {
      */
     static final String NODE_OPERATION_TYPE = 
         "mapreduce.marklogic.output.nodeoptype";
+    
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set to true, specifies to create properties
+     * even when a document does not exist on that URI.
+     */
+    static final String OUTPUT_PROPERTY_ALWAYS_CREATE =
+        "mapreduce.marklogic.output.property.alwayscreate";
+    
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates the namespace used for output.
+     * This is used only in NodeOutputFormat, and is used for 
+     * resolving element names in the node path.
      */
     static final String OUTPUT_NAMESPACE = 
-        "mapreduce.marklogic.output.namespace";
+        "mapreduce.marklogic.output.node.namespace";
     
     /** 
      * The default maximum split size for input splits, used if
