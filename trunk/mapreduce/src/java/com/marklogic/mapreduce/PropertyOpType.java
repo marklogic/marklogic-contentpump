@@ -1,5 +1,7 @@
 package com.marklogic.mapreduce;
 
+import org.apache.hadoop.conf.Configuration;
+
 /**
  * Type of supported property operations.
  * 
@@ -40,7 +42,10 @@ public enum PropertyOpType {
     
     abstract public String getFunctionName();
     
-    public String getQuery() {
+    public String getQuery(Configuration conf) {
+        boolean alwaysCreate = conf.getBoolean(
+                MarkLogicConstants.OUTPUT_PROPERTY_ALWAYS_CREATE, false);
+        
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
         buf.append("declare variable $");
@@ -49,12 +54,22 @@ public enum PropertyOpType {
         buf.append("declare variable $");
         buf.append(PropertyWriter.NODE_VARIABLE_NAME);
         buf.append(" as element() external;\n");
+        if (!alwaysCreate) {
+            buf.append("let $exist := fn:exists(fn:doc($");
+            buf.append(PropertyWriter.DOCURI_VARIABLE_NAME);
+            buf.append("))\nreturn if ($exist) then \n");
+        }
         buf.append(getFunctionName());
         buf.append("($");
         buf.append(PropertyWriter.DOCURI_VARIABLE_NAME);
         buf.append(", $");
         buf.append(PropertyWriter.NODE_VARIABLE_NAME);
-        buf.append(")");
+        if (!alwaysCreate) {
+            buf.append(") else ()");
+        } else {
+            buf.append(")");
+        }
+        
         return buf.toString();
     }
 }

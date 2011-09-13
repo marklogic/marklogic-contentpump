@@ -26,24 +26,24 @@ implements MarkLogicConstants {
     public static final String DOCURI_VARIABLE_NAME = "uri";
     public static final String NODE_VARIABLE_NAME = "node";
     
-    private PropertyOpType opType;
+    private String query;
     
     public PropertyWriter(URI serverUri, Configuration conf) {
         super(serverUri, conf);
         String propOpType = conf.get(PROPERTY_OPERATION_TYPE, 
                 DEFAULT_PROPERTY_OPERATION_TYPE);
-        opType = PropertyOpType.valueOf(propOpType);
+        PropertyOpType opType = PropertyOpType.valueOf(propOpType);
+        query = opType.getQuery(conf);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(query);
+        }
     }
 
     @Override
     public void write(DocumentURI uri, MarkLogicNode record)
             throws IOException, InterruptedException {
-        // construct query
+        // initialize recordString
         String recordString = record == null ? "()" : record.toString();
-        String query = opType.getQuery();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(query);
-        }
 
         // execute query
         Session session = getSession();

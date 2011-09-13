@@ -259,7 +259,9 @@ public class InternalUtilities implements MarkLogicConstants {
             byte[] bytes = binItem.asBinaryData();
             ((BytesWritable)value).set(bytes, 0, bytes.length);
         } else if (valueClass.equals(MarkLogicNode.class) &&
-                result.getValueType() == ValueType.NODE) {
+                (result.getValueType() == ValueType.NODE ||
+                 result.getValueType() == ValueType.ELEMENT ||
+                 result.getValueType() == ValueType.DOCUMENT)) {
             ((MarkLogicNode)value).set(result);
         } else {
             throw new UnsupportedOperationException("Value " +  
