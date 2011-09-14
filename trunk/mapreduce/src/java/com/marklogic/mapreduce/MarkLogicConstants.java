@@ -357,7 +357,7 @@ public interface MarkLogicConstants {
      * {@link #OUTPUT_USE_SSL output.usessl} is set to true.
      */
     static final String OUTPUT_SSL_OPTIONS_CLASS = 
-        "mapreduce.marklogic.input.ssloptionsclass"; 
+        "mapreduce.marklogic.output.ssloptionsclass"; 
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the MarkLogic Server database directory
@@ -366,7 +366,7 @@ public interface MarkLogicConstants {
      * must already exist.
      */
     static final String OUTPUT_DIRECTORY = 
-        "mapreduce.marklogic.output.directory";
+        "mapreduce.marklogic.output.content.directory";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a comma-separated list of collections
@@ -384,7 +384,7 @@ public interface MarkLogicConstants {
      * </pre>
      */
     static final String OUTPUT_COLLECTION =
-        "mapreduce.marklogic.output.collection";
+        "mapreduce.marklogic.output.content.collection";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a comma-separated list role-capability
@@ -416,7 +416,7 @@ public interface MarkLogicConstants {
      *  </p>
      */
     static final String OUTPUT_PERMISSION = 
-        "mapreduce.marklogic.output.permission";
+        "mapreduce.marklogic.output.content.permission";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the document quality for created
@@ -432,7 +432,7 @@ public interface MarkLogicConstants {
      * </p>
      */
     static final String OUTPUT_QUALITY = 
-        "mapreduce.marklogic.output.quality";
+        "mapreduce.marklogic.output.content.quality";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates whether or not to remove the output
@@ -446,7 +446,7 @@ public interface MarkLogicConstants {
      * </p>
      */
     static final String OUTPUT_CLEAN_DIR = 
-        "mapreduce.marklogic.output.cleandir";
+        "mapreduce.marklogic.output.content.cleandir";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates what node operation to perform
@@ -458,7 +458,7 @@ public interface MarkLogicConstants {
      * @see NodeOutputFormat
      */
     static final String NODE_OPERATION_TYPE = 
-        "mapreduce.marklogic.output.nodeoptype";
+        "mapreduce.marklogic.output.node.optype";
     
     /**
      * The config property name (<code>{@value}</code>)
@@ -495,7 +495,7 @@ public interface MarkLogicConstants {
      * @see PropertyWriter
      */
     static final String PROPERTY_OPERATION_TYPE = 
-        "mapreduce.marklogic.output.propertyoptype";
+        "mapreduce.marklogic.output.property.optype";
     /**
      * Default property operation type.
      */
@@ -507,7 +507,7 @@ public interface MarkLogicConstants {
      * Default: XML.
      */
     static final String CONTENT_TYPE = 
-        "mapreduce.marklogic.output.contenttype";
+        "mapreduce.marklogic.output.content.type";
     /**
      * Default content type.
      */
