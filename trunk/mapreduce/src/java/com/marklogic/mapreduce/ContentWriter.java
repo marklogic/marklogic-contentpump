@@ -79,6 +79,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             int i = 0;
             while (i + 1 < perms.length) {
                 String roleName = perms[i++];
+                if (roleName == null || roleName.isEmpty()) {
+                    LOG.error("Illegal role name: " + roleName);
+                    continue;
+                }
                 String perm = perms[i].trim();
                 ContentCapability capability = null;
                 if (perm.equalsIgnoreCase(ContentCapability.READ.toString())) {
@@ -105,7 +109,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         
         options = new ContentCreateOptions();
-        options.setCollections(conf.getStrings(OUTPUT_COLLECTION));
+        String[] collections = conf.getStrings(OUTPUT_COLLECTION);
+        if (collections != null) {
+            for (int i = 0; i < collections.length; i++) {
+                collections[i] = collections[i].trim();
+                LOG.debug("Collection: " + collections[i]);
+            }
+            options.setCollections(collections);
+        }
+        
         options.setQuality(conf.getInt(OUTPUT_QUALITY, 0));
         if (permissions != null) {
             options.setPermissions(permissions.toArray(new ContentPermission[permissions.size()]));
