@@ -23,6 +23,7 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.DocumentInputFormat;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.SslConfigOptions;
 
@@ -67,7 +68,7 @@ public class ContentReader {
 
         conf = job.getConfiguration();
         conf.addResource(otherArgs[0]);
-        conf.setClass("mapreduce.marklogic.input.ssloptionsclass",  
+        conf.setClass(MarkLogicConstants.INPUT_SSL_OPTIONS_CLASS,  
                 SslOptions.class, SslConfigOptions.class);
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);

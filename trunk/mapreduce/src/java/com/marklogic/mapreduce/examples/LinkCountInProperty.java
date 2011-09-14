@@ -21,6 +21,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.PropertyOutputFormat;
 import com.marklogic.mapreduce.ValueInputFormat;
@@ -120,7 +121,7 @@ public class LinkCountInProperty {
         
         conf = job.getConfiguration();
         conf.addResource(otherArgs[0]);
-        conf.setClass("mapreduce.marklogic.input.valueClass", Text.class, 
+        conf.setClass(MarkLogicConstants.INPUT_VALUE_CLASS, Text.class, 
                 Writable.class);
     
         System.exit(job.waitForCompletion(true) ? 0 : 1);

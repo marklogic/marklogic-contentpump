@@ -41,7 +41,7 @@
         <value>port</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.contenttype</name>
+        <name>mapreduce.marklogic.output.content.type</name>
         <value>TEXT</value>
     </property>
 </configuration>

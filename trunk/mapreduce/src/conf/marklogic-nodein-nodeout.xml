@@ -45,7 +45,7 @@
         <value>port</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.nodeoptype</name>
+        <name>mapreduce.marklogic.output.node.optype</name>
         <value>INSERT_CHILD</value>
     </property>
     <property>

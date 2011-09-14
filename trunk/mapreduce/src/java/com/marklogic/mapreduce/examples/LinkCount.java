@@ -15,6 +15,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
+import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.ValueInputFormat;
 
 /**
@@ -74,7 +75,7 @@ public class LinkCount {
 
         conf = job.getConfiguration();
         conf.addResource(otherArgs[0]);
-        conf.setClass("mapreduce.marklogic.input.valueClass", Text.class, 
+        conf.setClass(MarkLogicConstants.INPUT_VALUE_CLASS, Text.class, 
                 Writable.class);
         
         System.exit(job.waitForCompletion(true) ? 0 : 1);
