@@ -63,6 +63,8 @@ implements MarkLogicConstants, Configurable {
     @Override
     public void checkOutputSpecs(JobContext context) throws IOException,
             InterruptedException {
+        InternalUtilities.checkVersion();
+        
         Session session = null;
         ResultSequence result = null;
         try {

@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
@@ -19,6 +21,7 @@ import org.apache.hadoop.io.VIntWritable;
 import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.hadoop.util.VersionInfo;
 
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.ContentSourceFactory;
@@ -39,7 +42,9 @@ import com.marklogic.xcc.types.XSInteger;
  * @author jchen
  */
 public class InternalUtilities implements MarkLogicConstants {
-
+    public static final Log LOG =
+        LogFactory.getLog(MarkLogicConstants.class);
+    
     /**
      * Get input server URI based on the job configuration.
      * @param conf job configuration
@@ -261,7 +266,8 @@ public class InternalUtilities implements MarkLogicConstants {
         } else if (valueClass.equals(MarkLogicNode.class) &&
                 (result.getValueType() == ValueType.NODE ||
                  result.getValueType() == ValueType.ELEMENT ||
-                 result.getValueType() == ValueType.DOCUMENT)) {
+                 result.getValueType() == ValueType.DOCUMENT ||
+                 result.getValueType() == ValueType.ATTRIBUTE)) {
             ((MarkLogicNode)value).set(result);
         } else {
             throw new UnsupportedOperationException("Value " +  
@@ -297,5 +303,21 @@ public class InternalUtilities implements MarkLogicConstants {
         }
         throw new IllegalStateException("No host found while taskId = " + 
                 taskId + ", forestHostMap.size() = " + count);
+    }
+    
+    /**
+     * Check against unsupported versions.
+     */
+    public static void checkVersion() {
+        // check version
+        String version = VersionInfo.getVersion();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("version: " + VersionInfo.getVersion());
+        }
+        if (version.startsWith("0.20.203") ||
+            version.startsWith("0.20.204")) {
+            throw new UnsupportedOperationException(
+                    "Hadoop version " + version + " is not supported.");
+        }
     }
 }

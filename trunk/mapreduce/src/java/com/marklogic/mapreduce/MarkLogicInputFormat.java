@@ -38,8 +38,8 @@ import com.marklogic.xcc.types.XSString;
  * 
  * @author jchen
  */
-public abstract class MarkLogicInputFormat<KEYIN, VALUEIN> extends InputFormat<KEYIN, VALUEIN> 
-implements MarkLogicConstants {
+public abstract class MarkLogicInputFormat<KEYIN, VALUEIN> 
+extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     public static final Log LOG =
         LogFactory.getLog(MarkLogicInputFormat.class);
     static final String DEFAULT_DOCUMENT_SELECTOR = "fn:collection()";
@@ -52,7 +52,9 @@ implements MarkLogicConstants {
      */
     @Override
     public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
-            InterruptedException {
+            InterruptedException { 
+        InternalUtilities.checkVersion();
+        
         // get input from job configuration
         Configuration jobConf = jobContext.getConfiguration();
         long maxSplitSize;
