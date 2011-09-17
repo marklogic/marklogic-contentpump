@@ -13,17 +13,15 @@ import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.modeler.util.DomUtil;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
@@ -34,9 +32,11 @@ import com.marklogic.xcc.types.XdmBinary;
 import com.marklogic.xcc.types.XdmDocument;
 import com.marklogic.xcc.types.XdmElement;
 import com.marklogic.xcc.types.XdmText;
+import com.marklogic.xcc.types.impl.AttributeImpl;
 
 /**
- * A record returned by MarkLogic, used to represent an XML node. Use with
+ * A record returned by MarkLogic, used to represent an XML node.  Currently 
+ * only documents, elements and attributes are supported.  Use with
  * {@link NodeInputFormat} and {@link NodeOutputFormat}. May also be used
  * with {@link KeyValueInputFormat} and {@link ValueInputFormat}.
  * 
@@ -106,24 +106,46 @@ public class MarkLogicNode implements Writable {
     }
     
     public void readFields(DataInput in) throws IOException {
-        try {
-            node = DomUtil.readXml((DataInputStream)in);
-        } catch (ParserConfigurationException e) {
-            LOG.error(e);
-            throw new IOException(e);
-        } catch (SAXException e) {
-            LOG.error(e);
-            throw new IOException(e);
+        int type = in.readInt();
+        if (type == Node.ATTRIBUTE_NODE) {
+            String name = Text.readString(in);
+            String value = Text.readString(in);
+            try {
+                node = (new AttributeImpl(name, value)).asW3cAttr();
+            } catch (ParserConfigurationException e) {
+                LOG.error(e);
+            } catch (SAXException e) {
+                LOG.error(e);
+            }
+        } else {
+            try {
+                node = DomUtil.readXml((DataInputStream)in);
+            } catch (ParserConfigurationException e) {
+                LOG.error(e);
+                throw new IOException(e);
+            } catch (SAXException e) {
+                LOG.error(e);
+                throw new IOException(e);
+            }
         }
     }
 
     public void write(DataOutput out) throws IOException {
         if (node != null) {
-            try {
-                DomUtil.writeXml(node, (DataOutputStream)out);
-            } catch (TransformerException e) {
-                LOG.error(e);
-            }
+            short type = node.getNodeType();
+            IntWritable typeWritable = new IntWritable(type);
+            typeWritable.write(out);
+            if (type == Node.ATTRIBUTE_NODE) {
+                Attr attr = (Attr)node;
+                Text.writeString(out, attr.getName());
+                Text.writeString(out, attr.getValue());
+            } else {       
+                try {
+                    DomUtil.writeXml(node, (DataOutputStream)out);
+                } catch (TransformerException e) {
+                    LOG.error(e);
+                }
+            }           
         } else {
             LOG.error("Node to write is null.");
         }
@@ -133,13 +155,18 @@ public class MarkLogicNode implements Writable {
     public String toString() {
         if (node != null) {
             try {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                TransformerFactory tf = TransformerFactory.newInstance();
-                Transformer t = tf.newTransformer();
-                t.setOutputProperty(OutputKeys.INDENT, "yes");
-                t.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
-                t.transform(new DOMSource(node), new StreamResult(bos));
-                return bos.toString();
+                StringBuilder buf = new StringBuilder();
+                if (node.getNodeType() == Node.ATTRIBUTE_NODE) {
+                    buf.append("attribute name: ");
+                    buf.append(((Attr)node).getName());
+                    buf.append(", value: ");
+                    buf.append(((Attr)node).getValue());
+                } else {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    DomUtil.writeXml(node, bos);
+                    buf.append(bos.toString());
+                }
+                return buf.toString();
             } catch (TransformerException e) {
                 LOG.error(e);
             }
