@@ -11,6 +11,7 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.w3c.dom.Node;
 
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.Session;
@@ -30,12 +31,16 @@ implements MarkLogicConstants {
     public static final String NODE_VARIABLE_NAME = "node";
     public static final String PATH_VARIABLE_NAME = "path";
     
-    private NodeOpType opType;
-    private String namespace;
+    private String query;
     
     public NodeWriter(URI serverUri, Configuration conf) {
         super(serverUri, conf);
-        opType = NodeOpType.valueOf(conf.get(NODE_OPERATION_TYPE));
+        String opTypeStr = conf.get(NODE_OPERATION_TYPE);
+        if (opTypeStr == null || opTypeStr.isEmpty()) {
+            throw new IllegalArgumentException(
+                    NODE_OPERATION_TYPE + " is not specified.");
+        }
+        NodeOpType opType = NodeOpType.valueOf(opTypeStr);
         Collection<String> nsCol = conf.getStringCollection(OUTPUT_NAMESPACE);
         StringBuilder buf = new StringBuilder();
         if (nsCol != null) {
@@ -47,15 +52,19 @@ implements MarkLogicConstants {
                 }
             }
         }
-        this.namespace = buf.toString();
+        query = opType.getQuery(buf.toString());
     }
 
     @Override
     public void write(NodePath path, MarkLogicNode record) 
     throws IOException, InterruptedException {
-        String recordString = record == null ? "()" :
-            record.toString();
-        String query = opType.getQuery(namespace);
+        if (record == null || record.get() == null) {
+            throw new UnsupportedOperationException("Record node is null.");
+        } else if (record.get().getNodeType() != Node.ELEMENT_NODE) {
+            throw new UnsupportedOperationException("Unsupported node type: " +
+                    record.get().getNodeType());
+        }
+        String recordString = record.toString();
  
         if (LOG.isDebugEnabled()) {
             LOG.debug(query);
@@ -64,8 +73,13 @@ implements MarkLogicConstants {
         try {
             AdhocQuery request = session.newAdhocQuery(query);
             request.setNewStringVariable(PATH_VARIABLE_NAME, path.getFullPath());
+            
             request.setNewVariable(NODE_VARIABLE_NAME, ValueType.ELEMENT, 
                     recordString);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("path: " + path.getFullPath());
+                LOG.debug("node: " + recordString);
+            }
             session.submitRequest(request);
             commitIfNecessary();
         } catch (RequestException e) {    
