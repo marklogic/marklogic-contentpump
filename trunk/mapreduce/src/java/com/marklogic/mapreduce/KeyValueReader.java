@@ -46,12 +46,6 @@ implements MarkLogicConstants {
     private Class<? extends WritableComparable> keyClass;
     private Class<? extends Writable> valueClass;
     
-    /**
-     * Indicate whether a key has been fetched, and is waiting to fetch value
-     * from the next result.
-     */
-    private boolean keyFetched;
-    
     public KeyValueReader(Configuration conf) {
         super(conf);
         keyClass = conf.getClass(INPUT_KEY_CLASS, Text.class, 
@@ -74,27 +68,36 @@ implements MarkLogicConstants {
     protected void endOfResult() {
         key = null;
         value = null;
-        keyFetched = false;
     }
-
+    
     @SuppressWarnings("unchecked")
     @Override
-    protected boolean nextResult(ResultItem result) {
-        if (!keyFetched) {
+    public boolean nextKeyValue() throws IOException, InterruptedException {
+        if (result != null && result.hasNext()) {
             if (key == null) {
                 key = (KEYIN)ReflectionUtils.newInstance(keyClass, 
-                        getConf());
+                          getConf());
             }
-            InternalUtilities.assignResultValue(keyClass, result, key);
-        } else {
-            if (value == null) {
-                value = (VALUEIN)ReflectionUtils.newInstance(valueClass, 
-                        getConf());
+            ResultItem item = result.next();
+            InternalUtilities.assignResultValue(keyClass, item, key);
+            if (result.hasNext()) {
+                if (value == null) {
+                    value = (VALUEIN)ReflectionUtils.newInstance(valueClass, 
+                               getConf());
+                }
+                item = result.next();
+                InternalUtilities.assignResultValue(valueClass, item, value);
+                count++;
+                return true;
             }
-            InternalUtilities.assignResultValue(valueClass, result, value);
         }
-        keyFetched = !keyFetched;
-        return true;
+        endOfResult();
+        return false;
+    }
+
+    @Override
+    protected boolean nextResult(ResultItem result) {
+        return false;
     }
 
     @Override
