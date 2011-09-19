@@ -48,7 +48,7 @@ implements MarkLogicConstants {
     /**
      * Count of records fetched
      */
-    private long count;
+    protected long count;
     /**
      * Session to the MarkLogic server.
      */
@@ -56,7 +56,7 @@ implements MarkLogicConstants {
     /**
      * ResultSequence from the MarkLogic server.
      */
-    private ResultSequence result;
+    protected ResultSequence result;
     /**
      * Job configuration.
      */
