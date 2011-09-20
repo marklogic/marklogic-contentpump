@@ -54,7 +54,7 @@
     </property>
     <property>
         <name>mapreduce.linkcount.baseuri</name>
-        <value>/space/wikipedia/enwiki/</value>
+        <value>enwiki/</value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.maxsplitsize</name>
