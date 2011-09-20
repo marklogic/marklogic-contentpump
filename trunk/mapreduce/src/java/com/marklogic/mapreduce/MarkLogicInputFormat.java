@@ -102,10 +102,11 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             
             if (nsCol != null && !nsCol.isEmpty()) {
                 boolean isAlias = true;
+                buf.append('\'');
                 for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
                     String ns = nsIt.next();
                     if (isAlias) {
-                        buf.append("\'declare namespace ");
+                        buf.append("declare namespace ");
                         buf.append(ns);
                         buf.append("=\"");
                         isAlias = false;
