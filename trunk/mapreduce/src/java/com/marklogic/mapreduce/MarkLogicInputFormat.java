@@ -217,6 +217,10 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     splitCount++;
                 }
                 long splitSize = fsplit.recordCount / splitCount;
+                remainder = fsplit.recordCount % splitCount;
+                if (remainder != 0) {
+                    splitSize++;
+                }
                 long remainingCount = fsplit.recordCount;
                 while (remainingCount > 0) {
                     long start = fsplit.recordCount - remainingCount;
