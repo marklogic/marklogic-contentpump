@@ -25,7 +25,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * </p>
  * <p>
  *  Where the node is inserted relative to the path is controlled by the
- *  {@link MarkLogicConstants#NODE_OPERATION_TYPE output.nodeoptype} configuration
+ *  {@link MarkLogicConstants#NODE_OPERATION_TYPE output.node.optype} configuration
  *  property. You must set this property when using {@link NodeOutputFormat}.
  * </p>
  * 

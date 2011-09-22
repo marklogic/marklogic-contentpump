@@ -378,7 +378,7 @@ public interface MarkLogicConstants {
      * 
      * <pre class="codesample">
      * &lt;property&gt;
-     *   &lt;name&gt;mapreduce.marklogic.output.collection&lt;/name&gt;
+     *   &lt;name&gt;mapreduce.marklogic.output.content.collection&lt;/name&gt;
      *   &lt;value&gt;latest,top10&lt;/value&gt;
      * &lt;/property&gt;
      * </pre>
@@ -398,7 +398,7 @@ public interface MarkLogicConstants {
      * 
      * <pre class="codesample">
      * &lt;property&gt;
-     *   &lt;name&gt;mapreduce.marklogic.output.permission&lt;/name&gt;
+     *   &lt;name&gt;mapreduce.marklogic.output.content.permission&lt;/name&gt;
      *   &lt;value&gt;dls-user,update,dls-user,read&lt;/value&gt;
      * &lt;/property&gt;
      * </pre>
@@ -411,7 +411,7 @@ public interface MarkLogicConstants {
      * 
      * <p>
      *  If the property value includes a comma in embedded in the
-     *  role name, you must set this property programmatically,
+     *  role name, you must set this property programatically,
      *  rather than in a configuration file.
      *  </p>
      */
@@ -440,8 +440,8 @@ public interface MarkLogicConstants {
      * 
      * <p>
      *  When set to true, the output directory specified by the
-     *  {@link #OUTPUT_DIRECTORY output.directory} property is
-     *  removed. When set to false, an exception is thrown if
+     *  {@link #OUTPUT_DIRECTORY output.content.directory} property
+     *  is removed. When set to false, an exception is thrown if
      *  the output directory already exists.
      * </p>
      */

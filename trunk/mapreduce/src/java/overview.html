@@ -9,7 +9,6 @@
 <ul>
   <li><a href="#Introduction">Introduction</a></li>
   <li><a href="#Configuration">Configuration</a></li>
-  <li><a href="#Samples">Samples</a></li>
 </ul>
 
 <p>
@@ -171,82 +170,6 @@ subdocument expression: //wp:a[@href]/@title
  This query must return data that matches the configured InputFormat
  subclass.
 </p>
-
-<h2 id="Samples">Samples</h2>
-<p>
-   Sample code is included in {@link com.marklogic.mapreduce.examples},
-   with corresponding example config files under the conf/ directory
-   in the connector distribution. A brief overview of each sample is
-   given below. For detailed instructions, see the 
-   <em>MarkLogic Connector for Hadoop Developer's Guide</em>.
-</p>
-<table class="simple-table">
-  <tr>
-    <td>{@link com.marklogic.mapreduce.examples.LinkCountValue}</td>
-    <td>
-      Analyzes links between documents in a Wikipedia collection,
-      using basic input mode with {@link com.marklogic.mapreduce.ValueInputFormat}
-      and TextOutputFormat. See the <code>marklogic-textin-textout.xml</code> 
-      config file.
-    </td>
-  </tr>
-  <tr>
-    <td>{@link com.marklogic.mapreduce.examples.LinkCountInDoc}</td>
-    <td>
-      Analyzes links between documents in a Wikipedia collection, using
-      basic input mode with {@link com.marklogic.mapreduce.NodeInputFormat}
-      and {@link com.marklogic.mapreduce.NodeOutputFormat}. Results are
-      as a new text element on the documents. See the 
-      <code>marklogic-nodein-nodeout.xml</code> config file.
-    </td>
-  </tr>
-  <tr>
-    <td>{@link com.marklogic.mapreduce.examples.LinkCountInProperty}</td>
-    <td>Analyzes links between documents in a Wikipedia collection, using
-       basic input mode with {@link com.marklogic.mapreduce.PropertyOutputFormat}.
-       Results are stored in a document property. See the
-      <code>marklogic-textin-propout.xml</code> config file.
-    </td>
-  </tr>
-  <tr>
-    <td>{@link com.marklogic.mapreduce.examples.LinkCountCooccurrences}</td>
-    <td>
-      Analyzes links between documents in a Wikipedia collection, using the
-      lexicon function <code>cts:element-attribute-value-co-occurrences</code>
-      and {@link com.marklogic.mapreduce.KeyValueInputFormat}. Results are
-      saved as text in HDFS. See the <code>marklogic-lexicon.xml</code>
-      config file.
-    </td>
-  </tr>
-  <tr>
-    <td>{@link com.marklogic.mapreduce.examples.LinkCount}</td>
-    <td>Analyzes links between documents in a Wikipedia collection, using
-       advanced input mode with {@link com.marklogic.mapreduce.ValueInputFormat}.
-       Results are stored in HDFS. See the
-      <code>marklogic-advanced.xml</code> config file.
-    </td>
-  </tr>
-  <tr>
-    <td>{@link com.marklogic.mapreduce.examples.ContentLoader}</td>
-    <td>Loads text files from HDFS into MarkLogic Server documents.
-      See the <code>marklogic-textin-docout.xml</code> config file.
-    </td>      
-  </tr>
-  <tr>
-    <td>{@link com.marklogic.mapreduce.examples.ContentReader}</td>
-    <td>Copies documents from a MarkLogic Server database to HDFS
-      text files using an SSL-enabled connection. See the 
-      <code>marklogic-docin-textout.xml</code> config file.
-    </td>      
-  </tr>
-  <tr>
-    <td>{@link com.marklogic.mapreduce.examples.ZipContentLoader}</td>
-    <td>Loads text files from a zip file in HDFS into MarkLogic
-      Server documents. See the
-      <code>marklogic-textin-docout.xml</code> config file.
-    </td>      
-  </tr>
-</table>
 </body>
 </html>
 

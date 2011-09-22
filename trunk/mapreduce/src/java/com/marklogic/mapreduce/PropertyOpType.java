@@ -7,7 +7,7 @@ import org.apache.hadoop.conf.Configuration;
  * 
  * <p>
  *  When using {@link PropertyOutputFormat}, set the configuration property
- *  <code>mapreduce.marklogic.output.propertyoptype</code> to
+ *  <code>mapreduce.marklogic.output.property.optype</code> to
  *  one of these values to control how the output property value is 
  *  handled by the server.
  * </p>
