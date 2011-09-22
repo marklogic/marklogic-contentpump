@@ -8,12 +8,12 @@ package com.marklogic.mapreduce;
  * 
  * <p>
  *  When using {@link NodeOutputFormat}, set the configuration property
- *  <code>mapreduce.marklogic.output.nodeoptype</code> to
+ *  <code>mapreduce.marklogic.output.node.optype</code> to
  *  one of these values to control how the output node value is stored
  *  relative to the {@link NodePath} key.
  * </p>
  * <p>
- *  For example if the <code>nodeoptype</code> is set to "INSERT_BEFORE",
+ *  For example if the <code>node.optype</code> is set to "INSERT_BEFORE",
  *  then the new node is inserted as an immediately preceding sibling of
  *  the node addressed by the node path in the key.
  * </p>
