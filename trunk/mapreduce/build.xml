@@ -157,7 +157,7 @@
 
 	<target name="javadoc.mapreduce" depends="mapreduce.jar" unless="classes.current">
 		<mkdir dir="${javadocdir}/mapreduce"/>
-		<javadoc sourcepathref="mapreduce.javadoc.sourcepath" destdir="${javadocdir}/mapreduce"
+		<javadoc destdir="${javadocdir}/mapreduce"
 			packagenames="${mapreduce.javadoc.included.packages}" version="true"
 			windowtitle="${mapreduce.product.name} v${version.number.string}"
 			doctitle="${mapreduce.product.name} Version ${version.number.string}"
@@ -165,6 +165,13 @@
 			header="${mapreduce.product.name.short} ${version.number.string}"
 			link="${javadoc.jdk.javadoc.base}"
 		>
+		    <fileset dir="${java.source}">
+		        <include name="**/*.java"/>
+		        <exclude name="com/marklogic/mapreduce/test/*" />
+		        <exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS.java"/>
+		        <exclude name="com/marklogic/mapreduce/examples/WikiLoader.java"/>
+		        <exclude name="com/marklogic/mapreduce/InternalUtilities.java"/>
+			</fileset>
 			<classpath>
 				<pathelement path="${compiled.classes.dir}"/>
 				<path refid="mapreduce.classpath"/>
