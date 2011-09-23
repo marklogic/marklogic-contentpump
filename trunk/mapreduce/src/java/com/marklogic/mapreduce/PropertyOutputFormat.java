@@ -23,8 +23,14 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * <p>
  *  Control whether the inserted property replaces or adds to existing
  *  document properties by setting the configuration property
- *  {@link MarkLogicConstants#DEFAULT_PROPERTY_OPERATION_TYPE output.propertyopttype}.
+ *  {@link MarkLogicConstants#DEFAULT_PROPERTY_OPERATION_TYPE output.property.optype}.
  *  By default, any existing properties are replaced with the new one.
+ * </p>
+ * <p>
+ *  By default, properties are only created by documents that exist in the
+ *  database. Set the configuration property
+ *  {@link MarkLogicConstants#OUTPUT_PROPERTY_ALWAYS_CREATE output.property.alwayscreate}
+ *  to true to create properties even if the target document does not exist.
  * </p>
  * 
  * @see PropertyOpType
