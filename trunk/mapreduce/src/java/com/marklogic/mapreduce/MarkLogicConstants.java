@@ -362,7 +362,7 @@ public interface MarkLogicConstants {
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the MarkLogic Server database directory
      * where output documents are created. Required if using MarkLogic
-     * Server for output with document output format. The directory
+     * Server for output with {@link ContentOutputFormat}. The directory
      * must already exist.
      */
     static final String OUTPUT_DIRECTORY = 
@@ -371,8 +371,8 @@ public interface MarkLogicConstants {
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a comma-separated list of collections
      * to which generated output documents are added. Optional. Relevant
-     * only when using MarkLogic Server for output with document output
-     * format.
+     * only when using MarkLogic Server for output with
+     * {@link ContentOutputFormat}.
      * 
      * <p>Example:</p>
      * 
@@ -391,8 +391,8 @@ public interface MarkLogicConstants {
      * pairs to associate with created output documents. Optional. If
      * not set, the default permissions for 
      * {@link #OUTPUT_USERNAME output.username} are used. Relevant
-     * only when using MarkLogic Server for output with document
-     * output format.
+     * only when using MarkLogic Server for output with 
+     * {@link ContentOutputFormat}.
      * 
      * <p>Example:</p>
      * 
@@ -411,7 +411,7 @@ public interface MarkLogicConstants {
      * 
      * <p>
      *  If the property value includes a comma in embedded in the
-     *  role name, you must set this property programatically,
+     *  role name, you must set this property in your code,
      *  rather than in a configuration file.
      *  </p>
      */
@@ -421,7 +421,7 @@ public interface MarkLogicConstants {
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the document quality for created
      * output documents. Optional. Relevant only when using MarkLogic
-     * Server for output with document output format.
+     * Server for output with {@link ContentOutputFormat}.
      * 
      * <p>
      *  Quality affects the search relevance of a document. The
@@ -436,7 +436,8 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates whether or not to remove the output
-     * directory. Only applicable to document output. Default: true.
+     * directory. Only applicable to {@link ContentOutputFormat}. 
+     * Default: true.
      * 
      * <p>
      *  When set to true, the output directory specified by the
@@ -462,8 +463,16 @@ public interface MarkLogicConstants {
     
     /**
      * The config property name (<code>{@value}</code>)
-     * which, if set to true, specifies to create properties
-     * even when a document does not exist on that URI.
+     * which, if set to true, causes {@link PropertyOutputFormat}
+     * to create document properties for reduce output
+     * key-value pairs even when no document exists with 
+     * the target URI. Default: false.
+     * 
+     * <p>
+     *  By default, {@link PropertyOutputFormat} does not create a
+     *  property for a document URI unless the document already 
+     *  exists.
+     * </p>
      */
     static final String OUTPUT_PROPERTY_ALWAYS_CREATE =
         "mapreduce.marklogic.output.property.alwayscreate";
@@ -486,9 +495,9 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates what property operation to perform
-     * during output when using PropertyOutputFormat. Ignored if not using
-     * PropertyOutputFormat.  Optional.  Valid choices: SET_PROPERTY, 
-     * ADD_PROPERTY.  Default: SET_PROPERTY.
+     * during output when using {@link PropertyOutputFormat}. Ignored  
+     * if not using {@link PropertyOutputFormat}. Optional. Valid choices: 
+     * SET_PROPERTY, ADD_PROPERTY.  Default: SET_PROPERTY.
      * 
      * @see PropertyOpType
      * @see PropertyOutputFormat
