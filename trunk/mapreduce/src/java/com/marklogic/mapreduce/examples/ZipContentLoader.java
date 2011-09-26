@@ -124,7 +124,7 @@ class ZipContentReader extends RecordReader<Text, Text> {
         if (zipIn != null) {
             ZipEntry zipEntry;
             while ((zipEntry = zipIn.getNextEntry()) != null) {
-                if (zipEntry != null && !zipEntry.isDirectory()) {
+                if (zipEntry != null) {
                     key.set(zipEntry.getName());
                     StringBuilder entry = new StringBuilder();
                     long size;
