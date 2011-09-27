@@ -65,8 +65,10 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
     
     private static BigInteger hash64(String str) {
         BigInteger value = BigInteger.valueOf(HASH64_SEED);
-        for (int i = 0; i < str.length(); i++) {
-            value = value.add(BigInteger.valueOf(str.codePointAt(i))).multiply(
+
+        for(int cp, i = 0; i < str.length(); i += Character.charCount(cp)) {
+            cp = str.codePointAt(i);
+            value = value.add(BigInteger.valueOf(cp)).multiply(
                     BigInteger.valueOf(HASH64_STEP));
         }
         byte[] valueBytes = value.toByteArray();
@@ -156,7 +158,12 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
     }
     
     public static void main(String[] args) {
-        DocumentURI uri = new DocumentURI(args[0]);
-        System.out.println("id: " + uri.getPlacementId(Integer.valueOf(args[1])));
+        StringBuilder buf = new StringBuilder();
+        int i = 0;
+        for (; i < args.length - 1; i++) {
+            buf.append(Character.toChars(Integer.parseInt(args[i], 16)));
+        }
+        DocumentURI uri = new DocumentURI(buf.toString());
+        System.out.println("id: " + uri.getPlacementId(Integer.valueOf(args[i])));
     }
 }
