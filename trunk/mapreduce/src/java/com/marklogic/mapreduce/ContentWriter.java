@@ -5,13 +5,13 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
@@ -50,14 +50,19 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     private Map<String, ContentSource> forestSourceMap;
     
     /**
-     * A map from a forest id to a Session.
+     * Content lists for each forest.
      */
-    private Map<String, List<Content>> forestContentMap;
+    private Content[][] forestContents;
     
     /**
      * An array of forest ids
      */
     private String[] forestIds;
+    
+    /** 
+     * Counts of documents per forest.
+     */
+    private int[] counts;
 
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap) {
@@ -70,7 +75,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         this.outputDir = conf.get(OUTPUT_DIRECTORY);
         
         if (batchSize > 1) {
-            forestContentMap = new HashMap<String, List<Content>>();
+            forestContents = new Content[forestSourceMap.size()][batchSize];
+            counts = new int[forestSourceMap.size()];
         }
         
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
@@ -104,8 +110,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 i++;
             }
-        } else {
-            LOG.debug("no permissions");
         }
         
         options = new ContentCreateOptions();
@@ -113,7 +117,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (collections != null) {
             for (int i = 0; i < collections.length; i++) {
                 collections[i] = collections[i].trim();
-                LOG.debug("Collection: " + collections[i]);
             }
             options.setCollections(collections);
         }
@@ -130,43 +133,45 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     @Override
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
+        String uri = key.getUri();
+        if (outputDir != null && !outputDir.isEmpty()) {
+            uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
+                  outputDir + uri : outputDir + '/' + uri;
+        }    
+        key.setUri(uri);
+        DocumentURI.validate(uri);
         int fId = key.getPlacementId(forestIds.length);
+        
         String forestId = forestIds[fId];
-        ContentSource cs = forestSourceMap.get(forestId);
         Session session = null;
         try {
-            String uri = key.getUri();
-            if (outputDir != null && !outputDir.isEmpty()) {
-                uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
-                      outputDir + uri : outputDir + '/' + uri;
-            }    
-            DocumentURI.validate(uri);
             Content content = null;
             if (value instanceof Text) {
                 content = ContentFactory.newContent(uri, 
                         ((Text)value).toString(), options);
             } else if (value instanceof MarkLogicNode) {
                 content = ContentFactory.newContent(uri, 
-                        ((MarkLogicNode)value).get(), options);        
+                        ((MarkLogicNode)value).get(), options);   
+            } else if (value instanceof BytesWritable) {
+                content = ContentFactory.newContent(uri, 
+                        ((BytesWritable) value).getBytes(), options);
             } else {
                 throw new UnsupportedOperationException(value.getClass() + 
                         " is not supported.");
             }
-            session = cs.newSession(forestId);
+           
             if (batchSize > 1) {
-                List<Content> contentList = forestContentMap.get(forestId);
-                if (contentList == null) {
-                    contentList = new ArrayList<Content>();
-                    forestContentMap.put(forestId, contentList);
-                }
-                contentList.add(content);
-                if (contentList.size() == batchSize) {
-                    Content[] contents = contentList.toArray(
-                            new Content[batchSize]);
-                    session.insertContent(contents);
-                    contentList.clear();
+                forestContents[fId][counts[fId]++] = content;
+ 
+                if (counts[fId] == batchSize) {
+                    ContentSource cs = forestSourceMap.get(forestId);
+                    session = cs.newSession(forestId);
+                    session.insertContent(forestContents[fId]);
+                    counts[fId] = 0;
                 }
             } else {
+                ContentSource cs = forestSourceMap.get(forestId);
+                session = cs.newSession(forestId);
                 session.insertContent(content);
             }
         } catch (RequestException e) {
@@ -178,22 +183,23 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             } 
         }      
     }
-    
+
     @Override
     public void close(TaskAttemptContext context) throws IOException,
     InterruptedException {
-        if (forestContentMap == null) {
+        if (forestContents == null) {
             return;
         }       
-        for (String forestId : forestContentMap.keySet()) {
-            List<Content> contentList = forestContentMap.get(forestId);
-            if (contentList != null && !contentList.isEmpty()) {
-                Session session = 
-                    forestSourceMap.get(forestId).newSession(forestId);
-                Content[] contents = contentList.toArray(
-                        new Content[contentList.size()]);
+        for (int i = 0; i < forestIds.length; i++) {
+            if (counts[i] > 0) {
+                Content[] remainder = new Content[counts[i]];
+                System.arraycopy(forestContents[i], 0, remainder, 0, 
+                        counts[i]);
+                String forestId = forestIds[i];
+                ContentSource cs = forestSourceMap.get(forestId);
+                Session session = cs.newSession(forestId);
                 try {
-                    session.insertContent(contents);
+                    session.insertContent(remainder);
                 } catch (RequestException e) {
                     LOG.error(e);
                     throw new IOException(e);
