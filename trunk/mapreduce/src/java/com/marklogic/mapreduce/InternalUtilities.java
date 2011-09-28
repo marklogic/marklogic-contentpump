@@ -289,6 +289,7 @@ public class InternalUtilities implements MarkLogicConstants {
      * 
      * @param taskId
      * @param forestHostMap
+     * @return host name
      */
     public static String getHost(int taskId,
             LinkedMapWritable forestHostMap) {
