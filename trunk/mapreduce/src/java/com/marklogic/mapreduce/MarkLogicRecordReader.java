@@ -99,7 +99,12 @@ implements MarkLogicConstants {
         URI serverUri;
         try {
             String[] hostNames = mlSplit.getLocations();
-            assert hostNames != null && hostNames.length >= 1;
+            if (hostNames == null || hostNames.length < 1) {
+                throw new IllegalStateException("Empty split locations.");
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("split location: " + hostNames[0]);
+            }
             serverUri = InternalUtilities.getInputServerUri(conf, hostNames[0]);
         } catch (URISyntaxException e) {
             LOG.error(e);
@@ -118,8 +123,8 @@ implements MarkLogicConstants {
         // generate the query
         String queryText;
         long start = mlSplit.getStart() + 1;
-        long end = mlSplit.getLength() == Long.MAX_VALUE ? 
-                   mlSplit.getLength() : start + mlSplit.getLength() - 1;
+        long end = mlSplit.isLastSplit() ? 
+                   Long.MAX_VALUE : start + mlSplit.getLength() - 1;
         if (!advancedMode) {         
             LexiconFunction function = null;
             Class<? extends LexiconFunction> lexiconClass = 

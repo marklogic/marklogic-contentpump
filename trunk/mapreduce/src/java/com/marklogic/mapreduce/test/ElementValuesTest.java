@@ -29,7 +29,7 @@ public class ElementValuesTest {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-        if (otherArgs.length < 1) {
+        if (otherArgs.length < 2) {
             System.err.println("Usage: ElementValuesTest configFile outputDir");
             System.exit(2);
         }

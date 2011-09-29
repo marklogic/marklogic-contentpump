@@ -35,6 +35,10 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
      *  host name
      */
     private String[] hostName;
+    /**
+     * is the last split in the job
+     */
+    private boolean isLastSplit;
     
     public MarkLogicInputSplit() {
     }
@@ -51,6 +55,14 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
     @Override
     public long getLength() throws IOException, InterruptedException {
         return length;
+    }
+    
+    /**
+     * Is this the last split?
+     * @return True if this is the last split; false otherwise.
+     */
+    public boolean isLastSplit() {
+        return isLastSplit;
     }
 
     @Override
@@ -80,6 +92,10 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
 
     public void setLength(long length) {
         this.length = length;
+    }
+    
+    public void setLastSplit(boolean isLast) {
+        isLastSplit = isLast;
     }
 
     @Override

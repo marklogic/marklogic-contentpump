@@ -201,11 +201,10 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         
         for (ForestSplit fsplit : forestSplits) {
             if (fsplit.recordCount < maxSplitSize) {
-                // assign length to max value when it is the last split,
-                // since the record count is not accurate
                 MarkLogicInputSplit split = 
-                    new MarkLogicInputSplit(0, Long.MAX_VALUE, 
+                    new MarkLogicInputSplit(0, fsplit.recordCount, 
                             fsplit.forestId, fsplit.hostName);
+                split.setLastSplit(true);
                 splits.add(split);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Added split " + split);
@@ -223,14 +222,14 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 }
                 long remainingCount = fsplit.recordCount;
                 while (remainingCount > 0) {
-                    long start = fsplit.recordCount - remainingCount;
-                    // assign length to max value when it is the last split,
-                    // since the record count is not accurate
-                    long length = remainingCount <= maxSplitSize ? 
-                                     Long.MAX_VALUE : splitSize; 
+                    long start = fsplit.recordCount - remainingCount; 
+                    long length = splitSize;
                     MarkLogicInputSplit split = 
                         new MarkLogicInputSplit(start, length, fsplit.forestId,
                                 fsplit.hostName);
+                    if (remainingCount <= maxSplitSize) {
+                        split.setLastSplit(true);
+                    }
                     splits.add(split);
                     remainingCount -= length;
                     if (LOG.isDebugEnabled()) {
