@@ -19,8 +19,12 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
      * <p>
      *   This method corresponds to the $start parameter value of
      *   a lexicon function. Override the method to specify a
-     *   lexicon starting position other than the default.
+     *   lexicon starting position other than the default.  
      * </p>
+     * <p>
+     *   If the value's data type is string, include double quotes
+     *   as part of the value, e.g. use "\"foo\"" for string value
+     *   "foo".
      * 
      * @return the starting value for the function.
      */
