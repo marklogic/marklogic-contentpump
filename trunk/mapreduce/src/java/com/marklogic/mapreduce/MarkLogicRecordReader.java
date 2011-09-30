@@ -135,7 +135,8 @@ implements MarkLogicConstants {
             if (lexiconClass != null) {
                 function = ReflectionUtils.newInstance(lexiconClass, conf);
                 queryText = function.getInputQuery(nsCol, start, 
-                        mlSplit.getLength());
+                        mlSplit.isLastSplit() ? 
+                                Long.MAX_VALUE : mlSplit.getLength());
             } else {
                 String docExpr = conf.get(DOCUMENT_SELECTOR, 
                         MarkLogicInputFormat.DEFAULT_DOCUMENT_SELECTOR);
@@ -144,7 +145,8 @@ implements MarkLogicConstants {
                 buf.append("xquery version \"1.0-ml\"; \n");
                 buf.append("xdmp:with-namespaces(("); 
                 if (nsCol != null) {
-                    for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
+                    for (Iterator<String> nsIt = nsCol.iterator(); 
+                         nsIt.hasNext();) {
                         String ns = nsIt.next();
                         buf.append('"').append(ns).append('"');
                         if (nsIt.hasNext()) {

@@ -107,6 +107,7 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
         forestId = new BigInteger(forestIdText.getBytes());
         hostName = new String[1];
         hostName[0] = Text.readString(in);
+        isLastSplit = in.readBoolean();
     }
 
     @Override
@@ -118,6 +119,7 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
         if (hostName != null && hostName.length > 0) {
             Text.writeString(out, hostName[0]);
         }
+        out.writeBoolean(isLastSplit);
     }
 
     @Override
