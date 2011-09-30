@@ -7,11 +7,14 @@ import java.util.*;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.JobContext;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.XSBoolean;
 
 /**
  * MarkLogicOutputFormat for Content.
@@ -79,5 +82,5 @@ public class ContentOutputFormat<VALUEOUT> extends
         
         // construct the ContentWriter
         return new ContentWriter<VALUEOUT>(conf, forestSourceMap);
-    } 
+    }
 }
