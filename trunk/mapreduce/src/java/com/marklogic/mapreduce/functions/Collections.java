@@ -27,7 +27,7 @@ public class Collections extends ValuesOrWordsFunction {
 
     @Override
     void appendFunctionName(StringBuilder buf) {
-        buf.append("cts:collection");
+        buf.append("cts:collections");
     }
 
     @Override
