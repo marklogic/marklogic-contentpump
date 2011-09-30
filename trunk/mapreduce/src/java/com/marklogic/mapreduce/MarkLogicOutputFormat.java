@@ -21,6 +21,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.xcc.AdhocQuery;
+import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
@@ -151,7 +152,30 @@ implements MarkLogicConstants, Configurable {
                 throw new IOException("Failed to query directory creation mode.");
             }
             
-                      
+            // validate capabilities
+            String[] perms = conf.getStrings(OUTPUT_PERMISSION);
+            if (perms != null && perms.length > 0) {
+                if (perms.length % 2 != 0) {
+                    throw new IllegalStateException(
+                    "Permissions are expected to be in <role, capability> pairs.");
+                }
+                int i = 0;
+                while (i + 1 < perms.length) {
+                    String roleName = perms[i++];
+                    if (roleName == null || roleName.isEmpty()) {
+                        throw new IllegalStateException(
+                                "Illegal role name: " + roleName);
+                    }
+                    String perm = perms[i].trim();
+                    if (!perm.equalsIgnoreCase(ContentCapability.READ.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.INSERT.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
+                        throw new IllegalStateException("Illegal capability: " + perm);
+                    }
+                    i++;
+                }
+            }
         } catch (URISyntaxException e) {
             throw new IOException(e);
         } catch (XccConfigException e) {
