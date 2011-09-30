@@ -43,7 +43,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     public static final Log LOG =
         LogFactory.getLog(MarkLogicInputFormat.class);
     static final String DEFAULT_DOCUMENT_SELECTOR = "fn:collection()";
-    static final String DEFAULT_CTS_QUERY = "cts:and-query(())";
+    static final String DEFAULT_CTS_QUERY = "()";
 
     /**
      * Get input splits.
