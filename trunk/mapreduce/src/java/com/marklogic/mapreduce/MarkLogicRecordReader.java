@@ -185,7 +185,8 @@ implements MarkLogicConstants {
             AdhocQuery query = session.newAdhocQuery(queryText);
             if (advancedMode) {
                 query.setPosition(start);
-                query.setCount(mlSplit.getLength());
+                query.setCount(mlSplit.isLastSplit() ?
+                        Long.MAX_VALUE : mlSplit.getLength());
             }
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
