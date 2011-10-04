@@ -5,8 +5,6 @@ package com.marklogic.mapreduce.functions;
 
 import java.util.Collection;
 
-import com.marklogic.mapreduce.MarkLogicConstants;
-
 /**
  * Super class for all supported lexicon functions. 
  * {@link com.marklogic.mapreduce.MarkLogicInputFormat} and
