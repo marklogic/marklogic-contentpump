@@ -26,6 +26,11 @@ package com.marklogic.mapreduce.functions;
 
  * </p>
  * 
+ * <p>
+ *   All co-occurrences functions using this API do NOT preserve 
+ *   frequency order even if "frequency-order" option is specified.
+ * </p>
+ * 
  * @author jchen
  */
 public abstract class ElemValueCooccurrences extends CooccurrencesFunction {

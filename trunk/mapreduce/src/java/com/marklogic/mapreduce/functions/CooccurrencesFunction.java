@@ -10,6 +10,11 @@ import java.util.Iterator;
  * Supper class of wrapper classes for supported co-occurrences lexicon
  * functions, such as <code>cts:element-value-co-occurrences</code>.
  * 
+ * <p>
+ *   All co-occurrences functions using this API do NOT preserve 
+ *   frequency order even if "frequency-order" option is specified.
+ * </p>
+ * 
  * @author jchen
  */
 public abstract class CooccurrencesFunction extends LexiconFunction {
