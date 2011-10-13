@@ -530,5 +530,5 @@ public interface MarkLogicConstants {
     /**
      * Default batch size.
      */
-    static final int DEFAULT_BATCH_SIZE = 0;
+    static final int DEFAULT_BATCH_SIZE = 100;
 }
