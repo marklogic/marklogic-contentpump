@@ -34,6 +34,7 @@
 	<property name="javadocdir" value="${buildtmp}/javadoc"/>
 	<property name="docs.src.dir" value="docs"/>
 	<property name="conf.dir" value="src/conf"/>
+	<property name="sample-data.dir" value="src/sample-data"/>
 
 	<!-- Definitions related to Javadocs -->
 	<tstamp><format property="thisyear" pattern="yyyy"></format></tstamp>
@@ -212,6 +213,7 @@
 	<property name="mapreduce.stage.docs" value="${mapreduce.stagedir}/docs"/>
 	<property name="mapreduce.stage.api.docs" value="${mapreduce.stage.docs}/api"/>
 	<property name="mapreduce.stage.conf" value="${mapreduce.stagedir}/conf"/>
+	<property name="mapreduce.stage.sample-data" value="${mapreduce.stagedir}/sample-data"/>
 
 	<target name="mapreduce.stage" depends="mapreduce.jar,javadoc.mapreduce">
 		<delete dir="${mapreduce.stagedir}"/>
@@ -256,6 +258,10 @@
 		        <include name="*.xml"/>
 		        <exclude name="marklogic-wiki.xml"/>
 		    </fileset>
+		</copy>
+		<mkdir dir="${mapreduce.stage.sample-data}"/>
+		<copy todir="${mapreduce.stage.sample-data}">
+		    <fileset dir="${sample-data.dir}"/>
 		</copy>
 	</target>
 

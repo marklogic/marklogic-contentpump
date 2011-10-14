@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page xml:lang="en" xmlns="http://www.mediawiki.org/xml/export-0.4/">
+    <title>AnarchY</title>
+    <id>263</id>
+    <redirect/>
+    <revision>
+      <id>319152572</id>
+      <timestamp>2009-10-11T01:59:00Z</timestamp>
+      <contributor>
+        <username>Thinking of England</username>
+        <id>9901790</id>
+      </contributor>
+      <comment>
+<p>removed {{R to disambiguation page}} as inapplicable -- template is for redirects with "disambiguation" in their name -- see <a href="Template:R_to_disambiguation_page" title="template:R to disambiguation page">template:R to disambiguation page</a></p></comment>
+      <text xml:space="preserve"/>
+    </revision>
+  </page>
