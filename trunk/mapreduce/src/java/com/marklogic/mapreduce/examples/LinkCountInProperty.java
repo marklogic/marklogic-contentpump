@@ -39,7 +39,7 @@ public class LinkCountInProperty {
         
         public void map(LongWritable key, Text value, Context context) 
         throws IOException, InterruptedException {
-            refURI.set(value);
+            refURI.set(value.toString().trim());
             context.write(refURI, one);
         }
     }

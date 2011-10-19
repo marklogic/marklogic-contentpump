@@ -46,8 +46,8 @@ public class LinkCountInDoc {
             if (value != null && value.get() != null) {
                 Attr title = (Attr)value.get();
                 String href = title.getValue();
-            
-                refURI.set(href);
+                
+                refURI.set(href.trim());
                 context.write(refURI, one);
             } 
         }
