@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +62,8 @@ public class HelloWorld {
         
         public void map(DocumentURI key, MarkLogicNode value, Context context) 
         throws IOException, InterruptedException {
-            if (key != null && value != null && value.get() != null) {
+            if (key != null && value != null && value.get() != null &&
+                    value.get().getNodeType() == Node.DOCUMENT_NODE) {
                 // grab the first word from the document text
                 Document doc = (Document)value.get();
                 String text = doc.getDocumentElement().getTextContent();
