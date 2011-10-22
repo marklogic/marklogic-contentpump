@@ -39,7 +39,7 @@
 	<!-- Definitions related to Javadocs -->
 	<tstamp><format property="thisyear" pattern="yyyy"></format></tstamp>
 	<property name="mapreduce.javadoc.included.packages" value="com.marklogic.mapreduce,com.marklogic.mapreduce.functions,com.marklogic.mapreduce.examples"/>
-	<property name="javadoc.copyright.message" value="Copyright &amp;copy; 2003-${thisyear} MarkLogic Corporation, All Rights Reserved."/>
+	<property name="javadoc.copyright.message" value="Copyright &amp;copy; ${thisyear} MarkLogic Corporation. All Rights Reserved."/>
 	<property name="javadoc.custom.css" value="${java.source}/stylesheet.css"/>
 	<property name="javadoc.jdk.javadoc.base" value="http://download.oracle.com/javase/6/docs/api/"/>
 	<property name="mapreduce.examples.dir" value="${java.source}/com/marklogic/mapreduce/examples"/>
