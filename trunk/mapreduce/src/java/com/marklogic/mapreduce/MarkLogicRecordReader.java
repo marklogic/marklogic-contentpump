@@ -185,6 +185,10 @@ implements MarkLogicConstants {
             AdhocQuery query = session.newAdhocQuery(queryText);
             if (advancedMode) {
                 query.setPosition(start);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("split start position: " + start);
+                }
+                
                 query.setCount(mlSplit.isLastSplit() ?
                         Long.MAX_VALUE : mlSplit.getLength());
             }
