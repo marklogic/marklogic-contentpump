@@ -220,6 +220,12 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 if (remainder != 0) {
                     splitSize++;
                 }
+                if (this instanceof KeyValueInputFormat<?, ?>) {
+                    // each split size has to be an even number
+                    if ((splitSize & 0x1) != 0) {
+                        splitSize++;
+                    }
+                }
                 long remainingCount = fsplit.recordCount;
                 while (remainingCount > 0) {
                     long start = fsplit.recordCount - remainingCount; 
