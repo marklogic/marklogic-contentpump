@@ -362,8 +362,13 @@ public interface MarkLogicConstants {
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the MarkLogic Server database directory
      * where output documents are created. Required if using MarkLogic
-     * Server for output with {@link ContentOutputFormat}. The directory
-     * must already exist.
+     * Server for output with {@link ContentOutputFormat}. 
+     * <p>
+     *  If {@link #OUTPUT_CLEAN_DIR output.cleandir} is false (the default)
+     *  then an error occurs if the directory already exists. If {@link
+     *  #OUTPUT_CLEAN_DIR output.cleandir} is true, then the directory
+     *  is removed as part of the job submission process.
+     * </p>
      */
     static final String OUTPUT_DIRECTORY = 
         "mapreduce.marklogic.output.content.directory";
@@ -437,13 +442,13 @@ public interface MarkLogicConstants {
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates whether or not to remove the output
      * directory. Only applicable to {@link ContentOutputFormat}. 
-     * Default: true.
+     * Default: false.
      * 
      * <p>
      *  When set to true, the output directory specified by the
      *  {@link #OUTPUT_DIRECTORY output.content.directory} property
      *  is removed. When set to false, an exception is thrown if
-     *  the output directory already exists.
+     *  the output content directory already exists.
      * </p>
      */
     static final String OUTPUT_CLEAN_DIR = 
