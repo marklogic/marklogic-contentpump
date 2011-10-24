@@ -22,9 +22,12 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
      *   lexicon starting position other than the default.  
      * </p>
      * <p>
-     *   If the value's data type is string, include double quotes
-     *   as part of the value, e.g. use "\"foo\"" for string value
-     *   "foo".
+     *   The returned value must have the expected type when
+     *   evaluated as XQuery. Therefore, if the data type of the
+     *   start value is xs:string, the returned string must include
+     *   escaped double quotes. For example, if the start value 
+     *   should be the string "foo" in XQuery, return "\"foo\"".
+     * </p>
      * 
      * @return the starting value for the function.
      */
