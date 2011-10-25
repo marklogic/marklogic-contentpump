@@ -220,6 +220,7 @@
 		<mkdir dir="${mapreduce.stagedir}"/>
 
                 <copy todir="${mapreduce.stagedir}" file="LICENSE.txt"/>
+                <copy todir="${mapreduce.stagedir}" file="LEGALNOTICES.txt"/>
 		<mkdir dir="${mapreduce.stage.lib}"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${mapreduce.output.jar}"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-modeler-2.0.1.jar"/>
