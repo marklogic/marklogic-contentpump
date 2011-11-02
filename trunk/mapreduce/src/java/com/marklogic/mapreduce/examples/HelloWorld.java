@@ -27,7 +27,7 @@ import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicNode;
 
 /**
- * Read the first word from each word in the input documents, then produce
+ * Read the first word from each input document, then produce
  * a single output document containing the words, sorted, and concatenated
  * into a single string. Only XML documents with text nodes contribute
  * to the final result.
@@ -35,15 +35,15 @@ import com.marklogic.mapreduce.MarkLogicNode;
  * <p>This sample uses the marklogic-hello-world.xml config file.</p>
  * <p>
  *  The config file name is hard-coded into the sample for simplicity, 
- *  so not additional command line options are required by the sample.
+ *  so no additional command line options are required by the sample.
  * </p>
  * <p>
- *   The mapper create key-value pairs where the key is always the same
+ *   The mapper creates key-value pairs where the key is always the same
  *   constant and the value is the first word from the document. The reducer
  *   sorts the words, concatenates them together, and writes them to an
  *   output document. Since all key-value pairs produced by the mapper have
- *   same key, there's only one input pair to the reducer, producing only a
- *   single output document.
+ *   the same key, there's only one input pair to the reducer, producing  a
+ *   a single output document.
  * </p>
  * <p>
  *   For example, given 2 input documents whose first words are "hello" and
