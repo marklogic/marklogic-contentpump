@@ -85,9 +85,7 @@ public class MarkLogicNode implements Writable {
         ItemType type = item.getItemType();
         DocumentBuilder docBuilder = builderLocal.get();
         try {
-            if (type == ItemType.BINARY) {
-                node = ((XdmBinary)item.getItem()).asW3cNode(docBuilder);
-            } else if (type == ItemType.ELEMENT) {
+            if (type == ItemType.ELEMENT) {
                 node = ((XdmElement)item.getItem()).asW3cElement(docBuilder);
             } else if (type == ItemType.TEXT) {
                 node = ((XdmText)item.getItem()).asW3cText(docBuilder);
@@ -96,7 +94,8 @@ public class MarkLogicNode implements Writable {
             } else if (type == ItemType.ATTRIBUTE) {
                 node = ((XdmAttribute)item.getItem()).asW3cAttr(docBuilder);
             } else {
-                LOG.error("Unexpected item type: " + item.getItemType());
+                throw new UnsupportedOperationException(
+                        "Unexpected item type: " + item.getItemType());
             }
         } catch (IOException e) {
             LOG.error(e);
