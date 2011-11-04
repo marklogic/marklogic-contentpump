@@ -35,6 +35,7 @@ import com.marklogic.xcc.types.XSDouble;
 import com.marklogic.xcc.types.XSFloat;
 import com.marklogic.xcc.types.XSHexBinary;
 import com.marklogic.xcc.types.XSInteger;
+import com.marklogic.xcc.types.XdmBinary;
 
 /**
  * Internal utilities shared by the package.  No need to document.
@@ -263,6 +264,10 @@ public class InternalUtilities implements MarkLogicConstants {
             XSBase64Binary binItem = (XSBase64Binary)result.getItem();
             byte[] bytes = binItem.asBinaryData();
             ((BytesWritable)value).set(bytes, 0, bytes.length);
+        } else if (valueClass.equals(BytesWritable.class) &&
+                result.getValueType() == ValueType.BINARY) {
+            byte[] bytes = ((XdmBinary)result.getItem()).asBinaryData();
+            ((BytesWritable)value).set(bytes, 0, bytes.length);
         } else if (valueClass.equals(MarkLogicNode.class) &&
                 (result.getValueType() == ValueType.NODE ||
                  result.getValueType() == ValueType.ELEMENT ||
@@ -314,7 +319,8 @@ public class InternalUtilities implements MarkLogicConstants {
         if (LOG.isDebugEnabled()) {
             LOG.debug("version: " + VersionInfo.getVersion());
         }
-        if (version.startsWith("0.20.203")) {
+        if (version.startsWith("0.20.203") || 
+            version.startsWith("0.20.204")) {
             throw new UnsupportedOperationException(
                     "Hadoop version " + version + " is not supported.");
         }

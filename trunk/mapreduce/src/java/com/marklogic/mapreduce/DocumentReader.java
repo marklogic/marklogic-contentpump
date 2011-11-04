@@ -6,6 +6,8 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.xcc.ResultItem;
 
@@ -14,7 +16,8 @@ import com.marklogic.xcc.ResultItem;
  * 
  * @author jchen
  */
-public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogicNode> {
+public class DocumentReader<VALUEIN> 
+extends MarkLogicRecordReader<DocumentURI, VALUEIN> {
     
     static final float DOCUMENT_TO_FRAGMENT_RATIO = 1; 
     
@@ -25,10 +28,13 @@ public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogic
     /**
      * Current value.
      */
-    private MarkLogicNode currentValue;
+    private VALUEIN currentValue;
+    private Class<? extends Writable> valueClass;
     
     public DocumentReader(Configuration conf) {
         super(conf);
+        valueClass = conf.getClass(INPUT_VALUE_CLASS, MarkLogicNode.class, 
+                Writable.class);
     }
 
     @Override
@@ -42,6 +48,7 @@ public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogic
         currentValue = null;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected boolean nextResult(ResultItem result) {
         if (currentKey != null) {
@@ -49,16 +56,16 @@ public class DocumentReader extends MarkLogicRecordReader<DocumentURI, MarkLogic
         } else {
             currentKey = new DocumentURI(result.getDocumentURI());
         }
-        if (currentValue != null) {
-            currentValue.set(result);
-        } else {
-            currentValue = new MarkLogicNode(result);
+        if (currentValue == null) {
+            currentValue = (VALUEIN)ReflectionUtils.newInstance(valueClass, 
+                    getConf());
         }
+        InternalUtilities.assignResultValue(valueClass, result, currentValue);
         return true;
     }
 
     @Override
-    public MarkLogicNode getCurrentValue() throws IOException,
+    public VALUEIN getCurrentValue() throws IOException,
             InterruptedException {
         return currentValue;
     }

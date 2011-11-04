@@ -154,7 +154,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         ((MarkLogicNode)value).get(), options);   
             } else if (value instanceof BytesWritable) {
                 content = ContentFactory.newContent(uri, 
-                        ((BytesWritable) value).getBytes(), options);
+                        ((BytesWritable) value).getBytes(), 0, 
+                        ((BytesWritable) value).getLength(), options);
             } else {
                 throw new UnsupportedOperationException(value.getClass() + 
                         " is not supported.");
