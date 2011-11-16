@@ -186,10 +186,10 @@ implements MarkLogicConstants {
             AdhocQuery query = session.newAdhocQuery(queryText);
             if (advancedMode) {
                 if (bindSplitRange) {
-                    query.setNewIntegerVariable("http://marklogic.com/hadoop", 
-                            "splitstart", start);
-                    query.setNewIntegerVariable("http://marklogic.com/hadoop", 
-                            "splitend", end);
+                    query.setNewIntegerVariable(SPLIT_RANGE_NAMESPACE, 
+                            SPLIT_START_VARNAME, start);
+                    query.setNewIntegerVariable(SPLIT_RANGE_NAMESPACE, 
+                            SPLIT_END_VARNAME, end);
                 } else {
                     query.setPosition(start);
                     if (LOG.isDebugEnabled()) {

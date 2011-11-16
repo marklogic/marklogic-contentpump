@@ -165,9 +165,6 @@ public interface MarkLogicConstants {
      * evaluating the path expression constructed from the
      * {@link #DOCUMENT_SELECTOR input.documentselector} and
      * {@link #SUBDOCUMENT_EXPRESSION input.subdocumentexpr} properties.
-     * Required if using MarkLogic Server for input and running in
-     * <code>basic</code> mode; see the 
-     * {@link #INPUT_MODE input.mode} property.
      * 
      * <p>Specify the namespaces as comma separated alias-URI pairs.
      *  For example:
@@ -222,8 +219,7 @@ public interface MarkLogicConstants {
      * <p>
      *   The config property name (<code>{@value}</code>)
      *   which, if set, specifies the name of the MarkLogic Server 
-     *   database from which to create input splits. Required if using
-     *   MarkLogic Server for input.
+     *   database from which to create input splits. 
      * </p>
      */
     static final String INPUT_DATABASE_NAME = 
@@ -274,7 +270,7 @@ public interface MarkLogicConstants {
     /**
      *  The config property name (<code>{@value}</code>)
      *  which, if set, specifies the query used to retrieve input
-     *  records from MarkLogic Server. This property is only usable
+     *  records from MarkLogic Server. This property is required
      *  when <code>advanced</code> is specified in the
      *  {@link #INPUT_MODE input.mode} property.
      * </p>
@@ -295,15 +291,24 @@ public interface MarkLogicConstants {
      * The config property name (<code>{@value}</code>)
      * which, if set to true, specifies that the input query declares and 
      * references external variables splitstart and splitend under the 
-     * namespace "http://marklogic.com/xdmp/hadoop".  The connector 
+     * namespace "http://marklogic.com/hadoop".  The connector 
      * will bind to these variables with the start and end of an input split
      * instead of constraining the query with the split range.
      */
     static final String BIND_SPLIT_RANGE = 
         "mapreduce.marklogic.input.bindsplitrange";
     /**
-     * Value string of 
+     * Value string of the split range external variables namespace.
      */
+    static final String SPLIT_RANGE_NAMESPACE = "http://marklogic.com/hadoop";
+    /**
+     * Value string of the split start external variable name.
+     */
+    static final String SPLIT_START_VARNAME = "splitstart";
+    /**
+     * Value string of the split end external variable name.
+     */
+    static final String SPLIT_END_VARNAME = "splitend";
     /**      
      * The config property name (<code>{@value}</code>) which, if   
      * set, specifies the ratio of the number of retrieved       
