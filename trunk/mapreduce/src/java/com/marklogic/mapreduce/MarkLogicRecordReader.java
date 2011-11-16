@@ -114,6 +114,7 @@ implements MarkLogicConstants {
         // get job config properties
         boolean advancedMode = 
             conf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
+        boolean bindSplitRange =conf.getBoolean(BIND_SPLIT_RANGE, false);
         
         // initialize the total length
         float recToFragRatio = conf.getFloat(RECORD_TO_FRAGMENT_RATIO, 
@@ -184,13 +185,20 @@ implements MarkLogicConstants {
             session = cs.newSession("#"+mlSplit.getForestId().toString());
             AdhocQuery query = session.newAdhocQuery(queryText);
             if (advancedMode) {
-                query.setPosition(start);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("split start position: " + start);
+                if (bindSplitRange) {
+                    query.setNewIntegerVariable("http://marklogic.com/hadoop", 
+                            "splitstart", start);
+                    query.setNewIntegerVariable("http://marklogic.com/hadoop", 
+                            "splitend", end);
+                } else {
+                    query.setPosition(start);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("split start position: " + start);
+                    }
+                    
+                    query.setCount(mlSplit.isLastSplit() ?
+                            Long.MAX_VALUE : mlSplit.getLength());
                 }
-                
-                query.setCount(mlSplit.isLastSplit() ?
-                        Long.MAX_VALUE : mlSplit.getLength());
             }
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);

@@ -291,7 +291,19 @@ public interface MarkLogicConstants {
      */
     static final String INPUT_QUERY =
         "mapreduce.marklogic.input.query";
-    
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set to true, specifies that the input query declares and 
+     * references external variables splitstart and splitend under the 
+     * namespace "http://marklogic.com/xdmp/hadoop".  The connector 
+     * will bind to these variables with the start and end of an input split
+     * instead of constraining the query with the split range.
+     */
+    static final String BIND_SPLIT_RANGE = 
+        "mapreduce.marklogic.input.bindsplitrange";
+    /**
+     * Value string of 
+     */
     /**      
      * The config property name (<code>{@value}</code>) which, if   
      * set, specifies the ratio of the number of retrieved       
@@ -361,8 +373,7 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the MarkLogic Server database directory
-     * where output documents are created. Required if using MarkLogic
-     * Server for output with {@link ContentOutputFormat}. 
+     * where output documents are created. 
      * <p>
      *  If {@link #OUTPUT_CLEAN_DIR output.cleandir} is false (the default)
      *  then an error occurs if the directory already exists. If {@link

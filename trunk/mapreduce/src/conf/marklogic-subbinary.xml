@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Used with com.marklogic.mapreduce.examples.LinkCount.class -->
+
+<configuration>
+    <property>
+        <name>mapreduce.marklogic.input.username</name>
+        <value>username</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.password</name>
+        <value>password</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.host</name>
+        <value>hostname</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.port</name>
+        <value>port</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.query</name>
+        <value><![CDATA[
+        xquery version "1.0-ml"; 
+        declare namespace mlmr="http://marklogic.com/hadoop";
+        declare variable $mlmr:splitstart as xs:integer external;
+        declare variable $mlmr:splitend as xs:integer external;
+        for $doc in fn:doc()[$mlmr:splitstart to $mlmr:splitend]
+        return xdmp:subbinary($doc/binary(), 0, 1000)
+            ]]></value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.splitquery</name>
+        <value><![CDATA[
+        xquery version "1.0-ml"; 
+        import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy"; 
+        let $conf := admin:get-configuration() 
+        for $forest in xdmp:database-forests(xdmp:database()) 
+          let $host_id := admin:forest-get-host($conf, $forest) 
+          let $host_name := admin:host-get-name($conf, $host_id) 
+          let $cnt := xdmp:estimate(cts:search(fn:doc(), cts:and-query(()), (), 0.0, $forest)) 
+          return ($forest, $cnt, $host_name)]]></value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.mode</name>
+        <value>advanced</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.bindsplitrange</name>
+        <value>true</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.maxsplitsize</name>
+        <value>1000</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.valueclass</name>
+        <value>org.apache.hadoop.io.BytesWritable</value>
+    </property>
+</configuration>
