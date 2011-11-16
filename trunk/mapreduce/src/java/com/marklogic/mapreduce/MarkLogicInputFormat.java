@@ -57,6 +57,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         
         // get input from job configuration
         Configuration jobConf = jobContext.getConfiguration();
+        
         long maxSplitSize;
 
         String docSelector;
@@ -80,7 +81,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 "Max split size is required to be positive. It is set to " +
                 maxSplitSize);
         }
-        splitQuery = jobConf.get(SPLIT_QUERY, "");
+        splitQuery = jobConf.get(SPLIT_QUERY);
         boolean advancedMode = 
             jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
         
@@ -90,6 +91,27 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         ResultSequence result = null;
         
         if (!advancedMode) {
+            //warn about config parameters that are present but won't apply
+            if (splitQuery != null) {
+                LOG.warn("Config entry for " +
+                        "\"mapreduce.marklogic.input.splitquery\" will not " +
+                        "apply since the job is running in basic mode.  To " +
+                        "turn on advanced mode, set " +
+                        "\"mapreduce.marklogic.input.mode\" to \"advanced\".");
+            } else if (jobConf.get(INPUT_QUERY) != null) {
+                LOG.warn("Config entry for " +
+                        "\"mapreduce.marklogic.input.query\" will not " +
+                        "apply since the job is running in basic mode.  To " +
+                        "turn on advanced mode, set " +
+                        "\"mapreduce.marklogic.input.mode\" to \"advanced\".");
+            } else if (jobConf.get(BIND_SPLIT_RANGE) != null) {
+                LOG.warn("Config entry for " +
+                        "\"mapreduce.marklogic.input.bindsplitrange\" will " +
+                        "not apply since the job is running in basic mode.  " +
+                        "To turn on advanced mode, set " +
+                        "\"mapreduce.marklogic.input.mode\" to \"advanced\".");
+            }
+            
             Collection<String> nsCol = 
                 jobConf.getStringCollection(PATH_NAMESPACE);        
             
@@ -135,7 +157,33 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             
             splitQuery = buf.toString();
         } else {
-            if (splitQuery.isEmpty()) {
+            // warn about configs parameters that are present but won't apply
+            if (jobConf.get(DOCUMENT_SELECTOR) != null) {
+                LOG.warn("Config entry for " +
+                        "\"mapreduce.marklogic.input.documentselector\" " +
+                        "will not apply since the job is running in " +
+                        "advanced mode.  To switch to basic mode, set " +
+                        "\"mapreduce.marklogic.input.mode\" to \"basic\".");
+            } else if (jobConf.get(SUBDOCUMENT_EXPRESSION) != null) {
+                LOG.warn("Config entry for " +
+                        "\"mapreduce.marklogic.input.subdocumentexpr\" " +
+                        "will not apply since the job is running in " +
+                        "advanced mode.  To switch to basic mode, set " +
+                        "\"mapreduce.marklogic.input.mode\" to \"basic\".");
+            } else if (jobConf.get(INPUT_LEXICON_FUNCTION_CLASS) != null) {
+                LOG.warn("Config entry for " +
+                        "\"mapreduce.marklogic.input.lexiconfunctionclass\" " +
+                        "will not apply since the job is running in " +
+                        "advanced mode.  To switch to basic mode, set " +
+                        "\"mapreduce.marklogic.input.mode\" to \"basic\".");
+            } else if (jobConf.get(PATH_NAMESPACE) != null) {
+                LOG.warn("Config entry for " +
+                        "\"mapreduce.marklogic.input.namespace\" " +
+                        "will not apply since the job is running in " +
+                        "advanced mode.  To switch to basic mode, set " +
+                        "\"mapreduce.marklogic.input.mode\" to \"basic\".");
+            }
+            if (splitQuery == null) {
                 throw new IllegalStateException(
                   "Split query is required in advanced mode but not defined.");
             }
