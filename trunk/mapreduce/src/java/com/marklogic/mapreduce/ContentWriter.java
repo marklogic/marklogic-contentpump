@@ -25,7 +25,7 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 
 /**
- * MarkLogicRecordWriter that inserts content in bytes to MarkLogicServer.
+ * MarkLogicRecordWriter that inserts content to MarkLogicServer.
  * 
  * @author jchen
  *
@@ -63,10 +63,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * Counts of documents per forest.
      */
     private int[] counts;
+    
+    /**
+     * Whether in fast load mode.
+     */
+    private boolean fastLoad;
 
     public ContentWriter(Configuration conf, 
-            Map<String, ContentSource> forestSourceMap) {
+            Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         super(null, conf);
+        
+        this.fastLoad = fastLoad;
         
         this.forestSourceMap = forestSourceMap;
         forestIds = new String[forestSourceMap.size()];
@@ -134,15 +141,21 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
         String uri = key.getUri();
-        if (outputDir != null && !outputDir.isEmpty()) {
-            uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
-                  outputDir + uri : outputDir + '/' + uri;
-        }    
-        key.setUri(uri);
-        DocumentURI.validate(uri);
-        int fId = key.getPlacementId(forestIds.length);
+        String forestId = ContentOutputFormat.ID_PREFIX;
+        int fId = 0;
+        if (fastLoad) {
+            // compute forest to write to 
+            if (outputDir != null && !outputDir.isEmpty()) {
+                uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
+                      outputDir + uri : outputDir + '/' + uri;
+            }    
+            key.setUri(uri);
+            DocumentURI.validate(uri);
+            fId = key.getPlacementId(forestIds.length);
+            
+            forestId = forestIds[fId];
+        }
         
-        String forestId = forestIds[fId];
         Session session = null;
         try {
             Content content = null;
@@ -166,13 +179,14 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
  
                 if (counts[fId] == batchSize) {
                     ContentSource cs = forestSourceMap.get(forestId);
-                    session = cs.newSession(forestId);
+                    session = getSession(cs, forestId);         
                     session.insertContent(forestContents[fId]);
                     counts[fId] = 0;
                 }
             } else {
                 ContentSource cs = forestSourceMap.get(forestId);
-                session = cs.newSession(forestId);
+                session = getSession(cs, forestId);
+                
                 session.insertContent(content);
             }
         } catch (RequestException e) {
@@ -182,6 +196,14 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (session != null) {
                 session.close();
             } 
+        }      
+    }
+
+    private Session getSession(ContentSource cs, String forestId) {
+        if (fastLoad) {
+            return cs.newSession(forestId);
+        } else {
+            return cs.newSession();
         }      
     }
 
@@ -198,7 +220,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         counts[i]);
                 String forestId = forestIds[i];
                 ContentSource cs = forestSourceMap.get(forestId);
-                Session session = cs.newSession(forestId);
+                Session session = getSession(cs, forestId);
+                
                 try {
                     session.insertContent(remainder);
                 } catch (RequestException e) {
