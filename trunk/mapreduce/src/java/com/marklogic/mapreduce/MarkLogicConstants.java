@@ -471,6 +471,21 @@ public interface MarkLogicConstants {
         "mapreduce.marklogic.output.content.cleandir";
     /**
      * The config property name (<code>{@value}</code>)
+     * which, if set, indicates whether or not to use the fast load mode
+     * to load content into MarkLogic.  Default: false.
+     * 
+     * <p>
+     * Setting it to true when the documents
+     * to be loaded already exist may cause XDMP-DBDUPURI error if the
+     * original documents were inserted when the database had a different
+     * forest count.  The fast load mode will always be
+     * used if "mapreduce.marklogic.output.content.directory" is set.
+     * </p>
+     */
+    static final String OUTPUT_FAST_LOAD =
+        "mapreduce.marklogic.output.content.fastload";
+    /**
+     * The config property name (<code>{@value}</code>)
      * which, if set, indicates what node operation to perform
      * during output. Required if using MarkLogic Server for output
      * with NodeOutputFormat.  Valid choices: INSERT_BEFORE, INSERT_AFTER,
