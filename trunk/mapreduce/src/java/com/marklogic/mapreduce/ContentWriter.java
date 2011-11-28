@@ -52,27 +52,22 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     /**
      * Content lists for each forest.
      */
-    private Content[][] forestContents;
+    private List<Content>[] contentLists;
     
     /**
      * An array of forest ids
      */
     private String[] forestIds;
-    
-    /** 
-     * Counts of documents per forest.
-     */
-    private int[] counts;
-    
+
     /**
      * Whether in fast load mode.
      */
     private boolean fastLoad;
-
+    
+    @SuppressWarnings("unchecked")
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         super(null, conf);
-        
         this.fastLoad = fastLoad;
         
         this.forestSourceMap = forestSourceMap;
@@ -82,8 +77,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         this.outputDir = conf.get(OUTPUT_DIRECTORY);
         
         if (batchSize > 1) {
-            forestContents = new Content[forestSourceMap.size()][batchSize];
-            counts = new int[forestSourceMap.size()];
+            contentLists = new ArrayList[forestIds.length];
         }
         
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
@@ -141,10 +135,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
         String uri = key.getUri();
-        String forestId = ContentOutputFormat.ID_PREFIX;
+        String forestId = ContentOutputFormat.ID_PREFIX; 
         int fId = 0;
-        if (fastLoad) {
-            // compute forest to write to 
+        if (fastLoad) { // compute forest to write to
+            // outputDir can only be set if fastLoad is true
             if (outputDir != null && !outputDir.isEmpty()) {
                 uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
                       outputDir + uri : outputDir + '/' + uri;
@@ -154,6 +148,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             fId = key.getPlacementId(forestIds.length);
             
             forestId = forestIds[fId];
+        } else {
+            DocumentURI.validate(uri);
         }
         
         Session session = null;
@@ -173,20 +169,23 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 throw new UnsupportedOperationException(value.getClass() + 
                         " is not supported.");
             }
-           
+            
             if (batchSize > 1) {
-                forestContents[fId][counts[fId]++] = content;
- 
-                if (counts[fId] == batchSize) {
+                if (contentLists[fId] == null) {
+                    contentLists[fId] = new ArrayList<Content>();
+                }
+                contentLists[fId].add(content);
+                if (contentLists[fId].size() == batchSize) {
+                    Content[] contents = contentLists[fId].toArray(
+                        new Content[batchSize]);
                     ContentSource cs = forestSourceMap.get(forestId);
                     session = getSession(cs, forestId);         
-                    session.insertContent(forestContents[fId]);
-                    counts[fId] = 0;
+                    session.insertContent(contents);
+                    contentLists[fId].clear();
                 }
             } else {
                 ContentSource cs = forestSourceMap.get(forestId);
-                session = getSession(cs, forestId);
-                
+                session = getSession(cs, forestId);         
                 session.insertContent(content);
             }
         } catch (RequestException e) {
@@ -206,24 +205,22 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             return cs.newSession();
         }      
     }
-
+    
     @Override
     public void close(TaskAttemptContext context) throws IOException,
     InterruptedException {
-        if (forestContents == null) {
+        if (contentLists == null) {
             return;
         }       
-        for (int i = 0; i < forestIds.length; i++) {
-            if (counts[i] > 0) {
-                Content[] remainder = new Content[counts[i]];
-                System.arraycopy(forestContents[i], 0, remainder, 0, 
-                        counts[i]);
+        for (int i = 0; i < contentLists.length; i++) {
+            if (contentLists[i] != null && !contentLists[i].isEmpty()) {
                 String forestId = forestIds[i];
                 ContentSource cs = forestSourceMap.get(forestId);
                 Session session = getSession(cs, forestId);
-                
+                Content[] contents = contentLists[i].toArray(
+                        new Content[contentLists[i].size()]);
                 try {
-                    session.insertContent(remainder);
+                    session.insertContent(contents);
                 } catch (RequestException e) {
                     LOG.error(e);
                     throw new IOException(e);
