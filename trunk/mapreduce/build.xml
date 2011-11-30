@@ -163,7 +163,7 @@
 			windowtitle="${mapreduce.product.name} v${version.number.string}"
 			doctitle="${mapreduce.product.name} Version ${version.number.string}"
 			overview="${java.source}/overview.html" author="false"
-			header="${mapreduce.product.name.short} ${version.number.string}"
+			header="&lt;font color='#8A9B3C'&gt;${mapreduce.product.name.short} ${version.number.string}&lt;/font&gt;"
 			link="${javadoc.jdk.javadoc.base}"
 		>
 		    <fileset dir="${java.source}">
