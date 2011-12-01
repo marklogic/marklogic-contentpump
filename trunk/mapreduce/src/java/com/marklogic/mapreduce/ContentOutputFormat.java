@@ -13,8 +13,15 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.xcc.AdhocQuery;
+import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.ResultItem;
+import com.marklogic.xcc.ResultSequence;
+import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.XSBoolean;
 
 /**
  * MarkLogicOutputFormat for Content.
@@ -47,9 +54,91 @@ public class ContentOutputFormat<VALUEOUT> extends
     public static final Log LOG = LogFactory.getLog(ContentOutputFormat.class);
     
     // Prepend to a forest id to form a database name parsed by XDBC.
-    // Also used here alone to indicate that non-fast-mode.
+    // Also used here alone as the forest id placeholder in non-fast-mode.
     static final String ID_PREFIX = "#";
+ 
+    @Override
+    void checkOutputSpecs(Configuration conf, Session session, 
+            AdhocQuery query, ResultSequence result) 
+    throws RequestException { 
+        boolean fastLoad;
+        // clear output dir if specified
+        String outputDir = conf.get(OUTPUT_DIRECTORY);
+        if (outputDir != null) {
+            fastLoad = true;
+            outputDir = outputDir.endsWith("/") ? 
+                    outputDir : outputDir + "/";
+            if (conf.getBoolean(OUTPUT_CLEAN_DIR, false)) {
+                // delete directory if exists
+                String queryText = DELETE_DIRECTORY_TEMPLATE.replace(
+                        DIRECTORY_TEMPLATE, outputDir);
+                query.setQuery(queryText);
+                result = session.submitRequest(query);
+            } else { // ensure nothing exists under output dir
+                String queryText = CHECK_DIRECTORY_EXIST_TEMPLATE.replace(
+                        DIRECTORY_TEMPLATE, outputDir);
+                query.setQuery(queryText);
+                result = session.submitRequest(query);
+                if (result.hasNext()) {
+                    ResultItem item = result.next();
+                    if (((XSBoolean)(item.getItem())).asBoolean()) {
+                        throw new IllegalStateException("Directory " + 
+                                outputDir + " already exists");
+                    }
+                } else {
+                    throw new IllegalStateException(
+                            "Failed to query directory content.");
+                }
+            }
+        } else {
+            fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false);
+        }
 
+        // ensure manual directory creation 
+        if (fastLoad) {
+            LOG.info("Running in fast load mode");
+            query.setQuery(DIRECTORY_CREATE_QUERY);
+            result = session.submitRequest(query);
+            if (result.hasNext()) {
+                ResultItem item = result.next();
+                String dirMode = item.asString();
+                if (!dirMode.equals(MANUAL_DIRECTORY_MODE)) {
+                    throw new IllegalStateException(
+                            "Manual directory creation mode is required. " +
+                            "The current creation mode is " + dirMode + ".");
+                }
+            } else {
+                throw new IllegalStateException(
+                        "Failed to query directory creation mode.");
+            }
+        }     
+
+        // validate capabilities
+        String[] perms = conf.getStrings(OUTPUT_PERMISSION);
+        if (perms != null && perms.length > 0) {
+            if (perms.length % 2 != 0) {
+                throw new IllegalStateException(
+                "Permissions are expected to be in <role, capability> pairs.");
+            }
+            int i = 0;
+            while (i + 1 < perms.length) {
+                String roleName = perms[i++];
+                if (roleName == null || roleName.isEmpty()) {
+                    throw new IllegalStateException(
+                            "Illegal role name: " + roleName);
+                }
+                String perm = perms[i].trim();
+                if (!perm.equalsIgnoreCase(ContentCapability.READ.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.INSERT.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
+                    throw new IllegalStateException("Illegal capability: " + perm);
+                }
+                i++;
+            }
+        }
+    }
+    
     @Override
     public RecordWriter<DocumentURI, VALUEOUT> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
@@ -58,11 +147,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
                     LinkedMapWritable.class);
         boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false) ||
-                           (conf.get(OUTPUT_DIRECTORY) != null);
-        if (fastLoad) {
-            LOG.info("Running in fast load mode");
-        }
-        
+            (conf.get(OUTPUT_DIRECTORY) != null);
         Map<String, ContentSource> sourceMap = 
             new LinkedHashMap<String, ContentSource>();
         if (fastLoad) {        

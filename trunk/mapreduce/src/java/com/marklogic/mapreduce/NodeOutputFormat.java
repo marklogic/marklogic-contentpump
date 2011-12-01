@@ -14,6 +14,11 @@ import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.xcc.AdhocQuery;
+import com.marklogic.xcc.ResultSequence;
+import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.RequestException;
+
 /**
  * MarkLogicOutputFormat for Node.
  * 
@@ -54,6 +59,12 @@ extends MarkLogicOutputFormat<NodePath, MarkLogicNode> {
             LOG.error(e);
             throw new IOException(e);
         }
+    }
+
+    @Override
+    void checkOutputSpecs(Configuration conf, Session session,
+            AdhocQuery query, ResultSequence result) throws RequestException {
+        // No extra check needed     
     }
 
 }

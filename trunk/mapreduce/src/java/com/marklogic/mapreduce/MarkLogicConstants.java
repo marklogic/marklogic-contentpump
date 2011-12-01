@@ -290,7 +290,7 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set to true, specifies that the input query declares and 
-     * references external variables splitstart and splitend under the 
+     * references external variables "splitstart" and "splitend" under the 
      * namespace "http://marklogic.com/hadoop".  The connector 
      * will bind to these variables with the start and end of an input split
      * instead of constraining the query with the split range.
@@ -300,7 +300,7 @@ public interface MarkLogicConstants {
     /**
      * Value string of the split range external variables namespace.
      */
-    static final String SPLIT_RANGE_NAMESPACE = "http://marklogic.com/hadoop";
+    static final String MR_NAMESPACE = "http://marklogic.com/hadoop";
     /**
      * Value string of the split start external variable name.
      */
@@ -553,6 +553,44 @@ public interface MarkLogicConstants {
      */
     static final String CONTENT_TYPE = 
         "mapreduce.marklogic.output.content.type";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the data type of the  
+     * output keys for {@link KeyValueOutputFormat}. Optional. 
+     * Default: xs:string.
+     */
+    static final String OUTPUT_KEY_TYPE = 
+        "mapreduce.marklogic.output.keytype";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the data type of the map 
+     * output value for {@link KeyValueOutputFormat}. 
+     * Optional. Default: xs:string.
+     */
+    static final String OUTPUT_VALUE_TYPE = 
+        "mapreduce.marklogic.output.valuetype";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the statement to execute against MarkLogic 
+     * Server. This property is required for KeyValueOutputFormat.
+     * 
+     * <p>
+     * The statement is allowed to declare and refernce two external variables 
+     * "key" and "value" under namespace "http://marklogic.com/hadoop", which 
+     * will be bound by the connector with the output key and value in the user
+     * specified data type.
+     * </p>
+     */
+    static final String OUTPUT_STATEMENT =
+        "mapreduce.marklogic.output.statement";
+    /**
+     * Value string of the output key external variable name.
+     */
+    static final String OUTPUT_KEY_VARNAME = "key";
+    /**
+     * Value string of the output value external variable name.
+     */
+    static final String OUTPUT_VALUE_VARNAME = "value";
     /**
      * Default content type.
      */
