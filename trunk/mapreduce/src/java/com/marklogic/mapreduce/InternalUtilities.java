@@ -36,6 +36,8 @@ import com.marklogic.xcc.types.XSFloat;
 import com.marklogic.xcc.types.XSHexBinary;
 import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XdmBinary;
+import com.marklogic.xcc.types.XdmValue;
+import com.marklogic.xcc.ValueFactory;
 
 /**
  * Internal utilities shared by the package.  No need to document.
@@ -44,7 +46,7 @@ import com.marklogic.xcc.types.XdmBinary;
  */
 public class InternalUtilities implements MarkLogicConstants {
     public static final Log LOG =
-        LogFactory.getLog(MarkLogicConstants.class);
+        LogFactory.getLog(InternalUtilities.class);
     
     /**
      * Get input server URI based on the job configuration.
@@ -323,6 +325,37 @@ public class InternalUtilities implements MarkLogicConstants {
             version.startsWith("0.20.204")) {
             throw new UnsupportedOperationException(
                     "Hadoop version " + version + " is not supported.");
+        }
+    }
+    
+    /**
+     * Create new XdmValue from value type and Writables.
+     *  
+     */
+    public static XdmValue newValue(ValueType valueType, Object value) {
+        if (value instanceof Text) {
+            return ValueFactory.newValue(valueType, ((Text)value).toString());
+        } else if (value instanceof BytesWritable) {
+            return ValueFactory.newValue(valueType, ((BytesWritable)value).getBytes());
+        } else if (value instanceof IntWritable) {
+            return ValueFactory.newValue(valueType, ((IntWritable)value).get());
+        } else if (value instanceof LongWritable) {
+            return ValueFactory.newValue(valueType, ((LongWritable)value).get());
+        } else if (value instanceof VIntWritable) {
+            return ValueFactory.newValue(valueType, ((VIntWritable)value).get());
+        } else if (value instanceof VLongWritable) {
+            return ValueFactory.newValue(valueType, ((VLongWritable)value).get());
+        } else if (value instanceof BooleanWritable) {
+            return ValueFactory.newValue(valueType, ((BooleanWritable)value).get());
+        } else if (value instanceof FloatWritable) {
+            return ValueFactory.newValue(valueType, ((FloatWritable)value).get());
+        } else if (value instanceof DoubleWritable) {
+            return ValueFactory.newValue(valueType, ((DoubleWritable)value).get());
+        } else if (value instanceof MarkLogicNode) {
+            return ValueFactory.newValue(valueType, ((MarkLogicNode)value).get());
+        } else {
+            throw new UnsupportedOperationException("Value " +  
+                    value.getClass().getName() + " is unsupported.");
         }
     }
 }

@@ -21,7 +21,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.xcc.AdhocQuery;
-import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
@@ -29,7 +28,6 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
-import com.marklogic.xcc.types.XSBoolean;
 
 /**
  * MarkLogic-based OutputFormat superclass. Use the provided subclasses, such
@@ -109,73 +107,7 @@ implements MarkLogicConstants, Configurable {
                 return;
             }
             
-            // clear output dir if specified
-            String outputDir = conf.get(OUTPUT_DIRECTORY);
-            if (outputDir != null) {
-                outputDir = outputDir.endsWith("/") ? 
-                        outputDir : outputDir + "/";
-                if (conf.getBoolean(OUTPUT_CLEAN_DIR, false)) {
-                    // delete directory if exists
-                    String queryText = DELETE_DIRECTORY_TEMPLATE.replace(
-                            DIRECTORY_TEMPLATE, outputDir);
-                    query.setQuery(queryText);
-                    result = session.submitRequest(query);
-                } else { // ensure nothing exists under output dir
-                    String queryText = CHECK_DIRECTORY_EXIST_TEMPLATE.replace(
-                            DIRECTORY_TEMPLATE, outputDir);
-                    query.setQuery(queryText);
-                    result = session.submitRequest(query);
-                    if (result.hasNext()) {
-                        ResultItem item = result.next();
-                        if (((XSBoolean)(item.getItem())).asBoolean()) {
-                            throw new IllegalStateException("Directory " + 
-                                    outputDir + " already exists");
-                        }
-                    } else {
-                        throw new IOException("Failed to query directory content.");
-                    }
-                }
-            } 
-            
-            // ensure manual directory creation 
-            query.setQuery(DIRECTORY_CREATE_QUERY);
-            result = session.submitRequest(query);
-            if (result.hasNext()) {
-                ResultItem item = result.next();
-                String dirMode = item.asString();
-                if (!dirMode.equals(MANUAL_DIRECTORY_MODE)) {
-                    throw new IllegalStateException(
-                            "Manual directory creation mode is required. " +
-                            "The current creation mode is " + dirMode + ".");
-                }
-            } else {
-                throw new IOException("Failed to query directory creation mode.");
-            }
-            
-            // validate capabilities
-            String[] perms = conf.getStrings(OUTPUT_PERMISSION);
-            if (perms != null && perms.length > 0) {
-                if (perms.length % 2 != 0) {
-                    throw new IllegalStateException(
-                    "Permissions are expected to be in <role, capability> pairs.");
-                }
-                int i = 0;
-                while (i + 1 < perms.length) {
-                    String roleName = perms[i++];
-                    if (roleName == null || roleName.isEmpty()) {
-                        throw new IllegalStateException(
-                                "Illegal role name: " + roleName);
-                    }
-                    String perm = perms[i].trim();
-                    if (!perm.equalsIgnoreCase(ContentCapability.READ.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.INSERT.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
-                        throw new IllegalStateException("Illegal capability: " + perm);
-                    }
-                    i++;
-                }
-            }
+            checkOutputSpecs(conf, session, query, result);
         } catch (URISyntaxException e) {
             throw new IOException(e);
         } catch (XccConfigException e) {
@@ -211,4 +143,7 @@ implements MarkLogicConstants, Configurable {
     public void setConf(Configuration conf) {
         this.conf = conf;        
     }
+    
+    abstract void checkOutputSpecs(Configuration conf, Session session,
+            AdhocQuery query, ResultSequence result) throws RequestException;
 }

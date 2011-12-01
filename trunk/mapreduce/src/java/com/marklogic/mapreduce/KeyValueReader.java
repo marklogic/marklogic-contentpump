@@ -25,8 +25,7 @@ import com.marklogic.xcc.ResultItem;
  * @param <VALUEIN>
  */
 public class KeyValueReader<KEYIN, VALUEIN>
-extends MarkLogicRecordReader<KEYIN, VALUEIN>
-implements MarkLogicConstants {
+extends MarkLogicRecordReader<KEYIN, VALUEIN> {
     
     public static final Log LOG =
         LogFactory.getLog(KeyValueReader.class);

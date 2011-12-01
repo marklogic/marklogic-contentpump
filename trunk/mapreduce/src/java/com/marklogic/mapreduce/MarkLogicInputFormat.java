@@ -53,8 +53,6 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     @Override
     public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
             InterruptedException { 
-        InternalUtilities.checkVersion();
-        
         // get input from job configuration
         Configuration jobConf = jobContext.getConfiguration();
         
