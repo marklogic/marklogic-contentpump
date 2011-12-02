@@ -22,6 +22,7 @@ import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
+import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
 
 /**
@@ -50,11 +51,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     private Map<String, ContentSource> forestSourceMap;
     
     /**
-     * Content lists for each forest.
-     */
-    private List<Content>[] contentLists;
-    
-    /**
      * An array of forest ids
      */
     private String[] forestIds;
@@ -64,7 +60,16 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      */
     private boolean fastLoad;
     
-    @SuppressWarnings("unchecked")
+    /**
+     * An array of record counts per forest.
+     */
+    private int counts[];
+    
+    /**
+     * An array of sessions per forest.
+     */
+    private Session sessions[];
+
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         super(null, conf);
@@ -77,7 +82,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         this.outputDir = conf.get(OUTPUT_DIRECTORY);
         
         if (batchSize > 1) {
-            contentLists = new ArrayList[forestIds.length];
+            counts = new int[forestIds.length];
+            sessions = new Session[forestIds.length];
         }
         
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
@@ -152,7 +158,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             DocumentURI.validate(uri);
         }
         
-        Session session = null;
         try {
             Content content = null;
             if (value instanceof Text) {
@@ -171,65 +176,57 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
             
             if (batchSize > 1) {
-                if (contentLists[fId] == null) {
-                    contentLists[fId] = new ArrayList<Content>();
-                }
-                contentLists[fId].add(content);
-                if (contentLists[fId].size() == batchSize) {
-                    Content[] contents = contentLists[fId].toArray(
-                        new Content[batchSize]);
+                if (sessions[fId] == null) {
                     ContentSource cs = forestSourceMap.get(forestId);
-                    session = getSession(cs, forestId);         
-                    session.insertContent(contents);
-                    contentLists[fId].clear();
+                    sessions[fId] = getSession(cs, forestId, 
+                            TransactionMode.UPDATE); 
+                }
+                        
+                sessions[fId].insertContent(content);
+                counts[fId]++;
+                if (counts[fId] == batchSize) {
+                    sessions[fId].commit();
+                    counts[fId] = 0;
                 }
             } else {
                 ContentSource cs = forestSourceMap.get(forestId);
-                session = getSession(cs, forestId);         
-                session.insertContent(content);
+                Session session = getSession(cs, forestId, TransactionMode.AUTO);
+                session.insertContent(content);         
             }
         } catch (RequestException e) {
             LOG.error(e);
             throw new IOException(e);
-        } finally {
-            if (session != null) {
-                session.close();
-            } 
-        }      
+        }  
     }
 
-    private Session getSession(ContentSource cs, String forestId) {
+    private Session getSession(ContentSource cs, String forestId, 
+            TransactionMode mode) {
+        Session session;
         if (fastLoad) {
-            return cs.newSession(forestId);
+            session = cs.newSession(forestId);         
         } else {
-            return cs.newSession();
+            session = cs.newSession();
         }      
+        session.setTransactionMode(mode);
+        return session;
     }
     
     @Override
     public void close(TaskAttemptContext context) throws IOException,
     InterruptedException {
-        if (contentLists == null) {
+        if (counts == null) {
             return;
         }       
-        for (int i = 0; i < contentLists.length; i++) {
-            if (contentLists[i] != null && !contentLists[i].isEmpty()) {
-                String forestId = forestIds[i];
-                ContentSource cs = forestSourceMap.get(forestId);
-                Session session = getSession(cs, forestId);
-                Content[] contents = contentLists[i].toArray(
-                        new Content[contentLists[i].size()]);
+        for (int i = 0; i < counts.length; i++) {
+            if (counts[i] > 0) {
                 try {
-                    session.insertContent(contents);
+                    sessions[i].commit();
                 } catch (RequestException e) {
                     LOG.error(e);
                     throw new IOException(e);
-                } finally {
-                    if (session != null) {
-                        session.close();
-                    } 
-                } 
-            }
+                }
+            } 
+            sessions[i].close();
         }
     }
 }
