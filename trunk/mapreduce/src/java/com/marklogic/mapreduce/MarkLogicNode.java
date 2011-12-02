@@ -28,7 +28,6 @@ import org.xml.sax.SAXException;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.types.ItemType;
 import com.marklogic.xcc.types.XdmAttribute;
-import com.marklogic.xcc.types.XdmBinary;
 import com.marklogic.xcc.types.XdmDocument;
 import com.marklogic.xcc.types.XdmElement;
 import com.marklogic.xcc.types.XdmText;
