@@ -83,8 +83,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         if (batchSize > 1) {
             counts = new int[forestIds.length];
-            sessions = new Session[forestIds.length];
         }
+        
+        sessions = new Session[forestIds.length];
         
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
         List<ContentPermission> permissions = null;
@@ -189,9 +190,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     counts[fId] = 0;
                 }
             } else {
-                ContentSource cs = forestSourceMap.get(forestId);
-                Session session = getSession(cs, forestId, TransactionMode.AUTO);
-                session.insertContent(content);         
+                if (sessions[fId] == null) {
+                    ContentSource cs = forestSourceMap.get(forestId);
+                    sessions[fId] = getSession(cs, forestId, 
+                            TransactionMode.AUTO); 
+                }  
+                sessions[fId].insertContent(content);   
             }
         } catch (RequestException e) {
             LOG.error(e);
@@ -213,12 +217,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     
     @Override
     public void close(TaskAttemptContext context) throws IOException,
-    InterruptedException {
-        if (counts == null) {
-            return;
-        }       
-        for (int i = 0; i < counts.length; i++) {
-            if (counts[i] > 0) {
+    InterruptedException {      
+        for (int i = 0; i < sessions.length; i++) {
+            if (counts != null && counts[i] > 0) {
                 try {
                     sessions[i].commit();
                 } catch (RequestException e) {
@@ -226,7 +227,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     throw new IOException(e);
                 }
             } 
-            sessions[i].close();
+            if (sessions[i] != null) {
+                sessions[i].close();
+            }
         }
     }
 }
