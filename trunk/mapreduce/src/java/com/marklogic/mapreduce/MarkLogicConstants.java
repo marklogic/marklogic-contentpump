@@ -290,23 +290,59 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set to true, specifies that the input query declares and 
-     * references external variables "splitstart" and "splitend" under the 
-     * namespace "http://marklogic.com/hadoop".  The connector 
-     * will bind to these variables with the start and end of an input split
+     * references external variables <code>{@value #SPLIT_START_VARNAME}</code>
+     * and <code>{@value #SPLIT_END_VARNAME}</code> under the 
+     * namespace {@value #MR_NAMESPACE}.  The connector binds to
+     * these variables with the start and end of an input split
      * instead of constraining the query with the split range.
+     * 
+     * <p>
+     *  For details, see "Optimizing Your Input Query" in the <em>Hadoop 
+     *  MapReduce Connector Developer's Guide</em>.
+     * </p>
      */
     static final String BIND_SPLIT_RANGE = 
         "mapreduce.marklogic.input.bindsplitrange";
     /**
-     * Value string of the split range external variables namespace.
+     * The namespace ({@value}) in which the split range external variables 
+     * are defined.
+     * 
+     * <p>
+     *  The split range variables <code>{@value #SPLIT_START_VARNAME}</code> 
+     *  and <code>{@value #SPLIT_END_VARNAME}</code> are in this namespace when
+     *  using advanced input mode and <code>{@value #BIND_SPLIT_RANGE}</code>
+     *  is true. Declare a namespace prefix for this namespace in your input 
+     *  query and qualify references to <code>{@value #SPLIT_START_VARNAME}</code>
+     *  and <code>{@value #SPLIT_END_VARNAME}</code> by the prefix. For details,
+     *  see "Optimizing Your Input Query" in the <em>Hadoop MapReduce Connector
+     *  Developer's Guide</em>.
+     * </p>
      */
     static final String MR_NAMESPACE = "http://marklogic.com/hadoop";
     /**
-     * Value string of the split start external variable name.
+     * Use this external variable name (<code>{@value}</code>) in your advanced
+     * mode input query to access the start value of the record range in an
+     * input split when <code>{@value #BIND_SPLIT_RANGE}</code> is true. 
+     * 
+     * <p>
+     * The variable must be declared and referenced in the namespace
+     * <code>{@value #MR_NAMESPACE}</code>. For details, see
+     *  "Optimizing Your Input Query" in the <em>Hadoop MapReduce Connector
+     *  Developer's Guide</em>.
+     * </p>
      */
     static final String SPLIT_START_VARNAME = "splitstart";
     /**
-     * Value string of the split end external variable name.
+     * Use this external variable name (<code>{@value}</code>) in your advanced
+     * mode input query to access the end value of the record range in an input
+     * split when <code>{@value #BIND_SPLIT_RANGE}</code> is true. 
+     * 
+     * <p>
+     * The variable must be declared and referenced in the namespace
+     * <code>{@value #MR_NAMESPACE}</code>. For details, see
+     *  "Optimizing Your Input Query" in the <em>Hadoop MapReduce Connector
+     *  Developer's Guide</em>.
+     *  </p>
      */
     static final String SPLIT_END_VARNAME = "splitend";
     /**      
