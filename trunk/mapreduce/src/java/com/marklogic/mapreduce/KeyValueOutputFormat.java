@@ -50,8 +50,8 @@ public class KeyValueOutputFormat<KEYOUT, VALUEOUT> extends
     void checkOutputSpecs(Configuration conf, Session session,
             AdhocQuery query, ResultSequence result) throws RequestException {
         // check for required configuration
-        if (conf.get(OUTPUT_STATEMENT) == null) {
-            throw new IllegalArgumentException(OUTPUT_STATEMENT + 
+        if (conf.get(OUTPUT_QUERY) == null) {
+            throw new IllegalArgumentException(OUTPUT_QUERY + 
             " is not specified.");
         }
         

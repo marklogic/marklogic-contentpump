@@ -37,7 +37,7 @@ extends MarkLogicRecordWriter<KEYOUT, VALUEOUT> {
         String valueDataType = conf.get(OUTPUT_VALUE_TYPE, "xs:string");
         valueType = ValueType.valueOf(valueDataType);
         
-        statement = conf.get(OUTPUT_STATEMENT);
+        statement = conf.get(OUTPUT_QUERY);
     }
 
     @Override

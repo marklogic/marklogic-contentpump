@@ -29,7 +29,7 @@
         <value>wp,http://www.mediawiki.org/xml/export-0.4/</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.statement</name>
+        <name>mapreduce.marklogic.output.query</name>
         <value><![CDATA[
         xquery version '1.0-ml';
         declare namespace mlmr="http://marklogic.com/hadoop"

@@ -144,6 +144,8 @@ implements MarkLogicConstants {
                 String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
                 StringBuilder buf = new StringBuilder();      
                 buf.append("xquery version \"1.0-ml\"; \n");
+                buf.append("declare option xdmp:output \"indent=no\";");
+                buf.append("declare option xdmp:output \"indent-untyped=no\";");
                 buf.append("xdmp:with-namespaces(("); 
                 if (nsCol != null) {
                     for (Iterator<String> nsIt = nsCol.iterator(); 
