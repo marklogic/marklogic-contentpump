@@ -617,8 +617,8 @@ public interface MarkLogicConstants {
      * specified data type.
      * </p>
      */
-    static final String OUTPUT_STATEMENT =
-        "mapreduce.marklogic.output.statement";
+    static final String OUTPUT_QUERY =
+        "mapreduce.marklogic.output.query";
     /**
      * Value string of the output key external variable name.
      */
