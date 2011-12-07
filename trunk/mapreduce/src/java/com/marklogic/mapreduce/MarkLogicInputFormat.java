@@ -60,6 +60,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
 
         String docSelector;
         String splitQuery;
+        String inputQuery;
         LexiconFunction function = null;
         Class<? extends LexiconFunction> lexiconClass = 
             jobConf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
@@ -80,8 +81,10 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 maxSplitSize);
         }
         splitQuery = jobConf.get(SPLIT_QUERY);
+        inputQuery = jobConf.get(INPUT_QUERY);
         boolean advancedMode = 
             jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
+        boolean bindSplitRange = jobConf.getBoolean(BIND_SPLIT_RANGE, false);
         
         // fetch data from server
         List<ForestSplit> forestSplits = null;
@@ -96,7 +99,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                         "apply since the job is running in basic mode.  To " +
                         "turn on advanced mode, set " +
                         "\"mapreduce.marklogic.input.mode\" to \"advanced\".");
-            } else if (jobConf.get(INPUT_QUERY) != null) {
+            } else if (inputQuery != null) {
                 LOG.warn("Config entry for " +
                         "\"mapreduce.marklogic.input.query\" will not " +
                         "apply since the job is running in basic mode.  To " +
@@ -184,6 +187,20 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             if (splitQuery == null) {
                 throw new IllegalStateException(
                   "Split query is required in advanced mode but not defined.");
+            }
+            if (inputQuery == null) {
+                throw new IllegalStateException(
+                "Input query is required in advanced mode but not defined.");
+            }
+            if (bindSplitRange) {
+                if (!inputQuery.contains(SPLIT_START_VARNAME)) {
+                    LOG.warn("No split start variable is found in input " +
+                            "query when bind split range is set to true.");
+                }
+                if (!inputQuery.contains(SPLIT_END_VARNAME)) {
+                    LOG.warn("No split end variable is found in input " +
+                            "query when bind split range is set to true.");
+                }
             }
         }
         

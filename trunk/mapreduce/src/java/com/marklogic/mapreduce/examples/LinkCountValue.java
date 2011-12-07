@@ -16,7 +16,6 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.ValueInputFormat;
@@ -58,8 +57,7 @@ public class LinkCountValue {
 
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
-        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-        if (otherArgs.length < 2) {
+        if (args.length < 2) {
             System.err.println("Usage: LinkCountValue configFile outputDir");
             System.exit(2);
         }
@@ -75,10 +73,10 @@ public class LinkCountValue {
         job.setOutputFormatClass(TextOutputFormat.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
-        FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
+        FileOutputFormat.setOutputPath(job, new Path(args[1]));
 
         conf = job.getConfiguration();
-        conf.addResource(otherArgs[0]);
+        conf.addResource(args[0]);
         conf.setClass(MarkLogicConstants.INPUT_VALUE_CLASS, Text.class, 
                 Writable.class);
 

@@ -16,7 +16,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.util.GenericOptionsParser;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
@@ -102,8 +101,7 @@ public class LinkCountInProperty {
     
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
-        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-        if (otherArgs.length < 1) {
+        if (args.length < 1) {
             System.err.println("Usage: LinkCountInProperty configFile");
             System.exit(2);
         }
@@ -120,7 +118,7 @@ public class LinkCountInProperty {
         job.setOutputValueClass(MarkLogicNode.class);
         
         conf = job.getConfiguration();
-        conf.addResource(otherArgs[0]);
+        conf.addResource(args[0]);
         conf.setClass(MarkLogicConstants.INPUT_VALUE_CLASS, Text.class, 
                 Writable.class);
     

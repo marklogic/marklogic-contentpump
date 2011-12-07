@@ -39,19 +39,19 @@
         ]]></value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.username</name>
+        <name>mapreduce.marklogic.output.username</name>
         <value>username</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.password</name>
+        <name>mapreduce.marklogic.output.password</name>
         <value>password</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.host</name>
+        <name>mapreduce.marklogic.output.host</name>
         <value>hostname</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.input.port</name>
+        <name>mapreduce.marklogic.output.port</name>
         <value>port</value>
     </property>
     <property>
