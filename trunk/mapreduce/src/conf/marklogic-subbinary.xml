@@ -28,7 +28,7 @@
         declare variable $mlmr:splitstart as xs:integer external;
         declare variable $mlmr:splitend as xs:integer external;
         for $doc in fn:doc()[$mlmr:splitstart to $mlmr:splitend]
-        return xdmp:subbinary($doc/binary(), 0, 1000)
+        return xdmp:subbinary($doc/binary(), 1, 1000)
             ]]></value>
     </property>
     <property>

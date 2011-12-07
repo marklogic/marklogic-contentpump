@@ -6,7 +6,6 @@ package com.marklogic.mapreduce.examples;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -22,7 +21,7 @@ import com.marklogic.mapreduce.NodePath;
  * Extract the revision year from the document and add that as a collection to 
  * the document.  This example demonstrates how to use NodeInputFormat and
  * KeyValueOutputFormat, and can be run with the configuration file 
- * conf/marklogic-nodein-stmtout.xml.
+ * conf/marklogic-nodein-qryout.xml.
  *
  */
 public class RevisionGrouper {
@@ -45,8 +44,7 @@ public class RevisionGrouper {
 
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
-        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-        if (otherArgs.length < 1) {
+        if (args.length < 1) {
             System.err.println("Usage: RevisionGrouper configFile");
             System.exit(2);
         }
@@ -56,14 +54,14 @@ public class RevisionGrouper {
         job.setInputFormatClass(NodeInputFormat.class);
         job.setMapperClass(RevisionMapper.class);
         job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(IntWritable.class);
+        job.setMapOutputValueClass(Text.class);
      
         job.setOutputFormatClass(KeyValueOutputFormat.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(Text.class);
 
         conf = job.getConfiguration();
-        conf.addResource(otherArgs[0]);
+        conf.addResource(args[0]);
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }

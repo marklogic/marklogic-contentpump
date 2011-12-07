@@ -235,8 +235,11 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class of the map 
-     * input value for {@link KeyValueInputFormat} and {@link ValueInputFormat}. 
-     * Optional. Default: {@link org.apache.hadoop.io.Text}.
+     * input value for {@link KeyValueInputFormat}, {@link ValueInputFormat} 
+     * and {@link DocumentInputFormat}. 
+     * Optional. Default: {@link org.apache.hadoop.io.Text} for 
+     * {@link KeyValueInputFormat} and {@link ValueInputFormat}, 
+     * {@link MarkLogicNode} for {@link DocumentInputFormat}.
      */
     static final String INPUT_VALUE_CLASS = 
         "mapreduce.marklogic.input.valueclass";
