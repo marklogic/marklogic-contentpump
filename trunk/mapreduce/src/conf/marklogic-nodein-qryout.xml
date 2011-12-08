@@ -32,7 +32,7 @@
         <name>mapreduce.marklogic.output.query</name>
         <value><![CDATA[
         xquery version '1.0-ml';
-        declare namespace mlmr="http://marklogic.com/hadoop"
+        declare namespace mlmr="http://marklogic.com/hadoop";
         declare variable $mlmr:key as xs:string external;
         declare variable $mlmr:value as xs:string external;
         xdmp:document-add-collections($mlmr:key, ($mlmr:value))
