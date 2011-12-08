@@ -58,4 +58,8 @@
         <name>mapred.reduce.tasks</name>
         <value>0</value>
     </property>
+    <property>
+        <name>mapred.map.tasks.speculative.execution</name>
+        <value>false</value>
+    </property>
 </configuration>

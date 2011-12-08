@@ -64,4 +64,8 @@
         <name>mapreduce.marklogic.output.batchsize</name>
         <value>400</value>
     </property>
+    <property>
+        <name>mapred.reduce.tasks.speculative.execution</name>
+        <value>false</value>
+    </property>
 </configuration>
