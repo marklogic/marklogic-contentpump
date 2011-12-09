@@ -5,12 +5,15 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import com.marklogic.mapreduce.DocumentInputFormat;
 import com.marklogic.mapreduce.DocumentURI;
@@ -50,7 +53,7 @@ public class BinaryReader {
         job.setMapperClass(DocMapper.class);
         job.setMapOutputKeyClass(DocumentURI.class);
         job.setMapOutputValueClass(BytesWritable.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
+        job.setOutputFormatClass(BinaryOutputFormat.class);
         job.setOutputKeyClass(DocumentURI.class);
         job.setOutputValueClass(BytesWritable.class);
         FileOutputFormat.setOutputPath(job, new Path(args[1]));
@@ -60,4 +63,44 @@ public class BinaryReader {
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
+}
+
+class BinaryOutputFormat extends FileOutputFormat<DocumentURI, BytesWritable> {
+
+    @Override
+    public RecordWriter<DocumentURI, BytesWritable> getRecordWriter(
+            TaskAttemptContext context)
+            throws IOException, InterruptedException {
+        return new BinaryWriter(getOutputPath(context), 
+                context.getConfiguration());
+    }
+}
+
+class BinaryWriter extends RecordWriter<DocumentURI, BytesWritable> {
+
+    Path dir;
+    Configuration conf;
+    
+    public BinaryWriter(Path path, Configuration conf) {
+        dir = path;
+        this.conf = conf;
+    }
+
+    @Override
+    public void close(TaskAttemptContext arg0) throws IOException,
+            InterruptedException {  
+    }
+
+    @Override
+    public void write(DocumentURI uri, BytesWritable content)
+            throws IOException, InterruptedException {
+        String pathStr = dir.getName() + uri.getUri();
+        Path path = new Path(pathStr);
+        FileSystem fs = path.getFileSystem(conf);
+        FSDataOutputStream out = fs.create(path, false);
+        System.out.println("writing to: " + path);
+        out.write(content.getBytes(), 0, content.getLength());
+        out.flush();
+        out.close();
+    }       
 }

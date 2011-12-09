@@ -59,4 +59,8 @@
         <name>mapreduce.marklogic.input.valueclass</name>
         <value>org.apache.hadoop.io.BytesWritable</value>
     </property>
+    <property>
+        <name>mapred.reduce.tasks</name>
+        <value>0</value>
+    </property>    
 </configuration>
