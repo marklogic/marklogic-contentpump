@@ -9,7 +9,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.util.GenericOptionsParser;
 import org.w3c.dom.Element;
 
 import com.marklogic.mapreduce.KeyValueOutputFormat;
@@ -53,8 +52,6 @@ public class RevisionGrouper {
         job.setJarByClass(RevisionGrouper.class);
         job.setInputFormatClass(NodeInputFormat.class);
         job.setMapperClass(RevisionMapper.class);
-        job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(Text.class);
      
         job.setOutputFormatClass(KeyValueOutputFormat.class);
         job.setOutputKeyClass(Text.class);
