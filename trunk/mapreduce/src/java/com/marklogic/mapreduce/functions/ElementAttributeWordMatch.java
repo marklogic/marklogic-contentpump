@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2011 MarkLogic Corporation. All rights reserved.
+ * Copyright (c) 2003-2012 MarkLogic Corporation. All rights reserved.
  */
 package com.marklogic.mapreduce.functions;
 
