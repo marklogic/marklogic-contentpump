@@ -32,13 +32,8 @@
         <name>mapreduce.marklogic.input.splitquery</name>
         <value><![CDATA[
         declare namespace wp="http://www.mediawiki.org/xml/export-0.4/";
-        import module namespace admin = "http://marklogic.com/xdmp/admin" at "/MarkLogic/admin.xqy"; 
-        let $conf := admin:get-configuration() 
-        for $forest in xdmp:database-forests(xdmp:database()) 
-          let $host_id := admin:forest-get-host($conf, $forest) 
-          let $host_name := admin:host-get-name($conf, $host_id) 
-          let $cnt := xdmp:estimate(cts:search(fn:doc(), cts:and-query(()), (), 0.0, $forest)) 
-          return ($forest, $cnt, $host_name)]]></value>
+        import module namespace hadoop = "http://marklogic.com/xdmp/hadoop" at "/MarkLogic/hadoop.xqy"; 
+        hadoop:get-splits('', 'fn:doc()', '()')]]></value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.mode</name>
