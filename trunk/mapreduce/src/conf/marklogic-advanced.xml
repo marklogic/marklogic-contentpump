@@ -33,7 +33,7 @@
         <value><![CDATA[
         declare namespace wp="http://www.mediawiki.org/xml/export-0.4/";
         import module namespace hadoop = "http://marklogic.com/xdmp/hadoop" at "/MarkLogic/hadoop.xqy"; 
-        hadoop:get-splits('', 'fn:doc()', '()')]]></value>
+        hadoop:get-splits('', 'fn:doc()', 'cts:and-query(())')]]></value>
     </property>
     <property>
         <name>mapreduce.marklogic.input.mode</name>
