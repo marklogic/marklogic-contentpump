@@ -100,12 +100,7 @@ implements MarkLogicConstants, Configurable {
                 }
             }
             // store it into config system
-            DefaultStringifier.store(conf, forestHostMap, OUTPUT_FOREST_HOST); 
-            
-            if (!context.getOutputFormatClass().equals(
-                    ContentOutputFormat.class)) { 
-                return;
-            }
+            DefaultStringifier.store(conf, forestHostMap, OUTPUT_FOREST_HOST);
             
             checkOutputSpecs(conf, session, query, result);
         } catch (URISyntaxException e) {
@@ -113,8 +108,6 @@ implements MarkLogicConstants, Configurable {
         } catch (XccConfigException e) {
             throw new IOException(e);
         } catch (RequestException e) {
-            throw new IOException(e);
-        } catch (ClassNotFoundException e) {
             throw new IOException(e);
         } finally {
             if (result != null) {
@@ -144,6 +137,6 @@ implements MarkLogicConstants, Configurable {
         this.conf = conf;        
     }
     
-    abstract void checkOutputSpecs(Configuration conf, Session session,
+    public abstract void checkOutputSpecs(Configuration conf, Session session,
             AdhocQuery query, ResultSequence result) throws RequestException;
 }

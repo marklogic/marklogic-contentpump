@@ -284,7 +284,7 @@ public class InternalUtilities implements MarkLogicConstants {
         }
     }
 
-    public static ContentSource getOutputContentSource(Configuration conf,
+    static ContentSource getOutputContentSource(Configuration conf,
             String hostName) 
     throws URISyntaxException, XccConfigException, IOException {
         URI serverUri = getOutputServerUri(conf, hostName);
@@ -299,7 +299,7 @@ public class InternalUtilities implements MarkLogicConstants {
      * @param forestHostMap
      * @return host name
      */
-    public static String getHost(int taskId,
+    static String getHost(int taskId,
             LinkedMapWritable forestHostMap) {
         int count = forestHostMap.size();
         int position = taskId % count;

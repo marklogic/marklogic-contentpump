@@ -47,14 +47,20 @@ public class KeyValueOutputFormat<KEYOUT, VALUEOUT> extends
     }
 
     @Override
-    void checkOutputSpecs(Configuration conf, Session session,
+    public void checkOutputSpecs(Configuration conf, Session session,
             AdhocQuery query, ResultSequence result) throws RequestException {
         // check for required configuration
         if (conf.get(OUTPUT_QUERY) == null) {
             throw new IllegalArgumentException(OUTPUT_QUERY + 
             " is not specified.");
         }
-        
+        // warn against unsupported configuration
+        if (conf.get(BATCH_SIZE) != null) {
+            LOG.warn("Config entry for " +
+                    "\"mapreduce.marklogic.output.batchsize\" is not " +
+                    "supported for " + this.getClass().getName() + 
+                    " and will be ignored.");
+        }
     }
 
 }

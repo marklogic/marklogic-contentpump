@@ -37,14 +37,14 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
      * Session to the MarkLogic server.
      */
     private Session session;
-    protected int batchSize;
     private int count = 0;
     private Configuration conf;
+    protected int txnSize;
     
     public MarkLogicRecordWriter(URI serverUri, Configuration conf) {
         this.serverUri = serverUri;
         this.conf = conf;
-        this.batchSize = conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
+        this.txnSize = getTransactionSize(conf);
     }
     
     @Override
@@ -52,7 +52,7 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
             InterruptedException {
         if (session != null) {
             try {
-                if (count > 0 && batchSize > 1) {
+                if (count > 0 && txnSize > 1) {
                     session.commit();
                 }
                 session.close();
@@ -75,7 +75,7 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
                 ContentSource cs = InternalUtilities.getOutputContentSource(
                         conf, serverUri);
                 session = cs.newSession();
-                if (batchSize > 1) {
+                if (txnSize > 1) {
                     session.setTransactionMode(TransactionMode.UPDATE);
                 }
             } catch (XccConfigException e) {
@@ -87,9 +87,13 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
     }
     
     protected void commitIfNecessary() throws RequestException {
-        if (++count == batchSize && batchSize > 1) {
+        if (++count == txnSize && txnSize > 1) {
             session.commit();
             count = 0;
         }
+    }
+       
+    public int getTransactionSize(Configuration conf) {
+        return 1000;
     }
 }
