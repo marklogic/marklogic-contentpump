@@ -58,7 +58,7 @@ public class ContentOutputFormat<VALUEOUT> extends
     static final String ID_PREFIX = "#";
  
     @Override
-    void checkOutputSpecs(Configuration conf, Session session, 
+    public void checkOutputSpecs(Configuration conf, Session session, 
             AdhocQuery query, ResultSequence result) 
     throws RequestException { 
         boolean fastLoad;

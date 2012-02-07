@@ -67,9 +67,15 @@ extends MarkLogicOutputFormat<DocumentURI, MarkLogicNode> {
     }
 
     @Override
-    void checkOutputSpecs(Configuration conf, Session session,
+    public void checkOutputSpecs(Configuration conf, Session session,
             AdhocQuery query, ResultSequence result) throws RequestException {
-        // No extra check needed       
+        // warn against unsupported configuration
+        if (conf.get(BATCH_SIZE) != null) {
+            LOG.warn("Config entry for " +
+                    "\"mapreduce.marklogic.output.batchsize\" is not " +
+                    "supported for " + this.getClass().getName() + 
+                    " and will be ignored.");
+        }      
     }
 
 }

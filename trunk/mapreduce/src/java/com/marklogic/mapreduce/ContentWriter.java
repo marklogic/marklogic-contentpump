@@ -22,6 +22,7 @@ import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
+import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
 
 /**
@@ -68,6 +69,21 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * Whether in fast load mode.
      */
     private boolean fastLoad;
+    
+    /**
+     * Batch size.
+     */
+    private int batchSize;
+    
+    /**
+     * Counts of requests per forest.
+     */
+    private int[] stmtCounts;
+    
+    /**
+     * Sessions per forest.
+     */
+    private Session[] sessions;
 
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -76,14 +92,19 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         this.fastLoad = fastLoad;
         
         this.forestSourceMap = forestSourceMap;
-        forestIds = new String[forestSourceMap.size()];
+        
+        // arraySize is the number of forests in fast load mode; 1 otherwise.
+        int arraySize = forestSourceMap.size();
+        forestIds = new String[arraySize];
         forestIds = forestSourceMap.keySet().toArray(forestIds);
+        sessions = new Session[arraySize];
+        stmtCounts = new int[arraySize];
         
-        this.outputDir = conf.get(OUTPUT_DIRECTORY);
-        
-        if (batchSize > 1) {
-            forestContents = new Content[forestSourceMap.size()][batchSize];
-            counts = new int[forestSourceMap.size()];
+        outputDir = conf.get(OUTPUT_DIRECTORY);
+        batchSize = conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
+        if (batchSize > 1) {           
+            forestContents = new Content[arraySize][batchSize];
+            counts = new int[arraySize];
         }
         
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
@@ -130,7 +151,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         options.setQuality(conf.getInt(OUTPUT_QUALITY, 0));
         if (permissions != null) {
-            options.setPermissions(permissions.toArray(new ContentPermission[permissions.size()]));
+            options.setPermissions(permissions.toArray(
+                    new ContentPermission[permissions.size()]));
         } 
         String contentTypeStr = conf.get(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
         ContentType contentType = ContentType.valueOf(contentTypeStr);
@@ -155,8 +177,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             
             forestId = forestIds[fId];
         }
-        
-        Session session = null;
+ 
         try {
             Content content = null;
             if (value instanceof Text) {
@@ -177,62 +198,97 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (batchSize > 1) {
                 forestContents[fId][counts[fId]++] = content;
  
-                if (counts[fId] == batchSize) {
-                    ContentSource cs = forestSourceMap.get(forestId);
-                    session = getSession(cs, forestId);         
-                    session.insertContent(forestContents[fId]);
+                if (counts[fId] == batchSize) {                
+                    if (sessions[fId] == null) {
+                        sessions[fId] = getSession(forestId);
+                    }        
+                    sessions[fId].insertContent(forestContents[fId]);
+                    stmtCounts[fId]++;
                     counts[fId] = 0;
                 }
             } else {
-                ContentSource cs = forestSourceMap.get(forestId);
-                session = getSession(cs, forestId);
-                
-                session.insertContent(content);
+                if (sessions[fId] == null) {
+                    sessions[fId] = getSession(forestId);
+                }            
+                sessions[fId].insertContent(content);
+                stmtCounts[fId]++;
+            }
+            if (txnSize > 1 && stmtCounts[fId] == txnSize) {
+                sessions[fId].commit();
+                stmtCounts[fId] = 0;
             }
         } catch (RequestException e) {
             LOG.error(e);
+            if (sessions[fId] != null) {
+                sessions[fId].close();
+            }
             throw new IOException(e);
-        } finally {
-            if (session != null) {
-                session.close();
-            } 
-        }      
+        }  
     }
 
-    private Session getSession(ContentSource cs, String forestId) {
+    private Session getSession(String forestId) {
+        Session session = null;
+        ContentSource cs = forestSourceMap.get(forestId);
         if (fastLoad) {
-            return cs.newSession(forestId);
+            session = cs.newSession(forestId);
+            
         } else {
-            return cs.newSession();
+            session = cs.newSession();
         }      
+        if (txnSize > 1) {
+            session.setTransactionMode(TransactionMode.UPDATE);
+        }
+        return session;
     }
 
     @Override
     public void close(TaskAttemptContext context) throws IOException,
     InterruptedException {
-        if (forestContents == null) {
-            return;
-        }       
-        for (int i = 0; i < forestIds.length; i++) {
-            if (counts[i] > 0) {
-                Content[] remainder = new Content[counts[i]];
-                System.arraycopy(forestContents[i], 0, remainder, 0, 
-                        counts[i]);
-                String forestId = forestIds[i];
-                ContentSource cs = forestSourceMap.get(forestId);
-                Session session = getSession(cs, forestId);
-                
+        if (batchSize > 1) {
+            for (int i = 0; i < forestIds.length; i++) {
+                if (counts[i] > 0) {
+                    Content[] remainder = new Content[counts[i]];
+                    System.arraycopy(forestContents[i], 0, remainder, 0, 
+                            counts[i]);
+                    
+                    if (sessions[i] == null) {
+                        String forestId = forestIds[i];
+                        sessions[i] = getSession(forestId);
+                    }
+                                          
+                    try {
+                        sessions[i].insertContent(remainder);
+                        stmtCounts[i]++;        
+                    } catch (RequestException e) {
+                        LOG.error(e);
+                        if (sessions[i] != null) {
+                            sessions[i].close();
+                        }
+                        throw new IOException(e);
+                    }
+                }
+            }
+        }
+        for (Session session : sessions) {
+            if (txnSize > 1) {
                 try {
-                    session.insertContent(remainder);
+                    session.commit();              
                 } catch (RequestException e) {
                     LOG.error(e);
                     throw new IOException(e);
                 } finally {
-                    if (session != null) {
-                        session.close();
-                    } 
-                } 
+                    session.close();
+                }
             }
         }
+    }
+    
+    @Override
+    public int getTransactionSize(Configuration conf) {
+        // return the specified txn size
+        if (conf.get(TXN_SIZE) != null) {
+            return conf.getInt(TXN_SIZE, 0);
+        } 
+        return 2000 / conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
     }
 }

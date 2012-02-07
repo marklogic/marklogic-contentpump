@@ -636,7 +636,8 @@ public interface MarkLogicConstants {
     static final String DEFAULT_CONTENT_TYPE = "XML";
     /**
      * The config property name (<code>{@value}</code>)
-     * which, if set, indicates batch size for output.  Optional.
+     * which, if set, indicates the number of records in one request.  
+     * Optional.  Currently only applies to ContentOutputFormat.
      */
     static final String BATCH_SIZE = 
         "mapreduce.marklogic.output.batchsize";
@@ -644,4 +645,11 @@ public interface MarkLogicConstants {
      * Default batch size.
      */
     static final int DEFAULT_BATCH_SIZE = 100;
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, indicates the number of requests in one transaction. 
+     * Optional.
+     */
+    static final String TXN_SIZE = 
+        "mapreduce.marklogic.output.transactionsize";
 }

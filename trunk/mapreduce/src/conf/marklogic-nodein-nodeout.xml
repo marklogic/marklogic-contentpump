@@ -61,7 +61,7 @@
         <value>400</value>
     </property>
     <property>
-        <name>mapreduce.marklogic.output.batchsize</name>
+        <name>mapreduce.marklogic.output.transactionsize</name>
         <value>400</value>
     </property>
     <property>
