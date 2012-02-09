@@ -94,6 +94,6 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
     }
        
     public int getTransactionSize(Configuration conf) {
-        return 1000;
+        return conf.getInt(TXN_SIZE, 1000);
     }
 }
