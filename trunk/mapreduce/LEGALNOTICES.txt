@@ -1,7 +1,8 @@
 PRODUCT NOTICES
+(MARKLOGIC 5.0-3)
 MARKLOGIC CONNECTOR FOR HADOOP
 
-Copyright 2011-2012 MarkLogic Corporation.  All rights reserved.
+Copyright 2012 MarkLogic Corporation.  All rights reserved.
 
 All MarkLogic software products are protected by United States and
 international copyright laws, and incorporate certain third party libraries
@@ -27,6 +28,6 @@ http://creativecommons.org/licenses/by-sa/3.0/.
 TRADEMARK NOTICE
 
 The MarkLogic name and logo are registered trademarks of MarkLogic
-Corporation.  Any other names or logos included in the Software, this
-notice or the documentation are property of the respective trademark
-owners.
+Corporation in the United States and/or other countries.  Any other
+names or logos included in the Software, this notice or the
+documentation are property of the respective trademark owners.
