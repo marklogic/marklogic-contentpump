@@ -1,5 +1,4 @@
 PRODUCT NOTICES
-(MARKLOGIC 5.0-3)
 MARKLOGIC CONNECTOR FOR HADOOP
 
 Copyright 2012 MarkLogic Corporation.  All rights reserved.
