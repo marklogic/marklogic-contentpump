@@ -289,6 +289,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (conf.get(TXN_SIZE) != null) {
             return conf.getInt(TXN_SIZE, 0);
         } 
-        return 2000 / conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
+        return 1000 / conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
     }
 }
