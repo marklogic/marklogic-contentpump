@@ -269,15 +269,19 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
             }
         }
-        for (Session session : sessions) {
-            if (txnSize > 1) {
-                try {
-                    session.commit();              
-                } catch (RequestException e) {
-                    LOG.error(e);
-                    throw new IOException(e);
-                } finally {
-                    session.close();
+        for (int i = 0; i < sessions.length; i++) {  
+            if (sessions[i] != null) {
+                if (stmtCounts[i] > 0) {
+                    try {
+                        sessions[i].commit();
+                    } catch (RequestException e) {
+                        LOG.error(e);
+                        throw new IOException(e);
+                    } finally {
+                        sessions[i].close();
+                    }
+                } else {
+                    sessions[i].close();
                 }
             }
         }
