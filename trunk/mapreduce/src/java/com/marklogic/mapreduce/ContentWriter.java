@@ -271,7 +271,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         for (int i = 0; i < sessions.length; i++) {  
             if (sessions[i] != null) {
-                if (stmtCounts[i] > 0) {
+                if (stmtCounts[i] > 0 && txnSize > 1) {
                     try {
                         sessions[i].commit();
                     } catch (RequestException e) {
