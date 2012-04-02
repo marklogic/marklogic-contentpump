@@ -3,6 +3,9 @@
  */
 package com.marklogic.mapreduce;
 
+import com.marklogic.xcc.DocumentFormat;
+import com.marklogic.xcc.DocumentRepairLevel;
+
 /**
  * Configuration property names and other constants used in the
  * package. Use these property names in your Hadoop configuration
@@ -428,6 +431,32 @@ public interface MarkLogicConstants {
     static final String OUTPUT_DIRECTORY = 
         "mapreduce.marklogic.output.content.directory";
     /**
+     * <p>
+     * The charset encoding to be used by the server when loading this document.
+     * The encoding provided will be passed to the server at document load time
+     * and must be a name that it recognizes. The document byte stream will be
+     * transcoded to UTF-8 for storage.
+     * </p>
+     * <p>
+     * Note: UTF-8 encoded files may contain a three-byte Byte Order Mark at the
+     * beginning which decodes as the Unicode character \ufeff. As of 4.0, this
+     * value is no longer ignored by the server. When it's safe to do so, XCC
+     * will strip the BOM, which is not considered to be part of the content.
+     * XCC will <i>not</i> strip the BOM if the encoding is not UTF-8 (either
+     * explicitly set, or defaulted) and the document format (
+     * {@link #setFormat(DocumentFormat)}) is not text or XML. If the document
+     * format is not explicitly set, BOM stripping will not occur (because the
+     * server may choose to treat the content as binary) and document insertion
+     * may fail if a BOM is present.
+     * </p>
+     */
+    static final String OUTPUT_ENCODING = 
+        "mapreduce.marklogic.output.encoding";
+    /**
+     * Default output encoding
+     */
+    static final String DEFAULT_OUTPUT_ENCODING = "UTF-8";
+    /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a comma-separated list of collections
      * to which generated output documents are added. Optional. Relevant
@@ -627,9 +656,26 @@ public interface MarkLogicConstants {
      */
     static final String OUTPUT_KEY_VARNAME = "key";
     /**
+     * The language name to associate with inserted documents. A value of
+     * <code>en</code> indicates that the document is in english. The default
+     * is null, which indicates to use the server default.
+     */
+    static final String OUTPUT_LANGUAGE = "mapreduce.marklogic.output.language";
+    /**
      * Value string of the output value external variable name.
      */
     static final String OUTPUT_VALUE_VARNAME = "value";
+    /**
+     * The document repair level for this options object. The default value is
+     * {@link DocumentRepairLevel#FULL}, but this option is only applicable
+     * when the document format is {@link DocumentFormat#XML}.
+     */
+    static final String OUTPUT_XML_REPAIR_LEVEL = 
+        "mapreduce.marklogic.output.repairlevel";
+    /**
+     * Default output XML repair level
+     */
+    static final String DEFAULT_OUTPUT_XML_REPAIR_LEVEL = "DEFAULT";
     /**
      * Default content type.
      */
