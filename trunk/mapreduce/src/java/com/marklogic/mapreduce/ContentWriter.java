@@ -21,6 +21,7 @@ import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
@@ -157,6 +158,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         String contentTypeStr = conf.get(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
         ContentType contentType = ContentType.valueOf(contentTypeStr);
         options.setFormat(contentType.getDocumentFormat());
+        
+        options.setLanguage(conf.get(OUTPUT_LANGUAGE));
+        options.setEncoding(conf.get(OUTPUT_ENCODING,DEFAULT_OUTPUT_ENCODING));
+        String repairLevel = conf.get(OUTPUT_XML_REPAIR_LEVEL,
+                DEFAULT_OUTPUT_XML_REPAIR_LEVEL).toLowerCase();
+        if (DocumentRepairLevel.DEFAULT.toString().equals(repairLevel))
+            options.setRepairLevel(DocumentRepairLevel.DEFAULT);
+        else if (DocumentRepairLevel.NONE.toString().equals(repairLevel))
+            options.setRepairLevel(DocumentRepairLevel.NONE);
+        else if (DocumentRepairLevel.FULL.toString().equals(repairLevel))
+            options.setRepairLevel(DocumentRepairLevel.FULL);
     }
 
     @Override
