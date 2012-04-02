@@ -1,5 +1,9 @@
 package com.marklogic.mapreduce;
 
+import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+
 import com.marklogic.xcc.DocumentFormat;
 
 /**
@@ -12,17 +16,47 @@ public enum ContentType {
         public DocumentFormat getDocumentFormat() {
             return DocumentFormat.XML;
         }
+
+        @Override
+        public Class<? extends Writable> getWritableClass() {
+            return Text.class;
+        }
     },
     TEXT {
         public DocumentFormat getDocumentFormat() {
             return DocumentFormat.TEXT;
+        }
+
+        @Override
+        public Class<? extends Writable> getWritableClass() {
+            return Text.class;
         }
     },
     BINARY {
         public DocumentFormat getDocumentFormat() {
             return DocumentFormat.BINARY;
         }
+
+        @Override
+        public Class<? extends Writable> getWritableClass() {
+            return BytesWritable.class;
+        }
     };
     
     public abstract DocumentFormat getDocumentFormat();
+    
+    public abstract Class<? extends Writable> getWritableClass();
+    
+    public static ContentType forName(String typeName) {
+        if (typeName.equalsIgnoreCase(XML.name())) {
+            return XML;
+        } else if (typeName.equalsIgnoreCase(TEXT.name())) {
+            return TEXT;
+        } else if (typeName.equalsIgnoreCase(BINARY.name())) {
+            return BINARY;
+        } else {
+            throw new IllegalArgumentException("Unknown content type: " + 
+                    typeName);
+        }
+    }
 }
