@@ -22,12 +22,19 @@ package com.marklogic.contentpump;
  *
  */
 public interface ConfigConstants {
+    // property names
+    static final String HADOOP_HOME_ENV_NAME = "HADOOP_HOME";
+    static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
+    static final String CONTENTPUMP_VERSION_PROPERTY_NAME = 
+        "CONTENTPUMP_VERSION";
+    static final String CONTENTPUMP_JAR_NAME = 
+        "marklogic-contentpump-<VERSION>-SNAPSHOT.jar";
+    
     // common
     static final String MODE = "mode";
     static final String MODE_DISTRIBUTED = "distributed";
     static final String MODE_LOCAL = "local";
-    static final String HADOOP_HOME = "hadoop_home";
-    static final String HADOOP_HOME_PROPERTY_NAME = "HADOOP_HOME";
+    static final String HADOOP_HOME = "hadoop_home";    
     static final String THREAD_COUNT = "thread_count";
     static final String MAX_SPLIT_SIZE = "max_split_size";
     
@@ -62,7 +69,6 @@ public interface ConfigConstants {
     static final String STREAMING = "streaming";
     static final String NAMESPACE = "namespace";
     static final String DOCUMENT_TYPE = "document_type";
-    static final String DOCUMENT_TYPE_DEFAULT = "xml";
     static final String OUTPUT_IDNAME = "output_idname";
     static final String OUTPUT_LANGUAGE = "output_language";
     static final String OUTPUT_URI_REPLACE = "output_uri_replace";

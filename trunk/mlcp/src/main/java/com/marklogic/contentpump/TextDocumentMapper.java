@@ -24,19 +24,16 @@ import com.marklogic.mapreduce.DocumentURI;
 import org.apache.hadoop.mapreduce.Mapper;
 
 /**
- * Maps (file name, content) as (Text, Text) to (URI, document) as 
+ * Maps (file name, content) as (DocumentURI, Text) to (URI, document) as 
  * (DocumentURI, Text).
  * 
  * @author jchen
  *
  */
 public class TextDocumentMapper extends
-        Mapper<Text, Text, DocumentURI, Text> {
-    private DocumentURI uri = new DocumentURI();
-    
-    public void map(Text fileName, Text fileContent, Context context) 
+        Mapper<DocumentURI, Text, DocumentURI, Text> {    
+    public void map(DocumentURI uri, Text fileContent, Context context) 
     throws IOException, InterruptedException {
-        uri.setUri(fileName.toString());
         context.write(uri, fileContent);
     }
 }

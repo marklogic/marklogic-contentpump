@@ -15,6 +15,12 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Arrays;
 
 import org.apache.commons.cli.CommandLine;
@@ -38,7 +44,7 @@ import org.apache.sqoop.util.OptionsFileUtil;
  */
 public class ContentPump implements ConfigConstants {
     
-    public static final Log LOG = LogFactory.getLog(ContentPump.class.getName());
+    public static final Log LOG = LogFactory.getLog(ContentPump.class);
     
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
@@ -55,24 +61,25 @@ public class ContentPump implements ConfigConstants {
             System.err.println("Try 'mloader help' for usage.");
         }
         
-        runCommand(expandedArgs);
+        int rc = runCommand(expandedArgs);
+        System.exit(rc);
     }
 
-    private static void runCommand(String[] args) 
-    throws Exception {
+    private static int runCommand(String[] args) {
         // get command
         String cmd = args[0];
         if (cmd.equals("help")) {
             printUsage();
-            return;
+            return 1;
         }
         Command command = Command.forName(cmd);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Command: " + command);
-        }
         
         // get options arguments
         String[] optionArgs = Arrays.copyOfRange(args, 1, args.length);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Command: " + command);
+            LOG.debug("arguments: " + optionArgs);
+        }
         
         // parse hadoop specific options
         Configuration conf = new Configuration();
@@ -84,42 +91,139 @@ public class ContentPump implements ConfigConstants {
         Options options = new Options();
         command.configOptions(options);
         CommandLineParser parser = new GnuParser();
-        CommandLine cmdline = parser.parse(options, remainingArgs);
-      
-        // create job
-        Job job = command.createJob(conf, cmdline);
+        CommandLine cmdline;
+        try {
+            cmdline = parser.parse(options, remainingArgs);
+        } catch (Exception e) {
+            LOG.error("Error parsing the command arguments", e);
+            System.err.println(e.getMessage());
+            // Print the command usage message and exit.
+            command.printUsage();
+            return 1; // Exit on exception here.
+        }
         
-        // run job
+        // check running mode and hadoop home configuration       
         String mode = cmdline.getOptionValue(MODE);
-        if (cmdline.hasOption(HADOOP_HOME) ||
-            System.getProperty(HADOOP_HOME_PROPERTY_NAME) != null) {
-            if (mode == null || mode.equalsIgnoreCase(MODE_DISTRIBUTED)) {
-                // set HADOOP_HOME based on cmdline setting
-                if (cmdline.hasOption(HADOOP_HOME)) {
-                    System.setProperty(HADOOP_HOME_PROPERTY_NAME, 
-                            cmdline.getOptionValue(HADOOP_HOME));
+        String hadoopHome = System.getenv(HADOOP_HOME_ENV_NAME);
+        if (cmdline.hasOption(HADOOP_HOME)) {
+            hadoopHome = cmdline.getOptionValue(HADOOP_HOME);
+        }
+        boolean distributed = hadoopHome != null && (mode == null ||
+                mode.equals(MODE_DISTRIBUTED));
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Running in: " + (distributed ? "distributed " : "local")
+                + "mode");
+        }
+        
+        if (distributed) {
+            // set new class loader based on Hadoop home
+            ClassLoader parent = conf.getClassLoader();
+            File file = new File(hadoopHome, "conf");
+            if (file.exists()) {
+                URL url = null;
+                try {
+                    url = file.toURI().toURL();
+                } catch (MalformedURLException e) {
+                    LOG.error("Error converting $HADOOP_HOME/conf to URL", e);
+                    System.err.println(e.getMessage());
+                    return 1;
                 }
-                // submit job
-                job.waitForCompletion(true);
-            } else if (mode.equalsIgnoreCase(MODE_LOCAL)) {
-                LocalJobRunner runner = new LocalJobRunner(job, cmdline);
-                runner.run();
+                URL[] urls = new URL[1];
+                urls[0] = url;
+                ClassLoader classLoader = new URLClassLoader(urls, parent);
+                Thread.currentThread().setContextClassLoader(classLoader);
             } else {
-                throw new IllegalArgumentException("Invalid mode " 
-                        + mode);
-            }
-        } else {
-            if (mode == null || mode.equalsIgnoreCase(MODE_LOCAL)) {
-                LocalJobRunner runner = new LocalJobRunner(job, cmdline);
-                runner.run();
-            } else if (mode.equalsIgnoreCase(MODE_DISTRIBUTED)) {
-                throw new IllegalArgumentException("Missing configuration: " +
-                        HADOOP_HOME);
-            } else {
-                throw new IllegalArgumentException("Invalid mode " 
-                        + mode);
+                Exception ex = new FileNotFoundException(file.getAbsolutePath());
+                LOG.error("Hadoop conf directory is not found: " + file, ex);
+                System.err.println(ex.getMessage());
+                return 1;
             }
         }
+        
+        // create job
+        Job job = null;
+        try {
+            job = command.createJob(conf, cmdline);
+        } catch (Exception e) {
+            // Print exception message.
+            System.err.println(e.getMessage());
+            return 1;
+        }
+        
+        // run job
+        if (distributed) {
+            // submit job
+            return submitJob(job); 
+        } else {
+            return runJobLocally(job, cmdline);
+        }
+    }
+
+    private static int submitJob(Job job) {
+        String cpHome = 
+            System.getProperty(CONTENTPUMP_HOME_PROPERTY_NAME);
+        String cpVersion =
+            System.getProperty(CONTENTPUMP_VERSION_PROPERTY_NAME);
+        String cpJarName = CONTENTPUMP_JAR_NAME.replace("<VERSION>", 
+                cpVersion);
+        // set job jar
+        File cpJar = new File(cpHome, cpJarName);
+        if (!cpJar.exists()) {
+            Exception ex = new FileNotFoundException(cpJar.getAbsolutePath());
+            LOG.error("ContentPump jar file not found: " + 
+                    cpJar.getAbsolutePath(), ex);
+            System.err.println(ex.getMessage());
+            return 1;
+        }
+        
+        Configuration conf = job.getConfiguration();
+        try {
+            conf.set("mapred.jar", cpJar.toURI().toURL().toString());
+
+            File cpHomeDir= new File(cpHome);
+            FilenameFilter filter = new FilenameFilter() {
+
+                @Override
+                public boolean accept(File dir, String name) {
+                    if (name.endsWith(".jar")) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+            };
+        
+            // set lib jars
+            StringBuilder jars = new StringBuilder();
+            for (File jar : cpHomeDir.listFiles(filter)) {
+                if (jars.length() > 0) {
+                    jars.append(',');
+                }
+                jars.append(jar.toURI().toURL().toString());
+            }
+            conf.set("tmpjars", jars.toString());
+        
+        
+            job.waitForCompletion(true);
+            return 0;
+        } catch (Exception e) {
+            LOG.error("Error executing job", e);
+            System.err.println(e.getMessage());
+            return 1;
+        }    
+    }
+    
+    private static int runJobLocally(Job job, CommandLine cmdline) {
+        try {
+            LocalJobRunner runner = new LocalJobRunner(job, cmdline);
+            runner.run();
+            return 0;
+        } catch (Exception e) {
+            LOG.error("Error running a job locally", e);
+            System.err.println(e.getMessage());
+            return 1;
+        }      
     }
 
     private static void printUsage() {
