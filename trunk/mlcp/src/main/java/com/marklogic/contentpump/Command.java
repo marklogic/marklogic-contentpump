@@ -15,6 +15,8 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
@@ -27,6 +29,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
  * Enum of supported commands.
@@ -97,7 +100,8 @@ public enum Command implements ConfigConstants {
         }
 
         @Override
-        public Job createJob(Configuration conf, CommandLine cmdline) throws Exception {
+        public Job createJob(Configuration conf, CommandLine cmdline) 
+        throws IOException {
             // apply configuration
             if (cmdline.hasOption("conf")) {
                 conf.addResource(cmdline.getOptionValue("conf"));
@@ -107,7 +111,8 @@ public enum Command implements ConfigConstants {
                 inputTypeOption = cmdline.getOptionValue(INPUT_TYPE);
             }
             InputType type = InputType.forName(inputTypeOption);
-            String documentType = DOCUMENT_TYPE_DEFAULT;
+            String documentType = conf.get(MarkLogicConstants.CONTENT_TYPE, 
+                    MarkLogicConstants.DEFAULT_CONTENT_TYPE);
             if (cmdline.hasOption(DOCUMENT_TYPE)) {
                 documentType = cmdline.getOptionValue(DOCUMENT_TYPE);
             }
@@ -131,7 +136,14 @@ public enum Command implements ConfigConstants {
         }
 
         @Override
-        public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
+        public void applyConfigOptions(Configuration conf, 
+                CommandLine cmdline) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void printUsage() {
             // TODO Auto-generated method stub
             
         }   
@@ -151,7 +163,14 @@ public enum Command implements ConfigConstants {
         }
 
         @Override
-        public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
+        public void applyConfigOptions(Configuration conf, 
+                CommandLine cmdline) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void printUsage() {
             // TODO Auto-generated method stub
             
         }
@@ -171,7 +190,14 @@ public enum Command implements ConfigConstants {
         }
 
         @Override
-        public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
+        public void applyConfigOptions(Configuration conf, 
+                CommandLine cmdline) {
+            // TODO Auto-generated method stub
+            
+        }
+
+        @Override
+        public void printUsage() {
             // TODO Auto-generated method stub
             
         }       
@@ -204,7 +230,8 @@ public enum Command implements ConfigConstants {
      * @return a Hadoop job
      * @throws Exception 
      */
-    public abstract Job createJob(Configuration conf, CommandLine cmdline) throws Exception;
+    public abstract Job createJob(Configuration conf, CommandLine cmdline) 
+    throws IOException;
     
     /**
      * Apply config options set from the command-line to the configuration.
@@ -237,4 +264,6 @@ public enum Command implements ConfigConstants {
             .create(MAX_SPLIT_SIZE);
         options.addOption(splitSize);
     }
+
+    public abstract void printUsage();
 }

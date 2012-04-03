@@ -31,16 +31,18 @@ public enum InputType {
     DOCUMENTS {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
-                ContentType contentType) {
-            // TODO: be intelligent of the content type
-            return DocumentFileInputFormat.class;
+                ContentType contentType) {         
+            return CombineDocumentInputFormat.class;
         }
 
         @Override
         public Class<? extends Mapper> getMapperClass(
                 ContentType contentType) {
-            // TODO: be intelligent of the content type
-            return TextDocumentMapper.class;
+            if (contentType == ContentType.BINARY) {
+                return BinaryDocumentMapper.class;
+            } else {
+                return TextDocumentMapper.class;
+            }
         }       
     },
     AGGREGATES {

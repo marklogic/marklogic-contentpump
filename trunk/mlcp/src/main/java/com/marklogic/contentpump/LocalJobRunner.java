@@ -17,8 +17,8 @@ package com.marklogic.contentpump;
 
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
@@ -48,11 +48,10 @@ import org.apache.hadoop.util.ReflectionUtils;
  *
  */
 public class LocalJobRunner implements ConfigConstants {
-    public static final Log LOG = 
-        LogFactory.getLog(LocalJobRunner.class.getName());
+    public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
     
     private Job job;
-    private ThreadPoolExecutor pool;
+    private ExecutorService pool;
     
     public LocalJobRunner(Job job, CommandLine cmdline) {
         this.job = job;
@@ -62,8 +61,7 @@ public class LocalJobRunner implements ConfigConstants {
             int threadCount = Integer.parseInt(
                     cmdline.getOptionValue(THREAD_COUNT));
             if (threadCount > 1) {
-                pool = new ThreadPoolExecutor(threadCount, threadCount, 0, 
-                    TimeUnit.DAYS, new LinkedBlockingQueue<Runnable>());
+                pool = Executors.newFixedThreadPool(threadCount);
             }
         }
     }
@@ -129,6 +127,8 @@ public class LocalJobRunner implements ConfigConstants {
         if (pool != null) {
             pool.shutdown();
         }
+        // wait forever till all tasks are done
+        while (!pool.awaitTermination(1, TimeUnit.DAYS));
     }
     
     /**
