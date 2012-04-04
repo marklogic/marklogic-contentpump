@@ -107,6 +107,7 @@ public class ContentPump implements ConfigConstants {
         if (cmdline.hasOption(HADOOP_HOME)) {
             hadoopHome = cmdline.getOptionValue(HADOOP_HOME);
         }
+        
         boolean distributed = hadoopHome != null && (mode == null ||
                 mode.equals(MODE_DISTRIBUTED));
         if (LOG.isDebugEnabled()) {
@@ -115,26 +116,20 @@ public class ContentPump implements ConfigConstants {
         }
         
         if (distributed) {
+            File hdHomeDir= new File(hadoopHome);
+            try { 
+                checkHadoopHome(hdHomeDir);
+            } catch (IllegalArgumentException e) {
+                LOG.error("Error found with Hadoop home setting", e);
+                System.err.println(e.getMessage());
+                return 1;
+            }
             // set new class loader based on Hadoop home
-            ClassLoader parent = conf.getClassLoader();
-            File file = new File(hadoopHome, "conf");
-            if (file.exists()) {
-                URL url = null;
-                try {
-                    url = file.toURI().toURL();
-                } catch (MalformedURLException e) {
-                    LOG.error("Error converting $HADOOP_HOME/conf to URL", e);
-                    System.err.println(e.getMessage());
-                    return 1;
-                }
-                URL[] urls = new URL[1];
-                urls[0] = url;
-                ClassLoader classLoader = new URLClassLoader(urls, parent);
-                Thread.currentThread().setContextClassLoader(classLoader);
-            } else {
-                Exception ex = new FileNotFoundException(file.getAbsolutePath());
-                LOG.error("Hadoop conf directory is not found: " + file, ex);
-                System.err.println(ex.getMessage());
+            try {
+                setClassLoader(hdHomeDir, conf);
+            } catch (Exception e) {
+                LOG.error("Error configuring class loader", e);
+                System.err.println(e.getMessage());
                 return 1;
             }
         }
@@ -150,15 +145,60 @@ public class ContentPump implements ConfigConstants {
         }
         
         // run job
-        if (distributed) {
-            // submit job
-            return submitJob(job); 
-        } else {
-            return runJobLocally(job, cmdline);
+        try {
+            if (distributed) {
+                // submit job
+                submitJob(job); 
+            } else {
+                runJobLocally(job, cmdline);
+            }
+            return 0;
+        } catch (Exception e) {
+            LOG.error("Error running a ContentPump job", e); 
+            System.err.println(e.getMessage());
+            return 1;
         }
     }
+    
+    /**
+     * Set class loader for current thread and for Confifguration based on 
+     * Hadoop home.
+     * 
+     * @param hdHomeDir Hadoop home directory
+     * @param conf Hadoop configuration
+     * @throws MalformedURLException
+     */
+    private static void setClassLoader(File hdHomeDir, Configuration conf) 
+    throws Exception {
+        ClassLoader parent = conf.getClassLoader();
+        File file = new File(hdHomeDir, "conf");
+        if (file.exists()) {
+            URL url = file.toURI().toURL();
+            URL[] urls = new URL[1];
+            urls[0] = url;
+            ClassLoader classLoader = new URLClassLoader(urls, parent);
+            Thread.currentThread().setContextClassLoader(classLoader);
+            conf.setClassLoader(classLoader);
+        } else {
+            throw new FileNotFoundException(file.getAbsolutePath());
+        }  
+    }
 
-    private static int submitJob(Job job) {
+    private static void checkHadoopHome(File hdHomeDir) 
+    throws IllegalArgumentException {
+        if (!hdHomeDir.exists()) {
+            throw new IllegalArgumentException("Hadoop home " + hdHomeDir + 
+                    " is not found.");
+        } else if (!hdHomeDir.isDirectory()) {
+            throw new IllegalArgumentException("Hadoop home " + hdHomeDir + 
+                    " is not a directory.");
+        } else if (!hdHomeDir.canRead()) {
+            throw new IllegalArgumentException("Hadoop home " + hdHomeDir + 
+                    " cannot be read.");
+        }
+     }
+
+    private static void submitJob(Job job) throws Exception {
         String cpHome = 
             System.getProperty(CONTENTPUMP_HOME_PROPERTY_NAME);
         String cpVersion =
@@ -168,61 +208,44 @@ public class ContentPump implements ConfigConstants {
         // set job jar
         File cpJar = new File(cpHome, cpJarName);
         if (!cpJar.exists()) {
-            Exception ex = new FileNotFoundException(cpJar.getAbsolutePath());
-            LOG.error("ContentPump jar file not found: " + 
-                    cpJar.getAbsolutePath(), ex);
-            System.err.println(ex.getMessage());
-            return 1;
+            throw new FileNotFoundException(cpJar.getAbsolutePath());
         }
         
         Configuration conf = job.getConfiguration();
-        try {
-            conf.set("mapred.jar", cpJar.toURI().toURL().toString());
-
-            File cpHomeDir= new File(cpHome);
-            FilenameFilter filter = new FilenameFilter() {
-
-                @Override
-                public boolean accept(File dir, String name) {
-                    if (name.endsWith(".jar")) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
-            };
         
-            // set lib jars
-            StringBuilder jars = new StringBuilder();
-            for (File jar : cpHomeDir.listFiles(filter)) {
-                if (jars.length() > 0) {
-                    jars.append(',');
+        conf.set("mapred.jar", cpJar.toURI().toURL().toString());
+
+        File cpHomeDir= new File(cpHome);
+        FilenameFilter filter = new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String name) {
+                if (name.endsWith(".jar") && !name.startsWith("hadoop")) {
+                    return true;
+                } else {
+                    return false;
                 }
-                jars.append(jar.toURI().toURL().toString());
             }
-            conf.set("tmpjars", jars.toString());
-        
-        
-            job.waitForCompletion(true);
-            return 0;
-        } catch (Exception e) {
-            LOG.error("Error executing job", e);
-            System.err.println(e.getMessage());
-            return 1;
-        }    
+
+        };
+
+        // set lib jars
+        StringBuilder jars = new StringBuilder();
+        for (File jar : cpHomeDir.listFiles(filter)) {
+            if (jars.length() > 0) {
+                jars.append(',');
+            }
+            jars.append(jar.toURI().toURL().toString());
+        }
+        conf.set("tmpjars", jars.toString());
+
+        job.waitForCompletion(true);    
     }
     
-    private static int runJobLocally(Job job, CommandLine cmdline) {
-        try {
-            LocalJobRunner runner = new LocalJobRunner(job, cmdline);
-            runner.run();
-            return 0;
-        } catch (Exception e) {
-            LOG.error("Error running a job locally", e);
-            System.err.println(e.getMessage());
-            return 1;
-        }      
+    private static void runJobLocally(Job job, CommandLine cmdline) 
+    throws Exception {
+        LocalJobRunner runner = new LocalJobRunner(job, cmdline);
+        runner.run();  
     }
 
     private static void printUsage() {
