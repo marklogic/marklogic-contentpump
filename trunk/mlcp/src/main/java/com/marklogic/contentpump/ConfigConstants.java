@@ -28,7 +28,7 @@ public interface ConfigConstants {
     static final String CONTENTPUMP_VERSION_PROPERTY_NAME = 
         "CONTENTPUMP_VERSION";
     static final String CONTENTPUMP_JAR_NAME = 
-        "marklogic-contentpump-<VERSION>-SNAPSHOT.jar";
+        "marklogic-contentpump-<VERSION>.jar";
     
     // common
     static final String MODE = "mode";
