@@ -103,9 +103,6 @@ public enum Command implements ConfigConstants {
         public Job createJob(Configuration conf, CommandLine cmdline) 
         throws IOException {
             // apply configuration
-            if (cmdline.hasOption("conf")) {
-                conf.addResource(cmdline.getOptionValue("conf"));
-            }
             String inputTypeOption = INPUT_TYPE_DEFAULT;
             if (cmdline.hasOption(INPUT_TYPE)) {
                 inputTypeOption = cmdline.getOptionValue(INPUT_TYPE);

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly>
+    <id>src</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <fileSets>
+        <fileSet>
+            <directory>src</directory>
+            <outputDirectory>/src</outputDirectory>
+        </fileSet>
+    </fileSets>
+    <files>
+        <file>
+            <source>pom.xml</source>
+            <outputDirectory>/</outputDirectory>
+        </file>
+    </files>
+</assembly>
+
