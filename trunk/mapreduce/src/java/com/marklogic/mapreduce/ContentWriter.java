@@ -163,12 +163,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         options.setEncoding(conf.get(OUTPUT_ENCODING,DEFAULT_OUTPUT_ENCODING));
         String repairLevel = conf.get(OUTPUT_XML_REPAIR_LEVEL,
                 DEFAULT_OUTPUT_XML_REPAIR_LEVEL).toLowerCase();
-        if (DocumentRepairLevel.DEFAULT.toString().equals(repairLevel))
+        if (DocumentRepairLevel.DEFAULT.toString().equals(repairLevel)){
             options.setRepairLevel(DocumentRepairLevel.DEFAULT);
-        else if (DocumentRepairLevel.NONE.toString().equals(repairLevel))
+        }
+        else if (DocumentRepairLevel.NONE.toString().equals(repairLevel)){
             options.setRepairLevel(DocumentRepairLevel.NONE);
-        else if (DocumentRepairLevel.FULL.toString().equals(repairLevel))
+        }
+        else if (DocumentRepairLevel.FULL.toString().equals(repairLevel)){
             options.setRepairLevel(DocumentRepairLevel.FULL);
+        }
     }
 
     @Override
