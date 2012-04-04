@@ -37,6 +37,7 @@ public interface ConfigConstants {
     static final String HADOOP_HOME = "hadoop_home";    
     static final String THREAD_COUNT = "thread_count";
     static final String MAX_SPLIT_SIZE = "max_split_size";
+    static final String OPTIONS_FILE = "options-file";
     
     // command-specific
     static final String INPUT_FILE_PATH = "input_file_path";

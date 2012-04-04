@@ -16,7 +16,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>marklogic-contentpump</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <name>marklogic-contentpump</name>
   <packaging>jar</packaging>
   <build>
@@ -24,21 +24,59 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
         <configuration>
           <fork>true</fork>
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
       </plugin>
+      <plugin>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>2.4</version>
+        <configuration>
+          <excludeTransitive>true</excludeTransitive>
+        </configuration> 
+        <executions>
+          <execution>
+            <id>copy-dependency</id>
+            <phase>package</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>2.3</version>
+        <configuration>
+            <descriptors>
+              <descriptor>src/assemble/srcdist.xml</descriptor>
+              <descriptor>src/assemble/bindist.xml</descriptor>
+            </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
+    <!-- add back when really needed>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.10</version>
       <scope>test</scope>
     </dependency>
+    <-->
     <dependency>
       <groupId>commons-cli</groupId>
       <artifactId>commons-cli</artifactId>
@@ -63,6 +101,7 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <!-- add back when really needed>
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
@@ -73,11 +112,7 @@
       <artifactId>xpp3</artifactId>
       <version>1.1.3.3</version>
     </dependency>
-    <dependency>
-      <groupId>org.apache.sqoop</groupId>
-      <artifactId>sqoop</artifactId>
-      <version>1.4.1-incubating</version>
-    </dependency>
+    <-->
     <dependency>
       <groupId>com.marklogic</groupId>
       <artifactId>marklogic-xcc</artifactId>

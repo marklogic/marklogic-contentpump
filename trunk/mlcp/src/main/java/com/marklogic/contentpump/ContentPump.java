@@ -32,7 +32,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.GenericOptionsParser;
-import org.apache.sqoop.util.OptionsFileUtil;
 
 /**
  * ContentPump entry point.  MarkLogic ContentPump is a tool that moves content 
