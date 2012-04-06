@@ -35,7 +35,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.mapreduce.DocumentURI;
 
 /**
- * InputFormat for reading documents from file systems.  Once document on the
+ * InputFormat for reading documents from file systems.  One document on the
  * file system is one record (key value pair).
  * 
  * @author jchen

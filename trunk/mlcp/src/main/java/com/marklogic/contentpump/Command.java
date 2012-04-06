@@ -96,6 +96,14 @@ public enum Command implements ConfigConstants {
                 .withDescription("Codec used for compression")
                 .create(INPUT_COMPRESSION_CODEC);
             options.addOption(inputCompressionCodec);
+            Option documentType = OptionBuilder
+                .withArgName(DOCUMENT_TYPE)
+                .hasArg()
+                .withDescription(
+                    "Type of document content. Valid choices: " +
+                    "XML, TEXT, BINARY")
+                .create(DOCUMENT_TYPE);
+            options.addOption(documentType);
             //TODO: complete
         }
 
@@ -112,14 +120,28 @@ public enum Command implements ConfigConstants {
                     MarkLogicConstants.DEFAULT_CONTENT_TYPE);
             if (cmdline.hasOption(DOCUMENT_TYPE)) {
                 documentType = cmdline.getOptionValue(DOCUMENT_TYPE);
+                conf.set(MarkLogicConstants.CONTENT_TYPE, documentType.toUpperCase());
             }
             ContentType contentType = ContentType.forName(documentType);
+            boolean compressed = Boolean.parseBoolean(conf.get(
+                    MarkLogicConstants.INPUT_COMPRESSED,
+                    MarkLogicConstants.DEFAULT_INPUT_COMPRESSED));
+            if (cmdline.hasOption(INPUT_COMPRESSED)) {
+                compressed = Boolean.parseBoolean(cmdline
+                        .getOptionValue(INPUT_COMPRESSED));
+            }
+            String codec = conf.get(MarkLogicConstants.INPUT_COMPRESSION_CODEC);
+            if(cmdline.hasOption(INPUT_COMPRESSION_CODEC)){
+                codec = cmdline.getOptionValue(INPUT_COMPRESSION_CODEC);
+                conf.set(MarkLogicConstants.INPUT_COMPRESSION_CODEC, codec.toUpperCase());
+            }
             
             // construct a job
             Job job = new Job(conf);
             job.setJarByClass(this.getClass());
-            job.setInputFormatClass(type.getInputFormatClass(contentType));
-            job.setMapperClass(type.getMapperClass(contentType));
+            job.setInputFormatClass(type.getInputFormatClass(contentType,
+                    compressed));
+            job.setMapperClass(type.getMapperClass(contentType,compressed));
             job.setOutputFormatClass(ContentOutputFormat.class);
             
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
