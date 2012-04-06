@@ -111,13 +111,13 @@ public class CompressedDocumentReader<VALUEIN> extends RecordReader<DocumentURI,
                 continue;
             if (zipEntry != null) {
                 key.setUri(zipEntry.getName());
+                long size;
+                while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
+                    baos.write(buf, 0, (int) size);
+                }
                 if (value instanceof Text) {
-                    ((Text) value).set(zipEntry.toString());
+                    ((Text) value).set(baos.toString());
                 } else if (value instanceof BytesWritable) {
-                    long size;
-                    while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
-                        baos.write(buf, 0, (int) size);
-                    }
                     ((BytesWritable) value).set(baos.toByteArray(), 0,
                         baos.size());
                 }
