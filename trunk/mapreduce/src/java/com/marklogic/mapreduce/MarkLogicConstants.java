@@ -215,6 +215,22 @@ public interface MarkLogicConstants {
     static final String MAX_SPLIT_SIZE =
         "mapreduce.marklogic.input.maxsplitsize";
     /**
+     *  The config property name (<code>{@value}</code>)
+     *  which, if set, specifies whether the codec for compression.
+     */  
+    static final String INPUT_COMPRESSION_CODEC = 
+        "mapreduce.marklogic.input.compressioncodec";
+    /**
+     *  The config property name (<code>{@value}</code>)
+     *  which, if set, specifies whether the input data is compressed.
+     */  
+    static final String INPUT_COMPRESSED =
+        "mapreduce.marklogic.input.compressed";
+    /**
+     * Whether the input data is compressed by default.
+     */
+    static final String DEFAULT_INPUT_COMPRESSED = "false";
+    /**
      * Not yet Implemented.
      * 
      * <p>
