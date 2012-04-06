@@ -80,51 +80,55 @@ public class CompressedDocumentReader<VALUEIN> extends RecordReader<DocumentURI,
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
             throws IOException, InterruptedException {
-        Path file = ((FileSplit)inSplit).getPath();
+        Path file = ((FileSplit) inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         zipIn = new ZipInputStream(fileIn);
-        
+
         Configuration conf = context.getConfiguration();
-        //TODO: support codec
-        String codec = conf.get(MarkLogicConstants.INPUT_COMPRESSION_CODEC);
-        
-        String type = conf.get(MarkLogicConstants.CONTENT_TYPE, 
-                MarkLogicConstants.DEFAULT_CONTENT_TYPE);
-        ContentType contentType = ContentType.valueOf(type);        
+        // TODO: support codec
+        String codec = conf.get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC);
+
+        String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
+            MarkLogicConstants.DEFAULT_CONTENT_TYPE);
+        ContentType contentType = ContentType.valueOf(type);
         Class<? extends Writable> valueClass = contentType.getWritableClass();
         value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
     }
 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (zipIn != null) {
-            ZipEntry zipEntry;
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            
-            while ((zipEntry = zipIn.getNextEntry()) != null) {
-                if(zipEntry.isDirectory()) continue;
-                if (zipEntry != null) {
-                    key.setUri(zipEntry.getName());
-                    long size;
-                    while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
-                        baos.write(buf,0,(int)size);
-                    }
-                    if (value instanceof Text) {
-                        ((Text)value).set(baos.toString());
-                    } else if (value instanceof BytesWritable) {
-                        ((BytesWritable)value).set(baos.toByteArray(),0, baos.size());
-                    }
-                    baos.close();
-                    return true;
-                }
-            }
-            
-            baos.close();
+        if (zipIn == null) {
             hasNext = false;
             return false;
         }
+        
+        ZipEntry zipEntry;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        while ((zipEntry = zipIn.getNextEntry()) != null) {
+            if (zipEntry.isDirectory())
+                continue;
+            if (zipEntry != null) {
+                key.setUri(zipEntry.getName());
+                long size;
+                while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
+                    baos.write(buf, 0, (int) size);
+                }
+                if (value instanceof Text) {
+                    ((Text) value).set(baos.toString());
+                } else if (value instanceof BytesWritable) {
+                    ((BytesWritable) value).set(baos.toByteArray(), 0,
+                        baos.size());
+                }
+                baos.close();
+                return true;
+            }
+        }
+
+        baos.close();
         hasNext = false;
         return false;
     }
+
 }

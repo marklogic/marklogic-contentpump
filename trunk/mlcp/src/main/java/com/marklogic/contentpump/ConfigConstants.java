@@ -49,6 +49,7 @@ public interface ConfigConstants {
     static final String INPUT_TYPE = "input_type";
     static final String INPUT_TYPE_DEFAULT = "documents";
     static final String INPUT_COMPRESSED = "input_compressed";
+    static final boolean DEFAULT_INPUT_COMPRESSED = false;
     static final String INPUT_COMPRESSION_CODEC = "input_compression_codec";
     static final String INPUT_SEQUENCEFILE_KEY_CLASS = 
         "input_sequencefile_key_class";
@@ -96,4 +97,8 @@ public interface ConfigConstants {
     static final String OUTPUT_PASSWORD = "output_password";
     static final String OUTPUT_HOST = "output_host";
     static final String OUTPUT_PORT = "output_port";      
+    
+    // configurations to be overwritten in hadoop conf
+    static final String CONF_INPUT_COMPRESSION_CODEC = 
+        "mapreduce.marklogic.input.compressioncodec";
 }

@@ -30,33 +30,22 @@ public enum InputType {
     DOCUMENTS {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
-                ContentType contentType, boolean compressed) {
-        	if(compressed){
-        	    return CompressedDocumentInputFormat.class;
-        	}
-        	else{
-        	    return CombineDocumentInputFormat.class;
-        	}
+            ContentType contentType, boolean compressed) {
+            if (compressed) {
+                return CompressedDocumentInputFormat.class;
+            } else {
+                return CombineDocumentInputFormat.class;
+            }
         }
 
         @Override
-        public Class<? extends Mapper> getMapperClass(
-                ContentType contentType, boolean compressed) {
-        	if(compressed){
-                if (contentType == ContentType.BINARY) {
-                    return CompressedBinaryDocumentMapper.class;
-                } else {
-                    return CompressedTextDocumentMapper.class;
-                }
-        	}
-        	else{
-                if (contentType == ContentType.BINARY) {
-                    return BinaryDocumentMapper.class;
-                } else {
-                    return TextDocumentMapper.class;
-                }
-        	}
-        }       
+        public Class<? extends Mapper> getMapperClass(ContentType contentType) {
+            if (contentType == ContentType.BINARY) {
+                return BinaryDocumentMapper.class;
+            } else {
+                return TextDocumentMapper.class;
+            }
+        }
     },
     AGGREGATES {
         @Override
@@ -68,7 +57,7 @@ public enum InputType {
 
         @Override
         public Class<? extends Mapper> getMapperClass(
-                ContentType contentType, boolean compressed) {
+                ContentType contentType) {
             // TODO Auto-generated method stub
             return null;
         }
@@ -83,7 +72,7 @@ public enum InputType {
 
         @Override
         public Class<? extends Mapper> getMapperClass(
-                ContentType contentType, boolean compressed) {
+                ContentType contentType) {
             // TODO Auto-generated method stub
             return null;
         }
@@ -98,7 +87,7 @@ public enum InputType {
 
         @Override
         public Class<? extends Mapper> getMapperClass(
-                ContentType contentType, boolean compressed) {
+                ContentType contentType) {
             // TODO Auto-generated method stub
             return null;
         }
@@ -114,7 +103,7 @@ public enum InputType {
 
         @Override
         public Class<? extends Mapper> getMapperClass(
-                ContentType contentType, boolean compressed) {
+                ContentType contentType) {
             // TODO Auto-generated method stub
             return null;
         }
@@ -153,5 +142,5 @@ public enum InputType {
      * @return Mapper class
      */
     public abstract Class<? extends Mapper> getMapperClass(
-            ContentType contentType, boolean compressed);
+            ContentType contentType);
 }
