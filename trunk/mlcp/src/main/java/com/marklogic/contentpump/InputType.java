@@ -40,12 +40,8 @@ public enum InputType {
 
         @Override
         public Class<? extends Mapper> getMapperClass(ContentType contentType) {
-            if (contentType == ContentType.BINARY) {
-                return BinaryDocumentMapper.class;
-            } else {
-                return TextDocumentMapper.class;
-            }
-        }
+            return DocumentMapper.class;
+          }
     },
     AGGREGATES {
         @Override
