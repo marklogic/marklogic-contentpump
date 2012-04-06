@@ -110,30 +110,20 @@ public enum Command implements ConfigConstants {
         @Override
         public Job createJob(Configuration conf, CommandLine cmdline) 
         throws IOException {
-            // apply configuration
+            applyConfigOptions(conf, cmdline);
+            
             String inputTypeOption = INPUT_TYPE_DEFAULT;
             if (cmdline.hasOption(INPUT_TYPE)) {
                 inputTypeOption = cmdline.getOptionValue(INPUT_TYPE);
             }
             InputType type = InputType.forName(inputTypeOption);
-            String documentType = conf.get(MarkLogicConstants.CONTENT_TYPE, 
-                    MarkLogicConstants.DEFAULT_CONTENT_TYPE);
-            if (cmdline.hasOption(DOCUMENT_TYPE)) {
-                documentType = cmdline.getOptionValue(DOCUMENT_TYPE);
-                conf.set(MarkLogicConstants.CONTENT_TYPE, documentType.toUpperCase());
-            }
+            String documentType = conf.get(MarkLogicConstants.CONTENT_TYPE,
+                MarkLogicConstants.DEFAULT_CONTENT_TYPE);
             ContentType contentType = ContentType.forName(documentType);
-            boolean compressed = Boolean.parseBoolean(conf.get(
-                    MarkLogicConstants.INPUT_COMPRESSED,
-                    MarkLogicConstants.DEFAULT_INPUT_COMPRESSED));
+            boolean compressed = ConfigConstants.DEFAULT_INPUT_COMPRESSED;
             if (cmdline.hasOption(INPUT_COMPRESSED)) {
                 compressed = Boolean.parseBoolean(cmdline
-                        .getOptionValue(INPUT_COMPRESSED));
-            }
-            String codec = conf.get(MarkLogicConstants.INPUT_COMPRESSION_CODEC);
-            if(cmdline.hasOption(INPUT_COMPRESSION_CODEC)){
-                codec = cmdline.getOptionValue(INPUT_COMPRESSION_CODEC);
-                conf.set(MarkLogicConstants.INPUT_COMPRESSION_CODEC, codec.toUpperCase());
+                    .getOptionValue(INPUT_COMPRESSED));
             }
             
             // construct a job
@@ -141,7 +131,7 @@ public enum Command implements ConfigConstants {
             job.setJarByClass(this.getClass());
             job.setInputFormatClass(type.getInputFormatClass(contentType,
                     compressed));
-            job.setMapperClass(type.getMapperClass(contentType,compressed));
+            job.setMapperClass(type.getMapperClass(contentType));
             job.setOutputFormatClass(ContentOutputFormat.class);
             
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
@@ -155,8 +145,15 @@ public enum Command implements ConfigConstants {
         @Override
         public void applyConfigOptions(Configuration conf, 
                 CommandLine cmdline) {
-            // TODO Auto-generated method stub
-            
+            if (cmdline.hasOption(DOCUMENT_TYPE)) {
+                String documentType = cmdline.getOptionValue(DOCUMENT_TYPE);
+                conf.set(MarkLogicConstants.CONTENT_TYPE,
+                    documentType.toUpperCase());
+            }
+            if (cmdline.hasOption(INPUT_COMPRESSION_CODEC)) {
+                String codec = cmdline.getOptionValue(INPUT_COMPRESSION_CODEC);
+                conf.set(INPUT_COMPRESSION_CODEC, codec.toUpperCase());
+            }
         }
 
         @Override
