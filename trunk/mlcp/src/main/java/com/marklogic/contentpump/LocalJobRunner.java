@@ -126,9 +126,10 @@ public class LocalJobRunner implements ConfigConstants {
         }
         if (pool != null) {
             pool.shutdown();
+            // wait forever till all tasks are done
+            while (!pool.awaitTermination(1, TimeUnit.DAYS));
         }
-        // wait forever till all tasks are done
-        while (pool != null && !pool.awaitTermination(1, TimeUnit.DAYS));
+        
     }
     
     /**
