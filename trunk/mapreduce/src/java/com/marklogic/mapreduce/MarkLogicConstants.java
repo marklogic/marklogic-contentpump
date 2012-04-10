@@ -435,12 +435,12 @@ public interface MarkLogicConstants {
      * document load time and must be a name that it recognizes. The document
      * byte stream will be transcoded to UTF-8 for storage.
      */
-    static final String OUTPUT_ENCODING = 
-        "mapreduce.marklogic.output.encoding";
+    static final String OUTPUT_CONTENT_ENCODING = 
+        "mapreduce.marklogic.output.content.encoding";
     /**
-     * Default output encoding
+     * Default output content encoding
      */
-    static final String DEFAULT_OUTPUT_ENCODING = "UTF-8";
+    static final String DEFAULT_OUTPUT_CONTENT_ENCODING = "UTF-8";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a comma-separated list of collections
@@ -646,7 +646,8 @@ public interface MarkLogicConstants {
      * value of <code>en</code> indicates that the document is in english. The
      * default is null, which indicates to use the server default.
      */
-    static final String OUTPUT_LANGUAGE = "mapreduce.marklogic.output.language";
+    static final String OUTPUT_CONTENT_LANGUAGE = 
+        "mapreduce.marklogic.output.content.language";
     /**
      * Value string of the output value external variable name.
      */
