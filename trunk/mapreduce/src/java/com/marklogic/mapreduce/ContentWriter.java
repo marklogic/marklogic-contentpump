@@ -159,8 +159,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         ContentType contentType = ContentType.valueOf(contentTypeStr);
         options.setFormat(contentType.getDocumentFormat());
         
-        options.setLanguage(conf.get(OUTPUT_LANGUAGE));
-        options.setEncoding(conf.get(OUTPUT_ENCODING,DEFAULT_OUTPUT_ENCODING));
+        options.setLanguage(conf.get(OUTPUT_CONTENT_LANGUAGE));
+        options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
+                DEFAULT_OUTPUT_CONTENT_ENCODING));
         String repairLevel = conf.get(OUTPUT_XML_REPAIR_LEVEL,
                 DEFAULT_OUTPUT_XML_REPAIR_LEVEL).toLowerCase();
         if (DocumentRepairLevel.DEFAULT.toString().equals(repairLevel)){
