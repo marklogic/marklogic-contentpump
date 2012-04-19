@@ -60,7 +60,8 @@ extends FileInputFormat<DocumentURI, VALUE> {
     @Override
     public List<InputSplit> getSplits(JobContext job
     ) throws IOException {
-        long maxSize = getMaxSplitSize(job);
+        long minSize = Math.max(getFormatMinSplitSize(), getMinSplitSize(job));
+        long maxSize = getMaxSplitSize(job);      
 
         // generate splits
         List<InputSplit> splits = new ArrayList<InputSplit>();
@@ -70,6 +71,8 @@ extends FileInputFormat<DocumentURI, VALUE> {
             FileSystem fs = path.getFileSystem(job.getConfiguration());
             long length = file.getLen();
             BlockLocation[] blkLocations = fs.getFileBlockLocations(file, 0, length);
+            long blockSize = file.getBlockSize();
+            long splitSize = computeSplitSize(blockSize, minSize, maxSize);
             if (length != 0) { 
                 FileSplit fileSplit = new FileSplit(path, 0, length, 
                         blkLocations[0].getHosts());
@@ -79,8 +82,9 @@ extends FileInputFormat<DocumentURI, VALUE> {
                 }
 
                 try {
-                    if (split.getLength() + length < maxSize) {
-                        split.addSplit(fileSplit);
+                    if (split.getLength() + length < splitSize ||
+                        split.getLength() < minSize ) {
+                        split.addSplit(fileSplit); 
                     } else {
                         splits.add(split);
                         split = new CombineDocumentSplit();
