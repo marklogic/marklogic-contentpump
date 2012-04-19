@@ -37,6 +37,7 @@ public interface ConfigConstants {
     static final String HADOOP_HOME = "hadoop_home";    
     static final String THREAD_COUNT = "thread_count";
     static final String MAX_SPLIT_SIZE = "max_split_size";
+    static final String MIN_SPLIT_SIZE = "min_split_size";
     static final String OPTIONS_FILE = "options-file";
     
     // command-specific
@@ -96,9 +97,11 @@ public interface ConfigConstants {
     static final String OUTPUT_USERNAME = "output_username";
     static final String OUTPUT_PASSWORD = "output_password";
     static final String OUTPUT_HOST = "output_host";
-    static final String OUTPUT_PORT = "output_port";      
+    static final String OUTPUT_PORT = "output_port";   
     
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
         "mapreduce.marklogic.input.compressioncodec";
+    static final String CONF_MAX_SPLIT_SIZE = "mapred.max.split.size";
+    static final String CONF_MIN_SPLIT_SIZE = "mapred.min.split.size";
 }

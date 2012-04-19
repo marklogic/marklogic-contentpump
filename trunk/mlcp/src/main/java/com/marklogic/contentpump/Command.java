@@ -152,6 +152,14 @@ public enum Command implements ConfigConstants {
                 String codec = cmdline.getOptionValue(INPUT_COMPRESSION_CODEC);
                 conf.set(INPUT_COMPRESSION_CODEC, codec.toUpperCase());
             }
+            if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
+                String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
+                conf.set(CONF_MAX_SPLIT_SIZE, maxSize);
+            }
+            if (cmdline.hasOption(MIN_SPLIT_SIZE)) {
+                String maxSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
+                conf.set(CONF_MIN_SPLIT_SIZE, maxSize);
+            }
         }
 
         @Override
