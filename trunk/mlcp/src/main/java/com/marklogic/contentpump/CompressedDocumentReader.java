@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -44,7 +46,10 @@ import com.marklogic.mapreduce.MarkLogicConstants;
  *
  * @param <VALUEIN>
  */
-public class CompressedDocumentReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN> {
+public class CompressedDocumentReader<VALUEIN> extends
+        RecordReader<DocumentURI, VALUEIN> {
+    public static final Log LOG = LogFactory
+            .getLog(CompressedDocumentReader.class);
     private DocumentURI key = new DocumentURI();
     private VALUEIN value;
     private ZipInputStream zipIn;

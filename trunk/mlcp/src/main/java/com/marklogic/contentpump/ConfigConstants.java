@@ -43,12 +43,13 @@ public interface ConfigConstants {
     // command-specific
     static final String INPUT_FILE_PATH = "input_file_path";
     static final String INPUT_FILE_PATTERN = "input_file_pattern";
-    static final String INPUT_RECORD_NAME = "input_record_name";
-    static final String INPUT_RECORD_NAMESPACE = "input_record_namespace";
+    static final String AGGREGATE_RECORD_ELEMENT = "aggregate_record_element";
+    static final String AGGREGATE_RECORD_NAMESPACE = "aggregate_record_namespace";
+    static final String AGGREGATE_URI_ID = "aggregate_uri_id";
     static final String INPUT_METADATA_OPTIONAL = 
         "input_metadata_optional";
-    static final String INPUT_TYPE = "input_type";
-    static final String INPUT_TYPE_DEFAULT = "documents";
+    static final String INPUT_FILE_TYPE = "input_file_type";
+    static final String INPUT_FILE_TYPE_DEFAULT = "documents";
     static final String INPUT_COMPRESSED = "input_compressed";
     static final boolean DEFAULT_INPUT_COMPRESSED = false;
     static final String INPUT_COMPRESSION_CODEC = "input_compression_codec";
@@ -104,4 +105,10 @@ public interface ConfigConstants {
         "mapreduce.marklogic.input.compressioncodec";
     static final String CONF_MAX_SPLIT_SIZE = "mapred.max.split.size";
     static final String CONF_MIN_SPLIT_SIZE = "mapred.min.split.size";
+    static final String CONF_AGGREGATE_URI_ID = 
+        "mapreduce.marklogic.aggregate.uriid";
+    static final String CONF_AGGREGATE_RECORD_ELEMENT = 
+        "mapreduce.marklogic.aggregate.recordelement";
+    static final String CONF_AGGREGATE_RECORD_NAMESPACE = 
+        "mapreduce.marklogic.aggregate.recordnamespace";
 }
