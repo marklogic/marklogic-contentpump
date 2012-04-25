@@ -40,6 +40,7 @@ public enum Command implements ConfigConstants {
         @Override
         public void configOptions(Options options) {
             configCommonOptions(options);
+
             Option inputFilePath = OptionBuilder.withArgName(INPUT_FILE_PATH)
                 .hasArg()
                 .withDescription("The file system path in which to look for " +
@@ -53,20 +54,27 @@ public enum Command implements ConfigConstants {
                     "the input file path")
                 .create(INPUT_FILE_PATH);
             options.addOption(inputFilePattern);
-            Option inputRecordName = 
-                OptionBuilder.withArgName(INPUT_RECORD_NAME)
+            Option aggregateRecordElement = 
+                OptionBuilder.withArgName(AGGREGATE_RECORD_ELEMENT)
                 .hasArg()
                 .withDescription("Element name in which each document is " +
                     "found")
-                .create(INPUT_RECORD_NAME);
-            options.addOption(inputRecordName);
-            Option inputRecordNamespace = 
-                OptionBuilder.withArgName(INPUT_RECORD_NAMESPACE)
+                .create(AGGREGATE_RECORD_ELEMENT);
+            options.addOption(aggregateRecordElement);
+            Option aggregateRecordNamespace = 
+                OptionBuilder.withArgName(AGGREGATE_RECORD_NAMESPACE)
                 .hasArg()
                 .withDescription("Element namespace in which each document " +
                     "is found")
-                .create(INPUT_RECORD_NAMESPACE);
-            options.addOption(inputRecordNamespace);
+                .create(AGGREGATE_RECORD_NAMESPACE);
+            options.addOption(aggregateRecordNamespace);
+            Option aggregateUriId = 
+                OptionBuilder.withArgName(AGGREGATE_URI_ID)
+                .hasArg()
+                .withDescription("Element namespace in which each document " +
+                    "is found")
+                .create(AGGREGATE_URI_ID);
+            options.addOption(aggregateUriId);
             Option optionalMetadata = 
                 OptionBuilder.withArgName(INPUT_METADATA_OPTIONAL)
                 .hasArg()
@@ -75,12 +83,12 @@ public enum Command implements ConfigConstants {
                 .create(INPUT_METADATA_OPTIONAL);
             options.addOption(optionalMetadata);
             Option inputFileType = 
-                OptionBuilder.withArgName(INPUT_TYPE)
+                OptionBuilder.withArgName(INPUT_FILE_TYPE)
                 .hasArg()
                 .withDescription("Type of input file.  Valid choices are: " +
                     "documents, XML aggregates, delimited text, and export " +
                     "archive.")
-                .create(INPUT_TYPE);
+                .create(INPUT_FILE_TYPE);
             options.addOption(inputFileType);
             Option inputCompressed = 
                 OptionBuilder.withArgName(INPUT_COMPRESSED)
@@ -110,9 +118,9 @@ public enum Command implements ConfigConstants {
         throws IOException {
             applyConfigOptions(conf, cmdline);
             
-            String inputTypeOption = INPUT_TYPE_DEFAULT;
-            if (cmdline.hasOption(INPUT_TYPE)) {
-                inputTypeOption = cmdline.getOptionValue(INPUT_TYPE);
+            String inputTypeOption = INPUT_FILE_TYPE_DEFAULT;
+            if (cmdline.hasOption(INPUT_FILE_TYPE)) {
+                inputTypeOption = cmdline.getOptionValue(INPUT_FILE_TYPE);
             }
             InputType type = InputType.forName(inputTypeOption);
             String documentType = conf.get(MarkLogicConstants.CONTENT_TYPE,
@@ -141,8 +149,7 @@ public enum Command implements ConfigConstants {
         }
 
         @Override
-        public void applyConfigOptions(Configuration conf, 
-                CommandLine cmdline) {
+        public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             if (cmdline.hasOption(DOCUMENT_TYPE)) {
                 String documentType = cmdline.getOptionValue(DOCUMENT_TYPE);
                 conf.set(MarkLogicConstants.CONTENT_TYPE,
@@ -150,7 +157,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(INPUT_COMPRESSION_CODEC)) {
                 String codec = cmdline.getOptionValue(INPUT_COMPRESSION_CODEC);
-                conf.set(INPUT_COMPRESSION_CODEC, codec.toUpperCase());
+                conf.set(CONF_INPUT_COMPRESSION_CODEC, codec.toUpperCase());
             }
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
@@ -159,6 +166,20 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(MIN_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
                 conf.set(CONF_MIN_SPLIT_SIZE, maxSize);
+            }
+            if (cmdline.hasOption(AGGREGATE_URI_ID)) {
+                String uriId = cmdline.getOptionValue(AGGREGATE_URI_ID);
+                conf.set(CONF_AGGREGATE_URI_ID, uriId);
+            }
+            if (cmdline.hasOption(AGGREGATE_RECORD_ELEMENT)) {
+                String recElem = cmdline
+                    .getOptionValue(AGGREGATE_RECORD_ELEMENT);
+                conf.set(CONF_AGGREGATE_RECORD_ELEMENT, recElem);
+            }
+            if (cmdline.hasOption(AGGREGATE_RECORD_NAMESPACE)) {
+                String recNs = cmdline
+                    .getOptionValue(AGGREGATE_RECORD_NAMESPACE);
+                conf.set(CONF_AGGREGATE_RECORD_NAMESPACE, recNs);
             }
         }
 
