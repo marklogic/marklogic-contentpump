@@ -110,6 +110,15 @@ public enum Command implements ConfigConstants {
                     "XML, TEXT, BINARY")
                 .create(DOCUMENT_TYPE);
             options.addOption(documentType);
+            Option delimiter = OptionBuilder.withArgName(DELIMITER).hasArg()
+                .withDescription("Delimiter for delimited text.")
+                .create(DELIMITER);
+            options.addOption(delimiter);
+            Option delimitedUri = OptionBuilder.withArgName(DELIMITED_URI_ID)
+                .hasArg()
+                .withDescription("Delimited uri id for delimited text.")
+                .create(DELIMITED_URI_ID);
+            options.addOption(delimitedUri);
             //TODO: complete
         }
 
@@ -180,6 +189,14 @@ public enum Command implements ConfigConstants {
                 String recNs = cmdline
                     .getOptionValue(AGGREGATE_RECORD_NAMESPACE);
                 conf.set(CONF_AGGREGATE_RECORD_NAMESPACE, recNs);
+            }
+            if (cmdline.hasOption(DELIMITER)) {
+                String delim = cmdline.getOptionValue(DELIMITER);
+                conf.set(CONF_DELIMITER, delim);
+            }
+            if (cmdline.hasOption(DELIMITED_URI_ID)) {
+                String delimId = cmdline.getOptionValue(DELIMITED_URI_ID);
+                conf.set(CONF_DELIMITED_URI_ID, delimId);
             }
         }
 

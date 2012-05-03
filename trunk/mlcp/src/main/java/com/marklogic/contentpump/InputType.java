@@ -48,8 +48,7 @@ public enum InputType {
         public Class<? extends FileInputFormat> getInputFormatClass(
                 ContentType contentType, boolean compressed) {
             if (compressed) {
-                // TODO
-                return null;
+                return CompressedAggregateXMLInputFormat.class;
             } else {
                 return AggregateXMLInputFormat.class;
             }
@@ -65,15 +64,17 @@ public enum InputType {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
                 ContentType contentType, boolean compressed) {
-            // TODO Auto-generated method stub
-            return null;
+            if (compressed) {
+                return CompressedDelimitedTextInputFormat.class;
+            } else {
+                return DelimitedTextInputFormat.class;
+            }
         }
 
         @Override
         public Class<? extends Mapper> getMapperClass(
                 ContentType contentType) {
-            // TODO Auto-generated method stub
-            return null;
+            return DocumentMapper.class;
         }
     },
     ARCHIVE {
