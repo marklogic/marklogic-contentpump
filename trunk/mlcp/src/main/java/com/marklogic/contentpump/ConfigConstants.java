@@ -99,6 +99,8 @@ public interface ConfigConstants {
     static final String OUTPUT_PASSWORD = "output_password";
     static final String OUTPUT_HOST = "output_host";
     static final String OUTPUT_PORT = "output_port";   
+    static final String DELIMITER = "delimiter";
+    static final String DELIMITED_URI_ID = "delimited_uri_id";
     
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
@@ -111,4 +113,9 @@ public interface ConfigConstants {
         "mapreduce.marklogic.aggregate.recordelement";
     static final String CONF_AGGREGATE_RECORD_NAMESPACE = 
         "mapreduce.marklogic.aggregate.recordnamespace";
+    static final String CONF_DELIMITER = 
+        "mapreduce.marklogic.delimited.delimiter";
+    static final String CONF_DEFAULT_DELIMITER = ",";
+    static final String CONF_DELIMITED_URI_ID = 
+        "mapreduce.marklogic.delimited.uriid";
 }

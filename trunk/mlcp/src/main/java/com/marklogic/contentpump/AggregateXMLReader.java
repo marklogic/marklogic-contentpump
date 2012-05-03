@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 
-import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -28,20 +27,20 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
     public static final Log LOG = LogFactory.getLog(AggregateXMLReader.class);
     private static String DEFAULT_NS = null;
     private int currDepth = 0;
-    private DocumentURI key = new DocumentURI();
-    private Text value = new Text();
-    private XMLStreamReader xmlSR;
-    private String recordName;
-    private String recordNamespace;
+    protected DocumentURI key = new DocumentURI();
+    protected Text value = new Text();
+    protected XMLStreamReader xmlSR;
+    protected String recordName;
+    protected String recordNamespace;
     private int recordDepth = Integer.MAX_VALUE;
     private StringBuilder buffer;
-    private String idName;
+    protected String idName;
     private boolean skippingRecord = false;
     protected String currentId = null;
     private boolean keepGoing = true;
-    private HashMap<String, String> nameSpaces = new HashMap<String, String>();
+    protected HashMap<String, String> nameSpaces = new HashMap<String, String>();
     protected boolean startOfRecord = true;
-    private boolean hasNext = true;
+    protected boolean hasNext = true;
     private boolean newDoc = false;
     
     public AggregateXMLReader() {
@@ -112,7 +111,7 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
         }
     }
     
-    private void copyNameSpaceDecl(){
+    protected void copyNameSpaceDecl(){
         if (recordDepth < currDepth) {
             return;
         }
@@ -281,7 +280,6 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
         }
 
         try {
-
             while (xmlSR.hasNext()) {
                 int eventType;
                 eventType = xmlSR.next();
