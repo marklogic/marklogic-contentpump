@@ -40,18 +40,19 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             hasNext = false;
             return false;
         }
-        if(br == null) {
+        if (br == null) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             while ((currZipEntry = zipIn.getNextEntry()) != null) {
                 System.err.println(currZipEntry.getName());
-                if ( currZipEntry.isDirectory() || currZipEntry.getSize() ==0) {
+                if (currZipEntry.isDirectory() || currZipEntry.getSize() == 0) {
                     continue;
                 }
                 long size;
                 while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
                     baos.write(buf, 0, (int) size);
                 }
-                br =new BufferedReader( new InputStreamReader(new ByteArrayInputStream(baos.toByteArray())));
+                br = new BufferedReader(new InputStreamReader(
+                    new ByteArrayInputStream(baos.toByteArray())));
                 break;
             }
         }
