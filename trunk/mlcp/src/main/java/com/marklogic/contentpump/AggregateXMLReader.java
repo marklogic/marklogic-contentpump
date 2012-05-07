@@ -9,26 +9,20 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.mapreduce.DocumentURI;
 
-public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
-    public static final Log LOG = LogFactory.getLog(AggregateXMLReader.class);
+public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
     private static String DEFAULT_NS = null;
     private int currDepth = 0;
-    protected DocumentURI key = new DocumentURI();
-    protected Text value = new Text();
     protected XMLStreamReader xmlSR;
     protected String recordName;
     protected String recordNamespace;
@@ -42,7 +36,7 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
     protected boolean startOfRecord = true;
     protected boolean hasNext = true;
     private boolean newDoc = false;
-    
+
     public AggregateXMLReader() {
 
     }
@@ -66,7 +60,7 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
     }
 
     @Override
-    public Text getCurrentValue() throws IOException, InterruptedException {
+    public VALUEIN getCurrentValue() throws IOException, InterruptedException {
         return value;
     }
 
@@ -78,6 +72,7 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
+        initCommonConfigurations(context);
         Path file = ((FileSplit) inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
@@ -96,6 +91,7 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
         recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
         recordNamespace = conf
             .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
+
     }
 
     private void write(String str) {
@@ -126,6 +122,8 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
             }
         }
     }
+    
+
 
     private void processStartElement() throws XMLStreamException {
         String name = xmlSR.getLocalName();
@@ -184,7 +182,7 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
                 + "=\"" + aValue + "\"");
             if (newDoc && ("@" + aName).equals(idName)) {
                 currentId = aValue;
-                key.setUri(aValue);
+                setKey(aValue);
             }
         }
         sb.append(">");
@@ -200,7 +198,7 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
             String newId = xmlSR.getText();
             currentId = newId;
             sb.append(newId);
-            key.setUri(newId);
+            setKey(newId);
 
             // advance to the END_ELEMENT
             if (xmlSR.next() != XMLStreamConstants.END_ELEMENT) {
@@ -262,7 +260,7 @@ public class AggregateXMLReader extends RecordReader<DocumentURI, Text> {
             return true;
         }
 
-        value.set(buffer.toString());
+        ((Text)value).set(buffer.toString());
         currentId = null;
         newDoc = false;
         // reset buffer

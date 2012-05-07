@@ -15,6 +15,9 @@
  */
 package com.marklogic.contentpump;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Constants for configuration option names and values.
  * 
@@ -22,6 +25,7 @@ package com.marklogic.contentpump;
  *
  */
 public interface ConfigConstants {
+    public static final Log LOG = LogFactory.getLog(ConfigConstants.class);
     // property names
     static final String HADOOP_HOME_ENV_NAME = "HADOOP_HOME";
     static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
@@ -100,8 +104,9 @@ public interface ConfigConstants {
     static final String OUTPUT_HOST = "output_host";
     static final String OUTPUT_PORT = "output_port";   
     static final String DELIMITER = "delimiter";
+    //TODO: merge with "aggregate_uri_id" ?? 
     static final String DELIMITED_URI_ID = "delimited_uri_id";
-    
+
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
         "mapreduce.marklogic.input.compressioncodec";
@@ -118,4 +123,12 @@ public interface ConfigConstants {
     static final String CONF_DEFAULT_DELIMITER = ",";
     static final String CONF_DELIMITED_URI_ID = 
         "mapreduce.marklogic.delimited.uriid";
+    static final String CONF_OUTPUT_URI_REPLACE = 
+        "mapreduce.marklogic.output.urireplace";
+    static final String CONF_OUTPUT_URI_PREFIX = 
+        "mapreduce.marklogic.output_uriprefix";
+    static final String CONF_OUTPUT_URI_SUFFIX = 
+        "mapreduce.marklogic.output_urisuffix";
+    static final String CONF_OUTPUT_DIRECTORY = 
+        "mapreduce.marklogic.output.directory";
 }

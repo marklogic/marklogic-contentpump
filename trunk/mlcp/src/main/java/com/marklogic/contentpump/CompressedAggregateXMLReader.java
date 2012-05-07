@@ -13,13 +13,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 
 
-public class CompressedAggregateXMLReader extends AggregateXMLReader {
+public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
     private byte[] buf = new byte[65536];
     private ZipInputStream zipIn;
     private XMLInputFactory factory;
@@ -34,6 +35,7 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
+        initCommonConfigurations(context);
         Path file = ((FileSplit) inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
@@ -43,13 +45,11 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader {
 //        System.err.println(zfile.toString());
         
         zipIn = new ZipInputStream(fileIn);
-//        System.err.println(zipIn.getNextEntry());
         while ((currZipEntry = zipIn.getNextEntry()) != null) {
             if (!currZipEntry.isDirectory() && currZipEntry.getSize() != 0) {
                 break;
             }
         }
-//        System.err.println(currZipEntry);
         if(currZipEntry == null) { // no entry in zip
             return;
         }
@@ -79,23 +79,7 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader {
     }
 
     private boolean nextRecordInAggregate() throws IOException, XMLStreamException, InterruptedException{
-        boolean aggHasNext = super.nextKeyValue();
-        return aggHasNext;
-//        if (aggHasNext){
-//            return true;
-//        } else {
-//            //end of agg
-//            while ((currZipEntry = zipIn.getNextEntry()) != null) {
-//                if ( currZipEntry.isDirectory() || currZipEntry.getSize() ==0) {
-//                    continue;
-//                }
-////                xmlSR = factory.createXMLStreamReader(zipIn);
-//                hasNext = true;
-//                return true;
-//            }
-//            //end of agg
-//            return false;
-//        }
+        return super.nextKeyValue();
     }
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {

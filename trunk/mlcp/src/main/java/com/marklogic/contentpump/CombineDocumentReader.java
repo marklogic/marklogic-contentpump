@@ -18,25 +18,16 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-
-import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.MarkLogicConstants;
-
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.apache.hadoop.util.ReflectionUtils;
+
+import com.marklogic.mapreduce.DocumentURI;
 
 /**
  * RecordReader for CombineDocumentInputFormat.
@@ -46,12 +37,8 @@ import org.apache.hadoop.util.ReflectionUtils;
  * @param <VALUEIN>
  */
 public class CombineDocumentReader<VALUEIN> 
-extends RecordReader<DocumentURI, VALUEIN> {
-    public static final Log LOG = 
-        LogFactory.getLog(CombineDocumentReader.class);
+extends AbstractRecordReader<VALUEIN> {
     
-    private DocumentURI key = new DocumentURI();
-    private VALUEIN value;
     private long bytesRead;
     private long bytesTotal;
     private Iterator<FileSplit> iterator;
@@ -80,19 +67,13 @@ extends RecordReader<DocumentURI, VALUEIN> {
         return bytesRead / (float)bytesTotal;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
     throws IOException, InterruptedException {
+        initCommonConfigurations(context);
         iterator = ((CombineDocumentSplit)inSplit).getSplits().iterator();
         bytesTotal = inSplit.getLength();
         this.context = context;
-        Configuration conf = context.getConfiguration();
-        String type = conf.get(MarkLogicConstants.CONTENT_TYPE, 
-                MarkLogicConstants.DEFAULT_CONTENT_TYPE);
-        ContentType contentType = ContentType.valueOf(type);
-        Class<? extends Writable> valueClass = contentType.getWritableClass();
-        value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
     }
 
     @Override
@@ -102,7 +83,7 @@ extends RecordReader<DocumentURI, VALUEIN> {
             Path file = split.getPath();
             FileSystem fs = file.getFileSystem(context.getConfiguration());
             FSDataInputStream fileIn = fs.open(file);
-            key.setUri(file.toString());
+            setKey(file.toString());
             byte[] buf = new byte[(int)split.getLength()];
             try {
                 fileIn.readFully(buf);
