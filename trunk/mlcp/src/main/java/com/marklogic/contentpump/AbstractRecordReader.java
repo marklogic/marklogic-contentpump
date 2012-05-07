@@ -15,7 +15,7 @@ import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 
-public class AbstractRecordReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN> {
+public abstract class AbstractRecordReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN> {
     public static final Log LOG = 
         LogFactory.getLog(AbstractRecordReader.class);
     protected DocumentURI key = new DocumentURI();
