@@ -17,6 +17,7 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import com.marklogic.mapreduce.DocumentURI;
@@ -33,6 +34,22 @@ public class DocumentMapper<VALUE> extends
     Mapper<DocumentURI, VALUE, DocumentURI, VALUE> {
     public void map(DocumentURI uri, VALUE fileContent, Context context)
         throws IOException, InterruptedException {
+        StringBuilder sb = new StringBuilder();
+        
+        Configuration conf = context.getConfiguration();
+        String outDir = conf.get(ConfigConstants.CONF_OUTPUT_DIRECTORY);
+        if(outDir != null) {
+            sb.append(outDir);
+        }
+        sb.append(uri.toString());
+        String[] uriReplace = conf.getStrings(ConfigConstants.CONF_OUTPUT_URI_REPLACE);
+        if(uriReplace != null) {
+            int fromIndex = 0;
+            while((fromIndex = sb.indexOf(uriReplace[0], fromIndex))!= -1){
+                sb.replace(fromIndex, fromIndex + uriReplace[0].length(), uriReplace[1]);
+            }
+        }
+        uri.setUri(sb.toString());
         context.write(uri, fileContent);
     }
 

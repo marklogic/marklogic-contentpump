@@ -18,7 +18,7 @@ public class DelimitedTextInputFormat extends FileInputFormat<DocumentURI, Text>
     public RecordReader<DocumentURI, Text> createRecordReader(InputSplit arg0,
         TaskAttemptContext arg1) throws IOException, InterruptedException {
         
-        return new DelimitedTextReader();
+        return new DelimitedTextReader<Text>();
     }
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {

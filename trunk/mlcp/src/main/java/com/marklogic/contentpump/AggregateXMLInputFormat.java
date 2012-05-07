@@ -18,7 +18,7 @@ public class AggregateXMLInputFormat extends
     @Override
     public RecordReader<DocumentURI, Text> createRecordReader(InputSplit arg0,
         TaskAttemptContext arg1) throws IOException, InterruptedException {
-        return new AggregateXMLReader();
+        return new AggregateXMLReader<Text>();
     }
 
     @Override

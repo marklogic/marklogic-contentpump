@@ -119,6 +119,56 @@ public enum Command implements ConfigConstants {
                 .withDescription("Delimited uri id for delimited text.")
                 .create(DELIMITED_URI_ID);
             options.addOption(delimitedUri);
+            Option outputUriReplace = OptionBuilder
+                .withArgName(OUTPUT_URI_REPLACE).hasArg()
+                .withDescription("Replace URI in output.")
+                .create(OUTPUT_URI_REPLACE);
+            options.addOption(outputUriReplace);
+            Option outputUriPrefix = OptionBuilder
+                .withArgName(OUTPUT_URI_PREFIX).hasArg()
+                .withDescription("Prefix added to URI in output.")
+                .create(OUTPUT_URI_PREFIX);
+            options.addOption(outputUriPrefix);
+            Option outputUriSuffix = OptionBuilder
+                .withArgName(OUTPUT_URI_SUFFIX).hasArg()
+                .withDescription("Suffix added to URI in output.")
+                .create(OUTPUT_URI_SUFFIX);
+            options.addOption(outputUriSuffix);
+            Option outputFilenameCollection = OptionBuilder
+                .withArgName(OUTPUT_FILENAME_AS_COLLECTION).hasArg()
+                .withDescription("Filename as collection in output.")
+                .create(OUTPUT_FILENAME_AS_COLLECTION);
+            options.addOption(outputFilenameCollection);
+            Option outputCollections = OptionBuilder
+                .withArgName(OUTPUT_COLLECTIONS).hasArg()
+                .withDescription("Output collections in output.")
+                .create(OUTPUT_COLLECTIONS);
+            options.addOption(outputCollections);
+            Option outputPermissions = OptionBuilder
+                .withArgName(OUTPUT_PERMISSIONS).hasArg()
+                .withDescription("Output permissions in output.")
+                .create(OUTPUT_PERMISSIONS);
+            options.addOption(outputPermissions);
+            Option outputQuantity = OptionBuilder.withArgName(OUTPUT_QUALITY)
+                .hasArg().withDescription("Output quantity in output.")
+                .create(OUTPUT_QUALITY);
+            options.addOption(outputQuantity);
+            Option outputCleanDir = OptionBuilder.withArgName(OUTPUT_CLEANDIR)
+                .hasArg()
+                .withDescription("Whether to clean dir before output.")
+                .create(OUTPUT_CLEANDIR);
+            options.addOption(outputCleanDir);
+            Option batchSize = OptionBuilder.withArgName(BATCH_SIZE).hasArg()
+                .withDescription("Batch size.").create(BATCH_SIZE);
+            options.addOption(batchSize);
+            Option txnSize = OptionBuilder.withArgName(TRANSACTION_SIZE)
+                .hasArg().withDescription("Transaction size.")
+                .create(TRANSACTION_SIZE);
+            options.addOption(txnSize);
+            Option outputLanguage = OptionBuilder.withArgName(OUTPUT_LANGUAGE)
+                .hasArg().withDescription("Output language.")
+                .create(OUTPUT_LANGUAGE);
+            options.addOption(outputLanguage);
             //TODO: complete
         }
 
@@ -197,6 +247,55 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(DELIMITED_URI_ID)) {
                 String delimId = cmdline.getOptionValue(DELIMITED_URI_ID);
                 conf.set(CONF_DELIMITED_URI_ID, delimId);
+            }
+            if (cmdline.hasOption(OUTPUT_DIRECTORY)) {
+                String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
+                conf.set(CONF_OUTPUT_DIRECTORY, outDir);
+            }
+            if (cmdline.hasOption(OUTPUT_URI_REPLACE)) {
+                String[] uriReplace = cmdline
+                    .getOptionValues(OUTPUT_URI_REPLACE);
+                if (uriReplace != null && uriReplace.length == 2) {
+                    LOG.error(OUTPUT_URI_REPLACE
+                        + "is not configured correctly.");
+                }
+                conf.setStrings(CONF_OUTPUT_URI_REPLACE, uriReplace);
+            }
+            if (cmdline.hasOption(OUTPUT_URI_PREFIX)) {
+                String outPrefix = cmdline.getOptionValue(OUTPUT_URI_PREFIX);
+                conf.set(CONF_OUTPUT_URI_PREFIX, outPrefix);
+            }
+            if (cmdline.hasOption(OUTPUT_URI_SUFFIX)) {
+                String outSuffix = cmdline.getOptionValue(OUTPUT_URI_SUFFIX);
+                conf.set(CONF_OUTPUT_URI_SUFFIX, outSuffix);
+            }
+            if(cmdline.hasOption(OUTPUT_COLLECTIONS)) {
+                String collectionsString = cmdline.getOptionValue(OUTPUT_COLLECTIONS);
+                conf.set(MarkLogicConstants.OUTPUT_COLLECTION, collectionsString);
+            }
+            if(cmdline.hasOption(OUTPUT_PERMISSIONS)) {
+                String permissionString = cmdline.getOptionValue(OUTPUT_PERMISSIONS);
+                conf.set(MarkLogicConstants.OUTPUT_PERMISSION, permissionString);
+            }
+            if(cmdline.hasOption(OUTPUT_QUALITY)) {
+                String quantity = cmdline.getOptionValue(OUTPUT_QUALITY);
+                conf.set(MarkLogicConstants.OUTPUT_QUALITY, quantity);
+            }
+            if(cmdline.hasOption(OUTPUT_CLEANDIR)) {
+                String cleandir = cmdline.getOptionValue(OUTPUT_CLEANDIR);
+                conf.set(MarkLogicConstants.OUTPUT_CLEAN_DIR, cleandir);
+            }
+            if(cmdline.hasOption(BATCH_SIZE)) {
+                String batchSize = cmdline.getOptionValue(BATCH_SIZE);
+                conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
+            }
+            if(cmdline.hasOption(TRANSACTION_SIZE)) {
+                String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
+                conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
+            }
+            if(cmdline.hasOption(OUTPUT_LANGUAGE)) {
+                String language = cmdline.getOptionValue(OUTPUT_LANGUAGE);
+                conf.set(MarkLogicConstants.OUTPUT_CONTENT_LANGUAGE, language);
             }
         }
 
