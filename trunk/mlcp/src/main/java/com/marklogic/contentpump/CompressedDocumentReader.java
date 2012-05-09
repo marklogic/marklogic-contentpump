@@ -17,6 +17,8 @@ package com.marklogic.contentpump;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -40,11 +42,11 @@ import com.marklogic.mapreduce.DocumentURI;
  * @param <VALUEIN>
  */
 public class CompressedDocumentReader<VALUEIN> extends
-        AbstractRecordReader<VALUEIN> {
-    private ZipInputStream zipIn;
+        AbstractRecordReader <VALUEIN>{
+    private InputStream zipIn;
     private byte[] buf = new byte[65536];
     private boolean hasNext = true;
-    
+    private CompressionCodecEnum codec;
     public CompressedDocumentReader(){
         
     }
@@ -73,15 +75,28 @@ public class CompressedDocumentReader<VALUEIN> extends
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
             throws IOException, InterruptedException {
-        initCommonConfigurations(context);
+        Configuration conf = context.getConfiguration();
+        initCommonConfigurations(conf);
         Path file = ((FileSplit) inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
-        zipIn = new ZipInputStream(fileIn);
 
-        Configuration conf = context.getConfiguration();
-        // TODO: support codec
-        String codec = conf.get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC);
+        String codecString = conf
+            .get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
+                CompressionCodecEnum.ZIP.toString());
+        if (codecString.equalsIgnoreCase(CompressionCodecEnum.ZIP.toString())) {
+            zipIn = new ZipInputStream(fileIn);
+            codec = CompressionCodecEnum.ZIP;
+
+        } else if (codecString.equalsIgnoreCase(CompressionCodecEnum.GZIP.toString())) {
+//            GzipCodec gzcodec = new GzipCodec();
+//            zipIn = gzcodec.createInputStream(fileIn);
+            zipIn = new GZIPInputStream(fileIn);
+            codec = CompressionCodecEnum.GZIP;
+            String filename = file.getName();
+            setKey(filename.substring(0, filename.lastIndexOf('.')));
+        }
+
 
     }
 
@@ -91,33 +106,42 @@ public class CompressedDocumentReader<VALUEIN> extends
             hasNext = false;
             return false;
         }
-        
-        ZipEntry zipEntry;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        while ((zipEntry = zipIn.getNextEntry()) != null) {
-            if (zipEntry.isDirectory())
-                continue;
-            if (zipEntry != null) {
-                setKey(zipEntry.getName());
-                long size;
-                while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
-                    baos.write(buf, 0, (int) size);
+        if(codec.equals(CompressionCodecEnum.ZIP)) {
+            ZipEntry zipEntry;
+            ZipInputStream zis = (ZipInputStream)zipIn;
+            while ((zipEntry = zis.getNextEntry()) != null) {
+                if (zipEntry.isDirectory())
+                    continue;
+                if (zipEntry != null) {
+                    setKey(zipEntry.getName());
+                    readFromStream();
+                    return true;
                 }
-                if (value instanceof Text) {
-                    ((Text) value).set(baos.toString());
-                } else if (value instanceof BytesWritable) {
-                    ((BytesWritable) value).set(baos.toByteArray(), 0,
-                        baos.size());
-                }
-                baos.close();
-                return true;
             }
+        } else if (codec.equals(CompressionCodecEnum.GZIP)) {
+            readFromStream();
+            zipIn.close();
+            zipIn = null;
+            hasNext = false;
+            return true;
         }
-
-        baos.close();
         hasNext = false;
         return false;
     }
-
+    
+    private void readFromStream() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+        long size;
+        while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
+            baos.write(buf, 0, (int) size);
+        }
+        if (value instanceof Text) {
+            ((Text) value).set(baos.toString());
+        } else if (value instanceof BytesWritable) {
+            ((BytesWritable) value).set(baos.toByteArray(), 0,
+                baos.size());
+        }
+        baos.close();
+    }
+    
 }

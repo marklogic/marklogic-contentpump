@@ -72,7 +72,8 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        initCommonConfigurations(context);
+        Configuration conf = context.getConfiguration();
+        initCommonConfigurations(conf);
         Path file = ((FileSplit) inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
@@ -86,7 +87,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         } catch (XMLStreamException e) {
             e.printStackTrace();
         }
-        Configuration conf = context.getConfiguration();
+
         idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
         recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
         recordNamespace = conf

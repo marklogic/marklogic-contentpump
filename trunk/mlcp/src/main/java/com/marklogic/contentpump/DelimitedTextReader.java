@@ -25,8 +25,9 @@ public class DelimitedTextReader<VALUEIN> extends AbstractRecordReader<VALUEIN> 
     protected String idName;
     @Override
     public void close() throws IOException {
-        br.close();
-        
+        if(br != null ){
+            br.close();
+        }
     }
 
     @Override
@@ -47,16 +48,16 @@ public class DelimitedTextReader<VALUEIN> extends AbstractRecordReader<VALUEIN> 
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        initCommonConfigurations(context);
+        Configuration conf = context.getConfiguration();
+        initCommonConfigurations(conf);
         Path file = ((FileSplit) inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         br = new BufferedReader(new InputStreamReader(fileIn));
-        initDelimConf(context);
+        initDelimConf(conf);
     }
     
-    protected void initDelimConf(TaskAttemptContext context){
-        Configuration conf = context.getConfiguration();
+    protected void initDelimConf(Configuration conf){
         DELIM = conf.get(ConfigConstants.DELIMITER, ConfigConstants.CONF_DEFAULT_DELIMITER);
         idName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
     }

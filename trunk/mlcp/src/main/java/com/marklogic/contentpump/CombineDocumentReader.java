@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -70,7 +71,8 @@ extends AbstractRecordReader<VALUEIN> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
     throws IOException, InterruptedException {
-        initCommonConfigurations(context);
+        Configuration conf = context.getConfiguration();
+        initCommonConfigurations(conf);
         iterator = ((CombineDocumentSplit)inSplit).getSplits().iterator();
         bytesTotal = inSplit.getLength();
         this.context = context;
