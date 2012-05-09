@@ -131,4 +131,5 @@ public interface ConfigConstants {
         "mapreduce.marklogic.output_urisuffix";
     static final String CONF_OUTPUT_DIRECTORY = 
         "mapreduce.marklogic.output.directory";
+
 }

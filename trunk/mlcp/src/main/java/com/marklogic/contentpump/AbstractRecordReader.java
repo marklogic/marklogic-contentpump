@@ -62,8 +62,7 @@ public abstract class AbstractRecordReader<VALUEIN> extends RecordReader<Documen
     }
     
     @SuppressWarnings("unchecked")   
-    public void initCommonConfigurations(TaskAttemptContext context){
-        Configuration conf = context.getConfiguration();
+    public void initCommonConfigurations(Configuration conf){
         prefix = conf.get(ConfigConstants.CONF_OUTPUT_URI_PREFIX);
         suffix = conf.get(ConfigConstants.CONF_OUTPUT_URI_SUFFIX);
         String type = conf.get(MarkLogicConstants.CONTENT_TYPE, 
