@@ -169,6 +169,26 @@ public enum Command implements ConfigConstants {
                 .hasArg().withDescription("Output language.")
                 .create(OUTPUT_LANGUAGE);
             options.addOption(outputLanguage);
+            Option pattern = OptionBuilder.withArgName(INPUT_FILE_PATTERN)
+                .hasArg().withDescription("Input file pattern.")
+                .create(INPUT_FILE_PATTERN);
+            options.addOption(pattern);
+            Option username = OptionBuilder.withArgName(USERNAME).hasArg()
+                .withDescription("Username.").create(USERNAME);
+            options.addOption(username);
+            Option pswd = OptionBuilder.withArgName(PASSWORD).hasArg()
+                .withDescription("Password.").create(PASSWORD);
+            options.addOption(pswd);
+            Option host = OptionBuilder.withArgName(HOST).hasArg()
+                .withDescription("Host.").create(HOST);
+            options.addOption(host);
+            Option port = OptionBuilder.withArgName(PORT).hasArg()
+                .withDescription("Port.").create(PORT);
+            options.addOption(port);
+            Option repairLevel = OptionBuilder.withArgName(XML_REPAIR_LEVEL)
+                .hasArg().withDescription("XML repair level.")
+                .create(XML_REPAIR_LEVEL);
+            options.addOption(repairLevel);
             //TODO: complete
         }
 
@@ -196,14 +216,19 @@ public enum Command implements ConfigConstants {
             job.setJarByClass(this.getClass());
             job.setInputFormatClass(type.getInputFormatClass(contentType,
                     compressed));
+            
             job.setMapperClass(type.getMapperClass(contentType));
             job.setOutputFormatClass(ContentOutputFormat.class);
             
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
-                FileInputFormat.setInputPaths(job, 
-                        cmdline.getOptionValue(INPUT_FILE_PATH));
-            }      
-            
+                String[] paths = cmdline.getOptionValues(INPUT_FILE_PATH);
+                FileInputFormat.setInputPaths(job,
+                    Utilities.stringArrayToCommaSeparatedString(paths));
+            }
+            if (cmdline.hasOption(INPUT_FILE_PATTERN)) {
+                FileInputFormat.setInputPathFilter(job,
+                    DocumentPathFilter.class);
+            }
             return job;
         }
 
@@ -269,9 +294,14 @@ public enum Command implements ConfigConstants {
                 String outSuffix = cmdline.getOptionValue(OUTPUT_URI_SUFFIX);
                 conf.set(CONF_OUTPUT_URI_SUFFIX, outSuffix);
             }
+            
             if(cmdline.hasOption(OUTPUT_COLLECTIONS)) {
                 String collectionsString = cmdline.getOptionValue(OUTPUT_COLLECTIONS);
                 conf.set(MarkLogicConstants.OUTPUT_COLLECTION, collectionsString);
+            }
+            if(cmdline.hasOption(OUTPUT_FILENAME_AS_COLLECTION)) {
+                String fileAsCollection = cmdline.getOptionValue(OUTPUT_FILENAME_AS_COLLECTION);
+                conf.set(CONF_OUTPUT_FILENAME_AS_COLLECTION, fileAsCollection);
             }
             if(cmdline.hasOption(OUTPUT_PERMISSIONS)) {
                 String permissionString = cmdline.getOptionValue(OUTPUT_PERMISSIONS);
@@ -296,6 +326,34 @@ public enum Command implements ConfigConstants {
             if(cmdline.hasOption(OUTPUT_LANGUAGE)) {
                 String language = cmdline.getOptionValue(OUTPUT_LANGUAGE);
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_LANGUAGE, language);
+            }
+            if(cmdline.hasOption(INPUT_FILE_PATTERN)) {
+                String pattern = cmdline.getOptionValue(INPUT_FILE_PATTERN);
+                conf.set(CONF_INPUT_FILE_PATTERN, pattern);
+            }
+            if(cmdline.hasOption(USERNAME)) {
+                String username = cmdline.getOptionValue(USERNAME);
+                conf.set(MarkLogicConstants.OUTPUT_USERNAME, username);
+            }
+            if(cmdline.hasOption(PASSWORD)) {
+                String password = cmdline.getOptionValue(PASSWORD);
+                conf.set(MarkLogicConstants.OUTPUT_PASSWORD, password);
+            }
+            if(cmdline.hasOption(HOST)) {
+                String host = cmdline.getOptionValue(HOST);
+                conf.set(MarkLogicConstants.OUTPUT_HOST, host);
+            }
+            if(cmdline.hasOption(PORT)) {
+                String port = cmdline.getOptionValue(PORT);
+                conf.set(MarkLogicConstants.OUTPUT_PORT, port);
+            }
+            if (cmdline.hasOption(XML_REPAIR_LEVEL)) {
+                String repairLevel = cmdline.getOptionValue(XML_REPAIR_LEVEL);
+                conf.set(MarkLogicConstants.OUTPUT_XML_REPAIR_LEVEL,
+                    repairLevel);
+            } else {
+                conf.set(MarkLogicConstants.OUTPUT_XML_REPAIR_LEVEL,
+                    MarkLogicConstants.DEFAULT_OUTPUT_XML_REPAIR_LEVEL);
             }
         }
 

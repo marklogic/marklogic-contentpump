@@ -40,6 +40,8 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.TaskID;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.mapreduce.MarkLogicConstants;
+
 /**
  * Runs a job in-process, potentially multi-threaded.  Only supports map-only
  * jobs.
@@ -188,8 +190,9 @@ public class LocalJobRunner implements ConfigConstants {
             mapper.run(mapperContext);
             reader.close();
             writer.close(mapperContext);
+//            context.getConfiguration().set(MarkLogicConstants.OUTPUT_COLLECTION, mapperContext.getConfiguration().get(MarkLogicConstants.OUTPUT_COLLECTION));
             committer.commitTask(context);
-
+//            conf.set(MarkLogicConstants.OUTPUT_COLLECTION, mapperContext.getConfiguration().get(MarkLogicConstants.OUTPUT_COLLECTION));
             return null;
         }      
     }

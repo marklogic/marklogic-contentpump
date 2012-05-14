@@ -44,7 +44,7 @@ extends AbstractRecordReader<VALUEIN> {
     private long bytesTotal;
     private Iterator<FileSplit> iterator;
     private TaskAttemptContext context;
-
+    private Configuration conf;
     public CombineDocumentReader() {     
     }
 
@@ -71,18 +71,21 @@ extends AbstractRecordReader<VALUEIN> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
     throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        initCommonConfigurations(conf);
+        conf = context.getConfiguration();
+        //we don't know the file yet until nextKeyValue()
+        initCommonConfigurations(conf, null);
         iterator = ((CombineDocumentSplit)inSplit).getSplits().iterator();
         bytesTotal = inSplit.getLength();
         this.context = context;
     }
 
+    @SuppressWarnings({ "unchecked" })
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (iterator.hasNext()) {
+        while (iterator.hasNext()) {
             FileSplit split = iterator.next();
             Path file = split.getPath();
+            configFileNameAsCollection(conf, file);
             FileSystem fs = file.getFileSystem(context.getConfiguration());
             FSDataInputStream fileIn = fs.open(file);
             setKey(file.toString());
@@ -90,9 +93,17 @@ extends AbstractRecordReader<VALUEIN> {
             try {
                 fileIn.readFully(buf);
                 if (value instanceof Text) {
-                    ((Text)value).set(new String(buf));
+                    ((Text) value).set(new String(buf));
                 } else if (value instanceof BytesWritable) {
-                    ((BytesWritable)value).set(buf, 0, buf.length);
+                    ((BytesWritable) value).set(buf, 0, buf.length);
+                } else if (value instanceof ContentWithFileNameWritable) {
+                    VALUEIN realValue = (VALUEIN) ((ContentWithFileNameWritable<VALUEIN>) value)
+                        .getValue();
+                    if (realValue instanceof Text) {
+                        ((Text) realValue).set(new String(buf));
+                    } else if (realValue instanceof BytesWritable) {
+                        ((BytesWritable) realValue).set(buf, 0, buf.length);
+                    }
                 }
                 bytesRead += buf.length;
                 return true;
@@ -102,8 +113,9 @@ extends AbstractRecordReader<VALUEIN> {
             } finally {
                 fileIn.close();
             }
-        } else {
-            return false;
-        }
+        } 
+        
+        return false;
+
     }
 }

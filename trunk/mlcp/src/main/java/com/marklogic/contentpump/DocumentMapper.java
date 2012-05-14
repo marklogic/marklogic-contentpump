@@ -23,11 +23,11 @@ import org.apache.hadoop.mapreduce.Mapper;
 import com.marklogic.mapreduce.DocumentURI;
 
 /**
- * Maps (file name, content) as (DocumentURI, VALUE) to (URI, document) as 
+ * Maps (file name, content) as (DocumentURI, VALUE) to (URI, document) as
  * (DocumentURI, VALUE).
  * 
  * @author ali
- *
+ * 
  * @param <VALUE>
  */
 public class DocumentMapper<VALUE> extends
@@ -35,18 +35,20 @@ public class DocumentMapper<VALUE> extends
     public void map(DocumentURI uri, VALUE fileContent, Context context)
         throws IOException, InterruptedException {
         StringBuilder sb = new StringBuilder();
-        
+
         Configuration conf = context.getConfiguration();
         String outDir = conf.get(ConfigConstants.CONF_OUTPUT_DIRECTORY);
-        if(outDir != null) {
+        if (outDir != null) {
             sb.append(outDir);
         }
         sb.append(uri.toString());
-        String[] uriReplace = conf.getStrings(ConfigConstants.CONF_OUTPUT_URI_REPLACE);
-        if(uriReplace != null) {
+        String[] uriReplace = conf
+            .getStrings(ConfigConstants.CONF_OUTPUT_URI_REPLACE);
+        if (uriReplace != null) {
             int fromIndex = 0;
-            while((fromIndex = sb.indexOf(uriReplace[0], fromIndex))!= -1){
-                sb.replace(fromIndex, fromIndex + uriReplace[0].length(), uriReplace[1]);
+            while ((fromIndex = sb.indexOf(uriReplace[0], fromIndex)) != -1) {
+                sb.replace(fromIndex, fromIndex + uriReplace[0].length(),
+                    uriReplace[1]);
             }
         }
         uri.setUri(sb.toString());

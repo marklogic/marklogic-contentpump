@@ -73,8 +73,11 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        initCommonConfigurations(conf);
         Path file = ((FileSplit) inSplit).getPath();
+        initCommonConfigurations(conf, file);
+//        if (!file.getName().matches(inputPattern)) {
+//            return;
+//        }
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         XMLInputFactory f = XMLInputFactory.newInstance();
@@ -229,6 +232,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
      * @return false when the record end-element is found; true when keep going
      * @throws XMLStreamException
      */
+    @SuppressWarnings("unchecked")
     private boolean processEndElement() throws XMLStreamException {
         // TODO
         if (skippingRecord) {
@@ -260,8 +264,20 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             currDepth--;
             return true;
         }
-
-        ((Text)value).set(buffer.toString());
+        if (value instanceof Text) {
+            ((Text) value).set(buffer.toString());
+        } else if (value instanceof ContentWithFileNameWritable) {
+            VALUEIN realValue = (VALUEIN) ((ContentWithFileNameWritable<VALUEIN>) value)
+                .getValue();
+            if (realValue instanceof Text) {
+                ((Text) realValue).set(buffer.toString());
+            } else {
+                throw new XMLStreamException("Expects Text in aggregate XML");
+            }
+        } else {
+            throw new XMLStreamException("Expects Text in aggregate XML");
+        }
+        
         currentId = null;
         newDoc = false;
         // reset buffer
