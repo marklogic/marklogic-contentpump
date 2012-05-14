@@ -38,7 +38,7 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
      */
     private Session session;
     private int count = 0;
-    private Configuration conf;
+    protected Configuration conf;
     protected int txnSize;
     
     public MarkLogicRecordWriter(URI serverUri, Configuration conf) {

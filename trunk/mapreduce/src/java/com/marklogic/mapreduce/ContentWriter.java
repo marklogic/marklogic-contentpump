@@ -206,11 +206,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 content = ContentFactory.newContent(uri, 
                         ((BytesWritable) value).getBytes(), 0, 
                         ((BytesWritable) value).getLength(), options);
+            } else if (value instanceof CustomContent) {
+                content = ((CustomContent) value).getContent(conf, options, uri);
+                batchSize = 1;
             } else {
-                throw new UnsupportedOperationException(value.getClass() + 
-                        " is not supported.");
+                throw new UnsupportedOperationException(value.getClass()
+                    + " is not supported.");
             }
-           
             if (batchSize > 1) {
                 forestContents[fId][counts[fId]++] = content;
  
