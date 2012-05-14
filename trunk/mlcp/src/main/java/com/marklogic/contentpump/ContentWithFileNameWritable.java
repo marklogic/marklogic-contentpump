@@ -20,12 +20,12 @@ import com.marklogic.xcc.ContentFactory;
 
 public class ContentWithFileNameWritable<VALUE> implements CustomContent {
     private VALUE value;
-    private String fileName;
+    private Text fileName;
 
     public ContentWithFileNameWritable(VALUE value, String fileName) {
         super();
         this.value = value;
-        this.fileName = fileName;
+        this.fileName = new Text(fileName);
     }
 
     public VALUE getValue() {
@@ -37,11 +37,11 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
     }
 
     public String getFileName() {
-        return fileName;
+        return fileName.toString();
     }
 
     public void setFileName(String fileName) {
-        this.fileName = fileName;
+        this.fileName.set(fileName);
     }
 
     @Override
@@ -49,21 +49,18 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
         ContentCreateOptions options, String uri) {
         String[] collections = conf
             .getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
-
         if (collections != null) {
-            System.err.println(collections.length);
             List<String> optionList = new ArrayList<String>();
             Collections.addAll(optionList, collections);
-            optionList.add(fileName);
+            optionList.add(fileName.toString());
             collections = optionList.toArray(new String[0]);
             for (int i = 0; i < collections.length; i++) {
                 collections[i] = collections[i].trim();
             }
             options.setCollections(collections);
-            System.err.println(collections.length);
         } else {
             String[] col = new String[1];
-            col[0] = fileName;
+            col[0] = fileName.toString();
             options.setCollections(col);
         }
 
@@ -79,12 +76,12 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
                 ((BytesWritable) value).getBytes(), 0,
                 ((BytesWritable) value).getLength(), options);
         }
-        System.err.println("done");
         return content;
     }
 
     @Override
     public void readFields(DataInput arg0) throws IOException {
+        fileName.readFields(arg0);
         if (value instanceof Text) {
             ((Text) value).readFields(arg0);
         } else if (value instanceof MarkLogicNode) {
@@ -97,6 +94,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
 
     @Override
     public void write(DataOutput arg0) throws IOException {
+        fileName.write(arg0);
         if (value instanceof Text) {
             ((Text) value).write(arg0);
         } else if (value instanceof MarkLogicNode) {
