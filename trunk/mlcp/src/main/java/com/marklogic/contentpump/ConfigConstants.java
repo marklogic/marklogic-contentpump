@@ -84,6 +84,7 @@ public interface ConfigConstants {
     static final String OUTPUT_URI_SUFFIX = "output_uri_suffix";
     static final String OUTPUT_FILENAME_AS_COLLECTION = 
         "output_filename_as_collection";
+    static final String DEFAULT_OUTPUT_FILENAME_AS_COLLECTION = "false";
     static final String XML_REPAIR_LEVEL = "xml_repair_level";
     static final String COPY_COLLECTIONS = "copy_collections";
     static final String COPY_PERMISSIONS = "copy_permissions";
@@ -131,5 +132,8 @@ public interface ConfigConstants {
         "mapreduce.marklogic.output_urisuffix";
     static final String CONF_OUTPUT_DIRECTORY = 
         "mapreduce.marklogic.output.directory";
-
+    static final String CONF_INPUT_FILE_PATTERN = 
+        "mapreduce.marklogic.input.filepattern";
+    static final String CONF_OUTPUT_FILENAME_AS_COLLECTION = 
+        "mapreduce.marklogic.output.filenameascollection";
 }

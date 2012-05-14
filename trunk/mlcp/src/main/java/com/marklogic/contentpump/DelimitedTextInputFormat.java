@@ -12,14 +12,16 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.DocumentURI;
 
-public class DelimitedTextInputFormat extends FileInputFormat<DocumentURI, Text> {
+public class DelimitedTextInputFormat extends
+    FileInputFormat<DocumentURI, Text> {
 
     @Override
     public RecordReader<DocumentURI, Text> createRecordReader(InputSplit arg0,
         TaskAttemptContext arg1) throws IOException, InterruptedException {
-        
+
         return new DelimitedTextReader<Text>();
     }
+
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
         return false;

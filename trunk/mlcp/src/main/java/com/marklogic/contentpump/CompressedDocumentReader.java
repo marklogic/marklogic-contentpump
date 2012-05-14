@@ -38,18 +38,20 @@ import com.marklogic.mapreduce.DocumentURI;
  * RecordReader for CompressedDocumentInputFormat.
  * 
  * @author ali
- *
+ * 
  * @param <VALUEIN>
  */
 public class CompressedDocumentReader<VALUEIN> extends
-        AbstractRecordReader <VALUEIN>{
+    AbstractRecordReader<VALUEIN> {
     private InputStream zipIn;
     private byte[] buf = new byte[65536];
     private boolean hasNext = true;
     private CompressionCodecEnum codec;
-    public CompressedDocumentReader(){
-        
+
+    public CompressedDocumentReader() {
+
     }
+
     @Override
     public void close() throws IOException {
         if (zipIn != null) {
@@ -58,7 +60,8 @@ public class CompressedDocumentReader<VALUEIN> extends
     }
 
     @Override
-    public DocumentURI getCurrentKey() throws IOException, InterruptedException {
+    public DocumentURI getCurrentKey() throws IOException,
+        InterruptedException {
         return key;
     }
 
@@ -71,33 +74,30 @@ public class CompressedDocumentReader<VALUEIN> extends
     public float getProgress() throws IOException, InterruptedException {
         return hasNext ? 0 : 1;
     }
-    
+
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
-            throws IOException, InterruptedException {
+        throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        initCommonConfigurations(conf);
         Path file = ((FileSplit) inSplit).getPath();
+        initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
 
-        String codecString = conf
-            .get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
-                CompressionCodecEnum.ZIP.toString());
+        String codecString = conf.get(
+            ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
+            CompressionCodecEnum.ZIP.toString());
         if (codecString.equalsIgnoreCase(CompressionCodecEnum.ZIP.toString())) {
             zipIn = new ZipInputStream(fileIn);
             codec = CompressionCodecEnum.ZIP;
 
-        } else if (codecString.equalsIgnoreCase(CompressionCodecEnum.GZIP.toString())) {
-//            GzipCodec gzcodec = new GzipCodec();
-//            zipIn = gzcodec.createInputStream(fileIn);
+        } else if (codecString.equalsIgnoreCase(CompressionCodecEnum.GZIP
+            .toString())) {
             zipIn = new GZIPInputStream(fileIn);
             codec = CompressionCodecEnum.GZIP;
             String filename = file.getName();
             setKey(filename.substring(0, filename.lastIndexOf('.')));
         }
-
-
     }
 
     @Override
@@ -106,9 +106,9 @@ public class CompressedDocumentReader<VALUEIN> extends
             hasNext = false;
             return false;
         }
-        if(codec.equals(CompressionCodecEnum.ZIP)) {
+        if (codec.equals(CompressionCodecEnum.ZIP)) {
             ZipEntry zipEntry;
-            ZipInputStream zis = (ZipInputStream)zipIn;
+            ZipInputStream zis = (ZipInputStream) zipIn;
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry.isDirectory())
                     continue;
@@ -128,9 +128,10 @@ public class CompressedDocumentReader<VALUEIN> extends
         hasNext = false;
         return false;
     }
-    
+
+    @SuppressWarnings("unchecked")
     private void readFromStream() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(); 
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
         long size;
         while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
             baos.write(buf, 0, (int) size);
@@ -138,10 +139,18 @@ public class CompressedDocumentReader<VALUEIN> extends
         if (value instanceof Text) {
             ((Text) value).set(baos.toString());
         } else if (value instanceof BytesWritable) {
-            ((BytesWritable) value).set(baos.toByteArray(), 0,
-                baos.size());
+            ((BytesWritable) value).set(baos.toByteArray(), 0, baos.size());
+        } else if (value instanceof ContentWithFileNameWritable) {
+            VALUEIN realValue = (VALUEIN) ((ContentWithFileNameWritable<VALUEIN>) value)
+                .getValue();
+            if (realValue instanceof Text) {
+                ((Text) realValue).set(baos.toString());
+            } else if (realValue instanceof BytesWritable) {
+                ((BytesWritable) realValue).set(baos.toByteArray(), 0,
+                    baos.size());
+            }
         }
         baos.close();
     }
-    
+
 }

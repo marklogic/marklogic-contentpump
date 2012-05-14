@@ -24,19 +24,20 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
     private InputStream zipIn;
     private ZipEntry currZipEntry;
     private CompressionCodecEnum codec;
+
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        initCommonConfigurations(conf);
         Path file = ((FileSplit) inSplit).getPath();
+        initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
 
         initDelimConf(conf);
 
-        String codecString = conf
-        .get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
+        String codecString = conf.get(
+            ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
             CompressionCodecEnum.ZIP.toString());
         if (codecString.equalsIgnoreCase(CompressionCodecEnum.ZIP.toString())) {
             zipIn = new ZipInputStream(fileIn);
@@ -46,9 +47,9 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             zipIn = new GZIPInputStream(fileIn);
             codec = CompressionCodecEnum.GZIP;
         }
-        
+
     }
-    
+
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if (zipIn == null) {
@@ -61,7 +62,8 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                 ZipInputStream zis = (ZipInputStream) zipIn;
                 while ((currZipEntry = zis.getNextEntry()) != null) {
                     System.err.println(currZipEntry.getName());
-                    if (currZipEntry.isDirectory() || currZipEntry.getSize() == 0) {
+                    if (currZipEntry.isDirectory()
+                        || currZipEntry.getSize() == 0) {
                         continue;
                     }
                     long size;
@@ -78,5 +80,5 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
         }
         return super.nextKeyValue();
     }
-        
+
 }

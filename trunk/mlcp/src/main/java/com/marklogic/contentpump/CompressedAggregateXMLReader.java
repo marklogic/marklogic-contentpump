@@ -20,37 +20,31 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-
-
 public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private XMLInputFactory factory;
     private ZipEntry currZipEntry;
     private CompressionCodecEnum codec;
+
     @Override
     public void close() throws IOException {
         super.close();
-//        zfile.close();
     }
-
 
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        initCommonConfigurations(conf);
         Path file = ((FileSplit) inSplit).getPath();
+        initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         System.err.println(file.toUri());
-//        System.err.println(file.toUri());
-//        ZipFile zfile = new ZipFile(new File(file.toUri()));
-//        System.err.println(zfile.toString());
         factory = XMLInputFactory.newInstance();
 
-        String codecString = conf
-        .get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
+        String codecString = conf.get(
+            ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
             CompressionCodecEnum.ZIP.toString());
         if (codecString.equalsIgnoreCase(CompressionCodecEnum.ZIP.toString())) {
             zipIn = new ZipInputStream(fileIn);
@@ -90,7 +84,7 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
                 e.printStackTrace();
             }
         }
-        //copy the namespaces declared in root element
+        // copy the namespaces declared in root element
         copyNameSpaceDecl();
 
         idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
@@ -103,6 +97,7 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
         XMLStreamException, InterruptedException {
         return super.nextKeyValue();
     }
+
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if (zipIn == null) {

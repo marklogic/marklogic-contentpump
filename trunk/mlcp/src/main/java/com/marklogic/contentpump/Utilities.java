@@ -15,4 +15,14 @@ public class Utilities {
                         patterns[0].matcher(_in).replaceAll("&amp;"))
                         .replaceAll("&lt;")).replaceAll("&gt;");
     }
+    
+    public static String stringArrayToCommaSeparatedString(String [] arrayOfString) {
+        StringBuilder result = new StringBuilder();
+        for(String string : arrayOfString) {
+            result.append(string);
+            result.append(",");
+        }
+        return result.substring(0, result.length() - 1) ;
+    }
+
 }
