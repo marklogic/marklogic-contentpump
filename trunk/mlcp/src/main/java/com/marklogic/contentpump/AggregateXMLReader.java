@@ -36,7 +36,9 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
     protected boolean startOfRecord = true;
     protected boolean hasNext = true;
     private boolean newDoc = false;
-
+    protected boolean useAutomaticId = false;
+    protected String mode;
+    protected IdGenerator idGen;
     public AggregateXMLReader() {
 
     }
@@ -75,9 +77,6 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         Configuration conf = context.getConfiguration();
         Path file = ((FileSplit) inSplit).getPath();
         initCommonConfigurations(conf, file);
-//        if (!file.getName().matches(inputPattern)) {
-//            return;
-//        }
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         XMLInputFactory f = XMLInputFactory.newInstance();
@@ -92,9 +91,18 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         }
 
         idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
+        if(idName == null) {
+            useAutomaticId = true;
+        }
         recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
         recordNamespace = conf
             .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
+        mode = conf.get(ConfigConstants.CONF_MODE);
+        if (mode == null) {
+            idGen = new LocalIdGenerator(context.getTaskAttemptID().toString());
+        } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
+            idGen = new LocalIdGenerator(file.getName());
+        }
 
     }
 
@@ -144,6 +152,9 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             recordDepth = currDepth;
             isNewRootStart = true;
             newDoc = true;
+            if (useAutomaticId) {
+                setKey(idGen.incrementAndGet());
+            }
         } else {
             // record element name may not nest
             if (name.equals(recordName)
@@ -153,6 +164,9 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
                 recordDepth = currDepth;
                 isNewRootStart = true;
                 newDoc = true;
+                if (useAutomaticId) {
+                    setKey(idGen.incrementAndGet());
+                }
             }
         }
         
@@ -184,7 +198,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             String aValue = Utilities.escapeXml(xmlSR.getAttributeValue(i));
             sb.append(" " + (null == aPrefix ? "" : aPrefix + ":") + aName
                 + "=\"" + aValue + "\"");
-            if (newDoc && ("@" + aName).equals(idName)) {
+            if (!useAutomaticId && newDoc && ("@" + aName).equals(idName)) {
                 currentId = aValue;
                 setKey(aValue);
             }
@@ -193,7 +207,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
 
         // allow for repeated idName elements: first one wins
         // NOTE: idName is namespace-insensitive
-        if (newDoc && name.equals(idName)) {
+        if (!useAutomaticId && newDoc && name.equals(idName)) {
             if (xmlSR.next() != XMLStreamConstants.CHARACTERS) {
                 throw new XMLStreamException("badly formed xml or " + idName
                     + " is not a simple node: at" + xmlSR.getLocation());
@@ -242,8 +256,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         String name = xmlSR.getLocalName();
         String prefix = xmlSR.getPrefix();
 
-        // did something go wrong?
-        if (null == currentId && newDoc) {
+        if (!useAutomaticId && null == currentId && newDoc) {
             throw new XMLStreamException("end of record element " + name
                 + " with no id found: " + ConfigConstants.AGGREGATE_URI_ID
                 + "=" + idName);

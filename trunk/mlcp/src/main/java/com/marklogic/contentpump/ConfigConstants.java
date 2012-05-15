@@ -136,4 +136,5 @@ public interface ConfigConstants {
         "mapreduce.marklogic.input.filepattern";
     static final String CONF_OUTPUT_FILENAME_AS_COLLECTION = 
         "mapreduce.marklogic.output.filenameascollection";
+    static final String CONF_MODE = "mapreduce.marklogic.mode";
 }
