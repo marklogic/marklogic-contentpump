@@ -88,9 +88,18 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
         copyNameSpaceDecl();
 
         idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
+        if(idName == null) {
+            useAutomaticId = true;
+        }
         recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
         recordNamespace = conf
             .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
+        mode = conf.get(ConfigConstants.CONF_MODE);
+        if (mode == null) {
+            idGen = new LocalIdGenerator(context.getTaskAttemptID().toString());
+        } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
+            idGen = new LocalIdGenerator(file.getName());
+        }
     }
 
     private boolean nextRecordInAggregate() throws IOException,
