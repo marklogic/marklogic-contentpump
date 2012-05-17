@@ -32,8 +32,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-import com.marklogic.mapreduce.DocumentURI;
-
 /**
  * RecordReader for CompressedDocumentInputFormat.
  * 
@@ -57,17 +55,6 @@ public class CompressedDocumentReader<VALUEIN> extends
         if (zipIn != null) {
             zipIn.close();
         }
-    }
-
-    @Override
-    public DocumentURI getCurrentKey() throws IOException,
-        InterruptedException {
-        return key;
-    }
-
-    @Override
-    public VALUEIN getCurrentValue() throws IOException, InterruptedException {
-        return value;
     }
 
     @Override
@@ -141,7 +128,7 @@ public class CompressedDocumentReader<VALUEIN> extends
         } else if (value instanceof BytesWritable) {
             ((BytesWritable) value).set(baos.toByteArray(), 0, baos.size());
         } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = (VALUEIN) ((ContentWithFileNameWritable<VALUEIN>) value)
+            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
                 .getValue();
             if (realValue instanceof Text) {
                 ((Text) realValue).set(baos.toString());

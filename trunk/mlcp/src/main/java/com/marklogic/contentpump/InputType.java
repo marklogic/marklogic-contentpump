@@ -97,15 +97,13 @@ public enum InputType {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
                 ContentType contentType, boolean compressed) {
-            // TODO Auto-generated method stub
-            return null;
+            return SequenceFileInputFormat.class;
         }
 
         @Override
         public Class<? extends Mapper> getMapperClass(
                 ContentType contentType) {
-            // TODO Auto-generated method stub
-            return null;
+            return DocumentMapper.class;
         }
         
     };

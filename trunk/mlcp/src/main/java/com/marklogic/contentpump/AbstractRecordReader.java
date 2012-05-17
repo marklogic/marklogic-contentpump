@@ -39,27 +39,29 @@ public abstract class AbstractRecordReader<VALUEIN> extends
 
     @Override
     public void close() throws IOException {
+        throw new IOException("Not implemented in AbstractRecordReader.");
     }
 
     @Override
     public DocumentURI getCurrentKey() throws IOException,
         InterruptedException {
-        return null;
+        return key;
     }
 
     @Override
     public VALUEIN getCurrentValue() throws IOException, InterruptedException {
-        return null;
+        return value;
     }
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
-        return 0;
+        throw new InterruptedException("Not implemented in AbstractRecordReader.");
     }
 
     @Override
     public void initialize(InputSplit arg0, TaskAttemptContext context)
         throws IOException, InterruptedException {
+        throw new InterruptedException("Not implemented in AbstractRecordReader.");
     }
 
     @SuppressWarnings("unchecked")
@@ -98,7 +100,7 @@ public abstract class AbstractRecordReader<VALUEIN> extends
 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        return false;
+        throw new InterruptedException("Not implemented in AbstractRecordReader.");
     }
 
 }
