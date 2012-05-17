@@ -13,8 +13,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-import com.marklogic.mapreduce.DocumentURI;
-
 public class DelimitedTextReader<VALUEIN> extends
     AbstractRecordReader<VALUEIN> {
     protected static String[] fields;
@@ -30,17 +28,6 @@ public class DelimitedTextReader<VALUEIN> extends
         if (br != null) {
             br.close();
         }
-    }
-
-    @Override
-    public DocumentURI getCurrentKey() throws IOException,
-        InterruptedException {
-        return key;
-    }
-
-    @Override
-    public VALUEIN getCurrentValue() throws IOException, InterruptedException {
-        return value;
     }
 
     @Override
@@ -103,7 +90,7 @@ public class DelimitedTextReader<VALUEIN> extends
             ((Text) value).set(sb.toString());
         }
         else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = (VALUEIN) ((ContentWithFileNameWritable<VALUEIN>)value).getValue();
+            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>)value).getValue();
             if (realValue instanceof Text) {
                 ((Text)realValue).set(sb.toString());
             } else {

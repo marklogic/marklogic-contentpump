@@ -96,6 +96,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
         return content;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void readFields(DataInput in) throws IOException {
         String fn = Text.readString(in);
@@ -103,17 +104,21 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
         byte valueType = in.readByte();
         switch (valueType) {
         case 0:
+            value = (VALUE) new Text();
             ((Text) value).readFields(in);
             break;
         case 1:
+            value = (VALUE) new MarkLogicNode();
             ((MarkLogicNode) value).readFields(in);
             break;
         case 2:
+            value = (VALUE) new BytesWritable();
             ((BytesWritable) value).readFields(in);
             break;
         default:
             throw new IOException("incorrect type");
         }
+        type = valueType;
     }
 
     @Override

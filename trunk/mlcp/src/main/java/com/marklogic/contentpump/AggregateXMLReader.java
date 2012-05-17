@@ -18,8 +18,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-import com.marklogic.mapreduce.DocumentURI;
-
 public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
     private static String DEFAULT_NS = null;
     private int currDepth = 0;
@@ -53,17 +51,6 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             }
         }
 
-    }
-
-    @Override
-    public DocumentURI getCurrentKey() throws IOException,
-        InterruptedException {
-        return key;
-    }
-
-    @Override
-    public VALUEIN getCurrentValue() throws IOException, InterruptedException {
-        return value;
     }
 
     @Override
@@ -280,7 +267,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         if (value instanceof Text) {
             ((Text) value).set(buffer.toString());
         } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = (VALUEIN) ((ContentWithFileNameWritable<VALUEIN>) value)
+            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
                 .getValue();
             if (realValue instanceof Text) {
                 ((Text) realValue).set(buffer.toString());

@@ -28,8 +28,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-import com.marklogic.mapreduce.DocumentURI;
-
 /**
  * RecordReader for CombineDocumentInputFormat.
  * 
@@ -50,17 +48,6 @@ extends AbstractRecordReader<VALUEIN> {
 
     @Override
     public void close() throws IOException {
-    }
-
-    @Override
-    public DocumentURI getCurrentKey() 
-    throws IOException, InterruptedException {
-        return key;
-    }
-
-    @Override
-    public VALUEIN getCurrentValue() throws IOException, InterruptedException {
-        return value;
     }
 
     @Override
@@ -97,7 +84,7 @@ extends AbstractRecordReader<VALUEIN> {
                 } else if (value instanceof BytesWritable) {
                     ((BytesWritable) value).set(buf, 0, buf.length);
                 } else if (value instanceof ContentWithFileNameWritable) {
-                    VALUEIN realValue = (VALUEIN) ((ContentWithFileNameWritable<VALUEIN>) value)
+                    VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
                         .getValue();
                     if (realValue instanceof Text) {
                         ((Text) realValue).set(new String(buf));

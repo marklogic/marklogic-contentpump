@@ -63,6 +63,7 @@ public interface ConfigConstants {
         "input_sequencefile_value_class";
     static final String INPUT_SEQUENCEFILE_VALUE_TYPE =
         "input_sequencefile_value_type";
+    static final String DEFAULT_SEQUENCEFILE_VALUE_TYPE = "TEXT";
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
     static final String HOST = "host";
@@ -107,7 +108,7 @@ public interface ConfigConstants {
     static final String DELIMITER = "delimiter";
     //TODO: merge with "aggregate_uri_id" ?? 
     static final String DELIMITED_URI_ID = "delimited_uri_id";
-
+    
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
         "mapreduce.marklogic.input.compressioncodec";
@@ -137,4 +138,10 @@ public interface ConfigConstants {
     static final String CONF_OUTPUT_FILENAME_AS_COLLECTION = 
         "mapreduce.marklogic.output.filenameascollection";
     static final String CONF_MODE = "mapreduce.marklogic.mode";
+    static final String CONF_INPUT_SEQUENCEFILE_KEY_CLASS = 
+        "mapreduce.marklogic.input.sequencefile.keyclass";
+    static final String CONF_INPUT_SEQUENCEFILE_VALUE_CLASS = 
+        "mapreduce.marklogic.input.sequencefile.valueclass";
+    static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE =
+        "mapreduce.marklogic.input.sequencefile.valuetype";
 }

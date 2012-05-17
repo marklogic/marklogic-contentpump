@@ -187,6 +187,21 @@ public enum Command implements ConfigConstants {
                 .hasArg().withDescription("XML repair level.")
                 .create(XML_REPAIR_LEVEL);
             options.addOption(repairLevel);
+            Option seqKeyClass = OptionBuilder
+                .withArgName(INPUT_SEQUENCEFILE_KEY_CLASS).hasArg()
+                .withDescription("Sequencefile key class.")
+                .create(INPUT_SEQUENCEFILE_KEY_CLASS);
+            options.addOption(seqKeyClass);
+            Option seqValueClass = OptionBuilder
+                .withArgName(INPUT_SEQUENCEFILE_VALUE_CLASS).hasArg()
+                .withDescription("Sequencefile value class.")
+                .create(INPUT_SEQUENCEFILE_VALUE_CLASS);
+            options.addOption(seqValueClass);
+            Option seqValueType = OptionBuilder
+                .withArgName(INPUT_SEQUENCEFILE_VALUE_TYPE).hasArg()
+                .withDescription("Sequencefile value type.")
+                .create(INPUT_SEQUENCEFILE_VALUE_TYPE);
+            options.addOption(seqValueType);
             // TODO: complete
         }
 
@@ -361,6 +376,23 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.OUTPUT_XML_REPAIR_LEVEL,
                     MarkLogicConstants.DEFAULT_OUTPUT_XML_REPAIR_LEVEL);
             }
+            if (cmdline.hasOption(INPUT_SEQUENCEFILE_KEY_CLASS)) {
+                String keyClass = cmdline
+                    .getOptionValue(INPUT_SEQUENCEFILE_KEY_CLASS);
+                conf.set(CONF_INPUT_SEQUENCEFILE_KEY_CLASS, keyClass);
+            }
+            if (cmdline.hasOption(INPUT_SEQUENCEFILE_VALUE_CLASS)) {
+                String valueClass = cmdline
+                    .getOptionValue(INPUT_SEQUENCEFILE_VALUE_CLASS);
+                conf.set(CONF_INPUT_SEQUENCEFILE_VALUE_CLASS, valueClass);
+            }
+            if (cmdline.hasOption(INPUT_SEQUENCEFILE_VALUE_TYPE)) {
+                String valueType = cmdline
+                    .getOptionValue(INPUT_SEQUENCEFILE_VALUE_TYPE);
+                conf.set(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE, valueType.toUpperCase());
+            } else if (conf.get(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE) == null) {
+                conf.set(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE, DEFAULT_SEQUENCEFILE_VALUE_TYPE);
+            }
         }
 
         @Override
@@ -478,10 +510,16 @@ public enum Command implements ConfigConstants {
         Option threadCount = OptionBuilder.withArgName(THREAD_COUNT).hasArg()
             .withDescription("Number of threads").create(THREAD_COUNT);
         options.addOption(threadCount);
-        Option splitSize = OptionBuilder.withArgName(MAX_SPLIT_SIZE).hasArg()
+        Option maxSplitSize = OptionBuilder.withArgName(MAX_SPLIT_SIZE)
+            .hasArg()
             .withDescription("Maximum number of records per each split")
             .create(MAX_SPLIT_SIZE);
-        options.addOption(splitSize);
+        options.addOption(maxSplitSize);
+        Option minSplitSize = OptionBuilder.withArgName(MIN_SPLIT_SIZE)
+            .hasArg()
+            .withDescription("Minimum number of records per each split")
+            .create(MIN_SPLIT_SIZE);
+        options.addOption(minSplitSize);
     }
 
     public abstract void printUsage();
