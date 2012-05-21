@@ -1,7 +1,8 @@
-package com.marklogic.contentpump.example;
+package com.marklogic.contentpump.examples;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
 import java.net.URI;
 
 import org.apache.hadoop.conf.Configuration;
@@ -14,7 +15,7 @@ import org.apache.hadoop.io.Text;
 import com.marklogic.mapreduce.DocumentURI;
 
 public class SimpleSequenceFileCreator {
-    public static void main(String args[]) throws Exception {
+    public static void main(String args[]) throws IOException {
         System.out.println("Sequence File Creator");
         String uri = args[0]; // output sequence file name
         String filePath = args[1]; // text file to read from; Odd line is key,

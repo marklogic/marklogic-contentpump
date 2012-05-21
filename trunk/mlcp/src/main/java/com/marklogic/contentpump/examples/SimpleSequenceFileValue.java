@@ -1,4 +1,4 @@
-package com.marklogic.contentpump.example;
+package com.marklogic.contentpump.examples;
 
 import java.io.DataInput;
 import java.io.DataOutput;
