@@ -1,5 +1,6 @@
-package com.marklogic.contentpump.example;
+package com.marklogic.contentpump.examples;
 
+import java.io.IOException;
 import java.net.URI;
 
 import org.apache.hadoop.conf.Configuration;
@@ -34,7 +35,10 @@ public class SimpleSequenceFileReader {
                     ((SimpleSequenceFileValue) value).getValue());
                 position = reader.getPosition();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        catch (Exception e) {
             e.printStackTrace();
         } finally {
             IOUtils.closeStream(reader);

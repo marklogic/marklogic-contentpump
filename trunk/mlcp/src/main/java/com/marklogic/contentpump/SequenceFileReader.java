@@ -52,7 +52,6 @@ public class SequenceFileReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             .get(ConfigConstants.CONF_INPUT_SEQUENCEFILE_VALUE_TYPE);
         SequenceFileValueType svType = SequenceFileValueType
             .valueOf(valueType);
-        System.err.println(valueType);
         Class<? extends Writable> vClass = svType.getWritableClass();
         value = (VALUEIN) ReflectionUtils.newInstance(vClass, conf);
         configFileNameAsCollection(conf, file);
