@@ -14,6 +14,9 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.mapreduce.ContentType;
+import com.marklogic.mapreduce.MarkLogicConstants;
+
 public class SequenceFileReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
     protected SequenceFile.Reader reader;
     protected Writable seqKey;
@@ -54,6 +57,7 @@ public class SequenceFileReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             .valueOf(valueType);
         Class<? extends Writable> vClass = svType.getWritableClass();
         value = (VALUEIN) ReflectionUtils.newInstance(vClass, conf);
+
         configFileNameAsCollection(conf, file);
 
         if (!reader.getKeyClass().getCanonicalName().equals(keyClass)) {
