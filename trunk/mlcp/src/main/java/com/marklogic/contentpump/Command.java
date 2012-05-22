@@ -22,6 +22,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
@@ -390,6 +391,9 @@ public enum Command implements ConfigConstants {
                 String valueType = cmdline
                     .getOptionValue(INPUT_SEQUENCEFILE_VALUE_TYPE);
                 conf.set(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE, valueType.toUpperCase());
+                if (valueType.equalsIgnoreCase(SequenceFileValueType.BYTESWRITABLE.toString())) {
+                    conf.set(MarkLogicConstants.CONTENT_TYPE, ContentType.BINARY.toString());
+                } 
             } else if (conf.get(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE) == null) {
                 conf.set(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE, DEFAULT_SEQUENCEFILE_VALUE_TYPE);
             }

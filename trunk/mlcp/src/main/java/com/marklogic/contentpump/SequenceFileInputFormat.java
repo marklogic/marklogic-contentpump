@@ -21,9 +21,9 @@ public class SequenceFileInputFormat <VALUE> extends FileInputFormat<DocumentURI
         return new SequenceFileReader<VALUE>();
     }
     
-    @Override
-    protected boolean isSplitable(JobContext context, Path filename) {
-        return false;
-    }
+//    @Override
+//    protected boolean isSplitable(JobContext context, Path filename) {
+//        return false;
+//    }
 
 }
