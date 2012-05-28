@@ -1,0 +1,34 @@
+@ECHO OFF
+REM set arg=%~1
+REM echo %arg%
+set argss=%*
+echo %argss%
+
+
+set cmdpath=%~dp0
+echo Command Path:  %cmdpath%
+set cmdpath=%cmdpath:~0,-1%
+for %%d in (%cmdpath%) do set cmdppath=%%~dpd
+REM echo %cmdppath%
+set LIB_HOME=%cmdppath%lib
+REM echo LIB_HOME: %LIB_HOME%
+
+SET "VMARGS=-DCONTENTPUMP_HOME=%LIB_HOME% -DCONTENTPUMP_VERSION=1.0"
+
+ECHO VMARGS: %VMARGS%
+ECHO LIB_HOME: %LIB_HOME%
+SetLocal EnableDelayedExpansion
+
+echo "***
+set classpath=.
+
+for %%X in (%LIB_HOME%\*) do (
+  echo %%X
+  set tmp=%%X
+  set classpath=!classpath!;!tmp!
+)
+echo classpath: %classpath%
+java -version
+echo
+echo Start running .........\n
+java -cp %classpath% %VMARGS% com.marklogic.contentpump.ContentPump %*
