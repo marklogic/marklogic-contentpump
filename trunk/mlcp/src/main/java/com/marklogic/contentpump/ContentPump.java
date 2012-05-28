@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -64,7 +65,7 @@ public class ContentPump implements ConfigConstants {
         System.exit(rc);
     }
 
-    private static int runCommand(String[] args) {
+    private static int runCommand(String[] args) throws IOException {
         // get command
         String cmd = args[0];
         if (cmd.equals("help")) {
