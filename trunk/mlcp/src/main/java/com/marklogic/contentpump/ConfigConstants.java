@@ -42,7 +42,7 @@ public interface ConfigConstants {
     static final String THREAD_COUNT = "thread_count";
     static final String MAX_SPLIT_SIZE = "max_split_size";
     static final String MIN_SPLIT_SIZE = "min_split_size";
-    static final String OPTIONS_FILE = "options-file";
+    static final String OPTIONS_FILE = "-options_file";
     
     // command-specific
     static final String INPUT_FILE_PATH = "input_file_path";
