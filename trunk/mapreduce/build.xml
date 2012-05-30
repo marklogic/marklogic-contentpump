@@ -99,8 +99,7 @@
         <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
         <pathelement path="${jarlib}/commons-logging-1.0.4.jar"/>
         <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
-        <!--pathelement path="${jarlib}/hadoop-0.20.2-core.jar"/-->
-        <pathelement path="${jarlib}/hadoop-core-1.1.0-SNAPSHOT.jar"/>
+        <pathelement path="${jarlib}/hadoop-0.20.2-core.jar"/>
         <pathelement path="${jarlib}/log4j-1.2.15.jar"/>
         <pathelement path="${jarlib}/saxon9he.jar"/>
         <pathelement path="${jarlib}/cpox.jar"/>
