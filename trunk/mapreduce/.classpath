@@ -12,13 +12,33 @@
 	<classpathentry kind="con" path="/space/projects/xcc/mapreduce/src/lib/httpclient-4.0.3.jar"/>
 	<classpathentry kind="con" path="/space/projects/xcc/mapreduce/src/lib/httpcore-4.0.1.jar"/>
 	<classpathentry kind="con" path="/space/projects/xcc/mapreduce/src/lib/httpmime-4.0.3.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/hadoop 0.20.2"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/xcc"/>
 	<classpathentry kind="lib" path="src/lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="src/lib/saxon9he.jar"/>
-	<classpathentry kind="lib" path="src/lib/hadoop-0.20.2-core.jar"/>
 	<classpathentry kind="lib" path="src/lib/bliki-core-3.0.14-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="src/lib/xpp3-1.1.4c.jar"/>
 	<classpathentry kind="lib" path="/space/projects/xcc/mapreduce/src/lib/cpox.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/conf"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-configuration-1.6.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-lang-2.4.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-net-1.4.1.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-math-2.1.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-logging-api-1.0.4.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-httpclient-3.0.1.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-el-1.0.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-digester-1.8.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-daemon-1.0.1.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-collections-3.2.1.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-cli-1.2.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-beanutils-core-1.8.0.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-1.0/build/ivy/lib/Hadoop/common/commons-beanutils-1.7.0.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-0.23.1/share/hadoop/common/hadoop-common-0.23.1.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-0.23.1/share/hadoop/hdfs/hadoop-hdfs-0.23.1.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-0.23.1/share/hadoop/common/lib/guava-r09.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-0.23.1/share/hadoop/common/lib/hadoop-auth-0.23.1.jar"/>
+	<classpathentry kind="lib" path="/space/hadoop-0.23.1/share/hadoop/common/lib/protobuf-java-2.4.0a.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hadoop-0.20.2"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
