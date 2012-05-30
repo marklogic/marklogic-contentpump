@@ -41,6 +41,18 @@ public enum ContentType {
         public Class<? extends Writable> getWritableClass() {
             return BytesWritable.class;
         }
+    },
+    TYPE_OF_FIRST_VALUE {
+        @Override
+        public DocumentFormat getDocumentFormat() {
+            return null;
+        }
+
+        @Override
+        public Class<? extends Writable> getWritableClass() {
+            return null;
+        }
+        
     };
     
     public abstract DocumentFormat getDocumentFormat();

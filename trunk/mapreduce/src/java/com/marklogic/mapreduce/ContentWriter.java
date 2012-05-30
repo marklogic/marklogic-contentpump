@@ -21,6 +21,7 @@ import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.DocumentFormat;
 import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
@@ -85,6 +86,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * Sessions per forest.
      */
     private Session[] sessions;
+    
+    private boolean formatNeeded;
 
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -157,7 +160,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         } 
         String contentTypeStr = conf.get(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
         ContentType contentType = ContentType.valueOf(contentTypeStr);
-        options.setFormat(contentType.getDocumentFormat());
+        if (contentType == ContentType.TYPE_OF_FIRST_VALUE) {
+            formatNeeded = true;
+        } else {
+            options.setFormat(contentType.getDocumentFormat());
+        }
         
         options.setLanguage(conf.get(OUTPUT_CONTENT_LANGUAGE));
         options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
@@ -199,16 +206,35 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (value instanceof Text) {
                 content = ContentFactory.newContent(uri, 
                         ((Text)value).toString(), options);
+                if (formatNeeded) {
+                    options.setFormat(DocumentFormat.TEXT);
+                    formatNeeded = false;
+                }
             } else if (value instanceof MarkLogicNode) {
                 content = ContentFactory.newContent(uri, 
                         ((MarkLogicNode)value).get(), options);   
+                if (formatNeeded) {
+                    options.setFormat(DocumentFormat.XML);
+                    formatNeeded = false;
+                }
             } else if (value instanceof BytesWritable) {
                 content = ContentFactory.newContent(uri, 
                         ((BytesWritable) value).getBytes(), 0, 
                         ((BytesWritable) value).getLength(), options);
+                if (formatNeeded) {
+                    options.setFormat(DocumentFormat.BINARY);
+                    formatNeeded = false;
+                }
             } else if (value instanceof CustomContent) {
                 content = ((CustomContent) value).getContent(conf, options, uri);
                 batchSize = 1;
+            } else if (value instanceof SerializedXML) {
+                content = ContentFactory.newContent(uri, 
+                        ((SerializedXML)value).toString(), options);
+                if (formatNeeded) {
+                    options.setFormat(DocumentFormat.XML);
+                    formatNeeded = false;
+                }
             } else {
                 throw new UnsupportedOperationException(value.getClass()
                     + " is not supported.");
