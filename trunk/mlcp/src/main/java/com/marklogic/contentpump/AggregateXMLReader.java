@@ -69,10 +69,6 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         XMLInputFactory f = XMLInputFactory.newInstance();
         try {
             xmlSR = f.createXMLStreamReader(fileIn);
-            // skip the root element
-            xmlSR.next();
-            //copy the namespaces declared in root element
-            copyNameSpaceDecl();
         } catch (XMLStreamException e) {
             e.printStackTrace();
         }
@@ -302,9 +298,8 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
                 switch (eventType) {
                 case XMLStreamConstants.START_ELEMENT:
                     if (startOfRecord) {
-                        // this is the start of the record
-                        // by definition, we are at the start of an element
-                        processStartElement();
+                        // this is the start of the root, only copy namespaces
+                        copyNameSpaceDecl();
                         startOfRecord = false;
                         continue;
                     }
@@ -317,6 +312,9 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
                     write("<![CDATA[");
                     write(xmlSR.getText());
                     write("]]>");
+                    break;
+                case XMLStreamConstants.SPACE:
+                    write(xmlSR.getText());
                     break;
                 case XMLStreamConstants.ENTITY_REFERENCE:
                     write("&");
