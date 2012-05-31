@@ -13,6 +13,8 @@ CLASSPATH=$CLASSPATH:$LIB_HOME/marklogic-xcc-5.1.jar
 CLASSPATH=$CLASSPATH:$LIB_HOME/hadoop-core-0.20.2.jar
 CLASSPATH=$CLASSPATH:$LIB_HOME/marklogic-contentpump-1.0.jar
 CLASSPATH=$CLASSPATH:$LIB_HOME/commons-codec-1.3.jar
+CLASSPATH=$CLASSPATH:$LIB_HOME/xstream-1.4.2.jar
+CLASSPATH=$CLASSPATH:$LIB_HOME/commons-modeler-2.0.1.jar
 #echo $CLASSPATH
 
 java -cp $CLASSPATH $VMARGS com.marklogic.contentpump.ContentPump $*
