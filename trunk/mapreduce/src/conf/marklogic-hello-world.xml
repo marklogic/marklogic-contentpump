@@ -25,6 +25,10 @@
     	<value>basic</value>
     </property>
     <property>
+        <name>mapreduce.marklogic.input.valueclass</name>
+        <value>com.marklogic.mapreduce.MarkLogicNode</value>
+    </property>
+    <property>
         <name>mapreduce.marklogic.output.username</name>
         <value>username</value>
     </property>

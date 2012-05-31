@@ -29,6 +29,10 @@
         <value>true</value>
     </property>
     <property>
+        <name>mapreduce.marklogic.input.valueclass</name>
+        <value>com.marklogic.mapreduce.MarkLogicNode</value>
+    </property>
+    <property>
         <name>mapred.reduce.tasks</name>
         <value>0</value>
     </property>
