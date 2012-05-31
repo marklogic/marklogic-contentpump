@@ -32,6 +32,8 @@ import com.marklogic.xcc.types.XdmDocument;
 import com.marklogic.xcc.types.XdmElement;
 import com.marklogic.xcc.types.XdmText;
 import com.marklogic.xcc.types.impl.AttributeImpl;
+import com.marklogic.xcc.types.impl.DocumentImpl;
+import com.marklogic.xcc.types.impl.TextImpl;
 
 /**
  * A record returned by MarkLogic, used to represent an XML node.  Currently 
@@ -72,6 +74,22 @@ public class MarkLogicNode implements Writable {
         set(item);
     }
     
+    public MarkLogicNode(String content, ContentType contentType) {
+        try {
+            if (contentType == ContentType.TEXT) {
+                node = new TextImpl(content).asW3cText();
+            } else if (contentType == ContentType.XML) {
+                node = new DocumentImpl(content).asW3cDocument();
+            }
+        } catch (IOException e) {
+            LOG.error(e);
+        } catch (SAXException e) {
+            LOG.error("error parsing result", e);
+        } catch (ParserConfigurationException e) {
+            LOG.error(e);
+        }
+    }
+
     public Node get() {
         return node;
     }

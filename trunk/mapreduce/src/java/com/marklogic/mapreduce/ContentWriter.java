@@ -160,7 +160,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         } 
         String contentTypeStr = conf.get(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
         ContentType contentType = ContentType.valueOf(contentTypeStr);
-        if (contentType == ContentType.TYPE_OF_FIRST_VALUE) {
+        if (contentType == ContentType.UNKNOWN) {
             formatNeeded = true;
         } else {
             options.setFormat(contentType.getDocumentFormat());

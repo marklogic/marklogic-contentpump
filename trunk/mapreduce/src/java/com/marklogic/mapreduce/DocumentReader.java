@@ -33,7 +33,7 @@ extends MarkLogicRecordReader<DocumentURI, VALUEIN> {
     
     public DocumentReader(Configuration conf) {
         super(conf);
-        valueClass = conf.getClass(INPUT_VALUE_CLASS, MarkLogicNode.class, 
+        valueClass = conf.getClass(INPUT_VALUE_CLASS, MarkLogicDocument.class, 
                 Writable.class);
     }
 

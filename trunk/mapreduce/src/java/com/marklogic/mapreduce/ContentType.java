@@ -42,17 +42,16 @@ public enum ContentType {
             return BytesWritable.class;
         }
     },
-    TYPE_OF_FIRST_VALUE {
+    UNKNOWN {
         @Override
         public DocumentFormat getDocumentFormat() {
-            return null;
+            return DocumentFormat.NONE;
         }
 
         @Override
         public Class<? extends Writable> getWritableClass() {
-            return null;
-        }
-        
+            return MarkLogicDocument.class;
+        }       
     };
     
     public abstract DocumentFormat getDocumentFormat();
@@ -66,9 +65,24 @@ public enum ContentType {
             return TEXT;
         } else if (typeName.equalsIgnoreCase(BINARY.name())) {
             return BINARY;
+        } else if (typeName.equals(UNKNOWN)) {
+            return UNKNOWN;
         } else {
             throw new IllegalArgumentException("Unknown content type: " + 
                     typeName);
         }
+    }
+
+    public static ContentType valueOf(int ordinal) {
+        if (ordinal == 0) {
+            return XML;
+        } else if (ordinal == 1) {
+            return TEXT;
+        } else if (ordinal == 2) {
+            return BINARY;
+        } else if (ordinal == 3) {
+            return UNKNOWN;
+        }
+        return null;
     }
 }
