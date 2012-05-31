@@ -44,12 +44,14 @@ public class DocumentMapper<VALUE> extends
         sb.append(uri.toString());
         String[] uriReplace = conf
             .getStrings(ConfigConstants.CONF_OUTPUT_URI_REPLACE);
-        if (uriReplace != null) {
+        int i=0;
+        while (uriReplace != null && i < uriReplace.length) {
             int fromIndex = 0;
-            while ((fromIndex = sb.indexOf(uriReplace[0], fromIndex)) != -1) {
+            while ((fromIndex = sb.indexOf(uriReplace[i], fromIndex)) != -1) {
                 sb.replace(fromIndex, fromIndex + uriReplace[0].length(),
-                    uriReplace[1]);
+                    uriReplace[i + 1]);
             }
+            i += 2;
         }
         uri.setUri(sb.toString());
         context.write(uri, fileContent);
