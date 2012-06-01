@@ -67,9 +67,12 @@ public class MarkLogicDocument implements Writable {
         }
     }
     
-    public void setXMLFromBytes(byte[] bytes) {
-        content = bytes;
-        contentType = ContentType.XML;
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+    
+    public void setContentType(ContentType type) {
+        contentType = type;
     }
 
     @Override
