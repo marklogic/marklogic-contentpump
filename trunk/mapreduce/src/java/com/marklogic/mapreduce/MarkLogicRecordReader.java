@@ -44,7 +44,7 @@ implements MarkLogicConstants {
     /**
      * Input split for this record reader
      */
-    private MarkLogicInputSplit mlSplit;
+    protected MarkLogicInputSplit mlSplit;
     /**
      * Count of records fetched
      */
@@ -52,7 +52,7 @@ implements MarkLogicConstants {
     /**
      * Session to the MarkLogic server.
      */
-    private Session session;
+    protected Session session;
     /**
      * ResultSequence from the MarkLogic server.
      */
@@ -60,11 +60,11 @@ implements MarkLogicConstants {
     /**
      * Job configuration.
      */
-    private Configuration conf;
+    protected Configuration conf;
     /**
      * Total expected count of the records in a split.
      */
-    private float length;
+    protected float length;
     
     public MarkLogicRecordReader(Configuration conf) {
         this.conf = conf;

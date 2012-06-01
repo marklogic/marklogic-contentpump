@@ -13,6 +13,7 @@ import org.apache.hadoop.io.WritableUtils;
 
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.types.ValueType;
+import com.marklogic.xcc.types.XdmBinary;
 
 /**
  * Captures any type of MarkLogic documents.
@@ -52,12 +53,14 @@ public class MarkLogicDocument implements Writable {
     }
     
     public void set(ResultItem item) {
-        content = item.asString().getBytes();
         if (item.getValueType() == ValueType.DOCUMENT) {
+            content = item.asString().getBytes();
             contentType = ContentType.XML;
         } else if (item.getValueType() == ValueType.TEXT) {
+            content = item.asString().getBytes();
             contentType = ContentType.TEXT;
         } else if (item.getValueType() == ValueType.BINARY) {
+            content = ((XdmBinary)item.getItem()).asBinaryData();
             contentType = ContentType.BINARY;
         } else {
             contentType = ContentType.UNKNOWN;
