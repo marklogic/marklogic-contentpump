@@ -115,6 +115,7 @@ public class ContentPump implements ConfigConstants {
             LOG.debug("Running in: " + (distributed ? "distributed " : "local")
                 + "mode");
         }
+        conf.set(CONF_MODE, distributed ? MODE_DISTRIBUTED : MODE_LOCAL);
         
         if (distributed) {
             File hdHomeDir= new File(hadoopHome);

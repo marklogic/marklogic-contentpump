@@ -32,6 +32,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.MarkLogicInputSplit;
@@ -304,7 +305,8 @@ public class MarkLogicReaderForExportArchive extends MarkLogicRecordReader <Docu
                 }
                 
                 byte[] metacontent = metadata.toXML().getBytes();
-                currentValue.setXMLFromBytes(metacontent);
+                currentValue.setContent(metacontent);
+                currentValue.setContentType(ContentType.XML);
                 
             } else {
                 throw new IOException ("incorrect type");

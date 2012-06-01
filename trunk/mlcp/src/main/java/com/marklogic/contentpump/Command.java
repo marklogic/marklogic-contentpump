@@ -249,9 +249,6 @@ public enum Command implements ConfigConstants {
 
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
-            if (cmdline.hasOption(MODE)) {
-                conf.set(CONF_MODE, MODE_LOCAL);
-            }
             if (cmdline.hasOption(DOCUMENT_TYPE)) {
                 String documentType = cmdline.getOptionValue(DOCUMENT_TYPE);
                 conf.set(MarkLogicConstants.CONTENT_TYPE,
