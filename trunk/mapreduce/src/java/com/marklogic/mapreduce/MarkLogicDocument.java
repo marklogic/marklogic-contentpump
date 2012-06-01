@@ -66,6 +66,11 @@ public class MarkLogicDocument implements Writable {
             contentType = ContentType.UNKNOWN;
         }
     }
+    
+    public void setXMLFromBytes(byte[] bytes) {
+        content = bytes;
+        contentType = ContentType.XML;
+    }
 
     @Override
     public void readFields(DataInput in) throws IOException {
