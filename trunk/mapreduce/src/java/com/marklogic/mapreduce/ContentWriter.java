@@ -228,11 +228,19 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             } else if (value instanceof CustomContent) {
                 content = ((CustomContent) value).getContent(conf, options, uri);
                 batchSize = 1;
-            } else if (value instanceof SerializedXML) {
+            } else if (value instanceof MarkLogicDocument) {
+                MarkLogicDocument doc = (MarkLogicDocument)value;
+                if (doc.getContentType() == ContentType.BINARY) {
+                    content = ContentFactory.newContent(uri, 
+                              doc.getContentAsByteArray(), options);
+                } else {
+                    content = ContentFactory.newContent(uri, 
+                              doc.getContentAsText().toString(), options);
+                } 
                 content = ContentFactory.newContent(uri, 
-                        ((SerializedXML)value).toString(), options);
+                        ((MarkLogicDocument)value).toString(), options);
                 if (formatNeeded) {
-                    options.setFormat(DocumentFormat.XML);
+                    options.setFormat(doc.getContentType().getDocumentFormat());
                     formatNeeded = false;
                 }
             } else {
