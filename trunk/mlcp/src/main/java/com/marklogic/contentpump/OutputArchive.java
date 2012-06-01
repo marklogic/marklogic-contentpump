@@ -62,6 +62,9 @@ public class OutputArchive {
 
         Path zpath = new Path(file);
         FileSystem fs = zpath.getFileSystem(conf);
+        if(fs.exists(zpath)) {
+            throw new IOException(zpath + " already exists.");
+        }
         FSDataOutputStream out = fs.create(zpath, false);
 
         outputStream = new ZipOutputStream(out);
