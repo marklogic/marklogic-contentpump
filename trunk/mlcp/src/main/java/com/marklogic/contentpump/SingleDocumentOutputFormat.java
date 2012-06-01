@@ -21,7 +21,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -31,7 +30,6 @@ import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
-import com.marklogic.mapreduce.MarkLogicNode;
 
 /**
  * Write a document from MarkLogic Server to file system as a separate file. 
@@ -44,7 +42,6 @@ public class SingleDocumentOutputFormat extends FileOutputFormat<DocumentURI, Ma
     @Override
     public RecordWriter<DocumentURI, MarkLogicDocument> getRecordWriter(
         TaskAttemptContext contex) throws IOException, InterruptedException {
-        // TODO Auto-generated method stub
         Configuration conf = contex.getConfiguration();
         Path path = new Path(conf.get(MarkLogicConstants.OUTPUT_DIRECTORY));
         return new SingleDocumentWriter(path, conf);
@@ -82,16 +79,6 @@ class SingleDocumentWriter extends RecordWriter<DocumentURI, MarkLogicDocument> 
         FileSystem fs = path.getFileSystem(conf);
         FSDataOutputStream out = fs.create(path, false);
         System.out.println("writing to: " + path);
-//        if(content instanceof BytesWritable) {
-//            ((BytesWritable)content).write(out);
-//        } else if (content instanceof MarkLogicNode) {
-//            String s = ((MarkLogicNode)content).toString();
-//            out.write(s.getBytes());
-//        } else if (content instanceof Text) {
-//            ((Text)content).write(out);
-//        }
-//        out.write(content.getBytes(), 0, content.getLength());
-//        out.flush();
         ContentType type = content.getContentType();
         if(ContentType.BINARY.equals(type)){
             out.write(content.getContentAsByteArray());

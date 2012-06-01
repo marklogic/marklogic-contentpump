@@ -21,8 +21,6 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.mapreduce.DocumentInputFormat;
-import com.marklogic.mapreduce.KeyValueInputFormat;
-import com.marklogic.mapreduce.MarkLogicInputFormat;
 
 public enum ExportOutputType {
     DOCUMENT {
@@ -34,16 +32,16 @@ public enum ExportOutputType {
         @Override
         public Class<? extends FileOutputFormat> getOutputFormatClass(
             boolean compressed) {
-            // TODO Auto-generated method stub
-            return SingleDocumentOutputFormat.class;
+            if (compressed) {
+                return CompressedDocumentOutputFormat.class;
+            } else {
+                return SingleDocumentOutputFormat.class;
+            }
         }
 
         @Override
         public Class<? extends InputFormat> getInputFormatClass() {
-            // TODO Auto-generated method stub
-//            return MarkLogicInputFormatForExport.class;
             return DocumentInputFormat.class;
-//            return KeyValueInputFormat.class;
         }
     },
     ARCHIVE {
@@ -55,13 +53,11 @@ public enum ExportOutputType {
         @Override
         public Class<? extends FileOutputFormat> getOutputFormatClass(
             boolean compressed) {
-            // TODO Auto-generated method stub
             return ArchiveOutputFormat.class;
         }
 
         @Override
         public Class<? extends InputFormat> getInputFormatClass() {
-            // TODO Auto-generated method stub
             return MarkLogicInputFormatForExportArchive.class;
         }
     };
