@@ -15,8 +15,17 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.IOException;
+
+import org.apache.hadoop.mapreduce.Mapper;
+
 import com.marklogic.mapreduce.DocumentURI;
 
-public interface SequenceFileKey {
-    DocumentURI getDocumentURI();
+public class ExportMapper<VALUE> extends
+    Mapper<DocumentURI, VALUE, DocumentURI, VALUE> {
+    public void map(DocumentURI uri, VALUE fileContent, Context context)
+        throws IOException, InterruptedException {
+        uri.setUri(uri.toString());
+        context.write(uri, fileContent);
+    }
 }

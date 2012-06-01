@@ -190,9 +190,7 @@ public class LocalJobRunner implements ConfigConstants {
             mapper.run(mapperContext);
             reader.close();
             writer.close(mapperContext);
-//            context.getConfiguration().set(MarkLogicConstants.OUTPUT_COLLECTION, mapperContext.getConfiguration().get(MarkLogicConstants.OUTPUT_COLLECTION));
             committer.commitTask(context);
-//            conf.set(MarkLogicConstants.OUTPUT_COLLECTION, mapperContext.getConfiguration().get(MarkLogicConstants.OUTPUT_COLLECTION));
             return null;
         }      
     }

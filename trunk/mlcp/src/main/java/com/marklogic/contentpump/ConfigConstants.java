@@ -91,11 +91,18 @@ public interface ConfigConstants {
     static final String COPY_PERMISSIONS = "copy_permissions";
     static final String COPY_PROPERTIES = "copy_properties";
     static final String COPY_QUALITY = "copy_quality";
+    static final String DEFAULT_COPY_COLLECTIONS = "true";
+    static final String DEFAULT_COPY_PERMISSIONS = "true";
+    static final String DEFAULT_COPY_PROPERTIES = "true";
+    static final String DEFAULT_COPY_QUALITY = "true";
     static final String DOCUMENT_FILTER = "document_filter";
+    static final String DEFAULT_DOCUMENT_FILTER = "fn:collection()";
     static final String DOCUMENT_NAMESPACE = "document_namespace";
     static final String OUTPUT_TYPE = "output_type";
+    static final String DEFAULT_OUTPUT_TYPE = "document";
     static final String OUTPUT_FILE_PATH = "output_file_path";
     static final String OUTPUT_COMPRESS = "compress";
+    static final String DEFAULT_OUTPUT_COMPRESS = "false";
     static final String OUTPUT_INDENTED = "indented";
     static final String INPUT_USERNAME = "input_username";
     static final String INPUT_PASSWORD = "input_password";
@@ -106,8 +113,10 @@ public interface ConfigConstants {
     static final String OUTPUT_HOST = "output_host";
     static final String OUTPUT_PORT = "output_port";   
     static final String DELIMITER = "delimiter";
+    static final String DEFAULT_DELIMITER = ",";
     //TODO: merge with "aggregate_uri_id" ?? 
     static final String DELIMITED_URI_ID = "delimited_uri_id";
+
     
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
@@ -122,7 +131,7 @@ public interface ConfigConstants {
         "mapreduce.marklogic.aggregate.recordnamespace";
     static final String CONF_DELIMITER = 
         "mapreduce.marklogic.delimited.delimiter";
-    static final String CONF_DEFAULT_DELIMITER = ",";
+
     static final String CONF_DELIMITED_URI_ID = 
         "mapreduce.marklogic.delimited.uriid";
     static final String CONF_OUTPUT_URI_REPLACE = 
@@ -144,4 +153,13 @@ public interface ConfigConstants {
         "mapreduce.marklogic.input.sequencefile.valueclass";
     static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE =
         "mapreduce.marklogic.input.sequencefile.valuetype";
+    static final String CONF_DOCUMENT_FILTER = 
+        "mapreduce.marklogic.document.filter";
+    static final String CONF_OUTPUT_TYPE = "mapreduce.marklogic.output.type";
+    static final String CONF_OUTPUT_COMPRESS = "mapreduce.marklogic.output.compress";
+    static final String CONF_OUTPUT_INDENTED = "mapreduce.marklogic.output.indented";
+    static final String CONF_COPY_COLLECTIONS = "mapreduce.marklogic.copycollections";
+    static final String CONF_COPY_PERMISSIONS = "mapreduce.marklogic.copypermissions";
+    static final String CONF_COPY_PROPERTIES = "mapreduce.marklogic.copyproperties";
+    static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
 }
