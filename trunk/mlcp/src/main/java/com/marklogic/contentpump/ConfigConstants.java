@@ -54,6 +54,8 @@ public interface ConfigConstants {
         "input_metadata_optional";
     static final String INPUT_FILE_TYPE = "input_file_type";
     static final String INPUT_FILE_TYPE_DEFAULT = "documents";
+    static final String INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "input_archive_allow_empty_metadata";
+    static final String DEFAULT_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "false";
     static final String INPUT_COMPRESSED = "input_compressed";
     static final boolean DEFAULT_INPUT_COMPRESSED = false;
     static final String INPUT_COMPRESSION_CODEC = "input_compression_codec";
@@ -73,11 +75,15 @@ public interface ConfigConstants {
     static final String OUTPUT_PERMISSIONS = "output_permissions";
     static final String OUTPUT_QUALITY = "output_quality";
     static final String OUTPUT_CLEANDIR = "output_cleandir";
+    static final String DEFAULT_OUTPUT_CLEANDIR = "false";
     static final String BATCH_SIZE = "batch_size";
+    static final int DEFAULT_BATCH_SIZE = 100;
     static final String TRANSACTION_SIZE = "transaction_size";
+    static final int DEFAULT_TRANSACTION_SIZE = 10;
     static final String STREAMING = "streaming";
     static final String NAMESPACE = "namespace";
     static final String DOCUMENT_TYPE = "document_type";
+    static final String DEFAULT_DOCUMENT_TYPE = "XML";
     static final String OUTPUT_IDNAME = "output_idname";
     static final String OUTPUT_LANGUAGE = "output_language";
     static final String OUTPUT_URI_REPLACE = "output_uri_replace";
@@ -162,4 +168,6 @@ public interface ConfigConstants {
     static final String CONF_COPY_PERMISSIONS = "mapreduce.marklogic.copypermissions";
     static final String CONF_COPY_PROPERTIES = "mapreduce.marklogic.copyproperties";
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
+    static final String CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = 
+        "mapreduce.marklogic.input.archive.allowemptymetadata";
 }
