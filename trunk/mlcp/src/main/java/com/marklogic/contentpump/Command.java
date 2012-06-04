@@ -162,6 +162,10 @@ public enum Command implements ConfigConstants {
                 .withDescription("Whether to clean dir before output.")
                 .create(OUTPUT_CLEANDIR);
             options.addOption(outputCleanDir);
+            Option outputDir = OptionBuilder.withArgName(OUTPUT_DIRECTORY)
+                .hasArg().withDescription("Output Directory in MarkLogic.")
+                .create(OUTPUT_DIRECTORY);
+            options.addOption(outputDir);
             Option batchSize = OptionBuilder.withArgName(BATCH_SIZE).hasArg()
                 .withDescription("Batch size.").create(BATCH_SIZE);
             options.addOption(batchSize);
@@ -249,11 +253,16 @@ public enum Command implements ConfigConstants {
 
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
-            if (cmdline.hasOption(DOCUMENT_TYPE)) {
-                String documentType = cmdline.getOptionValue(DOCUMENT_TYPE);
-                conf.set(MarkLogicConstants.CONTENT_TYPE,
-                    documentType.toUpperCase());
-            }
+            applyCopyConfigOptions(conf, cmdline);
+            String allowEmptyMeta = cmdline.getOptionValue(
+                INPUT_ARCHIVE_ALLOW_EMPTY_METADATA,
+                DEFAULT_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA);
+            conf.set(CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA, allowEmptyMeta);
+
+            String documentType = cmdline.getOptionValue(DOCUMENT_TYPE,
+                DEFAULT_DOCUMENT_TYPE);
+            conf.set(MarkLogicConstants.CONTENT_TYPE,
+                documentType.toUpperCase());
             if (cmdline.hasOption(INPUT_COMPRESSION_CODEC)) {
                 String codec = cmdline.getOptionValue(INPUT_COMPRESSION_CODEC);
                 conf.set(CONF_INPUT_COMPRESSION_CODEC, codec.toUpperCase());
@@ -290,7 +299,8 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(OUTPUT_DIRECTORY)) {
                 String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
-                conf.set(CONF_OUTPUT_DIRECTORY, outDir);
+                conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, outDir);
+//                conf.set(CONF_OUTPUT_DIRECTORY, outDir);
             }
             if (cmdline.hasOption(OUTPUT_URI_REPLACE)) {
                 String[] uriReplace = cmdline
@@ -316,11 +326,10 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.OUTPUT_COLLECTION,
                     collectionsString);
             }
-            if (cmdline.hasOption(OUTPUT_FILENAME_AS_COLLECTION)) {
-                String fileAsCollection = cmdline
-                    .getOptionValue(OUTPUT_FILENAME_AS_COLLECTION);
-                conf.set(CONF_OUTPUT_FILENAME_AS_COLLECTION, fileAsCollection);
-            }
+            String fileAsCollection = cmdline.getOptionValue(
+                OUTPUT_FILENAME_AS_COLLECTION,
+                DEFAULT_OUTPUT_FILENAME_AS_COLLECTION);
+            conf.set(CONF_OUTPUT_FILENAME_AS_COLLECTION, fileAsCollection);
             if (cmdline.hasOption(OUTPUT_PERMISSIONS)) {
                 String permissionString = cmdline
                     .getOptionValue(OUTPUT_PERMISSIONS);
@@ -331,21 +340,18 @@ public enum Command implements ConfigConstants {
                 String quantity = cmdline.getOptionValue(OUTPUT_QUALITY);
                 conf.set(MarkLogicConstants.OUTPUT_QUALITY, quantity);
             }
-            if (cmdline.hasOption(OUTPUT_CLEANDIR)) {
-                String cleandir = cmdline.getOptionValue(OUTPUT_CLEANDIR);
-                conf.set(MarkLogicConstants.OUTPUT_CLEAN_DIR, cleandir);
-            }
-            if (cmdline.hasOption(BATCH_SIZE)) {
-                String batchSize = cmdline.getOptionValue(BATCH_SIZE);
-                conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
-            }
-            if (cmdline.hasOption(TRANSACTION_SIZE)) {
-                String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
-                conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
-            }
+            String cleandir = cmdline.getOptionValue(OUTPUT_CLEANDIR,
+                DEFAULT_OUTPUT_CLEANDIR);
+            conf.set(MarkLogicConstants.OUTPUT_CLEAN_DIR, cleandir);
+            String batchSize = cmdline.getOptionValue(BATCH_SIZE,
+                String.valueOf(DEFAULT_BATCH_SIZE));
+            conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
+            String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE,
+                String.valueOf(DEFAULT_TRANSACTION_SIZE));
+            conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
             if (cmdline.hasOption(NAMESPACE)) {
-                String txnSize = cmdline.getOptionValue(NAMESPACE);
-                conf.set(MarkLogicConstants.OUTPUT_NAMESPACE, txnSize);
+                String ns = cmdline.getOptionValue(NAMESPACE);
+                conf.set(MarkLogicConstants.OUTPUT_NAMESPACE, ns);
             }
             if (cmdline.hasOption(OUTPUT_LANGUAGE)) {
                 String language = cmdline.getOptionValue(OUTPUT_LANGUAGE);
@@ -371,14 +377,11 @@ public enum Command implements ConfigConstants {
                 String port = cmdline.getOptionValue(PORT);
                 conf.set(MarkLogicConstants.OUTPUT_PORT, port);
             }
-            if (cmdline.hasOption(XML_REPAIR_LEVEL)) {
-                String repairLevel = cmdline.getOptionValue(XML_REPAIR_LEVEL);
-                conf.set(MarkLogicConstants.OUTPUT_XML_REPAIR_LEVEL,
-                    repairLevel);
-            } else {
-                conf.set(MarkLogicConstants.OUTPUT_XML_REPAIR_LEVEL,
-                    MarkLogicConstants.DEFAULT_OUTPUT_XML_REPAIR_LEVEL);
-            }
+
+            String repairLevel = cmdline.getOptionValue(XML_REPAIR_LEVEL,
+                MarkLogicConstants.DEFAULT_OUTPUT_XML_REPAIR_LEVEL);
+            conf.set(MarkLogicConstants.OUTPUT_XML_REPAIR_LEVEL, repairLevel);
+
             if (cmdline.hasOption(INPUT_SEQUENCEFILE_KEY_CLASS)) {
                 String keyClass = cmdline
                     .getOptionValue(INPUT_SEQUENCEFILE_KEY_CLASS);
@@ -391,7 +394,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(INPUT_SEQUENCEFILE_VALUE_TYPE)) {
                 String valueType = cmdline
-                    .getOptionValue(INPUT_SEQUENCEFILE_VALUE_TYPE);
+                    .getOptionValue(INPUT_SEQUENCEFILE_VALUE_TYPE, DEFAULT_SEQUENCEFILE_VALUE_TYPE);
                 conf.set(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE,
                     valueType.toUpperCase());
                 if (valueType
@@ -404,6 +407,7 @@ public enum Command implements ConfigConstants {
                 conf.set(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE,
                     DEFAULT_SEQUENCEFILE_VALUE_TYPE);
             }
+
         }
 
         @Override
@@ -492,21 +496,23 @@ public enum Command implements ConfigConstants {
             job.setOutputKeyClass(DocumentURI.class);
 //            job.setOutputValueClass(BytesWritable.class);
 
-            String path = conf.get(MarkLogicConstants.OUTPUT_DIRECTORY);
+                String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
+//                conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, path);
+//            }
+//            String path = conf.get(MarkLogicConstants.OUTPUT_DIRECTORY);
             FileOutputFormat.setOutputPath(job, new Path(path));
             return job;
         }
 
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
+            applyCopyConfigOptions(conf, cmdline);
+            
             if (cmdline.hasOption(OUTPUT_TYPE)) {
                 String outputType = cmdline.getOptionValue(OUTPUT_TYPE);
                 conf.set(CONF_OUTPUT_TYPE, outputType);
             }
-            if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
-                String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
-                conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, path);
-            }
+
             if (cmdline.hasOption(DOCUMENT_NAMESPACE)) {
                 String ns = cmdline.getOptionValue(DOCUMENT_NAMESPACE);
                 conf.set(MarkLogicConstants.PATH_NAMESPACE, ns);
@@ -535,26 +541,7 @@ public enum Command implements ConfigConstants {
                 String pswd = cmdline.getOptionValue(PASSWORD);
                 conf.set(MarkLogicConstants.INPUT_PASSWORD, pswd);
             }
-            if (cmdline.hasOption(COPY_COLLECTIONS)) {
-                String c = cmdline.getOptionValue(COPY_COLLECTIONS,
-                    DEFAULT_COPY_COLLECTIONS);
-                conf.set(CONF_COPY_COLLECTIONS, c);
-            }
-            if (cmdline.hasOption(COPY_PERMISSIONS)) {
-                String c = cmdline.getOptionValue(COPY_PERMISSIONS,
-                    DEFAULT_COPY_PERMISSIONS);
-                conf.set(CONF_COPY_PERMISSIONS, c);
-            }
-            if (cmdline.hasOption(COPY_PROPERTIES)) {
-                String c = cmdline.getOptionValue(COPY_PROPERTIES,
-                    DEFAULT_COPY_PROPERTIES);
-                conf.set(CONF_COPY_PROPERTIES, c);
-            }
-            if (cmdline.hasOption(COPY_QUALITY)) {
-                String c = cmdline.getOptionValue(COPY_QUALITY,
-                    DEFAULT_COPY_QUALITY);
-                conf.set(CONF_COPY_QUALITY, c);
-            }
+            
             if (cmdline.hasOption(DOCUMENT_FILTER)) {
                 String c = cmdline.getOptionValue(DOCUMENT_FILTER,
                     DEFAULT_DOCUMENT_FILTER);
@@ -564,6 +551,7 @@ public enum Command implements ConfigConstants {
                 String c = cmdline.getOptionValue(DOCUMENT_NAMESPACE);
                 conf.set(MarkLogicConstants.PATH_NAMESPACE, c);
             }
+            
         }
 
         @Override
@@ -641,6 +629,7 @@ public enum Command implements ConfigConstants {
      */
     public abstract void applyConfigOptions(Configuration conf,
         CommandLine cmdline);
+    
 
     static void configCommonOptions(Options options) {
         Option mode = OptionBuilder
@@ -695,6 +684,29 @@ public enum Command implements ConfigConstants {
         Option cpqt = OptionBuilder.withArgName(COPY_QUALITY).hasArg()
             .withDescription("Copy quality.").create(COPY_QUALITY);
         options.addOption(cpqt);
+    }
+    
+    static void applyCopyConfigOptions(Configuration conf, CommandLine cmdline) {
+        if (cmdline.hasOption(COPY_COLLECTIONS)) {
+            String c = cmdline.getOptionValue(COPY_COLLECTIONS,
+                DEFAULT_COPY_COLLECTIONS);
+            conf.set(CONF_COPY_COLLECTIONS, c);
+        }
+        if (cmdline.hasOption(COPY_PERMISSIONS)) {
+            String c = cmdline.getOptionValue(COPY_PERMISSIONS,
+                DEFAULT_COPY_PERMISSIONS);
+            conf.set(CONF_COPY_PERMISSIONS, c);
+        }
+        if (cmdline.hasOption(COPY_PROPERTIES)) {
+            String c = cmdline.getOptionValue(COPY_PROPERTIES,
+                DEFAULT_COPY_PROPERTIES);
+            conf.set(CONF_COPY_PROPERTIES, c);
+        }
+        if (cmdline.hasOption(COPY_QUALITY)) {
+            String c = cmdline.getOptionValue(COPY_QUALITY,
+                DEFAULT_COPY_QUALITY);
+            conf.set(CONF_COPY_QUALITY, c);
+        }
     }
 
     public abstract void printUsage();
