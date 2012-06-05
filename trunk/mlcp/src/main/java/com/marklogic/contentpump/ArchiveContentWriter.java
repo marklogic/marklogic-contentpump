@@ -248,7 +248,7 @@ public class ArchiveContentWriter<VALUE> extends
                     formatNeeded = false;
                 }
             } else {
-                throw new IOException("expecting CustomMarkLogicDocument");
+                throw new IOException("expecting MarkLogicDocumentWithMeta");
             }
             if (batchSize > 1) {
                 forestContents[fId][counts[fId]++] = content;

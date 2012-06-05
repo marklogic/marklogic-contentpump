@@ -24,13 +24,12 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
-import com.marklogic.mapreduce.CustomMarkLogicDocument;
 import com.marklogic.mapreduce.DocumentURI;
 
-public class ArchiveInputFormat extends FileInputFormat<DocumentURI, CustomMarkLogicDocument> {
+public class ArchiveInputFormat extends FileInputFormat<DocumentURI, MarkLogicDocumentWithMeta> {
 
     @Override
-    public RecordReader<DocumentURI, CustomMarkLogicDocument> createRecordReader(InputSplit split,
+    public RecordReader<DocumentURI, MarkLogicDocumentWithMeta> createRecordReader(InputSplit split,
         TaskAttemptContext context) throws IOException, InterruptedException {
         return (RecordReader)new ArchiveRecordReader();
     }
