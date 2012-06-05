@@ -53,9 +53,7 @@ public abstract class AbstractRecordReader<VALUEIN> extends
     }
 
     @Override
-    public void close() throws IOException {
-        throw new IOException("Not implemented in AbstractRecordReader.");
-    }
+    public abstract void close() throws IOException;
 
     @Override
     public DocumentURI getCurrentKey() throws IOException,
@@ -69,15 +67,12 @@ public abstract class AbstractRecordReader<VALUEIN> extends
     }
 
     @Override
-    public float getProgress() throws IOException, InterruptedException {
-        throw new InterruptedException("Not implemented in AbstractRecordReader.");
-    }
+    public abstract float getProgress() throws IOException,
+        InterruptedException;
 
     @Override
-    public void initialize(InputSplit arg0, TaskAttemptContext context)
-        throws IOException, InterruptedException {
-        throw new InterruptedException("Not implemented in AbstractRecordReader.");
-    }
+    public abstract void initialize(InputSplit arg0, TaskAttemptContext context)
+        throws IOException, InterruptedException;
 
     @SuppressWarnings("unchecked")
     protected void configFileNameAsCollection(Configuration conf, Path file) {
@@ -88,12 +83,12 @@ public abstract class AbstractRecordReader<VALUEIN> extends
             ConfigConstants.CONF_OUTPUT_FILENAME_AS_COLLECTION,
             ConfigConstants.DEFAULT_OUTPUT_FILENAME_AS_COLLECTION);
         if (isFileAsCollection.equalsIgnoreCase("true")) {
-            Writable cvalue = new ContentWithFileNameWritable<VALUEIN>(
-                (VALUEIN) value, file.getName());
             if (value instanceof ContentWithFileNameWritable) {
                 ((ContentWithFileNameWritable<VALUEIN>) value)
                     .setFileName(file.getName());
             } else {
+                Writable cvalue = new ContentWithFileNameWritable<VALUEIN>(
+                    (VALUEIN) value, file.getName());
                 value = (VALUEIN) cvalue;
             }
         }
@@ -114,8 +109,7 @@ public abstract class AbstractRecordReader<VALUEIN> extends
     }
 
     @Override
-    public boolean nextKeyValue() throws IOException, InterruptedException {
-        throw new InterruptedException("Not implemented in AbstractRecordReader.");
-    }
+    public abstract boolean nextKeyValue() throws IOException,
+        InterruptedException;
 
 }

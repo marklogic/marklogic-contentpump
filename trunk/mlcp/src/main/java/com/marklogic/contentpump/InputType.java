@@ -16,8 +16,10 @@
 package com.marklogic.contentpump;
 
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
+import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
 
 /**
@@ -42,6 +44,13 @@ public enum InputType {
         public Class<? extends Mapper> getMapperClass(ContentType contentType) {
             return DocumentMapper.class;
           }
+
+        @Override
+        public Class<? extends OutputFormat> getOutputFormatClass(
+            ContentType contentType) {
+            // TODO Auto-generated method stub
+            return ContentOutputFormat.class;
+        }
     },
     AGGREGATES {
         @Override
@@ -58,6 +67,13 @@ public enum InputType {
         public Class<? extends Mapper> getMapperClass(
                 ContentType contentType) {
             return DocumentMapper.class;
+        }
+
+        @Override
+        public Class<? extends OutputFormat> getOutputFormatClass(
+            ContentType contentType) {
+            // TODO Auto-generated method stub
+            return null;
         }
     },   
     DELIMITED_TEXT {
@@ -76,20 +92,33 @@ public enum InputType {
                 ContentType contentType) {
             return DocumentMapper.class;
         }
+
+        @Override
+        public Class<? extends OutputFormat> getOutputFormatClass(
+            ContentType contentType) {
+            // TODO Auto-generated method stub
+            return ContentOutputFormat.class;
+        }
     },
     ARCHIVE {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
                 ContentType contentType, boolean compressed) {
             // TODO Auto-generated method stub
-            return null;
+            return ArchiveInputFormat.class;
         }
 
         @Override
         public Class<? extends Mapper> getMapperClass(
                 ContentType contentType) {
             // TODO Auto-generated method stub
-            return null;
+            return DocumentMapper.class;
+        }
+        
+        public Class<? extends OutputFormat> getOutputFormatClass(
+                ContentType contentType) {
+            // TODO Auto-generated method stub
+            return ImportArchiveOutputFormat.class;
         }
     },
     SEQUENCEFILE {
@@ -104,6 +133,13 @@ public enum InputType {
         public Class<? extends Mapper> getMapperClass(
                 ContentType contentType) {
             return DocumentMapper.class;
+        }
+
+        @Override
+        public Class<? extends OutputFormat> getOutputFormatClass(
+            ContentType contentType) {
+            // TODO Auto-generated method stub
+            return ContentOutputFormat.class;
         }
         
     };
@@ -141,4 +177,7 @@ public enum InputType {
      */
     public abstract Class<? extends Mapper> getMapperClass(
             ContentType contentType);
+    
+    public abstract Class<? extends OutputFormat> getOutputFormatClass(
+        ContentType contentType);
 }

@@ -86,4 +86,12 @@ public class Utilities {
         }
         return rv.toString();
     }
+    
+    public static void validateURI(String uri) {
+        if (uri.isEmpty() || 
+            Character.isWhitespace(uri.charAt(0)) ||
+            Character.isWhitespace(uri.charAt(uri.length() - 1))) {
+            throw new IllegalStateException("Invalid URI Format: " + uri);
+        }
+    }
 }

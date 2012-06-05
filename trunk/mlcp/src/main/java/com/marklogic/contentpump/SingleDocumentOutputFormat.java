@@ -43,7 +43,8 @@ public class SingleDocumentOutputFormat extends FileOutputFormat<DocumentURI, Ma
     public RecordWriter<DocumentURI, MarkLogicDocument> getRecordWriter(
         TaskAttemptContext contex) throws IOException, InterruptedException {
         Configuration conf = contex.getConfiguration();
-        Path path = new Path(conf.get(MarkLogicConstants.OUTPUT_DIRECTORY));
+        String p = conf.get(ConfigConstants.CONF_OUTPUT_FILEPATH);
+        Path path = new Path(p);
         return new SingleDocumentWriter(path, conf);
     }
 
