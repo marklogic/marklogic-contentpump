@@ -19,7 +19,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
 
-public class MarkLogicDocumentWithMeta extends MarkLogicDocument {//implements CustomMarkLogicDocument{
+public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
     protected DocumentMetadata meta;
     
     public DocumentMetadata getMeta() {
