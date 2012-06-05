@@ -73,7 +73,7 @@ public enum InputType {
         public Class<? extends OutputFormat> getOutputFormatClass(
             ContentType contentType) {
             // TODO Auto-generated method stub
-            return null;
+            return ContentOutputFormat.class;
         }
     },   
     DELIMITED_TEXT {
