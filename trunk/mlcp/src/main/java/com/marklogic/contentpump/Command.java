@@ -27,7 +27,6 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
@@ -46,7 +45,8 @@ public enum Command implements ConfigConstants {
             configCommonOptions(options);
             configUserPswdHostPort(options);
             configCopyOptions(options);
-
+            configCommonOutputOptions(options);
+            
             Option inputFilePath = OptionBuilder
                 .withArgName(INPUT_FILE_PATH)
                 .hasArg()
@@ -123,49 +123,7 @@ public enum Command implements ConfigConstants {
                 .withDescription("Delimited uri id for delimited text.")
                 .create(DELIMITED_URI_ID);
             options.addOption(delimitedUri);
-            Option outputUriReplace = OptionBuilder
-                .withArgName(OUTPUT_URI_REPLACE).hasArg()
-                .withDescription("Replace URI in output.")
-                .create(OUTPUT_URI_REPLACE);
-            options.addOption(outputUriReplace);
-            Option outputUriPrefix = OptionBuilder
-                .withArgName(OUTPUT_URI_PREFIX).hasArg()
-                .withDescription("Prefix added to URI in output.")
-                .create(OUTPUT_URI_PREFIX);
-            options.addOption(outputUriPrefix);
-            Option outputUriSuffix = OptionBuilder
-                .withArgName(OUTPUT_URI_SUFFIX).hasArg()
-                .withDescription("Suffix added to URI in output.")
-                .create(OUTPUT_URI_SUFFIX);
-            options.addOption(outputUriSuffix);
-            Option outputFilenameCollection = OptionBuilder
-                .withArgName(OUTPUT_FILENAME_AS_COLLECTION).hasArg()
-                .withDescription("Filename as collection in output.")
-                .create(OUTPUT_FILENAME_AS_COLLECTION);
-            options.addOption(outputFilenameCollection);
-            Option outputCollections = OptionBuilder
-                .withArgName(OUTPUT_COLLECTIONS).hasArg()
-                .withDescription("Output collections in output.")
-                .create(OUTPUT_COLLECTIONS);
-            options.addOption(outputCollections);
-            Option outputPermissions = OptionBuilder
-                .withArgName(OUTPUT_PERMISSIONS).hasArg()
-                .withDescription("Output permissions in output.")
-                .create(OUTPUT_PERMISSIONS);
-            options.addOption(outputPermissions);
-            Option outputQuantity = OptionBuilder.withArgName(OUTPUT_QUALITY)
-                .hasArg().withDescription("Output quantity in output.")
-                .create(OUTPUT_QUALITY);
-            options.addOption(outputQuantity);
-            Option outputCleanDir = OptionBuilder.withArgName(OUTPUT_CLEANDIR)
-                .hasArg()
-                .withDescription("Whether to clean dir before output.")
-                .create(OUTPUT_CLEANDIR);
-            options.addOption(outputCleanDir);
-            Option outputDir = OptionBuilder.withArgName(OUTPUT_DIRECTORY)
-                .hasArg().withDescription("Output Directory in MarkLogic.")
-                .create(OUTPUT_DIRECTORY);
-            options.addOption(outputDir);
+            
             Option batchSize = OptionBuilder.withArgName(BATCH_SIZE).hasArg()
                 .withDescription("Batch size.").create(BATCH_SIZE);
             options.addOption(batchSize);
@@ -188,7 +146,20 @@ public enum Command implements ConfigConstants {
                 .hasArg().withDescription("Input file pattern.")
                 .create(INPUT_FILE_PATTERN);
             options.addOption(pattern);
-
+            Option outputCleanDir = OptionBuilder.withArgName(OUTPUT_CLEANDIR)
+                .hasArg()
+                .withDescription("Whether to clean dir before output.")
+                .create(OUTPUT_CLEANDIR);
+            options.addOption(outputCleanDir);
+            Option outputDir = OptionBuilder.withArgName(OUTPUT_DIRECTORY)
+                .hasArg().withDescription("Output Directory in MarkLogic.")
+                .create(OUTPUT_DIRECTORY);
+            options.addOption(outputDir);
+            Option outputFilenameCollection = OptionBuilder
+                .withArgName(OUTPUT_FILENAME_AS_COLLECTION).hasArg()
+                .withDescription("Filename as collection in output.")
+                .create(OUTPUT_FILENAME_AS_COLLECTION);
+            options.addOption(outputFilenameCollection);
             Option repairLevel = OptionBuilder.withArgName(XML_REPAIR_LEVEL)
                 .hasArg().withDescription("XML repair level.")
                 .create(XML_REPAIR_LEVEL);
@@ -209,6 +180,9 @@ public enum Command implements ConfigConstants {
                 .create(INPUT_SEQUENCEFILE_VALUE_TYPE);
             options.addOption(seqValueType);
             // TODO: complete
+            Option streaming = OptionBuilder.withArgName(STREAMING).hasArg()
+                .withDescription("Streaming").create(STREAMING);
+            options.addOption(streaming);
         }
 
         @Override
@@ -237,7 +211,6 @@ public enum Command implements ConfigConstants {
                 compressed));
 
             job.setMapperClass(type.getMapperClass(contentType));
-            //TODO for importing archive, need a new content output format
             job.setOutputFormatClass(type.getOutputFormatClass(contentType));
 
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
@@ -255,6 +228,8 @@ public enum Command implements ConfigConstants {
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyCopyConfigOptions(conf, cmdline);
+            applyCommonOutputConfigOptions(conf, cmdline);
+            
             String allowEmptyMeta = cmdline.getOptionValue(
                 INPUT_ARCHIVE_ALLOW_EMPTY_METADATA,
                 DEFAULT_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA);
@@ -270,11 +245,11 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
-                conf.set(CONF_MAX_SPLIT_SIZE, maxSize);
+                conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
             }
             if (cmdline.hasOption(MIN_SPLIT_SIZE)) {
-                String maxSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
-                conf.set(CONF_MIN_SPLIT_SIZE, maxSize);
+                String minSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
+                conf.set(CONF_MIN_SPLIT_SIZE, minSize);
             }
             if (cmdline.hasOption(AGGREGATE_URI_ID)) {
                 String uriId = cmdline.getOptionValue(AGGREGATE_URI_ID);
@@ -298,49 +273,16 @@ public enum Command implements ConfigConstants {
                 String delimId = cmdline.getOptionValue(DELIMITED_URI_ID);
                 conf.set(CONF_DELIMITED_URI_ID, delimId);
             }
-            if (cmdline.hasOption(OUTPUT_DIRECTORY)) {
-                String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
-                conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, outDir);
-//                conf.set(CONF_OUTPUT_DIRECTORY, outDir);
-            }
-            if (cmdline.hasOption(OUTPUT_URI_REPLACE)) {
-                String[] uriReplace = cmdline
-                    .getOptionValues(OUTPUT_URI_REPLACE);
-                if (uriReplace != null && uriReplace.length == 2) {
-                    LOG.error(OUTPUT_URI_REPLACE
-                        + "is not configured correctly.");
-                }
-                conf.setStrings(CONF_OUTPUT_URI_REPLACE, uriReplace);
-            }
-            if (cmdline.hasOption(OUTPUT_URI_PREFIX)) {
-                String outPrefix = cmdline.getOptionValue(OUTPUT_URI_PREFIX);
-                conf.set(CONF_OUTPUT_URI_PREFIX, outPrefix);
-            }
-            if (cmdline.hasOption(OUTPUT_URI_SUFFIX)) {
-                String outSuffix = cmdline.getOptionValue(OUTPUT_URI_SUFFIX);
-                conf.set(CONF_OUTPUT_URI_SUFFIX, outSuffix);
-            }
 
-            if (cmdline.hasOption(OUTPUT_COLLECTIONS)) {
-                String collectionsString = cmdline
-                    .getOptionValue(OUTPUT_COLLECTIONS);
-                conf.set(MarkLogicConstants.OUTPUT_COLLECTION,
-                    collectionsString);
-            }
             String fileAsCollection = cmdline.getOptionValue(
                 OUTPUT_FILENAME_AS_COLLECTION,
                 DEFAULT_OUTPUT_FILENAME_AS_COLLECTION);
             conf.set(CONF_OUTPUT_FILENAME_AS_COLLECTION, fileAsCollection);
-            if (cmdline.hasOption(OUTPUT_PERMISSIONS)) {
-                String permissionString = cmdline
-                    .getOptionValue(OUTPUT_PERMISSIONS);
-                conf.set(MarkLogicConstants.OUTPUT_PERMISSION,
-                    permissionString);
-            }
-            if (cmdline.hasOption(OUTPUT_QUALITY)) {
-                String quantity = cmdline.getOptionValue(OUTPUT_QUALITY);
-                conf.set(MarkLogicConstants.OUTPUT_QUALITY, quantity);
-            }
+
+            if (cmdline.hasOption(OUTPUT_DIRECTORY)) {
+                String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
+                conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, outDir);
+            }            
             String cleandir = cmdline.getOptionValue(OUTPUT_CLEANDIR,
                 DEFAULT_OUTPUT_CLEANDIR);
             conf.set(MarkLogicConstants.OUTPUT_CLEAN_DIR, cleandir);
@@ -424,7 +366,8 @@ public enum Command implements ConfigConstants {
             configCommonOptions(options);
             configUserPswdHostPort(options);
             configCopyOptions(options);
-
+            configDocumentFilteringOptions(options);
+            
             Option outputType = OptionBuilder.withArgName(OUTPUT_TYPE)
                 .hasArg().withDescription("export output type")
                 .create(OUTPUT_TYPE);
@@ -444,15 +387,7 @@ public enum Command implements ConfigConstants {
                 .withDescription("Whether to pretty indent XML elements")
                 .create(OUTPUT_INDENTED);
             options.addOption(exportIndented);
-            Option filter = OptionBuilder.withArgName(DOCUMENT_FILTER)
-                .hasArg()
-                .withDescription("Path expression used to retrieve records ")
-                .create(DOCUMENT_FILTER);
-            options.addOption(filter);
-            Option ns = OptionBuilder.withArgName(DOCUMENT_NAMESPACE).hasArg()
-                .withDescription("Path expression used to retrieve records ")
-                .create(DOCUMENT_NAMESPACE);
-            options.addOption(ns);
+
             // TODO: complete
         }
 
@@ -507,6 +442,7 @@ public enum Command implements ConfigConstants {
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyCopyConfigOptions(conf, cmdline);
+            applyDocumentFilteringConfigOptions(conf, cmdline);
             
             if (cmdline.hasOption(OUTPUT_TYPE)) {
                 String outputType = cmdline.getOptionValue(OUTPUT_TYPE);
@@ -544,16 +480,10 @@ public enum Command implements ConfigConstants {
                 String pswd = cmdline.getOptionValue(PASSWORD);
                 conf.set(MarkLogicConstants.INPUT_PASSWORD, pswd);
             }
-            
-            if (cmdline.hasOption(DOCUMENT_FILTER)) {
-                String c = cmdline.getOptionValue(DOCUMENT_FILTER,
-                    DEFAULT_DOCUMENT_FILTER);
-                conf.set(MarkLogicConstants.DOCUMENT_SELECTOR, c);
-            }
-            if (cmdline.hasOption(DOCUMENT_NAMESPACE)) {
-                String c = cmdline.getOptionValue(DOCUMENT_NAMESPACE);
-                conf.set(MarkLogicConstants.PATH_NAMESPACE, c);
-            }
+            String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE,
+                DEFAULT_MAX_SPLIT_SIZE);
+            conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
+
             
         }
 
@@ -568,7 +498,45 @@ public enum Command implements ConfigConstants {
         @Override
         public void configOptions(Options options) {
             configCommonOptions(options);
-            // TODO: complete
+            configCopyOptions(options);
+            configCommonOutputOptions(options);
+            configDocumentFilteringOptions(options);
+
+            Option iUsername = OptionBuilder.withArgName(INPUT_USERNAME)
+                .hasArg()
+                .withDescription("Input username of source ML server ")
+                .create(INPUT_USERNAME);
+            options.addOption(iUsername);
+            Option iPswd = OptionBuilder.withArgName(INPUT_PASSWORD).hasArg()
+                .withDescription("Input password of source ML server ")
+                .create(INPUT_PASSWORD);
+            options.addOption(iPswd);
+            Option iHost = OptionBuilder.withArgName(INPUT_HOST).hasArg()
+                .withDescription("Input host of source ML server")
+                .create(INPUT_HOST);
+            options.addOption(iHost);
+            Option iPort = OptionBuilder.withArgName(INPUT_PORT).hasArg()
+                .withDescription("Input port of source ML server")
+                .create(INPUT_PORT);
+            options.addOption(iPort);
+
+            Option oUsername = OptionBuilder.withArgName(OUTPUT_USERNAME)
+            .hasArg()
+            .withDescription("Output username of destination ML server ")
+            .create(OUTPUT_USERNAME);
+            options.addOption(oUsername);
+            Option oPswd = OptionBuilder.withArgName(OUTPUT_PASSWORD).hasArg()
+                .withDescription("Output password of destination ML server ")
+                .create(OUTPUT_PASSWORD);
+            options.addOption(oPswd);
+            Option oHost = OptionBuilder.withArgName(OUTPUT_HOST).hasArg()
+                .withDescription("Output host of destination ML server")
+                .create(OUTPUT_HOST);
+            options.addOption(oHost);
+            Option oPort = OptionBuilder.withArgName(OUTPUT_PORT).hasArg()
+                .withDescription("Output port of destination ML server")
+                .create(OUTPUT_PORT);
+            options.addOption(oPort);
         }
 
         @Override
@@ -579,8 +547,47 @@ public enum Command implements ConfigConstants {
 
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
-            // TODO Auto-generated method stub
-
+            applyCopyConfigOptions(conf, cmdline);
+            applyDocumentFilteringConfigOptions(conf, cmdline);
+            applyCommonOutputConfigOptions(conf, cmdline);
+            
+            if (cmdline.hasOption(OUTPUT_USERNAME)) {
+                String username = cmdline.getOptionValue(OUTPUT_USERNAME);
+                conf.set(MarkLogicConstants.OUTPUT_USERNAME, username);
+            }
+            if (cmdline.hasOption(OUTPUT_PASSWORD)) {
+                String password = cmdline.getOptionValue(OUTPUT_PASSWORD);
+                conf.set(MarkLogicConstants.OUTPUT_PASSWORD, password);
+            }
+            if (cmdline.hasOption(OUTPUT_HOST)) {
+                String host = cmdline.getOptionValue(OUTPUT_HOST);
+                conf.set(MarkLogicConstants.OUTPUT_HOST, host);
+            }
+            if (cmdline.hasOption(OUTPUT_PORT)) {
+                String port = cmdline.getOptionValue(OUTPUT_PORT);
+                conf.set(MarkLogicConstants.OUTPUT_PORT, port);
+            }
+            
+            if (cmdline.hasOption(INPUT_USERNAME)) {
+                String username = cmdline.getOptionValue(INPUT_USERNAME);
+                conf.set(MarkLogicConstants.INPUT_USERNAME, username);
+            }
+            if (cmdline.hasOption(INPUT_PASSWORD)) {
+                String password = cmdline.getOptionValue(INPUT_PASSWORD);
+                conf.set(MarkLogicConstants.INPUT_PASSWORD, password);
+            }
+            if (cmdline.hasOption(INPUT_HOST)) {
+                String host = cmdline.getOptionValue(INPUT_HOST);
+                conf.set(MarkLogicConstants.INPUT_HOST, host);
+            }
+            if (cmdline.hasOption(INPUT_PORT)) {
+                String port = cmdline.getOptionValue(INPUT_PORT);
+                conf.set(MarkLogicConstants.INPUT_PORT, port);
+            }
+            if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
+                String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
+                conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
+            }
         }
 
         @Override
@@ -659,6 +666,37 @@ public enum Command implements ConfigConstants {
         options.addOption(minSplitSize);
     }
 
+    static void configCommonOutputOptions(Options options) {
+        Option outputUriReplace = OptionBuilder
+            .withArgName(OUTPUT_URI_REPLACE).hasArg()
+            .withDescription("Replace URI in output.")
+            .create(OUTPUT_URI_REPLACE);
+        options.addOption(outputUriReplace);
+        Option outputUriPrefix = OptionBuilder.withArgName(OUTPUT_URI_PREFIX)
+            .hasArg().withDescription("Prefix added to URI in output.")
+            .create(OUTPUT_URI_PREFIX);
+        options.addOption(outputUriPrefix);
+        Option outputUriSuffix = OptionBuilder.withArgName(OUTPUT_URI_SUFFIX)
+            .hasArg().withDescription("Suffix added to URI in output.")
+            .create(OUTPUT_URI_SUFFIX);
+        options.addOption(outputUriSuffix);
+
+        Option outputCollections = OptionBuilder
+            .withArgName(OUTPUT_COLLECTIONS).hasArg()
+            .withDescription("Output collections in output.")
+            .create(OUTPUT_COLLECTIONS);
+        options.addOption(outputCollections);
+        Option outputPermissions = OptionBuilder
+            .withArgName(OUTPUT_PERMISSIONS).hasArg()
+            .withDescription("Output permissions in output.")
+            .create(OUTPUT_PERMISSIONS);
+        options.addOption(outputPermissions);
+        Option outputQuantity = OptionBuilder.withArgName(OUTPUT_QUALITY)
+            .hasArg().withDescription("Output quantity in output.")
+            .create(OUTPUT_QUALITY);
+        options.addOption(outputQuantity);
+
+    }
     static void configUserPswdHostPort(Options options) {
         Option username = OptionBuilder.withArgName(USERNAME).hasArg()
             .withDescription("Username.").create(USERNAME);
@@ -688,7 +726,16 @@ public enum Command implements ConfigConstants {
             .withDescription("Copy quality.").create(COPY_QUALITY);
         options.addOption(cpqt);
     }
-    
+    static void configDocumentFilteringOptions(Options options) {
+        Option filter = OptionBuilder.withArgName(DOCUMENT_FILTER).hasArg()
+            .withDescription("Path expression used to retrieve records ")
+            .create(DOCUMENT_FILTER);
+        options.addOption(filter);
+        Option ns = OptionBuilder.withArgName(DOCUMENT_NAMESPACE).hasArg()
+            .withDescription("Path expression used to retrieve records ")
+            .create(DOCUMENT_NAMESPACE);
+        options.addOption(ns);
+    }
     static void applyCopyConfigOptions(Configuration conf, CommandLine cmdline) {
         String c = cmdline.getOptionValue(COPY_COLLECTIONS,
             DEFAULT_COPY_COLLECTIONS);
@@ -699,6 +746,55 @@ public enum Command implements ConfigConstants {
         conf.set(CONF_COPY_PROPERTIES, c);
         c = cmdline.getOptionValue(COPY_QUALITY, DEFAULT_COPY_QUALITY);
         conf.set(CONF_COPY_QUALITY, c);
+    }
+    
+    static void applyDocumentFilteringConfigOptions(Configuration conf, CommandLine cmdline) {
+        String c = cmdline.getOptionValue(DOCUMENT_FILTER,
+            DEFAULT_DOCUMENT_FILTER);
+        conf.set(MarkLogicConstants.DOCUMENT_SELECTOR, c);
+        if (cmdline.hasOption(DOCUMENT_NAMESPACE)) {
+            String ns = cmdline.getOptionValue(DOCUMENT_NAMESPACE);
+            conf.set(MarkLogicConstants.PATH_NAMESPACE, ns);
+        }
+    }
+    
+    static void applyCommonOutputConfigOptions(Configuration conf, CommandLine cmdline) {
+
+        if (cmdline.hasOption(OUTPUT_URI_REPLACE)) {
+            String[] uriReplace = cmdline
+                .getOptionValues(OUTPUT_URI_REPLACE);
+            if (uriReplace == null || uriReplace.length %2 !=0) {
+                LOG.error(OUTPUT_URI_REPLACE
+                    + " is not configured correctly.");
+            } else {
+                conf.setStrings(CONF_OUTPUT_URI_REPLACE, uriReplace);
+            }
+        }
+        if (cmdline.hasOption(OUTPUT_URI_PREFIX)) {
+            String outPrefix = cmdline.getOptionValue(OUTPUT_URI_PREFIX);
+            conf.set(CONF_OUTPUT_URI_PREFIX, outPrefix);
+        }
+        if (cmdline.hasOption(OUTPUT_URI_SUFFIX)) {
+            String outSuffix = cmdline.getOptionValue(OUTPUT_URI_SUFFIX);
+            conf.set(CONF_OUTPUT_URI_SUFFIX, outSuffix);
+        }
+
+        if (cmdline.hasOption(OUTPUT_COLLECTIONS)) {
+            String collectionsString = cmdline
+                .getOptionValue(OUTPUT_COLLECTIONS);
+            conf.set(MarkLogicConstants.OUTPUT_COLLECTION,
+                collectionsString);
+        }
+        if (cmdline.hasOption(OUTPUT_PERMISSIONS)) {
+            String permissionString = cmdline
+                .getOptionValue(OUTPUT_PERMISSIONS);
+            conf.set(MarkLogicConstants.OUTPUT_PERMISSION,
+                permissionString);
+        }
+        if (cmdline.hasOption(OUTPUT_QUALITY)) {
+            String quantity = cmdline.getOptionValue(OUTPUT_QUALITY);
+            conf.set(MarkLogicConstants.OUTPUT_QUALITY, quantity);
+        }
     }
 
     public abstract void printUsage();
