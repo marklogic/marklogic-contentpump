@@ -25,7 +25,6 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.w3c.dom.Element;
@@ -69,7 +68,7 @@ public class MarkLogicReaderForExportArchive extends MarkLogicRecordReader <Docu
      * Current value.
      */
     protected MarkLogicDocument currentValue;
-
+    protected ContentType valType;
     public MarkLogicReaderForExportArchive(Configuration conf) {
         super(conf);
         copyCollection = isCopyCollection(conf);
@@ -261,11 +260,12 @@ public class MarkLogicReaderForExportArchive extends MarkLogicRecordReader <Docu
                 // handle document-node, always present
 //                byte[] content = Utilities.cat(item.asInputStream());
                 currentValue.set(item);//content, 0, content.length);
+                valType = currentValue.getContentType();
                 item = result.next();
             
             } else if ("META".equals(type)) {
                 DocumentMetadata metadata = new DocumentMetadata();
-                currentKey.setUri(uri + ".metadata");
+                currentKey.setUri(uri + DocumentMetadata.EXTENSION);
                 // handle collections, may not be present
                 while ( item!=null && item.getItemType() == ValueType.XS_STRING) {
                     if (!copyCollection) {
@@ -306,7 +306,8 @@ public class MarkLogicReaderForExportArchive extends MarkLogicRecordReader <Docu
                 
                 byte[] metacontent = metadata.toXML().getBytes();
                 currentValue.setContent(metacontent);
-                currentValue.setContentType(ContentType.XML);
+                // the type of metadata is the same as type of the content
+                currentValue.setContentType(valType);
                 
             } else {
                 throw new IOException ("incorrect type");

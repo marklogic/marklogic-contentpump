@@ -237,7 +237,8 @@ public enum Command implements ConfigConstants {
                 compressed));
 
             job.setMapperClass(type.getMapperClass(contentType));
-            job.setOutputFormatClass(ContentOutputFormat.class);
+            //TODO for importing archive, need a new content output format
+            job.setOutputFormatClass(type.getOutputFormatClass(contentType));
 
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
                 String[] paths = cmdline.getOptionValues(INPUT_FILE_PATH);
@@ -496,10 +497,9 @@ public enum Command implements ConfigConstants {
             job.setOutputKeyClass(DocumentURI.class);
 //            job.setOutputValueClass(BytesWritable.class);
 
-                String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
-//                conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, path);
+
 //            }
-//            String path = conf.get(MarkLogicConstants.OUTPUT_DIRECTORY);
+            String path = conf.get(ConfigConstants.CONF_OUTPUT_FILEPATH);
             FileOutputFormat.setOutputPath(job, new Path(path));
             return job;
         }
@@ -512,7 +512,10 @@ public enum Command implements ConfigConstants {
                 String outputType = cmdline.getOptionValue(OUTPUT_TYPE);
                 conf.set(CONF_OUTPUT_TYPE, outputType);
             }
-
+            if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
+                String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
+                conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH, path);
+            }
             if (cmdline.hasOption(DOCUMENT_NAMESPACE)) {
                 String ns = cmdline.getOptionValue(DOCUMENT_NAMESPACE);
                 conf.set(MarkLogicConstants.PATH_NAMESPACE, ns);
@@ -687,26 +690,15 @@ public enum Command implements ConfigConstants {
     }
     
     static void applyCopyConfigOptions(Configuration conf, CommandLine cmdline) {
-        if (cmdline.hasOption(COPY_COLLECTIONS)) {
-            String c = cmdline.getOptionValue(COPY_COLLECTIONS,
-                DEFAULT_COPY_COLLECTIONS);
-            conf.set(CONF_COPY_COLLECTIONS, c);
-        }
-        if (cmdline.hasOption(COPY_PERMISSIONS)) {
-            String c = cmdline.getOptionValue(COPY_PERMISSIONS,
-                DEFAULT_COPY_PERMISSIONS);
-            conf.set(CONF_COPY_PERMISSIONS, c);
-        }
-        if (cmdline.hasOption(COPY_PROPERTIES)) {
-            String c = cmdline.getOptionValue(COPY_PROPERTIES,
-                DEFAULT_COPY_PROPERTIES);
-            conf.set(CONF_COPY_PROPERTIES, c);
-        }
-        if (cmdline.hasOption(COPY_QUALITY)) {
-            String c = cmdline.getOptionValue(COPY_QUALITY,
-                DEFAULT_COPY_QUALITY);
-            conf.set(CONF_COPY_QUALITY, c);
-        }
+        String c = cmdline.getOptionValue(COPY_COLLECTIONS,
+            DEFAULT_COPY_COLLECTIONS);
+        conf.set(CONF_COPY_COLLECTIONS, c);
+        c = cmdline.getOptionValue(COPY_PERMISSIONS, DEFAULT_COPY_PERMISSIONS);
+        conf.set(CONF_COPY_PERMISSIONS, c);
+        c = cmdline.getOptionValue(COPY_PROPERTIES, DEFAULT_COPY_PROPERTIES);
+        conf.set(CONF_COPY_PROPERTIES, c);
+        c = cmdline.getOptionValue(COPY_QUALITY, DEFAULT_COPY_QUALITY);
+        conf.set(CONF_COPY_QUALITY, c);
     }
 
     public abstract void printUsage();

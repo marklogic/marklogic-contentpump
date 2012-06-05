@@ -29,7 +29,7 @@ import com.thoughtworks.xstream.XStream;
 
 public class DocumentMetadata {
     static XStream xstream = new XStream();
-
+    public static String EXTENSION = ".metadata";
     DocumentFormat format = DocumentFormat.XML;
 
     List<String> collectionsList = new Vector<String>();

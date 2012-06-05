@@ -37,10 +37,10 @@ public class DocumentMapper<VALUE> extends
         StringBuilder sb = new StringBuilder();
 
         Configuration conf = context.getConfiguration();
-        String outDir = conf.get(ConfigConstants.CONF_OUTPUT_DIRECTORY);
-        if (outDir != null) {
-            sb.append(outDir);
-        }
+//        String outDir = conf.get(ConfigConstants.CONF_OUTPUT_DIRECTORY);
+//        if (outDir != null) {
+//            sb.append(outDir);
+//        }
         sb.append(uri.toString());
         String[] uriReplace = conf
             .getStrings(ConfigConstants.CONF_OUTPUT_URI_REPLACE);
