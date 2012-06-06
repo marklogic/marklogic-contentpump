@@ -1,6 +1,7 @@
 package com.marklogic.mapreduce.examples;
 
 import java.io.IOException;
+import java.net.URI;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
@@ -14,16 +15,23 @@ import javax.net.ssl.X509TrustManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.RecordWriter;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
+import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentInputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
-import com.marklogic.mapreduce.MarkLogicNode;
+import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.SslConfigOptions;
 
 /**
@@ -33,10 +41,10 @@ import com.marklogic.mapreduce.SslConfigOptions;
  */
 public class ContentReader {
     public static class DocMapper 
-    extends Mapper<DocumentURI, MarkLogicNode, DocumentURI, MarkLogicNode> {
+    extends Mapper<DocumentURI, MarkLogicDocument, DocumentURI, MarkLogicDocument> {
         public static final Log LOG =
             LogFactory.getLog(DocMapper.class);
-        public void map(DocumentURI key, MarkLogicNode value, Context context) 
+        public void map(DocumentURI key, MarkLogicDocument value, Context context) 
         throws IOException, InterruptedException {
             if (key != null && value != null) {
                 context.write(key, value);
@@ -58,11 +66,10 @@ public class ContentReader {
         job.setInputFormatClass(DocumentInputFormat.class);
         job.setMapperClass(DocMapper.class);
         job.setMapOutputKeyClass(DocumentURI.class);
-        job.setMapOutputValueClass(MarkLogicNode.class);
-        job.setOutputFormatClass(TextOutputFormat.class);
-        job.setOutputKeyClass(DocumentURI.class);
-        job.setOutputValueClass(MarkLogicNode.class);
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        job.setMapOutputValueClass(MarkLogicDocument.class);
+        job.setOutputFormatClass(CustomOutputFormat.class);
+       
+        CustomOutputFormat.setOutputPath(job, new Path(args[1]));
 
         conf = job.getConfiguration();
         conf.addResource(args[0]);
@@ -119,5 +126,71 @@ public class ContentReader {
             }
             return sslContext;
         }
+    }
+    
+    static class CustomOutputFormat 
+    extends FileOutputFormat<DocumentURI, MarkLogicDocument> {
+        
+        @Override
+        public RecordWriter<DocumentURI, MarkLogicDocument> getRecordWriter(
+                TaskAttemptContext context)
+                throws IOException, InterruptedException {
+            return new CustomWriter(getOutputPath(context), 
+                    context.getConfiguration());
+        }
+    }
+
+    static class CustomWriter extends RecordWriter<DocumentURI, MarkLogicDocument> {
+
+        Path dir;
+        Configuration conf;
+        FileSystem fs;
+        
+        public CustomWriter(Path path, Configuration conf) {
+            dir = path;
+            this.conf = conf;
+            try {
+                fs = path.getFileSystem(conf);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+
+        @Override
+        public void close(TaskAttemptContext arg0) throws IOException,
+                InterruptedException {  
+        }
+
+        @Override
+        public void write(DocumentURI key, MarkLogicDocument content)
+                throws IOException, InterruptedException {
+            Path path = null;
+            try {
+                URI uri = new URI(key.getUri());
+                String pathname = uri.getPath();
+                int nameStart = pathname.lastIndexOf('/');
+                String filename = nameStart > 0 ? 
+                                pathname.substring(pathname.lastIndexOf('/')) :
+                                pathname;
+                String pathStr = dir.getName() + '/' + filename;
+                path = new Path(pathStr);
+            
+                FSDataOutputStream out = fs.create(path, false);
+                System.out.println("writing to: " + path);
+                if (content.getContentType() == ContentType.BINARY) {
+                    byte[] byteArray = content.getContentAsByteArray();
+                    out.write(byteArray, 0, byteArray.length);
+                    out.flush();
+                    out.close();
+                } else {
+                    Text text = content.getContentAsText();
+                    out.writeChars(text.toString());
+                }
+            } catch (Exception ex) {
+                System.err.println("Failed to create or write to file: " +
+                                path);
+                ex.printStackTrace();
+            }         
+        }   
     }
 }

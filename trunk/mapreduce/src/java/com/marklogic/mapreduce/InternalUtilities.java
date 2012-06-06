@@ -23,10 +23,15 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.VersionInfo;
 
+import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.ContentSourceFactory;
+import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
+import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.SecurityOptions;
+import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XSBase64Binary;
@@ -47,6 +52,11 @@ import com.marklogic.xcc.ValueFactory;
 public class InternalUtilities implements MarkLogicConstants {
     public static final Log LOG =
         LogFactory.getLog(InternalUtilities.class);
+    
+    static final String FOREST_HOST_MAP_QUERY =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "hadoop:get-forest-host-map()";
     
     /**
      * Get input server URI based on the job configuration.
@@ -274,8 +284,8 @@ public class InternalUtilities implements MarkLogicConstants {
                 (result.getValueType() == ValueType.NODE ||
                  result.getValueType() == ValueType.ELEMENT ||
                  result.getValueType() == ValueType.DOCUMENT ||
-                 result.getValueType() == ValueType.ATTRIBUTE) ||
-                 result.getValueType() == ValueType.TEXT) {
+                 result.getValueType() == ValueType.ATTRIBUTE ||
+                 result.getValueType() == ValueType.TEXT)) {
             ((MarkLogicNode)value).set(result);
         } else if (valueClass.equals(MarkLogicDocument.class)) {
             ((MarkLogicDocument) value).set(result);
@@ -359,6 +369,49 @@ public class InternalUtilities implements MarkLogicConstants {
         } else {
             throw new UnsupportedOperationException("Value " +  
                     value.getClass().getName() + " is unsupported.");
+        }
+    }
+    
+    /**
+     * Query MarkLogic and produce a forest-host mapping.
+     * @param session session to use for the query
+     */
+    public static LinkedMapWritable queryForestHostMap(Session session) 
+    throws RequestException {
+        AdhocQuery query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
+        RequestOptions options = new RequestOptions();
+        options.setDefaultXQueryVersion("1.0-ml");
+        query.setOptions(options);
+        return queryForestHostMap(session, query);
+    }
+    
+    /**
+     * Query MarkLogic and produce a forest-host mapping.
+     * @param session session to use for the query
+     * @param query query to use
+     */
+    public static LinkedMapWritable queryForestHostMap(Session session, 
+                    AdhocQuery query) throws RequestException {
+        ResultSequence result = null;
+        try {
+            result = session.submitRequest(query);
+            LinkedMapWritable forestHostMap = new LinkedMapWritable();
+            Text forest = null;
+            while (result.hasNext()) {
+                ResultItem item = result.next();
+                if (forest == null) {
+                    forest = new Text(item.asString());            
+                } else {
+                    Text hostName = new Text(item.asString());
+                    forestHostMap.put(forest, hostName);
+                    forest = null;
+                }
+            }
+            return forestHostMap;
+        } finally {
+            if (result != null) {
+                result.close();
+            }
         }
     }
 }
