@@ -28,7 +28,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
 /**
@@ -68,23 +67,19 @@ class SingleDocumentWriter extends RecordWriter<DocumentURI, MarkLogicDocument> 
     @Override
     public void write(DocumentURI uri, MarkLogicDocument content)
             throws IOException, InterruptedException {
-        int index = uri.getUri().lastIndexOf("/");
-        String pathStr = null;
-        if(index == -1) {
-            pathStr = dir.toUri().getPath() + "/" + uri.getUri();
-        } else {
-            pathStr = dir.toUri().getPath() + uri.getUri().substring(index);
-        }
+        String pathStr = uri.getUri();
+        // hdfs doesn't allow ":" in the file name
+        pathStr = dir.toUri().getPath() + "/" + pathStr.replaceAll(":", "");
         
         Path path = new Path(pathStr);
         FileSystem fs = path.getFileSystem(conf);
         FSDataOutputStream out = fs.create(path, false);
-        System.out.println("writing to: " + path);
+//        System.out.println("writing to: " + path);
         ContentType type = content.getContentType();
         if(ContentType.BINARY.equals(type)){
             out.write(content.getContentAsByteArray());
         } else if(ContentType.TEXT.equals(type) || ContentType.XML.equals(type)) {
-            Text t = content.getContentAsText(); ;
+            Text t = content.getContentAsText();
             out.write(t.toString().getBytes());
         } else {
             throw new IOException ("incorrect type: " + type);

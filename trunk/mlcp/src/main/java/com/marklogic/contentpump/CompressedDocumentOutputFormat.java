@@ -18,7 +18,7 @@ public class CompressedDocumentOutputFormat extends FileOutputFormat<DocumentURI
     public RecordWriter<DocumentURI, MarkLogicDocument> getRecordWriter(
         TaskAttemptContext contex) throws IOException, InterruptedException {
         Configuration conf = contex.getConfiguration();
-        Path path = new Path(conf.get(MarkLogicConstants.OUTPUT_DIRECTORY));
+        Path path = new Path(conf.get(ConfigConstants.CONF_OUTPUT_FILEPATH));
         return new DocumentZipWriter(path, conf);
     }
 }
