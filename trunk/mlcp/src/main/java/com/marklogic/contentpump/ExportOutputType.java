@@ -58,7 +58,7 @@ public enum ExportOutputType {
 
         @Override
         public Class<? extends InputFormat> getInputFormatClass() {
-            return MarkLogicInputFormatForExportArchive.class;
+            return MarkLogicDocumentInputFormat.class;
         }
     };
     public abstract Class<? extends Writable> getWritableClass();
