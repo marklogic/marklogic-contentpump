@@ -180,9 +180,9 @@ public enum Command implements ConfigConstants {
                 .create(INPUT_SEQUENCEFILE_VALUE_TYPE);
             options.addOption(seqValueType);
             // TODO: complete
-            Option streaming = OptionBuilder.withArgName(STREAMING).hasArg()
-                .withDescription("Streaming").create(STREAMING);
-            options.addOption(streaming);
+//            Option streaming = OptionBuilder.withArgName(STREAMING).hasArg()
+//                .withDescription("Streaming").create(STREAMING);
+//            options.addOption(streaming);
         }
 
         @Override
@@ -382,13 +382,15 @@ public enum Command implements ConfigConstants {
                 .withDescription("Whether to compress the output document")
                 .create(OUTPUT_COMPRESS);
             options.addOption(exportCompress);
+
+
+            // TODO: complete
+            
             Option exportIndented = OptionBuilder.withArgName(OUTPUT_INDENTED)
                 .hasArg()
                 .withDescription("Whether to pretty indent XML elements")
                 .create(OUTPUT_INDENTED);
             options.addOption(exportIndented);
-
-            // TODO: complete
         }
 
         @Override
@@ -538,6 +540,7 @@ public enum Command implements ConfigConstants {
             job.setInputFormatClass(MarkLogicDocumentInputFormat.class);
             job.setMapperClass(DocumentMapper.class);
             job.setMapOutputKeyClass(DocumentURI.class);
+            job.setMapOutputValueClass(MarkLogicDocument.class);
             job.setOutputFormatClass(ImportArchiveOutputFormat.class);
             job.setOutputKeyClass(DocumentURI.class);
             return job;
