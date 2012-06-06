@@ -292,6 +292,7 @@ public enum Command implements ConfigConstants {
             String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE,
                 String.valueOf(DEFAULT_TRANSACTION_SIZE));
             conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
+            //TODO PROBLEMATIC
             if (cmdline.hasOption(NAMESPACE)) {
                 String ns = cmdline.getOptionValue(NAMESPACE);
                 conf.set(MarkLogicConstants.OUTPUT_NAMESPACE, ns);
@@ -386,11 +387,11 @@ public enum Command implements ConfigConstants {
 
             // TODO: complete
             
-            Option exportIndented = OptionBuilder.withArgName(OUTPUT_INDENTED)
-                .hasArg()
-                .withDescription("Whether to pretty indent XML elements")
-                .create(OUTPUT_INDENTED);
-            options.addOption(exportIndented);
+//            Option exportIndented = OptionBuilder.withArgName(OUTPUT_INDENTED)
+//                .hasArg()
+//                .withDescription("Whether to pretty indent XML elements")
+//                .create(OUTPUT_INDENTED);
+//            options.addOption(exportIndented);
         }
 
         @Override
@@ -423,6 +424,7 @@ public enum Command implements ConfigConstants {
 
             job.setMapperClass(DocumentMapper.class);
             job.setMapOutputKeyClass(DocumentURI.class);
+            job.setMapOutputValueClass(MarkLogicDocument.class);
             job.setOutputFormatClass(outputType
                 .getOutputFormatClass(isCompressed));
             job.setOutputKeyClass(DocumentURI.class);
@@ -444,10 +446,10 @@ public enum Command implements ConfigConstants {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
                 conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH, path);
             }
-            if (cmdline.hasOption(DOCUMENT_NAMESPACE)) {
-                String ns = cmdline.getOptionValue(DOCUMENT_NAMESPACE);
-                conf.set(MarkLogicConstants.PATH_NAMESPACE, ns);
-            }
+//            if (cmdline.hasOption(DOCUMENT_NAMESPACE)) {
+//                String ns = cmdline.getOptionValue(DOCUMENT_NAMESPACE);
+//                conf.set(MarkLogicConstants.PATH_NAMESPACE, ns);
+//            }
             if (cmdline.hasOption(OUTPUT_COMPRESS)) {
                 String isCompress = cmdline.getOptionValue(OUTPUT_COMPRESS);
                 conf.set(CONF_OUTPUT_COMPRESS, isCompress);
