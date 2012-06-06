@@ -91,7 +91,7 @@ public class ImportArchiveOutputFormat extends ContentOutputFormat<MarkLogicDocu
         }
         
         // construct the ContentWriter
-        return new ArchiveContentWriter<MarkLogicDocumentWithMeta>(conf, sourceMap, fastLoad);
+        return new MarkLogicDocumentContentWriter<MarkLogicDocumentWithMeta>(conf, sourceMap, fastLoad);
         
     }
 }

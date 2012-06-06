@@ -22,6 +22,9 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.util.regex.Pattern;
 
+import com.marklogic.xcc.ContentCreateOptions;
+import com.marklogic.xcc.ContentPermission;
+
 public class Utilities {
     private static int BUFFER_SIZE = 32768;
     protected static Pattern[] patterns = new Pattern[] {
@@ -93,5 +96,11 @@ public class Utilities {
             Character.isWhitespace(uri.charAt(uri.length() - 1))) {
             throw new IllegalStateException("Invalid URI Format: " + uri);
         }
+    }
+    
+    public static void updateOptionsUsingMeta(ContentCreateOptions options, DocumentMetadata meta) {
+        options.setQuality(meta.quality);
+        options.setCollections(meta.collectionsList.toArray(new String[0]));
+        options.setPermissions(meta.permissionsList.toArray(new ContentPermission[0]));
     }
 }

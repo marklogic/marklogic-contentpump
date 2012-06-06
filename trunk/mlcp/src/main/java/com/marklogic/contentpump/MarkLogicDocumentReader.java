@@ -52,10 +52,10 @@ import com.marklogic.xcc.types.XdmElement;
  * @author ali
  *
  */
-public class MarkLogicReaderForExportArchive extends MarkLogicRecordReader <DocumentURI, MarkLogicDocument>{
+public class MarkLogicDocumentReader extends MarkLogicRecordReader <DocumentURI, MarkLogicDocument>{
     static final float DOCUMENT_TO_FRAGMENT_RATIO = 1;
     public static final Log LOG = LogFactory
-    .getLog(MarkLogicReaderForExportArchive.class);
+    .getLog(MarkLogicDocumentReader.class);
     protected boolean copyCollection;
     protected boolean copyPermission;
     protected boolean copyProperties;
@@ -69,7 +69,7 @@ public class MarkLogicReaderForExportArchive extends MarkLogicRecordReader <Docu
      */
     protected MarkLogicDocument currentValue;
     protected ContentType valType;
-    public MarkLogicReaderForExportArchive(Configuration conf) {
+    public MarkLogicDocumentReader(Configuration conf) {
         super(conf);
         copyCollection = isCopyCollection(conf);
         copyPermission = isCopyPermission(conf);
@@ -306,7 +306,8 @@ public class MarkLogicReaderForExportArchive extends MarkLogicRecordReader <Docu
                 
                 byte[] metacontent = metadata.toXML().getBytes();
                 currentValue.setContent(metacontent);
-                // the type of metadata is the same as type of the content
+            // the type of metadata is the same as type of the content, so that
+            // it goes into the same archive
                 currentValue.setContentType(valType);
                 
             } else {

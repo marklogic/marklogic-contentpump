@@ -409,11 +409,6 @@ public enum Command implements ConfigConstants {
                 //use basic mode for getSplits; use advanced mode(hardcoded) for record reader
                 conf.set(MarkLogicConstants.INPUT_MODE,
                     MarkLogicConstants.BASIC_MODE);
-//                String docExpr = conf.get(MarkLogicConstants.SUBDOCUMENT_EXPRESSION, "fn:collection()");
-//                StringBuilder buf = new StringBuilder();
-//                docExpr = getDocExpr(buf, docExpr, cmdline);
-//                //new docExpr used in record reader
-//                conf.set(MarkLogicConstants.SUBDOCUMENT_EXPRESSION, docExpr);
             }
             
             String compressed = conf.get(CONF_OUTPUT_COMPRESS,
@@ -424,16 +419,11 @@ public enum Command implements ConfigConstants {
             job.setJarByClass(this.getClass());
             job.setInputFormatClass(outputType.getInputFormatClass());
 
-            job.setMapperClass(ExportMapper.class);
+            job.setMapperClass(DocumentMapper.class);
             job.setMapOutputKeyClass(DocumentURI.class);
-            // job.setMapOutputValueClass(BytesWritable.class);
             job.setOutputFormatClass(outputType
                 .getOutputFormatClass(isCompressed));
             job.setOutputKeyClass(DocumentURI.class);
-//            job.setOutputValueClass(BytesWritable.class);
-
-
-//            }
             String path = conf.get(ConfigConstants.CONF_OUTPUT_FILEPATH);
             FileOutputFormat.setOutputPath(job, new Path(path));
             return job;
@@ -540,9 +530,17 @@ public enum Command implements ConfigConstants {
         }
 
         @Override
-        public Job createJob(Configuration conf, CommandLine cmdline) {
-            // TODO Auto-generated method stub
-            return null;
+        public Job createJob(Configuration conf, CommandLine cmdline) throws IOException {
+            applyConfigOptions(conf, cmdline);
+            
+            Job job = new Job(conf);
+            job.setJarByClass(this.getClass());
+            job.setInputFormatClass(MarkLogicDocumentInputFormat.class);
+            job.setMapperClass(DocumentMapper.class);
+            job.setMapOutputKeyClass(DocumentURI.class);
+            job.setOutputFormatClass(ImportArchiveOutputFormat.class);
+            job.setOutputKeyClass(DocumentURI.class);
+            return job;
         }
 
         @Override
@@ -763,7 +761,7 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(OUTPUT_URI_REPLACE)) {
             String[] uriReplace = cmdline
                 .getOptionValues(OUTPUT_URI_REPLACE);
-            if (uriReplace == null || uriReplace.length %2 !=0) {
+            if (uriReplace == null || uriReplace.length > 1) {
                 LOG.error(OUTPUT_URI_REPLACE
                     + " is not configured correctly.");
             } else {

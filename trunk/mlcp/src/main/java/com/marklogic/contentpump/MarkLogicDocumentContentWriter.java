@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +50,10 @@ import com.marklogic.xcc.exceptions.RequestException;
  * @author ali
  * 
  */
-public class ArchiveContentWriter<VALUE> extends
+public class MarkLogicDocumentContentWriter<VALUE> extends
     MarkLogicRecordWriter<DocumentURI, VALUE> implements MarkLogicConstants {
     public static final Log LOG = LogFactory
-        .getLog(ArchiveContentWriter.class);
+        .getLog(MarkLogicDocumentContentWriter.class);
 
     /**
      * Directory of the output documents.
@@ -108,7 +109,7 @@ public class ArchiveContentWriter<VALUE> extends
 
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
-    public ArchiveContentWriter(Configuration conf,
+    public MarkLogicDocumentContentWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         super(null, conf);
 
@@ -224,9 +225,11 @@ public class ArchiveContentWriter<VALUE> extends
         }
 
         try {
+            boolean metaOnly = false;
             Content content = null;
             DocumentMetadata meta = null;
             if (value instanceof MarkLogicDocumentWithMeta) {
+                //this is particularly for importing archive
                 meta = ((MarkLogicDocumentWithMeta) value).getMeta();
                 
                 ((MarkLogicDocumentWithMeta) value).updateOptions(options);
@@ -247,9 +250,37 @@ public class ArchiveContentWriter<VALUE> extends
                         .setFormat(doc.getContentType().getDocumentFormat());
                     formatNeeded = false;
                 }
+            } else if(value instanceof MarkLogicDocument) { 
+              //this is particularly for copy
+                batchSize = 1;
+                if (uri.endsWith(DocumentMetadata.EXTENSION)) {
+                    options.setFormatXml();
+                    ((MarkLogicDocument)value).setContentType(ContentType.XML);
+                    String metaStr = ((MarkLogicDocument)value).getContentAsText().toString();
+                    meta = DocumentMetadata.fromXML(new StringReader(metaStr));
+                    Utilities.updateOptionsUsingMeta(options, meta);
+                    metaOnly = true;
+                } else {
+                    MarkLogicDocument doc = (MarkLogicDocument) value;
+                    if (doc.getContentType() == ContentType.BINARY) {
+                        options.setFormatBinary();
+                        content = ContentFactory.newContent(uri,
+                            doc.getContentAsByteArray(), options);
+                    } else {
+                        content = ContentFactory.newContent(uri, doc
+                            .getContentAsText().toString(), options);
+                    }
+
+                    if (formatNeeded) {
+                        options
+                            .setFormat(doc.getContentType().getDocumentFormat());
+                        formatNeeded = false;
+                    }
+                }
             } else {
-                throw new IOException("expecting MarkLogicDocumentWithMeta");
+                throw new IOException("unexpected type " + value.getClass());
             }
+            
             if (batchSize > 1) {
                 forestContents[fId][counts[fId]++] = content;
 
@@ -265,10 +296,16 @@ public class ArchiveContentWriter<VALUE> extends
                 if (sessions[fId] == null) {
                     sessions[fId] = getSession(forestId);
                 }
-                sessions[fId].insertContent(content);
-                stmtCounts[fId]++;
-                if(meta != null && meta.getProperties()!=null)
-                setDocumentProperties(uri, meta.getProperties(), sessions[fId]);
+                if(content != null) {
+                    sessions[fId].insertContent(content);
+                    stmtCounts[fId]++;
+                }
+                if(meta != null && meta.getProperties()!=null) {
+                    if(metaOnly) {
+                        uri = uri.substring(0, uri.length() - DocumentMetadata.EXTENSION.length());
+                    }
+                    setDocumentProperties(uri, meta.getProperties(), sessions[fId]);
+                }
             }
             if (txnSize > 1 && stmtCounts[fId] == txnSize) {
                 sessions[fId].commit();
