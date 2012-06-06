@@ -204,45 +204,43 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         try {
             Content content = null;
             if (value instanceof Text) {
-                content = ContentFactory.newContent(uri, 
-                        ((Text)value).toString(), options);
                 if (formatNeeded) {
                     options.setFormat(DocumentFormat.TEXT);
                     formatNeeded = false;
                 }
-            } else if (value instanceof MarkLogicNode) {
                 content = ContentFactory.newContent(uri, 
-                        ((MarkLogicNode)value).get(), options);   
+                        ((Text)value).toString(), options);             
+            } else if (value instanceof MarkLogicNode) {
                 if (formatNeeded) {
                     options.setFormat(DocumentFormat.XML);
                     formatNeeded = false;
                 }
-            } else if (value instanceof BytesWritable) {
                 content = ContentFactory.newContent(uri, 
-                        ((BytesWritable) value).getBytes(), 0, 
-                        ((BytesWritable) value).getLength(), options);
+                        ((MarkLogicNode)value).get(), options);                 
+            } else if (value instanceof BytesWritable) {
                 if (formatNeeded) {
                     options.setFormat(DocumentFormat.BINARY);
                     formatNeeded = false;
                 }
+                content = ContentFactory.newContent(uri, 
+                        ((BytesWritable) value).getBytes(), 0, 
+                        ((BytesWritable) value).getLength(), options);               
             } else if (value instanceof CustomContent) {
                 content = ((CustomContent) value).getContent(conf, options, uri);
                 batchSize = 1;
             } else if (value instanceof MarkLogicDocument) {
                 MarkLogicDocument doc = (MarkLogicDocument)value;
+                if (formatNeeded) {
+                    options.setFormat(doc.getContentType().getDocumentFormat());
+                    formatNeeded = false;
+                }
                 if (doc.getContentType() == ContentType.BINARY) {
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsByteArray(), options);
                 } else {
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsText().toString(), options);
-                } 
-                content = ContentFactory.newContent(uri, 
-                        ((MarkLogicDocument)value).toString(), options);
-                if (formatNeeded) {
-                    options.setFormat(doc.getContentType().getDocumentFormat());
-                    formatNeeded = false;
-                }
+                }              
             } else {
                 throw new UnsupportedOperationException(value.getClass()
                     + " is not supported.");
