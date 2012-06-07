@@ -332,7 +332,7 @@ public enum Command implements ConfigConstants {
 
             String repairLevel = cmdline.getOptionValue(XML_REPAIR_LEVEL,
                 MarkLogicConstants.DEFAULT_OUTPUT_XML_REPAIR_LEVEL);
-            conf.set(MarkLogicConstants.OUTPUT_XML_REPAIR_LEVEL, repairLevel);
+            conf.set(MarkLogicConstants.OUTPUT_XML_REPAIR_LEVEL, repairLevel.toUpperCase());
 
             if (cmdline.hasOption(INPUT_SEQUENCEFILE_KEY_CLASS)) {
                 String keyClass = cmdline
