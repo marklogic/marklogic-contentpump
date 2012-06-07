@@ -1,20 +1,18 @@
 #!/bin/sh
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../
-#echo $DIR
-
-VMARGS="-DCONTENTPUMP_HOME=$DIR/lib -DCONTENTPUMP_VERSION=1.0"
-TARGET=$DIR/lib/marklogic-contentpump-1.0.jar
+VMARGS="-DCONTENTPUMP_HOME=$DIR/lib -DCONTENTPUMP_VERSION=1.0" 
 LIB_HOME=$DIR/lib
-CLASSPATH=$LIB_HOME/commons-cli-1.2.jar
-CLASSPATH=$CLASSPATH:$LIB_HOME/commons-logging-1.1.1.jar
-CLASSPATH=$CLASSPATH:$LIB_HOME/marklogic-mapreduce-1.1.jar
-CLASSPATH=$CLASSPATH:$LIB_HOME/marklogic-xcc-5.1.jar
-CLASSPATH=$CLASSPATH:$LIB_HOME/hadoop-core-0.20.2.jar
-CLASSPATH=$CLASSPATH:$LIB_HOME/marklogic-contentpump-1.0.jar
-CLASSPATH=$CLASSPATH:$LIB_HOME/commons-codec-1.3.jar
-CLASSPATH=$CLASSPATH:$LIB_HOME/xstream-1.4.2.jar
-CLASSPATH=$CLASSPATH:$LIB_HOME/commons-modeler-2.0.1.jar
-#echo $CLASSPATH
-
+n=0
+for file in ${LIB_HOME}/*.jar
+do
+  if [ $n -eq 0 ]
+  then
+    CLASSPATH=$file
+    n=1
+  else
+    CLASSPATH=${CLASSPATH}":"$file
+  fi
+done
+CLASSPATH=$DIR/conf:$CLASSPATH
 java -cp $CLASSPATH $VMARGS com.marklogic.contentpump.ContentPump $*
