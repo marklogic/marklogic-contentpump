@@ -649,6 +649,14 @@ public interface MarkLogicConstants {
     static final String OUTPUT_CONTENT_LANGUAGE = 
         "mapreduce.marklogic.output.content.language";
     /**
+     * The config property name (<code>{@value}</code>) which, if set,
+     * specifies the namespace to associate with inserted documents. The 
+     * default is null, which indicates that the default namespace should 
+     * be used.
+     */
+    static final String OUTPUT_CONTENT_NAMESPACE = 
+        "mapreduce.marklogic.output.content.namespace";
+    /**
      * Value string of the output value external variable name.
      */
     static final String OUTPUT_VALUE_VARNAME = "value";
