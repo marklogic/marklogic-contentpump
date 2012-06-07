@@ -29,6 +29,14 @@
           <include>*.bat</include>
         </includes>
     </fileSet>
+    <fileSet>
+      <directory>src/conf</directory>
+        <outputDirectory>/conf</outputDirectory>
+        <fileMode>0755</fileMode>
+        <includes>
+          <include>log4j.properties</include>
+        </includes>
+    </fileSet>
   </fileSets>
 </assembly>
 
