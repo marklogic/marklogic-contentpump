@@ -32,6 +32,11 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
+/**
+ * Read archive, construct MarkLogicDocumentWithMeta as value
+ * @author ali
+ *
+ */
 public class ArchiveRecordReader extends
     AbstractRecordReader<MarkLogicDocumentWithMeta> {
     private ZipInputStream zipIn;

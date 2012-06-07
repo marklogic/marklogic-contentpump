@@ -25,7 +25,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
 public class ArchiveOutputFormat extends
@@ -60,7 +59,6 @@ class ArchiveWriter extends RecordWriter<DocumentURI, MarkLogicDocument> {
     public ArchiveWriter(Path path, Configuration conf) {
         dir = path.toUri().getPath();
         this.conf = conf;
-//        txtArchive = new OutputArchive(dir, conf);
     }
 
     @Override
@@ -80,7 +78,6 @@ class ArchiveWriter extends RecordWriter<DocumentURI, MarkLogicDocument> {
     @Override
     public void write(DocumentURI uri, MarkLogicDocument content)
         throws IOException, InterruptedException {
-//        txtArchive.write(uri.getUri(), content.getBytes());
         ContentType type = content.getContentType();
         if(type == null) {
             throw new IOException ("null content type: ");

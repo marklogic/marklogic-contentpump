@@ -17,10 +17,12 @@ package com.marklogic.contentpump;
 
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
+import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
+import com.marklogic.mapreduce.ContentWriter;
 
 /**
  * Enum of supported input type.
@@ -51,6 +53,13 @@ public enum InputType {
             // TODO Auto-generated method stub
             return ContentOutputFormat.class;
         }
+
+        @Override
+        public Class<? extends RecordWriter> getOutputValueClass(
+            ContentType contentType) {
+            // TODO Auto-generated method stub
+            return ContentWriter.class;
+        }
     },
     AGGREGATES {
         @Override
@@ -74,6 +83,13 @@ public enum InputType {
             ContentType contentType) {
             // TODO Auto-generated method stub
             return ContentOutputFormat.class;
+        }
+
+        @Override
+        public Class<? extends RecordWriter> getOutputValueClass(
+            ContentType contentType) {
+            // TODO Auto-generated method stub
+            return ContentWriter.class;
         }
     },   
     DELIMITED_TEXT {
@@ -99,6 +115,13 @@ public enum InputType {
             // TODO Auto-generated method stub
             return ContentOutputFormat.class;
         }
+
+        @Override
+        public Class<? extends RecordWriter> getOutputValueClass(
+            ContentType contentType) {
+            // TODO Auto-generated method stub
+            return ContentWriter.class;
+        }
     },
     ARCHIVE {
         @Override
@@ -120,6 +143,13 @@ public enum InputType {
             // TODO Auto-generated method stub
             return ImportArchiveOutputFormat.class;
         }
+
+        @Override
+        public Class<? extends RecordWriter> getOutputValueClass(
+            ContentType contentType) {
+            // TODO Auto-generated method stub
+            return MarkLogicDocumentContentWriter.class;
+        }
     },
     SEQUENCEFILE {
 
@@ -140,6 +170,13 @@ public enum InputType {
             ContentType contentType) {
             // TODO Auto-generated method stub
             return ContentOutputFormat.class;
+        }
+
+        @Override
+        public Class<? extends RecordWriter> getOutputValueClass(
+            ContentType contentType) {
+            // TODO Auto-generated method stub
+            return ContentWriter.class;
         }
         
     };
@@ -180,4 +217,9 @@ public enum InputType {
     
     public abstract Class<? extends OutputFormat> getOutputFormatClass(
         ContentType contentType);
+    
+    public abstract Class<? extends RecordWriter> getOutputValueClass(
+        ContentType contentType);
+    
+    
 }

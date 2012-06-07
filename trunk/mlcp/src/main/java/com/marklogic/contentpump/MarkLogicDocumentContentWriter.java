@@ -235,21 +235,18 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                 ((MarkLogicDocumentWithMeta) value).updateOptions(options);
                 batchSize = 1;
 
-                MarkLogicDocument doc = (MarkLogicDocument) value;
-                if (doc.getContentType() == ContentType.BINARY) {
-                    options.setFormatBinary();
-                    content = ContentFactory.newContent(uri,
-                        doc.getContentAsByteArray(), options);
-                } else {
-                    content = ContentFactory.newContent(uri, doc
-                        .getContentAsText().toString(), options);
-                }
-
+                MarkLogicDocument doc = (MarkLogicDocument)value;
                 if (formatNeeded) {
-                    options
-                        .setFormat(doc.getContentType().getDocumentFormat());
+                    options.setFormat(doc.getContentType().getDocumentFormat());
                     formatNeeded = false;
                 }
+                if (doc.getContentType() == ContentType.BINARY) {
+                    content = ContentFactory.newContent(uri, 
+                              doc.getContentAsByteArray(), options);
+                } else {
+                    content = ContentFactory.newContent(uri, 
+                              doc.getContentAsText().toString(), options);
+                } 
             } else if(value instanceof MarkLogicDocument) { 
               //this is particularly for copy
                 batchSize = 1;
@@ -261,21 +258,18 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                     Utilities.updateOptionsUsingMeta(options, meta);
                     metaOnly = true;
                 } else {
-                    MarkLogicDocument doc = (MarkLogicDocument) value;
-                    if (doc.getContentType() == ContentType.BINARY) {
-                        options.setFormatBinary();
-                        content = ContentFactory.newContent(uri,
-                            doc.getContentAsByteArray(), options);
-                    } else {
-                        content = ContentFactory.newContent(uri, doc
-                            .getContentAsText().toString(), options);
-                    }
-
+                    MarkLogicDocument doc = (MarkLogicDocument)value;
                     if (formatNeeded) {
-                        options
-                            .setFormat(doc.getContentType().getDocumentFormat());
+                        options.setFormat(doc.getContentType().getDocumentFormat());
                         formatNeeded = false;
                     }
+                    if (doc.getContentType() == ContentType.BINARY) {
+                        content = ContentFactory.newContent(uri, 
+                                  doc.getContentAsByteArray(), options);
+                    } else {
+                        content = ContentFactory.newContent(uri, 
+                                  doc.getContentAsText().toString(), options);
+                    } 
                 }
             } else {
                 throw new IOException("unexpected type " + value.getClass());

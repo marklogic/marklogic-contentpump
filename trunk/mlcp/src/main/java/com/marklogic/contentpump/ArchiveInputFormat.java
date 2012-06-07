@@ -25,7 +25,11 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.DocumentURI;
-
+/**
+ * FileInputFormat for reading archive
+ * @author ali
+ *
+ */
 public class ArchiveInputFormat extends FileInputFormat<DocumentURI, MarkLogicDocumentWithMeta> {
 
     @Override
