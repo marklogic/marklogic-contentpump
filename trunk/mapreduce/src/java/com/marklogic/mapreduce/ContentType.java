@@ -65,7 +65,7 @@ public enum ContentType {
             return TEXT;
         } else if (typeName.equalsIgnoreCase(BINARY.name())) {
             return BINARY;
-        } else if (typeName.equals(UNKNOWN)) {
+        } else if (typeName.equals(UNKNOWN.name())) {
             return UNKNOWN;
         } else {
             throw new IllegalArgumentException("Unknown content type: " + 
