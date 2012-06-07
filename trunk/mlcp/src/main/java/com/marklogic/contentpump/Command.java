@@ -179,6 +179,14 @@ public enum Command implements ConfigConstants {
                 .withDescription("Sequencefile value type.")
                 .create(INPUT_SEQUENCEFILE_VALUE_TYPE);
             options.addOption(seqValueType);
+            
+            Option allowEmptyMeta = OptionBuilder
+                .withArgName(INPUT_ARCHIVE_ALLOW_EMPTY_METADATA)
+                .hasArg()
+                .withDescription(
+                    "If allow empty metadata when importing archive")
+                .create(INPUT_ARCHIVE_ALLOW_EMPTY_METADATA);
+            options.addOption(allowEmptyMeta);
             // TODO: complete
 //            Option streaming = OptionBuilder.withArgName(STREAMING).hasArg()
 //                .withDescription("Streaming").create(STREAMING);
@@ -190,10 +198,8 @@ public enum Command implements ConfigConstants {
             throws IOException {
             applyConfigOptions(conf, cmdline);
 
-            String inputTypeOption = INPUT_FILE_TYPE_DEFAULT;
-            if (cmdline.hasOption(INPUT_FILE_TYPE)) {
-                inputTypeOption = cmdline.getOptionValue(INPUT_FILE_TYPE);
-            }
+            String inputTypeOption = cmdline.getOptionValue(INPUT_FILE_TYPE,
+                INPUT_FILE_TYPE_DEFAULT);
             InputType type = InputType.forName(inputTypeOption);
             String documentType = conf.get(MarkLogicConstants.CONTENT_TYPE,
                 MarkLogicConstants.DEFAULT_CONTENT_TYPE);
@@ -211,6 +217,8 @@ public enum Command implements ConfigConstants {
                 compressed));
 
             job.setMapperClass(type.getMapperClass(contentType));
+            job.setMapOutputKeyClass(DocumentURI.class);
+            job.setMapOutputValueClass(type.getOutputValueClass(contentType));
             job.setOutputFormatClass(type.getOutputFormatClass(contentType));
 
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
@@ -351,6 +359,14 @@ public enum Command implements ConfigConstants {
                 conf.set(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE,
                     DEFAULT_SEQUENCEFILE_VALUE_TYPE);
             }
+            if (cmdline.hasOption(INPUT_FILE_TYPE)) {
+                String fileType = cmdline
+                    .getOptionValue(INPUT_FILE_TYPE);
+                if(fileType.equalsIgnoreCase(InputType.ARCHIVE.toString())) {
+                conf.set(MarkLogicConstants.CONTENT_TYPE, ContentType.UNKNOWN.toString());
+                }
+            }
+            
 
         }
 

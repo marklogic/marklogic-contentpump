@@ -10,7 +10,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
 public class CompressedDocumentOutputFormat extends FileOutputFormat<DocumentURI, MarkLogicDocument> {
