@@ -45,19 +45,17 @@ public enum InputType {
         @Override
         public Class<? extends Mapper> getMapperClass(ContentType contentType) {
             return DocumentMapper.class;
-          }
+        }
 
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
             ContentType contentType) {
-            // TODO Auto-generated method stub
             return ContentOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
             ContentType contentType) {
-            // TODO Auto-generated method stub
             return ContentWriter.class;
         }
     },
@@ -81,14 +79,12 @@ public enum InputType {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
             ContentType contentType) {
-            // TODO Auto-generated method stub
             return ContentOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
             ContentType contentType) {
-            // TODO Auto-generated method stub
             return ContentWriter.class;
         }
     },   
@@ -112,14 +108,12 @@ public enum InputType {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
             ContentType contentType) {
-            // TODO Auto-generated method stub
             return ContentOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
             ContentType contentType) {
-            // TODO Auto-generated method stub
             return ContentWriter.class;
         }
     },
@@ -127,27 +121,23 @@ public enum InputType {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
                 ContentType contentType, boolean compressed) {
-            // TODO Auto-generated method stub
             return ArchiveInputFormat.class;
         }
 
         @Override
         public Class<? extends Mapper> getMapperClass(
                 ContentType contentType) {
-            // TODO Auto-generated method stub
             return DocumentMapper.class;
         }
         
         public Class<? extends OutputFormat> getOutputFormatClass(
                 ContentType contentType) {
-            // TODO Auto-generated method stub
             return ImportArchiveOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
             ContentType contentType) {
-            // TODO Auto-generated method stub
             return MarkLogicDocumentContentWriter.class;
         }
     },
@@ -168,14 +158,12 @@ public enum InputType {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
             ContentType contentType) {
-            // TODO Auto-generated method stub
             return ContentOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
             ContentType contentType) {
-            // TODO Auto-generated method stub
             return ContentWriter.class;
         }
         

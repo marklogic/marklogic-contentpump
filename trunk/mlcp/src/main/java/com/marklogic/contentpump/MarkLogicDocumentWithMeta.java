@@ -15,6 +15,11 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.io.StringReader;
+
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
@@ -31,7 +36,6 @@ public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
     }
 
     public void updateOptions(ContentCreateOptions options){
-        // TODO session.setDocumentProperties
         options.setQuality(meta.quality);
         options.setCollections(meta.collectionsList.toArray(new String[0]));
         options.setPermissions(meta.permissionsList.toArray(new ContentPermission[0]));
@@ -40,6 +44,23 @@ public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
     public String getProperties(){
         return meta.getProperties();
     }
-    
+
+    @Override
+    public void readFields(DataInput in) throws IOException {
+        super.readFields(in);
+        int len = in.readInt();
+        byte [] xml = new byte[len];
+        in.readFully(xml, 0, len);
+        StringReader reader = new StringReader(new String(xml));
+        meta = DocumentMetadata.fromXML(reader);
+    }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+        super.write(out);
+        byte[] xml = meta.toXML().getBytes();
+        out.writeInt(xml.length);
+        out.write(xml);
+    }
     
 }
