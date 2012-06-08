@@ -135,7 +135,7 @@ public enum Command implements ConfigConstants {
                 .withArgName(NAMESPACE)
                 .hasArg()
                 .withDescription(
-                    "Namespace used in NodeOutputFormat for output document.")
+                    "Namespace used for output document.")
                 .create(NAMESPACE);
             options.addOption(namespace);
             Option outputLanguage = OptionBuilder.withArgName(OUTPUT_LANGUAGE)
@@ -300,10 +300,9 @@ public enum Command implements ConfigConstants {
             String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE,
                 String.valueOf(DEFAULT_TRANSACTION_SIZE));
             conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
-            //TODO PROBLEMATIC
             if (cmdline.hasOption(NAMESPACE)) {
                 String ns = cmdline.getOptionValue(NAMESPACE);
-                conf.set(MarkLogicConstants.OUTPUT_NAMESPACE, ns);
+                conf.set(MarkLogicConstants.OUTPUT_CONTENT_NAMESPACE, ns);
             }
             if (cmdline.hasOption(OUTPUT_LANGUAGE)) {
                 String language = cmdline.getOptionValue(OUTPUT_LANGUAGE);
