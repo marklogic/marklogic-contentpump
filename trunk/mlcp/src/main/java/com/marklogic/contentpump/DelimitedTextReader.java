@@ -31,7 +31,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 public class DelimitedTextReader<VALUEIN> extends
     AbstractRecordReader<VALUEIN> {
-    protected static String[] fields;
+    protected String[] fields;
     protected static String DELIM;
     protected static String ROOT_START = "<root>";
     protected static String ROOT_END = "</root>";
