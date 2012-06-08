@@ -15,20 +15,14 @@ REM echo LIB_HOME: %LIB_HOME%
 
 SET "VMARGS=-DCONTENTPUMP_HOME=%LIB_HOME% -DCONTENTPUMP_VERSION=1.0"
 
-ECHO VMARGS: %VMARGS%
-ECHO LIB_HOME: %LIB_HOME%
 SetLocal EnableDelayedExpansion
 
 echo "***
-set classpath=.
+set classpath=%LIB_HOME%conf
 
 for %%X in (%LIB_HOME%\*) do (
   echo %%X
   set tmp=%%X
   set classpath=!classpath!;!tmp!
 )
-echo classpath: %classpath%
-java -version
-echo
-echo Start running .........\n
 java -cp %classpath% %VMARGS% com.marklogic.contentpump.ContentPump %*
