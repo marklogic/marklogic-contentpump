@@ -80,6 +80,9 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         Path file = ((FileSplit) inSplit).getPath();
         initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
+//        if (!fs.isFile(file)) {
+//            return;
+//        }
         FSDataInputStream fileIn = fs.open(file);
         XMLInputFactory f = XMLInputFactory.newInstance();
         try {
@@ -246,9 +249,13 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
      */
     @SuppressWarnings("unchecked")
     private boolean processEndElement() throws XMLStreamException {
-        // TODO
         if (skippingRecord) {
             return false;
+        }
+        if (recordDepth != currDepth || !newDoc) {
+            // not the end of the record: go look for more nodes
+            currDepth--;
+            return true;
         }
         
         String name = xmlSR.getLocalName();
@@ -270,11 +277,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         sb.append(">");
         write(sb.toString());
 
-        if (recordDepth != currDepth || !newDoc) {
-            // not the end of the record: go look for more nodes
-            currDepth--;
-            return true;
-        }
+
         if (value instanceof Text) {
             ((Text) value).set(buffer.toString());
         } else if (value instanceof ContentWithFileNameWritable) {
