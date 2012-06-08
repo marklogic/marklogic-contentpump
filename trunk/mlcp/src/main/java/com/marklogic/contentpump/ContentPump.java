@@ -82,6 +82,7 @@ public class ContentPump implements ConfigConstants {
         }
         
         // parse hadoop specific options
+        // TODO: add a default config file here so that it doesn't log a debug IOException.
         Configuration conf = new Configuration();
         GenericOptionsParser genericParser = new GenericOptionsParser(
                 conf, optionArgs);
@@ -134,6 +135,11 @@ public class ContentPump implements ConfigConstants {
                 System.err.println(e.getMessage());
                 return 1;
             }
+        } else { // running in local mode
+            // Tell Hadoop that we are running in local mode.  This is useful
+            // when the user has Hadoop home or their Hadoop conf dir in their
+            // classpath but want to run in local mode.
+            conf.set("mapred.job.tracker", "local");
         }
         
         // create job
