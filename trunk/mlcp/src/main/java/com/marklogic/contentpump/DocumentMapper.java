@@ -48,8 +48,17 @@ public class DocumentMapper<VALUE> extends
         while (uriReplace != null && i < uriReplace.length) {
             int fromIndex = 0;
             while ((fromIndex = sb.indexOf(uriReplace[i], fromIndex)) != -1) {
-                sb.replace(fromIndex, fromIndex + uriReplace[i].length(),
-                    uriReplace[i + 1]);
+                String replacement = uriReplace[i + 1];
+                if (replacement.startsWith("'")
+                    && replacement.endsWith("'")) {
+                    String trim = replacement.substring(1,
+                        replacement.length() - 1);
+                    sb.replace(fromIndex, fromIndex + uriReplace[i].length(),
+                        trim);
+                } else {
+                    throw new IOException(
+                        "replacement string should be wrapped by a pair of single quotes");
+                }
             }
             i += 2;
         }

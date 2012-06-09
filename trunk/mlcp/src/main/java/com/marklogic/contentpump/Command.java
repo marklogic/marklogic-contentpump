@@ -332,7 +332,9 @@ public enum Command implements ConfigConstants {
             String repairLevel = cmdline.getOptionValue(XML_REPAIR_LEVEL,
                 MarkLogicConstants.DEFAULT_OUTPUT_XML_REPAIR_LEVEL);
             conf.set(MarkLogicConstants.OUTPUT_XML_REPAIR_LEVEL, repairLevel.toUpperCase());
-
+//            String streaming = cmdline.getOptionValue(STREAMING,
+//                DEFAULT_STREAMING);
+//            conf.set(CONF_STREAMING, streaming);
             if (cmdline.hasOption(INPUT_SEQUENCEFILE_KEY_CLASS)) {
                 String keyClass = cmdline
                     .getOptionValue(INPUT_SEQUENCEFILE_KEY_CLASS);
@@ -461,10 +463,6 @@ public enum Command implements ConfigConstants {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
                 conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH, path);
             }
-//            if (cmdline.hasOption(DOCUMENT_NAMESPACE)) {
-//                String ns = cmdline.getOptionValue(DOCUMENT_NAMESPACE);
-//                conf.set(MarkLogicConstants.PATH_NAMESPACE, ns);
-//            }
             if (cmdline.hasOption(OUTPUT_COMPRESS)) {
                 String isCompress = cmdline.getOptionValue(OUTPUT_COMPRESS);
                 conf.set(CONF_OUTPUT_COMPRESS, isCompress);
@@ -779,11 +777,9 @@ public enum Command implements ConfigConstants {
     static void applyCommonOutputConfigOptions(Configuration conf, CommandLine cmdline) {
 
         if (cmdline.hasOption(OUTPUT_URI_REPLACE)) {
-            String[] uriReplace = cmdline
-                .getOptionValues(OUTPUT_URI_REPLACE);
-            if (uriReplace == null || uriReplace.length > 1) {
-                LOG.error(OUTPUT_URI_REPLACE
-                    + " is not configured correctly.");
+            String uriReplace = cmdline.getOptionValue(OUTPUT_URI_REPLACE);
+            if (uriReplace == null) {
+                LOG.error(OUTPUT_URI_REPLACE + " is not configured correctly.");
             } else {
                 conf.setStrings(CONF_OUTPUT_URI_REPLACE, uriReplace);
             }
