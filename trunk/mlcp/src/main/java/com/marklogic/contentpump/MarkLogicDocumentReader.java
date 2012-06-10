@@ -47,15 +47,17 @@ import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XdmElement;
 
 /**
- * can't reuse MarkLogicRecordReader, because the prolog of the query need to be changed, can't simply change query body
+ * can't reuse MarkLogicRecordReader, because the prolog of the query need to be
+ * changed, can't simply change query body
  * 
  * @author ali
- *
+ * 
  */
-public class MarkLogicDocumentReader extends MarkLogicRecordReader <DocumentURI, MarkLogicDocument>{
+public class MarkLogicDocumentReader extends
+    MarkLogicRecordReader<DocumentURI, MarkLogicDocument> {
     static final float DOCUMENT_TO_FRAGMENT_RATIO = 1;
     public static final Log LOG = LogFactory
-    .getLog(MarkLogicDocumentReader.class);
+        .getLog(MarkLogicDocumentReader.class);
     protected boolean copyCollection;
     protected boolean copyPermission;
     protected boolean copyProperties;
@@ -68,7 +70,7 @@ public class MarkLogicDocumentReader extends MarkLogicRecordReader <DocumentURI,
      * Current value.
      */
     protected MarkLogicDocument currentValue;
-    protected ContentType valType;
+
     public MarkLogicDocumentReader(Configuration conf) {
         super(conf);
         copyCollection = isCopyCollection(conf);
@@ -78,27 +80,27 @@ public class MarkLogicDocumentReader extends MarkLogicRecordReader <DocumentURI,
         currentKey = new DocumentURI();
 
     }
-    
-    private boolean isCopyCollection(Configuration conf){
+
+    private boolean isCopyCollection(Configuration conf) {
         String r = conf.get(ConfigConstants.CONF_COPY_COLLECTIONS);
         return Boolean.parseBoolean(r);
     }
-    
-    private boolean isCopyPermission(Configuration conf){
+
+    private boolean isCopyPermission(Configuration conf) {
         String r = conf.get(ConfigConstants.CONF_COPY_PERMISSIONS);
         return Boolean.parseBoolean(r);
     }
-    
-    private boolean isCopyProperties(Configuration conf){
+
+    private boolean isCopyProperties(Configuration conf) {
         String r = conf.get(ConfigConstants.CONF_COPY_PROPERTIES);
         return Boolean.parseBoolean(r);
     }
-    
-    private boolean isCopyQuality(Configuration conf){
+
+    private boolean isCopyQuality(Configuration conf) {
         String r = conf.get(ConfigConstants.CONF_COPY_QUALITY);
         return Boolean.parseBoolean(r);
     }
-    
+
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
@@ -161,42 +163,47 @@ public class MarkLogicDocumentReader extends MarkLogicRecordReader <DocumentURI,
         buf.append("for $doc in ");
         buf.append(docExpr);
         buf.append("[$mlmr:splitstart to $mlmr:splitend]");
-        buf.append("\nlet $uri := fn:base-uri($doc)\n return ('DOC',");
-        buf.append("$uri,");
-        buf.append("$doc,");
-        buf.append("0,");
-
-        buf.append("'META',");
-        buf.append("$uri,");
-        if (copyCollection) {
-            buf.append("xdmp:document-get-collections($uri),\n");
-        }
-        if (copyPermission) {
-            buf.append("let $list := xdmp:document-get-permissions($uri)\n");
-            buf.append("let $query := \"import module 'http://marklogic.com/xdmp/security' at '/MarkLogic/security.xqy';\n");
-            buf.append("declare variable $LIST as element(sec:permissions) external;\n");
-            buf.append("for $p in $LIST/sec:permission \n");
-            buf.append("return element sec:permission {\n");
-            buf.append("$p/@*, $p/node(), sec:get-role-names($p/sec:role-id) }\"\n");
-            buf.append("return xdmp:eval($query, (xs:QName('LIST'), element sec:permissions { $list }),");
-            buf.append("<options xmlns=\"xdmp:eval\"><database>{ xdmp:security-database() }</database></options>),");
-        }
-        // if copy-quality, else + 0
-        if (copyQuality) {
-            buf.append("xdmp:document-get-quality($uri),\n");
-        } else {
+        buf.append("\nlet $uri := fn:base-uri($doc)\n return (");
+        
+        if (copyCollection || copyPermission || copyProperties || copyQuality) {
+            buf.append("'META',");
+            buf.append("$uri,");
+            buf.append("xdmp:node-kind(($doc/element(),$doc/text(),$doc/binary(),$doc/processing-instruction(),$doc/comment())),");
+            if (copyCollection) {
+                buf.append("xdmp:document-get-collections($uri),\n");
+            }
+            if (copyPermission) {
+                buf.append("let $list := xdmp:document-get-permissions($uri)\n");
+                buf.append("let $query := \"import module 'http://marklogic.com/xdmp/security' at '/MarkLogic/security.xqy';\n");
+                buf.append("declare variable $LIST as element(sec:permissions) external;\n");
+                buf.append("for $p in $LIST/sec:permission \n");
+                buf.append("return element sec:permission {\n");
+                buf.append("$p/@*, $p/node(), sec:get-role-names($p/sec:role-id) }\"\n");
+                buf.append("return xdmp:eval($query, (xs:QName('LIST'), element sec:permissions { $list }),");
+                buf.append("<options xmlns=\"xdmp:eval\"><database>{ xdmp:security-database() }</database></options>),");
+            }
+            // if copy-quality, else + 0
+            if (copyQuality) {
+                buf.append("xdmp:document-get-quality($uri),\n");
+            } else {
+                buf.append("0,");
+            }
+            // if copy-properties, else + (),\n
+            if (copyProperties) {
+                buf.append("xdmp:document-properties($uri)/prop:properties,\n");
+            } else {
+                buf.append("(),\n");
+            }
+            // end-of-record marker
             buf.append("0,");
         }
-        // if copy-properties, else + (),\n
-        if (copyProperties) {
-            buf.append("xdmp:document-properties($uri)/prop:properties,\n");
-        } else {
-            buf.append("(),\n");
-        }
-        // end-of-record marker
-        buf.append("0 )\n");
+        buf.append("'DOC',");
+        buf.append("$uri,");
+        buf.append("$doc,");
+        buf.append("0");
 
-        buf.append(")[");
+        
+        buf.append(" )\n)[");
         buf.append(Long.toString(start));
         buf.append(" to ");
         buf.append(Long.toString(end));
@@ -237,143 +244,139 @@ public class MarkLogicDocumentReader extends MarkLogicRecordReader <DocumentURI,
         if (result == null || !result.hasNext()) {
             return false;
         }
-            ResultItem item = result.next();
-            count++;
+        ResultItem item = result.next();
+        count++;
 
-            currentValue = new MarkLogicDocument();
+        currentValue = new MarkLogicDocument();
 
-            // value type: document or metadata
-            String type = null;
-            if ( item!=null && item.getItemType() == ValueType.XS_STRING) {
-                type = item.asString();
-            } else {
-                throw new IOException("incorrect format");
-            }
+        // value type: document or metadata
+        String type = null;
+        if (item != null && item.getItemType() == ValueType.XS_STRING) {
+            type = item.asString();
+        } else {
+            throw new IOException("incorrect format");
+        }
+        item = result.next();
+        String uri = item.asString();
+        if (uri == null) {
+            throw new IOException("no uri");
+        }
+        item = result.next();
+        if ("DOC".equals(type)) {
+            currentKey.setUri(uri);
+            // handle document-node, always present
+            currentValue.set(item);
             item = result.next();
-            String uri = item.asString();
-            if(uri == null) {
-                throw new IOException("no uri");
-            }
-            item = result.next();
-            if("DOC".equals(type)) {
-                currentKey.setUri(uri);
-                // handle document-node, always present
-//                byte[] content = Utilities.cat(item.asInputStream());
-                currentValue.set(item);//content, 0, content.length);
-                valType = currentValue.getContentType();
-                item = result.next();
+
+        } else if ("META".equals(type)) {
+            DocumentMetadata metadata = new DocumentMetadata();
+            //node-kind, must exist
+            String nKind = item.asString();
+            metadata.setFormat(nKind);
             
-            } else if ("META".equals(type)) {
-                DocumentMetadata metadata = new DocumentMetadata();
-                currentKey.setUri(uri + DocumentMetadata.EXTENSION);
-                // handle collections, may not be present
-                while ( item!=null && item.getItemType() == ValueType.XS_STRING) {
-                    if (!copyCollection) {
-                        continue;
-                    }
-                    metadata.addCollection(item.asString());
-                    item = result.next();
+            item = result.next();
+            currentKey.setUri(uri + DocumentMetadata.EXTENSION);
+            // handle collections, may not be present
+            while (item != null && item.getItemType() == ValueType.XS_STRING) {
+                if (!copyCollection) {
+                    continue;
                 }
-                // handle permissions, may not be present
-                while ( item !=null 
-                        && ValueType.ELEMENT == item.getItemType()) {
-                    if (!copyPermission) {
-                        continue;
-                    }
-                    try {
-                        readPermission((XdmElement) item.getItem(),
-                                metadata);
-                    } catch (Exception e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    item = result.next();
-                }
-                // handle quality, always present even if not requested (barrier)
-                metadata.setQuality((XSInteger) item.getItem());
+                metadata.addCollection(item.asString());
                 item = result.next();
-
-                // handle prop:properties node, optional
-                // if not present, there will be a 0 as a marker
-                if (copyProperties
-                        && ValueType.ELEMENT == item.getItemType()) {
-                    String pString = item.asString();
-                    if (pString != null) {
-                        metadata.setProperties(pString);
-                    }
-                    item = result.next();
+            }
+            // handle permissions, may not be present
+            while (item != null && ValueType.ELEMENT == item.getItemType()) {
+                if (!copyPermission) {
+                    continue;
                 }
-                
-                byte[] metacontent = metadata.toXML().getBytes();
-                currentValue.setContent(metacontent);
+                try {
+                    readPermission((XdmElement) item.getItem(), metadata);
+                } catch (Exception e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                item = result.next();
+            }
+            // handle quality, always present even if not requested (barrier)
+            metadata.setQuality((XSInteger) item.getItem());
+            item = result.next();
+
+            // handle prop:properties node, optional
+            // if not present, there will be a 0 as a marker
+            if (copyProperties && ValueType.ELEMENT == item.getItemType()) {
+                String pString = item.asString();
+                if (pString != null) {
+                    metadata.setProperties(pString);
+                }
+                item = result.next();
+            }
+
+            byte[] metacontent = metadata.toXML().getBytes();
+            currentValue.setContent(metacontent);
             // the type of metadata is the same as type of the content, so that
             // it goes into the same archive
-                currentValue.setContentType(valType);
-                
-            } else {
-                throw new IOException ("incorrect type");
-            }
-            
+            String format = metadata.getFormatName();
+            format = format.replaceAll("\\(\\)", "");
+            currentValue.setContentType(ContentType.forName(format));
+
+        } else {
+            throw new IOException("incorrect type");
+        }
+
         if (ValueType.XS_INTEGER != item.getItemType()) {
             throw new IOException("unexpected " + item.getItemType() + " "
                 + item.asString() + ", expected " + ValueType.XS_INTEGER
                 + " 0");
         }
-            
+
         return true;
     }
-    
+
     @Override
     protected boolean nextResult(ResultItem result) {
-        return false; 
+        return false;
     }
-    
+
     private void readPermission(XdmElement _permissionElement,
         DocumentMetadata _metadata) throws Exception {
-    // permission: turn into a ContentPermission object
-    // each permission is a sec:permission element.
-    // children:
-    // sec:capability ("read", "insert", "update")
-    // and sec:role xs:unsignedLong (but we need string)
-    LOG.debug("permissionElement = "
-            + _permissionElement.asString());
+        // permission: turn into a ContentPermission object
+        // each permission is a sec:permission element.
+        // children:
+        // sec:capability ("read", "insert", "update")
+        // and sec:role xs:unsignedLong (but we need string)
+        LOG.debug("permissionElement = " + _permissionElement.asString());
 
-        Element permissionW3cElement = _permissionElement
-                .asW3cElement();
-        LOG.debug("permissionElement = "
-                + permissionW3cElement.toString());
+        Element permissionW3cElement = _permissionElement.asW3cElement();
+        LOG.debug("permissionElement = " + permissionW3cElement.toString());
 
         NodeList capabilities = permissionW3cElement
-                .getElementsByTagName("sec:capability");
+            .getElementsByTagName("sec:capability");
         NodeList roles = permissionW3cElement
-                .getElementsByTagName("sec:role-name");
+            .getElementsByTagName("sec:role-name");
         Node role;
         Node capability;
         if (0 < roles.getLength() && 0 < capabilities.getLength()) {
             role = roles.item(0);
             capability = capabilities.item(0);
-            _metadata.addPermission(capability.getTextContent(), role
-                    .getTextContent());
+            _metadata.addPermission(capability.getTextContent(),
+                role.getTextContent());
             if (roles.getLength() > 1) {
-                LOG.warn("input permission: "
-                        + permissionW3cElement + ": "
-                        + roles.getLength() + " roles, using only 1");
+                LOG.warn("input permission: " + permissionW3cElement + ": "
+                    + roles.getLength() + " roles, using only 1");
             }
             if (capabilities.getLength() > 1) {
-                LOG.warn("input permission: "
-                        + permissionW3cElement + ": "
-                        + capabilities.getLength()
-                        + " capabilities, using only 1");
+                LOG.warn("input permission: " + permissionW3cElement + ": "
+                    + capabilities.getLength() + " capabilities, using only 1");
             }
         } else {
             // warn and skip
             if (roles.getLength() < 1) {
-                LOG.warn("skipping input permission: "
-                        + permissionW3cElement + ": no roles");
+                LOG.warn("skipping input permission: " + permissionW3cElement
+                    + ": no roles");
             }
             if (capabilities.getLength() < 1) {
-                LOG.warn("skipping input permission: "
-                        + permissionW3cElement + ": no capabilities");
+                LOG.warn("skipping input permission: " + permissionW3cElement
+                    + ": no capabilities");
             }
         }
 
@@ -391,14 +394,15 @@ public class MarkLogicDocumentReader extends MarkLogicRecordReader <DocumentURI,
     }
 
     @Override
-    public DocumentURI getCurrentKey() throws IOException, InterruptedException {
+    public DocumentURI getCurrentKey() throws IOException,
+        InterruptedException {
         return currentKey;
     }
 
     @Override
-    public MarkLogicDocument getCurrentValue() throws IOException, InterruptedException {
+    public MarkLogicDocument getCurrentValue() throws IOException,
+        InterruptedException {
         return currentValue;
     }
 
-    
 }

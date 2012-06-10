@@ -82,6 +82,7 @@ public interface ConfigConstants {
     static final String TRANSACTION_SIZE = "transaction_size";
     static final int DEFAULT_TRANSACTION_SIZE = 10;
     static final String STREAMING = "streaming";
+    static final String DEFAULT_STREAMING = "false";
     static final String NAMESPACE = "namespace";
     static final String DOCUMENT_TYPE = "document_type";
     static final String DEFAULT_DOCUMENT_TYPE = "XML";
@@ -171,4 +172,6 @@ public interface ConfigConstants {
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
     static final String CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = 
         "mapreduce.marklogic.input.archive.allowemptymetadata";
+    //TODO
+    static final String CONF_STREAMING = "mapreduce.marklogic.input.streaming";
 }
