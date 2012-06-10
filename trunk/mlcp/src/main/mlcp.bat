@@ -6,7 +6,7 @@ echo %argss%
 
 
 set cmdpath=%~dp0
-echo Command Path:  %cmdpath%
+REM echo Command Path:  %cmdpath%
 set cmdpath=%cmdpath:~0,-1%
 for %%d in (%cmdpath%) do set cmdppath=%%~dpd
 REM echo %cmdppath%
@@ -17,8 +17,7 @@ SET "VMARGS=-DCONTENTPUMP_HOME=%LIB_HOME% -DCONTENTPUMP_VERSION=1.0"
 
 SetLocal EnableDelayedExpansion
 
-echo "***
-set classpath=%LIB_HOME%conf
+set classpath=%cmdppath%conf
 
 for %%X in (%LIB_HOME%\*) do (
   echo %%X
