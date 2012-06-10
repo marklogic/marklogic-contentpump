@@ -39,7 +39,8 @@ public abstract class AbstractRecordReader<VALUEIN> extends
     protected VALUEIN value;
     protected String prefix;
     protected String suffix;
-
+    protected String mode;
+    protected boolean streaming = false;
     protected void setKey(String uri) {
         StringBuilder sb = new StringBuilder();
         if (prefix != null) {
@@ -105,7 +106,12 @@ public abstract class AbstractRecordReader<VALUEIN> extends
         Class<? extends Writable> valueClass = contentType.getWritableClass();
         value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
         configFileNameAsCollection(conf, file);
-        
+//        mode = conf.get(ConfigConstants.CONF_MODE);
+//        if(mode.equals(ConfigConstants.MODE_LOCAL)) {
+//            if(Boolean.parseBoolean(conf.get(ConfigConstants.CONF_STREAMING))) {
+//                //TODO: do something about streaming
+//            }
+//        }
     }
 
     @Override

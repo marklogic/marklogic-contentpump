@@ -26,7 +26,7 @@ import com.marklogic.xcc.ContentPermission;
 
 public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
     protected DocumentMetadata meta;
-    
+
     public DocumentMetadata getMeta() {
         return meta;
     }
@@ -35,13 +35,17 @@ public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
         this.meta = meta;
     }
 
-    public void updateOptions(ContentCreateOptions options){
+    public void updateOptions(ContentCreateOptions options) {
+        if (meta == null) {
+            return;
+        }
         options.setQuality(meta.quality);
         options.setCollections(meta.collectionsList.toArray(new String[0]));
-        options.setPermissions(meta.permissionsList.toArray(new ContentPermission[0]));
+        options.setPermissions(meta.permissionsList
+            .toArray(new ContentPermission[0]));
     }
-    
-    public String getProperties(){
+
+    public String getProperties() {
         return meta.getProperties();
     }
 
@@ -49,7 +53,7 @@ public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
     public void readFields(DataInput in) throws IOException {
         super.readFields(in);
         int len = in.readInt();
-        byte [] xml = new byte[len];
+        byte[] xml = new byte[len];
         in.readFully(xml, 0, len);
         StringReader reader = new StringReader(new String(xml));
         meta = DocumentMetadata.fromXML(reader);
@@ -62,5 +66,5 @@ public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
         out.writeInt(xml.length);
         out.write(xml);
     }
-    
+
 }

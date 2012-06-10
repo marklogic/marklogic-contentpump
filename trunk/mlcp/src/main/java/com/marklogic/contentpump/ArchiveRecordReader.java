@@ -43,6 +43,8 @@ public class ArchiveRecordReader extends
     private boolean hasNext = true;
     private static String EXTENSION = ".zip";
     private byte[] buf = new byte[65536];
+    private boolean allowEmptyMeta = false;
+    private int count = 0;
     /**
      * the type of files in this archive Valid choices: XML, TEXT, BINARY
      */
@@ -85,6 +87,8 @@ public class ArchiveRecordReader extends
         FSDataInputStream fileIn = fs.open(file);
         zipIn = new ZipInputStream(fileIn);
 
+        allowEmptyMeta = Boolean.parseBoolean(conf
+            .get(ConfigConstants.CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA));
     }
 
     @Override
@@ -105,11 +109,18 @@ public class ArchiveRecordReader extends
                 if (name.endsWith(DocumentMetadata.EXTENSION)) {
                     ((MarkLogicDocumentWithMeta) value)
                         .setMeta(getMetadataFromStream());
-                    return true;
+                    count++;
+                    continue;
+                }
+                //no meta data
+                if(count%2 ==0 && !allowEmptyMeta) {
+//                    expects meta, while not allowing empty meta
+                    throw new IOException("No metadata in archive.");
                 } else {
                     setKey(zipEntry.getName());
                     readDocFromStream((MarkLogicDocument) value);
-                    continue;
+                    count++;
+                    return true;
                 }
 
             }
