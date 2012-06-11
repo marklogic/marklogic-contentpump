@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -61,6 +62,7 @@ extends FileAndDirectoryInputFormat<DocumentURI, VALUE> {
 
         // generate splits
         List<InputSplit> splits = super.getSplits(job);
+        List<InputSplit> combinedSplits = new ArrayList<InputSplit>();
         CombineDocumentSplit split = null;
         for (InputSplit file: splits) {
             Path path = ((FileSplit)file).getPath();
@@ -79,7 +81,7 @@ extends FileAndDirectoryInputFormat<DocumentURI, VALUE> {
                         split.getLength() < minSize ) {
                         split.addSplit((FileSplit) file); 
                     } else {
-                        splits.add(split);
+                        combinedSplits.add(split);
                         split = new CombineDocumentSplit();
                         split.addSplit((FileSplit) file);
                     }
@@ -90,12 +92,12 @@ extends FileAndDirectoryInputFormat<DocumentURI, VALUE> {
             } 
         }
         if (split != null) {
-            splits.add(split);
+            combinedSplits.add(split);
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("Total # of splits: " + splits.size());
         }
         
-        return splits;
+        return combinedSplits;
     }
 }
