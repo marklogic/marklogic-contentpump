@@ -90,7 +90,11 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         } catch (XMLStreamException e) {
             e.printStackTrace();
         }
-
+        initAggConf(inSplit, context);
+    }
+    
+    protected void initAggConf(InputSplit inSplit, TaskAttemptContext context){
+        Configuration conf = context.getConfiguration();
         idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
         if(idName == null) {
             useAutomaticId = true;
@@ -98,13 +102,14 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
         recordNamespace = conf
             .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
-        mode = conf.get(ConfigConstants.CONF_MODE);
-        if (mode.equals(ConfigConstants.MODE_DISTRIBUTED)) {
-            idGen = new LocalIdGenerator( String.valueOf(context.getTaskAttemptID().getTaskID().getId()));
-        } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
-            idGen = new LocalIdGenerator(String.valueOf(inSplit.hashCode()));
+        if(useAutomaticId) {
+            mode = conf.get(ConfigConstants.CONF_MODE);
+            if (mode.equals(ConfigConstants.MODE_DISTRIBUTED)) {
+                idGen = new LocalIdGenerator( String.valueOf(context.getTaskAttemptID().getTaskID().getId()));
+            } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
+                idGen = new LocalIdGenerator(String.valueOf(inSplit.hashCode()));
+            }
         }
-
     }
 
     private void write(String str) {
