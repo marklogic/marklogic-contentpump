@@ -64,7 +64,7 @@ public class InternalUtilities implements MarkLogicConstants {
      * @return server URI
      * @throws URISyntaxException
      */
-    static URI getInputServerUri(Configuration conf) throws URISyntaxException {
+    public static URI getInputServerUri(Configuration conf) throws URISyntaxException {
         String host = conf.get(INPUT_HOST);
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException(INPUT_HOST + 
@@ -81,7 +81,7 @@ public class InternalUtilities implements MarkLogicConstants {
      * @return server URI
      * @throws URISyntaxException
      */
-    static URI getInputServerUri(Configuration conf, String hostName) 
+    public static URI getInputServerUri(Configuration conf, String hostName) 
     throws URISyntaxException {
         String user = conf.get(INPUT_USERNAME, "");
         String password = conf.get(INPUT_PASSWORD, "");
@@ -141,7 +141,7 @@ public class InternalUtilities implements MarkLogicConstants {
      * @throws XccConfigException
      * @throws IOException
      */
-    static ContentSource getInputContentSource(Configuration conf) 
+    public static ContentSource getInputContentSource(Configuration conf) 
     throws URISyntaxException, XccConfigException, IOException {
         return getInputContentSource(conf, getInputServerUri(conf));
     }
@@ -157,7 +157,7 @@ public class InternalUtilities implements MarkLogicConstants {
      * @throws URISyntaxException 
      * @throws IOException 
      */
-    static ContentSource getInputContentSource(Configuration conf, 
+    public static ContentSource getInputContentSource(Configuration conf, 
             URI serverUri)
     throws IOException, XccConfigException { 
         boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
@@ -189,7 +189,7 @@ public class InternalUtilities implements MarkLogicConstants {
      * @throws URISyntaxException 
      * @throws IOException 
      */
-    static ContentSource getOutputContentSource(Configuration conf,
+    public static ContentSource getOutputContentSource(Configuration conf,
             URI serverUri)
     throws IOException, XccConfigException { 
         boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
@@ -296,7 +296,7 @@ public class InternalUtilities implements MarkLogicConstants {
         }
     }
 
-    static ContentSource getOutputContentSource(Configuration conf,
+    public static ContentSource getOutputContentSource(Configuration conf,
             String hostName) 
     throws URISyntaxException, XccConfigException, IOException {
         URI serverUri = getOutputServerUri(conf, hostName);
@@ -311,7 +311,7 @@ public class InternalUtilities implements MarkLogicConstants {
      * @param forestHostMap
      * @return host name
      */
-    static String getHost(int taskId,
+    public static String getHost(int taskId,
             LinkedMapWritable forestHostMap) {
         int count = forestHostMap.size();
         int position = taskId % count;
@@ -369,49 +369,6 @@ public class InternalUtilities implements MarkLogicConstants {
         } else {
             throw new UnsupportedOperationException("Value " +  
                     value.getClass().getName() + " is unsupported.");
-        }
-    }
-    
-    /**
-     * Query MarkLogic and produce a forest-host mapping.
-     * @param session session to use for the query
-     */
-    public static LinkedMapWritable queryForestHostMap(Session session) 
-    throws RequestException {
-        AdhocQuery query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
-        RequestOptions options = new RequestOptions();
-        options.setDefaultXQueryVersion("1.0-ml");
-        query.setOptions(options);
-        return queryForestHostMap(session, query);
-    }
-    
-    /**
-     * Query MarkLogic and produce a forest-host mapping.
-     * @param session session to use for the query
-     * @param query query to use
-     */
-    public static LinkedMapWritable queryForestHostMap(Session session, 
-                    AdhocQuery query) throws RequestException {
-        ResultSequence result = null;
-        try {
-            result = session.submitRequest(query);
-            LinkedMapWritable forestHostMap = new LinkedMapWritable();
-            Text forest = null;
-            while (result.hasNext()) {
-                ResultItem item = result.next();
-                if (forest == null) {
-                    forest = new Text(item.asString());            
-                } else {
-                    Text hostName = new Text(item.asString());
-                    forestHostMap.put(forest, hostName);
-                    forest = null;
-                }
-            }
-            return forestHostMap;
-        } finally {
-            if (result != null) {
-                result.close();
-            }
         }
     }
 }
