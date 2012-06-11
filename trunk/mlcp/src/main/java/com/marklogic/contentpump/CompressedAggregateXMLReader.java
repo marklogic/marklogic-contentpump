@@ -55,7 +55,6 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
         initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
-        System.err.println(file.toUri());
         factory = XMLInputFactory.newInstance();
 
         String codecString = conf.get(
@@ -81,8 +80,6 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
                 xmlSR = factory
                     .createXMLStreamReader(new ByteArrayInputStream(baos
                         .toByteArray()));
-                // skip the root element
-                xmlSR.next();
             } catch (XMLStreamException e) {
                 e.printStackTrace();
             }
@@ -93,28 +90,12 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
             codec = CompressionCodecEnum.GZIP;
             try {
                 xmlSR = factory.createXMLStreamReader(zipIn);
-                // skip the root element
-                xmlSR.next();
             } catch (XMLStreamException e) {
                 e.printStackTrace();
             }
         }
-        // copy the namespaces declared in root element
-        copyNameSpaceDecl();
 
-        idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
-        if(idName == null) {
-            useAutomaticId = true;
-        }
-        recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
-        recordNamespace = conf
-            .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
-        mode = conf.get(ConfigConstants.CONF_MODE);
-        if (mode == null) {
-            idGen = new LocalIdGenerator(context.getTaskAttemptID().toString());
-        } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
-            idGen = new LocalIdGenerator(file.getName());
-        }
+        initAggConf(inSplit, context);
     }
 
     private boolean nextRecordInAggregate() throws IOException,
@@ -141,7 +122,6 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
                 // xmlSR does not hasNext, try next zipEntry if any
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 while ((currZipEntry = zis.getNextEntry()) != null) {
-                    System.err.println(currZipEntry.getName());
                     if (currZipEntry.isDirectory()
                         || currZipEntry.getSize() == 0) {
                         continue;
@@ -153,10 +133,7 @@ public class CompressedAggregateXMLReader extends AggregateXMLReader<Text> {
                     xmlSR = factory
                         .createXMLStreamReader(new ByteArrayInputStream(baos
                             .toByteArray()));
-                    // skip the root element
-                    xmlSR.next();
                     nameSpaces.clear();
-                    copyNameSpaceDecl();
 
                     return nextRecordInAggregate();
                 }
