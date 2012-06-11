@@ -16,12 +16,10 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -29,7 +27,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.mapreduce.DocumentURI;
@@ -42,7 +39,7 @@ import com.marklogic.mapreduce.DocumentURI;
  *
  */
 public class CombineDocumentInputFormat<VALUE>
-extends FileInputFormat<DocumentURI, VALUE> {
+extends FileAndDirectoryInputFormat<DocumentURI, VALUE> {
     public static final Log LOG = 
         LogFactory.getLog(CombineDocumentInputFormat.class);
     
@@ -58,25 +55,21 @@ extends FileInputFormat<DocumentURI, VALUE> {
     } 
     
     @Override
-    public List<InputSplit> getSplits(JobContext job
-    ) throws IOException {
+    public List<InputSplit> getSplits(JobContext job) throws IOException {
         long minSize = Math.max(getFormatMinSplitSize(), getMinSplitSize(job));
         long maxSize = getMaxSplitSize(job);      
 
         // generate splits
-        List<InputSplit> splits = new ArrayList<InputSplit>();
+        List<InputSplit> splits = super.getSplits(job);
         CombineDocumentSplit split = null;
-        for (FileStatus file: listStatus(job)) {
-            Path path = file.getPath();
+        for (InputSplit file: splits) {
+            Path path = ((FileSplit)file).getPath();
             FileSystem fs = path.getFileSystem(job.getConfiguration());
-            long length = file.getLen();
-            BlockLocation[] blkLocations = fs.getFileBlockLocations(file, 0, length);
-            long blockSize = file.getBlockSize();
+            FileStatus status = fs.getFileStatus(path);
+            long length = status.getLen();
+            long blockSize = status.getBlockSize();
             long splitSize = computeSplitSize(blockSize, minSize, maxSize);
-            if (length != 0) { 
-                FileSplit fileSplit = new FileSplit(path, 0, length, 
-                        blkLocations[0].getHosts());
-
+            if (length != 0) {
                 if (split == null) {
                     split = new CombineDocumentSplit();
                 }
@@ -84,12 +77,11 @@ extends FileInputFormat<DocumentURI, VALUE> {
                 try {
                     if (split.getLength() + length < splitSize ||
                         split.getLength() < minSize ) {
-                        split.addSplit(fileSplit); 
+                        split.addSplit((FileSplit) file); 
                     } else {
                         splits.add(split);
                         split = new CombineDocumentSplit();
-                        split.addSplit(new FileSplit(path, 0, length, 
-                                blkLocations[0].getHosts()));
+                        split.addSplit((FileSplit) file);
                     }
                 } catch (InterruptedException e) {
                     LOG.error(e);

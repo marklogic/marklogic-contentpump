@@ -23,12 +23,11 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.DocumentURI;
 
 public class DelimitedTextInputFormat extends
-    FileInputFormat<DocumentURI, Text> {
+FileAndDirectoryInputFormat<DocumentURI, Text> {
 
     @Override
     public RecordReader<DocumentURI, Text> createRecordReader(InputSplit arg0,
