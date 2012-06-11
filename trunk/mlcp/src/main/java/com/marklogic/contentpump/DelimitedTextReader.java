@@ -78,21 +78,49 @@ public class DelimitedTextReader<VALUEIN> extends
             return false;
         }
         String line = br.readLine();
+        // skip empty lines
+        while (line != null) {
+            if (!"".equals(line.trim())) {
+                break;
+            }
+            line = br.readLine();
+        }
         if (line == null) {
             return false;
         }
         if (fields == null) {
             fields = line.split(DELIM);
+            boolean found = false;
             for (int i = 0; i < fields.length; i++) {
                 if (i == 0 && idName == null || fields[i].equals(idName)) {
                     idName = fields[i];
+                    found = true;
                     break;
                 }
             }
+            if(found == false) {
+                //idname doesn't match any columns
+                LOG.error("delimited_uri_id doesn't match any column");
+                throw new IOException("delimited_uri_id doesn't match any column");
+            }
             line = br.readLine();
+            // skip empty lines
+            while (line != null) {
+                if (!"".equals(line.trim())) {
+                    break;
+                }
+                line = br.readLine();
+            }
+            if (line == null) {
+                return false;
+            }
         }
 
         String[] values = line.split(DELIM);
+        if(values.length != fields.length) {
+            LOG.error(line + " is inconsistent with column definition");
+            return true;
+        }
         StringBuilder sb = new StringBuilder();
         sb.append(ROOT_START);
         for (int i = 0; i < fields.length; i++) {
@@ -110,11 +138,11 @@ public class DelimitedTextReader<VALUEIN> extends
         sb.append(ROOT_END);
         if (value instanceof Text) {
             ((Text) value).set(sb.toString());
-        }
-        else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>)value).getValue();
+        } else if (value instanceof ContentWithFileNameWritable) {
+            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
+                .getValue();
             if (realValue instanceof Text) {
-                ((Text)realValue).set(sb.toString());
+                ((Text) realValue).set(sb.toString());
             } else {
                 LOG.error("Expects Text in delimited text");
             }
