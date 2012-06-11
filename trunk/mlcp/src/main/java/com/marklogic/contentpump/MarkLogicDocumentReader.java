@@ -33,6 +33,7 @@ import org.w3c.dom.NodeList;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.InternalUtilities;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.MarkLogicInputSplit;
 import com.marklogic.mapreduce.MarkLogicRecordReader;

@@ -218,7 +218,7 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                     : outputDir + '/' + uri;
             }
             key.setUri(uri);
-            Utilities.validateURI(uri);
+            key.validate();
             fId = key.getPlacementId(forestIds.length);
 
             forestId = forestIds[fId];
@@ -255,7 +255,7 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                     ((MarkLogicDocument)value).setContentType(ContentType.XML);
                     String metaStr = ((MarkLogicDocument)value).getContentAsText().toString();
                     meta = DocumentMetadata.fromXML(new StringReader(metaStr));
-                    Utilities.updateOptionsUsingMeta(options, meta);
+                    updateOptionsUsingMeta(options, meta);
                     metaOnly = true;
                 } else {
                     MarkLogicDocument doc = (MarkLogicDocument)value;
@@ -407,5 +407,11 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
         req.setNewStringVariable("URI", _uri);
         req.setNewStringVariable("XML-STRING", _xmlString);
         s.submitRequest(req);
+    }
+    
+    public static void updateOptionsUsingMeta(ContentCreateOptions options, DocumentMetadata meta) {
+        options.setQuality(meta.quality);
+        options.setCollections(meta.collectionsList.toArray(new String[0]));
+        options.setPermissions(meta.permissionsList.toArray(new ContentPermission[0]));
     }
 }

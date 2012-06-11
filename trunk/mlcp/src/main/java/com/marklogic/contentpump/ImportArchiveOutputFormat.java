@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.InternalUtilities;
 import com.marklogic.mapreduce.LinkedMapWritable;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.exceptions.XccConfigException;

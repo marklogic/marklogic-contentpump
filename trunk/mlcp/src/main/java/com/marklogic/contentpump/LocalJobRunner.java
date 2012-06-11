@@ -40,8 +40,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.TaskID;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.marklogic.mapreduce.MarkLogicConstants;
-
 /**
  * Runs a job in-process, potentially multi-threaded.  Only supports map-only
  * jobs.

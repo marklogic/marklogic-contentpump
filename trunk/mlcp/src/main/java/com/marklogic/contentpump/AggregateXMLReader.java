@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -34,6 +35,8 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
+    protected static Pattern[] patterns = new Pattern[] {
+        Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
     private static String DEFAULT_NS = null;
     private int currDepth = 0;
     protected XMLStreamReader xmlSR;
@@ -201,7 +204,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         for (int i = 0; i < attrCount; i++) {
             String aPrefix = xmlSR.getAttributePrefix(i);
             String aName = xmlSR.getAttributeLocalName(i);
-            String aValue = Utilities.escapeXml(xmlSR.getAttributeValue(i));
+            String aValue = escapeXml(xmlSR.getAttributeValue(i));
             sb.append(" " + (null == aPrefix ? "" : aPrefix + ":") + aName
                 + "=\"" + aValue + "\"");
             if (!useAutomaticId && newDoc && ("@" + aName).equals(idName)) {
@@ -329,7 +332,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
                     processStartElement();
                     break;
                 case XMLStreamConstants.CHARACTERS:
-                    write(Utilities.escapeXml(xmlSR.getText()));
+                    write(escapeXml(xmlSR.getText()));
                     break;
                 case XMLStreamConstants.CDATA:
                     write("<![CDATA[");
@@ -402,5 +405,14 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         }
         return false;
     }
-
+    
+    public static String escapeXml(String _in) {
+        if (null == _in){
+            return "";
+        }
+        return patterns[2].matcher(
+                patterns[1].matcher(
+                        patterns[0].matcher(_in).replaceAll("&amp;"))
+                        .replaceAll("&lt;")).replaceAll("&gt;");
+    }
 }
