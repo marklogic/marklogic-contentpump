@@ -362,8 +362,9 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(INPUT_FILE_TYPE)) {
                 String fileType = cmdline
                     .getOptionValue(INPUT_FILE_TYPE);
-                if(fileType.equalsIgnoreCase(InputType.ARCHIVE.toString())) {
-                conf.set(MarkLogicConstants.CONTENT_TYPE, ContentType.UNKNOWN.toString());
+                if (fileType.equalsIgnoreCase(InputType.ARCHIVE.toString())) {
+                    conf.set(MarkLogicConstants.CONTENT_TYPE,
+                        ContentType.UNKNOWN.toString());
                 }
             }
             

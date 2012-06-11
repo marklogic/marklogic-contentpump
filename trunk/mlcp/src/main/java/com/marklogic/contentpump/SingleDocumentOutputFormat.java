@@ -34,7 +34,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
  * Write a document from MarkLogic Server to file system as a separate file. 
  * @author ali
  *
- * @param <BytesWritable>
+ * 
  */
 public class SingleDocumentOutputFormat extends FileOutputFormat<DocumentURI, MarkLogicDocument> {
 
@@ -74,7 +74,6 @@ class SingleDocumentWriter extends RecordWriter<DocumentURI, MarkLogicDocument> 
         Path path = new Path(pathStr);
         FileSystem fs = path.getFileSystem(conf);
         FSDataOutputStream out = fs.create(path, false);
-//        System.out.println("writing to: " + path);
         ContentType type = content.getContentType();
         if(ContentType.BINARY.equals(type)){
             out.write(content.getContentAsByteArray());

@@ -116,10 +116,10 @@ public class DelimitedTextReader<VALUEIN> extends
             if (realValue instanceof Text) {
                 ((Text)realValue).set(sb.toString());
             } else {
-                throw new IOException("Expects Text in delimited text");
+                LOG.error("Expects Text in delimited text");
             }
         } else {
-            throw new IOException("Expects Text in delimited text");
+            LOG.error("Expects Text in delimited text");
         }
         return true;
     }

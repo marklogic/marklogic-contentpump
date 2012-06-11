@@ -208,6 +208,9 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {
         String uri = key.getUri();
+        if ("null".equals(uri)) {
+            return;
+        }
         String forestId = ImportArchiveOutputFormat.ID_PREFIX;
         int fId = 0;
         if (fastLoad) {
