@@ -16,11 +16,10 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Iterator;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
@@ -41,8 +40,7 @@ extends AbstractRecordReader<VALUEIN> {
     
     private long bytesRead;
     private long bytesTotal;
-    private List<FileSplit> files;
-    private int count = 0;
+    private Iterator<FileSplit> iterator;
     private TaskAttemptContext context;
     private Configuration conf;
     public CombineDocumentReader() {     
@@ -63,7 +61,7 @@ extends AbstractRecordReader<VALUEIN> {
         conf = context.getConfiguration();
         //we don't know the file yet until nextKeyValue()
         initCommonConfigurations(conf, null);
-        files = ((CombineDocumentSplit)inSplit).getSplits();
+        iterator = ((CombineDocumentSplit)inSplit).getSplits().iterator();
         bytesTotal = inSplit.getLength();
         this.context = context;
     }
@@ -71,20 +69,11 @@ extends AbstractRecordReader<VALUEIN> {
     @SuppressWarnings({ "unchecked" })
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        while (count < files.size()) {
-            FileSplit split = files.get(count++);
+        while (iterator.hasNext()) {
+            FileSplit split = iterator.next();
             Path file = split.getPath();
-            FileSystem fs = file.getFileSystem(conf);
-            FileStatus status = fs.getFileStatus(file);
-            if (status.isDir()) {
-                for (FileStatus stat: fs.listStatus(status.getPath())) {
-                    FileSplit child = new FileSplit(stat.getPath(), 0, 
-                                    stat.getLen(), null);
-                    files.add(child);
-                }
-                continue;
-            }
             configFileNameAsCollection(conf, file);
+            FileSystem fs = file.getFileSystem(context.getConfiguration());
             FSDataInputStream fileIn = fs.open(file);
             setKey(file.toString());
             byte[] buf = new byte[(int)split.getLength()];
@@ -111,7 +100,9 @@ extends AbstractRecordReader<VALUEIN> {
             } finally {
                 fileIn.close();
             }
-        }        
+        } 
+        
         return false;
+
     }
 }

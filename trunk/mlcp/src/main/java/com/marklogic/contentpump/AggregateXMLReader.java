@@ -83,9 +83,6 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         Path file = ((FileSplit) inSplit).getPath();
         initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
-//        if (!fs.isFile(file)) {
-//            return;
-//        }
         FSDataInputStream fileIn = fs.open(file);
         XMLInputFactory f = XMLInputFactory.newInstance();
         try {

@@ -24,7 +24,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.DocumentURI;
 
@@ -37,7 +36,7 @@ import com.marklogic.mapreduce.DocumentURI;
  * @param <VALUE>
  */
 public class CompressedDocumentInputFormat<VALUE> extends
-		FileInputFormat<DocumentURI, VALUE> {
+FileAndDirectoryInputFormat<DocumentURI, VALUE> {
     public static final Log LOG = 
         LogFactory.getLog(CompressedDocumentReader.class);
     
