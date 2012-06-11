@@ -16,7 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -75,8 +74,7 @@ extends AbstractRecordReader<VALUEIN> {
         while (count < files.size()) {
             FileSplit split = files.get(count++);
             Path file = split.getPath();
-            configFileNameAsCollection(conf, file);
-            FileSystem fs = file.getFileSystem(context.getConfiguration());
+            FileSystem fs = file.getFileSystem(conf);
             FileStatus status = fs.getFileStatus(file);
             if (status.isDir()) {
                 for (FileStatus stat: fs.listStatus(status.getPath())) {
@@ -86,6 +84,7 @@ extends AbstractRecordReader<VALUEIN> {
                 }
                 continue;
             }
+            configFileNameAsCollection(conf, file);
             FSDataInputStream fileIn = fs.open(file);
             setKey(file.toString());
             byte[] buf = new byte[(int)split.getLength()];

@@ -16,7 +16,11 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.util.List;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -24,6 +28,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.mapreduce.DocumentURI;
 
@@ -39,5 +44,32 @@ public class AggregateXMLInputFormat extends
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
         return false;
+    }
+    
+    @Override
+    public List<InputSplit> getSplits(JobContext job) throws IOException {
+        List<InputSplit> splits = super.getSplits(job);
+        Configuration conf = job.getConfiguration();
+        
+        // take a second pass of the splits generated to extract files from 
+        // directories
+        int count = 0;
+        while (count < splits.size()) {
+            FileSplit split = (FileSplit) splits.get(count);
+            Path file = split.getPath();
+            FileSystem fs = file.getFileSystem(conf);
+            FileStatus status = fs.getFileStatus(file);
+            if (status.isDir()) {
+                splits.remove(count);
+                for (FileStatus stat: fs.listStatus(status.getPath())) {
+                    FileSplit child = new FileSplit(stat.getPath(), 0, 
+                                    stat.getLen(), null);
+                    splits.add(child);
+                }
+            } else {
+                count++;
+            }
+        }
+        return splits;
     }
 }
