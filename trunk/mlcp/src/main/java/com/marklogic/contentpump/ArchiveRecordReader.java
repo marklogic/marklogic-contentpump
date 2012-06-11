@@ -115,7 +115,8 @@ public class ArchiveRecordReader extends
                 //no meta data
                 if(count%2 ==0 && !allowEmptyMeta) {
 //                    expects meta, while not allowing empty meta
-                    throw new IOException("No metadata in archive.");
+                    LOG.error("Archive damaged: no/incorrect metadata for " + name);
+                    return true;
                 } else {
                     setKey(zipEntry.getName());
                     readDocFromStream((MarkLogicDocument) value);

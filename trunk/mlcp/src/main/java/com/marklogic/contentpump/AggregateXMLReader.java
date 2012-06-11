@@ -270,9 +270,11 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         String prefix = xmlSR.getPrefix();
 
         if (!useAutomaticId && null == currentId && newDoc) {
-            throw new XMLStreamException("end of record element " + name
+            LOG.error("end of record element " + name
                 + " with no id found: " + ConfigConstants.AGGREGATE_URI_ID
                 + "=" + idName);
+            cleanupEndElement();
+            return true;
         }
 
         StringBuilder sb = new StringBuilder();
@@ -294,19 +296,23 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             if (realValue instanceof Text) {
                 ((Text) realValue).set(buffer.toString());
             } else {
-                throw new XMLStreamException("Expects Text in aggregate XML");
+                LOG.error("Expects Text in aggregate XML");
             }
         } else {
-            throw new XMLStreamException("Expects Text in aggregate XML");
+            LOG.error("Expects Text in aggregate XML");
         }
         
+        cleanupEndElement();
+        // end of new record
+        return false;
+    }
+    
+    protected void cleanupEndElement(){
         currentId = null;
         newDoc = false;
         // reset buffer
         buffer.setLength(0);
         currDepth--;
-        // end of new record
-        return false;
     }
 
     @Override
