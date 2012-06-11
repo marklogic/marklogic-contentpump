@@ -196,7 +196,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                       outputDir + uri : outputDir + '/' + uri;
             }    
             key.setUri(uri);
-            DocumentURI.validate(uri);
+            key.validate();
             fId = key.getPlacementId(forestIds.length);
             
             forestId = forestIds[fId];

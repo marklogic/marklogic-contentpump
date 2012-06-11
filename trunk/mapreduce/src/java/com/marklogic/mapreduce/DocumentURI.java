@@ -149,7 +149,7 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
         return buf.toString();
     }
     
-    protected static void validate(String uri) {
+    public void validate() {
         if (uri.isEmpty() || 
             Character.isWhitespace(uri.charAt(0)) ||
             Character.isWhitespace(uri.charAt(uri.length() - 1))) {
