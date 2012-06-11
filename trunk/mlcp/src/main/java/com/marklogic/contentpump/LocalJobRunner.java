@@ -165,30 +165,36 @@ public class LocalJobRunner implements ConfigConstants {
         
         @SuppressWarnings("unchecked")
         @Override
-        public Object call() throws Exception {
-            TaskID taskId = new TaskID(new JobID(), true, id);
-            TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
-            TaskAttemptContext context = new TaskAttemptContext(conf, 
-                    taskAttemptId);
-            RecordReader<INKEY, INVALUE> reader = 
-                inputFormat.createRecordReader(split, context);
-            RecordWriter<OUTKEY, OUTVALUE> writer = 
-                outputFormat.getRecordWriter(context);
-            OutputCommitter committer = 
-                outputFormat.getOutputCommitter(context);
-            mapper = 
-                (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)
-                ReflectionUtils.newInstance(job.getMapperClass(), conf);
-            
-            Mapper.Context mapperContext = mapper.new Context(conf,
-                    taskAttemptId, reader, writer, committer, 
-                    (StatusReporter)null, split);
-            
-            reader.initialize(split, mapperContext);
-            mapper.run(mapperContext);
-            reader.close();
-            writer.close(mapperContext);
-            committer.commitTask(context);
+        public Object call() {
+            Mapper.Context mapperContext = null;
+            try {
+                TaskID taskId = new TaskID(new JobID(), true, id);
+                TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
+                TaskAttemptContext context = new TaskAttemptContext(conf, 
+                        taskAttemptId);
+                RecordReader<INKEY, INVALUE> reader = 
+                    inputFormat.createRecordReader(split, context);
+                RecordWriter<OUTKEY, OUTVALUE> writer = 
+                    outputFormat.getRecordWriter(context);
+                OutputCommitter committer = 
+                    outputFormat.getOutputCommitter(context);
+                mapper = 
+                    (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)
+                    ReflectionUtils.newInstance(job.getMapperClass(), conf);
+                
+                mapperContext = mapper.new Context(conf,
+                        taskAttemptId, reader, writer, committer, 
+                        (StatusReporter)null, split);
+                
+                reader.initialize(split, mapperContext);
+                mapper.run(mapperContext);
+                reader.close();
+                writer.close(mapperContext);
+                committer.commitTask(context);
+            } catch (Throwable t) {
+                LOG.error("Error running task: " + 
+                                mapperContext.getTaskAttemptID(), t);
+            }
             return null;
         }      
     }
