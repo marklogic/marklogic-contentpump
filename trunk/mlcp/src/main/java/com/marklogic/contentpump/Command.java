@@ -222,9 +222,8 @@ public enum Command implements ConfigConstants {
             job.setOutputFormatClass(type.getOutputFormatClass(contentType));
 
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
-                String[] paths = cmdline.getOptionValues(INPUT_FILE_PATH);
-                FileInputFormat.setInputPaths(job,
-                    Utilities.stringArrayToCommaSeparatedString(paths));
+                String path = cmdline.getOptionValue(INPUT_FILE_PATH);
+                FileInputFormat.setInputPaths(job, path);
             }
             if (cmdline.hasOption(INPUT_FILE_PATTERN)) {
                 FileInputFormat.setInputPathFilter(job,
