@@ -64,8 +64,10 @@ public class DelimitedTextReader<VALUEIN> extends
     }
 
     protected void initDelimConf(Configuration conf) {
-        DELIM = conf.get(ConfigConstants.DELIMITER,
-            ConfigConstants.DEFAULT_DELIMITER);
+        if (DELIM == null) {
+            DELIM = conf.get(ConfigConstants.DELIMITER,
+                ConfigConstants.DEFAULT_DELIMITER);
+        }
         idName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
     }
 
@@ -95,6 +97,10 @@ public class DelimitedTextReader<VALUEIN> extends
         sb.append(ROOT_START);
         for (int i = 0; i < fields.length; i++) {
             if (idName.equals(fields[i])) {
+                if (values[i] == null || values[i].equals("")) {
+                    LOG.error(line + ":column used for uri_id is empty");
+                    return true;
+                }
                 setKey(values[i]);
             }
             sb.append("<").append(fields[i]).append(">");
@@ -110,10 +116,10 @@ public class DelimitedTextReader<VALUEIN> extends
             if (realValue instanceof Text) {
                 ((Text)realValue).set(sb.toString());
             } else {
-                throw new IOException("Expects Text in aggregate XML");
+                throw new IOException("Expects Text in delimited text");
             }
         } else {
-            throw new IOException("Expects Text in aggregate XML");
+            throw new IOException("Expects Text in delimited text");
         }
         return true;
     }
