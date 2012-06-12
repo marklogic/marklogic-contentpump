@@ -38,7 +38,8 @@ import com.marklogic.mapreduce.MarkLogicDocument;
  *
  */
 public class ArchiveRecordReader extends
-    AbstractRecordReader<MarkLogicDocumentWithMeta> {
+    AbstractRecordReader<MarkLogicDocumentWithMeta> implements 
+    ConfigConstants {
     private ZipInputStream zipIn;
     private boolean hasNext = true;
     private static String EXTENSION = ".zip";
@@ -87,8 +88,8 @@ public class ArchiveRecordReader extends
         FSDataInputStream fileIn = fs.open(file);
         zipIn = new ZipInputStream(fileIn);
 
-        allowEmptyMeta = Boolean.parseBoolean(conf
-            .get(ConfigConstants.CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA));
+        allowEmptyMeta = conf.getBoolean(
+                        CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA, false);
     }
 
     @Override
