@@ -26,6 +26,8 @@ import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.RequestPermissionException;
+import com.marklogic.xcc.exceptions.ServerConnectionException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -270,10 +272,16 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         } catch (RequestException e) {
             LOG.error(e);
-            if (sessions[fId] != null) {
-                sessions[fId].close();
+            counts[fId] = 0;
+            stmtCounts[fId] = 0;
+
+            if (e instanceof ServerConnectionException
+                || e instanceof RequestPermissionException) {
+                if (sessions[fId] != null) {
+                    sessions[fId].close();
+                }
+                throw new IOException(e);
             }
-            throw new IOException(e);
         }  
     }
 
@@ -315,7 +323,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         if (sessions[i] != null) {
                             sessions[i].close();
                         }
-                        throw new IOException(e);
+                        if (e instanceof ServerConnectionException
+                            || e instanceof RequestPermissionException) {
+                            throw new IOException(e);
+                        }
                     }
                 }
             }
