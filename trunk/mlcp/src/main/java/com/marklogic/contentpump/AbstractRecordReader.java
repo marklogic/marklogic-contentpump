@@ -32,7 +32,7 @@ import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 
 public abstract class AbstractRecordReader<VALUEIN> extends
-    RecordReader<DocumentURI, VALUEIN> {
+    RecordReader<DocumentURI, VALUEIN> implements ConfigConstants {
     public static final Log LOG = LogFactory
         .getLog(AbstractRecordReader.class);
     protected DocumentURI key = new DocumentURI();
@@ -80,10 +80,7 @@ public abstract class AbstractRecordReader<VALUEIN> extends
         if (file == null) {
             return;
         }
-        String isFileAsCollection = conf.get(
-            ConfigConstants.CONF_OUTPUT_FILENAME_AS_COLLECTION,
-            ConfigConstants.DEFAULT_OUTPUT_FILENAME_AS_COLLECTION);
-        if (isFileAsCollection.equalsIgnoreCase("true")) {
+        if (conf.getBoolean(CONF_OUTPUT_FILENAME_AS_COLLECTION, false)) {
             if (value instanceof ContentWithFileNameWritable) {
                 ((ContentWithFileNameWritable<VALUEIN>) value)
                     .setFileName(file.getName());

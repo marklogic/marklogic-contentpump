@@ -58,7 +58,7 @@ public class ContentPump implements ConfigConstants {
         } catch (Exception ex) {
             LOG.error("Error while expanding arguments", ex);
             System.err.println(ex.getMessage());
-            System.err.println("Try 'mloader help' for usage.");
+            System.err.println("Try 'mlcp help' for usage.");
         }
         
         int rc = runCommand(expandedArgs);
@@ -257,7 +257,11 @@ public class ContentPump implements ConfigConstants {
     }
 
     private static void printUsage() {
-        // TODO Auto-generated method stub
-        
+        System.out.println("usage: mlcp COMMAND [ARGS]\n");
+        System.out.println("Available commands:");
+        System.out.println("  IMPORT import data to a MarkLogic database");
+        System.out.println("  EXPORT export data from a MarkLogic database");
+        System.out.println("  COPY   copy data from one MarkLogic database to another");
+        System.out.println("  HELP   list available commands");
     }
 }

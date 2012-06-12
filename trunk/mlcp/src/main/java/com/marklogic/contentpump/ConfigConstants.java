@@ -15,9 +15,6 @@
  */
 package com.marklogic.contentpump;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
  * Constants for configuration option names and values.
  * 
@@ -25,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
  *
  */
 public interface ConfigConstants {
-    public static final Log LOG = LogFactory.getLog(ConfigConstants.class);
     // property names
     static final String HADOOP_HOME_ENV_NAME = "HADOOP_HOME";
     static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
@@ -58,7 +54,6 @@ public interface ConfigConstants {
     static final String INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "input_archive_allow_empty_metadata";
     static final String DEFAULT_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "false";
     static final String INPUT_COMPRESSED = "input_compressed";
-    static final boolean DEFAULT_INPUT_COMPRESSED = false;
     static final String INPUT_COMPRESSION_CODEC = "input_compression_codec";
     static final String INPUT_SEQUENCEFILE_KEY_CLASS = 
         "input_sequencefile_key_class";
@@ -76,7 +71,6 @@ public interface ConfigConstants {
     static final String OUTPUT_PERMISSIONS = "output_permissions";
     static final String OUTPUT_QUALITY = "output_quality";
     static final String OUTPUT_CLEANDIR = "output_cleandir";
-    static final String DEFAULT_OUTPUT_CLEANDIR = "false";
     static final String BATCH_SIZE = "batch_size";
     static final int DEFAULT_BATCH_SIZE = 100;
     static final String TRANSACTION_SIZE = "transaction_size";
@@ -93,7 +87,6 @@ public interface ConfigConstants {
     static final String OUTPUT_URI_SUFFIX = "output_uri_suffix";
     static final String OUTPUT_FILENAME_AS_COLLECTION = 
         "output_filename_as_collection";
-    static final String DEFAULT_OUTPUT_FILENAME_AS_COLLECTION = "false";
     static final String XML_REPAIR_LEVEL = "xml_repair_level";
     static final String COPY_COLLECTIONS = "copy_collections";
     static final String COPY_PERMISSIONS = "copy_permissions";
@@ -110,7 +103,6 @@ public interface ConfigConstants {
     static final String DEFAULT_OUTPUT_TYPE = "document";
     static final String OUTPUT_FILE_PATH = "output_file_path";
     static final String OUTPUT_COMPRESS = "compress";
-    static final String DEFAULT_OUTPUT_COMPRESS = "false";
     static final String OUTPUT_INDENTED = "indented";
     static final String INPUT_USERNAME = "input_username";
     static final String INPUT_PASSWORD = "input_password";
@@ -124,7 +116,7 @@ public interface ConfigConstants {
     static final String DEFAULT_DELIMITER = ",";
     //TODO: merge with "aggregate_uri_id" ?? 
     static final String DELIMITED_URI_ID = "delimited_uri_id";
-
+    static final String FAST_LOAD = "fastload";
     
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
