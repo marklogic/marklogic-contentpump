@@ -22,6 +22,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -39,7 +40,7 @@ FileInputFormat<K, V> {
     public List<InputSplit> getSplits(JobContext job) throws IOException {
         List<InputSplit> splits = super.getSplits(job);
         Configuration conf = job.getConfiguration();
-        
+        PathFilter jobFilter = getInputPathFilter(job);
         // take a second pass of the splits generated to extract files from 
         // directories
         int count = 0;
@@ -50,7 +51,10 @@ FileInputFormat<K, V> {
             FileStatus status = fs.getFileStatus(file);
             if (status.isDir()) {
                 splits.remove(count);
-                for (FileStatus stat: fs.listStatus(status.getPath())) {
+                FileStatus[] children = jobFilter == null ? 
+                                fs.listStatus(status.getPath()) :
+                                fs.listStatus(status.getPath(), jobFilter);
+                for (FileStatus stat : children) {
                     FileSplit child = new FileSplit(stat.getPath(), 0, 
                                     stat.getLen(), null);
                     splits.add(child);
