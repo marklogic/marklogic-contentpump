@@ -82,7 +82,6 @@ public class ContentPump implements ConfigConstants {
         }
         
         // parse hadoop specific options
-        // TODO: add a default config file here so that it doesn't log a debug IOException.
         Configuration conf = new Configuration();
         GenericOptionsParser genericParser = new GenericOptionsParser(
                 conf, optionArgs);
