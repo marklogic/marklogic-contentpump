@@ -331,6 +331,9 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                         counts[fId] = 0;
                         prevMeta[fId] = meta;
                     }
+                    if (prevMeta[fId] == null) {
+                        prevMeta[fId] = meta;
+                    }
                     //update current options
                     updateOptionsUsingMeta(options, meta);
                     metaOnly = true;
