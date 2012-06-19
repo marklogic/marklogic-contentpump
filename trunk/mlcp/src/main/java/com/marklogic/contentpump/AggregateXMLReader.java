@@ -113,7 +113,6 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
     }
 
     private void write(String str) {
-        // TODO
         if (skippingRecord) {
             return;
         }

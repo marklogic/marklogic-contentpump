@@ -242,4 +242,58 @@ public class DocumentMetadata {
             addCollection(_collections[i]);
         }
     }
+    
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || !(obj instanceof DocumentMetadata)) {
+            return false;
+        }
+
+        DocumentMetadata meta = (DocumentMetadata) obj;
+        boolean result = compareCollections(meta.getCollections())
+            && getFormatName().equals(meta.getFormatName())
+            && comparePermissions(meta.getPermissions())
+            && compareProperties(meta.getProperties())
+            && getQuality() == meta.getQuality();
+
+        return result;
+    }
+    
+    private boolean compareProperties(String properties) {
+        if (this.properties == properties) {
+            return true;
+        }
+        if (this.properties != null) {
+            return this.properties.equals(properties);
+        }
+        return false;
+    }
+
+    private boolean compareCollections(String[] cols) {
+        if (cols == null || collectionsList.size() != cols.length) {
+            return false;
+        }
+        for (int i = 0; i < collectionsList.size(); i++) {
+            if (!collectionsList.get(i).equals(cols[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private boolean comparePermissions(ContentPermission[] p) {
+        if(p == null && getPermissions() == null) {
+            return true;
+        }
+        if (permissionsList.size() != p.length) {
+            return false;
+        }
+        for (int i = 0; i < permissionsList.size(); i++) {
+            if (!permissionsList.get(i).toString().equals(p[i].toString())) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
