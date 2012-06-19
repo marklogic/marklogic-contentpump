@@ -34,6 +34,7 @@ import org.w3c.dom.NodeList;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.InternalUtilities;
+import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.MarkLogicInputSplit;
 import com.marklogic.mapreduce.MarkLogicRecordReader;
@@ -137,7 +138,7 @@ public class MarkLogicDocumentReader extends
             + mlSplit.getLength() - 1;
 
         Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
-        String docExpr = conf.get(ConfigConstants.DOCUMENT_FILTER,
+        String docExpr = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR,
             ConfigConstants.DEFAULT_DOCUMENT_FILTER);
         String query = "for $doc in " + docExpr + "\n";
         query += "let $uri := fn:base-uri($doc)";
@@ -204,11 +205,7 @@ public class MarkLogicDocumentReader extends
         buf.append("0");
 
         
-        buf.append(" )\n)[");
-        buf.append(Long.toString(start));
-        buf.append(" to ");
-        buf.append(Long.toString(end));
-        buf.append("]");
+        buf.append(" )\n)");
         buf.append(subExpr);
         buf.append("))");
         queryText = buf.toString();
@@ -255,7 +252,7 @@ public class MarkLogicDocumentReader extends
         if (item != null && item.getItemType() == ValueType.XS_STRING) {
             type = item.asString();
         } else {
-            throw new IOException("incorrect format");
+            throw new IOException("incorrect format:" + item.getItem() + "\n" + result.asString());
         }
         item = result.next();
         String uri = item.asString();
