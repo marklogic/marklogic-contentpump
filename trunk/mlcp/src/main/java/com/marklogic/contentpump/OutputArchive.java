@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipOutputStream;
@@ -29,17 +30,19 @@ import org.apache.hadoop.fs.Path;
 
 public class OutputArchive {
     public static final Log LOG = LogFactory.getLog(OutputArchive.class);
-    static final int MAX_ENTRIES = 65536 - 2;
+    // avoid maximum number of zip entry to reach over 65535
+    // number of entries is even as we have metadata, so max is 65534
+    static final int MAX_ENTRIES = 65534;
     public static String EXTENSION = ".zip";
     private long currentFileBytes = 0;
     private ZipOutputStream outputStream;
     private String path;
-    private int fileCount = 0;
+    private static AtomicInteger fileCount = new AtomicInteger();
     private int currentEntries;
     private Configuration conf;
-
+    
     public OutputArchive(String path, Configuration conf) {
-        if(path.toLowerCase().endsWith(EXTENSION)) {
+        if (path.toLowerCase().endsWith(EXTENSION)) {
             this.path = path;
         } else {
             this.path = path + EXTENSION;
@@ -51,10 +54,12 @@ public class OutputArchive {
         String file = path;
         // use the constructor filename for the first zip,
         // then add filecount to subsequent archives, if any.
-        if (fileCount > 0) {
-            file = newPackagePath(path, fileCount, 6);
+        int count = fileCount.getAndIncrement();
+        if (count > 0) {
+            file = newPackagePath(path, count, 6);
         }
         if (outputStream != null) {
+            outputStream.flush();
             outputStream.close();
         }
         currentFileBytes = 0;
@@ -62,13 +67,12 @@ public class OutputArchive {
 
         Path zpath = new Path(file);
         FileSystem fs = zpath.getFileSystem(conf);
-        if(fs.exists(zpath)) {
+        if (fs.exists(zpath)) {
             throw new IOException(zpath + " already exists.");
         }
-        FSDataOutputStream out = fs.create(zpath, false);
+        FSDataOutputStream fsout = fs.create(zpath, false);
 
-        outputStream = new ZipOutputStream(out);
-        fileCount++;
+        outputStream = new ZipOutputStream(fsout);
     }
 
     /**
@@ -81,10 +85,12 @@ public class OutputArchive {
         int width) {
         String path = canonicalPath;
         if (path.endsWith(EXTENSION)) {
-            String pathPattern = "(.+)" + EXTENSION + "$";
-            String replacementPattern = "$1-"
-                + String.format("%0" + width + "d", count) + EXTENSION;
-            path = path.replaceFirst(pathPattern, replacementPattern);
+            int index1 = path.lastIndexOf(EXTENSION);
+            String subStr = path.substring(0, index1);
+            int index2 = subStr.lastIndexOf('.');
+            path = path.substring(0, index2)
+                + String.format("-%0" + width + "d", count)
+                + path.substring(index2);
         } else {
             path = path + "-" + count;
         }
@@ -106,6 +112,7 @@ public class OutputArchive {
 
         if (outputStream == null) {
             // lazily construct a new zipfile outputstream
+            LOG.info("concstructing new output stream");
             newOutputStream();
         }
 
@@ -127,7 +134,6 @@ public class OutputArchive {
             outputStream.putNextEntry(entry);
             outputStream.write(bytes);
             outputStream.closeEntry();
-
             /*
              * // Flush once in a while to see if this frees up memory if
              * (currentEntries % 10 == 0) { outputStream.flush(); }
@@ -135,11 +141,10 @@ public class OutputArchive {
         } catch (ZipException e) {
             // if (configuration.isSkipExisting()
             // && e.getMessage().startsWith("duplicate entry")) {
-            // LOG.warn("skipping duplicate entry: "
-            // + entry.getName());
-            // return 0;
+            LOG.warn("skipping duplicate entry: " + entry.getName());
+            return 0;
             // }
-            throw e;
+//            throw e;
         }
 
         currentFileBytes += total;

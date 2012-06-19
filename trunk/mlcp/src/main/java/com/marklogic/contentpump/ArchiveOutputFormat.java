@@ -31,10 +31,10 @@ public class ArchiveOutputFormat extends
     FileOutputFormat<DocumentURI, MarkLogicDocument> {
     @Override
     public RecordWriter<DocumentURI, MarkLogicDocument> getRecordWriter(
-        TaskAttemptContext contex) throws IOException, InterruptedException {
-        Configuration conf = contex.getConfiguration();
+        TaskAttemptContext context) throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
         Path path = new Path(conf.get(ConfigConstants.CONF_OUTPUT_FILEPATH));
-        return new ArchiveWriter(path, conf);
+        return new ArchiveWriter(path, context);
     }
 
 }
@@ -42,7 +42,7 @@ public class ArchiveOutputFormat extends
 class ArchiveWriter extends RecordWriter<DocumentURI, MarkLogicDocument> {
 
     private String dir;
-    private Configuration conf;
+    private TaskAttemptContext context;
     /**
      * Archive for Text
      */
@@ -56,9 +56,9 @@ class ArchiveWriter extends RecordWriter<DocumentURI, MarkLogicDocument> {
      */
     private OutputArchive binaryArchive;
 
-    public ArchiveWriter(Path path, Configuration conf) {
+    public ArchiveWriter(Path path, TaskAttemptContext context) {
         dir = path.toUri().getPath();
-        this.conf = conf;
+        this.context = context;
     }
 
     @Override
@@ -82,7 +82,17 @@ class ArchiveWriter extends RecordWriter<DocumentURI, MarkLogicDocument> {
         if(type == null) {
             throw new IOException ("null content type: ");
         }
-        String dst = dir + "." + type.toString();
+        Configuration conf = context.getConfiguration();
+        String dst = null;
+        
+        String mode = conf.get(ConfigConstants.CONF_MODE);
+        if (mode.equals(ConfigConstants.MODE_DISTRIBUTED)) {
+            dst = dir + "-" + context.getTaskAttemptID().getTaskID().getId()
+                + "." + type.toString();
+        } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
+            dst = dir + "." + type.toString();
+        }
+        
         if(ContentType.BINARY.equals(type)) {
             if(binaryArchive == null) {
                 binaryArchive = new OutputArchive(dst, conf);

@@ -46,6 +46,7 @@ public class ArchiveRecordReader extends
     private byte[] buf = new byte[65536];
     private boolean allowEmptyMeta = false;
     private int count = 0;
+    String zipfile;
     /**
      * the type of files in this archive Valid choices: XML, TEXT, BINARY
      */
@@ -71,6 +72,10 @@ public class ArchiveRecordReader extends
         throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         Path file = ((FileSplit) inSplit).getPath();
+        zipfile = file.toUri().getPath();
+        if(LOG.isDebugEnabled()) {
+            LOG.debug("Zip file name: " + zipfile);
+        }
         int index = file.toUri().getPath().lastIndexOf(EXTENSION);
         if (index == -1) {
             throw new IOException("Archive file should have suffix .zip");
@@ -102,30 +107,26 @@ public class ArchiveRecordReader extends
         ZipEntry zipEntry;
         ZipInputStream zis = (ZipInputStream) zipIn;
         while ((zipEntry = zis.getNextEntry()) != null) {
-            if (zipEntry.isDirectory()) {
+            String name = zipEntry.getName();
+            if (name.endsWith(DocumentMetadata.EXTENSION)) {
+                ((MarkLogicDocumentWithMeta) value)
+                    .setMeta(getMetadataFromStream());
+                count++;
                 continue;
             }
-            if (zipEntry != null) {
-                String name = zipEntry.getName();
-                if (name.endsWith(DocumentMetadata.EXTENSION)) {
-                    ((MarkLogicDocumentWithMeta) value)
-                        .setMeta(getMetadataFromStream());
-                    count++;
-                    continue;
-                }
-                //no meta data
-                if(count%2 ==0 && !allowEmptyMeta) {
-//                    expects meta, while not allowing empty meta
-                    LOG.error("Archive damaged: no/incorrect metadata for " + name);
-                    return true;
-                } else {
-                    setKey(zipEntry.getName());
-                    readDocFromStream((MarkLogicDocument) value);
-                    count++;
-                    return true;
-                }
-
+            // no meta data
+            if (count % 2 == 0 && !allowEmptyMeta) {
+                // expects meta, while not allowing empty meta
+                LOG.error("Archive damaged: no/incorrect metadata for " + name
+                    + " in " + zipfile);
+                return true;
+            } else {
+                setKey(zipEntry.getName());
+                readDocFromStream((MarkLogicDocument) value);
+                count++;
+                return true;
             }
+
         }
         hasNext = false;
         return false;
