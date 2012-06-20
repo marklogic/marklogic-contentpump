@@ -89,9 +89,7 @@ public class DelimitedTextReader<VALUEIN> extends
             return false;
         }
         if (fields == null) {
-            if (DELIM.equals("|")) {
-                DELIM = "\\" + DELIM;
-            }
+            DELIM = "\\" + DELIM;
             fields = line.split(DELIM);
             boolean found = false;
             for (int i = 0; i < fields.length; i++) {
