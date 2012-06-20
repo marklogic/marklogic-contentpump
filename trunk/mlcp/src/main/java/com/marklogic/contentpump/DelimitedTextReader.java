@@ -65,7 +65,7 @@ public class DelimitedTextReader<VALUEIN> extends
 
     protected void initDelimConf(Configuration conf) {
         if (DELIM == null) {
-            DELIM = conf.get(ConfigConstants.DELIMITER,
+            DELIM = conf.get(ConfigConstants.CONF_DELIMITER,
                 ConfigConstants.DEFAULT_DELIMITER);
         }
         idName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
@@ -89,6 +89,9 @@ public class DelimitedTextReader<VALUEIN> extends
             return false;
         }
         if (fields == null) {
+            if (DELIM.equals("|")) {
+                DELIM = "\\" + DELIM;
+            }
             fields = line.split(DELIM);
             boolean found = false;
             for (int i = 0; i < fields.length; i++) {
@@ -98,10 +101,11 @@ public class DelimitedTextReader<VALUEIN> extends
                     break;
                 }
             }
-            if(found == false) {
-                //idname doesn't match any columns
+            if (found == false) {
+                // idname doesn't match any columns
                 LOG.error("delimited_uri_id doesn't match any column");
-                throw new IOException("delimited_uri_id doesn't match any column");
+                throw new IOException(
+                    "delimited_uri_id doesn't match any column");
             }
             line = br.readLine();
             // skip empty lines
@@ -117,7 +121,7 @@ public class DelimitedTextReader<VALUEIN> extends
         }
 
         String[] values = line.split(DELIM);
-        if(values.length != fields.length) {
+        if (values.length != fields.length) {
             LOG.error(line + " is inconsistent with column definition");
             return true;
         }
