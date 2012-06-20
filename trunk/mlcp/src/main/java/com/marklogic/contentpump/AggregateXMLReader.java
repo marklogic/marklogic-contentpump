@@ -256,23 +256,9 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         if (skippingRecord) {
             return false;
         }
-        if (recordDepth != currDepth || !newDoc) {
-            // not the end of the record: go look for more nodes
-            currDepth--;
-            return true;
-        }
         
         String name = xmlSR.getLocalName();
         String prefix = xmlSR.getPrefix();
-
-        if (!useAutomaticId && null == currentId && newDoc) {
-            LOG.error("end of record element " + name
-                + " with no id found: " + ConfigConstants.AGGREGATE_URI_ID
-                + "=" + idName);
-            cleanupEndElement();
-            return true;
-        }
-
         StringBuilder sb = new StringBuilder();
         sb.append("</");
         if (prefix != null && prefix != "") {
@@ -281,8 +267,21 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             sb.append(name);
         }
         sb.append(">");
-        write(sb.toString());
+        //write to finish the end tag before checking errors
+        write(sb.toString()); 
 
+        if (recordDepth != currDepth || !newDoc) {
+            // not the end of the record: go look for more nodes
+            currDepth--;
+            return true;
+        }
+        if (!useAutomaticId && null == currentId && newDoc) {
+            LOG.error("end of record element " + name
+                + " with no id found: " + ConfigConstants.AGGREGATE_URI_ID
+                + "=" + idName);
+            cleanupEndElement();
+            return true;
+        }
 
         if (value instanceof Text) {
             ((Text) value).set(buffer.toString());
