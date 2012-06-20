@@ -253,9 +253,12 @@ public enum Command implements ConfigConstants {
                 if (arg == null || arg.equalsIgnoreCase("true")) {
                     conf.setBoolean(CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA,
                         true);
-                } else {
+                } else if (arg.equalsIgnoreCase("false")) {
                     conf.setBoolean(CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA,
                         false);
+                } else {
+                    LOG.warn("Unrecognized option argument for " + 
+                        INPUT_ARCHIVE_ALLOW_EMPTY_METADATA + ": " + arg);
                 }
             }
 
@@ -313,9 +316,12 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(OUTPUT_CLEANDIR)) {
                 String arg = cmdline.getOptionValue(OUTPUT_CLEANDIR);
                 if (arg == null || arg.equalsIgnoreCase("true")) {
-                    conf.setBoolean(OUTPUT_CLEANDIR, true);
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_CLEAN_DIR, true);
+                } else if (arg.equalsIgnoreCase("false")){
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_CLEAN_DIR, false);
                 } else {
-                    conf.setBoolean(OUTPUT_CLEANDIR, false);
+                    LOG.warn("Unrecognized option argument for " + 
+                                    OUTPUT_CLEANDIR + ": " + arg);
                 }
             }
             String batchSize = cmdline.getOptionValue(BATCH_SIZE,
@@ -397,11 +403,13 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(FAST_LOAD);
                 if (arg == null || arg.equalsIgnoreCase("true")) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, true);
-                } else {
+                } else if (arg.equalsIgnoreCase("false")){
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, false);
+                } else {
+                    LOG.warn("Unrecognized option argument for " + FAST_LOAD +
+                                    ": " + arg);
                 }
             }
-
         }
 
         @Override
@@ -500,8 +508,11 @@ public enum Command implements ConfigConstants {
                 String isCompress = cmdline.getOptionValue(OUTPUT_COMPRESS);
                 if (isCompress == null || isCompress.equalsIgnoreCase("true")) {
                     conf.setBoolean(CONF_OUTPUT_COMPRESS, true);
-                } else {
+                } else if (isCompress.equalsIgnoreCase("false")){
                     conf.setBoolean(CONF_OUTPUT_COMPRESS, false);
+                } else {
+                    LOG.warn("Unrecognized option argument for " + 
+                                    OUTPUT_COMPRESS + ": " + isCompress);
                 }
             }
             if (cmdline.hasOption(OUTPUT_INDENTED)) {
@@ -526,7 +537,6 @@ public enum Command implements ConfigConstants {
             }
             String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE, "10000");
             conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
-
         }
 
         @Override
@@ -814,8 +824,12 @@ public enum Command implements ConfigConstants {
             String arg = cmdline.getOptionValue(COPY_COLLECTIONS);
             if (arg == null || arg.equalsIgnoreCase("true")) {
                 conf.setBoolean(COPY_COLLECTIONS, true);
-            } else {
+            } else if (arg.equalsIgnoreCase("false")) {
                 conf.setBoolean(COPY_COLLECTIONS, false);
+            } else {
+                LOG.warn("Unrecognized option argument for " + COPY_COLLECTIONS
+                                + ": " + arg);
+                conf.set(CONF_COPY_COLLECTIONS, DEFAULT_COPY_COLLECTIONS);
             }
         } else {
             conf.set(CONF_COPY_COLLECTIONS, DEFAULT_COPY_COLLECTIONS);
@@ -824,8 +838,12 @@ public enum Command implements ConfigConstants {
             String arg = cmdline.getOptionValue(COPY_PERMISSIONS);
             if (arg == null || arg.equalsIgnoreCase("true")) {
                 conf.setBoolean(COPY_PERMISSIONS, true);
-            } else {
+            } else if (arg.equalsIgnoreCase("false")) {
                 conf.setBoolean(COPY_PERMISSIONS, false);
+            } else {
+                LOG.warn("Unrecognized option argument for " + COPY_PERMISSIONS
+                                + ": " + arg);
+                conf.set(CONF_COPY_PERMISSIONS, DEFAULT_COPY_PERMISSIONS);
             }
         } else {
             conf.set(CONF_COPY_PERMISSIONS, DEFAULT_COPY_PERMISSIONS);
@@ -844,8 +862,12 @@ public enum Command implements ConfigConstants {
             String arg = cmdline.getOptionValue(COPY_QUALITY);
             if (arg == null || arg.equalsIgnoreCase("true")) {
                 conf.setBoolean(COPY_QUALITY, true);
-            } else {
+            } else if (arg.equalsIgnoreCase("false")) {
                 conf.setBoolean(COPY_QUALITY, false);
+            } else {
+                LOG.warn("Unrecognized option argument for " + COPY_QUALITY
+                                + ": " + arg);
+                conf.set(CONF_COPY_QUALITY, DEFAULT_COPY_QUALITY);
             }
         } else {
             conf.set(CONF_COPY_QUALITY, DEFAULT_COPY_QUALITY);
