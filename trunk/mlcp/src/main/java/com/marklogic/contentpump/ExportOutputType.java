@@ -33,7 +33,7 @@ public enum ExportOutputType {
         public Class<? extends FileOutputFormat> getOutputFormatClass(
             boolean compressed) {
             if (compressed) {
-                return CompressedDocumentOutputFormat.class;
+                return ArchiveOutputFormat.class;
             } else {
                 return SingleDocumentOutputFormat.class;
             }
