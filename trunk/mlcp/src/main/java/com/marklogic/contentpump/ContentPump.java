@@ -143,7 +143,7 @@ public class ContentPump implements ConfigConstants {
         
         // create job
         Job job = null;
-        try {
+        try { 
             job = command.createJob(conf, cmdline);
         } catch (Exception e) {
             // Print exception message.
@@ -154,6 +154,9 @@ public class ContentPump implements ConfigConstants {
         // run job
         try {
             if (distributed) {
+                // So far all jobs created by mlcp are map only,
+                // so set number of reduce tasks to 0.
+                conf.setInt("mapred.reduce.tasks", 0);
                 // submit job
                 submitJob(job); 
             } else {
