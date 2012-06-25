@@ -49,6 +49,7 @@ import org.apache.hadoop.util.ReflectionUtils;
  */
 public class LocalJobRunner implements ConfigConstants {
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
+    public static final int DEFAULT_THREAD_COUNT = 10;
     
     private Job job;
     private ExecutorService pool;
@@ -56,13 +57,13 @@ public class LocalJobRunner implements ConfigConstants {
     public LocalJobRunner(Job job, CommandLine cmdline) {
         this.job = job;
         
-        // Default thread count is 1.
+        int threadCount = DEFAULT_THREAD_COUNT;
         if (cmdline.hasOption(THREAD_COUNT)) {
-            int threadCount = Integer.parseInt(
+            threadCount = Integer.parseInt(
                     cmdline.getOptionValue(THREAD_COUNT));
-            if (threadCount > 1) {
-                pool = Executors.newFixedThreadPool(threadCount);
-            }
+        }
+        if (threadCount > 1) {
+            pool = Executors.newFixedThreadPool(threadCount);
         }
     }
     
