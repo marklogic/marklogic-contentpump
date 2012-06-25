@@ -32,7 +32,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 public class DelimitedTextReader<VALUEIN> extends
     AbstractRecordReader<VALUEIN> {
     protected String[] fields;
-    protected static String DELIM;
+    protected String DELIM;
     protected static String ROOT_START = "<root>";
     protected static String ROOT_END = "</root>";
     protected BufferedReader br;
@@ -89,7 +89,12 @@ public class DelimitedTextReader<VALUEIN> extends
             return false;
         }
         if (fields == null) {
-            DELIM = "\\" + DELIM;
+            if( DELIM.length() == 1){
+                DELIM = "\\" + DELIM;
+            } else {
+                LOG.error("Incorrect delimitor: " + DELIM);
+                return false;
+            }
             fields = line.split(DELIM);
             boolean found = false;
             for (int i = 0; i < fields.length; i++) {
