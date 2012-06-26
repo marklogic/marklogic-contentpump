@@ -50,7 +50,11 @@ public abstract class AbstractRecordReader<VALUEIN> extends
         if (suffix != null) {
             sb.append(suffix);
         }
-        this.key.setUri(sb.toString());
+        //key may be set to null previously for empty delim uri_id
+        if(key == null) {
+            key = new DocumentURI();
+        }
+        key.setUri(sb.toString());
     }
 
     @Override
