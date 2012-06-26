@@ -55,9 +55,7 @@ public class OutputArchive {
         // use the constructor filename for the first zip,
         // then add filecount to subsequent archives, if any.
         int count = fileCount.getAndIncrement();
-        if (count > 0) {
-            file = newPackagePath(path, count, 6);
-        }
+        file = newPackagePath(path, count, 6);
         if (outputStream != null) {
             outputStream.flush();
             outputStream.close();
