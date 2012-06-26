@@ -1,9 +1,5 @@
 @ECHO OFF
-REM set arg=%~1
-REM echo %arg%
 set argss=%*
-echo %argss%
-
 
 set cmdpath=%~dp0
 REM echo Command Path:  %cmdpath%
@@ -20,7 +16,6 @@ SetLocal EnableDelayedExpansion
 set classpath=%cmdppath%conf
 
 for %%X in (%LIB_HOME%\*) do (
-  echo %%X
   set tmp=%%X
   set classpath=!classpath!;!tmp!
 )
