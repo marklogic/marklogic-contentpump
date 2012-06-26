@@ -34,13 +34,11 @@ public class DocumentMapper<VALUE> extends
     Mapper<DocumentURI, VALUE, DocumentURI, VALUE> {
     public void map(DocumentURI uri, VALUE fileContent, Context context)
         throws IOException, InterruptedException {
+        if (uri == null) {
+            return;
+        }
         StringBuilder sb = new StringBuilder();
-
         Configuration conf = context.getConfiguration();
-//        String outDir = conf.get(ConfigConstants.CONF_OUTPUT_DIRECTORY);
-//        if (outDir != null) {
-//            sb.append(outDir);
-//        }
         sb.append(uri.toString());
         String[] uriReplace = conf
             .getStrings(ConfigConstants.CONF_OUTPUT_URI_REPLACE);

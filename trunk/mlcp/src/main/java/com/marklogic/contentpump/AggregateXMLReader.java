@@ -291,10 +291,12 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             if (realValue instanceof Text) {
                 ((Text) realValue).set(buffer.toString());
             } else {
-                LOG.error("Expects Text in aggregate XML");
+                LOG.error("Expects Text in aggregate XML, but gets "
+                    + realValue.getClass().getCanonicalName());
             }
         } else {
-            LOG.error("Expects Text in aggregate XML");
+            LOG.error("Expects Text in aggregate XML, but gets "
+                + value.getClass().getCanonicalName());
         }
         
         cleanupEndElement();

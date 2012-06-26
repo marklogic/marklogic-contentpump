@@ -134,6 +134,8 @@ public class DelimitedTextReader<VALUEIN> extends
             if (idName.equals(fields[i])) {
                 if (values[i] == null || values[i].equals("")) {
                     LOG.error(line + ":column used for uri_id is empty");
+                    //clear the key of previous record 
+                    key = null;
                     return true;
                 }
                 setKey(values[i]);
