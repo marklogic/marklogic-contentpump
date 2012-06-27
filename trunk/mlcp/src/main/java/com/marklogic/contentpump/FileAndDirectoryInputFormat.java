@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -36,11 +37,26 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
  */
 public abstract class FileAndDirectoryInputFormat<K, V> extends
 FileInputFormat<K, V> {
+    // add my own hiddenFileFilter since the one defined in FileInputFormat
+    // is not accessible.
+    private static final PathFilter hiddenFileFilter = new PathFilter() {
+        public boolean accept(Path p) {
+            String name = p.getName();
+            return !name.startsWith("_") && !name.startsWith(".");
+        }
+    };
+
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
         List<InputSplit> splits = super.getSplits(job);
         Configuration conf = job.getConfiguration();
         PathFilter jobFilter = getInputPathFilter(job);
+        List<PathFilter> filters = new ArrayList<PathFilter>();
+        filters.add(hiddenFileFilter);
+        if (jobFilter != null) {
+            filters.add(jobFilter);
+        }
+        PathFilter inputFilter = new MultiPathFilter(filters);
         // take a second pass of the splits generated to extract files from 
         // directories
         int count = 0;
@@ -51,9 +67,8 @@ FileInputFormat<K, V> {
             FileStatus status = fs.getFileStatus(file);
             if (status.isDir()) {
                 splits.remove(count);
-                FileStatus[] children = jobFilter == null ? 
-                                fs.listStatus(status.getPath()) :
-                                fs.listStatus(status.getPath(), jobFilter);
+                FileStatus[] children = 
+                                fs.listStatus(status.getPath(), inputFilter);
                 for (FileStatus stat : children) {
                     FileSplit child = new FileSplit(stat.getPath(), 0, 
                                     stat.getLen(), null);
@@ -64,5 +79,27 @@ FileInputFormat<K, V> {
             }
         }
         return splits;
+    }
+    
+    /**
+     * Proxy PathFilter that accepts a path only if all filters given in the
+     * constructor do. Used by the listPaths() to apply the built-in
+     * hiddenFileFilter together with a user provided one (if any).
+     */
+    private static class MultiPathFilter implements PathFilter {
+        private List<PathFilter> filters;
+
+        public MultiPathFilter(List<PathFilter> filters) {
+            this.filters = filters;
+        }
+
+        public boolean accept(Path path) {
+            for (PathFilter filter : filters) {
+                if (!filter.accept(path)) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
