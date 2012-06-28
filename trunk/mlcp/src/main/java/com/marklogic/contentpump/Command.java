@@ -213,10 +213,7 @@ public enum Command implements ConfigConstants {
             String documentType = conf.get(MarkLogicConstants.CONTENT_TYPE,
                 MarkLogicConstants.DEFAULT_CONTENT_TYPE);
             ContentType contentType = ContentType.forName(documentType);
-            //set batch_size to 1 for binary file
-            if (ContentType.BINARY.equals(contentType)) {
-                conf.set(MarkLogicConstants.BATCH_SIZE, "1");
-            }
+
             boolean compressed = false;
             if (cmdline.hasOption(INPUT_COMPRESSED)) {
                 String arg = cmdline.getOptionValue(INPUT_COMPRESSED);
