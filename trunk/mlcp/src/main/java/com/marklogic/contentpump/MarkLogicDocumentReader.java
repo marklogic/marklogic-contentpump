@@ -57,7 +57,7 @@ import com.marklogic.xcc.types.XdmElement;
  */
 public class MarkLogicDocumentReader extends
     MarkLogicRecordReader<DocumentURI, MarkLogicDocument> {
-    static final float DOCUMENT_TO_FRAGMENT_RATIO = 1;
+    static final float DOCUMENT_TO_FRAGMENT_RATIO = 2;
     public static final Log LOG = LogFactory
         .getLog(MarkLogicDocumentReader.class);
     protected boolean copyCollection;
