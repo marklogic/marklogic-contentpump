@@ -101,6 +101,13 @@ public class ContentPump implements ConfigConstants {
             command.printUsage();
             return 1; // Exit on exception here.
         }
+
+        for (String arg : cmdline.getArgs()) {
+            LOG.error("Unrecognized argument: " + arg);
+            // Print the command usage message and exit.
+            command.printUsage();
+            return 1; // Exit on exception here.
+        }
         
         // check running mode and hadoop home configuration       
         String mode = cmdline.getOptionValue(MODE);
