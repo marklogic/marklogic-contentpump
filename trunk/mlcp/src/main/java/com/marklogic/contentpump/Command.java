@@ -31,6 +31,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.Indentation;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
@@ -445,15 +446,12 @@ public enum Command implements ConfigConstants {
                 .withDescription("Whether to compress the output document")
                 .create(OUTPUT_COMPRESS);
             options.addOption(exportCompress);
-
-            // TODO: complete
-
-            // Option exportIndented =
-            // OptionBuilder.withArgName(OUTPUT_INDENTED)
-            // .hasArg()
-            // .withDescription("Whether to pretty indent XML elements")
-            // .create(OUTPUT_INDENTED);
-            // options.addOption(exportIndented);
+            Option exportIndented = OptionBuilder
+                 .withArgName(OUTPUT_INDENTED)
+                 .hasArg()
+                 .withDescription("Whether to format data with indentation")
+                 .create(OUTPUT_INDENTED);
+            options.addOption(exportIndented);
         }
 
         @Override
@@ -521,7 +519,9 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(OUTPUT_INDENTED)) {
                 String isIndented = cmdline.getOptionValue(OUTPUT_INDENTED);
-                conf.set(CONF_OUTPUT_INDENTED, isIndented);
+                // check value validity
+                Indentation indent = Indentation.forName(isIndented);
+                conf.set(MarkLogicConstants.INDENTED, isIndented);
             }
             if (cmdline.hasOption(HOST)) {
                 String host = cmdline.getOptionValue(HOST);

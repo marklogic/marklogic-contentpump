@@ -157,7 +157,6 @@ public interface ConfigConstants {
         "mapreduce.marklogic.document.filter";
     static final String CONF_OUTPUT_TYPE = "mapreduce.marklogic.output.type";
     static final String CONF_OUTPUT_COMPRESS = "mapreduce.marklogic.output.compress";
-    static final String CONF_OUTPUT_INDENTED = "mapreduce.marklogic.output.indented";
     static final String CONF_COPY_COLLECTIONS = "mapreduce.marklogic.copycollections";
     static final String CONF_COPY_PERMISSIONS = "mapreduce.marklogic.copypermissions";
     static final String CONF_COPY_PROPERTIES = "mapreduce.marklogic.copyproperties";
