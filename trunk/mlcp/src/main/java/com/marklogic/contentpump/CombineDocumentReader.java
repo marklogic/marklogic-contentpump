@@ -28,6 +28,8 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.mapreduce.MarkLogicConstants;
+
 /**
  * RecordReader for CombineDocumentInputFormat.
  * 
@@ -43,6 +45,8 @@ extends AbstractRecordReader<VALUEIN> {
     private Iterator<FileSplit> iterator;
     private TaskAttemptContext context;
     private Configuration conf;
+    private int batchSize;
+    
     public CombineDocumentReader() {     
     }
 
@@ -64,6 +68,8 @@ extends AbstractRecordReader<VALUEIN> {
         iterator = ((CombineDocumentSplit)inSplit).getSplits().iterator();
         bytesTotal = inSplit.getLength();
         this.context = context;
+        batchSize = conf.getInt(MarkLogicConstants.BATCH_SIZE, 
+                        MarkLogicConstants.DEFAULT_BATCH_SIZE);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -82,7 +88,14 @@ extends AbstractRecordReader<VALUEIN> {
                 if (value instanceof Text) {
                     ((Text) value).set(new String(buf));
                 } else if (value instanceof BytesWritable) {
-                    ((BytesWritable) value).set(buf, 0, buf.length);
+                    if (batchSize > 1) {
+                        // Copy data since XCC won't do it when Content is 
+                        // created.
+                        value = (VALUEIN) new BytesWritable(buf);
+                    } else {
+                        ((BytesWritable) value).set(buf, 0, buf.length);
+                    }
+                // TODO: why do we need this?
                 } else if (value instanceof ContentWithFileNameWritable) {
                     VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
                         .getValue();
