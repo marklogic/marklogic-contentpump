@@ -142,10 +142,12 @@ implements MarkLogicConstants {
                 String docExpr = conf.get(DOCUMENT_SELECTOR, 
                         MarkLogicInputFormat.DEFAULT_DOCUMENT_SELECTOR);
                 String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
+                String indent = conf.get(INDENTED, "FALSE");
+                Indentation ind = Indentation.valueOf(indent);
                 StringBuilder buf = new StringBuilder();      
                 buf.append("xquery version \"1.0-ml\"; \n");
-                buf.append("declare option xdmp:output \"indent=no\";");
-                buf.append("declare option xdmp:output \"indent-untyped=no\";");
+               
+                buf.append(ind.getStatement());
                 buf.append("xdmp:with-namespaces(("); 
                 if (nsCol != null) {
                     for (Iterator<String> nsIt = nsCol.iterator(); 

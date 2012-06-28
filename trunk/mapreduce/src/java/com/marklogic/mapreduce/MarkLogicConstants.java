@@ -362,7 +362,14 @@ public interface MarkLogicConstants {
      */       
      static final String RECORD_TO_FRAGMENT_RATIO =      
          "mapreduce.marklogic.input.recordtofragmentratio"; 
-
+     /**      
+      * The config property name (<code>{@value}</code>) which, if   
+      * set, specifies whether to format data with indentation retrieved from 
+      * MarkLogic.  Optional. Valid values: TRUE, FALSE, SERVERDEFAULT.
+      * Default: false.     
+      */       
+      static final String INDENTED =      
+          "mapreduce.marklogic.input.indented"; 
     
     // output-related config property names
     /**
