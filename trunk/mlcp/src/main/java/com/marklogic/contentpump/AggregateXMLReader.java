@@ -82,6 +82,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         Configuration conf = context.getConfiguration();
         Path file = ((FileSplit) inSplit).getPath();
         initCommonConfigurations(conf, file);
+        configFileNameAsCollection(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         XMLInputFactory f = XMLInputFactory.newInstance();
@@ -293,10 +294,12 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
             } else {
                 LOG.error("Expects Text in aggregate XML, but gets "
                     + realValue.getClass().getCanonicalName());
+                key = null;
             }
         } else {
             LOG.error("Expects Text in aggregate XML, but gets "
                 + value.getClass().getCanonicalName());
+            key = null;
         }
         
         cleanupEndElement();

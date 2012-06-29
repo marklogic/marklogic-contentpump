@@ -125,15 +125,9 @@ public class CompressedDocumentReader<VALUEIN> extends
             ((Text) value).set(baos.toString());
         } else if (value instanceof BytesWritable) {
             ((BytesWritable) value).set(baos.toByteArray(), 0, baos.size());
-        } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                .getValue();
-            if (realValue instanceof Text) {
-                ((Text) realValue).set(baos.toString());
-            } else if (realValue instanceof BytesWritable) {
-                ((BytesWritable) realValue).set(baos.toByteArray(), 0,
-                    baos.size());
-            }
+        } else {
+            LOG.error("Unexpected type: " + value.getClass()); 
+            key = null;
         }
         baos.close();
     }

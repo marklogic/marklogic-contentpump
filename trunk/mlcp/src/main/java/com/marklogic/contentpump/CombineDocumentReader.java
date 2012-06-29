@@ -78,7 +78,6 @@ extends AbstractRecordReader<VALUEIN> {
         while (iterator.hasNext()) {
             FileSplit split = iterator.next();
             Path file = split.getPath();
-            configFileNameAsCollection(conf, file);
             FileSystem fs = file.getFileSystem(context.getConfiguration());
             FSDataInputStream fileIn = fs.open(file);
             setKey(file.toString());
@@ -95,15 +94,10 @@ extends AbstractRecordReader<VALUEIN> {
                     } else {
                         ((BytesWritable) value).set(buf, 0, buf.length);
                     }
-                // TODO: why do we need this?
-                } else if (value instanceof ContentWithFileNameWritable) {
-                    VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                        .getValue();
-                    if (realValue instanceof Text) {
-                        ((Text) realValue).set(new String(buf));
-                    } else if (realValue instanceof BytesWritable) {
-                        ((BytesWritable) realValue).set(buf, 0, buf.length);
-                    }
+                } else {
+                    LOG.error("Unexpected type: " + value.getClass());
+                    key = null;
+                    return true;
                 }
                 bytesRead += buf.length;
                 return true;

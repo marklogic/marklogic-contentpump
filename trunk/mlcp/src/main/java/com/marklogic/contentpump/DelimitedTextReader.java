@@ -57,6 +57,7 @@ public class DelimitedTextReader<VALUEIN> extends
         Configuration conf = context.getConfiguration();
         Path file = ((FileSplit) inSplit).getPath();
         initCommonConfigurations(conf, file);
+        configFileNameAsCollection(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         br = new BufferedReader(new InputStreamReader(fileIn));
@@ -154,9 +155,11 @@ public class DelimitedTextReader<VALUEIN> extends
                 ((Text) realValue).set(sb.toString());
             } else {
                 LOG.error("Expects Text in delimited text");
+                key = null;
             }
         } else {
             LOG.error("Expects Text in delimited text");
+            key = null;
         }
         return true;
     }
