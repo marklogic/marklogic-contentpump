@@ -37,30 +37,29 @@ public class DocumentMapper<VALUE> extends
         if (uri == null) {
             return;
         }
-        StringBuilder sb = new StringBuilder();
+        String sb = new String(uri.toString());
         Configuration conf = context.getConfiguration();
-        sb.append(uri.toString());
         String[] uriReplace = conf
             .getStrings(ConfigConstants.CONF_OUTPUT_URI_REPLACE);
-        int i=0;
+        if (uriReplace != null && uriReplace.length % 2 != 0) {
+            throw new IOException("Argument for -output_uri_replace should be"
+                + " Comma_separated list of regex pattern and string pairs");
+        }
+        int i = 0;
         while (uriReplace != null && i < uriReplace.length) {
-            int fromIndex = 0;
-            while ((fromIndex = sb.indexOf(uriReplace[i], fromIndex)) != -1) {
-                String replacement = uriReplace[i + 1];
-                if (replacement.startsWith("'")
-                    && replacement.endsWith("'")) {
-                    String trim = replacement.substring(1,
-                        replacement.length() - 1);
-                    sb.replace(fromIndex, fromIndex + uriReplace[i].length(),
-                        trim);
-                } else {
-                    throw new IOException(
-                        "replacement string should be wrapped by a pair of single quotes");
-                }
+            String replacement = uriReplace[i + 1];
+            if (replacement.startsWith("'") && replacement.endsWith("'")) {
+                String trim = replacement.substring(1,
+                    replacement.length() - 1);
+                sb = sb.replaceAll(uriReplace[i], trim);
+            } else {
+                throw new IOException(
+                    "replacement string should be wrapped by a pair of "
+                        + "single quotes");
             }
             i += 2;
         }
-        uri.setUri(sb.toString());
+        uri.setUri(sb);
         context.write(uri, fileContent);
     }
 
