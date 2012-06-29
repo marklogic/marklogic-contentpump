@@ -70,8 +70,6 @@ public class SequenceFileReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         Class<? extends Writable> vClass = svType.getWritableClass();
         value = (VALUEIN) ReflectionUtils.newInstance(vClass, conf);
 
-        configFileNameAsCollection(conf, file);
-
         if (!reader.getKeyClass().getCanonicalName().equals(keyClass)) {
             throw new IOException("Key class of sequence file on HDFS is "
                 + keyClass
@@ -107,17 +105,9 @@ public class SequenceFileReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
                 ((BytesWritable) value)
                     .set(((SequenceFileValue<BytesWritable>) seqValue)
                         .getValue());
-            } else if (value instanceof ContentWithFileNameWritable) {
-                VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                    .getValue();
-                if (realValue instanceof Text) {
-                    ((Text) realValue)
-                        .set(((SequenceFileValue<Text>) seqValue).getValue());
-                } else if (realValue instanceof BytesWritable) {
-                    ((BytesWritable) realValue)
-                        .set(((SequenceFileValue<BytesWritable>) seqValue)
-                            .getValue());
-                }
+            } else {
+                LOG.error("Unexpected type: " + value.getClass());
+                key = null;
             }
             return true;
         }
