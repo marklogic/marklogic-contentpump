@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -107,13 +108,7 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
      * Sessions per forest.
      */
     private Session[] sessions;
-
-    private boolean formatNeeded;
-
-    private DocumentMetadata prevMeta[];
-    
-//    private boolean flush = false;
-    
+   
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
     public MarkLogicDocumentContentWriter(Configuration conf,
@@ -137,9 +132,13 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
             forestContents = new Content[arraySize][batchSize];
             counts = new int[arraySize];
             metadatas = new URIMetadata[arraySize][batchSize];
-            prevMeta = new DocumentMetadata[arraySize];
         }
+    }
 
+    /**
+     * fetch the options information from conf, set to the field "options"
+     */
+    private void newContentCreateOptions() {
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
         List<ContentPermission> permissions = null;
         if (perms != null && perms.length > 0) {
@@ -191,14 +190,6 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
             options.setPermissions(permissions
                 .toArray(new ContentPermission[permissions.size()]));
         }
-        String contentTypeStr = conf.get(CONTENT_TYPE, DEFAULT_CONTENT_TYPE);
-        ContentType contentType = ContentType.valueOf(contentTypeStr);
-        if (contentType == ContentType.UNKNOWN) {
-            formatNeeded = true;
-        } else {
-            options.setFormat(contentType.getDocumentFormat());
-        }
-
         options.setLanguage(conf.get(OUTPUT_CONTENT_LANGUAGE));
         options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
             DEFAULT_OUTPUT_CONTENT_ENCODING));
@@ -243,46 +234,10 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
             if (value instanceof MarkLogicDocumentWithMeta) {
                 //this is particularly for importing archive
                 meta = ((MarkLogicDocumentWithMeta) value).getMeta();
-                
-                if (counts[fId] == batchSize
-                    || (counts[fId] != 0 && prevMeta[fId] != null && !prevMeta[fId]
-                        .equals(meta))) {
-                    // metadata changes, has to flush batch
-                    if (sessions[fId] == null) {
-                        sessions[fId] = getSession(forestId);
-                    }
-                    Content[] buffer = new Content[counts[fId]];
-                    System.arraycopy(forestContents[fId], 0, buffer, 0,
-                        counts[fId]);
-                    sessions[fId].insertContent(buffer);
-                    stmtCounts[fId]++;
-                    // insertProperties
-                    for (int i = 0; i < counts[fId]; i++) {
-                        DocumentMetadata m = metadatas[fId][i].getMeta();
-                        String u = metadatas[fId][i].getUri();
-                        if (m != null && m.getProperties() != null) {
-                            setDocumentProperties(u, m.getProperties(),
-                                sessions[fId]);
-                            stmtCounts[fId]++;
-                        }
-                    }
-                    if(LOG.isDebugEnabled()) {
-                        LOG.debug("flushed " + counts[fId] + " docs");
-                    }
-                    counts[fId] = 0;
-                    prevMeta[fId] = meta;
-                }
-                // now change the options for current value
+                newContentCreateOptions();
                 ((MarkLogicDocumentWithMeta) value).updateOptions(options);
-                if (prevMeta[fId] == null) {
-                    prevMeta[fId] = meta;
-                }
-
                 MarkLogicDocument doc = (MarkLogicDocument)value;
-                if (formatNeeded) {
-                    options.setFormat(doc.getContentType().getDocumentFormat());
-                    formatNeeded = false;
-                }
+                options.setFormat(doc.getContentType().getDocumentFormat());
                 if (doc.getContentType() == ContentType.BINARY) {
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsByteArray(), options);
@@ -290,80 +245,40 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsText().toString(), options);
                 } 
-            } else if(value instanceof MarkLogicDocument) { 
+            } else if (value instanceof MarkLogicDocument) { 
               //this is particularly for copy
-//                batchSize = 1;
                 if (uri.endsWith(DocumentMetadata.EXTENSION)) {
-                    options.setFormatXml();
+                    newContentCreateOptions();
+                    //contenttype of metadata is same as the doc, set it to XML
                     ((MarkLogicDocument)value).setContentType(ContentType.XML);
                     String metaStr = ((MarkLogicDocument)value).getContentAsText().toString();
                     meta = DocumentMetadata.fromXML(new StringReader(metaStr));
-                    
-                    
-                    if (counts[fId] == batchSize
-                        || (counts[fId] != 0 && prevMeta[fId] != null && !prevMeta[fId]
-                            .equals(meta))) {
-                        // metadata changes, has to flush batch
-                        if (sessions[fId] == null) {
-                            sessions[fId] = getSession(forestId);
-                        }
-                        Content[] buffer = new Content[counts[fId]];
-                        System.arraycopy(forestContents[fId], 0, buffer, 0,
-                            counts[fId]);
-                        sessions[fId].insertContent(buffer);
-                        stmtCounts[fId]++;
-                        // insertProperties
-                        for (int i = 0; i < counts[fId]; i++) {
-                            DocumentMetadata m = metadatas[fId][i].getMeta();
-                            String u = metadatas[fId][i].getUri();
-                            if (m != null && m.getProperties() != null) {
-                                if(metaOnly) {
-                                    uri = uri.substring(0, uri.length() - DocumentMetadata.EXTENSION.length());
-                                }
-                                setDocumentProperties(u, m.getProperties(),
-                                    sessions[fId]);
-                                stmtCounts[fId]++;
-                            }
-                        }
-                        if(LOG.isDebugEnabled()) {
-                            LOG.debug("flushed " + counts[fId] + " docs");
-                        }
-                        counts[fId] = 0;
-                        prevMeta[fId] = meta;
-                    }
-                    if (prevMeta[fId] == null) {
-                        prevMeta[fId] = meta;
-                    }
-                    //update current options
                     updateOptionsUsingMeta(options, meta);
                     metaOnly = true;
                 } else {
                     MarkLogicDocument doc = (MarkLogicDocument)value;
-                    if (formatNeeded) {
-                        options.setFormat(doc.getContentType().getDocumentFormat());
-                        formatNeeded = false;
-                    }
+                    options.setFormat(doc.getContentType().getDocumentFormat());
                     if (doc.getContentType() == ContentType.BINARY) {
                         content = ContentFactory.newContent(uri, 
                                   doc.getContentAsByteArray(), options);
                     } else {
-                        content = ContentFactory.newContent(uri, 
-                                  doc.getContentAsText().toString(), options);
+                        content = ContentFactory.newContent(uri, doc
+                            .getContentAsText().toString(), options);
                     } 
                 }
             } else {
                 throw new IOException("unexpected type " + value.getClass());
             }
             
-            if (batchSize > 1) {
+             if (batchSize > 1) {
                 if (value instanceof MarkLogicDocumentWithMeta) {
                 // add new content
                     forestContents[fId][counts[fId]] = content;
                     metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
                 }
-                else if(value instanceof MarkLogicDocument) {
-                    if(meta != null /*&& meta.getProperties()!=null*/) {
-                        if(metaOnly) {
+                else if (value instanceof MarkLogicDocument) {
+                    if (meta != null /*&& meta.getProperties()!=null*/) {
+                        if (metaOnly) {
                             uri = uri.substring(0, uri.length() - DocumentMetadata.EXTENSION.length());
                         }
                         metadatas[fId][counts[fId]] = new URIMetadata(uri, meta);
@@ -371,17 +286,40 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                         forestContents[fId][counts[fId]++] = content;
                     }
                 }
+                
+                if (counts[fId] == batchSize) {
+                    if (sessions[fId] == null) {
+                        sessions[fId] = getSession(forestId);
+                    }
+                    sessions[fId].insertContent(forestContents[fId]);
+                    stmtCounts[fId]++;
+                    // insertProperties
+                    for (int i = 0; i < counts[fId]; i++) {
+                        DocumentMetadata m = metadatas[fId][i].getMeta();
+                        String u = metadatas[fId][i].getUri();
+                        if (m != null && m.getProperties() != null) {
+                            if (metaOnly) {
+                                uri = uri.substring(0, uri.length()
+                                    - DocumentMetadata.EXTENSION.length());
+                            }
+                            setDocumentProperties(u, m.getProperties(),
+                                sessions[fId]);
+                            stmtCounts[fId]++;
+                        }
+                    }
+                    counts[fId] = 0;
+                }
 
             } else {
                 if (sessions[fId] == null) {
                     sessions[fId] = getSession(forestId);
                 }
-                if(content != null) {
+                if (content != null) {
                     sessions[fId].insertContent(content);
                     stmtCounts[fId]++;
                 }
-                if(meta != null && meta.getProperties()!=null) {
-                    if(metaOnly) {
+                if (meta != null && meta.getProperties()!=null) {
+                    if (metaOnly) {
                         uri = uri.substring(0, uri.length() - DocumentMetadata.EXTENSION.length());
                     }
                     setDocumentProperties(uri, meta.getProperties(), sessions[fId]);
@@ -392,8 +330,6 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
             }
-            
-            
         } catch (RequestException e) {
             LOG.error(e);
             counts[fId] = 0;
