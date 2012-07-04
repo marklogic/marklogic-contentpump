@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.Stack;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLInputFactory;
@@ -48,7 +49,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
     private boolean skippingRecord = false;
     protected String currentId = null;
     private boolean keepGoing = true;
-    protected HashMap<String, String> nameSpaces = new HashMap<String, String>();
+    protected HashMap<String, Stack<String>> nameSpaces = new HashMap<String, Stack<String>>();
     protected boolean startOfRecord = true;
     protected boolean hasNext = true;
     private boolean newDoc = false;
@@ -94,21 +95,23 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         initAggConf(inSplit, context);
     }
     
-    protected void initAggConf(InputSplit inSplit, TaskAttemptContext context){
+    protected void initAggConf(InputSplit inSplit, TaskAttemptContext context) {
         Configuration conf = context.getConfiguration();
         idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
-        if(idName == null) {
+        if (idName == null) {
             useAutomaticId = true;
         }
         recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
         recordNamespace = conf
             .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
-        if(useAutomaticId) {
+        if (useAutomaticId) {
             mode = conf.get(ConfigConstants.CONF_MODE);
             if (mode.equals(ConfigConstants.MODE_DISTRIBUTED)) {
-                idGen = new LocalIdGenerator( String.valueOf(context.getTaskAttemptID().getTaskID().getId()));
+                idGen = new LocalIdGenerator(String.valueOf(context
+                    .getTaskAttemptID().getTaskID().getId()));
             } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
-                idGen = new LocalIdGenerator(String.valueOf(inSplit.hashCode()));
+                idGen = new LocalIdGenerator(
+                    String.valueOf(inSplit.hashCode()));
             }
         }
     }
@@ -125,23 +128,48 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         }
     }
     
-    protected void copyNameSpaceDecl(){
+    protected void copyNameSpaceDecl() {
         if (recordDepth < currDepth) {
             return;
         }
-        int stop = xmlSR.getNamespaceCount(); 
+        int stop = xmlSR.getNamespaceCount();
         if (stop > 0) {
             String nsDeclPrefix, nsDeclUri;
             LOG.debug("checking namespace declarations");
             for (int i = 0; i < stop; i++) {
                 nsDeclPrefix = xmlSR.getNamespacePrefix(i);
                 nsDeclUri = xmlSR.getNamespaceURI(i);
-                nameSpaces.put(nsDeclPrefix, nsDeclUri);
+                if (nameSpaces.containsKey(nsDeclPrefix)) {
+                    nameSpaces.get(nsDeclPrefix).push(nsDeclUri);
+                } else {
+                    Stack<String> s = new Stack<String>();
+                    s.push(nsDeclUri);
+                    nameSpaces.put(nsDeclPrefix, s);
+                }
             }
         }
     }
     
-
+    protected void removeNameSpaceDecl() {
+        if (recordDepth < currDepth) {
+            return;
+        }
+        int stop = xmlSR.getNamespaceCount();
+        if (stop > 0) {
+            String nsDeclPrefix;
+            LOG.debug("checking namespace declarations");
+            for (int i = 0; i < stop; i++) {
+                nsDeclPrefix = xmlSR.getNamespacePrefix(i);
+                if (nameSpaces.containsKey(nsDeclPrefix)) {
+                    if (!nameSpaces.get(nsDeclPrefix).isEmpty()) {
+                        nameSpaces.get(nsDeclPrefix).pop();
+                    }
+                } else {
+                    LOG.warn("Namespace " + nsDeclPrefix + " in scope");
+                }
+            }
+        }
+    }
 
     private void processStartElement() throws XMLStreamException {
         String name = xmlSR.getLocalName();
@@ -189,7 +217,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         if (isNewRootStart && namespace != null) {
             Set<String> keys = nameSpaces.keySet();
             for (String k : keys) {
-                String v = nameSpaces.get(k);
+                String v = nameSpaces.get(k).peek();
                 if (DEFAULT_NS == k) {
                     sb.append(" xmlns=\"" + v + "\"");
                 } else {
@@ -271,9 +299,14 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         //write to finish the end tag before checking errors
         write(sb.toString()); 
 
-        if (recordDepth != currDepth || !newDoc) {
+        if (recordDepth != currDepth ) {
             // not the end of the record: go look for more nodes
             currDepth--;
+            removeNameSpaceDecl();
+            return true;
+        } else if (!newDoc) {
+            //depth is same: it is record that not matched
+            cleanupEndElement();
             return true;
         }
         if (!useAutomaticId && null == currentId && newDoc) {
@@ -313,6 +346,7 @@ public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
         // reset buffer
         buffer.setLength(0);
         currDepth--;
+        removeNameSpaceDecl();
     }
 
     @Override
