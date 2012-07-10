@@ -274,7 +274,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
-                conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
+                conf.set(ConfigConstants.CONF_MAX_SPLIT_SIZE, maxSize);
             }
             if (cmdline.hasOption(MIN_SPLIT_SIZE)) {
                 String minSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
@@ -824,9 +824,9 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(COPY_COLLECTIONS)) {
             String arg = cmdline.getOptionValue(COPY_COLLECTIONS);
             if (arg == null || arg.equalsIgnoreCase("true")) {
-                conf.setBoolean(COPY_COLLECTIONS, true);
+                conf.setBoolean(CONF_COPY_COLLECTIONS, true);
             } else if (arg.equalsIgnoreCase("false")) {
-                conf.setBoolean(COPY_COLLECTIONS, false);
+                conf.setBoolean(CONF_COPY_COLLECTIONS, false);
             } else {
                 LOG.warn("Unrecognized option argument for " + COPY_COLLECTIONS
                                 + ": " + arg);
@@ -838,9 +838,9 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(COPY_PERMISSIONS)) {
             String arg = cmdline.getOptionValue(COPY_PERMISSIONS);
             if (arg == null || arg.equalsIgnoreCase("true")) {
-                conf.setBoolean(COPY_PERMISSIONS, true);
+                conf.setBoolean(CONF_COPY_PERMISSIONS, true);
             } else if (arg.equalsIgnoreCase("false")) {
-                conf.setBoolean(COPY_PERMISSIONS, false);
+                conf.setBoolean(CONF_COPY_PERMISSIONS, false);
             } else {
                 LOG.warn("Unrecognized option argument for " + COPY_PERMISSIONS
                                 + ": " + arg);
@@ -852,9 +852,9 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(COPY_PROPERTIES)) {
             String arg = cmdline.getOptionValue(COPY_PROPERTIES);
             if (arg == null || arg.equalsIgnoreCase("true")) {
-                conf.setBoolean(COPY_PROPERTIES, true);
+                conf.setBoolean(CONF_COPY_PROPERTIES, true);
             } else {
-                conf.setBoolean(COPY_PROPERTIES, false);
+                conf.setBoolean(CONF_COPY_PROPERTIES, false);
             }
         } else {
             conf.set(CONF_COPY_PROPERTIES, DEFAULT_COPY_PROPERTIES);
@@ -862,9 +862,9 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(COPY_QUALITY)) {
             String arg = cmdline.getOptionValue(COPY_QUALITY);
             if (arg == null || arg.equalsIgnoreCase("true")) {
-                conf.setBoolean(COPY_QUALITY, true);
+                conf.setBoolean(CONF_COPY_QUALITY, true);
             } else if (arg.equalsIgnoreCase("false")) {
-                conf.setBoolean(COPY_QUALITY, false);
+                conf.setBoolean(CONF_COPY_QUALITY, false);
             } else {
                 LOG.warn("Unrecognized option argument for " + COPY_QUALITY
                                 + ": " + arg);
