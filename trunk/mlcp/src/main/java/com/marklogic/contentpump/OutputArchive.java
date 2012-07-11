@@ -110,7 +110,7 @@ public class OutputArchive {
 
         if (outputStream == null) {
             // lazily construct a new zipfile outputstream
-            LOG.info("concstructing new output stream");
+            LOG.info("constructing new output stream");
             newOutputStream();
         }
 
