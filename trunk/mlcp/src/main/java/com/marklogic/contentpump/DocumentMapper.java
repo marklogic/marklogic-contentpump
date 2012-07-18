@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import com.marklogic.mapreduce.DocumentURI;
@@ -32,10 +33,17 @@ import com.marklogic.mapreduce.DocumentURI;
  */
 public class DocumentMapper<VALUE> extends
     Mapper<DocumentURI, VALUE, DocumentURI, VALUE> {
+    
+    protected Counter inputRecordCount;
+    protected Counter skippedRecordCount;
+    
     public void map(DocumentURI uri, VALUE fileContent, Context context)
         throws IOException, InterruptedException {
         if (uri == null) {
+            skippedRecordCount.increment(1);
             return;
+        } else {
+            inputRecordCount.increment(1);
         }
         String sb = new String(uri.toString());
         Configuration conf = context.getConfiguration();
@@ -61,6 +69,14 @@ public class DocumentMapper<VALUE> extends
         }
         uri.setUri(sb);
         context.write(uri, fileContent);
+    }
+    
+    @Override
+    public void setup(Context context) {
+        inputRecordCount = context.getCounter(
+                        ContentPumpStats.VALID_INPUT_RECORD_COUNT);
+        skippedRecordCount = context.getCounter(
+                        ContentPumpStats.SKIPPED_INPUT_RECORD_COUNT);
     }
 
 }

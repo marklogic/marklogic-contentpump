@@ -31,10 +31,10 @@ import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 
-public abstract class AbstractRecordReader<VALUEIN> extends
+public abstract class ImportRecordReader<VALUEIN> extends
     RecordReader<DocumentURI, VALUEIN> implements ConfigConstants {
     public static final Log LOG = LogFactory
-        .getLog(AbstractRecordReader.class);
+        .getLog(ImportRecordReader.class);
     protected DocumentURI key = new DocumentURI();
     protected VALUEIN value;
     protected String prefix;

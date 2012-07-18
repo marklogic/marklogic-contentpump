@@ -38,7 +38,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
  *
  */
 public class ArchiveRecordReader extends
-    AbstractRecordReader<MarkLogicDocumentWithMeta> implements 
+    ImportRecordReader<MarkLogicDocumentWithMeta> implements 
     ConfigConstants {
     private ZipInputStream zipIn;
     private boolean hasNext = true;

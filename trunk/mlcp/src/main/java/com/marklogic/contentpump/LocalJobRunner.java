@@ -15,16 +15,23 @@
  */
 package com.marklogic.contentpump;
 
+
+import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
@@ -34,11 +41,11 @@ import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.RecordWriter;
-import org.apache.hadoop.mapreduce.StatusReporter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.TaskID;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.hadoop.util.StringUtils;
 
 /**
  * Runs a job in-process, potentially multi-threaded.  Only supports map-only
@@ -53,6 +60,9 @@ public class LocalJobRunner implements ConfigConstants {
     
     private Job job;
     private ExecutorService pool;
+    private AtomicInteger[] progress;
+    private AtomicBoolean jobComplete;
+    private long startTime;
     
     public LocalJobRunner(Job job, CommandLine cmdline) {
         this.job = job;
@@ -65,6 +75,8 @@ public class LocalJobRunner implements ConfigConstants {
         if (threadCount > 1) {
             pool = Executors.newFixedThreadPool(threadCount);
         }
+        jobComplete = new AtomicBoolean();
+        startTime = System.currentTimeMillis();
     }
     
     /**
@@ -94,13 +106,21 @@ public class LocalJobRunner implements ConfigConstants {
                 job.getMapperClass(), conf);
         outputFormat.checkOutputSpecs(job);
         conf = job.getConfiguration();
-      
+        progress = new AtomicInteger[splits.size()];
+        for (int i = 0; i < splits.size(); i++) {
+            progress[i] = new AtomicInteger();
+        }
+        Monitor monitor = new Monitor();
+        monitor.start();
+        ContentPumpReporter reporter = new ContentPumpReporter();
+        
         for (int i = 0; i < splits.size(); i++) {        
             InputSplit split = splits.get(i);
             if (pool != null) {
                 LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE> task = 
                     new LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE>(job,
-                            inputFormat, outputFormat, conf, i, split);
+                        inputFormat, outputFormat, conf, i, split, reporter,
+                        progress[i]);
                 pool.submit(task);
             } else {
                 TaskID taskId = new TaskID(new JobID(), true, i);
@@ -113,14 +133,16 @@ public class LocalJobRunner implements ConfigConstants {
                     outputFormat.getRecordWriter(context);
                 OutputCommitter committer = 
                     outputFormat.getOutputCommitter(context);
-                // TODO: find a way to leverage the StatusReporter
-                Mapper.Context mapperContext = mapper.new Context(conf,
-                        taskAttemptId, reader, writer, committer, 
-                        (StatusReporter)null, split);
+                TrackingRecordReader trackingReader = 
+                    new TrackingRecordReader(reader, progress[i]);
                 
-                reader.initialize(split, mapperContext);
+                Mapper.Context mapperContext = mapper.new Context(conf,
+                        taskAttemptId, trackingReader, writer, committer, 
+                        reporter, split);
+                
+                trackingReader.initialize(split, mapperContext);
                 mapper.run(mapperContext);
-                reader.close();
+                trackingReader.close();
                 writer.close(mapperContext);
                 committer.commitTask(context);
             }
@@ -129,8 +151,25 @@ public class LocalJobRunner implements ConfigConstants {
             pool.shutdown();
             // wait forever till all tasks are done
             while (!pool.awaitTermination(1, TimeUnit.DAYS));
+            jobComplete.set(true);
         }
+        monitor.interrupt();
         
+        // report counters
+        Iterator<CounterGroup> groupIt = 
+            reporter.counters.iterator();
+        while (groupIt.hasNext()) {
+            CounterGroup group = groupIt.next();
+            LOG.info(group.getDisplayName() + ": ");
+            Iterator<Counter> counterIt = group.iterator();
+            while (counterIt.hasNext()) {
+                Counter counter = counterIt.next();
+                LOG.info(counter.getDisplayName() + ": " + 
+                                counter.getValue());
+            }
+        }
+        LOG.info("Total execution time: " + 
+                    (System.currentTimeMillis() - startTime) / 1000 + " sec");
     }
     
     /**
@@ -143,7 +182,7 @@ public class LocalJobRunner implements ConfigConstants {
      * @param <OUTKEY>
      * @param <OUTVALUE>
      */
-    public static class LocalMapTask<INKEY,INVALUE,OUTKEY,OUTVALUE>
+    public class LocalMapTask<INKEY,INVALUE,OUTKEY,OUTVALUE>
     implements Callable<Object> {
         private Job job;
         private InputFormat<INKEY, INVALUE> inputFormat;
@@ -152,16 +191,21 @@ public class LocalJobRunner implements ConfigConstants {
         private Configuration conf;
         private int id;
         private InputSplit split;
+        private AtomicInteger pctProgress;
+        private ContentPumpReporter reporter;
         
         public LocalMapTask(Job job, InputFormat<INKEY, INVALUE> inputFormat, 
                 OutputFormat<OUTKEY, OUTVALUE> outputFormat, 
-                Configuration conf, int id, InputSplit split) {
+                Configuration conf, int id, InputSplit split, 
+                ContentPumpReporter reporter, AtomicInteger pctProgress) {
             this.job = job;
             this.inputFormat = inputFormat;
             this.outputFormat = outputFormat;
             this.conf = conf;
             this.id = id;
             this.split = split;
+            this.pctProgress = pctProgress;
+            this.reporter = reporter;
         }
         
         @SuppressWarnings("unchecked")
@@ -182,21 +226,97 @@ public class LocalJobRunner implements ConfigConstants {
                 mapper = 
                     (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)
                     ReflectionUtils.newInstance(job.getMapperClass(), conf);
-                
+                TrackingRecordReader trackingReader = 
+                    new TrackingRecordReader(reader, pctProgress);
                 mapperContext = mapper.new Context(conf,
-                        taskAttemptId, reader, writer, committer, 
-                        (StatusReporter)null, split);
+                        taskAttemptId, trackingReader, writer, committer, 
+                        reporter, split);
                 
-                reader.initialize(split, mapperContext);
+                trackingReader.initialize(split, mapperContext);
                 mapper.run(mapperContext);
-                reader.close();
+                trackingReader.close();
                 writer.close(mapperContext);
-                committer.commitTask(context);
+                committer.commitTask(context);                
             } catch (Throwable t) {
                 LOG.error("Error running task: " + 
                                 mapperContext.getTaskAttemptID(), t);
             }
             return null;
         }      
+    }
+    
+    class TrackingRecordReader<K, V> extends RecordReader<K, V> {
+        private final RecordReader<K, V> real;
+        private AtomicInteger pctProgress;
+
+        TrackingRecordReader(RecordReader<K, V> real, 
+                        AtomicInteger pctProgress) {
+            this.real = real;
+            this.pctProgress = pctProgress;
+        }
+
+        @Override
+        public void close() throws IOException {
+            real.close();
+        }
+
+        @Override
+        public K getCurrentKey() throws IOException, InterruptedException {
+            return real.getCurrentKey();
+        }
+
+        @Override
+        public V getCurrentValue() throws IOException, InterruptedException {
+            return real.getCurrentValue();
+        }
+
+        @Override
+        public float getProgress() throws IOException, InterruptedException {
+            return real.getProgress();
+        }
+
+        @Override
+        public void initialize(org.apache.hadoop.mapreduce.InputSplit split,
+                        org.apache.hadoop.mapreduce.TaskAttemptContext context)
+                        throws IOException, InterruptedException {
+            real.initialize(split, context);
+        }
+
+        @Override
+        public boolean nextKeyValue() throws IOException, InterruptedException {
+            boolean result = real.nextKeyValue();
+            pctProgress.set((int) (getProgress() * 100));
+            return result;
+        }
+    }
+    
+    class Monitor extends Thread {
+        private String lastReport;
+        
+        public void run() {
+            try {
+                while (!jobComplete.get() && !interrupted()) {
+                    Thread.sleep(1000);
+                    String report = 
+                        (" completed " + 
+                            StringUtils.formatPercent(computeProgress(), 0));
+                    if (!report.equals(lastReport)) {
+                        LOG.info(report);
+                        lastReport = report;
+                    }
+                }
+            } catch (InterruptedException e) {
+            } catch (Throwable t) {
+                LOG.error("Error in monitor thread", t);
+            }
+        }
+    }
+
+    public double computeProgress() {
+        long result = 0;
+        for (AtomicInteger pct : progress) {
+            result += pct.longValue();
+        }
+        return (double)result / progress.length / 100;
     }
 }

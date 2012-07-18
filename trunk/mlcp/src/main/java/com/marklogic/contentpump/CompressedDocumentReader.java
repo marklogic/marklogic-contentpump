@@ -40,7 +40,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
  * @param <VALUEIN>
  */
 public class CompressedDocumentReader<VALUEIN> extends
-    AbstractRecordReader<VALUEIN> {
+    ImportRecordReader<VALUEIN> {
     private InputStream zipIn;
     private byte[] buf = new byte[65536];
     private boolean hasNext = true;

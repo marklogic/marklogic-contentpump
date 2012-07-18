@@ -35,7 +35,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-public class AggregateXMLReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
+public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected static Pattern[] patterns = new Pattern[] {
         Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
     private static String DEFAULT_NS = null;

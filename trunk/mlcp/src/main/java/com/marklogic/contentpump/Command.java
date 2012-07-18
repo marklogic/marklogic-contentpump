@@ -518,7 +518,7 @@ public enum Command implements ConfigConstants {
                 String isIndented = cmdline.getOptionValue(OUTPUT_INDENTED);
                 // check value validity
                 Indentation indent = Indentation.forName(isIndented);
-                conf.set(MarkLogicConstants.INDENTED, isIndented);
+                conf.set(MarkLogicConstants.INDENTED, indent.name());
             }
             if (cmdline.hasOption(HOST)) {
                 String host = cmdline.getOptionValue(HOST);

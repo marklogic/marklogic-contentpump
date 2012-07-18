@@ -29,7 +29,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 
-public class SequenceFileReader<VALUEIN> extends AbstractRecordReader<VALUEIN> {
+public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected SequenceFile.Reader reader;
     protected Writable seqKey;
     protected Writable seqValue;
