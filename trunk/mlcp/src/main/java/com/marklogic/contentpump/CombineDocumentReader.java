@@ -38,7 +38,7 @@ import com.marklogic.mapreduce.MarkLogicConstants;
  * @param <VALUEIN>
  */
 public class CombineDocumentReader<VALUEIN> 
-extends AbstractRecordReader<VALUEIN> {
+extends ImportRecordReader<VALUEIN> {
     
     private long bytesRead;
     private long bytesTotal;

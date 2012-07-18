@@ -30,7 +30,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 public class DelimitedTextReader<VALUEIN> extends
-    AbstractRecordReader<VALUEIN> {
+    ImportRecordReader<VALUEIN> {
     protected String[] fields;
     protected String DELIM;
     protected static String ROOT_START = "<root>";
