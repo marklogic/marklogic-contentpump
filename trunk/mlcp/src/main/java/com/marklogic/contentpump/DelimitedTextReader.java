@@ -38,7 +38,8 @@ public class DelimitedTextReader<VALUEIN> extends
     protected BufferedReader br;
     protected boolean hasNext = true;
     protected String idName;
-
+    protected long fileLen = Long.MAX_VALUE;
+    protected long bytesRead;
     @Override
     public void close() throws IOException {
         if (br != null) {
@@ -48,7 +49,7 @@ public class DelimitedTextReader<VALUEIN> extends
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
-        return hasNext == true ? 0 : 1;
+        return bytesRead/fileLen;
     }
 
     @Override
@@ -61,6 +62,7 @@ public class DelimitedTextReader<VALUEIN> extends
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         br = new BufferedReader(new InputStreamReader(fileIn));
+        fileLen = inSplit.getLength();
         initDelimConf(conf);
     }
 
@@ -79,14 +81,17 @@ public class DelimitedTextReader<VALUEIN> extends
             return false;
         }
         String line = br.readLine();
+        
         // skip empty lines
         while (line != null) {
+            bytesRead += line.getBytes().length;
             if (!"".equals(line.trim())) {
                 break;
             }
             line = br.readLine();
         }
         if (line == null) {
+            bytesRead = fileLen;
             return false;
         }
         if (fields == null) {
@@ -112,16 +117,19 @@ public class DelimitedTextReader<VALUEIN> extends
                     "delimited_uri_id doesn't match any column");
             }
             line = br.readLine();
+            
             // skip empty lines
             while (line != null) {
+                bytesRead += line.getBytes().length;
                 if (!"".equals(line.trim())) {
                     break;
                 }
                 line = br.readLine();
             }
             if (line == null) {
+                bytesRead = fileLen;
                 return false;
-            }
+            } 
         }
 
         String[] values = line.split(DELIM);
