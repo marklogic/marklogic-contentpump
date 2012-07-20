@@ -16,9 +16,12 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Stack;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLInputFactory;
@@ -35,12 +38,18 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
+import com.sun.org.apache.xerces.internal.impl.XMLStreamReaderImpl;
+import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
+
 public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
+
     protected static Pattern[] patterns = new Pattern[] {
         Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
     private static String DEFAULT_NS = null;
     private int currDepth = 0;
     protected XMLStreamReader xmlSR;
+
     protected String recordName;
     protected String recordNamespace;
     private int recordDepth = Integer.MAX_VALUE;
@@ -50,12 +59,31 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected String currentId = null;
     private boolean keepGoing = true;
     protected HashMap<String, Stack<String>> nameSpaces = new HashMap<String, Stack<String>>();
+    protected NamespaceContext nsctx;
     protected boolean startOfRecord = true;
     protected boolean hasNext = true;
     private boolean newDoc = false;
     protected boolean useAutomaticId = false;
     protected String mode;
     protected IdGenerator idGen;
+    protected boolean parallelMode = false;
+    protected Configuration conf;
+    protected XMLInputFactory f;
+    protected FileSystem fs;
+    protected Path file;
+    protected FSDataInputStream fInputStream;
+    protected long start;
+    protected long pos;
+    protected long end;
+    protected long parserOffsetInSplit;
+    // TODO: should this be a paramater
+    protected int LOOKAHEAD_BUF = 4096;
+
+    protected static String NOT_WELL_FORMED = "The markup in the document "
+        + "following the root element must be well-formed";
+    protected static String CONTENT_IN_PROLOG = "Content is not allowed in "
+        + "prolog";
+    
     public AggregateXMLReader() {
 
     }
@@ -69,7 +97,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 e.printStackTrace();
             }
         }
-
     }
 
     @Override
@@ -81,18 +108,20 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        Path file = ((FileSplit) inSplit).getPath();
+        file = ((FileSplit) inSplit).getPath();
         initCommonConfigurations(conf, file);
         configFileNameAsCollection(conf, file);
-        FileSystem fs = file.getFileSystem(context.getConfiguration());
-        FSDataInputStream fileIn = fs.open(file);
-        XMLInputFactory f = XMLInputFactory.newInstance();
+        fs = file.getFileSystem(context.getConfiguration());
+        fInputStream = fs.open(file);
+        
+        f = new AggregateXMLInputFactoryImpl();//XMLInputFactory.newInstance();
         try {
-            xmlSR = f.createXMLStreamReader(fileIn);
+            xmlSR = f.createXMLStreamReader(fInputStream);
         } catch (XMLStreamException e) {
             e.printStackTrace();
         }
         initAggConf(inSplit, context);
+        
     }
     
     protected void initAggConf(InputSplit inSplit, TaskAttemptContext context) {
@@ -123,22 +152,31 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if (buffer == null) {
             buffer = new StringBuilder();
         }
-        if (recordDepth <= currDepth) {
+        if (parallelMode) {
+            //parallel mode always starts from record elem
+            buffer.append(str);
+        } else if (currDepth >= recordDepth) {
             buffer.append(str);
         }
+
     }
     
     protected void copyNameSpaceDecl() {
-        if (recordDepth < currDepth) {
+        if (!parallelMode && recordDepth < currDepth) {
             return;
         }
         int stop = xmlSR.getNamespaceCount();
         if (stop > 0) {
             String nsDeclPrefix, nsDeclUri;
-            LOG.debug("checking namespace declarations");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("checking namespace declarations");
+            }
             for (int i = 0; i < stop; i++) {
                 nsDeclPrefix = xmlSR.getNamespacePrefix(i);
                 nsDeclUri = xmlSR.getNamespaceURI(i);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(nsDeclPrefix + ":" + nsDeclUri);
+                }
                 if (nameSpaces.containsKey(nsDeclPrefix)) {
                     nameSpaces.get(nsDeclPrefix).push(nsDeclUri);
                 } else {
@@ -151,7 +189,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
     
     protected void removeNameSpaceDecl() {
-        if (recordDepth < currDepth) {
+        if (!parallelMode && recordDepth < currDepth) {
             return;
         }
         int stop = xmlSR.getNamespaceCount();
@@ -174,6 +212,19 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private void processStartElement() throws XMLStreamException {
         String name = xmlSR.getLocalName();
         String namespace = xmlSR.getNamespaceURI();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Start-tag: " + name);
+        }
+        if (namespace == null) {
+            String prefix = xmlSR.getPrefix();
+            if ("".equals(prefix)) {
+                prefix = DEFAULT_NS;
+            } 
+            if (nameSpaces.get(prefix) != null) {
+                namespace = nameSpaces.get(prefix).peek();
+            }
+        }
+        
         String prefix = xmlSR.getPrefix();
         int attrCount = xmlSR.getAttributeCount();
         boolean isNewRootStart = false;
@@ -251,7 +302,9 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             currentId = newId;
             sb.append(newId);
             setKey(newId);
-
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("URI_ID: " + newId);
+            }
             // advance to the END_ELEMENT
             if (xmlSR.next() != XMLStreamConstants.END_ELEMENT) {
                 throw new XMLStreamException(
@@ -273,6 +326,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         // return;
         // }
         write(sb.toString());
+//        System.out.println("START_ELEM#namespace context: " + nsctx +":" +  nsctx.getDeclaredPrefixCount());
     }
 
     /**
@@ -287,6 +341,19 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
         
         String name = xmlSR.getLocalName();
+        String namespace = xmlSR.getNamespaceURI();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("End-tag: " + name);
+        }
+        if (namespace == null) {
+            String prefix = xmlSR.getPrefix();
+            if ("".equals(prefix)) {
+                prefix = DEFAULT_NS;
+            } 
+            if (nameSpaces.get(prefix) != null) {
+                namespace = nameSpaces.get(prefix).peek();
+            }
+        }
         String prefix = xmlSR.getPrefix();
         StringBuilder sb = new StringBuilder();
         sb.append("</");
@@ -299,14 +366,27 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         //write to finish the end tag before checking errors
         write(sb.toString()); 
 
-        if (recordDepth != currDepth ) {
+        /*if (recordDepth != currDepth ) {
             // not the end of the record: go look for more nodes
             currDepth--;
             removeNameSpaceDecl();
             return true;
-        } else if (!newDoc) {
-            //depth is same: it is record that not matched
-            cleanupEndElement();
+        } else */
+//        (name.equals(recordName)
+//            && ((recordNamespace == null && namespace == null) 
+//                 || (recordNamespace != null && recordNamespace
+//                                    .equals(namespace))))
+        if (!newDoc || !name.equals(recordName) || !((recordNamespace == null && namespace == null) 
+          || (recordNamespace != null && recordNamespace
+          .equals(namespace)))) {
+         // not the end of the record: go look for more nodes
+            
+            if( currDepth == 1) {
+                cleanupEndElement();
+            } else {
+                currDepth--;
+                removeNameSpaceDecl();
+            }
             return true;
         }
         if (!useAutomaticId && null == currentId && newDoc) {
@@ -348,7 +428,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         currDepth--;
         removeNameSpaceDecl();
     }
-
+ 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if (xmlSR == null) {
@@ -356,94 +436,203 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             return false;
         }
 
-        try {
-            while (xmlSR.hasNext()) {
-                int eventType;
-                eventType = xmlSR.next();
-
-                switch (eventType) {
-                case XMLStreamConstants.START_ELEMENT:
-                    if (startOfRecord) {
-                        // this is the start of the root, only copy namespaces
-                        copyNameSpaceDecl();
-                        startOfRecord = false;
-                        continue;
-                    }
-                    processStartElement();
-                    break;
-                case XMLStreamConstants.CHARACTERS:
-                    write(escapeXml(xmlSR.getText()));
-                    break;
-                case XMLStreamConstants.CDATA:
-                    write("<![CDATA[");
-                    write(xmlSR.getText());
-                    write("]]>");
-                    break;
-                case XMLStreamConstants.SPACE:
-                    write(xmlSR.getText());
-                    break;
-                case XMLStreamConstants.ENTITY_REFERENCE:
-                    write("&");
-                    write(xmlSR.getLocalName());
-                    write(";");
-                    break;
-                case XMLStreamConstants.DTD:
-                    write("<!DOCTYPE");
-                    write(xmlSR.getText());
-                    write(">");
-                    break;
-                case XMLStreamConstants.PROCESSING_INSTRUCTION:
-                    write("<?");
-                    write(xmlSR.getPIData());
-                    write("?>");
-                    break;
-                case XMLStreamConstants.COMMENT:
-                    write("<!--");
-                    write(xmlSR.getText());
-                    write("-->");
-                    break;
-                case XMLStreamConstants.END_ELEMENT:
-                    keepGoing = processEndElement();
-                    if (!keepGoing) {
-                        keepGoing = true;
-                        return true;
-                    }
-                    break;
-                case XMLStreamConstants.START_DOCUMENT:
-                    throw new XMLStreamException(
-                        "unexpected start of document within record!\n"
-                            + "recordName = " + recordName
-                            + ", recordNamespace = " + recordNamespace
-                            + " at " + xmlSR.getLocation());
-                case XMLStreamConstants.END_DOCUMENT:
-                    if (currentId != null) {
+        while (!parallelMode || (parallelMode && xmlSR.getLocation().getCharacterOffset() + parserOffsetInSplit <= end)) {
+            try {
+                while (xmlSR.hasNext()) {
+                    int eventType;
+                    pos = xmlSR.getLocation().getCharacterOffset() + parserOffsetInSplit;
+//                    System.out.println("BEFORE_NEXT#namespace context: " + nsctx +":" +  nsctx.getDeclaredPrefixCount());
+                    eventType = xmlSR.next();
+//                    System.out.println("AFTER_NEXT#namespace context: " + nsctx +":" +  nsctx.getDeclaredPrefixCount());
+                    switch (eventType) {
+                    case XMLStreamConstants.START_ELEMENT:
+                        if (!parallelMode) {
+                            if (startOfRecord) {
+                                // this is the start of the root, only copy
+                                // namespaces
+                                copyNameSpaceDecl();
+                                startOfRecord = false;
+                                continue;
+                            }
+                        }
+                        processStartElement();
+                        break;
+                    case XMLStreamConstants.CHARACTERS:
+                        write(escapeXml(xmlSR.getText()));
+                        break;
+                    case XMLStreamConstants.CDATA:
+                        write("<![CDATA[");
+                        write(xmlSR.getText());
+                        write("]]>");
+                        break;
+                    case XMLStreamConstants.SPACE:
+                        write(xmlSR.getText());
+                        break;
+                    case XMLStreamConstants.ENTITY_REFERENCE:
+                        write("&");
+                        write(xmlSR.getLocalName());
+                        write(";");
+                        break;
+                    case XMLStreamConstants.DTD:
+                        write("<!DOCTYPE");
+                        write(xmlSR.getText());
+                        write(">");
+                        break;
+                    case XMLStreamConstants.PROCESSING_INSTRUCTION:
+                        write("<?");
+                        write(xmlSR.getPIData());
+                        write("?>");
+                        break;
+                    case XMLStreamConstants.COMMENT:
+                        write("<!--");
+                        write(xmlSR.getText());
+                        write("-->");
+                        break;
+                    case XMLStreamConstants.END_ELEMENT:
+                        keepGoing = processEndElement();
+                        if (!keepGoing) {
+                            keepGoing = true;
+                            return true;
+                        }
+                        break;
+                    case XMLStreamConstants.START_DOCUMENT:
                         throw new XMLStreamException(
-                            "end of document before end of current record!\n"
+                            "unexpected start of document within record!\n"
                                 + "recordName = " + recordName
                                 + ", recordNamespace = " + recordNamespace
                                 + " at " + xmlSR.getLocation());
-                    } else {
-                        hasNext = false;
-                        break;
+                    case XMLStreamConstants.END_DOCUMENT:
+                        if (currentId != null) {
+                            throw new XMLStreamException(
+                                "end of document before end of current record!\n"
+                                    + "recordName = " + recordName
+                                    + ", recordNamespace = " + recordNamespace
+                                    + " at " + xmlSR.getLocation());
+                        } else {
+                            hasNext = false;
+                            //to get out of outer while-loop
+//                            parserOffsetInSplit = Integer.MAX_VALUE;
+//                            break;
+                            return false;
+                        }
+                    default:
+                        throw new XMLStreamException("UNIMPLEMENTED: "
+                            + eventType);
                     }
-                default:
-                    throw new XMLStreamException("UNIMPLEMENTED: " + eventType);
                 }
-            }
-        } catch (XMLStreamException e) {
-            LOG.warn(e.getClass().getSimpleName() + " at "
-                + xmlSR.getLocation());// .getPositionDescription());
-            if (e.getMessage().contains("quotation or apostrophe")
-            /* && !config.isFatalErrors() */) {
-                // messed-up attribute? skip it?
-                LOG.warn("attribute error: " + e.getMessage());
-                // all we can do is ignore it, apparently
-            } else {
-                LOG.error(e.toString());
+            } catch (XMLStreamException e) {
+                if (e.getMessage().contains("quotation or apostrophe")) {
+                    // messed-up attribute? skip it?
+                    LOG.warn("attribute error: " + e.getMessage());
+                    continue;
+                    // all we can do is ignore it, apparently
+                } else if (e.getMessage().contains(CONTENT_IN_PROLOG)
+                    || e.getMessage().contains(NOT_WELL_FORMED)) {
+                    //XMLStreamReader looks ahead by 32 bytes once at a time
+                    if (parallelMode) {
+                        if (moveToNextRecord(pos - 32) == -1) {
+                            return false;
+                        }
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(e.getMessage());
+                            LOG.debug("seek to " + pos);
+                        }
+                        continue;
+                    }
+                }
+
+                LOG.error(e.toString() + "\n" + e.getStackTrace());
                 throw new IOException(e.toString());
             }
         }
         return false;
+    }
+    
+    /**
+     * 
+     * @param match
+     * @return the offset of the match found; -1 if not found
+     * @throws IOException
+     */
+    protected int readUntilMatch(String match, long streamOffset) throws IOException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Regex pattern for record element: " + new String(match));
+        }
+        fInputStream.seek(streamOffset);
+        Pattern pattern = Pattern.compile(match);
+        while (true) {
+            byte buffer[] = new byte[LOOKAHEAD_BUF];
+            int b = fInputStream.read(buffer);
+            // end of file:
+            if (b == -1) {
+                return -1;
+            }
+            Matcher m = pattern.matcher(new String(buffer));
+            if (m.find()) {
+                return m.start();
+            } else {
+                return -1;
+            }
+        }
+    }
+    /**
+     * Move to the beginning of record element
+     * @return the offset of the next record element;
+     * @throws IOException
+     */
+    protected long moveToNextRecord(long streamOffset) throws IOException {
+        String matchStrs [] = new String[nameSpaces.size() + 1];
+        matchStrs[0] = "<(?!(/))(.+:)?" + recordName + "[ >]";
+        try {
+            //close xml stream 
+            if (xmlSR!=null ) {
+                xmlSR.close();
+            }
+            if (fInputStream!=null) fInputStream.close();
+            fInputStream = fs.open(file);
+            int offset = readUntilMatch(matchStrs[0], streamOffset);
+            if (offset == -1) {
+                //no record elem in this split
+                return -1;
+            }
+        
+            pos = offset + streamOffset;
+            parserOffsetInSplit = pos;
+            fInputStream.seek(pos);
+            xmlSR = f.createXMLStreamReader(fInputStream);
+            updateNamespaceContext();
+
+            return pos;
+        } catch (XMLStreamException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    protected void updateNamespaceContext() {
+        //to hide the println made by getScanner in jdk
+        PrintStream printStreamOriginal = System.out;
+        System.setOut(new PrintStream(new OutputStream() {
+            public void write(int b) {
+            }
+        }));
+        XMLDocumentScannerImpl scanner = ((XMLStreamReaderImpl) xmlSR)
+            .getScanner();
+        System.setOut(printStreamOriginal);
+        //set namespace context in xmlSR
+        scanner.setProperty(
+            "http://apache.org/xml/properties/internal/namespace-context",
+            nsctx);
+        int count = scanner.getNamespaceContext().getDeclaredPrefixCount();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("namespaces in context");
+            for (int i = 0; i < count; i++) {
+                String p = scanner.getNamespaceContext()
+                    .getDeclaredPrefixAt(i);
+                LOG.debug("prefix:" + p);
+                LOG.debug(scanner.getNamespaceContext().getURI(p));
+            }
+        }
     }
     
     public static String escapeXml(String _in) {

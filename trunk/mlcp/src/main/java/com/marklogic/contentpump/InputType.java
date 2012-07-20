@@ -64,9 +64,9 @@ public enum InputType {
         public Class<? extends FileInputFormat> getInputFormatClass(
                 ContentType contentType, boolean compressed) {
             if (compressed) {
-                return CompressedAggregateXMLInputFormat.class;
+                return CompressedAggXMLAdvInputFormat.class;
             } else {
-                return AggregateXMLInputFormat.class;
+                return AggregateXMLAdvInputFormat.class;
             }
         }
 
