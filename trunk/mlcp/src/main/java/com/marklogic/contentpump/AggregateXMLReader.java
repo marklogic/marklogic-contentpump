@@ -350,7 +350,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             if ("".equals(prefix)) {
                 prefix = DEFAULT_NS;
             } 
-            if (nameSpaces.get(prefix) != null) {
+            if (nameSpaces.get(prefix) != null && !nameSpaces.get(prefix).isEmpty()) {
                 namespace = nameSpaces.get(prefix).peek();
             }
         }
