@@ -115,10 +115,12 @@ public class AggregateXMLAdvInputFormat extends FileAndDirectoryInputFormat<Docu
                 //make a new copy, so that splits in the same agg file won't share the same context
                 NamespaceSupport nssp = (NamespaceSupport) nsctx;
                 nsctx = new NamespaceSupportAggregate();
-                int nscount = nssp.getDeclaredPrefixCount();
-                for(int i=0; i<nscount; i++) {
-                    String prefix = nssp.getDeclaredPrefixAt(i);
-                    nsctx.declarePrefix(prefix, nssp.getURI(prefix));
+                if (nssp != null) {
+                    int nscount = nssp.getDeclaredPrefixCount();
+                    for(int i=0; i<nscount; i++) {
+                        String prefix = nssp.getDeclaredPrefixAt(i);
+                        nsctx.declarePrefix(prefix, nssp.getURI(prefix));
+                    }
                 }
 //                System.out.println("GetSplit#namespace context: " + nsctx +":" +  nsctx.getDeclaredPrefixCount());
                 AggregateSplit split = new AggregateSplit(((FileSplit)file), nameSpaces, recordName, nsctx);
