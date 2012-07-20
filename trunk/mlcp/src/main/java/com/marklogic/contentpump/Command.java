@@ -49,7 +49,8 @@ public enum Command implements ConfigConstants {
             configUserPswdHostPort(options);
             configCopyOptions(options);
             configCommonOutputOptions(options);
-
+            configBatchTxn(options);
+            
             Option inputFilePath = OptionBuilder
                 .withArgName(INPUT_FILE_PATH)
                 .hasArg()
@@ -127,13 +128,7 @@ public enum Command implements ConfigConstants {
                 .create(DELIMITED_URI_ID);
             options.addOption(delimitedUri);
 
-            Option batchSize = OptionBuilder.withArgName(BATCH_SIZE).hasArg()
-                .withDescription("Batch size.").create(BATCH_SIZE);
-            options.addOption(batchSize);
-            Option txnSize = OptionBuilder.withArgName(TRANSACTION_SIZE)
-                .hasArg().withDescription("Transaction size.")
-                .create(TRANSACTION_SIZE);
-            options.addOption(txnSize);
+            
             Option namespace = OptionBuilder.withArgName(NAMESPACE).hasArg()
                 .withDescription("Namespace used for output document.")
                 .create(NAMESPACE);
@@ -248,7 +243,8 @@ public enum Command implements ConfigConstants {
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyCopyConfigOptions(conf, cmdline);
             applyCommonOutputConfigOptions(conf, cmdline);
-
+            applyBatchTxnConfigOptions(conf, cmdline);
+            
             if (cmdline.hasOption(INPUT_ARCHIVE_ALLOW_EMPTY_METADATA)) {
                 String arg = cmdline
                     .getOptionValue(INPUT_ARCHIVE_ALLOW_EMPTY_METADATA);
@@ -326,12 +322,7 @@ public enum Command implements ConfigConstants {
                                     OUTPUT_CLEANDIR + ": " + arg);
                 }
             }
-            String batchSize = cmdline.getOptionValue(BATCH_SIZE,
-                String.valueOf(DEFAULT_BATCH_SIZE));
-            conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
-            String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE,
-                String.valueOf(DEFAULT_TRANSACTION_SIZE));
-            conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
+            
             if (cmdline.hasOption(NAMESPACE)) {
                 String ns = cmdline.getOptionValue(NAMESPACE);
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_NAMESPACE, ns);
@@ -554,7 +545,8 @@ public enum Command implements ConfigConstants {
             configCopyOptions(options);
             configCommonOutputOptions(options);
             configDocumentFilteringOptions(options);
-
+            configBatchTxn(options);
+            
             Option iUsername = OptionBuilder.withArgName(INPUT_USERNAME)
                 .hasArg()
                 .withDescription("Input username of source ML server ")
@@ -598,6 +590,11 @@ public enum Command implements ConfigConstants {
                     "Whether to use the fast load mode to load content into "
                         + "MarkLogic").create(FAST_LOAD);
             options.addOption(fastLoad);
+            
+            Option outputDir = OptionBuilder.withArgName(OUTPUT_DIRECTORY)
+                .hasArg().withDescription("Output Directory in MarkLogic.")
+                .create(OUTPUT_DIRECTORY);
+            options.addOption(outputDir);
         }
 
         @Override
@@ -621,7 +618,8 @@ public enum Command implements ConfigConstants {
             applyCopyConfigOptions(conf, cmdline);
             applyDocumentFilteringConfigOptions(conf, cmdline);
             applyCommonOutputConfigOptions(conf, cmdline);
-
+            applyBatchTxnConfigOptions(conf, cmdline);
+            
             if (cmdline.hasOption(OUTPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(OUTPUT_USERNAME);
                 conf.set(MarkLogicConstants.OUTPUT_USERNAME, username);
@@ -664,6 +662,10 @@ public enum Command implements ConfigConstants {
                 } else {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, false);
                 }
+            }
+            if (cmdline.hasOption(OUTPUT_DIRECTORY)) {
+                String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
+                conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, outDir);
             }
         }
 
@@ -808,7 +810,15 @@ public enum Command implements ConfigConstants {
             .withDescription("Copy quality.").create(COPY_QUALITY);
         options.addOption(cpqt);
     }
-
+    
+    static void configBatchTxn(Options options) {
+        Option batchSize = OptionBuilder.withArgName(BATCH_SIZE).hasArg()
+            .withDescription("Batch size.").create(BATCH_SIZE);
+        options.addOption(batchSize);
+        Option txnSize = OptionBuilder.withArgName(TRANSACTION_SIZE).hasArg()
+            .withDescription("Transaction size.").create(TRANSACTION_SIZE);
+        options.addOption(txnSize);
+    }
     static void configDocumentFilteringOptions(Options options) {
         Option filter = OptionBuilder.withArgName(DOCUMENT_FILTER).hasArg()
             .withDescription("Path expression used to retrieve records ")
@@ -886,6 +896,16 @@ public enum Command implements ConfigConstants {
         }
     }
 
+    static void applyBatchTxnConfigOptions(Configuration conf,
+        CommandLine cmdline) {
+        String batchSize = cmdline.getOptionValue(BATCH_SIZE,
+            String.valueOf(DEFAULT_BATCH_SIZE));
+        conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
+        String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE,
+            String.valueOf(DEFAULT_TRANSACTION_SIZE));
+        conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
+    }
+    
     static void applyCommonOutputConfigOptions(Configuration conf,
         CommandLine cmdline) {
 
