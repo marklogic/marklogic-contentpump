@@ -16,6 +16,8 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -86,11 +88,14 @@ class ArchiveWriter extends RecordWriter<DocumentURI, MarkLogicDocument> {
         String dst = null;
         
         String mode = conf.get(ConfigConstants.CONF_MODE);
+        Date date = new Date();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssZ");
+        String timestamp = sdf.format(date);
         if (mode.equals(ConfigConstants.MODE_DISTRIBUTED)) {
-            dst = dir + "-" + context.getTaskAttemptID().getTaskID().getId()
-                + "." + type.toString();
+            dst = dir + "/" + context.getTaskAttemptID().getTaskID().getId() + "-" + timestamp 
+                + "-" + type.toString();
         } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
-            dst = dir + "." + type.toString();
+            dst = dir + "/" + timestamp + "-" + type.toString();
         }
         
         if(ContentType.BINARY.equals(type)) {

@@ -85,7 +85,7 @@ public class OutputArchive {
         if (path.endsWith(EXTENSION)) {
             int index1 = path.lastIndexOf(EXTENSION);
             String subStr = path.substring(0, index1);
-            int index2 = subStr.lastIndexOf('.');
+            int index2 = subStr.lastIndexOf('-');
             path = path.substring(0, index2)
                 + String.format("-%0" + width + "d", count)
                 + path.substring(index2);

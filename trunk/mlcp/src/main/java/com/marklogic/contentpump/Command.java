@@ -477,6 +477,7 @@ public enum Command implements ConfigConstants {
                 .getOutputFormatClass(isCompressed));
             job.setOutputKeyClass(DocumentURI.class);
             String path = conf.get(ConfigConstants.CONF_OUTPUT_FILEPATH);
+            //directory should not exist and it will be created
             FileOutputFormat.setOutputPath(job, new Path(path));
             return job;
         }
