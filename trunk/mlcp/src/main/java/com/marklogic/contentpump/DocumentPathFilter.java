@@ -28,7 +28,8 @@ public class DocumentPathFilter implements PathFilter, Configurable {
 
     private String pattern;
     private Configuration conf;
-
+    private boolean pathIsLocal;
+    
     public String getPattern() {
         return pattern;
     }
@@ -38,18 +39,20 @@ public class DocumentPathFilter implements PathFilter, Configurable {
     }
 
     @Override
-    public boolean accept(Path arg0) {
-        String filename = arg0.getName();
-        int index = filename.lastIndexOf('/');
-        filename = filename.substring(index + 1);
+    public boolean accept(Path inPath) {
+        String filename = inPath.getName();
         if (filename.matches(pattern) == true) {
             return true;
         }
         // take care of the case when INPUT_FILE_PATH is a DIR
         FileSystem fs;
         try {
-            fs = arg0.getFileSystem(conf);
-            FileStatus[] status = fs.globStatus(arg0);
+            if (pathIsLocal == true && !inPath.toString().startsWith("file://")) {
+            	//prefix has been lost in LocalFileSystem.globStatusInternal
+                inPath = new Path("file://" + inPath.toString());
+            }
+            fs = inPath.getFileSystem(conf);
+            FileStatus[] status = fs.globStatus(inPath);
             for (FileStatus s : status) {
                 if (s.isDir()) {
                     return true;
@@ -70,6 +73,7 @@ public class DocumentPathFilter implements PathFilter, Configurable {
     public void setConf(Configuration conf) {
         this.conf = conf;
         pattern = conf.get(ConfigConstants.CONF_INPUT_FILE_PATTERN, ".*");
+        pathIsLocal = conf.getBoolean(ConfigConstants.CONF_INPUT_FILE_PATH_IS_LOCAL, true);
     }
 
 }

@@ -153,6 +153,7 @@ public interface ConfigConstants {
         "mapreduce.marklogic.input.sequencefile.valueclass";
     static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE =
         "mapreduce.marklogic.input.sequencefile.valuetype";
+    static final String CONF_INPUT_FILE_PATH_IS_LOCAL = "mapreduce.marklogic.input.islocal";
     static final String CONF_DOCUMENT_FILTER = 
         "mapreduce.marklogic.document.filter";
     static final String CONF_OUTPUT_TYPE = "mapreduce.marklogic.output.type";
@@ -163,6 +164,7 @@ public interface ConfigConstants {
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
     static final String CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = 
         "mapreduce.marklogic.input.archive.allowemptymetadata";
+     
     //TODO
     static final String CONF_STREAMING = "mapreduce.marklogic.input.streaming";
 }

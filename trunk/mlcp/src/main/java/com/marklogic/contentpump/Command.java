@@ -209,6 +209,15 @@ public enum Command implements ConfigConstants {
                 MarkLogicConstants.DEFAULT_CONTENT_TYPE);
             ContentType contentType = ContentType.forName(documentType);
 
+            if (cmdline.hasOption(INPUT_FILE_PATH)) {
+                String path = cmdline.getOptionValue(INPUT_FILE_PATH);
+                if (path.startsWith("file://")) {
+                    conf.setBoolean(ConfigConstants.CONF_INPUT_FILE_PATH_IS_LOCAL, true);
+                } else {
+                    conf.setBoolean(ConfigConstants.CONF_INPUT_FILE_PATH_IS_LOCAL, false);
+                }
+            }
+            
             boolean compressed = false;
             if (cmdline.hasOption(INPUT_COMPRESSED)) {
                 String arg = cmdline.getOptionValue(INPUT_COMPRESSED);
