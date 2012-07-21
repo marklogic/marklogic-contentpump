@@ -10,14 +10,10 @@ import java.net.URISyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.xcc.AdhocQuery;
-import com.marklogic.xcc.ResultSequence;
-import com.marklogic.xcc.Session;
-import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.ContentSource;
 
 /**
  * MarkLogicOutputFormat for Node.
@@ -47,9 +43,7 @@ extends MarkLogicOutputFormat<NodePath, MarkLogicNode> {
     public RecordWriter<NodePath, MarkLogicNode> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        LinkedMapWritable forestHostMap = 
-            DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
-                    LinkedMapWritable.class);
+        LinkedMapWritable forestHostMap = getForestHostMap(conf);
         try {
             int taskId = context.getTaskAttemptID().getTaskID().getId();
             String host = InternalUtilities.getHost(taskId, forestHostMap);
@@ -62,8 +56,8 @@ extends MarkLogicOutputFormat<NodePath, MarkLogicNode> {
     }
 
     @Override
-    public void checkOutputSpecs(Configuration conf, Session session,
-            AdhocQuery query, ResultSequence result) throws RequestException {
+    public void checkOutputSpecs(Configuration conf, ContentSource cs) 
+    throws IOException {
         // warn against unsupported configuration
         if (conf.get(BATCH_SIZE) != null) {
             LOG.warn("Config entry for " +

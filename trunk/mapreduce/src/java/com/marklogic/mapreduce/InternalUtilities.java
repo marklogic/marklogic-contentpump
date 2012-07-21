@@ -326,22 +326,6 @@ public class InternalUtilities implements MarkLogicConstants {
     }
     
     /**
-     * Check against unsupported versions.
-     */
-    public static void checkVersion() {
-        // check version
-        String version = VersionInfo.getVersion();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("version: " + VersionInfo.getVersion());
-        }
-        if (version.startsWith("0.20.203") || 
-            version.startsWith("0.20.204")) {
-            throw new UnsupportedOperationException(
-                    "Hadoop version " + version + " is not supported.");
-        }
-    }
-    
-    /**
      * Create new XdmValue from value type and Writables.
      *  
      */

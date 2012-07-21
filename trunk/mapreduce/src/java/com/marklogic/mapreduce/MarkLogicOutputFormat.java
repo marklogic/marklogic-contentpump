@@ -5,7 +5,6 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +26,6 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
-import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
  * MarkLogic-based OutputFormat superclass. Use the provided subclasses, such
@@ -62,22 +60,84 @@ implements MarkLogicConstants, Configurable {
     @Override
     public void checkOutputSpecs(JobContext context) throws IOException,
             InterruptedException {
-        InternalUtilities.checkVersion();
-        
-        Session session = null;
-        ResultSequence result = null;
-        try {
-            String host = conf.get(OUTPUT_HOST);
+        String host = conf.get(OUTPUT_HOST);
 
-            if (host == null || host.isEmpty()) {
-                throw new IllegalStateException(OUTPUT_HOST +
-                        " is not specified.");
-            }                     
-            
+        if (host == null || host.isEmpty()) {
+            throw new IllegalStateException(OUTPUT_HOST +
+                    " is not specified.");
+        }                     
+
+        try {
             URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
+            
             // try getting a connection
             ContentSource cs = InternalUtilities.getOutputContentSource(conf, 
                     serverUri);
+            
+            // query forest host mapping            
+            LinkedMapWritable forestHostMap = queryForestHostMap(cs);
+            
+            // store it into config system
+            DefaultStringifier.store(conf, forestHostMap, OUTPUT_FOREST_HOST);
+            
+            checkOutputSpecs(conf, cs);
+        } catch (Exception ex) {
+            throw new IOException(ex);
+        }
+    }
+
+    @Override
+    public OutputCommitter getOutputCommitter(TaskAttemptContext context)
+            throws IOException, InterruptedException {
+        return new FileOutputCommitter(FileOutputFormat.getOutputPath(context),
+                context);
+    }
+    
+
+    @Override
+    public Configuration getConf() {
+        return conf;
+    }
+
+    @Override
+    public void setConf(Configuration conf) {
+        this.conf = conf;        
+    }
+    
+    // forest host map is saved when checkOutputSpecs() is called.  In certain 
+    // versions of Hadoop, the config is not persisted as part of the job hence
+    // will be lost.  See MAPREDUCE-3377 for details.  When this entry cannot
+    // be found from the config, re-query the database to get this info.  It is
+    // possible that each task gets a different version of the map if the 
+    // forest config changes while the job runs.
+    protected LinkedMapWritable getForestHostMap(Configuration conf) 
+    throws IOException {
+        String forestHost = conf.get(OUTPUT_FOREST_HOST);
+        if (forestHost != null) {
+            return DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
+                            LinkedMapWritable.class);
+        } else {
+            try {
+                URI serverUri = InternalUtilities.getOutputServerUri(conf, 
+                                conf.get(OUTPUT_HOST));
+                
+                // try getting a connection
+                ContentSource cs = 
+                    InternalUtilities.getOutputContentSource(conf, serverUri);
+                
+                // query forest host mapping            
+                return queryForestHostMap(cs);
+            } catch (Exception ex) {
+                throw new IOException(ex);
+            }
+        }
+    }
+    
+    protected LinkedMapWritable queryForestHostMap(ContentSource cs) 
+    throws IOException {      
+        Session session = null;
+        ResultSequence result = null;
+        try {
             session = cs.newSession();   
             
             // query forest host mapping            
@@ -99,14 +159,7 @@ implements MarkLogicConstants, Configurable {
                     forest = null;
                 }
             }
-            // store it into config system
-            DefaultStringifier.store(conf, forestHostMap, OUTPUT_FOREST_HOST);
-            
-            checkOutputSpecs(conf, session, query, result);
-        } catch (URISyntaxException e) {
-            throw new IOException(e);
-        } catch (XccConfigException e) {
-            throw new IOException(e);
+            return forestHostMap;
         } catch (RequestException e) {
             throw new IOException(e);
         } finally {
@@ -118,25 +171,7 @@ implements MarkLogicConstants, Configurable {
             }
         }    
     }
-
-    @Override
-    public OutputCommitter getOutputCommitter(TaskAttemptContext context)
-            throws IOException, InterruptedException {
-        return new FileOutputCommitter(FileOutputFormat.getOutputPath(context),
-                context);
-    }
     
-
-    @Override
-    public Configuration getConf() {
-        return conf;
-    }
-
-    @Override
-    public void setConf(Configuration conf) {
-        this.conf = conf;        
-    }
-    
-    public abstract void checkOutputSpecs(Configuration conf, Session session,
-            AdhocQuery query, ResultSequence result) throws RequestException;
+    public abstract void checkOutputSpecs(Configuration conf, ContentSource cs) 
+    throws IOException;
 }

@@ -7,7 +7,6 @@ import java.util.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -58,83 +57,98 @@ public class ContentOutputFormat<VALUEOUT> extends
     static final String ID_PREFIX = "#";
  
     @Override
-    public void checkOutputSpecs(Configuration conf, Session session, 
-            AdhocQuery query, ResultSequence result) 
-    throws RequestException { 
+    public void checkOutputSpecs(Configuration conf, ContentSource cs) 
+    throws IOException { 
         boolean fastLoad;
-        // clear output dir if specified
-        String outputDir = conf.get(OUTPUT_DIRECTORY);
-        if (outputDir != null) {
-            fastLoad = true;
-            outputDir = outputDir.endsWith("/") ? 
-                    outputDir : outputDir + "/";
-            if (conf.getBoolean(OUTPUT_CLEAN_DIR, false)) {
-                // delete directory if exists
-                String queryText = DELETE_DIRECTORY_TEMPLATE.replace(
-                        DIRECTORY_TEMPLATE, outputDir);
-                query.setQuery(queryText);
-                result = session.submitRequest(query);
-            } else { // ensure nothing exists under output dir
-                String queryText = CHECK_DIRECTORY_EXIST_TEMPLATE.replace(
-                        DIRECTORY_TEMPLATE, outputDir);
-                query.setQuery(queryText);
+        Session session = null;
+        ResultSequence result = null;
+        try {
+            session = cs.newSession(); 
+            
+            // clear output dir if specified
+            String outputDir = conf.get(OUTPUT_DIRECTORY);
+            if (outputDir != null) {
+                fastLoad = true;
+                outputDir = outputDir.endsWith("/") ? 
+                        outputDir : outputDir + "/";
+                if (conf.getBoolean(OUTPUT_CLEAN_DIR, false)) {
+                    // delete directory if exists
+                    String queryText = DELETE_DIRECTORY_TEMPLATE.replace(
+                            DIRECTORY_TEMPLATE, outputDir);
+                    AdhocQuery query = session.newAdhocQuery(queryText);
+                    result = session.submitRequest(query);
+                } else { // ensure nothing exists under output dir
+                    String queryText = CHECK_DIRECTORY_EXIST_TEMPLATE.replace(
+                            DIRECTORY_TEMPLATE, outputDir);
+                    AdhocQuery query = session.newAdhocQuery(queryText);
+                    result = session.submitRequest(query);
+                    if (result.hasNext()) {
+                        ResultItem item = result.next();
+                        if (((XSBoolean)(item.getItem())).asBoolean()) {
+                            throw new IllegalStateException("Directory " + 
+                                    outputDir + " already exists");
+                        }
+                    } else {
+                        throw new IllegalStateException(
+                                "Failed to query directory content.");
+                    }
+                }
+            } else {
+                fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false);
+            }
+    
+            // ensure manual directory creation 
+            if (fastLoad) {
+                LOG.info("Running in fast load mode");
+                AdhocQuery query = session.newAdhocQuery(
+                                DIRECTORY_CREATE_QUERY);
                 result = session.submitRequest(query);
                 if (result.hasNext()) {
                     ResultItem item = result.next();
-                    if (((XSBoolean)(item.getItem())).asBoolean()) {
-                        throw new IllegalStateException("Directory " + 
-                                outputDir + " already exists");
+                    String dirMode = item.asString();
+                    if (!dirMode.equals(MANUAL_DIRECTORY_MODE)) {
+                        throw new IllegalStateException(
+                                "Manual directory creation mode is required. " +
+                                "The current creation mode is " + dirMode + ".");
                     }
                 } else {
                     throw new IllegalStateException(
-                            "Failed to query directory content.");
+                            "Failed to query directory creation mode.");
                 }
-            }
-        } else {
-            fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false);
-        }
-
-        // ensure manual directory creation 
-        if (fastLoad) {
-            LOG.info("Running in fast load mode");
-            query.setQuery(DIRECTORY_CREATE_QUERY);
-            result = session.submitRequest(query);
-            if (result.hasNext()) {
-                ResultItem item = result.next();
-                String dirMode = item.asString();
-                if (!dirMode.equals(MANUAL_DIRECTORY_MODE)) {
+            }     
+    
+            // validate capabilities
+            String[] perms = conf.getStrings(OUTPUT_PERMISSION);
+            if (perms != null && perms.length > 0) {
+                if (perms.length % 2 != 0) {
                     throw new IllegalStateException(
-                            "Manual directory creation mode is required. " +
-                            "The current creation mode is " + dirMode + ".");
+                    "Permissions are expected to be in <role, capability> pairs.");
                 }
-            } else {
-                throw new IllegalStateException(
-                        "Failed to query directory creation mode.");
+                int i = 0;
+                while (i + 1 < perms.length) {
+                    String roleName = perms[i++];
+                    if (roleName == null || roleName.isEmpty()) {
+                        throw new IllegalStateException(
+                                "Illegal role name: " + roleName);
+                    }
+                    String perm = perms[i].trim();
+                    if (!perm.equalsIgnoreCase(ContentCapability.READ.toString()) &&
+                            !perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString()) &&
+                            !perm.equalsIgnoreCase(ContentCapability.INSERT.toString()) &&
+                            !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
+                        throw new IllegalStateException("Illegal capability: " + perm);
+                    }
+                    i++;
+                }
             }
-        }     
-
-        // validate capabilities
-        String[] perms = conf.getStrings(OUTPUT_PERMISSION);
-        if (perms != null && perms.length > 0) {
-            if (perms.length % 2 != 0) {
-                throw new IllegalStateException(
-                "Permissions are expected to be in <role, capability> pairs.");
-            }
-            int i = 0;
-            while (i + 1 < perms.length) {
-                String roleName = perms[i++];
-                if (roleName == null || roleName.isEmpty()) {
-                    throw new IllegalStateException(
-                            "Illegal role name: " + roleName);
-                }
-                String perm = perms[i].trim();
-                if (!perm.equalsIgnoreCase(ContentCapability.READ.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.INSERT.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
-                    throw new IllegalStateException("Illegal capability: " + perm);
-                }
-                i++;
+        } catch (RequestException ex) {
+            throw new IOException(ex);
+        } finally {
+            if (session != null) {
+                session.close();
+            } 
+            if (result != null) {
+                result.close();
             }
         }
     }
@@ -143,9 +157,9 @@ public class ContentOutputFormat<VALUEOUT> extends
     public RecordWriter<DocumentURI, VALUEOUT> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        LinkedMapWritable forestHostMap = 
-            DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
-                    LinkedMapWritable.class);
+        
+        LinkedMapWritable forestHostMap = getForestHostMap(conf);
+       
         boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false) ||
             (conf.get(OUTPUT_DIRECTORY) != null);
         Map<String, ContentSource> sourceMap = 
