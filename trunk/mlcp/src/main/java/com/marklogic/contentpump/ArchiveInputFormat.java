@@ -22,7 +22,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.DocumentURI;
 /**
@@ -30,7 +29,8 @@ import com.marklogic.mapreduce.DocumentURI;
  * @author ali
  *
  */
-public class ArchiveInputFormat extends FileInputFormat<DocumentURI, MarkLogicDocumentWithMeta> {
+public class ArchiveInputFormat extends
+    FileAndDirectoryInputFormat<DocumentURI, MarkLogicDocumentWithMeta> {
 
     @Override
     public RecordReader<DocumentURI, MarkLogicDocumentWithMeta> createRecordReader(InputSplit split,
