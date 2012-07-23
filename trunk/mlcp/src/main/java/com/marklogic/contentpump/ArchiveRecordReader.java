@@ -81,7 +81,7 @@ public class ArchiveRecordReader extends
             throw new IOException("Archive file should have suffix .zip");
         }
         String subStr = file.toUri().getPath().substring(0, index);
-        index = subStr.lastIndexOf('.');
+        index = subStr.lastIndexOf('-');
         if (index == -1) {
             throw new IOException("Not type information in Archive name");
         }
