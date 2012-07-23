@@ -15,6 +15,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
@@ -64,6 +65,9 @@ public class ContentOutputFormat<VALUEOUT> extends
         ResultSequence result = null;
         try {
             session = cs.newSession(); 
+            RequestOptions options = new RequestOptions();
+            options.setDefaultXQueryVersion("1.0-ml");
+            session.setDefaultRequestOptions(options);
             
             // clear output dir if specified
             String outputDir = conf.get(OUTPUT_DIRECTORY);
