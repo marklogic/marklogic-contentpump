@@ -174,7 +174,7 @@ public class ContentPump implements ConfigConstants {
                 // submit job
                 submitJob(job); 
             } else {
-                runJobLocally(job, cmdline);
+                runJobLocally(job, cmdline, command);
             }
             return 0;
         } catch (Exception e) {
@@ -266,9 +266,9 @@ public class ContentPump implements ConfigConstants {
         job.waitForCompletion(true);    
     }
     
-    private static void runJobLocally(Job job, CommandLine cmdline) 
+    private static void runJobLocally(Job job, CommandLine cmdline, Command cmd) 
     throws Exception {
-        LocalJobRunner runner = new LocalJobRunner(job, cmdline);
+        LocalJobRunner runner = new LocalJobRunner(job, cmdline, cmd);
         runner.run();  
     }
 
