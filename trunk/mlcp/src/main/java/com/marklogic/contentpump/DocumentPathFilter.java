@@ -73,7 +73,11 @@ public class DocumentPathFilter implements PathFilter, Configurable {
     public void setConf(Configuration conf) {
         this.conf = conf;
         pattern = conf.get(ConfigConstants.CONF_INPUT_FILE_PATTERN, ".*");
-        pathIsLocal = conf.getBoolean(ConfigConstants.CONF_INPUT_FILE_PATH_IS_LOCAL, true);
+        String inPath = conf.get("mapred.input.dir");
+        if (inPath != null && inPath.startsWith("file://")) {
+            pathIsLocal = true;
+        }
+        
     }
 
 }
