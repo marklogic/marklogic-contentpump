@@ -488,7 +488,8 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                 options.setCollections(collections);
             }
             if (permissions != null) {
-                permissions.toArray(new ContentPermission[permissions.size()]);
+                options.setPermissions(permissions
+                    .toArray(new ContentPermission[permissions.size()]));
             }
         }
     }
