@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -46,8 +47,9 @@ import com.marklogic.xcc.exceptions.RequestPermissionException;
 import com.marklogic.xcc.exceptions.ServerConnectionException;
 
 /**
- * MarkLogicRecordWriter that inserts content read from Archive to
- * MarkLogicServer.
+ * MarkLogicRecordWriter that can 
+ * 1) insert content from Archive to MarkLogic Server
+ * 2) copy content from source MarkLogic Server to destination MarkLogic Server
  * 
  * @author ali
  * 
@@ -134,11 +136,7 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
         }
     }
 
-    /**
-     * fetch the options information from conf, set to the field "options"
-     */
-    private void newContentCreateOptions() {
-        String[] perms = conf.getStrings(OUTPUT_PERMISSION);
+    private List<ContentPermission> getPermissions(String[] perms) {
         List<ContentPermission> permissions = null;
         if (perms != null && perms.length > 0) {
             int i = 0;
@@ -174,21 +172,18 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                 i++;
             }
         }
+        return permissions;
+    }
 
+    /**
+     * fetch the options information from conf and metadata, set to the field
+     * "options"
+     */
+    private void newContentCreateOptions(DocumentMetadata meta) {
         options = new ContentCreateOptions();
-        String[] collections = conf.getStrings(OUTPUT_COLLECTION);
-        if (collections != null) {
-            for (int i = 0; i < collections.length; i++) {
-                collections[i] = collections[i].trim();
-            }
-            options.setCollections(collections);
-        }
 
-        options.setQuality(conf.getInt(OUTPUT_QUALITY, 0));
-        if (permissions != null) {
-            options.setPermissions(permissions
-                .toArray(new ContentPermission[permissions.size()]));
-        }
+        updateCopyOptions(options, meta);
+
         options.setLanguage(conf.get(OUTPUT_CONTENT_LANGUAGE));
         options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
             DEFAULT_OUTPUT_CONTENT_ENCODING));
@@ -233,8 +228,7 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
             if (value instanceof MarkLogicDocumentWithMeta) {
                 // this is particularly for importing archive
                 meta = ((MarkLogicDocumentWithMeta) value).getMeta();
-                newContentCreateOptions();
-                ((MarkLogicDocumentWithMeta) value).updateOptions(options);
+                newContentCreateOptions(meta);
                 MarkLogicDocument doc = (MarkLogicDocument) value;
                 options.setFormat(doc.getContentType().getDocumentFormat());
                 if (doc.getContentType() == ContentType.BINARY) {
@@ -247,14 +241,13 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
             } else if (value instanceof MarkLogicDocument) {
                 // this is particularly for copy
                 if (uri.endsWith(DocumentMetadata.EXTENSION)) {
-                    newContentCreateOptions();
                     // contenttype of metadata is same as the doc, set it to XML
                     ((MarkLogicDocument) value)
                         .setContentType(ContentType.XML);
                     String metaStr = ((MarkLogicDocument) value)
                         .getContentAsText().toString();
                     meta = DocumentMetadata.fromXML(new StringReader(metaStr));
-                    updateOptionsUsingMeta(options, meta);
+                    newContentCreateOptions(meta);
                     metaOnly = true;
                 } else {
                     MarkLogicDocument doc = (MarkLogicDocument) value;
@@ -296,18 +289,21 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                     }
                     sessions[fId].insertContent(forestContents[fId]);
                     stmtCounts[fId]++;
-                    // insertProperties
-                    for (int i = 0; i < counts[fId]; i++) {
-                        DocumentMetadata m = metadatas[fId][i].getMeta();
-                        String u = metadatas[fId][i].getUri();
-                        if (m != null && m.getProperties() != null) {
-                            if (metaOnly) {
-                                uri = uri.substring(0, uri.length()
-                                    - DocumentMetadata.EXTENSION.length());
+                    if (conf.getBoolean(ConfigConstants.CONF_COPY_PROPERTIES,
+                        true)) {
+                        // insert properties
+                        for (int i = 0; i < counts[fId]; i++) {
+                            DocumentMetadata m = metadatas[fId][i].getMeta();
+                            String u = metadatas[fId][i].getUri();
+                            if (m != null && m.getProperties() != null) {
+                                if (metaOnly) {
+                                    uri = uri.substring(0, uri.length()
+                                        - DocumentMetadata.EXTENSION.length());
+                                }
+                                setDocumentProperties(u, m.getProperties(),
+                                    sessions[fId]);
+                                stmtCounts[fId]++;
                             }
-                            setDocumentProperties(u, m.getProperties(),
-                                sessions[fId]);
-                            stmtCounts[fId]++;
                         }
                     }
                     counts[fId] = 0;
@@ -321,6 +317,7 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
                     sessions[fId].insertContent(content);
                     stmtCounts[fId]++;
                 }
+                // meta's properties is null if CONF_COPY_PROPERTIES is false
                 if (meta != null && meta.getProperties() != null) {
                     if (metaOnly) {
                         uri = uri.substring(0, uri.length()
@@ -439,8 +436,8 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
      * @param forestId
      * @throws RequestException
      */
-    public void setDocumentProperties(String _uri, String _xmlString, Session s)
-        throws RequestException {
+    private void setDocumentProperties(String _uri, String _xmlString,
+        Session s) throws RequestException {
         String query = XQUERY_VERSION_1_0_ML
             + "declare variable $URI as xs:string external;\n"
             + "declare variable $XML-STRING as xs:string external;\n"
@@ -452,14 +449,49 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
         s.submitRequest(req);
     }
 
-    public static void updateOptionsUsingMeta(ContentCreateOptions options,
+    private void updateCopyOptions(ContentCreateOptions options,
         DocumentMetadata meta) {
-        options.setQuality(meta.quality);
-        options.setCollections(meta.collectionsList.toArray(new String[0]));
-        options.setPermissions(meta.permissionsList
-            .toArray(new ContentPermission[0]));
-    }
+        String quality = conf.get(OUTPUT_QUALITY);
+        if (quality != null) {
+            // use output_quality
+            options.setQuality(Integer.parseInt(quality));
+        } else if (meta != null) {
+            // use the quality stored in meta
+            options.setQuality(meta.quality);
+        } // else use default, do nothing
 
+        String[] collections = conf.getStrings(OUTPUT_COLLECTION);
+        String[] perms = conf.getStrings(OUTPUT_PERMISSION);
+        List<ContentPermission> permissions = getPermissions(perms);
+        if (meta != null) {
+            HashSet<String> colSet = new HashSet<String>(meta.collectionsList);
+            HashSet<ContentPermission> pSet = new HashSet<ContentPermission>(
+                meta.permissionsList);
+            if (collections != null) {
+                // union copy_collection and output_collection
+                for (String s : collections) {
+                    colSet.add(s);
+                }
+            }
+            if (permissions != null) {
+                // union of output_permission & copy_permission
+                for (ContentPermission p : permissions) {
+                    pSet.add(p);
+                }
+            }
+            options.setCollections(colSet.toArray(new String[colSet.size()]));
+            options.setPermissions(pSet.toArray(new ContentPermission[pSet
+                .size()]));
+        } else {
+            // empty metadata
+            if (collections != null) {
+                options.setCollections(collections);
+            }
+            if (permissions != null) {
+                permissions.toArray(new ContentPermission[permissions.size()]);
+            }
+        }
+    }
 }
 
 class URIMetadata {
