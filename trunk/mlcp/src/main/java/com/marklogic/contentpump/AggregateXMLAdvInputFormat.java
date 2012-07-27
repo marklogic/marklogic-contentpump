@@ -257,6 +257,7 @@ protected void initAggConf(InputSplit inSplit, Configuration conf) {
      * @return true once recordName is set 
      * @throws XMLStreamException
      */
+    @SuppressWarnings("unchecked")
     private boolean processStartElement() throws XMLStreamException {
         String name = xmlSR.getLocalName();
         String namespace = xmlSR.getNamespaceURI();
@@ -273,7 +274,9 @@ protected void initAggConf(InputSplit inSplit, Configuration conf) {
             recordDepth = currDepth;
             //NamespaceContextWrapper belongs to javax.xml.namespace
             //inside the wrapper, it is NamespaceSupport which belongs xerces
-            NamespaceSupport nssp = (NamespaceSupport) ((NamespaceContextWrapper) xmlSR.getNamespaceContext()).getNamespaceContext();
+            NamespaceSupport nssp = 
+                (NamespaceSupport) ((NamespaceContextWrapper) 
+                            xmlSR.getNamespaceContext()).getNamespaceContext();
             //make a copy of context to avoid data race
             nsctx = new NamespaceSupportAggregate();
             Enumeration<String> itr = nssp.getAllPrefixes();

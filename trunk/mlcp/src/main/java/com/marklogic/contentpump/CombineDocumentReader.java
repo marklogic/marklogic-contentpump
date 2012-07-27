@@ -40,12 +40,12 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 public class CombineDocumentReader<VALUEIN> 
 extends ImportRecordReader<VALUEIN> {
     
-    private long bytesRead;
-    private long bytesTotal;
-    private Iterator<FileSplit> iterator;
-    private TaskAttemptContext context;
-    private Configuration conf;
-    private int batchSize;
+    protected long bytesRead;
+    protected long bytesTotal;
+    protected Iterator<FileSplit> iterator;
+    protected TaskAttemptContext context;
+    protected Configuration conf;
+    protected int batchSize;
     
     public CombineDocumentReader() {     
     }
