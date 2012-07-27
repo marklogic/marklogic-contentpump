@@ -106,13 +106,6 @@ public abstract class ImportRecordReader<VALUEIN> extends
         ContentType contentType = ContentType.valueOf(type);
         Class<? extends Writable> valueClass = contentType.getWritableClass();
         value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
-//        configFileNameAsCollection(conf, file);
-//        mode = conf.get(ConfigConstants.CONF_MODE);
-//        if(mode.equals(ConfigConstants.MODE_LOCAL)) {
-//            if(Boolean.parseBoolean(conf.get(ConfigConstants.CONF_STREAMING))) {
-//                //TODO: do something about streaming
-//            }
-//        }
     }
 
     @Override

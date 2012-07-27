@@ -15,6 +15,7 @@
  */
 package com.marklogic.contentpump;
 
+import org.apache.commons.cli.CommandLine;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -22,6 +23,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.mapreduce.DocumentInputFormat;
 
+@SuppressWarnings("unchecked")
 public enum ExportOutputType {
     DOCUMENT {
         @Override
@@ -31,8 +33,8 @@ public enum ExportOutputType {
 
         @Override
         public Class<? extends FileOutputFormat> getOutputFormatClass(
-            boolean compressed) {
-            if (compressed) {
+                        CommandLine cmdline) {
+            if (Command.isOutputCompressed(cmdline)) {
                 return ArchiveOutputFormat.class;
             } else {
                 return SingleDocumentOutputFormat.class;
@@ -52,7 +54,7 @@ public enum ExportOutputType {
 
         @Override
         public Class<? extends FileOutputFormat> getOutputFormatClass(
-            boolean compressed) {
+                        CommandLine cmdline) {
             return ArchiveOutputFormat.class;
         }
 
@@ -63,6 +65,6 @@ public enum ExportOutputType {
     };
     public abstract Class<? extends Writable> getWritableClass();
     public abstract Class<? extends FileOutputFormat> getOutputFormatClass(
-        boolean compressed);
+        CommandLine cmdline);
     public abstract Class<? extends InputFormat> getInputFormatClass();
 }
