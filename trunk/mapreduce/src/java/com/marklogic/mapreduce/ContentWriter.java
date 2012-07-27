@@ -4,6 +4,10 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +15,8 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -90,6 +96,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     private Session[] sessions;
     
     private boolean formatNeeded;
+    
+    private FileSystem fs;
 
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -185,6 +193,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
@@ -243,7 +252,20 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 } else {
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsText().toString(), options);
-                }              
+                }     
+            } else if (value instanceof Path) {
+                if (batchSize > 1) {
+                    LOG.warn(
+                      "Batch size is reset to 1 because value type is Path.");
+                    batchSize = 1;
+                }
+                if (fs == null) {
+                    String path = ((Path)value).toString();
+                    URI fileUri = new URI(URLEncoder.encode(path));
+                    fs = FileSystem.get(fileUri, conf);
+                }
+                InputStream is = fs.open((Path)value);
+                content = ContentFactory.newUnBufferedContent(uri, is, options);
             } else {
                 throw new UnsupportedOperationException(value.getClass()
                     + " is not supported.");
@@ -282,6 +304,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 throw new IOException(e);
             }
+        } catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }  
     }
 
