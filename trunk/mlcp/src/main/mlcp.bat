@@ -19,4 +19,4 @@ for %%X in (%LIB_HOME%\*) do (
   set tmp=%%X
   set classpath=!classpath!;!tmp!
 )
-java -cp %classpath% %VMARGS% com.marklogic.contentpump.ContentPump %*
+java -cp %classpath% %VMARGS% %JVM_OPTS% com.marklogic.contentpump.ContentPump %*
