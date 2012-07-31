@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -35,37 +36,38 @@ public enum InputType implements ConfigConstants {
     DOCUMENTS {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
-            CommandLine cmdline) {
-            if (Command.isStreaming(cmdline)) {
-                return StreamingDocumentInputFormat.class;    
-            }
+            CommandLine cmdline, Configuration conf) {
             if (Command.isInputCompressed(cmdline)) {
                 return CompressedDocumentInputFormat.class;
+            }
+            if (Command.isStreaming(cmdline, conf)) {
+                return StreamingDocumentInputFormat.class;    
             }
             return CombineDocumentInputFormat.class;
         }
 
         @Override
-        public Class<? extends Mapper> getMapperClass(CommandLine cmdline) {
+        public Class<? extends Mapper> getMapperClass(CommandLine cmdline,
+                Configuration conf) {
             return DocumentMapper.class;
         }
 
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ContentOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ContentWriter.class;
         }
     },
     AGGREGATES {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             if (Command.isInputCompressed(cmdline)) {
                 return CompressedAggXMLAdvInputFormat.class;
             } else {
@@ -75,26 +77,26 @@ public enum InputType implements ConfigConstants {
 
         @Override
         public Class<? extends Mapper> getMapperClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return DocumentMapper.class;
         }
 
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ContentOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ContentWriter.class;
         }
     },   
     DELIMITED_TEXT {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             if (Command.isInputCompressed(cmdline)) {
                 return CompressedDelimitedTextInputFormat.class;
             } else {
@@ -104,43 +106,43 @@ public enum InputType implements ConfigConstants {
 
         @Override
         public Class<? extends Mapper> getMapperClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return DocumentMapper.class;
         }
 
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ContentOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ContentWriter.class;
         }
     },
     ARCHIVE {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ArchiveInputFormat.class;
         }
 
         @Override
         public Class<? extends Mapper> getMapperClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return DocumentMapper.class;
         }
         
         public Class<? extends OutputFormat> getOutputFormatClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ImportArchiveOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return MarkLogicDocumentContentWriter.class;
         }
     },
@@ -148,25 +150,25 @@ public enum InputType implements ConfigConstants {
 
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return SequenceFileInputFormat.class;
         }
 
         @Override
         public Class<? extends Mapper> getMapperClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return DocumentMapper.class;
         }
 
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ContentOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline) {
+                        CommandLine cmdline, Configuration conf) {
             return ContentWriter.class;
         }
         
@@ -195,7 +197,7 @@ public enum InputType implements ConfigConstants {
      * @return InputFormat class
      */
     public abstract Class<? extends FileInputFormat> getInputFormatClass(
-            CommandLine cmdline);
+            CommandLine cmdline, Configuration conf);
     
     /**
      * Get Mapper class based on content type.
@@ -203,11 +205,12 @@ public enum InputType implements ConfigConstants {
      * @param contentType content type
      * @return Mapper class
      */
-    public abstract Class<? extends Mapper> getMapperClass(CommandLine cmdline);
+    public abstract Class<? extends Mapper> getMapperClass(CommandLine cmdline,
+            Configuration conf);
     
     public abstract Class<? extends OutputFormat> getOutputFormatClass(
-                    CommandLine cmdline);
+                    CommandLine cmdline, Configuration conf);
     
     public abstract Class<? extends RecordWriter> getOutputValueClass(
-        CommandLine cmdline);
+        CommandLine cmdline, Configuration conf);
 }

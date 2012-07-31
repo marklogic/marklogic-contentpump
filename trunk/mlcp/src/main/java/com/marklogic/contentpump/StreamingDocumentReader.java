@@ -24,9 +24,12 @@ import java.io.IOException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.mapreduce.CompressionCodec;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.StreamLocator;
 
-public class StreamingDocumentReader extends CombineDocumentReader<Path> {
+public class StreamingDocumentReader extends 
+CombineDocumentReader<StreamLocator> {
 
     @Override
     public DocumentURI getCurrentKey() throws IOException, InterruptedException {
@@ -39,7 +42,7 @@ public class StreamingDocumentReader extends CombineDocumentReader<Path> {
             FileSplit split = iterator.next();
             Path path = split.getPath();
             setKey(path.toString());
-            value = path;
+            value = new StreamLocator(path, CompressionCodec.NONE);
             bytesRead += split.getLength();
             return true;
         }

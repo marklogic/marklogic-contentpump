@@ -15,6 +15,8 @@
  */
 package com.marklogic.contentpump;
 
+import com.marklogic.mapreduce.ContentType;
+
 /**
  * Constants for configuration option names and values.
  * 
@@ -76,7 +78,7 @@ public interface ConfigConstants {
     static final String STREAMING = "streaming";
     static final String NAMESPACE = "namespace";
     static final String DOCUMENT_TYPE = "document_type";
-    static final String DEFAULT_DOCUMENT_TYPE = "XML";
+    static final String DEFAULT_DOCUMENT_TYPE = ContentType.XML.name();
     static final String OUTPUT_IDNAME = "output_idname";
     static final String OUTPUT_LANGUAGE = "output_language";
     static final String OUTPUT_URI_REPLACE = "output_uri_replace";
@@ -159,4 +161,5 @@ public interface ConfigConstants {
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
     static final String CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = 
         "mapreduce.marklogic.input.archive.allowemptymetadata";
+    static final String CONF_STREAMING = "mapreduce.marklogic.streaming";
 }

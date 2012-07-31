@@ -19,6 +19,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.mapreduce.CompressionCodec;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 
 public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
@@ -26,7 +27,7 @@ public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
     private InputStream zipIn;
     private XMLInputFactory factory;
     private ZipEntry currZipEntry;
-    private CompressionCodecEnum codec;
+    private CompressionCodec codec;
 
     @Override
     public void close() throws IOException {
@@ -45,10 +46,10 @@ public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
 
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
-            CompressionCodecEnum.ZIP.toString());
-        if (codecString.equalsIgnoreCase(CompressionCodecEnum.ZIP.toString())) {
+            CompressionCodec.ZIP.toString());
+        if (codecString.equalsIgnoreCase(CompressionCodec.ZIP.toString())) {
             zipIn = new ZipInputStream(fileIn);
-            codec = CompressionCodecEnum.ZIP;
+            codec = CompressionCodec.ZIP;
             while ((currZipEntry = ((ZipInputStream) zipIn).getNextEntry()) != null) {
                 if (!currZipEntry.isDirectory() && currZipEntry.getSize() != 0) {
                     break;
@@ -70,10 +71,10 @@ public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
                 e.printStackTrace();
             }
 
-        } else if (codecString.equalsIgnoreCase(CompressionCodecEnum.GZIP
+        } else if (codecString.equalsIgnoreCase(CompressionCodec.GZIP
             .toString())) {
             zipIn = new GZIPInputStream(fileIn);
-            codec = CompressionCodecEnum.GZIP;
+            codec = CompressionCodec.GZIP;
             try {
                 xmlSR = factory.createXMLStreamReader(zipIn);
             } catch (XMLStreamException e) {
@@ -96,7 +97,7 @@ public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
             return false;
         }
         try {
-            if (codec.equals(CompressionCodecEnum.ZIP)) {
+            if (codec.equals(CompressionCodec.ZIP)) {
                 ZipInputStream zis = (ZipInputStream) zipIn;
 
                 if (xmlSR.hasNext()) {
@@ -128,7 +129,7 @@ public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
                 // end of zip
                 return false;
 
-            } else if (codec.equals(CompressionCodecEnum.GZIP)) {
+            } else if (codec.equals(CompressionCodec.GZIP)) {
                 return nextRecordInAggregate();
             }
         } catch (XMLStreamException e1) {
