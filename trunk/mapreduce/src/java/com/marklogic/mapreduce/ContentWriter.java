@@ -6,11 +6,11 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -98,6 +98,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     private boolean formatNeeded;
     
     private FileSystem fs;
+    
+    private InputStream is;
 
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -193,7 +195,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
@@ -238,8 +239,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         ((BytesWritable) value).getBytes(), 0, 
                         ((BytesWritable) value).getLength(), options);               
             } else if (value instanceof CustomContent) {
-                content = ((CustomContent) value).getContent(conf, options, uri);
-                batchSize = 1;
+                ContentCreateOptions newOptions = options;
+                if (batchSize > 1) {
+                    newOptions = (ContentCreateOptions)options.clone();
+                }
+                content = ((CustomContent) value).getContent(conf, newOptions, 
+                        uri);
             } else if (value instanceof MarkLogicDocument) {
                 MarkLogicDocument doc = (MarkLogicDocument)value;
                 if (formatNeeded) {
@@ -253,19 +258,41 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsText().toString(), options);
                 }     
-            } else if (value instanceof Path) {
+            } else if (value instanceof StreamLocator) {
                 if (batchSize > 1) {
                     LOG.warn(
                       "Batch size is reset to 1 because value type is Path.");
                     batchSize = 1;
                 }
-                if (fs == null) {
-                    String path = ((Path)value).toString();
-                    URI fileUri = new URI(URLEncoder.encode(path));
+                Path path = ((StreamLocator)value).getPath();
+                if (fs == null) {         
+                    URI fileUri = path.toUri();
                     fs = FileSystem.get(fileUri, conf);
                 }
-                InputStream is = fs.open((Path)value);
-                content = ContentFactory.newUnBufferedContent(uri, is, options);
+                switch (((StreamLocator)value).getCodec()) {
+                    case GZIP:
+                        InputStream fileIn = fs.open(path);
+                        is = new GZIPInputStream(fileIn);
+                        break;
+                    case ZIP:
+                        if (is == null) {
+                            InputStream zipfileIn = fs.open(path);
+                            ZipInputStream zis = new ZipInputStream(zipfileIn);
+                            is = new ZipEntryInputStream(zis, path.toString());
+                        } 
+                        if (!((ZipEntryInputStream)is).hasNext()) {
+                            LOG.error("Reached end of stream for " + value);
+                        }
+                        break;
+                    case NONE:
+                        is = fs.open(path);
+                        break;
+                    default:
+                        LOG.error("Unsupported compression codec: " + value);
+                        return;
+                }
+                content = ContentFactory.newUnBufferedContent(uri, is, 
+                        options);
             } else {
                 throw new UnsupportedOperationException(value.getClass()
                     + " is not supported.");
@@ -304,10 +331,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 throw new IOException(e);
             }
-        } catch (URISyntaxException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }  
+        }
     }
 
     private Session getSession(String forestId) {
@@ -370,6 +394,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 } else {
                     sessions[i].close();
                 }
+            }
+        }
+        if (is != null) {
+            is.close();
+            if (is instanceof ZipEntryInputStream) {
+                ((ZipEntryInputStream)is).closeZipInputStream();
             }
         }
     }
