@@ -15,10 +15,11 @@ import com.marklogic.xcc.ContentCreateOptions;
  */
 public interface CustomContent extends Writable{
     /**
-     * Get the content that is about to written out.
+     * Get the content that is about to inserted.  
      * 
-     * @param conf Hadoop Configuration
-     * @param options XCC ContentCreateOptions
+     * @param conf job configuration
+     * @param options a template for ContentCreateOptions to be used for 
+     * the content to be created.
      * @param uri URI String of DocumentURI
      * @return Content
      */

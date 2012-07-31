@@ -42,7 +42,11 @@ public enum ContentType {
             return BytesWritable.class;
         }
     },
-    UNKNOWN {
+    /**
+     * Type to be derived and set from the type of the first value passed
+     * to writer.
+     */
+    UNKNOWN { 
         @Override
         public DocumentFormat getDocumentFormat() {
             return DocumentFormat.NONE;
@@ -51,6 +55,21 @@ public enum ContentType {
         @Override
         public Class<? extends Writable> getWritableClass() {
             return MarkLogicDocument.class;
+        }       
+    },
+    /**
+     * Content contains mixed type, and the eventual type stored in 
+     * MarkLogic Server will be determined by the MIME-type mapping.
+     */
+    MIXED { 
+        @Override
+        public DocumentFormat getDocumentFormat() {
+            return DocumentFormat.NONE;
+        }
+
+        @Override
+        public Class<? extends Writable> getWritableClass() {
+            return StreamLocator.class;
         }       
     };
     
@@ -65,8 +84,10 @@ public enum ContentType {
             return TEXT;
         } else if (typeName.equalsIgnoreCase(BINARY.name())) {
             return BINARY;
-        } else if (typeName.equals(UNKNOWN.name())) {
+        } else if (typeName.equalsIgnoreCase(UNKNOWN.name())) {
             return UNKNOWN;
+        } else if (typeName.equalsIgnoreCase(MIXED.name())) {
+            return MIXED;
         } else {
             throw new IllegalArgumentException("Unknown content type: " + 
                     typeName);
@@ -82,6 +103,8 @@ public enum ContentType {
             return BINARY;
         } else if (ordinal == 3) {
             return UNKNOWN;
+        } else if (ordinal == 4) {
+            return MIXED;
         }
         return null;
     }
