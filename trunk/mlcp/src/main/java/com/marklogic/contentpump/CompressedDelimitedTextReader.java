@@ -34,11 +34,13 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.mapreduce.CompressionCodec;
+
 public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private ZipEntry currZipEntry;
-    private CompressionCodecEnum codec;
+    private CompressionCodec codec;
 
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
@@ -53,14 +55,14 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
 
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
-            CompressionCodecEnum.ZIP.toString());
-        if (codecString.equalsIgnoreCase(CompressionCodecEnum.ZIP.toString())) {
+            CompressionCodec.ZIP.toString());
+        if (codecString.equalsIgnoreCase(CompressionCodec.ZIP.toString())) {
             zipIn = new ZipInputStream(fileIn);
-            codec = CompressionCodecEnum.ZIP;
-        } else if (codecString.equalsIgnoreCase(CompressionCodecEnum.GZIP
+            codec = CompressionCodec.ZIP;
+        } else if (codecString.equalsIgnoreCase(CompressionCodec.GZIP
             .toString())) {
             zipIn = new GZIPInputStream(fileIn);
-            codec = CompressionCodecEnum.GZIP;
+            codec = CompressionCodec.GZIP;
         }
 
     }
@@ -72,7 +74,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             return false;
         }
         if (br == null) {
-            if (codec.equals(CompressionCodecEnum.ZIP)) {
+            if (codec.equals(CompressionCodec.ZIP)) {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ZipInputStream zis = (ZipInputStream) zipIn;
                 while ((currZipEntry = zis.getNextEntry()) != null) {
@@ -89,7 +91,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                         new ByteArrayInputStream(baos.toByteArray())));
                     break;
                 }
-            } else if (codec.equals(CompressionCodecEnum.GZIP)) {
+            } else if (codec.equals(CompressionCodec.GZIP)) {
                 br = new BufferedReader(new InputStreamReader(zipIn));
             }
         }

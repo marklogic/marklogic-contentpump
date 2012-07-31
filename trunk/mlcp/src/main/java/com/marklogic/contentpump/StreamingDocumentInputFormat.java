@@ -17,13 +17,13 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.StreamLocator;
 
 /**
  * FileInputFormat for unbuffered streaming documents.  Used when streaming 
@@ -32,16 +32,16 @@ import com.marklogic.mapreduce.DocumentURI;
  * @author jchen
  */
 public class StreamingDocumentInputFormat extends 
-CombineDocumentInputFormat<Path> {
+CombineDocumentInputFormat<StreamLocator> {
 
-    protected boolean isSplitable(JobContext context, Path filename) {
+    protected boolean isSplitable(JobContext context, StreamLocator filename) {
       return false;
     }
     
     @Override
-    public RecordReader<DocumentURI, Path> createRecordReader(InputSplit split,
-                    TaskAttemptContext context) throws IOException,
-                    InterruptedException {
+    public RecordReader<DocumentURI, StreamLocator> createRecordReader(
+            InputSplit split, TaskAttemptContext context) 
+            throws IOException, InterruptedException {
         return new StreamingDocumentReader();
     }
 

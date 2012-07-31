@@ -79,6 +79,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
     @Override
     public Content getContent(Configuration conf,
         ContentCreateOptions options, String uri) {
+        
         String[] collections = conf
             .getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
         if (collections != null) {

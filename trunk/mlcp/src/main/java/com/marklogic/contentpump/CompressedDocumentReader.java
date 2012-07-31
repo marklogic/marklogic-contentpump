@@ -22,6 +22,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -32,6 +34,8 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.mapreduce.CompressionCodec;
+
 /**
  * RecordReader for CompressedDocumentInputFormat.
  * 
@@ -41,10 +45,13 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
  */
 public class CompressedDocumentReader<VALUEIN> extends
     ImportRecordReader<VALUEIN> {
-    private InputStream zipIn;
-    private byte[] buf = new byte[65536];
-    private boolean hasNext = true;
-    private CompressionCodecEnum codec;
+    public static final Log LOG = LogFactory.getLog(
+            CompressedDocumentReader.class);
+    protected InputStream zipIn;
+    protected byte[] buf = new byte[65536];
+    protected boolean hasNext = true;
+    protected CompressionCodec codec;
+    protected Path file;
 
     public CompressedDocumentReader() {
 
@@ -66,24 +73,25 @@ public class CompressedDocumentReader<VALUEIN> extends
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        Path file = ((FileSplit) inSplit).getPath();
+        file = ((FileSplit) inSplit).getPath();
         initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
 
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
-            CompressionCodecEnum.ZIP.toString());
-        if (codecString.equalsIgnoreCase(CompressionCodecEnum.ZIP.toString())) {
-            zipIn = new ZipInputStream(fileIn);
-            codec = CompressionCodecEnum.ZIP;
-
-        } else if (codecString.equalsIgnoreCase(CompressionCodecEnum.GZIP
-            .toString())) {
-            zipIn = new GZIPInputStream(fileIn);
-            codec = CompressionCodecEnum.GZIP;
-            String filename = file.getName();
-            setKey(filename.substring(0, filename.lastIndexOf('.')));
+            CompressionCodec.ZIP.toString()).toUpperCase();
+        codec = CompressionCodec.valueOf(codecString);
+        switch (codec) {
+            case ZIP:
+                zipIn = new ZipInputStream(fileIn);
+                break;
+            case GZIP:
+                zipIn = new GZIPInputStream(fileIn);
+                break;
+            default:
+                String error = "Unsupported codec: " + codec.name();
+                LOG.error(error, new UnsupportedOperationException(error));
         }
     }
 
@@ -93,18 +101,18 @@ public class CompressedDocumentReader<VALUEIN> extends
             hasNext = false;
             return false;
         }
-        if (codec.equals(CompressionCodecEnum.ZIP)) {
+        if (codec == CompressionCodec.ZIP) {
             ZipEntry zipEntry;
             ZipInputStream zis = (ZipInputStream) zipIn;
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry != null) {
                     setKey(zipEntry.getName());
-                    readFromStream();
+                    setValue();
                     return true;
                 }
             }
-        } else if (codec.equals(CompressionCodecEnum.GZIP)) {
-            readFromStream();
+        } else if (codec == CompressionCodec.GZIP) {
+            setValue();
             zipIn.close();
             zipIn = null;
             hasNext = false;
@@ -114,8 +122,7 @@ public class CompressedDocumentReader<VALUEIN> extends
         return false;
     }
 
-    @SuppressWarnings("unchecked")
-    private void readFromStream() throws IOException {
+    protected void setValue() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         long size;
         while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
@@ -126,7 +133,9 @@ public class CompressedDocumentReader<VALUEIN> extends
         } else if (value instanceof BytesWritable) {
             ((BytesWritable) value).set(baos.toByteArray(), 0, baos.size());
         } else {
-            LOG.error("Unexpected type: " + value.getClass()); 
+            String error = "Unsupported input value class: " + 
+                value.getClass();
+            LOG.error(error, new UnsupportedOperationException(error)); 
             key = null;
         }
         baos.close();

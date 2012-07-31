@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -40,10 +41,17 @@ FileAndDirectoryInputFormat<DocumentURI, VALUE> {
     public static final Log LOG = 
         LogFactory.getLog(CompressedDocumentReader.class);
     
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public RecordReader<DocumentURI, VALUE> createRecordReader(InputSplit arg0,
 			TaskAttemptContext arg1) throws IOException, InterruptedException {
-		return new CompressedDocumentReader<VALUE>();
+	    Configuration conf = arg1.getConfiguration();
+	    if (conf.getBoolean(ConfigConstants.CONF_STREAMING, false)) {
+	        return (RecordReader<DocumentURI, VALUE>) 
+	            new CompressedStreamingReader();
+	    } else {
+	        return new CompressedDocumentReader<VALUE>();
+	    }
 	}
 
     @Override

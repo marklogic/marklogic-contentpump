@@ -42,7 +42,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
  */
 @SuppressWarnings("static-access")
 public enum Command implements ConfigConstants {
-    IMPORT {
+    IMPORT {        
         @Override
         public void configOptions(Options options) {
             configCommonOptions(options);
@@ -64,7 +64,7 @@ public enum Command implements ConfigConstants {
                 .withDescription(
                     "Matching regex pattern for files found in "
                     + "the input file path")
-                .create(INPUT_FILE_PATH);
+                .create(INPUT_FILE_PATTERN);
             options.addOption(inputFilePattern);
             Option aggregateRecordElement = OptionBuilder
                 .withArgName(AGGREGATE_RECORD_ELEMENT)
@@ -224,12 +224,13 @@ public enum Command implements ConfigConstants {
             // construct a job
             Job job = new Job(conf);
             job.setJarByClass(this.getClass());
-            job.setInputFormatClass(type.getInputFormatClass(cmdline));
+            job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
 
-            job.setMapperClass(type.getMapperClass(cmdline));
+            job.setMapperClass(type.getMapperClass(cmdline, conf));
             job.setMapOutputKeyClass(DocumentURI.class);
-            job.setMapOutputValueClass(type.getOutputValueClass(cmdline));
-            job.setOutputFormatClass(type.getOutputFormatClass(cmdline));
+            job.setMapOutputValueClass(type.getOutputValueClass(cmdline, 
+                    conf));
+            job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
 
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(INPUT_FILE_PATH);
@@ -326,17 +327,18 @@ public enum Command implements ConfigConstants {
                                     + OUTPUT_CLEANDIR + ": " + arg);
                 }
             }
+            if (isStreaming(cmdline, conf)) {
+                conf.setInt(MarkLogicConstants.BATCH_SIZE, 1);
+                conf.setBoolean(CONF_STREAMING, true);
+            }
             String batchSize = cmdline.getOptionValue(BATCH_SIZE);
             if (batchSize != null) {       
-                if (!batchSize.equals("1") && isStreaming(cmdline)) {
+                if (!batchSize.equals("1") && isStreaming(cmdline, conf)) {
                     LOG.warn("Batch size is reset to 1 since streaming is " +
                     		"enabled."); 
                 } else {
                     conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
                 }
-            }
-            if (isStreaming(cmdline)) {
-                conf.setInt(MarkLogicConstants.BATCH_SIZE, 1);
             }
 
             String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
@@ -732,12 +734,43 @@ public enum Command implements ConfigConstants {
         return false;
     }
     
-    protected static boolean isStreaming(CommandLine cmdline) {
+    protected static boolean isStreaming(CommandLine cmdline, 
+            Configuration conf) {
+        if (conf.get(CONF_STREAMING) != null) {
+            return conf.getBoolean(CONF_STREAMING, false);
+        }
+        String arg = null;
         if (cmdline.hasOption(STREAMING)) {
-            String arg = cmdline.getOptionValue(STREAMING);
+            arg = cmdline.getOptionValue(STREAMING);
             if (arg == null || arg.equalsIgnoreCase("true")) {
+                InputType inputType = getInputType(cmdline);
+                if (inputType != InputType.DOCUMENTS) {
+                    LOG.warn("Streaming option is not applicable to input " +
+                            "type " + inputType);
+                }
                 return true;
-            }       
+            } 
+        } else if (isMixedType(cmdline)) {
+            if ("false".equalsIgnoreCase(arg)) {
+                LOG.warn("Streaming cannot be turned off when input " +
+                    "contain mixed-typed documents.");
+            }
+            return true;
+        }
+        return false;
+    }
+    
+    protected static boolean isMixedType(CommandLine cmdline) {
+        String type = cmdline.getOptionValue(DOCUMENT_TYPE, 
+                DEFAULT_DOCUMENT_TYPE);
+        if (type.equalsIgnoreCase(ContentType.MIXED.name())) {
+            InputType inputType = getInputType(cmdline);
+            if (inputType != InputType.DOCUMENTS) {
+                LOG.warn("Document type MIXED is not applicable to input " +
+                        "type " + inputType);
+                return false;
+            }
+            return true;
         }
         return false;
     }
@@ -1039,6 +1072,12 @@ public enum Command implements ConfigConstants {
             String quantity = cmdline.getOptionValue(OUTPUT_QUALITY);
             conf.set(MarkLogicConstants.OUTPUT_QUALITY, quantity);
         }
+    }
+    
+    static InputType getInputType(CommandLine cmdline) {
+        String inputTypeOption = cmdline.getOptionValue(INPUT_FILE_TYPE,
+                INPUT_FILE_TYPE_DEFAULT);
+        return InputType.forName(inputTypeOption);
     }
 
     public abstract void printUsage();

@@ -33,8 +33,7 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 
 public abstract class ImportRecordReader<VALUEIN> extends
     RecordReader<DocumentURI, VALUEIN> implements ConfigConstants {
-    public static final Log LOG = LogFactory
-        .getLog(ImportRecordReader.class);
+    public static final Log LOG = LogFactory.getLog(ImportRecordReader.class);
     protected DocumentURI key = new DocumentURI();
     protected VALUEIN value;
     protected String prefix;
@@ -102,10 +101,11 @@ public abstract class ImportRecordReader<VALUEIN> extends
         suffix = conf.get(ConfigConstants.CONF_OUTPUT_URI_SUFFIX);
         String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
             MarkLogicConstants.DEFAULT_CONTENT_TYPE);
-        
-        ContentType contentType = ContentType.valueOf(type);
-        Class<? extends Writable> valueClass = contentType.getWritableClass();
-        value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
+        if (!conf.getBoolean(CONF_STREAMING, false)) {
+            ContentType contentType = ContentType.valueOf(type);
+            Class<? extends Writable> valueClass = contentType.getWritableClass();
+            value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
+        } 
     }
 
     @Override
