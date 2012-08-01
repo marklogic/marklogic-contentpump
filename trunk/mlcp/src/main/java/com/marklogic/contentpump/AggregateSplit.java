@@ -20,7 +20,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.Stack;
 
 import org.apache.hadoop.fs.Path;
@@ -32,7 +31,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.sun.org.apache.xerces.internal.util.NamespaceSupport;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 
-public class AggregateSplit extends InputSplit implements Writable{
+public class AggregateSplit extends InputSplit implements Writable {
     private Path file;
     private long start;
     private long length;
@@ -40,11 +39,13 @@ public class AggregateSplit extends InputSplit implements Writable{
     private HashMap<String, Stack<String>> namespaces;
     private String recordElem;
     private NamespaceContext nsctx;
-    
+
     AggregateSplit() {
     }
-    
-    public AggregateSplit(FileSplit split, HashMap<String, Stack<String>> namespaces, String recordElem, NamespaceContext nsctx) throws IOException {
+
+    public AggregateSplit(FileSplit split,
+        HashMap<String, Stack<String>> namespaces, String recordElem,
+        NamespaceContext nsctx) throws IOException {
         this.file = split.getPath();
         this.start = split.getStart();
         this.length = split.getLength();
@@ -62,15 +63,15 @@ public class AggregateSplit extends InputSplit implements Writable{
     @Override
     public String[] getLocations() throws IOException, InterruptedException {
         if (this.hosts == null) {
-            return new String[]{};
-          } else {
+            return new String[] {};
+        } else {
             return this.hosts;
-          }
+        }
     }
-    
-    public HashMap<String, Stack<String>> getNamespaces(){
+
+    public HashMap<String, Stack<String>> getNamespaces() {
         return namespaces;
-        
+
     }
 
     public String getRecordElem() {
@@ -91,42 +92,14 @@ public class AggregateSplit extends InputSplit implements Writable{
         out.writeLong(start);
         out.writeLong(length);
         Text.writeString(out, recordElem);
-//        out.writeLong(totalLength);
-        if (namespaces != null) {
-            out.writeInt(namespaces.size());
-            Set<String> keys = namespaces.keySet();
-            for(String k : keys) {
-                Text.writeString(out, "" + k);
-                // record elem only case about the inner most ns
-                Text.writeString(out, namespaces.get(k).peek());
-            }
-        } else {
-            out.writeInt(0);
-        }
-//        out.writeInt(((NamespaceSupport)nsctx).)
-//        Enumeration<String> itr = nsctx.getAllPrefixes();
-//        int nscount = 0;
-//        while(itr.hasMoreElements()) {
-//            itr.nextElement();
-//            nscount++;
-//        }
-//        out.writeInt(nscount);
-//        //reset enumerator
-//        itr = nsctx.getAllPrefixes();
-//        while(itr.hasMoreElements()) {
-//            String prefix = itr.nextElement();
-//            Text.writeString(out, prefix);
-//            Text.writeString(out, nsctx.getURI(prefix));
-//        }
-        int nscount = ((NamespaceSupport)nsctx).getDeclaredPrefixCount();
+        int nscount = ((NamespaceSupport) nsctx).getDeclaredPrefixCount();
         out.writeInt(nscount);
-        for ( int i =0; i<nscount; i++) {
-            String prefix = ((NamespaceSupport)nsctx).getDeclaredPrefixAt(i);
-            //default ns, prefix="", so have to write something else
-            Text.writeString(out, "".equals(prefix)?"null":prefix);
-            Text.writeString(out, ((NamespaceSupport)nsctx).getURI(prefix).trim());
+        for (int i = 0; i < nscount; i++) {
+            String prefix = ((NamespaceSupport) nsctx).getDeclaredPrefixAt(i);
+            Text.writeString(out, prefix);
+            Text.writeString(out, ((NamespaceSupport) nsctx).getURI(prefix)
+                .trim());
         }
-
     }
 
     @Override
@@ -135,33 +108,28 @@ public class AggregateSplit extends InputSplit implements Writable{
         start = in.readLong();
         length = in.readLong();
         recordElem = Text.readString(in);
-//        totalLength = in.readLong();
         hosts = null;
-//        split = new FileSplit(file, start, length, hosts);
-        
-        int size = in.readInt();
         namespaces = new HashMap<String, Stack<String>>();
-        for (int i = 0; i < size; i++) {
-            String key = Text.readString(in);
-            String value = Text.readString(in);
-            Stack<String> s = new Stack<String>();
-            s.push(value);
-            namespaces.put(key, s);
-        }
-        
         int nscount = in.readInt();
         nsctx = new NamespaceSupportAggregate();
         for (int i = 0; i < nscount; i++) {
             String prefix = Text.readString(in);
             String uri = Text.readString(in);
-            nsctx.declarePrefix("null".equals(prefix)?"":prefix, uri);
+            nsctx.declarePrefix(prefix, uri);
+            Stack<String> s = new Stack<String>();
+            s.push(uri);
+            namespaces.put("".equals(prefix) ? AggregateXMLReader.DEFAULT_NS
+                : prefix, s);
         }
-        System.out.println("READFIELD#namespace context: " + nsctx +":" + nsctx.getURI("ml"));
-        System.out.println("READFIELD#namespace context: " + nsctx +":" + nsctx.getURI(""));
     }
+
     /** The file containing this split's data. */
-    public Path getPath() { return file; }
-    
+    public Path getPath() {
+        return file;
+    }
+
     /** The position of the first byte in the file to process. */
-    public long getStart() { return start; }
+    public long getStart() {
+        return start;
+    }
 }
