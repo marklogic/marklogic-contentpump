@@ -46,7 +46,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected static Pattern[] patterns = new Pattern[] {
         Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
-    private static String DEFAULT_NS = null;
+    public static String DEFAULT_NS = null;
     private int currDepth = 0;
     protected XMLStreamReader xmlSR;
 
@@ -63,6 +63,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected boolean startOfRecord = true;
     protected boolean hasNext = true;
     private boolean newDoc = false;
+    private boolean newUriId = false;
     protected boolean useAutomaticId = false;
     protected String mode;
     protected IdGenerator idGen;
@@ -76,11 +77,10 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long pos;
     protected long end;
     protected long parserOffsetInSplit;
-    // TODO: should this be a paramater
+
     protected int LOOKAHEAD_BUF = 4096;
 
-    protected static String NOT_WELL_FORMED = "The markup in the document "
-        + "following the root element must be well-formed";
+    protected static String NOT_WELL_FORMED = "must be well-formed";
     protected static String CONTENT_IN_PROLOG = "Content is not allowed in "
         + "prolog";
     
@@ -101,7 +101,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
-        return hasNext ? 0 : 1;
+        return ((float)(pos - start)) / (end - start);
     }
 
     @Override
@@ -114,7 +114,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         fs = file.getFileSystem(context.getConfiguration());
         fInputStream = fs.open(file);
         
-        f = new AggregateXMLInputFactoryImpl();//XMLInputFactory.newInstance();
+        f = new AggregateXMLInputFactoryImpl();
         try {
             xmlSR = f.createXMLStreamReader(fInputStream);
         } catch (XMLStreamException e) {
@@ -237,6 +237,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             recordDepth = currDepth;
             isNewRootStart = true;
             newDoc = true;
+            newUriId = true;
             if (useAutomaticId) {
                 setKey(idGen.incrementAndGet());
             }
@@ -249,6 +250,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 recordDepth = currDepth;
                 isNewRootStart = true;
                 newDoc = true;
+                newUriId = true;
                 if (useAutomaticId) {
                     setKey(idGen.incrementAndGet());
                 }
@@ -301,7 +303,13 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             String newId = xmlSR.getText();
             currentId = newId;
             sb.append(newId);
-            setKey(newId);
+            if (newUriId) {
+                setKey(newId);
+                newUriId = false;
+            } else {
+                LOG.warn("duplicate URI_ID: " + idName + ". Skipped. " );
+            }
+            //TODO LOG WARNING
             if (LOG.isDebugEnabled()) {
                 LOG.debug("URI_ID: " + newId);
             }
@@ -326,7 +334,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         // return;
         // }
         write(sb.toString());
-//        System.out.println("START_ELEM#namespace context: " + nsctx +":" +  nsctx.getDeclaredPrefixCount());
     }
 
     /**
@@ -365,17 +372,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         sb.append(">");
         //write to finish the end tag before checking errors
         write(sb.toString()); 
-
-        /*if (recordDepth != currDepth ) {
-            // not the end of the record: go look for more nodes
-            currDepth--;
-            removeNameSpaceDecl();
-            return true;
-        } else */
-//        (name.equals(recordName)
-//            && ((recordNamespace == null && namespace == null) 
-//                 || (recordNamespace != null && recordNamespace
-//                                    .equals(namespace))))
         if (!newDoc || !name.equals(recordName) || !((recordNamespace == null && namespace == null) 
           || (recordNamespace != null && recordNamespace
           .equals(namespace)))) {
@@ -435,15 +431,13 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             hasNext = false;
             return false;
         }
-
-        while (!parallelMode || (parallelMode && xmlSR.getLocation().getCharacterOffset() + parserOffsetInSplit <= end)) {
+        
+        while (!parallelMode || (parallelMode && pos <= end)) {
             try {
                 while (xmlSR.hasNext()) {
                     int eventType;
                     pos = xmlSR.getLocation().getCharacterOffset() + parserOffsetInSplit;
-//                    System.out.println("BEFORE_NEXT#namespace context: " + nsctx +":" +  nsctx.getDeclaredPrefixCount());
                     eventType = xmlSR.next();
-//                    System.out.println("AFTER_NEXT#namespace context: " + nsctx +":" +  nsctx.getDeclaredPrefixCount());
                     switch (eventType) {
                     case XMLStreamConstants.START_ELEMENT:
                         if (!parallelMode) {
@@ -510,9 +504,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                                     + " at " + xmlSR.getLocation());
                         } else {
                             hasNext = false;
-                            //to get out of outer while-loop
-//                            parserOffsetInSplit = Integer.MAX_VALUE;
-//                            break;
                             return false;
                         }
                     default:
@@ -571,7 +562,11 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             if (m.find()) {
                 return m.start();
             } else {
-                return -1;
+                //be conservative: move forward recordName length's bytes
+                streamOffset += recordName.length();
+                if (streamOffset < end) {
+                    fInputStream.seek(streamOffset);
+                }
             }
         }
     }
@@ -581,8 +576,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
      * @throws IOException
      */
     protected long moveToNextRecord(long streamOffset) throws IOException {
-        String matchStrs [] = new String[nameSpaces.size() + 1];
-        matchStrs[0] = "<(?!(/))(.+:)?" + recordName + "[ >]";
+        String matchStr = "<(?!(/))(.+:)?" + recordName + "[ >]";
         try {
             //close xml stream 
             if (xmlSR!=null ) {
@@ -590,7 +584,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
             if (fInputStream!=null) fInputStream.close();
             fInputStream = fs.open(file);
-            int offset = readUntilMatch(matchStrs[0], streamOffset);
+            int offset = readUntilMatch(matchStr, streamOffset);
             if (offset == -1) {
                 //no record elem in this split
                 return -1;
