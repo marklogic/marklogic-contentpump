@@ -327,18 +327,9 @@ public enum Command implements ConfigConstants {
                                     + OUTPUT_CLEANDIR + ": " + arg);
                 }
             }
-            if (isStreaming(cmdline, conf)) {
-                conf.setInt(MarkLogicConstants.BATCH_SIZE, 1);
-                conf.setBoolean(CONF_STREAMING, true);
-            }
             String batchSize = cmdline.getOptionValue(BATCH_SIZE);
             if (batchSize != null) {       
-                if (!batchSize.equals("1") && isStreaming(cmdline, conf)) {
-                    LOG.warn("Batch size is reset to 1 since streaming is " +
-                    		"enabled."); 
-                } else {
-                    conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
-                }
+                conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
             }
 
             String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
