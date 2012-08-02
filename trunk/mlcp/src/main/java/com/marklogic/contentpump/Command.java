@@ -806,6 +806,7 @@ public enum Command implements ConfigConstants {
     public abstract void applyConfigOptions(Configuration conf,
                     CommandLine cmdline);
 
+    @SuppressWarnings("deprecation")
     static void configCommonOptions(Options options) {
         Option mode = OptionBuilder
             .withArgName(MODE)
@@ -813,6 +814,12 @@ public enum Command implements ConfigConstants {
             .withDescription("Whether to run in local or distributed mode.")
             .create(MODE);
         options.addOption(mode);
+        Option hadoopConfDir = OptionBuilder
+            .withArgName(HADOOP_CONF_DIR)
+            .hasArg()
+            .withDescription("Override $HADOOP_HOME")
+            .create(HADOOP_CONF_DIR);
+        options.addOption(hadoopConfDir);
         Option hadoopHome = OptionBuilder
             .withArgName(HADOOP_HOME)
             .hasArg()

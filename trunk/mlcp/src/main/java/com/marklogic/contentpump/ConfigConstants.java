@@ -25,7 +25,10 @@ import com.marklogic.mapreduce.ContentType;
  */
 public interface ConfigConstants {
     // property names
+    /** Deprecated.  Use HADOOP_CONFDIR_ENV_NAME instead */
+    @Deprecated
     static final String HADOOP_HOME_ENV_NAME = "HADOOP_HOME";
+    static final String HADOOP_CONFDIR_ENV_NAME = "HADOOP_CONF_DIR";
     static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
     static final String CONTENTPUMP_VERSION_PROPERTY_NAME = 
         "CONTENTPUMP_VERSION";
@@ -36,7 +39,10 @@ public interface ConfigConstants {
     static final String MODE = "mode";
     static final String MODE_DISTRIBUTED = "distributed";
     static final String MODE_LOCAL = "local";
-    static final String HADOOP_HOME = "hadoop_home";    
+    /** Deprecated.  Use HADOOP_CONF_DIR instead */
+    @Deprecated
+    static final String HADOOP_HOME = "hadoop_home";  
+    static final String HADOOP_CONF_DIR = "hadoop_conf_dir";
     static final String THREAD_COUNT = "thread_count";
     static final String MAX_SPLIT_SIZE = "max_split_size";
     static final String DEFAULT_MAX_SPLIT_SIZE = "50000";
