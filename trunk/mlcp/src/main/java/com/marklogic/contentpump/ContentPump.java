@@ -65,6 +65,7 @@ public class ContentPump implements ConfigConstants {
         System.exit(rc);
     }
 
+    @SuppressWarnings("deprecation")
     private static int runCommand(String[] args) throws IOException {
         // get command
         String cmd = args[0];
@@ -109,14 +110,25 @@ public class ContentPump implements ConfigConstants {
             return 1; // Exit on exception here.
         }
         
-        // check running mode and hadoop home configuration       
+        // check running mode and hadoop conf dir configuration 
         String mode = cmdline.getOptionValue(MODE);
-        String hadoopHome = System.getenv(HADOOP_HOME_ENV_NAME);
-        if (cmdline.hasOption(HADOOP_HOME)) {
-            hadoopHome = cmdline.getOptionValue(HADOOP_HOME);
+        String hadoopConfDir = System.getenv(HADOOP_CONFDIR_ENV_NAME);
+        if (cmdline.hasOption(HADOOP_CONF_DIR)) {
+            hadoopConfDir = cmdline.getOptionValue(HADOOP_CONF_DIR);
         }
+        if (hadoopConfDir == null) {
+            // HADOOP_HOME environment and -hadoop_home option are deprecated.
+            String hadoopHome = System.getenv(HADOOP_HOME_ENV_NAME);
+            if (cmdline.hasOption(HADOOP_HOME)) {
+                hadoopHome = cmdline.getOptionValue(HADOOP_HOME);
+            }
+            if (hadoopHome != null) {
+                hadoopConfDir = hadoopHome + 
+                    System.getProperty("file.separator") + "conf";
+            }
+        }       
         
-        boolean distributed = hadoopHome != null && (mode == null ||
+        boolean distributed = hadoopConfDir != null && (mode == null ||
                 mode.equals(MODE_DISTRIBUTED));
         if (LOG.isDebugEnabled()) {
             LOG.debug("Running in: " + (distributed ? "distributed " : "local")
@@ -125,17 +137,17 @@ public class ContentPump implements ConfigConstants {
         conf.set(CONF_MODE, distributed ? MODE_DISTRIBUTED : MODE_LOCAL);
         
         if (distributed) {
-            File hdHomeDir= new File(hadoopHome);
+            File hdConfDir= new File(hadoopConfDir);
             try { 
-                checkHadoopHome(hdHomeDir);
+                checkHadoopConfDir(hdConfDir);
             } catch (IllegalArgumentException e) {
                 LOG.error("Error found with Hadoop home setting", e);
                 System.err.println(e.getMessage());
                 return 1;
             }
-            // set new class loader based on Hadoop home
+            // set new class loader based on Hadoop Conf Dir
             try {
-                setClassLoader(hdHomeDir, conf);
+                setClassLoader(hdConfDir, conf);
             } catch (Exception e) {
                 LOG.error("Error configuring class loader", e);
                 System.err.println(e.getMessage());
@@ -188,37 +200,32 @@ public class ContentPump implements ConfigConstants {
      * Set class loader for current thread and for Confifguration based on 
      * Hadoop home.
      * 
-     * @param hdHomeDir Hadoop home directory
+     * @param hdConfDir Hadoop home directory
      * @param conf Hadoop configuration
      * @throws MalformedURLException
      */
-    private static void setClassLoader(File hdHomeDir, Configuration conf) 
+    private static void setClassLoader(File hdConfDir, Configuration conf) 
     throws Exception {
         ClassLoader parent = conf.getClassLoader();
-        File file = new File(hdHomeDir, "conf");
-        if (file.exists()) {
-            URL url = file.toURI().toURL();
-            URL[] urls = new URL[1];
-            urls[0] = url;
-            ClassLoader classLoader = new URLClassLoader(urls, parent);
-            Thread.currentThread().setContextClassLoader(classLoader);
-            conf.setClassLoader(classLoader);
-        } else {
-            throw new FileNotFoundException(file.getAbsolutePath());
-        }  
+        URL url = hdConfDir.toURI().toURL();
+        URL[] urls = new URL[1];
+        urls[0] = url;
+        ClassLoader classLoader = new URLClassLoader(urls, parent);
+        Thread.currentThread().setContextClassLoader(classLoader);
+        conf.setClassLoader(classLoader);
     }
 
-    private static void checkHadoopHome(File hdHomeDir) 
+    private static void checkHadoopConfDir(File hdConfDir) 
     throws IllegalArgumentException {
-        if (!hdHomeDir.exists()) {
-            throw new IllegalArgumentException("Hadoop home " + hdHomeDir + 
-                    " is not found.");
-        } else if (!hdHomeDir.isDirectory()) {
-            throw new IllegalArgumentException("Hadoop home " + hdHomeDir + 
-                    " is not a directory.");
-        } else if (!hdHomeDir.canRead()) {
-            throw new IllegalArgumentException("Hadoop home " + hdHomeDir + 
-                    " cannot be read.");
+        if (!hdConfDir.exists()) {
+            throw new IllegalArgumentException("Hadoop conf dir " + hdConfDir 
+                    + " is not found.");
+        } else if (!hdConfDir.isDirectory()) {
+            throw new IllegalArgumentException("Hadoop conf dir " + hdConfDir 
+                    + " is not a directory.");
+        } else if (!hdConfDir.canRead()) {
+            throw new IllegalArgumentException("Hadoop conf dir " + hdConfDir
+                    + " cannot be read.");
         }
      }
 
