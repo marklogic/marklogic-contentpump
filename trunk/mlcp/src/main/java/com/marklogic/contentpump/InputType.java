@@ -137,13 +137,13 @@ public enum InputType implements ConfigConstants {
         
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
-            return ImportArchiveOutputFormat.class;
+            return DatabaseContentOutputFormat.class;
         }
 
         @Override
         public Class<? extends RecordWriter> getOutputValueClass(
                         CommandLine cmdline, Configuration conf) {
-            return MarkLogicDocumentContentWriter.class;
+            return DatabaseContentWriter.class;
         }
     },
     SEQUENCEFILE {

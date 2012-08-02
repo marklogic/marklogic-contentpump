@@ -35,7 +35,14 @@ import com.marklogic.mapreduce.LinkedMapWritable;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.exceptions.XccConfigException;
 
-public class ImportArchiveOutputFormat extends ContentOutputFormat<MarkLogicDocumentWithMeta> {
+/**
+ * ContentOutputFormat for importing archive to MarkLogic and copying from
+ * source MarkLogic Server to destination MarkLogic Server
+ * 
+ * @author ali
+ * 
+ */
+public class DatabaseContentOutputFormat extends ContentOutputFormat<MarkLogicDocumentWithMeta> {
     public static final String ID_PREFIX = "#";
     @Override
     public RecordWriter<DocumentURI, MarkLogicDocumentWithMeta> getRecordWriter(
@@ -92,7 +99,7 @@ public class ImportArchiveOutputFormat extends ContentOutputFormat<MarkLogicDocu
         }
         
         // construct the ContentWriter
-        return new MarkLogicDocumentContentWriter<MarkLogicDocumentWithMeta>(conf, sourceMap, fastLoad);
+        return new DatabaseContentWriter<MarkLogicDocumentWithMeta>(conf, sourceMap, fastLoad);
         
     }
 }

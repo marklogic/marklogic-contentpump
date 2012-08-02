@@ -627,11 +627,11 @@ public enum Command implements ConfigConstants {
 
             Job job = new Job(conf);
             job.setJarByClass(this.getClass());
-            job.setInputFormatClass(MarkLogicDocumentInputFormat.class);
+            job.setInputFormatClass(DatabaseContentInputFormat.class);
             job.setMapperClass(DocumentMapper.class);
             job.setMapOutputKeyClass(DocumentURI.class);
             job.setMapOutputValueClass(MarkLogicDocument.class);
-            job.setOutputFormatClass(ImportArchiveOutputFormat.class);
+            job.setOutputFormatClass(DatabaseContentOutputFormat.class);
             job.setOutputKeyClass(DocumentURI.class);
             return job;
         }

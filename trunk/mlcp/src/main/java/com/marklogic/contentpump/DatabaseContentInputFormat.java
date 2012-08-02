@@ -24,13 +24,20 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicInputFormat;
 
-public class MarkLogicDocumentInputFormat<VALUE> extends
+/**
+ * MarkLogic-based InputFormat for Database Content, taking DocumentURI as key class and a generic value 
+ * class.
+ * @author ali
+ *
+ * @param <VALUE>
+ */
+public class DatabaseContentInputFormat<VALUE> extends
     MarkLogicInputFormat<DocumentURI, VALUE> {
     @Override
     public RecordReader<DocumentURI, VALUE> createRecordReader(
         InputSplit split, TaskAttemptContext context) throws IOException,
         InterruptedException {
-        MarkLogicDocumentReader reader = new MarkLogicDocumentReader(
+        DatabaseContentReader reader = new DatabaseContentReader(
             context.getConfiguration());
         return (RecordReader<DocumentURI, VALUE>) reader;
     }

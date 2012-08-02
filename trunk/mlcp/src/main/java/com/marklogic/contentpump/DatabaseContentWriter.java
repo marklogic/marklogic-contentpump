@@ -54,10 +54,10 @@ import com.marklogic.xcc.exceptions.ServerConnectionException;
  * @author ali
  * 
  */
-public class MarkLogicDocumentContentWriter<VALUE> extends
+public class DatabaseContentWriter<VALUE> extends
     MarkLogicRecordWriter<DocumentURI, VALUE> implements MarkLogicConstants {
     public static final Log LOG = LogFactory
-        .getLog(MarkLogicDocumentContentWriter.class);
+        .getLog(DatabaseContentWriter.class);
 
     /**
      * Directory of the output documents.
@@ -112,7 +112,7 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
 
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
-    public MarkLogicDocumentContentWriter(Configuration conf,
+    public DatabaseContentWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         super(null, conf);
 
@@ -205,7 +205,7 @@ public class MarkLogicDocumentContentWriter<VALUE> extends
         if ("null".equals(uri)) {
             return;
         }
-        String forestId = ImportArchiveOutputFormat.ID_PREFIX;
+        String forestId = DatabaseContentOutputFormat.ID_PREFIX;
         int fId = 0;
         if (fastLoad) {
             // compute forest to write to
