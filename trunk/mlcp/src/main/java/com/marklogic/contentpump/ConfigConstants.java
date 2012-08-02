@@ -84,7 +84,7 @@ public interface ConfigConstants {
     static final String STREAMING = "streaming";
     static final String NAMESPACE = "namespace";
     static final String DOCUMENT_TYPE = "document_type";
-    static final String DEFAULT_DOCUMENT_TYPE = ContentType.XML.name();
+    static final String DEFAULT_DOCUMENT_TYPE = ContentType.MIXED.name();
     static final String OUTPUT_IDNAME = "output_idname";
     static final String OUTPUT_LANGUAGE = "output_language";
     static final String OUTPUT_URI_REPLACE = "output_uri_replace";
