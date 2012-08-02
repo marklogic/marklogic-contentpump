@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
@@ -49,21 +50,27 @@ import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XdmElement;
 
 /**
- * can't reuse MarkLogicRecordReader, because the prolog of the query need to be
- * changed, can't simply change query body
+ * A MarkLogicRecordReader that fetches data from MarkLogic server and generates 
+ * <DocumentURI, MarkLogicDocument> key value pairs.
  * 
  * @author ali
  * 
  */
-public class MarkLogicDocumentReader extends
+
+//can't reuse MarkLogicRecordReader, because the prolog of the query need to be
+//changed, can't simply change query body
+
+public class DatabaseContentReader extends
     MarkLogicRecordReader<DocumentURI, MarkLogicDocument> {
     static final float DOCUMENT_TO_FRAGMENT_RATIO = 2;
     public static final Log LOG = LogFactory
-        .getLog(MarkLogicDocumentReader.class);
+        .getLog(DatabaseContentReader.class);
     protected boolean copyCollection;
     protected boolean copyPermission;
     protected boolean copyProperties;
     protected boolean copyQuality;
+    protected HashMap<String, DocumentMetadata> metadataMap;
+    protected boolean metasTurn = true;
     /**
      * Current key.
      */
@@ -73,37 +80,21 @@ public class MarkLogicDocumentReader extends
      */
     protected MarkLogicDocument currentValue;
 
-    public MarkLogicDocumentReader(Configuration conf) {
+    public DatabaseContentReader(Configuration conf) {
         super(conf);
-        copyCollection = isCopyCollection(conf);
-        copyPermission = isCopyPermission(conf);
-        copyProperties = isCopyProperties(conf);
-        copyQuality = isCopyQuality(conf);
+        copyCollection = conf.getBoolean(
+            ConfigConstants.CONF_COPY_COLLECTIONS, false);
+        copyPermission = conf.getBoolean(
+            ConfigConstants.CONF_COPY_PERMISSIONS, false);
+        copyProperties = conf.getBoolean(ConfigConstants.CONF_COPY_PROPERTIES,
+            false);
+        copyQuality = conf
+            .getBoolean(ConfigConstants.CONF_COPY_QUALITY, false);
         currentKey = new DocumentURI();
-
+        metadataMap = new HashMap<String, DocumentMetadata>();
     }
 
-    private boolean isCopyCollection(Configuration conf) {
-        String r = conf.get(ConfigConstants.CONF_COPY_COLLECTIONS);
-        return Boolean.parseBoolean(r);
-    }
-
-    private boolean isCopyPermission(Configuration conf) {
-        String r = conf.get(ConfigConstants.CONF_COPY_PERMISSIONS);
-        return Boolean.parseBoolean(r);
-    }
-
-    private boolean isCopyProperties(Configuration conf) {
-        String r = conf.get(ConfigConstants.CONF_COPY_PROPERTIES);
-        return Boolean.parseBoolean(r);
-    }
-
-    private boolean isCopyQuality(Configuration conf) {
-        String r = conf.get(ConfigConstants.CONF_COPY_QUALITY);
-        return Boolean.parseBoolean(r);
-    }
-
-    @Override
+     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         mlSplit = (MarkLogicInputSplit) inSplit;
@@ -140,8 +131,6 @@ public class MarkLogicDocumentReader extends
         Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
         String docExpr = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR,
             ConfigConstants.DEFAULT_DOCUMENT_FILTER);
-        String query = "for $doc in " + docExpr + "\n";
-        query += "let $uri := fn:base-uri($doc)";
         String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
@@ -149,22 +138,24 @@ public class MarkLogicDocumentReader extends
         buf.append("declare option xdmp:output \"indent=no\";");
         buf.append("declare option xdmp:output \"indent-untyped=no\";");
         buf.append("declare variable $mlmr:splitstart as xs:integer external;");
-        buf.append("declare variable $mlmr:splitend as xs:integer external;");
-        buf.append("xdmp:with-namespaces((");
+        buf.append("declare variable $mlmr:splitend as xs:integer external;\n");
+        StringBuilder buftmp = new StringBuilder();
+        buftmp.append("xdmp:with-namespaces((");
         if (nsCol != null) {
             for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
                 String ns = nsIt.next();
-                buf.append('"').append(ns).append('"');
+                buftmp.append('"').append(ns).append('"');
                 if (nsIt.hasNext()) {
-                    buf.append(',');
+                    buftmp.append(',');
                 }
             }
         }
+        buf.append(buftmp.toString());
         buf.append("),fn:unordered(fn:unordered(");
-
-        buf.append("for $doc in ");
+        buf.append("let $cols := fn:unordered(fn:unordered(");
         buf.append(docExpr);
-        buf.append("[$mlmr:splitstart to $mlmr:splitend]");
+        buf.append(")[$mlmr:splitstart to $mlmr:splitend])");
+        buf.append("\nfor $doc in $cols");
         buf.append("\nlet $uri := fn:base-uri($doc)\n return (");
         
         if (copyCollection || copyPermission || copyProperties || copyQuality) {
@@ -197,17 +188,16 @@ public class MarkLogicDocumentReader extends
                 buf.append("(),\n");
             }
             // end-of-record marker
-            buf.append("0,");
+            buf.append("0");
         }
-        buf.append("'DOC',");
-        buf.append("$uri,");
-        buf.append("$doc,");
-        buf.append("0");
-
         
         buf.append(" )\n)");
         buf.append(subExpr);
-        buf.append("))");
+        buf.append(")),'EOM',"); //end of metadata
+        buf.append(buftmp.toString());
+        buf.append("),fn:unordered(fn:unordered(");
+        buf.append(docExpr);
+        buf.append(")[$mlmr:splitstart to $mlmr:splitend]))");
         queryText = buf.toString();
 
         if (LOG.isDebugEnabled()) {
@@ -227,6 +217,8 @@ public class MarkLogicDocumentReader extends
             options.setCacheResult(false);
             aquery.setOptions(options);
             result = session.submitRequest(aquery);
+            
+            initMetadataMap();
         } catch (XccConfigException e) {
             LOG.error(e);
             throw new IOException(e);
@@ -237,96 +229,126 @@ public class MarkLogicDocumentReader extends
         }
     }
 
+    
+    private void initMetadataMap() throws IOException {
+        while (result.hasNext()) {
+            ResultItem item = result.next();
+            String type = null;
+            if (item != null && item.getItemType() == ValueType.XS_STRING) {
+                type = item.asString();
+            } else {
+                throw new IOException("incorrect format:" + item.getItem()
+                    + "\n" + result.asString());
+            }
+
+            if ("META".equals(type)) {
+                item = result.next();
+                String uri = item.asString();
+                if (uri == null) {
+                    throw new IOException("no uri");
+                }
+                item = result.next();
+                DocumentMetadata metadata = new DocumentMetadata();
+                //node-kind, must exist
+                String nKind = item.asString();
+                metadata.setFormat(nKind);
+                
+                item = result.next();
+                // handle collections, may not be present
+                while (item != null && item.getItemType() == ValueType.XS_STRING) {
+                    if (!copyCollection) {
+                        continue;
+                    }
+                    metadata.addCollection(item.asString());
+                    item = result.next();
+                }
+                // handle permissions, may not be present
+                while (item != null && ValueType.ELEMENT == item.getItemType()) {
+                    if (!copyPermission) {
+                        continue;
+                    }
+                    try {
+                        readPermission((XdmElement) item.getItem(), metadata);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    item = result.next();
+                }
+                // handle quality, always present even if not requested (barrier)
+                metadata.setQuality((XSInteger) item.getItem());
+                item = result.next();
+
+                // handle prop:properties node, optional
+                // if not present, there will be a 0 as a marker
+                if (copyProperties && ValueType.ELEMENT == item.getItemType()) {
+                    String pString = item.asString();
+                    if (pString != null) {
+                        metadata.setProperties(pString);
+                    }
+                    item = result.next();
+                }
+                if (ValueType.XS_INTEGER != item.getItemType()) {
+                    throw new IOException("unexpected " + item.getItemType() + " "
+                        + item.asString() + ", expected " + ValueType.XS_INTEGER
+                        + " 0");
+                }
+                metadataMap.put(uri, metadata);
+            } else if ("EOM".equals(type)) {
+                //end of metadata
+                return;
+            } else {
+                throw new IOException("incorrect type");
+            }
+        }
+
+    }
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (result == null || !result.hasNext()) {
+        if (result == null || (!result.hasNext() && metasTurn)) {
             return false;
         }
-        ResultItem item = result.next();
+        
+        ResultItem currItem = null;
+        if (metasTurn) {
+        	//move to next doc node
+            currItem = result.next();
+        } else {
+            currItem = result.current();
+        }
         count++;
-
         currentValue = new MarkLogicDocument();
 
-        // value type: document or metadata
-        String type = null;
-        if (item != null && item.getItemType() == ValueType.XS_STRING) {
-            type = item.asString();
-        } else {
-            throw new IOException("incorrect format:" + item.getItem() + "\n" + result.asString());
-        }
-        item = result.next();
-        String uri = item.asString();
+        String uri = null;
+        uri = currItem.getDocumentURI();
         if (uri == null) {
             throw new IOException("no uri");
         }
-        item = result.next();
-        if ("DOC".equals(type)) {
-            currentKey.setUri(uri);
-            // handle document-node, always present
-            currentValue.set(item);
-            item = result.next();
 
-        } else if ("META".equals(type)) {
-            DocumentMetadata metadata = new DocumentMetadata();
-            //node-kind, must exist
-            String nKind = item.asString();
-            metadata.setFormat(nKind);
-            
-            item = result.next();
+        if (metasTurn) {
             currentKey.setUri(uri + DocumentMetadata.EXTENSION);
-            // handle collections, may not be present
-            while (item != null && item.getItemType() == ValueType.XS_STRING) {
-                if (!copyCollection) {
-                    continue;
-                }
-                metadata.addCollection(item.asString());
-                item = result.next();
+            DocumentMetadata metadata = metadataMap.get(uri);
+            if (metadata != null) {
+                byte[] metacontent = metadata.toXML().getBytes();
+                currentValue.setContent(metacontent);
+                // the type of metadata is the same as type of the content, so
+                // that
+                // it goes into the same archive
+                String format = metadata.getFormatName();
+                format = format.replaceAll("\\(\\)", "");
+                currentValue.setContentType(ContentType.forName(format));
+            } else {
+                LOG.error("no meta for " + uri);
             }
-            // handle permissions, may not be present
-            while (item != null && ValueType.ELEMENT == item.getItemType()) {
-                if (!copyPermission) {
-                    continue;
-                }
-                try {
-                    readPermission((XdmElement) item.getItem(), metadata);
-                } catch (Exception e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                item = result.next();
-            }
-            // handle quality, always present even if not requested (barrier)
-            metadata.setQuality((XSInteger) item.getItem());
-            item = result.next();
-
-            // handle prop:properties node, optional
-            // if not present, there will be a 0 as a marker
-            if (copyProperties && ValueType.ELEMENT == item.getItemType()) {
-                String pString = item.asString();
-                if (pString != null) {
-                    metadata.setProperties(pString);
-                }
-                item = result.next();
-            }
-
-            byte[] metacontent = metadata.toXML().getBytes();
-            currentValue.setContent(metacontent);
-            // the type of metadata is the same as type of the content, so that
-            // it goes into the same archive
-            String format = metadata.getFormatName();
-            format = format.replaceAll("\\(\\)", "");
-            currentValue.setContentType(ContentType.forName(format));
-
+            //cache the item, otherwise doc node will be lost on second visit
+            currItem.cache();
+            metasTurn = false;
+            return true;
         } else {
-            throw new IOException("incorrect type");
+            currentKey.setUri(uri);
+            // handle document-node
+            currentValue.set(currItem);
+            metasTurn = true;
         }
-
-        if (ValueType.XS_INTEGER != item.getItemType()) {
-            throw new IOException("unexpected " + item.getItemType() + " "
-                + item.asString() + ", expected " + ValueType.XS_INTEGER
-                + " 0");
-        }
-
         return true;
     }
 

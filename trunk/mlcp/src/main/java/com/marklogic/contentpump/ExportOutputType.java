@@ -60,7 +60,7 @@ public enum ExportOutputType {
 
         @Override
         public Class<? extends InputFormat> getInputFormatClass() {
-            return MarkLogicDocumentInputFormat.class;
+            return DatabaseContentInputFormat.class;
         }
     };
     public abstract Class<? extends Writable> getWritableClass();
