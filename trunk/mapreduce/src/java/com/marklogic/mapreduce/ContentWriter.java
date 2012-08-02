@@ -259,11 +259,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                               doc.getContentAsText().toString(), options);
                 }     
             } else if (value instanceof StreamLocator) {
-                if (batchSize > 1) {
-                    LOG.warn(
-                      "Batch size is reset to 1 because value type is Path.");
-                    batchSize = 1;
-                }
                 Path path = ((StreamLocator)value).getPath();
                 if (fs == null) {         
                     URI fileUri = path.toUri();
