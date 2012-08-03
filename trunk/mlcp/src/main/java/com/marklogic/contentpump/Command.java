@@ -257,6 +257,9 @@ public enum Command implements ConfigConstants {
             
             InputType inputType = getInputType(cmdline);   
             inputType.setDocumentType(cmdline, conf);
+            if (Command.isStreaming(cmdline, conf)) {
+                conf.setBoolean(CONF_STREAMING, true);
+            }
 
             if (cmdline.hasOption(INPUT_ARCHIVE_ALLOW_EMPTY_METADATA)) {
                 String arg = cmdline.getOptionValue(
