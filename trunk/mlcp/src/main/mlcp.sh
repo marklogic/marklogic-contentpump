@@ -1,4 +1,5 @@
 #!/bin/bash
+unset CLASSPATH
 if [ ! -z "$HADOOP_DIST" ] && [ "$HADOOP_DIST" = "HDP" ]; then
   if [ -z "$HADOOP_INSTALL_DIR" ]; then
     HADOOP_INSTALL_DIR=/usr/lib/hadoop
