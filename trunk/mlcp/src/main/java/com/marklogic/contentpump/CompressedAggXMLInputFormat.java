@@ -24,9 +24,8 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.DocumentURI;
-import com.sun.org.apache.xerces.internal.util.NamespaceSupport;
 
-public class CompressedAggXMLAdvInputFormat extends
+public class CompressedAggXMLInputFormat extends
 FileAndDirectoryInputFormat<DocumentURI, Text> {
 
     @Override
@@ -35,7 +34,7 @@ FileAndDirectoryInputFormat<DocumentURI, Text> {
         Configuration conf = context.getConfiguration();
         String recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
         String recordNamespace = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
-        return new CompressedAggXMLAdvReader(recordName, recordNamespace, null);
+        return new CompressedAggXMLReader(recordName, recordNamespace, null);
     }
 
     @Override

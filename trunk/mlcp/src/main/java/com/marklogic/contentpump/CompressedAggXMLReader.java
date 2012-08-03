@@ -22,7 +22,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.mapreduce.CompressionCodec;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 
-public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
+public class CompressedAggXMLReader<VALUEIN> extends
+    AggregateXMLReader<VALUEIN> {
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private XMLInputFactory factory;
@@ -42,7 +43,7 @@ public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
         initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
-        factory = new AggregateXMLInputFactoryImpl();//XMLInputFactory.newInstance();
+        factory = new AggregateXMLInputFactoryImpl();
 
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
@@ -113,11 +114,9 @@ public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
                         || currZipEntry.getSize() == 0) {
                         continue;
                     }
-//                    end = 0;
                     long size;
                     while ((size = zis.read(buf, 0, buf.length)) != -1) {
                         baos.write(buf, 0, (int) size);
-//                        end += size;
                     }
                     xmlSR = factory
                         .createXMLStreamReader(new ByteArrayInputStream(baos
@@ -137,10 +136,9 @@ public class CompressedAggXMLAdvReader extends AggregateXMLAdvReader{
         }
         return true;
     }
-    public CompressedAggXMLAdvReader(String recordElem,
+    public CompressedAggXMLReader(String recordElem,
         String namespace, NamespaceContext nsctx) {
         super(recordElem, namespace, nsctx);
-        // TODO Auto-generated constructor stub
     }
 
 }

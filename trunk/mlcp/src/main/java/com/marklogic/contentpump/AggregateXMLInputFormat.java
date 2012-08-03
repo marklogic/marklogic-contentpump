@@ -48,13 +48,11 @@ import com.sun.org.apache.xerces.internal.util.NamespaceSupport;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 
 /**
- * Reads records that are delimited by a specific begin/end tag.
+ * InputFormat for aggregate XML
  */
-public class AggregateXMLAdvInputFormat extends FileAndDirectoryInputFormat<DocumentURI, Text> {
+public class AggregateXMLInputFormat extends FileAndDirectoryInputFormat<DocumentURI, Text> {
     public static final Log LOG = LogFactory
-    .getLog(AggregateXMLAdvInputFormat.class);
-//    public static final String START_TAG_KEY = "xmlinput.start";
-//    public static final String END_TAG_KEY = "xmlinput.end";
+    .getLog(AggregateXMLInputFormat.class);
     private int currDepth = 0;
     protected XMLStreamReader xmlSR;
     protected String recordName;
@@ -71,14 +69,17 @@ public class AggregateXMLAdvInputFormat extends FileAndDirectoryInputFormat<Docu
     
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
-        return true;
+        return context.getConfiguration().getBoolean(
+            ConfigConstants.CONF_AGGREGATE_SPLIT, false);
     }
     
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
-//        long minSize = Math.max(getFormatMinSplitSize(), getMinSplitSize(job));
-//        long maxSize = getMaxSplitSize(job);     
-        
+        boolean parallelMode = job.getConfiguration().getBoolean(
+                ConfigConstants.CONF_AGGREGATE_SPLIT, false);
+        if (!parallelMode) {
+        	return super.getSplits(job);
+        }
         List<InputSplit> splits = super.getSplits(job);
         // add namespace info into splits
         List<InputSplit> populatedSplits = new ArrayList<InputSplit>();
@@ -90,6 +91,7 @@ public class AggregateXMLAdvInputFormat extends FileAndDirectoryInputFormat<Docu
             if (LOG.isDebugEnabled()) {
                 LOG.debug(path.getName());
             }
+            
             long position = ((FileSplit)file).getStart();
             FileSystem fs = path.getFileSystem(job.getConfiguration());
             FSDataInputStream fileIn = fs.open(path);
@@ -110,37 +112,34 @@ public class AggregateXMLAdvInputFormat extends FileAndDirectoryInputFormat<Docu
                 }
             }
 
-             long length = status.getLen();
+            long length = status.getLen();
             if (length != 0) {
-                //make a new copy, so that splits in the same agg file won't share the same context
+                // make a new copy, so that splits in the same agg file won't
+                // share the same context
                 NamespaceSupport nssp = (NamespaceSupport) nsctx;
                 nsctx = new NamespaceSupportAggregate();
                 if (nssp != null) {
                     int nscount = nssp.getDeclaredPrefixCount();
-                    for(int i=0; i<nscount; i++) {
+                    for (int i = 0; i < nscount; i++) {
                         String prefix = nssp.getDeclaredPrefixAt(i);
                         nsctx.declarePrefix(prefix, nssp.getURI(prefix));
                     }
                 }
-//                System.out.println("GetSplit#namespace context: " + nsctx +":" +  nsctx.getDeclaredPrefixCount());
-                AggregateSplit split = new AggregateSplit(((FileSplit)file), nameSpaces, recordName, nsctx);
-//                System.out.println("GetSplit#namespace context: " + nsctx +":" + nsctx.getURI("ml"));
-//                System.out.println("GetSplit#namespace context: " + nsctx +":" + nsctx.getURI(""));
+                AggregateSplit split = new AggregateSplit(((FileSplit) file),
+                    nameSpaces, recordName, nsctx);
                 populatedSplits.add(split);
-
             }
         }
-        
+
         return populatedSplits;
         
     }
 
-
-protected void initAggConf(InputSplit inSplit, Configuration conf) {
-    recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
-    recordNamespace = conf
-        .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
-}
+    protected void initAggConf(InputSplit inSplit, Configuration conf) {
+        recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
+        recordNamespace = conf
+            .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
+    }
 
     protected boolean parse() throws IOException {
         if (xmlSR == null) {
@@ -284,7 +283,6 @@ protected void initAggConf(InputSplit inSplit, Configuration conf) {
                 String prefix = itr.nextElement();
                 nsctx.declarePrefix(prefix, nssp.getURI(prefix));
             }
-//            newDoc = true;
             return true;
         } 
         return false;
@@ -344,9 +342,7 @@ protected void initAggConf(InputSplit inSplit, Configuration conf) {
     @Override
     public RecordReader<DocumentURI, Text> createRecordReader(InputSplit is,
         TaskAttemptContext tac) {
-
-        return new AggregateXMLAdvReader(recordName, recordNamespace, nsctx);
-
+        return new AggregateXMLReader(recordName, recordNamespace, nsctx);
     }
 
  
