@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.mapreduce.CompressionCodec;
+import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
  * RecordReader for CompressedDocumentInputFormat.
@@ -52,7 +53,7 @@ public class CompressedDocumentReader<VALUEIN> extends
     protected boolean hasNext = true;
     protected CompressionCodec codec;
     protected Path file;
-
+    protected int batchSize;
     public CompressedDocumentReader() {
 
     }
@@ -83,16 +84,25 @@ public class CompressedDocumentReader<VALUEIN> extends
             CompressionCodec.ZIP.toString()).toUpperCase();
         codec = CompressionCodec.valueOf(codecString);
         switch (codec) {
-            case ZIP:
-                zipIn = new ZipInputStream(fileIn);
-                break;
-            case GZIP:
-                zipIn = new GZIPInputStream(fileIn);
-                break;
-            default:
-                String error = "Unsupported codec: " + codec.name();
-                LOG.error(error, new UnsupportedOperationException(error));
+        case ZIP:
+            zipIn = new ZipInputStream(fileIn);
+            break;
+        case GZIP:
+            zipIn = new GZIPInputStream(fileIn);
+            String filename = file.toString();
+            if (filename.toLowerCase().endsWith(".gz")
+                || filename.toLowerCase().endsWith(".gzip")) {
+                setKey(filename.substring(0, filename.lastIndexOf('.')));
+            } else {
+                setKey(filename);
+            }
+            break;
+        default:
+            String error = "Unsupported codec: " + codec.name();
+            LOG.error(error, new UnsupportedOperationException(error));
         }
+        batchSize = conf.getInt(MarkLogicConstants.BATCH_SIZE, 
+            MarkLogicConstants.DEFAULT_BATCH_SIZE);
     }
 
     @Override
@@ -105,7 +115,7 @@ public class CompressedDocumentReader<VALUEIN> extends
             ZipEntry zipEntry;
             ZipInputStream zis = (ZipInputStream) zipIn;
             while ((zipEntry = zis.getNextEntry()) != null) {
-                if (zipEntry != null) {
+                if (zipEntry != null && !zipEntry.isDirectory()) {
                     setKey(zipEntry.getName());
                     setValue();
                     return true;
@@ -122,6 +132,7 @@ public class CompressedDocumentReader<VALUEIN> extends
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     protected void setValue() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         long size;
@@ -131,6 +142,10 @@ public class CompressedDocumentReader<VALUEIN> extends
         if (value instanceof Text) {
             ((Text) value).set(baos.toString());
         } else if (value instanceof BytesWritable) {
+            if (batchSize > 1) {
+                // Copy data since XCC won't do it when Content is created.
+                value = (VALUEIN) new BytesWritable();
+            }
             ((BytesWritable) value).set(baos.toByteArray(), 0, baos.size());
         } else {
             String error = "Unsupported input value class: " + 
