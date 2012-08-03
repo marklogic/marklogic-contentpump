@@ -79,9 +79,9 @@ public enum InputType implements ConfigConstants {
         public Class<? extends FileInputFormat> getInputFormatClass(
                         CommandLine cmdline, Configuration conf) {
             if (Command.isInputCompressed(cmdline)) {
-                return CompressedAggXMLAdvInputFormat.class;
+                return CompressedAggXMLInputFormat.class;
             } else {
-                return AggregateXMLAdvInputFormat.class;
+                return AggregateXMLInputFormat.class;
             }
         }
 

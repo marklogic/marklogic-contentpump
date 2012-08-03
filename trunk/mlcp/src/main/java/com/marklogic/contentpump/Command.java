@@ -210,6 +210,13 @@ public enum Command implements ConfigConstants {
                         + " MarkLogic")
                 .create(STREAMING);
             options.addOption(streaming);
+            Option aggParallelImport = OptionBuilder
+                .withArgName(AGGREGATE_SPLIT)
+                .hasOptionalArg()
+                .withDescription(
+                    "Whether to enable parallel mode to import aggregate XML to "
+                        + " MarkLogic").create(AGGREGATE_SPLIT);
+            options.addOption(aggParallelImport);
         }
 
         @Override
@@ -409,6 +416,17 @@ public enum Command implements ConfigConstants {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, false);
                 } else {
                     LOG.warn("Unrecognized option argument for " + FAST_LOAD
+                                    + ": " + arg);
+                }
+            }
+            if (cmdline.hasOption(AGGREGATE_SPLIT)) {
+                String arg = cmdline.getOptionValue(AGGREGATE_SPLIT);
+                if (arg == null || arg.equalsIgnoreCase("false")) {
+                    conf.setBoolean(CONF_AGGREGATE_SPLIT, false);
+                } else if (arg.equalsIgnoreCase("true")) {
+                    conf.setBoolean(CONF_AGGREGATE_SPLIT, true);
+                } else {
+                    LOG.warn("Unrecognized option argument for " + AGGREGATE_SPLIT
                                     + ": " + arg);
                 }
             }

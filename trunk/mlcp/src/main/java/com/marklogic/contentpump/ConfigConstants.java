@@ -21,54 +21,48 @@ import com.marklogic.mapreduce.ContentType;
  * Constants for configuration option names and values.
  * 
  * @author jchen
- *
+ * 
  */
 public interface ConfigConstants {
     // property names
-    /** Deprecated.  Use HADOOP_CONFDIR_ENV_NAME instead */
+    /** Deprecated. Use HADOOP_CONFDIR_ENV_NAME instead */
     @Deprecated
     static final String HADOOP_HOME_ENV_NAME = "HADOOP_HOME";
     static final String HADOOP_CONFDIR_ENV_NAME = "HADOOP_CONF_DIR";
     static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
-    static final String CONTENTPUMP_VERSION_PROPERTY_NAME = 
-        "CONTENTPUMP_VERSION";
-    static final String CONTENTPUMP_JAR_NAME = 
-        "marklogic-contentpump-<VERSION>.jar";
-    
+    static final String CONTENTPUMP_VERSION_PROPERTY_NAME = "CONTENTPUMP_VERSION";
+    static final String CONTENTPUMP_JAR_NAME = "marklogic-contentpump-<VERSION>.jar";
+
     // common
     static final String MODE = "mode";
     static final String MODE_DISTRIBUTED = "distributed";
     static final String MODE_LOCAL = "local";
-    /** Deprecated.  Use HADOOP_CONF_DIR instead */
+    /** Deprecated. Use HADOOP_CONF_DIR instead */
     @Deprecated
-    static final String HADOOP_HOME = "hadoop_home";  
+    static final String HADOOP_HOME = "hadoop_home";
     static final String HADOOP_CONF_DIR = "hadoop_conf_dir";
     static final String THREAD_COUNT = "thread_count";
     static final String MAX_SPLIT_SIZE = "max_split_size";
     static final String DEFAULT_MAX_SPLIT_SIZE = "50000";
     static final String MIN_SPLIT_SIZE = "min_split_size";
     static final String OPTIONS_FILE = "-options_file";
-    
+
     // command-specific
     static final String INPUT_FILE_PATH = "input_file_path";
     static final String INPUT_FILE_PATTERN = "input_file_pattern";
     static final String AGGREGATE_RECORD_ELEMENT = "aggregate_record_element";
     static final String AGGREGATE_RECORD_NAMESPACE = "aggregate_record_namespace";
     static final String AGGREGATE_URI_ID = "aggregate_uri_id";
-    static final String INPUT_METADATA_OPTIONAL = 
-        "input_metadata_optional";
+    static final String INPUT_METADATA_OPTIONAL = "input_metadata_optional";
     static final String INPUT_FILE_TYPE = "input_file_type";
     static final String INPUT_FILE_TYPE_DEFAULT = "documents";
     static final String INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "input_archive_allow_empty_metadata";
     static final String DEFAULT_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "false";
     static final String INPUT_COMPRESSED = "input_compressed";
     static final String INPUT_COMPRESSION_CODEC = "input_compression_codec";
-    static final String INPUT_SEQUENCEFILE_KEY_CLASS = 
-        "input_sequencefile_key_class";
-    static final String INPUT_SEQUENCEFILE_VALUE_CLASS = 
-        "input_sequencefile_value_class";
-    static final String INPUT_SEQUENCEFILE_VALUE_TYPE =
-        "input_sequencefile_value_type";
+    static final String INPUT_SEQUENCEFILE_KEY_CLASS = "input_sequencefile_key_class";
+    static final String INPUT_SEQUENCEFILE_VALUE_CLASS = "input_sequencefile_value_class";
+    static final String INPUT_SEQUENCEFILE_VALUE_TYPE = "input_sequencefile_value_type";
     static final String DEFAULT_SEQUENCEFILE_VALUE_TYPE = "TEXT";
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
@@ -90,8 +84,7 @@ public interface ConfigConstants {
     static final String OUTPUT_URI_REPLACE = "output_uri_replace";
     static final String OUTPUT_URI_PREFIX = "output_uri_prefix";
     static final String OUTPUT_URI_SUFFIX = "output_uri_suffix";
-    static final String OUTPUT_FILENAME_AS_COLLECTION = 
-        "output_filename_as_collection";
+    static final String OUTPUT_FILENAME_AS_COLLECTION = "output_filename_as_collection";
     static final String XML_REPAIR_LEVEL = "xml_repair_level";
     static final String COPY_COLLECTIONS = "copy_collections";
     static final String COPY_PERMISSIONS = "copy_permissions";
@@ -116,56 +109,40 @@ public interface ConfigConstants {
     static final String OUTPUT_USERNAME = "output_username";
     static final String OUTPUT_PASSWORD = "output_password";
     static final String OUTPUT_HOST = "output_host";
-    static final String OUTPUT_PORT = "output_port";   
+    static final String OUTPUT_PORT = "output_port";
     static final String DELIMITER = "delimiter";
     static final String DEFAULT_DELIMITER = ",";
-    //TODO: merge with "aggregate_uri_id" ?? 
+    // TODO: merge with "aggregate_uri_id" ??
     static final String DELIMITED_URI_ID = "delimited_uri_id";
     static final String FAST_LOAD = "fastload";
-    
+    static final String AGGREGATE_SPLIT = "aggregate_split";
     // configurations to be overwritten in hadoop conf
-    static final String CONF_INPUT_COMPRESSION_CODEC = 
-        "mapreduce.marklogic.input.compressioncodec";
+    static final String CONF_INPUT_COMPRESSION_CODEC = "mapreduce.marklogic.input.compressioncodec";
     static final String CONF_MAX_SPLIT_SIZE = "mapred.max.split.size";
     static final String CONF_MIN_SPLIT_SIZE = "mapred.min.split.size";
-    static final String CONF_AGGREGATE_URI_ID = 
-        "mapreduce.marklogic.aggregate.uriid";
-    static final String CONF_AGGREGATE_RECORD_ELEMENT = 
-        "mapreduce.marklogic.aggregate.recordelement";
-    static final String CONF_AGGREGATE_RECORD_NAMESPACE = 
-        "mapreduce.marklogic.aggregate.recordnamespace";
-    static final String CONF_DELIMITER = 
-        "mapreduce.marklogic.delimited.delimiter";
+    static final String CONF_AGGREGATE_URI_ID = "mapreduce.marklogic.aggregate.uriid";
+    static final String CONF_AGGREGATE_RECORD_ELEMENT = "mapreduce.marklogic.aggregate.recordelement";
+    static final String CONF_AGGREGATE_RECORD_NAMESPACE = "mapreduce.marklogic.aggregate.recordnamespace";
+    static final String CONF_DELIMITER = "mapreduce.marklogic.delimited.delimiter";
 
-    static final String CONF_DELIMITED_URI_ID = 
-        "mapreduce.marklogic.delimited.uriid";
-    static final String CONF_OUTPUT_URI_REPLACE = 
-        "mapreduce.marklogic.output.urireplace";
-    static final String CONF_OUTPUT_URI_PREFIX = 
-        "mapreduce.marklogic.output_uriprefix";
-    static final String CONF_OUTPUT_URI_SUFFIX = 
-        "mapreduce.marklogic.output_urisuffix";
-    static final String CONF_OUTPUT_FILEPATH = 
-        "mapreduce.marklogic.output.filepath";
-    static final String CONF_INPUT_FILE_PATTERN = 
-        "mapreduce.marklogic.input.filepattern";
-    static final String CONF_OUTPUT_FILENAME_AS_COLLECTION = 
-        "mapreduce.marklogic.output.filenameascollection";
+    static final String CONF_DELIMITED_URI_ID = "mapreduce.marklogic.delimited.uriid";
+    static final String CONF_OUTPUT_URI_REPLACE = "mapreduce.marklogic.output.urireplace";
+    static final String CONF_OUTPUT_URI_PREFIX = "mapreduce.marklogic.output_uriprefix";
+    static final String CONF_OUTPUT_URI_SUFFIX = "mapreduce.marklogic.output_urisuffix";
+    static final String CONF_OUTPUT_FILEPATH = "mapreduce.marklogic.output.filepath";
+    static final String CONF_INPUT_FILE_PATTERN = "mapreduce.marklogic.input.filepattern";
+    static final String CONF_OUTPUT_FILENAME_AS_COLLECTION = "mapreduce.marklogic.output.filenameascollection";
     static final String CONF_MODE = "mapreduce.marklogic.mode";
-    static final String CONF_INPUT_SEQUENCEFILE_KEY_CLASS = 
-        "mapreduce.marklogic.input.sequencefile.keyclass";
-    static final String CONF_INPUT_SEQUENCEFILE_VALUE_CLASS = 
-        "mapreduce.marklogic.input.sequencefile.valueclass";
-    static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE =
-        "mapreduce.marklogic.input.sequencefile.valuetype";
-    static final String CONF_DOCUMENT_FILTER = 
-        "mapreduce.marklogic.document.filter";
+    static final String CONF_INPUT_SEQUENCEFILE_KEY_CLASS = "mapreduce.marklogic.input.sequencefile.keyclass";
+    static final String CONF_INPUT_SEQUENCEFILE_VALUE_CLASS = "mapreduce.marklogic.input.sequencefile.valueclass";
+    static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE = "mapreduce.marklogic.input.sequencefile.valuetype";
+    static final String CONF_DOCUMENT_FILTER = "mapreduce.marklogic.document.filter";
     static final String CONF_OUTPUT_TYPE = "mapreduce.marklogic.output.type";
     static final String CONF_COPY_COLLECTIONS = "mapreduce.marklogic.copycollections";
     static final String CONF_COPY_PERMISSIONS = "mapreduce.marklogic.copypermissions";
     static final String CONF_COPY_PROPERTIES = "mapreduce.marklogic.copyproperties";
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
-    static final String CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = 
-        "mapreduce.marklogic.input.archive.allowemptymetadata";
+    static final String CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "mapreduce.marklogic.input.archive.allowemptymetadata";
     static final String CONF_STREAMING = "mapreduce.marklogic.streaming";
+    static final String CONF_AGGREGATE_SPLIT = "mapreduce.marklogic.aggregate.split";
 }

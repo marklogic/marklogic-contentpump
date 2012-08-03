@@ -84,8 +84,11 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected static String CONTENT_IN_PROLOG = "Content is not allowed in "
         + "prolog";
     
-    public AggregateXMLReader() {
-
+    public AggregateXMLReader(String recordElem, String namespace,
+        NamespaceContext nsctx) {
+        recordName = recordElem;
+        recordNamespace = namespace;
+        this.nsctx = nsctx;
     }
 
     @Override
@@ -105,7 +108,43 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     @Override
-    public void initialize(InputSplit inSplit, TaskAttemptContext context)
+    public void initialize(InputSplit is, TaskAttemptContext context)
+        throws IOException, InterruptedException {
+        conf = context.getConfiguration();
+        parallelMode = conf.getBoolean(ConfigConstants.CONF_AGGREGATE_SPLIT, false);
+        if (parallelMode) {
+            AggregateSplit asplit = (AggregateSplit) is;
+            initAggConf(asplit, context);
+            nameSpaces = asplit.getNamespaces();
+            recordName = asplit.getRecordElem();
+            nsctx = asplit.getNamespaceContext();
+            file = asplit.getPath();
+            start = asplit.getStart();
+            end = start + asplit.getLength();
+            initCommonConfigurations(conf, file);
+            configFileNameAsCollection(conf, file);
+            fs = file.getFileSystem(context.getConfiguration());
+            fInputStream = fs.open(file);
+            f = new AggregateXMLInputFactoryImpl();
+            long fileLen = fs.getFileStatus(file).getLen();
+            if (asplit.getStart() == 0 && fileLen == asplit.getLength()) {
+                try {
+                    xmlSR = f.createXMLStreamReader(fInputStream);
+                } catch (XMLStreamException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                // jump to the first record elem in the split
+                moveToNextRecord(start);
+            }
+        } else {
+            start = 0;
+            end = is.getLength();
+            initializeSeqMode(is, context);
+        }
+    }
+    
+    public void initializeSeqMode(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         file = ((FileSplit) inSplit).getPath();
@@ -440,14 +479,12 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     eventType = xmlSR.next();
                     switch (eventType) {
                     case XMLStreamConstants.START_ELEMENT:
-                        if (!parallelMode) {
-                            if (startOfRecord) {
-                                // this is the start of the root, only copy
-                                // namespaces
-                                copyNameSpaceDecl();
-                                startOfRecord = false;
-                                continue;
-                            }
+                        if (!parallelMode && startOfRecord) {
+                            // this is the start of the root, only copy
+                            // namespaces
+                            copyNameSpaceDecl();
+                            startOfRecord = false;
+                            continue;
                         }
                         processStartElement();
                         break;
@@ -519,14 +556,29 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     // all we can do is ignore it, apparently
                 } else if (e.getMessage().contains(CONTENT_IN_PROLOG)
                     || e.getMessage().contains(NOT_WELL_FORMED)) {
-                    //XMLStreamReader looks ahead by 32 bytes once at a time
+
                     if (parallelMode) {
-                        if (moveToNextRecord(pos - 32) == -1) {
-                            return false;
+                        long nextLoc = xmlSR.getLocation()
+                            .getCharacterOffset() + parserOffsetInSplit - 32;
+                        if (nextLoc > fInputStream.getPos()) {
+                            // abnormal/rare parser location (maybe a bug in
+                            // jdk, happens once in 9 million medline)
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Parser position " + nextLoc
+                                    + " > input stream position "
+                                    + fInputStream.getPos());
+                            }
+                            //don't know where to end, move conservatively
+                            nextLoc = parserOffsetInSplit
+                                + recordName.length() + 2;
                         }
+
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(e.getMessage());
-                            LOG.debug("seek to " + pos);
+                            LOG.debug("Next postion to search " + nextLoc);
+                        }
+                        if (moveToNextRecord(nextLoc) == -1) {
+                            return false;
                         }
                         continue;
                     }
