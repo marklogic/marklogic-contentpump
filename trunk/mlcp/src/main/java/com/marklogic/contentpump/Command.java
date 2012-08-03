@@ -247,6 +247,9 @@ public enum Command implements ConfigConstants {
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyCopyConfigOptions(conf, cmdline);
             applyCommonOutputConfigOptions(conf, cmdline);
+            
+            InputType inputType = getInputType(cmdline);   
+            inputType.setDocumentType(cmdline, conf);
 
             if (cmdline.hasOption(INPUT_ARCHIVE_ALLOW_EMPTY_METADATA)) {
                 String arg = cmdline.getOptionValue(
@@ -264,10 +267,6 @@ public enum Command implements ConfigConstants {
                 }
             }
 
-            String documentType = cmdline.getOptionValue(DOCUMENT_TYPE,
-                            DEFAULT_DOCUMENT_TYPE);
-            conf.set(MarkLogicConstants.CONTENT_TYPE, 
-                    documentType.toUpperCase());
             if (cmdline.hasOption(INPUT_COMPRESSION_CODEC)) {
                 String codec = cmdline.getOptionValue(INPUT_COMPRESSION_CODEC);
                 conf.set(CONF_INPUT_COMPRESSION_CODEC, codec.toUpperCase());
