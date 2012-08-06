@@ -27,12 +27,13 @@ import java.util.Arrays;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
-import org.apache.commons.cli.Options;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.GenericOptionsParser;
+
+import com.marklogic.contentpump.utilities.CommandlineOptions;
 
 /**
  * ContentPump entry point.  MarkLogic ContentPump is a tool that moves content 
@@ -89,7 +90,7 @@ public class ContentPump implements ConfigConstants {
         String[] remainingArgs = genericParser.getRemainingArgs();
         
         // parse command specific options
-        Options options = new Options();
+        CommandlineOptions options = new CommandlineOptions();
         command.configOptions(options);
         CommandLineParser parser = new GnuParser();
         CommandLine cmdline;
@@ -99,14 +100,15 @@ public class ContentPump implements ConfigConstants {
             LOG.error("Error parsing the command arguments", e);
             System.err.println(e.getMessage());
             // Print the command usage message and exit.
-            command.printUsage();
+            
+            command.printUsage(command, options.getPublicOptions());
             return 1; // Exit on exception here.
         }
 
         for (String arg : cmdline.getArgs()) {
             LOG.error("Unrecognized argument: " + arg);
             // Print the command usage message and exit.
-            command.printUsage();
+            command.printUsage(command, options.getPublicOptions());
             return 1; // Exit on exception here.
         }
         
