@@ -16,7 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
