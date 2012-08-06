@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.marklogic.contentpump;
+package com.marklogic.contentpump.utilities;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,6 +24,8 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import com.marklogic.contentpump.ConfigConstants;
 
 /**
  * Provides utility functions to read in options file. An options file is a

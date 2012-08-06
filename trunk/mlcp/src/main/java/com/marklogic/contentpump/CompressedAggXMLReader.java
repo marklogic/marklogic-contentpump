@@ -19,6 +19,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.AggregateXMLInputFactoryImpl;
 import com.marklogic.mapreduce.CompressionCodec;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 
