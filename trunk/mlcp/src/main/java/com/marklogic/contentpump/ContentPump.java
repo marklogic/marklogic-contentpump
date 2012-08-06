@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.contentpump.utilities.CommandlineOptions;
+import com.marklogic.contentpump.utilities.OptionsFileUtil;
 
 /**
  * ContentPump entry point.  MarkLogic ContentPump is a tool that moves content 

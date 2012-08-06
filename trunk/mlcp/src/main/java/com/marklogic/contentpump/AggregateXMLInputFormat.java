@@ -42,6 +42,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.AggregateXMLInputFactoryImpl;
 import com.marklogic.mapreduce.DocumentURI;
 import com.sun.org.apache.xerces.internal.util.NamespaceContextWrapper;
 import com.sun.org.apache.xerces.internal.util.NamespaceSupport;

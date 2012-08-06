@@ -38,6 +38,9 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.AggregateXMLInputFactoryImpl;
+import com.marklogic.contentpump.utilities.IdGenerator;
+import com.marklogic.contentpump.utilities.LocalIdGenerator;
 import com.sun.org.apache.xerces.internal.impl.XMLDocumentScannerImpl;
 import com.sun.org.apache.xerces.internal.impl.XMLStreamReaderImpl;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
