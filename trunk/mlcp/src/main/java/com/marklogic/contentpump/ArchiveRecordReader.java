@@ -94,7 +94,7 @@ public class ArchiveRecordReader extends
         zipIn = new ZipInputStream(fileIn);
 
         allowEmptyMeta = conf.getBoolean(
-                        CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA, false);
+                        CONF_INPUT_ARCHIVE_METADATA_OPTIONAL, false);
     }
 
     @Override

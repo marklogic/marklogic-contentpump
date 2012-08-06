@@ -51,18 +51,22 @@ public interface ConfigConstants {
     static final String INPUT_FILE_PATH = "input_file_path";
     static final String INPUT_FILE_PATTERN = "input_file_pattern";
     static final String AGGREGATE_RECORD_ELEMENT = "aggregate_record_element";
-    static final String AGGREGATE_RECORD_NAMESPACE = "aggregate_record_namespace";
+    static final String AGGREGATE_RECORD_NAMESPACE = 
+        "aggregate_record_namespace";
     static final String AGGREGATE_URI_ID = "aggregate_uri_id";
-    static final String INPUT_METADATA_OPTIONAL = "input_metadata_optional";
     static final String INPUT_FILE_TYPE = "input_file_type";
     static final String INPUT_FILE_TYPE_DEFAULT = "documents";
-    static final String INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "input_archive_allow_empty_metadata";
-    static final String DEFAULT_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "false";
+    static final String ARCHIVE_METADATA_OPTIONAL = 
+        "archive_metadata_optional";
+    static final String DEFAULT_ARCHIVE_METADATA_OPTIONAL = "false";
     static final String INPUT_COMPRESSED = "input_compressed";
     static final String INPUT_COMPRESSION_CODEC = "input_compression_codec";
-    static final String INPUT_SEQUENCEFILE_KEY_CLASS = "input_sequencefile_key_class";
-    static final String INPUT_SEQUENCEFILE_VALUE_CLASS = "input_sequencefile_value_class";
-    static final String INPUT_SEQUENCEFILE_VALUE_TYPE = "input_sequencefile_value_type";
+    static final String INPUT_SEQUENCEFILE_KEY_CLASS = 
+        "sequencefile_key_class";
+    static final String INPUT_SEQUENCEFILE_VALUE_CLASS = 
+        "sequencefile_value_class";
+    static final String INPUT_SEQUENCEFILE_VALUE_TYPE = 
+        "sequencefile_value_type";
     static final String DEFAULT_SEQUENCEFILE_VALUE_TYPE = "TEXT";
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
@@ -84,7 +88,7 @@ public interface ConfigConstants {
     static final String OUTPUT_URI_REPLACE = "output_uri_replace";
     static final String OUTPUT_URI_PREFIX = "output_uri_prefix";
     static final String OUTPUT_URI_SUFFIX = "output_uri_suffix";
-    static final String OUTPUT_FILENAME_AS_COLLECTION = "output_filename_as_collection";
+    static final String OUTPUT_FILENAME_AS_COLLECTION = "filename_as_collection";
     static final String XML_REPAIR_LEVEL = "xml_repair_level";
     static final String COPY_COLLECTIONS = "copy_collections";
     static final String COPY_PERMISSIONS = "copy_permissions";
@@ -142,7 +146,8 @@ public interface ConfigConstants {
     static final String CONF_COPY_PERMISSIONS = "mapreduce.marklogic.copypermissions";
     static final String CONF_COPY_PROPERTIES = "mapreduce.marklogic.copyproperties";
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
-    static final String CONF_INPUT_ARCHIVE_ALLOW_EMPTY_METADATA = "mapreduce.marklogic.input.archive.allowemptymetadata";
+    static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = 
+        "mapreduce.marklogic.input.archive.metadataoptional";
     static final String CONF_STREAMING = "mapreduce.marklogic.streaming";
     static final String CONF_AGGREGATE_SPLIT = "mapreduce.marklogic.aggregate.split";
 }
