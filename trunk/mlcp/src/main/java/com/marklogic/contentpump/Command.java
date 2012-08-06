@@ -702,6 +702,15 @@ public enum Command implements ConfigConstants {
                 String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
                 conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, outDir);
             }
+            String batchSize = cmdline.getOptionValue(BATCH_SIZE);
+            if (batchSize != null) {       
+                conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
+            }
+
+            String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
+            if (txnSize != null) {
+                conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
+            }
         }
     };
 
