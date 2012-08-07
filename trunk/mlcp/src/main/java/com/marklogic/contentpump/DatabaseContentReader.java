@@ -134,6 +134,9 @@ public class DatabaseContentReader extends
         String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
+        buf.append("import module namespace hadoop = ");
+        buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
+        buf.append("\"/MarkLogic/hadoop.xqy\";\n");
         buf.append("declare namespace mlmr=\"http://marklogic.com/hadoop\";");
         buf.append("declare option xdmp:output \"indent=no\";");
         buf.append("declare option xdmp:output \"indent-untyped=no\";");
@@ -167,13 +170,7 @@ public class DatabaseContentReader extends
             }
             if (copyPermission) {
                 buf.append("let $list := xdmp:document-get-permissions($uri)\n");
-                buf.append("let $query := \"import module 'http://marklogic.com/xdmp/security' at '/MarkLogic/security.xqy';\n");
-                buf.append("declare variable $LIST as element(sec:permissions) external;\n");
-                buf.append("for $p in $LIST/sec:permission \n");
-                buf.append("return element sec:permission {\n");
-                buf.append("$p/@*, $p/node(), sec:get-role-names($p/sec:role-id) }\"\n");
-                buf.append("return xdmp:eval($query, (xs:QName('LIST'), element sec:permissions { $list }),");
-                buf.append("<options xmlns=\"xdmp:eval\"><database>{ xdmp:security-database() }</database></options>),");
+                buf.append("return hadoop:get-permissions-in($list),");
             }
             // if copy-quality, else + 0
             if (copyQuality) {
