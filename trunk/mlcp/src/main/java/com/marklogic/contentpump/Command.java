@@ -776,14 +776,15 @@ public enum Command implements ConfigConstants {
     }
     
     protected static boolean isMixedType(CommandLine cmdline) {
-        String type = cmdline.getOptionValue(DOCUMENT_TYPE);
-        InputType inputType = getInputType(cmdline);
-        if (type != null && !type.equalsIgnoreCase(ContentType.XML.name()) &&
-            inputType != InputType.DOCUMENTS) {
-            LOG.warn("Document type " + type + 
-                    " is not applicable to input type " + inputType);
-        } else if (type == null || // default is mixed
-                type.equalsIgnoreCase(ContentType.MIXED.name())) {
+        String type = cmdline.getOptionValue(DOCUMENT_TYPE,
+            DEFAULT_DOCUMENT_TYPE);
+        if (type.equalsIgnoreCase(ContentType.MIXED.name())) {
+            InputType inputType = getInputType(cmdline);
+            if (inputType != InputType.DOCUMENTS) {
+                LOG.warn("Document type MIXED is not applicable to input "
+                    + "type " + inputType);
+                return false;
+            }
             return true;
         }
         return false;
