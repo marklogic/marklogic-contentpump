@@ -56,9 +56,9 @@ import org.apache.hadoop.util.StringUtils;
  */
 public class LocalJobRunner implements ConfigConstants {
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
-    public static final int DEFAULT_IMPORT_THREAD_COUNT = 10;
-    public static final int DEFAULT_COPY_THREAD_COUNT = 10;
-    public static final int DEFAULT_EXPORT_THREAD_COUNT = 10;
+    public static final int DEFAULT_IMPORT_THREAD_COUNT = 4;
+    public static final int DEFAULT_COPY_THREAD_COUNT = 4;
+    public static final int DEFAULT_EXPORT_THREAD_COUNT = 4;
     
     
     private Job job;

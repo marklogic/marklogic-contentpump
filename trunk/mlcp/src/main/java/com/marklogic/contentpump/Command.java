@@ -545,9 +545,10 @@ public enum Command implements ConfigConstants {
                 String pswd = cmdline.getOptionValue(PASSWORD);
                 conf.set(MarkLogicConstants.INPUT_PASSWORD, pswd);
             }
-            String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE, 
-                DEFAULT_MAX_SPLIT_SIZE);
-            conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
+            if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
+                String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
+                conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
+            }
         }
     },
     COPY {
@@ -685,9 +686,10 @@ public enum Command implements ConfigConstants {
                 String port = cmdline.getOptionValue(INPUT_PORT);
                 conf.set(MarkLogicConstants.INPUT_PORT, port);
             }
-            String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE, 
-                    DEFAULT_MAX_SPLIT_SIZE);
-            conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
+            if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
+                String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
+                conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
+            }
             if (cmdline.hasOption(FAST_LOAD)) {
                 String arg = cmdline.getOptionValue(FAST_LOAD);
                 if (arg == null || arg.equalsIgnoreCase("true")) {

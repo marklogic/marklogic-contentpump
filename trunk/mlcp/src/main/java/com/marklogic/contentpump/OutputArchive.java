@@ -30,9 +30,6 @@ import org.apache.hadoop.fs.Path;
 
 public class OutputArchive {
     public static final Log LOG = LogFactory.getLog(OutputArchive.class);
-    // avoid maximum number of zip entry to reach over 65535
-    // number of entries is even as we have metadata, so max is 65534
-    static final int MAX_ENTRIES = 65534;
     public static String EXTENSION = ".zip";
     private long currentFileBytes = 0;
     private ZipOutputStream outputStream;
@@ -119,12 +116,6 @@ public class OutputArchive {
         if (currentFileBytes > 0
             && currentFileBytes + total > Integer.MAX_VALUE) {
             LOG.warn("too many bytes in current package");
-            newOutputStream();
-        }
-
-        // don't create zips that Java can't read back in
-        if (currentEntries > 0 && (currentEntries + 2) >= MAX_ENTRIES) {
-            LOG.warn("too many entries in current package");
             newOutputStream();
         }
 
