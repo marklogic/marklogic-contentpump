@@ -29,7 +29,7 @@ public abstract class LexiconFunction {
      * @return cts:query.
      */
     public String getLexiconQuery() {
-        return "()";
+        return "cts:and-query(())";
     }
     
     /**

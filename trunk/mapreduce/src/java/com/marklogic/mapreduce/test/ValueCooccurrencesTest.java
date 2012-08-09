@@ -15,10 +15,12 @@ import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.ValueInputFormat;
-import com.marklogic.mapreduce.functions.ElementAttributeValues;
+import com.marklogic.mapreduce.functions.PathReference;
+import com.marklogic.mapreduce.functions.Reference;
+import com.marklogic.mapreduce.functions.ValueCooccurrences;
 
-public class ElementAttributeValuesTest {
-    public static class ElementAttrValueMapper 
+public class ValueCooccurrencesTest {
+    public static class ValueCooccurrencesMapper 
     extends Mapper<LongWritable, Text, LongWritable, Text> {
         public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
@@ -30,14 +32,14 @@ public class ElementAttributeValuesTest {
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         if (otherArgs.length < 2) {
-            System.err.println("Usage: ElementAttributeValuesTest configFile outputDir");
+            System.err.println("Usage: ValueCooccurrencesTest configFile outputDir");
             System.exit(2);
         }
 
         Job job = new Job(conf);
-        job.setJarByClass(ElementAttributeValuesTest.class);
+        job.setJarByClass(ValueCooccurrencesTest.class);
         job.setInputFormatClass(ValueInputFormat.class);
-        job.setMapperClass(ElementAttrValueMapper.class);
+        job.setMapperClass(ValueCooccurrencesMapper.class);
         job.setMapOutputKeyClass(LongWritable.class);
         job.setMapOutputValueClass(Text.class);
         job.setOutputFormatClass(TextOutputFormat.class);
@@ -48,30 +50,45 @@ public class ElementAttributeValuesTest {
         conf.setClass(MarkLogicConstants.INPUT_VALUE_CLASS, Text.class, 
                 Writable.class);
         conf.setClass(MarkLogicConstants.INPUT_LEXICON_FUNCTION_CLASS, 
-            ElementAttributeValuesFunction.class, ElementAttributeValues.class);
+            ValueCooccurrencesFunction.class, ValueCooccurrences.class);
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
     
-    static class ElementAttributeValuesFunction extends ElementAttributeValues {
-
-        @Override
-        public String[] getElementNames() {
-            String[] names = {"xs:QName(\"wp:a\")"};
-            return names;
-        }
-
-        @Override
-        public String[] getAttributeNames() {
-            String[] names = {"xs:QName(\"title\"), xs:QName(\"href\")"};
-            return names;
-        }
+    static class ValueCooccurrencesFunction extends ValueCooccurrences {
         
         @Override
         public String[] getUserDefinedOptions() {
             String[] options = 
-                {"collation=http://marklogic.com/collation/codepoint"};
+                {"proximity=1"};
             return options;
+        }
+
+        @Override
+        public Reference getReference1() {
+            return new ItemPathReference();
+        }
+
+        @Override
+        public Reference getReference2() {
+            return new CityPathReference();
+        }
+    }
+    
+    static class ItemPathReference extends PathReference {
+
+        @Override
+        public String getPathExpression() {
+            return "/news/sale/sold-item";
+        }
+        
+    }
+    
+    static class CityPathReference extends PathReference {
+
+        @Override
+        public String getPathExpression() {
+            return "/news/sale/city";
         }
         
     }
