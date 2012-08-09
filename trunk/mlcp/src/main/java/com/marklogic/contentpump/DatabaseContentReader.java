@@ -170,7 +170,7 @@ public class DatabaseContentReader extends
             }
             if (copyPermission) {
                 buf.append("let $list := xdmp:document-get-permissions($uri)\n");
-                buf.append("return hadoop:get-permissions-in($list),");
+                buf.append("return hadoop:get-permissions($list),");
             }
             // if copy-quality, else + 0
             if (copyQuality) {
