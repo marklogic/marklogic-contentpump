@@ -202,9 +202,6 @@ public class DatabaseContentWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {
         String uri = key.getUri();
-        if ("null".equals(uri)) {
-            return;
-        }
         String forestId = DatabaseContentOutputFormat.ID_PREFIX;
         int fId = 0;
         if (fastLoad) {
@@ -214,7 +211,14 @@ public class DatabaseContentWriter<VALUE> extends
                     + uri
                     : outputDir + '/' + uri;
             }
-            key.setUri(uri);
+            if (uri.endsWith(DocumentMetadata.EXTENSION)) {
+                //let the metadata stay in the same forest as its doc
+                //because forestContents and metadatas need to be aligned 
+                key.setUri(uri.substring(0, uri.length()
+                    - DocumentMetadata.EXTENSION.length()));
+            } else {
+                key.setUri(uri);
+            }
             key.validate();
             fId = key.getPlacementId(forestIds.length);
 
@@ -380,6 +384,10 @@ public class DatabaseContentWriter<VALUE> extends
                     try {
                         sessions[i].insertContent(remainder);
                         stmtCounts[i]++;
+                        if (!conf.getBoolean(
+                            ConfigConstants.CONF_COPY_PROPERTIES, true)) {
+                            continue;
+                        }
                         for (int j = 0; j < counts[i]; j++) {
                             DocumentMetadata m = metadatas[i][j].getMeta();
                             String u = metadatas[i][j].getUri();
@@ -389,7 +397,6 @@ public class DatabaseContentWriter<VALUE> extends
                                 stmtCounts[i]++;
                             }
                         }
-
                     } catch (RequestException e) {
                         LOG.error(e);
                         if (sessions[i] != null) {
