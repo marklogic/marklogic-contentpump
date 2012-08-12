@@ -119,6 +119,7 @@ public class ContentPump implements ConfigConstants {
         if (cmdline.hasOption(HADOOP_CONF_DIR)) {
             hadoopConfDir = cmdline.getOptionValue(HADOOP_CONF_DIR);
         }
+    
         if (hadoopConfDir == null) {
             // HADOOP_HOME environment and -hadoop_home option are deprecated.
             String hadoopHome = System.getenv(HADOOP_HOME_ENV_NAME);
@@ -133,9 +134,17 @@ public class ContentPump implements ConfigConstants {
         
         boolean distributed = hadoopConfDir != null && (mode == null ||
                 mode.equals(MODE_DISTRIBUTED));
+        if (mode.equalsIgnoreCase(MODE_DISTRIBUTED) && !distributed) {
+            LOG.error("Cannot run in distributed mode.  HADOOP_CONF_DIR is "
+                    + "not configured.");
+        }
+        
         if (LOG.isDebugEnabled()) {
             LOG.debug("Running in: " + (distributed ? "distributed " : "local")
                 + "mode");
+            if (distributed) {
+                LOG.debug("HADOOP_CONF_DIR is set to " + hadoopConfDir);
+            }
         }
         conf.set(CONF_MODE, distributed ? MODE_DISTRIBUTED : MODE_LOCAL);
         
