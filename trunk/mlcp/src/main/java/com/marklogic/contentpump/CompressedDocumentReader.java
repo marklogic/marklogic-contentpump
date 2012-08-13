@@ -117,12 +117,12 @@ public class CompressedDocumentReader<VALUEIN> extends
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry != null && !zipEntry.isDirectory()) {
                     setKey(zipEntry.getName());
-                    setValue();
+                    setValue(zipEntry.getSize());
                     return true;
                 }
             }
         } else if (codec == CompressionCodec.GZIP) {
-            setValue();
+            setValue(0);
             zipIn.close();
             zipIn = null;
             hasNext = false;
@@ -133,8 +133,14 @@ public class CompressedDocumentReader<VALUEIN> extends
     }
 
     @SuppressWarnings("unchecked")
-    protected void setValue() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    protected void setValue(long length) throws IOException {
+        ByteArrayOutputStream baos;
+        if (length > 0) {
+            baos = new ByteArrayOutputStream((int) length);
+        } else {
+            baos = new ByteArrayOutputStream();
+        }
+         
         long size;
         while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
             baos.write(buf, 0, (int) size);
@@ -154,6 +160,11 @@ public class CompressedDocumentReader<VALUEIN> extends
             key = null;
         }
         baos.close();
+    }
+
+    @Override
+    public boolean needEncoding() {
+        return true;
     }
 
 }
