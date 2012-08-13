@@ -161,10 +161,4 @@ public class CompressedDocumentReader<VALUEIN> extends
         }
         baos.close();
     }
-
-    @Override
-    public boolean needEncoding() {
-        return true;
-    }
-
 }
