@@ -26,7 +26,7 @@ import com.marklogic.mapreduce.StreamLocator;
 public class CompressedStreamingReader 
 extends CompressedDocumentReader<StreamLocator> {
     @Override
-    protected void setValue() {
+    protected void setValue(long length) {
         if (value == null || value.getPath() == null) {
             value = new StreamLocator(file, codec);
         }
