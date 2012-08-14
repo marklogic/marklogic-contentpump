@@ -16,8 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -25,7 +23,6 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
@@ -39,82 +36,4 @@ public class ArchiveOutputFormat extends
         return new ArchiveWriter(path, context);
     }
 
-}
-
-class ArchiveWriter extends RecordWriter<DocumentURI, MarkLogicDocument> {
-
-    private String dir;
-    private TaskAttemptContext context;
-    /**
-     * Archive for Text
-     */
-    private OutputArchive txtArchive;
-    /**
-     * Archive for XML
-     */
-    private OutputArchive xmlArchive;
-    /**
-     * Archive for Binary
-     */
-    private OutputArchive binaryArchive;
-
-    public ArchiveWriter(Path path, TaskAttemptContext context) {
-        dir = path.toUri().getPath();
-        this.context = context;
-    }
-
-    @Override
-    public void close(TaskAttemptContext arg0) throws IOException,
-        InterruptedException {
-        if (txtArchive != null) {
-            txtArchive.close();
-        }
-        if (xmlArchive != null) {
-            xmlArchive.close();
-        }
-        if (binaryArchive != null) {
-            binaryArchive.close();
-        }
-    }
-
-    @Override
-    public void write(DocumentURI uri, MarkLogicDocument content)
-        throws IOException, InterruptedException {
-        ContentType type = content.getContentType();
-        if(type == null) {
-            throw new IOException ("null content type: ");
-        }
-        Configuration conf = context.getConfiguration();
-        String dst = null;
-        
-        String mode = conf.get(ConfigConstants.CONF_MODE);
-        Date date = new Date();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssZ");
-        String timestamp = sdf.format(date);
-        if (mode.equals(ConfigConstants.MODE_DISTRIBUTED)) {
-            dst = dir + "/" + context.getTaskAttemptID().getTaskID().getId() + "-" + timestamp 
-                + "-" + type.toString();
-        } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
-            dst = dir + "/" + timestamp + "-" + type.toString();
-        }
-        
-        if(ContentType.BINARY.equals(type)) {
-            if(binaryArchive == null) {
-                binaryArchive = new OutputArchive(dst, conf);
-            }
-            binaryArchive.write(uri.getUri(), content.getContentAsByteArray());
-        } else if(ContentType.TEXT.equals(type)) {
-            if(txtArchive == null) {
-                txtArchive = new OutputArchive(dst, conf);
-            }
-            txtArchive.write(uri.getUri(), content.getContentAsText().toString().getBytes());
-        } else if(ContentType.XML.equals(type)) {
-            if(xmlArchive == null) {
-                xmlArchive = new OutputArchive(dst, conf);
-            }
-            xmlArchive.write(uri.getUri(), content.getContentAsText().toString().getBytes());
-        } else {
-            throw new IOException ("incorrect type: " + type);
-        }
-    }
 }

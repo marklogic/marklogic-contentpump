@@ -25,7 +25,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.ContentWriter;
-import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
  * Enum of supported input type.
@@ -67,11 +66,10 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public void setDocumentType(CommandLine cmdline, Configuration conf) {
+        public ContentType getContentType(CommandLine cmdline) {
             String type = cmdline.getOptionValue(DOCUMENT_TYPE, 
-                    DEFAULT_DOCUMENT_TYPE);
-            conf.set(MarkLogicConstants.CONTENT_TYPE, 
-                    type.toUpperCase());
+                    ContentType.MIXED.name());
+            return ContentType.forName(type);
         }
     },
     AGGREGATES {
@@ -104,8 +102,8 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public void setDocumentType(CommandLine cmdline, Configuration conf) {
-            conf.set(MarkLogicConstants.CONTENT_TYPE, ContentType.XML.name());   
+        public ContentType getContentType(CommandLine cmdline) {
+            return ContentType.XML;   
         }
     },   
     DELIMITED_TEXT {
@@ -138,8 +136,8 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public void setDocumentType(CommandLine cmdline, Configuration conf) {
-            conf.set(MarkLogicConstants.CONTENT_TYPE, ContentType.XML.name());   
+        public ContentType getContentType(CommandLine cmdline) {
+            return ContentType.XML;   
         }
     },
     ARCHIVE {
@@ -167,8 +165,8 @@ public enum InputType implements ConfigConstants {
         }
         
         @Override
-        public void setDocumentType(CommandLine cmdline, Configuration conf) {
-            conf.set(MarkLogicConstants.CONTENT_TYPE, ContentType.XML.name());   
+        public ContentType getContentType(CommandLine cmdline) {
+            return ContentType.XML;   
         }
     },
     SEQUENCEFILE {
@@ -198,8 +196,10 @@ public enum InputType implements ConfigConstants {
         }
         
         @Override
-        public void setDocumentType(CommandLine cmdline, Configuration conf) {
-            conf.set(MarkLogicConstants.CONTENT_TYPE, ContentType.XML.name());   
+        public ContentType getContentType(CommandLine cmdline) {
+            String type = cmdline.getOptionValue(DOCUMENT_TYPE, 
+                    ContentType.XML.name());
+            return ContentType.forName(type);
         }
     };
     
@@ -243,6 +243,5 @@ public enum InputType implements ConfigConstants {
     public abstract Class<? extends RecordWriter> getOutputValueClass(
         CommandLine cmdline, Configuration conf);
     
-    public abstract void setDocumentType(CommandLine cmdline, 
-            Configuration conf);
+    public abstract ContentType getContentType(CommandLine cmdline);
 }

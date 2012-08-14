@@ -147,7 +147,13 @@ public class DelimitedTextReader<VALUEIN> extends
                     key = null;
                     return true;
                 }
-                setKey(values[i]);
+                String uri = getEncodedURI(values[i]);
+                if (uri != null) {
+                    setKey(uri);
+                } else {
+                    key = null;
+                    return true;
+                }
             }
             sb.append("<").append(fields[i]).append(">");
             sb.append(values[i]);
@@ -171,5 +177,4 @@ public class DelimitedTextReader<VALUEIN> extends
         }
         return true;
     }
-
 }

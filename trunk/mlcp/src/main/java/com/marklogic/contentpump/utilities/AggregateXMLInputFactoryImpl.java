@@ -27,8 +27,8 @@ import com.sun.xml.internal.stream.XMLInputFactoryImpl;
 
 /**
  * XMLInputFactory for creating AggregateXMLStreamReaderImpl
+ * 
  * @author ali
- *
  */
 public class AggregateXMLInputFactoryImpl extends XMLInputFactoryImpl {
     //List of supported properties and default values.
@@ -41,30 +41,34 @@ public class AggregateXMLInputFactoryImpl extends XMLInputFactoryImpl {
     boolean fPropertyChanged = false;
     //no reader reuse by default
     boolean fReuseInstance = false;
-    public XMLStreamReader createXMLStreamReader(InputStream inputstream) throws XMLStreamException {
+    public XMLStreamReader createXMLStreamReader(InputStream inputstream) 
+    throws XMLStreamException {
         XMLInputSource inputSource = new XMLInputSource(null, null, null, inputstream, null);
         return getXMLStreamReaderImpl(inputSource);
     }
-    
-    XMLStreamReader getXMLStreamReaderImpl(XMLInputSource inputSource) throws javax.xml.stream.XMLStreamException{
+
+    XMLStreamReader getXMLStreamReaderImpl(XMLInputSource inputSource) 
+    throws javax.xml.stream.XMLStreamException {
         //1. if the temp reader is null -- create the instance and return
         if(fTempReader == null){
             fPropertyChanged = false;
             return fTempReader = new AggregateXMLStreamReaderImpl(inputSource, 
                     new PropertyManager(fPropertyManager));
         }
-        //if factory is configured to reuse the instance & this instance can be reused 
-        //& the setProperty() hasn't been called
-        if(fReuseInstance && fTempReader.canReuse() && !fPropertyChanged){
+        // If factory is configured to reuse the instance & this instance can 
+        // be reused and the setProperty() hasn't been called
+        if (fReuseInstance && fTempReader.canReuse() && !fPropertyChanged){
             if(DEBUG)System.out.println("Reusing the instance");
-            //we can make setInputSource() call reset() and this way there wont be two function calls
+            // We can make setInputSource() call reset() and this way there 
+            // won't be two function calls.
             fTempReader.reset();
             fTempReader.setInputSource(inputSource);
             fPropertyChanged = false;
             return fTempReader;
-        }else{
+        } else {
             fPropertyChanged = false;
-            //just return the new instance.. note that we are not setting  fTempReader to the newly created instance
+            // Just return the new instance.. note that we are not setting  
+            // fTempReader to the newly created instance
             return fTempReader = new AggregateXMLStreamReaderImpl(inputSource, 
                     new PropertyManager(fPropertyManager));
         }
