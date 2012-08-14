@@ -115,7 +115,7 @@ public class CompressedDocumentReader<VALUEIN> extends
             ZipEntry zipEntry;
             ZipInputStream zis = (ZipInputStream) zipIn;
             while ((zipEntry = zis.getNextEntry()) != null) {
-                if (zipEntry != null && !zipEntry.isDirectory()) {
+                if (zipEntry != null) {
                     setKey(zipEntry.getName());
                     setValue(zipEntry.getSize());
                     return true;
