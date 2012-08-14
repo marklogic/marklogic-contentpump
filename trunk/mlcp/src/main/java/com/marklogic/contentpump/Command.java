@@ -445,7 +445,7 @@ public enum Command implements ConfigConstants {
             configCommonOptions(options);
             configConnectionId(options);
             configCopyOptions(options);
-            configDocumentFilteringOptions(options);
+            configFilteringOptions(options);
 
             Option outputType = OptionBuilder
                 .withArgName("type")
@@ -514,7 +514,7 @@ public enum Command implements ConfigConstants {
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyCopyConfigOptions(conf, cmdline);
-            applyDocumentFilteringConfigOptions(conf, cmdline);
+            applyFilteringConfigOptions(conf, cmdline);
 
             if (cmdline.hasOption(OUTPUT_TYPE)) {
                 String outputType = cmdline.getOptionValue(OUTPUT_TYPE);
@@ -558,7 +558,7 @@ public enum Command implements ConfigConstants {
             configCommonOptions(options);
             configCopyOptions(options);
             configCommonOutputOptions(options);
-            configDocumentFilteringOptions(options);
+            configFilteringOptions(options);
             configBatchTxn(options);
 
             Option inputUsername = OptionBuilder
@@ -651,7 +651,7 @@ public enum Command implements ConfigConstants {
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyCopyConfigOptions(conf, cmdline);
-            applyDocumentFilteringConfigOptions(conf, cmdline);
+            applyFilteringConfigOptions(conf, cmdline);
             applyCommonOutputConfigOptions(conf, cmdline);
 
             if (cmdline.hasOption(OUTPUT_USERNAME)) {
@@ -979,20 +979,18 @@ public enum Command implements ConfigConstants {
         options.addOption(txnSize);
     }
 
-    static void configDocumentFilteringOptions(Options options) {
+    static void configFilteringOptions(Options options) {
         Option filter = OptionBuilder
-            .withArgName("expression")
+            .withArgName("String")
             .hasArg()
-            .withDescription("Path expression used to retrieve records from "
-                   + "MarkLogic Server")
-            .create(DOCUMENT_FILTER);
+            .withDescription("Comma-separated list of directories")
+            .create(DIRECTORY_FILTER);
         options.addOption(filter);
         Option ns = OptionBuilder
-            .withArgName("namespace")
+            .withArgName("String")
             .hasArg()
-            .withDescription("Comma-separated alias-URI pairs, used with "
-                  + "document_filter")
-            .create(DOCUMENT_NAMESPACE);
+            .withDescription("Comma-separated list of collections")
+            .create(COLLECTION_FILTER);
         options.addOption(ns);
     }
 
@@ -1051,15 +1049,27 @@ public enum Command implements ConfigConstants {
         }
     }
 
-    static void applyDocumentFilteringConfigOptions(Configuration conf,
+    static void applyFilteringConfigOptions(Configuration conf,
                     CommandLine cmdline) {
-        String c = cmdline.getOptionValue(DOCUMENT_FILTER,
-                        DEFAULT_DOCUMENT_FILTER);
-        conf.set(MarkLogicConstants.DOCUMENT_SELECTOR, c);
-        if (cmdline.hasOption(DOCUMENT_NAMESPACE)) {
-            String ns = cmdline.getOptionValue(DOCUMENT_NAMESPACE);
-            conf.set(MarkLogicConstants.PATH_NAMESPACE, ns);
+        if (cmdline.hasOption(COLLECTION_FILTER)
+            && cmdline.hasOption(DIRECTORY_FILTER)) {
+            LOG.error(COLLECTION_FILTER + " and " + DIRECTORY_FILTER
+                + " cannot be set at the same time");
+            return;
         }
+        if (cmdline.hasOption(COLLECTION_FILTER)) {
+            String c = cmdline.getOptionValue(COLLECTION_FILTER);
+            conf.set(ConfigConstants.CONF_COLLECTION_FILTER, c);
+            conf.set(MarkLogicConstants.DOCUMENT_SELECTOR, "fn:collection(\""
+                + c + "\")");
+        }
+        if (cmdline.hasOption(DIRECTORY_FILTER)) {
+            String d = cmdline.getOptionValue(DIRECTORY_FILTER);
+            conf.set(ConfigConstants.CONF_DIRECTORY_FILTER, d);
+            conf.set(MarkLogicConstants.DOCUMENT_SELECTOR, "xdmp:directory(\""
+                + d + "\")");
+        }
+        //if neither is set, default is fn:collection
     }
 
     static void applyCommonOutputConfigOptions(Configuration conf,

@@ -235,13 +235,15 @@ public class DatabaseContentWriter<VALUE> extends
                 newContentCreateOptions(meta);
                 MarkLogicDocument doc = (MarkLogicDocument) value;
                 options.setFormat(doc.getContentType().getDocumentFormat());
-                if (doc.getContentType() == ContentType.BINARY) {
-                    content = ContentFactory.newContent(uri,
-                        doc.getContentAsByteArray(), options);
-                } else {
-                    content = ContentFactory.newContent(uri, doc
-                        .getContentAsText().toString(), options);
-                }
+                if (!meta.isNakedProps()) {
+                    if (doc.getContentType() == ContentType.BINARY) {
+                        content = ContentFactory.newContent(uri,
+                            doc.getContentAsByteArray(), options);
+                    } else {
+                        content = ContentFactory.newContent(uri, doc
+                            .getContentAsText().toString(), options);
+                    }
+                }// else naked property
             } else if (value instanceof MarkLogicDocument) {
                 // this is particularly for copy
                 if (uri.endsWith(DocumentMetadata.EXTENSION)) {
@@ -253,6 +255,13 @@ public class DatabaseContentWriter<VALUE> extends
                     meta = DocumentMetadata.fromXML(new StringReader(metaStr));
                     newContentCreateOptions(meta);
                     metaOnly = true;
+                } else if (uri.endsWith(DocumentMetadata.NAKED)){
+                    ((MarkLogicDocument) value)
+                        .setContentType(ContentType.XML);
+                    String metaStr = ((MarkLogicDocument) value)
+                        .getContentAsText().toString();
+                    meta = DocumentMetadata.fromXML(new StringReader(metaStr));
+                    newContentCreateOptions(meta);
                 } else {
                     MarkLogicDocument doc = (MarkLogicDocument) value;
                     options
@@ -269,19 +278,49 @@ public class DatabaseContentWriter<VALUE> extends
                 throw new IOException("unexpected type " + value.getClass());
             }
 
+            boolean isCopyProps = conf.getBoolean(
+                ConfigConstants.CONF_COPY_PROPERTIES, true);
             if (batchSize > 1) {
                 if (value instanceof MarkLogicDocumentWithMeta) {
-                    // add new content
-                    forestContents[fId][counts[fId]] = content;
-                    metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
-                } else if (value instanceof MarkLogicDocument) {
-                    if (meta != null /* && meta.getProperties()!=null */) {
-                        if (metaOnly) {
-                            uri = uri.substring(0, uri.length()
-                                - DocumentMetadata.EXTENSION.length());
-                        }
-                        metadatas[fId][counts[fId]] = new URIMetadata(uri,
+                    if (!meta.isNakedProps()) {
+                        // add new content
+                        forestContents[fId][counts[fId]] = content;
+                        metadatas[fId][counts[fId]++] = new URIMetadata(uri,
                             meta);
+                    } else {
+                     // naked properties
+                        if (isCopyProps) {
+                            if (sessions[fId] == null) {
+                                sessions[fId] = getSession(forestId);
+                            }
+                            uri = uri.substring(0,
+                                uri.length() - DocumentMetadata.NAKED.length());
+                            setDocumentProperties(uri, meta.getProperties(),
+                                sessions[fId]);
+                            stmtCounts[fId]++;
+                        }
+                    }
+                } else if (value instanceof MarkLogicDocument) {
+                    if (meta != null) {
+                        if (meta.isNakedProps()) {
+                            if (isCopyProps) {
+                                if (sessions[fId] == null) {
+                                    sessions[fId] = getSession(forestId);
+                                }
+                                uri = uri.substring(0, uri.length()
+                                    - DocumentMetadata.NAKED.length());
+                                setDocumentProperties(uri,
+                                    meta.getProperties(), sessions[fId]);
+                                stmtCounts[fId]++;
+                            }
+                        } else {
+                            if (metaOnly) {
+                                uri = uri.substring(0, uri.length()
+                                    - DocumentMetadata.EXTENSION.length());
+                            }
+                            metadatas[fId][counts[fId]] = new URIMetadata(uri,
+                                meta);
+                        }
                     } else {
                         forestContents[fId][counts[fId]++] = content;
                     }
@@ -293,17 +332,12 @@ public class DatabaseContentWriter<VALUE> extends
                     }
                     sessions[fId].insertContent(forestContents[fId]);
                     stmtCounts[fId]++;
-                    if (conf.getBoolean(ConfigConstants.CONF_COPY_PROPERTIES,
-                        true)) {
+                    if (isCopyProps) {
                         // insert properties
                         for (int i = 0; i < counts[fId]; i++) {
                             DocumentMetadata m = metadatas[fId][i].getMeta();
                             String u = metadatas[fId][i].getUri();
                             if (m != null && m.getProperties() != null) {
-                                if (metaOnly) {
-                                    uri = uri.substring(0, uri.length()
-                                        - DocumentMetadata.EXTENSION.length());
-                                }
                                 setDocumentProperties(u, m.getProperties(),
                                     sessions[fId]);
                                 stmtCounts[fId]++;
@@ -332,7 +366,7 @@ public class DatabaseContentWriter<VALUE> extends
                     stmtCounts[fId]++;
                 }
             }
-            if (txnSize > 1 && stmtCounts[fId] == txnSize) {
+            if (txnSize > 1 && stmtCounts[fId] >= txnSize) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
             }
