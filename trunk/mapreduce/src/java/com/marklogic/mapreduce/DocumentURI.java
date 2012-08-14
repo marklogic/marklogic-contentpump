@@ -7,6 +7,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.Normalizer;
 
 import org.apache.hadoop.io.Text;
@@ -45,14 +47,15 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
         return uri;
     }
     
+    @Deprecated
     public String getUnparsedUri() {
-        return unparse(uri);
+        return InternalUtilities.unparse(uri);
     }
     
     public void setUri(String uri) {
         this.uri = uri;
     }
-
+    
     @Override
     public int compareTo(DocumentURI o) {
         return uri.compareTo(o.getUri());
@@ -123,47 +126,25 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
         }
     }
     
-    protected static String unparse(String s) {
-        int len = s.length();
-        StringBuilder buf = new StringBuilder(len * 2);
-        for(int cp, i = 0; i < s.length(); i += Character.charCount(cp)) {
-            cp = s.codePointAt(i);
-            // iterate through the codepoints in the string
-            if ((cp >= 0x20) && (cp < 0x80)) {
-                switch (cp) {
-                    case '"':
-                        buf.append("&quot;");
-                        break;
-                    case '&':
-                        buf.append("&amp;");
-                        break;
-                    default:
-                        buf.append(s.charAt(i));
-                }
-            } else {
-                buf.append("&#x");
-                buf.append(Long.toString(cp, 16));
-                buf.append(';');    
-            }
-        }
-        return buf.toString();
-    }
-    
     public void validate() {
         if (uri.isEmpty() || 
             Character.isWhitespace(uri.charAt(0)) ||
             Character.isWhitespace(uri.charAt(uri.length() - 1))) {
             throw new IllegalStateException("Invalid URI Format: " + uri);
         }
-    }
-    
-    public static void main(String[] args) {
-        StringBuilder buf = new StringBuilder();
-        int i = 0;
-        for (; i < args.length - 1; i++) {
-            buf.append(Character.toChars(Integer.parseInt(args[i], 16)));
+        for (int i = 0; i < uri.length(); i++) {
+            if (uri.charAt(i) < ' ') {
+                throw new IllegalStateException("Invalid URI Format: " + uri);
+            }
         }
-        DocumentURI uri = new DocumentURI(buf.toString());
-        System.out.println("id: " + uri.getPlacementId(Integer.valueOf(args[i])));
+    } 
+    
+    public static void main(String[] args) throws URISyntaxException {
+        for (String arg : args) {
+            URI uri = new URI(null, null, null, 0, arg, null, null);
+            System.out.println("URI encoded: " + uri.toString());
+            URI outuri = new URI(uri.toString());
+            System.out.println("URI decoded: " + outuri.getPath());
+        }      
     }
 }
