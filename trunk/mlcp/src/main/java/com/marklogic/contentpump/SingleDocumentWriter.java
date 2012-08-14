@@ -72,10 +72,10 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 childPath = child.getPath();
             }
             if (childPath == null || childPath.isEmpty()) {
-                LOG.warn("Error parsing document URI, skipping: " + uriStr);
-                return;
+                LOG.warn("Error parsing document URI: " + uriStr);
+                childPath = uriStr;
             }
-            if (child.isAbsolute() || childPath.charAt(0) == '/') {
+            if (childPath.charAt(0) == '/') {
                 // concatenate outputPath with path to form the path
                 path = new Path(dir.toString() + childPath);
             } else {
