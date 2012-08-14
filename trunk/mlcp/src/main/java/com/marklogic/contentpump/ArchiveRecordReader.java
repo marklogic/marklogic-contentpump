@@ -106,8 +106,19 @@ public class ArchiveRecordReader extends
 
         ZipEntry zipEntry;
         ZipInputStream zis = (ZipInputStream) zipIn;
+        if (value == null) {
+            value = new MarkLogicDocumentWithMeta();
+        }
         while ((zipEntry = zis.getNextEntry()) != null) {
             String name = zipEntry.getName();
+            if (name.endsWith(DocumentMetadata.NAKED)) {
+                ((MarkLogicDocumentWithMeta) value)
+                    .setMeta(getMetadataFromStream());
+                setKey(zipEntry.getName());
+                value.setContent(null);
+                count++;
+                return true;
+            }
             if (name.endsWith(DocumentMetadata.EXTENSION)) {
                 ((MarkLogicDocumentWithMeta) value)
                     .setMeta(getMetadataFromStream());

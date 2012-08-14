@@ -29,16 +29,32 @@ import com.thoughtworks.xstream.XStream;
 
 public class DocumentMetadata {
     static XStream xstream = new XStream();
+    /**
+     * suffix of the URI of metadata
+     */
     public static String EXTENSION = ".metadata";
-    DocumentFormat format = DocumentFormat.XML;
+    /**
+     * suffix of the URI of naked properties
+     */
+    public static String NAKED = ".naked";
+    protected DocumentFormat format = DocumentFormat.XML;
 
-    List<String> collectionsList = new Vector<String>();
+    protected List<String> collectionsList = new Vector<String>();
 
-    List<ContentPermission> permissionsList = new Vector<ContentPermission>();
+    protected List<ContentPermission> permissionsList = new Vector<ContentPermission>();
 
-    int quality = 0;
+    protected int quality = 0;
 
-    String properties = null;
+    protected String properties = null;
+
+    protected boolean isNakedProps;
+    public boolean isNakedProps() {
+        return isNakedProps;
+    }
+
+    public void setNakedProps(boolean isNakedProps) {
+        this.isNakedProps = isNakedProps;
+    }
 
     /**
      * @param reader

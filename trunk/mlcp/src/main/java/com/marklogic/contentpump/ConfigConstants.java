@@ -96,9 +96,8 @@ public interface ConfigConstants {
     static final String DEFAULT_COPY_PERMISSIONS = "true";
     static final String DEFAULT_COPY_PROPERTIES = "true";
     static final String DEFAULT_COPY_QUALITY = "true";
-    static final String DOCUMENT_FILTER = "document_filter";
-    static final String DEFAULT_DOCUMENT_FILTER = "fn:collection()";
-    static final String DOCUMENT_NAMESPACE = "document_namespace";
+    static final String COLLECTION_FILTER = "collection_filter";
+    static final String DIRECTORY_FILTER = "directory_filter";
     static final String OUTPUT_TYPE = "output_type";
     static final String DEFAULT_OUTPUT_TYPE = "document";
     static final String OUTPUT_FILE_PATH = "output_file_path";
@@ -138,7 +137,8 @@ public interface ConfigConstants {
     static final String CONF_INPUT_SEQUENCEFILE_KEY_CLASS = "mapreduce.marklogic.input.sequencefile.keyclass";
     static final String CONF_INPUT_SEQUENCEFILE_VALUE_CLASS = "mapreduce.marklogic.input.sequencefile.valueclass";
     static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE = "mapreduce.marklogic.input.sequencefile.valuetype";
-    static final String CONF_DOCUMENT_FILTER = "mapreduce.marklogic.document.filter";
+    static final String CONF_DIRECTORY_FILTER = "mapreduce.marklogic.directory.filter";
+    static final String CONF_COLLECTION_FILTER = "mapreduce.marklogic.collection.filter";
     static final String CONF_OUTPUT_TYPE = "mapreduce.marklogic.output.type";
     static final String CONF_COPY_COLLECTIONS = "mapreduce.marklogic.copycollections";
     static final String CONF_COPY_PERMISSIONS = "mapreduce.marklogic.copypermissions";

@@ -19,9 +19,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -128,10 +126,10 @@ public class DatabaseContentReader extends
         long end = mlSplit.isLastSplit() ? Long.MAX_VALUE : start
             + mlSplit.getLength() - 1;
 
-        Collection<String> nsCol = conf.getStringCollection(PATH_NAMESPACE);
-        String docExpr = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR,
-            ConfigConstants.DEFAULT_DOCUMENT_FILTER);
-        String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
+        String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR, "fn:collection()");
+        String cFilter = conf.get(ConfigConstants.CONF_COLLECTION_FILTER);
+        String dFilter = conf.get(ConfigConstants.CONF_DIRECTORY_FILTER);
+        
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
         buf.append("import module namespace hadoop = ");
@@ -142,22 +140,9 @@ public class DatabaseContentReader extends
         buf.append("declare option xdmp:output \"indent-untyped=no\";");
         buf.append("declare variable $mlmr:splitstart as xs:integer external;");
         buf.append("declare variable $mlmr:splitend as xs:integer external;\n");
-        StringBuilder buftmp = new StringBuilder();
-        buftmp.append("xdmp:with-namespaces((");
-        if (nsCol != null) {
-            for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
-                String ns = nsIt.next();
-                buftmp.append('"').append(ns).append('"');
-                if (nsIt.hasNext()) {
-                    buftmp.append(',');
-                }
-            }
-        }
-        buf.append(buftmp.toString());
-        buf.append("),fn:unordered(fn:unordered(");
-        buf.append("let $cols := fn:unordered(fn:unordered(");
-        buf.append(docExpr);
-        buf.append(")[$mlmr:splitstart to $mlmr:splitend])");
+        buf.append("let $cols := ");
+        buf.append(src);
+        buf.append("[$mlmr:splitstart to $mlmr:splitend]");
         buf.append("\nfor $doc in $cols");
         buf.append("\nlet $uri := fn:base-uri($doc)\n return (");
         
@@ -188,13 +173,59 @@ public class DatabaseContentReader extends
             buf.append("0");
         }
         
-        buf.append(" )\n)");
-        buf.append(subExpr);
-        buf.append(")),'EOM',"); //end of metadata
-        buf.append(buftmp.toString());
-        buf.append("),fn:unordered(fn:unordered(");
-        buf.append(docExpr);
-        buf.append(")[$mlmr:splitstart to $mlmr:splitend]))");
+        buf.append(" )\n");
+        buf.append(",'EOM',"); //end of metadata
+        
+        //doc
+        buf.append(src);
+        buf.append("[$mlmr:splitstart to $mlmr:splitend]");
+        
+        // naked properties
+        
+        if (copyProperties) {
+            buf.append(", if ($mlmr:splitstart eq 1) then ");
+            buf.append("\nlet $props := cts:search(");
+            if (cFilter != null) {
+                buf.append("xdmp:collection-properties(\"");
+                buf.append(cFilter);
+                buf.append("\")");
+            } else if (dFilter != null) {
+                buf.append("xdmp:directory-properties(\"");
+                buf.append(dFilter);
+                buf.append("\")");
+            } else {
+                buf.append("xdmp:collection-properties()");
+            }
+            buf.append(",");
+            buf.append("cts:not-query(cts:document-fragment-query(cts:and-query( () ))))\n");
+            buf.append("for $doc in $props\n");
+            buf.append("let $uri := fn:base-uri($doc)\n return (");
+
+            buf.append("'META',");
+            buf.append("$uri,");
+            buf.append("xdmp:node-kind(($doc/element(),$doc/text(),$doc/binary(),$doc/processing-instruction(),$doc/comment())),");
+            if (copyCollection) {
+                buf.append("xdmp:document-get-collections($uri),\n");
+            }
+            if (copyPermission) {
+                buf.append("let $list := xdmp:document-get-permissions($uri)\n");
+                buf.append("return hadoop:get-permissions($list),");
+            }
+            // if copy-quality, else + 0
+            if (copyQuality) {
+                buf.append("xdmp:document-get-quality($uri),\n");
+            } else {
+                buf.append("0,");
+            }
+            buf.append("$doc/prop:properties, \n");
+
+            // end-of-record marker
+            buf.append("0");
+
+            buf.append(" )\n");
+            buf.append(" else ()");
+        }
+
         queryText = buf.toString();
 
         if (LOG.isDebugEnabled()) {
@@ -239,56 +270,8 @@ public class DatabaseContentReader extends
             }
 
             if ("META".equals(type)) {
-                item = result.next();
-                String uri = item.asString();
-                if (uri == null) {
-                    throw new IOException("no uri");
-                }
-                item = result.next();
                 DocumentMetadata metadata = new DocumentMetadata();
-                //node-kind, must exist
-                String nKind = item.asString();
-                metadata.setFormat(nKind);
-                
-                item = result.next();
-                // handle collections, may not be present
-                while (item != null && item.getItemType() == ValueType.XS_STRING) {
-                    if (!copyCollection) {
-                        continue;
-                    }
-                    metadata.addCollection(item.asString());
-                    item = result.next();
-                }
-                // handle permissions, may not be present
-                while (item != null && ValueType.ELEMENT == item.getItemType()) {
-                    if (!copyPermission) {
-                        continue;
-                    }
-                    try {
-                        readPermission((XdmElement) item.getItem(), metadata);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    item = result.next();
-                }
-                // handle quality, always present even if not requested (barrier)
-                metadata.setQuality((XSInteger) item.getItem());
-                item = result.next();
-
-                // handle prop:properties node, optional
-                // if not present, there will be a 0 as a marker
-                if (copyProperties && ValueType.ELEMENT == item.getItemType()) {
-                    String pString = item.asString();
-                    if (pString != null) {
-                        metadata.setProperties(pString);
-                    }
-                    item = result.next();
-                }
-                if (ValueType.XS_INTEGER != item.getItemType()) {
-                    throw new IOException("unexpected " + item.getItemType() + " "
-                        + item.asString() + ", expected " + ValueType.XS_INTEGER
-                        + " 0");
-                }
+                String uri = parseMetadata(metadata);
                 metadataMap.put(uri, metadata);
             } else if ("EOM".equals(type)) {
                 //end of metadata
@@ -298,6 +281,70 @@ public class DatabaseContentReader extends
             }
         }
 
+    }
+    
+    /**
+     * Parse metadata from the sequence, store it into the DocumentMetadata
+     * object passed in
+     * 
+     * @param metadata
+     * @return uri of the document with this metadata
+     * @throws IOException
+     */
+
+    private String parseMetadata(DocumentMetadata metadata) throws IOException {
+        ResultItem item = result.next();
+        String uri = item.asString();
+        if (uri == null) {
+            throw new IOException("no uri");
+        }
+        item = result.next();
+        //node-kind, must exist
+        String nKind = item.asString();
+        metadata.setFormat(nKind);
+        
+        item = result.next();
+        // handle collections, may not be present
+        while (item != null && item.getItemType() == ValueType.XS_STRING) {
+            if (!copyCollection) {
+                item = result.next();
+                continue;
+            }
+            metadata.addCollection(item.asString());
+            item = result.next();
+        }
+        // handle permissions, may not be present
+        while (item != null && ValueType.ELEMENT == item.getItemType()) {
+            if (!copyPermission) {
+                item = result.next();
+                continue;
+            }
+            try {
+                readPermission((XdmElement) item.getItem(), metadata);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            item = result.next();
+        }
+        // handle quality, always present even if not requested (barrier)
+        metadata.setQuality((XSInteger) item.getItem());
+        item = result.next();
+
+        // handle prop:properties node, optional
+        // if not present, there will be a 0 as a marker
+        if (copyProperties && ValueType.ELEMENT == item.getItemType()) {
+            String pString = item.asString();
+            if (pString != null) {
+                metadata.setProperties(pString);
+            }
+            item = result.next();
+        }
+        if (ValueType.XS_INTEGER != item.getItemType()) {
+            throw new IOException("unexpected " + item.getItemType() + " "
+                + item.asString() + ", expected " + ValueType.XS_INTEGER
+                + " 0");
+        }
+        return uri;
     }
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
@@ -312,39 +359,64 @@ public class DatabaseContentReader extends
         } else {
             currItem = result.current();
         }
-        count++;
-        currentValue = new MarkLogicDocument();
+        
+        //naked properties are excluded from count
+        if (count < length) {
+            count++;
+            //docs
+            currentValue = new MarkLogicDocument();
 
-        String uri = null;
-        uri = currItem.getDocumentURI();
-        if (uri == null) {
-            throw new IOException("no uri");
-        }
-
-        if (metasTurn) {
-            currentKey.setUri(uri + DocumentMetadata.EXTENSION);
-            DocumentMetadata metadata = metadataMap.get(uri);
-            if (metadata != null) {
-                byte[] metacontent = metadata.toXML().getBytes();
-                currentValue.setContent(metacontent);
-                // the type of metadata is the same as type of the content, so
-                // that
-                // it goes into the same archive
-                String format = metadata.getFormatName();
-                format = format.replaceAll("\\(\\)", "");
-                currentValue.setContentType(ContentType.forName(format));
-            } else {
-                LOG.error("no meta for " + uri);
+            String uri = null;
+            uri = currItem.getDocumentURI();
+            if (uri == null) {
+                throw new IOException("no uri");
             }
-            //cache the item, otherwise doc node will be lost on second visit
-            currItem.cache();
-            metasTurn = false;
-            return true;
+            if (metasTurn) {
+                currentKey.setUri(uri + DocumentMetadata.EXTENSION);
+                DocumentMetadata metadata = metadataMap.get(uri);
+                if (metadata != null) {
+                    byte[] metacontent = metadata.toXML().getBytes();
+                    currentValue.setContent(metacontent);
+                    // the type of metadata is the same as type of the content,
+                    // so that it goes into the same archive
+                    String format = metadata.getFormatName();
+                    format = format.replaceAll("\\(\\)", "");
+                    currentValue.setContentType(ContentType.forName(format));
+                } else {
+                    LOG.error("no meta for " + uri);
+                }
+                // cache the item, otherwise doc node will be lost on second
+                // visit
+                currItem.cache();
+                metasTurn = false;
+                return true;
+            } else {
+                currentKey.setUri(uri);
+                // handle document-node
+                currentValue.set(currItem);
+                metasTurn = true;
+            }
         } else {
-            currentKey.setUri(uri);
-            // handle document-node
-            currentValue.set(currItem);
-            metasTurn = true;
+            // naked properties
+            currentValue = new MarkLogicDocument();
+            ResultItem item = currItem;
+            String type = null;
+            if (item != null && item.getItemType() == ValueType.XS_STRING) {
+                type = item.asString();
+            } else {
+                throw new IOException("incorrect format:" + item.getItem()
+                    + "\n" + result.asString());
+            }
+            if ("META".equals(type)) {
+                DocumentMetadata metadata = new DocumentMetadata();
+                String uri = parseMetadata(metadata) + DocumentMetadata.NAKED;
+                metadata.setNakedProps(true);
+                currentKey.setUri(uri);
+                currentValue.setContent(metadata.toXML().getBytes());
+                currentValue.setContentType(ContentType.XML);
+            } else {
+                throw new IOException("incorrect type");
+            }
         }
         return true;
     }
