@@ -48,9 +48,8 @@ public class DatabaseContentOutputFormat extends ContentOutputFormat<MarkLogicDo
     public RecordWriter<DocumentURI, MarkLogicDocumentWithMeta> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        LinkedMapWritable forestHostMap = 
-            DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
-                    LinkedMapWritable.class);
+        LinkedMapWritable forestHostMap = getForestHostMap(conf);
+         
         boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false) ||
             (conf.get(OUTPUT_DIRECTORY) != null);
         Map<String, ContentSource> sourceMap = 
