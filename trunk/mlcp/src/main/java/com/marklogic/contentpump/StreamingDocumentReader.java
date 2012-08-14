@@ -41,7 +41,13 @@ CombineDocumentReader<StreamLocator> {
         if (iterator.hasNext()) {
             FileSplit split = iterator.next();
             Path path = split.getPath();
-            setKey(path.toString());
+            String uri = makeURIFromPath(path);
+            if (uri != null) {
+                setKey(makeURIFromPath(path));
+            } else {
+                key = null;
+                return true;
+            }   
             value = new StreamLocator(path, CompressionCodec.NONE);
             bytesRead += split.getLength();
             return true;

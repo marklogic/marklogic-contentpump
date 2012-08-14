@@ -16,6 +16,8 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -107,9 +109,32 @@ public abstract class ImportRecordReader<VALUEIN> extends
             value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
         } 
     }
+    
+    protected String makeURIFromPath(Path file) {
+        // get path portion of the file
+       String path = file.toUri().getPath();
+       // create a URI out of it
+       try {
+           URI uri = new URI(null, null, null, 0, path, null, null);
+           // return the encoded uri as document uri key
+           return uri.toString();
+       } catch (URISyntaxException ex) {
+           LOG.warn("Error parsing file path, skipping " + file, ex);
+           return null;
+       }
+    }
+    
+    protected String getEncodedURI(String val) {  
+        try {
+            URI uri = new URI(null, null, null, 0, val, null, null);
+            return uri.toString();
+        } catch (URISyntaxException e) {
+            LOG.warn("Error parsing value as URI, skipping " + val, e);
+            return null;
+        }
+    }
 
     @Override
     public abstract boolean nextKeyValue() throws IOException,
         InterruptedException;
-
 }

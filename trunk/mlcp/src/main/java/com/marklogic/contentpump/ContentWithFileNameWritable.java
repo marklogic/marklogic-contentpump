@@ -18,10 +18,14 @@ package com.marklogic.contentpump;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
@@ -34,8 +38,11 @@ import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
 
 public class ContentWithFileNameWritable<VALUE> implements CustomContent {
+    public static final Log LOG = 
+        LogFactory.getLog(ContentWithFileNameWritable.class);
+    
     private VALUE value;
-    private Text fileName;
+    private String fileName;
     /**
      *  type: 0 is text; 1 is MarkLogicNode; 2 is BinaryWritable 
      */
@@ -43,7 +50,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
     public ContentWithFileNameWritable(VALUE value, String fileName) {
         super();
         this.value = value;
-        this.fileName = new Text(fileName);
+        this.fileName = fileName;
         if (value instanceof Text) {
             type = 0;
         } else if (value instanceof MarkLogicNode) {
@@ -73,7 +80,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
     }
 
     public void setFileName(String fileName) {
-        this.fileName.set(fileName);
+        this.fileName = fileName;
     }
 
     @Override
@@ -82,10 +89,20 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
         
         String[] collections = conf
             .getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
+        
+        String collectionUri = null;
+        try {
+            URI fileUri = new URI(null, null, null, 0, fileName, null, null);
+            collectionUri = fileUri.toString();
+        } catch (URISyntaxException e) {
+            LOG.warn("Error parsing file name as URI " + fileName, e);
+        }
         if (collections != null) {
             List<String> optionList = new ArrayList<String>();
             Collections.addAll(optionList, collections);
-            optionList.add(fileName.toString());
+            if (collectionUri != null) {
+                optionList.add(collectionUri);
+            }           
             collections = optionList.toArray(new String[0]);
             for (int i = 0; i < collections.length; i++) {
                 collections[i] = collections[i].trim();
@@ -93,7 +110,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
             options.setCollections(collections);
         } else {
             String[] col = new String[1];
-            col[0] = fileName.toString();
+            col[0] = collectionUri;
             options.setCollections(col);
         }
 
@@ -116,7 +133,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
     @Override
     public void readFields(DataInput in) throws IOException {
         String fn = Text.readString(in);
-        fileName.set(fn);
+        fileName = fn;
         byte valueType = in.readByte();
         switch (valueType) {
         case 0:
@@ -139,7 +156,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
 
     @Override
     public void write(DataOutput out) throws IOException {
-        fileName.write(out);
+        Text.writeString(out, fileName);
         out.writeByte(type);
         if (value instanceof Text) {
             ((Text) value).write(out);
@@ -150,7 +167,13 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
         }
     }
     
-    public static void main(String [] args) {
-        
+    protected String getEncodedURI(String val) {
+        try {
+            URI uri = new URI(null, null, null, 0, val, null, null);
+            return uri.toString();
+        } catch (URISyntaxException e) {
+            LOG.warn("Error parsing value as URI, skipping " + val, e);
+            return null;
+        }
     }
 }

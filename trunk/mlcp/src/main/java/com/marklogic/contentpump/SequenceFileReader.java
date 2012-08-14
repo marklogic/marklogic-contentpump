@@ -113,5 +113,4 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
         return false;
     }
-
 }

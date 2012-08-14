@@ -80,9 +80,16 @@ extends ImportRecordReader<VALUEIN> {
             Path file = split.getPath();
             FileSystem fs = file.getFileSystem(context.getConfiguration());
             FSDataInputStream fileIn = fs.open(file);
-            setKey(file.toString());
+            
             byte[] buf = new byte[(int)split.getLength()];
             try {
+                String uri = makeURIFromPath(file);
+                if (uri != null) {
+                    setKey(uri);
+                } else {
+                    key = null;
+                    return true;
+                }             
                 fileIn.readFully(buf);
                 if (value instanceof Text) {
                     ((Text) value).set(new String(buf));
@@ -107,9 +114,7 @@ extends ImportRecordReader<VALUEIN> {
             } finally {
                 fileIn.close();
             }
-        } 
-        
+        }       
         return false;
-
     }
 }

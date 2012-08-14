@@ -351,7 +351,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             } else {
                 LOG.warn("duplicate URI_ID: " + idName + ". Skipped. " );
             }
-            //TODO LOG WARNING
             if (LOG.isDebugEnabled()) {
                 LOG.debug("URI_ID: " + newId);
             }
@@ -692,5 +691,15 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 patterns[1].matcher(
                         patterns[0].matcher(_in).replaceAll("&amp;"))
                         .replaceAll("&lt;")).replaceAll("&gt;");
+    }
+    
+    @Override
+    protected void setKey(String val) {
+        String uri = getEncodedURI(val);
+        if (uri == null) {
+            key = null;
+        } else {
+            super.setKey(uri);
+        }
     }
 }

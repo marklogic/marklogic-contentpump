@@ -89,12 +89,15 @@ public class CompressedDocumentReader<VALUEIN> extends
             break;
         case GZIP:
             zipIn = new GZIPInputStream(fileIn);
-            String filename = file.toString();
-            if (filename.toLowerCase().endsWith(".gz")
-                || filename.toLowerCase().endsWith(".gzip")) {
-                setKey(filename.substring(0, filename.lastIndexOf('.')));
+            String uri = makeURIFromPath(file);
+            if (uri == null) {
+                key = null;
             } else {
-                setKey(filename);
+                if (uri.toLowerCase().endsWith(".gz") || 
+                    uri.toLowerCase().endsWith(".gzip")) {
+                    uri = uri.substring(0, uri.lastIndexOf('.'));
+                } 
+                setKey(uri);
             }
             break;
         default:
@@ -116,8 +119,13 @@ public class CompressedDocumentReader<VALUEIN> extends
             ZipInputStream zis = (ZipInputStream) zipIn;
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry != null) {
-                    setKey(zipEntry.getName());
-                    setValue(zipEntry.getSize());
+                    String uri = getEncodedURI(zipEntry.getName());
+                    if (uri != null) {
+                        setKey(zipEntry.getName());
+                        setValue(zipEntry.getSize());
+                    } else {
+                        key = null;
+                    }       
                     return true;
                 }
             }

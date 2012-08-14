@@ -259,7 +259,8 @@ public enum Command implements ConfigConstants {
             applyCommonOutputConfigOptions(conf, cmdline);
             
             InputType inputType = getInputType(cmdline);   
-            inputType.setDocumentType(cmdline, conf);
+            ContentType contentType = inputType.getContentType(cmdline);
+            conf.set(MarkLogicConstants.CONTENT_TYPE, contentType.name());
             if (Command.isStreaming(cmdline, conf)) {
                 conf.setBoolean(CONF_STREAMING, true);
             }
@@ -776,18 +777,9 @@ public enum Command implements ConfigConstants {
     }
     
     protected static boolean isMixedType(CommandLine cmdline) {
-        String type = cmdline.getOptionValue(DOCUMENT_TYPE,
-            DEFAULT_DOCUMENT_TYPE);
-        if (type.equalsIgnoreCase(ContentType.MIXED.name())) {
-            InputType inputType = getInputType(cmdline);
-            if (inputType != InputType.DOCUMENTS) {
-                LOG.warn("Document type MIXED is not applicable to input "
-                    + "type " + inputType);
-                return false;
-            }
-            return true;
-        }
-        return false;
+        InputType inputType = Command.getInputType(cmdline);
+        ContentType contentType = inputType.getContentType(cmdline);
+        return contentType == ContentType.MIXED;
     }
 
     /**

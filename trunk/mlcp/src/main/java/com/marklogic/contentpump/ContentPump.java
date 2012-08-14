@@ -134,8 +134,7 @@ public class ContentPump implements ConfigConstants {
         
         boolean distributed = hadoopConfDir != null && (mode == null ||
                 mode.equals(MODE_DISTRIBUTED));
-        if (mode != null && mode.equalsIgnoreCase(MODE_DISTRIBUTED) && 
-            !distributed) {
+        if (MODE_DISTRIBUTED.equalsIgnoreCase(mode) && !distributed) {
             LOG.error("Cannot run in distributed mode.  HADOOP_CONF_DIR is "
                     + "not configured.");
         }
