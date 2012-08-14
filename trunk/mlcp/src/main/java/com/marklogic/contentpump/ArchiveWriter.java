@@ -133,8 +133,8 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             }
             return childPath;
         } catch (Exception ex) {
-            LOG.warn("Error parsing URI " + uri, ex);
-            return null;
+            LOG.warn("Error parsing URI " + uriStr + ".");
+            return uriStr;
         }
     }
 }
