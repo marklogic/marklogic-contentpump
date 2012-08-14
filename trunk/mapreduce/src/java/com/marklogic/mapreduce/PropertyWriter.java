@@ -50,7 +50,7 @@ implements MarkLogicConstants {
         try {
             AdhocQuery request = session.newAdhocQuery(query);
             request.setNewStringVariable(DOCURI_VARIABLE_NAME, 
-                    uri.getUnparsedUri());
+                    InternalUtilities.unparse(uri.getUri()));
             request.setNewVariable(NODE_VARIABLE_NAME, ValueType.ELEMENT, 
                     recordString);
             session.submitRequest(request);

@@ -65,7 +65,7 @@ public class NodePath implements WritableComparable<NodePath> {
     public String getFullPath() {
         StringBuilder buf = new StringBuilder();
         buf.append("fn:doc(\"");
-        buf.append(DocumentURI.unparse(docUri));
+        buf.append(InternalUtilities.unparse(docUri));
         buf.append("\")");
         buf.append(path);
         return buf.toString();

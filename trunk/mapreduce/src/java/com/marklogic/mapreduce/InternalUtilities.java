@@ -355,4 +355,30 @@ public class InternalUtilities implements MarkLogicConstants {
                     value.getClass().getName() + " is unsupported.");
         }
     }
+    
+    protected static String unparse(String s) {
+        int len = s.length();
+        StringBuilder buf = new StringBuilder(len * 2);
+        for(int cp, i = 0; i < s.length(); i += Character.charCount(cp)) {
+            cp = s.codePointAt(i);
+            // iterate through the codepoints in the string
+            if ((cp >= 0x20) && (cp < 0x80)) {
+                switch (cp) {
+                    case '"':
+                        buf.append("&quot;");
+                        break;
+                    case '&':
+                        buf.append("&amp;");
+                        break;
+                    default:
+                        buf.append(s.charAt(i));
+                }
+            } else {
+                buf.append("&#x");
+                buf.append(Long.toString(cp, 16));
+                buf.append(';');    
+            }
+        }
+        return buf.toString();
+    }
 }
