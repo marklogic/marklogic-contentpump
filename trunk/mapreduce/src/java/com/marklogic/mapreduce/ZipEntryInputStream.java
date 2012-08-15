@@ -11,8 +11,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * XCC closes the input stream after reading from it once.  This wrapper class 
- * blocks the close call since the ZipInputStream needs to be read repeatedly.
+ * ZipEntryInputStream is a wrapper class of ZipInputStream to interface with
+ * XCC so that the zip entries can be read sequentially.
  * 
  * @author jchen
  */
@@ -25,6 +25,8 @@ public class ZipEntryInputStream extends InputStream {
     public ZipEntryInputStream(ZipInputStream zipIn, String fileName) {
         this.zipIn = zipIn;   
         this.fileName = fileName;
+        // advance the stream to the first zip entry position.
+        hasNext();
     }
     
     public boolean hasNext() {
@@ -38,18 +40,40 @@ public class ZipEntryInputStream extends InputStream {
     }
     
     @Override
-    public int read() throws IOException {
-        return zipIn.read();
+    public int read() throws IOException {  
+        int bytes = zipIn.read();
+        if (bytes == -1) {
+            // advance the stream to the next entry if done with this one.
+            zipIn.getNextEntry();
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("bytes read from " + fileName + ": " + bytes);
+        }
+        return bytes;
     }
     
     @Override
     public int read(byte[] buf) throws IOException {
-        return zipIn.read(buf);
+        int bytes = zipIn.read(buf);
+        if (bytes == -1) {
+            zipIn.getNextEntry();
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("bytes read from " + fileName + ": " + bytes);
+        }
+        return bytes;
     }
     
     @Override 
     public int read(byte[] b, int off, int len) throws IOException {
-        return zipIn.read();
+        int bytes = zipIn.read();
+        if (bytes == -1) {
+            zipIn.getNextEntry();
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("bytes read from " + fileName + ": " + bytes);
+        }
+        return bytes;
     }  
     
     @Override
