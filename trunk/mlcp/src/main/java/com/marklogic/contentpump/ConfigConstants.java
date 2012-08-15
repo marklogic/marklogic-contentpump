@@ -24,9 +24,6 @@ package com.marklogic.contentpump;
  */
 public interface ConfigConstants {
     // property names
-    /** Deprecated. Use HADOOP_CONFDIR_ENV_NAME instead */
-    @Deprecated
-    static final String HADOOP_HOME_ENV_NAME = "HADOOP_HOME";
     static final String HADOOP_CONFDIR_ENV_NAME = "HADOOP_CONF_DIR";
     static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
     static final String CONTENTPUMP_VERSION_PROPERTY_NAME = "CONTENTPUMP_VERSION";

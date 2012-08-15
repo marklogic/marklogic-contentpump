@@ -103,10 +103,9 @@ public class ContentPump implements ConfigConstants {
         try {
             cmdline = parser.parse(options, remainingArgs);
         } catch (Exception e) {
-            LOG.error("Error parsing the command arguments", e);
-            System.err.println(e.getMessage());
-            // Print the command usage message and exit.
-            
+            LOG.error("Error parsing command arguments: ");
+            LOG.error(e.getMessage());
+            // Print the command usage message and exit.    
             command.printUsage(command, options.getPublicOptions());
             return 1; // Exit on exception here.
         }
@@ -126,8 +125,8 @@ public class ContentPump implements ConfigConstants {
         }
     
         if (hadoopConfDir == null) {
-            // HADOOP_HOME environment and -hadoop_home option are deprecated.
-            String hadoopHome = System.getenv(HADOOP_HOME_ENV_NAME);
+            // -hadoop_home option are deprecated.
+            String hadoopHome = null;
             if (cmdline.hasOption(HADOOP_HOME)) {
                 hadoopHome = cmdline.getOptionValue(HADOOP_HOME);
             }
