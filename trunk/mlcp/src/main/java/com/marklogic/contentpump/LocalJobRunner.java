@@ -167,6 +167,7 @@ public class LocalJobRunner implements ConfigConstants {
             jobComplete.set(true);
         }
         monitor.interrupt();
+        monitor.join(1000);
         
         // report counters
         Iterator<CounterGroup> groupIt = 
@@ -182,7 +183,7 @@ public class LocalJobRunner implements ConfigConstants {
             }
         }
         LOG.info("Total execution time: " + 
-                    (System.currentTimeMillis() - startTime) / 1000 + " sec");
+                 (System.currentTimeMillis() - startTime) / 1000 + " sec");
     }
     
     /**
@@ -321,6 +322,12 @@ public class LocalJobRunner implements ConfigConstants {
             } catch (InterruptedException e) {
             } catch (Throwable t) {
                 LOG.error("Error in monitor thread", t);
+            }
+            String report = 
+                (" completed " + 
+                    StringUtils.formatPercent(computeProgress(), 0));
+            if (!report.equals(lastReport)) {
+                LOG.info(report);
             }
         }
     }
