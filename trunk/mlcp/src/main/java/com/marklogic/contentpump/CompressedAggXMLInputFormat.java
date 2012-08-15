@@ -32,9 +32,12 @@ FileAndDirectoryInputFormat<DocumentURI, Text> {
     public RecordReader<DocumentURI, Text> createRecordReader(
         InputSplit split, TaskAttemptContext context) {
         Configuration conf = context.getConfiguration();
-        String recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
-        String recordNamespace = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
-        return new CompressedAggXMLReader(recordName, recordNamespace, null);
+        String recordName = conf
+            .get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
+        String recordNamespace = conf
+            .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
+        return new CompressedAggXMLReader<Text>(recordName, recordNamespace,
+            null);
     }
 
     @Override

@@ -15,7 +15,6 @@
  */
 package com.marklogic.contentpump;
 
-import com.marklogic.mapreduce.ContentType;
 
 /**
  * Constants for configuration option names and values.

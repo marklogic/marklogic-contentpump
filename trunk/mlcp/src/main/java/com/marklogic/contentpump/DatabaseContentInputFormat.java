@@ -33,6 +33,7 @@ import com.marklogic.mapreduce.MarkLogicInputFormat;
  */
 public class DatabaseContentInputFormat<VALUE> extends
     MarkLogicInputFormat<DocumentURI, VALUE> {
+    @SuppressWarnings("unchecked")
     @Override
     public RecordReader<DocumentURI, VALUE> createRecordReader(
         InputSplit split, TaskAttemptContext context) throws IOException,

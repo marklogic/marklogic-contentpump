@@ -343,7 +343,7 @@ public class AggregateXMLInputFormat extends FileAndDirectoryInputFormat<Documen
     @Override
     public RecordReader<DocumentURI, Text> createRecordReader(InputSplit is,
         TaskAttemptContext tac) {
-        return new AggregateXMLReader(recordName, recordNamespace, nsctx);
+        return new AggregateXMLReader<Text>(recordName, recordNamespace, nsctx);
     }
 
  
