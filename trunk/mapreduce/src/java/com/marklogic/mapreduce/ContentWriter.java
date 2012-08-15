@@ -274,9 +274,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                             InputStream zipfileIn = fs.open(path);
                             ZipInputStream zis = new ZipInputStream(zipfileIn);
                             is = new ZipEntryInputStream(zis, path.toString());
-                        } 
-                        if (!((ZipEntryInputStream)is).hasNext()) {
-                            LOG.error("Reached end of stream for " + value);
                         }
                         break;
                     case NONE:
