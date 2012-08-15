@@ -1059,15 +1059,49 @@ public enum Command implements ConfigConstants {
         }
         if (cmdline.hasOption(COLLECTION_FILTER)) {
             String c = cmdline.getOptionValue(COLLECTION_FILTER);
-            conf.set(ConfigConstants.CONF_COLLECTION_FILTER, c);
-            conf.set(MarkLogicConstants.DOCUMENT_SELECTOR, "fn:collection(\""
-                + c + "\")");
+            String[] cf = c.split(",");
+            if (cf.length > 1) {
+                StringBuilder sb = new StringBuilder("(");
+                for (int i = 0; i < cf.length; i++) {
+                    if (i > 0) {
+                        sb.append(",");
+                    }
+                    sb.append("\"");
+                    sb.append(cf[i]);
+                    sb.append("\"");
+                }
+                sb.append(")");
+                conf.set(ConfigConstants.CONF_COLLECTION_FILTER, sb.toString());
+                conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
+                    "fn:collection(" + sb.toString() + ")");
+            } else {
+                conf.set(ConfigConstants.CONF_COLLECTION_FILTER, "\"" + c + "\"");
+                conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
+                    "fn:collection(\"" + c + "\")");
+            }
         }
         if (cmdline.hasOption(DIRECTORY_FILTER)) {
             String d = cmdline.getOptionValue(DIRECTORY_FILTER);
-            conf.set(ConfigConstants.CONF_DIRECTORY_FILTER, d);
-            conf.set(MarkLogicConstants.DOCUMENT_SELECTOR, "xdmp:directory(\""
-                + d + "\")");
+            String[] df = d.split(",");
+            if (df.length > 1) {
+                StringBuilder sb = new StringBuilder("(");
+                for (int i = 0; i < df.length; i++) {
+                    if (i > 0) {
+                        sb.append(",");
+                    }
+                    sb.append("\"");
+                    sb.append(df[i]);
+                    sb.append("\"");
+                }
+                sb.append(")");
+                conf.set(ConfigConstants.CONF_DIRECTORY_FILTER, sb.toString());
+                conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
+                    "xdmp:directory(" + sb.toString() + ",\"infinity\")");
+            } else {
+                conf.set(ConfigConstants.CONF_DIRECTORY_FILTER, "\"" + d + "\"");
+                conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
+                    "xdmp:directory(\"" + d + "\",\"infinity\")");
+            }
         }
         //if neither is set, default is fn:collection
     }

@@ -186,13 +186,13 @@ public class DatabaseContentReader extends
             buf.append(", if ($mlmr:splitstart eq 1) then ");
             buf.append("\nlet $props := cts:search(");
             if (cFilter != null) {
-                buf.append("xdmp:collection-properties(\"");
+                buf.append("xdmp:collection-properties(");
                 buf.append(cFilter);
-                buf.append("\")");
+                buf.append(")");
             } else if (dFilter != null) {
-                buf.append("xdmp:directory-properties(\"");
+                buf.append("xdmp:directory-properties(");
                 buf.append(dFilter);
-                buf.append("\")");
+                buf.append(", \"infinity\")");
             } else {
                 buf.append("xdmp:collection-properties()");
             }

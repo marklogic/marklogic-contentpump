@@ -35,7 +35,7 @@ public class ArchiveInputFormat extends
     @Override
     public RecordReader<DocumentURI, MarkLogicDocumentWithMeta> createRecordReader(InputSplit split,
         TaskAttemptContext context) throws IOException, InterruptedException {
-        return (RecordReader)new ArchiveRecordReader();
+        return new ArchiveRecordReader();
     }
 
     @Override

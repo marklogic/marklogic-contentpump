@@ -107,7 +107,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
-        return ((float)(pos - start)) / (end - start);
+        return (pos > end) ? 1 : ((float) (pos - start)) / (end - start);
     }
 
     @Override
