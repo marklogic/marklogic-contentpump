@@ -71,17 +71,22 @@ public class ContentPump implements ConfigConstants {
     private static int runCommand(String[] args) throws IOException {
         // get command
         String cmd = args[0];
-        if (cmd.equals("help")) {
+        if (cmd.equalsIgnoreCase("help")) {
             printUsage();
             return 1;
         }
         Command command = Command.forName(cmd);
-        
+
         // get options arguments
         String[] optionArgs = Arrays.copyOfRange(args, 1, args.length);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Command: " + command);
-            LOG.debug("arguments: " + optionArgs);
+            StringBuilder buf = new StringBuilder();
+            for (String arg : optionArgs) {
+                buf.append(arg);
+                buf.append(' ');
+            }     
+            LOG.debug("Arguments: " + buf);
         }
         
         // parse hadoop specific options

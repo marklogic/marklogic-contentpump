@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2012 MarkLogic Corporation
+  Copyright 2003-2012 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -46,7 +48,7 @@ import com.sun.org.apache.xerces.internal.impl.XMLStreamReaderImpl;
 import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 
 public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
-
+    public static final Log LOG = LogFactory.getLog(AggregateXMLReader.class);
     protected static Pattern[] patterns = new Pattern[] {
         Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
     public static String DEFAULT_NS = null;
@@ -61,7 +63,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private boolean skippingRecord = false;
     protected String currentId = null;
     private boolean keepGoing = true;
-    protected HashMap<String, Stack<String>> nameSpaces = new HashMap<String, Stack<String>>();
+    protected HashMap<String, Stack<String>> nameSpaces = 
+        new HashMap<String, Stack<String>>();
     protected NamespaceContext nsctx;
     protected boolean startOfRecord = true;
     protected boolean hasNext = true;
@@ -100,7 +103,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             try {
                 xmlSR.close();
             } catch (XMLStreamException e) {
-                e.printStackTrace();
+                LOG.error("Error closing stream reader", e);
             }
         }
     }
@@ -114,7 +117,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public void initialize(InputSplit is, TaskAttemptContext context)
         throws IOException, InterruptedException {
         conf = context.getConfiguration();
-        parallelMode = conf.getBoolean(ConfigConstants.CONF_AGGREGATE_SPLIT, false);
+        parallelMode = conf.getBoolean(ConfigConstants.CONF_AGGREGATE_SPLIT, 
+                false);
         if (parallelMode) {
             AggregateSplit asplit = (AggregateSplit) is;
             initAggConf(asplit, context);
@@ -210,14 +214,14 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         int stop = xmlSR.getNamespaceCount();
         if (stop > 0) {
             String nsDeclPrefix, nsDeclUri;
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("checking namespace declarations");
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("checking namespace declarations");
             }
             for (int i = 0; i < stop; i++) {
                 nsDeclPrefix = xmlSR.getNamespacePrefix(i);
                 nsDeclUri = xmlSR.getNamespaceURI(i);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(nsDeclPrefix + ":" + nsDeclUri);
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(nsDeclPrefix + ":" + nsDeclUri);
                 }
                 if (nameSpaces.containsKey(nsDeclPrefix)) {
                     nameSpaces.get(nsDeclPrefix).push(nsDeclUri);
@@ -237,7 +241,9 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         int stop = xmlSR.getNamespaceCount();
         if (stop > 0) {
             String nsDeclPrefix;
-            LOG.debug("checking namespace declarations");
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("checking namespace declarations");
+            }           
             for (int i = 0; i < stop; i++) {
                 nsDeclPrefix = xmlSR.getNamespacePrefix(i);
                 if (nameSpaces.containsKey(nsDeclPrefix)) {
@@ -245,7 +251,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                         nameSpaces.get(nsDeclPrefix).pop();
                     }
                 } else {
-                    LOG.warn("Namespace " + nsDeclPrefix + " in scope");
+                    LOG.warn("Namespace " + nsDeclPrefix + " not in scope");
                 }
             }
         }
@@ -254,8 +260,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private void processStartElement() throws XMLStreamException {
         String name = xmlSR.getLocalName();
         String namespace = xmlSR.getNamespaceURI();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Start-tag: " + name);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Start-tag: " + name);
         }
         if (namespace == null) {
             String prefix = xmlSR.getPrefix();
@@ -349,10 +355,11 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 setKey(newId);
                 newUriId = false;
             } else {
-                LOG.warn("duplicate URI_ID: " + idName + ". Skipped. " );
+                LOG.warn("Ignoring duplicate URI_ID: " + idName + " = " + 
+                        newId);
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("URI_ID: " + newId);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("URI_ID: " + newId);
             }
             // advance to the END_ELEMENT
             if (xmlSR.next() != XMLStreamConstants.END_ELEMENT) {
@@ -371,7 +378,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         // we should skip as much of this work as possible
         // this avoids OutOfMemory errors, too
         // if (skippingRecord) {
-        // LOG.debug("skipping record");
+        // LOG.trace("skipping record");
         // return;
         // }
         write(sb.toString());
@@ -390,15 +397,16 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         
         String name = xmlSR.getLocalName();
         String namespace = xmlSR.getNamespaceURI();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("End-tag: " + name);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("End-tag: " + name);
         }
         if (namespace == null) {
             String prefix = xmlSR.getPrefix();
             if ("".equals(prefix)) {
                 prefix = DEFAULT_NS;
             } 
-            if (nameSpaces.get(prefix) != null && !nameSpaces.get(prefix).isEmpty()) {
+            if (nameSpaces.get(prefix) != null && 
+                !nameSpaces.get(prefix).isEmpty()) {
                 namespace = nameSpaces.get(prefix).peek();
             }
         }
@@ -565,8 +573,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                         if (nextLoc > fInputStream.getPos()) {
                             // abnormal/rare parser location (maybe a bug in
                             // jdk, happens once in 9 million medline)
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Parser position " + nextLoc
+                            if (LOG.isTraceEnabled()) {
+                                LOG.trace("Parser position " + nextLoc
                                     + " > input stream position "
                                     + fInputStream.getPos());
                             }
@@ -575,9 +583,9 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                                 + recordName.length() + 2;
                         }
 
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(e.getMessage());
-                            LOG.debug("Next postion to search " + nextLoc);
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace(e.getMessage());
+                            LOG.trace("Next postion to search " + nextLoc);
                         }
                         if (moveToNextRecord(nextLoc) == -1) {
                             return false;
@@ -600,8 +608,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
      * @throws IOException
      */
     protected int readUntilMatch(String match, long streamOffset) throws IOException {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Regex pattern for record element: " + new String(match));
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Regex pattern for record element: " + new String(match));
         }
         fInputStream.seek(streamOffset);
         Pattern pattern = Pattern.compile(match);
@@ -672,13 +680,13 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             "http://apache.org/xml/properties/internal/namespace-context",
             nsctx);
         int count = scanner.getNamespaceContext().getDeclaredPrefixCount();
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("namespaces in context");
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("namespaces in context");
             for (int i = 0; i < count; i++) {
                 String p = scanner.getNamespaceContext()
                     .getDeclaredPrefixAt(i);
-                LOG.debug("prefix:" + p);
-                LOG.debug(scanner.getNamespaceContext().getURI(p));
+                LOG.trace("prefix:" + p);
+                LOG.trace(scanner.getNamespaceContext().getURI(p));
             }
         }
     }
