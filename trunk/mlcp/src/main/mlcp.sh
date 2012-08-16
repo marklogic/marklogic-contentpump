@@ -8,7 +8,7 @@ if [ ! -z "$HADOOP_DIST" ] && [ "$HADOOP_DIST" = "HDP" ]; then
     HADOOP_CONF_DIR=/etc/hadoop/conf
     export HADOOP_CONF_DIR
   fi
-  CLASSPATH=$HADOOP_INSTALL_DIR/hadoop-core-1.0.3.jar
+  CLASSPATH=$HADOOP_INSTALL_DIR/hadoop-core.jar
   CLASSPATH=$CLASSPATH:$HADOOP_INSTALL_DIR/lib/commons-configuration-1.6.jar
   CLASSPATH=$CLASSPATH:$HADOOP_INSTALL_DIR/lib/commons-lang-2.4.jar
   CLASSPATH=$CLASSPATH:$HADOOP_INSTALL_DIR/lib/jackson-core-asl-1.8.8.jar

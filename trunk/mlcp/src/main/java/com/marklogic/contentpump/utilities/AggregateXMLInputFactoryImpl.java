@@ -30,6 +30,7 @@ import com.sun.xml.internal.stream.XMLInputFactoryImpl;
  * 
  * @author ali
  */
+@SuppressWarnings("all")
 public class AggregateXMLInputFactoryImpl extends XMLInputFactoryImpl {
     //List of supported properties and default values.
     private PropertyManager fPropertyManager = new PropertyManager(PropertyManager.CONTEXT_READER) ;
