@@ -1089,6 +1089,10 @@ public enum Command implements ConfigConstants {
                     if (i > 0) {
                         sb.append(",");
                     }
+                    if (!df[i].endsWith("/")) {
+                        LOG.warn("directory_filter: Directory does not end "
+                            + "with a forward slash (/): " + df[i]);
+                    }
                     sb.append("\"");
                     sb.append(df[i]);
                     sb.append("\"");
@@ -1098,12 +1102,17 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
                     "xdmp:directory(" + sb.toString() + ",\"infinity\")");
             } else {
-                conf.set(ConfigConstants.CONF_DIRECTORY_FILTER, "\"" + d + "\"");
+                if (!d.endsWith("/")) {
+                    LOG.warn("directory_filter: Directory does not end "
+                        + "with a forward slash (/): " + d);
+                }
+                conf.set(ConfigConstants.CONF_DIRECTORY_FILTER, "\"" + d
+                    + "\"");
                 conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
                     "xdmp:directory(\"" + d + "\",\"infinity\")");
             }
         }
-        //if neither is set, default is fn:collection
+        // if neither is set, default is fn:collection
     }
 
     static void applyCommonOutputConfigOptions(Configuration conf,
