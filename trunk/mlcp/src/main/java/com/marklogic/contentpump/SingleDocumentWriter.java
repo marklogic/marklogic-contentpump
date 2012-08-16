@@ -83,14 +83,14 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             }
             
             FileSystem fs = path.getFileSystem(conf);
-            FSDataOutputStream out = fs.create(path, true);
+            os = fs.create(path, true);
             ContentType type = content.getContentType();
             if (ContentType.BINARY.equals(type)){
-                out.write(content.getContentAsByteArray());
+                os.write(content.getContentAsByteArray());
             } else if (ContentType.TEXT.equals(type) || 
                     ContentType.XML.equals(type)) {
                 Text t = content.getContentAsText();
-                out.write(t.toString().getBytes());
+                os.write(t.toString().getBytes());
             } else {
                 LOG.warn("Skipping " + uri + 
                         ".  Unsupported content type: " + 
