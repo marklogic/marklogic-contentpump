@@ -117,7 +117,17 @@ public class LocalJobRunner implements ConfigConstants {
         Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE> mapper = 
             (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)ReflectionUtils.newInstance(
                 job.getMapperClass(), conf);
-        outputFormat.checkOutputSpecs(job);
+        try {
+            outputFormat.checkOutputSpecs(job);
+        } catch (Exception ex) {         
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error checking output specification: ", ex);
+            } else {
+                LOG.error("Error checking output specification: ");
+                LOG.error(ex.getMessage());
+            }
+            return;
+        }
         conf = job.getConfiguration();
         progress = new AtomicInteger[splits.size()];
         for (int i = 0; i < splits.size(); i++) {
