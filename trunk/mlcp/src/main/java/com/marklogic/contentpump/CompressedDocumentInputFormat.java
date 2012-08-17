@@ -27,6 +27,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
  * InputFormat for reading compressed documents from file systems. One zip entry
@@ -46,7 +47,7 @@ FileAndDirectoryInputFormat<DocumentURI, VALUE> {
 	public RecordReader<DocumentURI, VALUE> createRecordReader(InputSplit arg0,
 			TaskAttemptContext arg1) throws IOException, InterruptedException {
 	    Configuration conf = arg1.getConfiguration();
-	    if (conf.getBoolean(ConfigConstants.CONF_STREAMING, false)) {
+	    if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false)) {
 	        return (RecordReader<DocumentURI, VALUE>) 
 	            new CompressedStreamingReader();
 	    } else {

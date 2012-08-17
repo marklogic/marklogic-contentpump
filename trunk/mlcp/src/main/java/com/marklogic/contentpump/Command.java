@@ -115,7 +115,10 @@ public enum Command implements ConfigConstants {
                 .withArgName("type")
                 .hasArg()
                 .withDescription("Type of document content. Valid choices: "
-                    + "XML, TEXT, BINARY")
+                    + "XML, TEXT, BINARY, and MIXED.  Default type for " 
+                    + "document is MIXED, where the type is determined "
+                    + "from the MIME type mapping configured in MarkLogic "
+                    + "Server.")
                 .create(DOCUMENT_TYPE);
             options.addOption(documentType);
             Option delimiter = OptionBuilder
@@ -261,8 +264,17 @@ public enum Command implements ConfigConstants {
             InputType inputType = getInputType(cmdline);   
             ContentType contentType = inputType.getContentType(cmdline);
             conf.set(MarkLogicConstants.CONTENT_TYPE, contentType.name());
+            
+            if (ContentType.MIXED == contentType) {
+                LOG.info("Content type is set to MIXED.  The format of the " +
+                        " inserted documents will be determined by the MIME " +
+                        " type specification configured on MarkLogic Server.");
+            } else {
+                LOG.info("Content type: " + contentType.name());
+            }
+            
             if (Command.isStreaming(cmdline, conf)) {
-                conf.setBoolean(CONF_STREAMING, true);
+                conf.setBoolean(MarkLogicConstants.OUTPUT_STREAMING, true);
             }
 
             if (cmdline.hasOption(ARCHIVE_METADATA_OPTIONAL)) {
@@ -752,8 +764,8 @@ public enum Command implements ConfigConstants {
     
     protected static boolean isStreaming(CommandLine cmdline, 
             Configuration conf) {
-        if (conf.get(CONF_STREAMING) != null) {
-            return conf.getBoolean(CONF_STREAMING, false);
+        if (conf.get(MarkLogicConstants.OUTPUT_STREAMING) != null) {
+            return conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false);
         }
         String arg = null;
         if (cmdline.hasOption(STREAMING)) {
@@ -764,22 +776,12 @@ public enum Command implements ConfigConstants {
                     LOG.warn("Streaming option is not applicable to input " +
                             "type " + inputType);
                 }
+                conf.setBoolean(MarkLogicConstants.OUTPUT_STREAMING, true);
                 return true;
             } 
-        } else if (isMixedType(cmdline)) {
-            if ("false".equalsIgnoreCase(arg)) {
-                LOG.warn("Streaming cannot be turned off when input " +
-                    "contain mixed-typed documents.");
-            }
-            return true;
-        }
+        } 
+        conf.setBoolean(MarkLogicConstants.OUTPUT_STREAMING, false);
         return false;
-    }
-    
-    protected static boolean isMixedType(CommandLine cmdline) {
-        InputType inputType = Command.getInputType(cmdline);
-        ContentType contentType = inputType.getContentType(cmdline);
-        return contentType == ContentType.MIXED;
     }
 
     /**
