@@ -55,7 +55,7 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
     private OutputArchive binaryArchive;
 
     public ArchiveWriter(Path path, TaskAttemptContext context) {
-        dir = path.toUri().getPath();
+        dir = path.toString();
         this.context = context;
     }
 
