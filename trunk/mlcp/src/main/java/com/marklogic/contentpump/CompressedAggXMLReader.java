@@ -11,6 +11,8 @@ import java.util.zip.ZipInputStream;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -25,6 +27,8 @@ import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 
 public class CompressedAggXMLReader<VALUEIN> extends
     AggregateXMLReader<VALUEIN> {
+    public static final Log LOG = LogFactory
+        .getLog(CompressedAggXMLReader.class);
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private XMLInputFactory factory;
@@ -53,17 +57,23 @@ public class CompressedAggXMLReader<VALUEIN> extends
             zipIn = new ZipInputStream(fileIn);
             codec = CompressionCodec.ZIP;
             while ((currZipEntry = ((ZipInputStream) zipIn).getNextEntry()) != null) {
-                if (!currZipEntry.isDirectory() && currZipEntry.getSize() != 0) {
+                if (currZipEntry.getSize() != 0) {
                     break;
                 }
             }
             if (currZipEntry == null) { // no entry in zip
                 return;
             }
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            long size;
-            while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
-                baos.write(buf, 0, (int) size);
+            ByteArrayOutputStream baos;
+            long size = currZipEntry.getSize();
+            if (size == -1) {
+                baos = new ByteArrayOutputStream();
+            } else {
+                baos = new ByteArrayOutputStream((int) size);
+            }
+            int nb;
+            while ((nb = zipIn.read(buf, 0, buf.length)) != -1) {
+                baos.write(buf, 0, nb);
             }
             try {
                 xmlSR = factory
@@ -82,6 +92,9 @@ public class CompressedAggXMLReader<VALUEIN> extends
             } catch (XMLStreamException e) {
                 e.printStackTrace();
             }
+        } else {
+            throw new UnsupportedOperationException("Unsupported codec: "
+                + codec.name());
         }
 
         initAggConf(inSplit, context);
@@ -109,15 +122,20 @@ public class CompressedAggXMLReader<VALUEIN> extends
                     }
                 }
                 // xmlSR does not hasNext, try next zipEntry if any
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ByteArrayOutputStream baos;
                 while ((currZipEntry = zis.getNextEntry()) != null) {
-                    if (currZipEntry.isDirectory()
-                        || currZipEntry.getSize() == 0) {
+                    if (currZipEntry.getSize() == 0) {
                         continue;
                     }
-                    long size;
-                    while ((size = zis.read(buf, 0, buf.length)) != -1) {
-                        baos.write(buf, 0, (int) size);
+                    long size = currZipEntry.getSize();
+                    if (size == -1) {
+                        baos = new ByteArrayOutputStream();
+                    } else {
+                        baos = new ByteArrayOutputStream((int) size);
+                    }
+                    int nb;
+                    while ((nb = zis.read(buf, 0, buf.length)) != -1) {
+                        baos.write(buf, 0, nb);
                     }
                     xmlSR = factory
                         .createXMLStreamReader(new ByteArrayInputStream(baos

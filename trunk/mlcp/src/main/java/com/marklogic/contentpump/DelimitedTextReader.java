@@ -20,6 +20,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -31,6 +33,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 public class DelimitedTextReader<VALUEIN> extends
     ImportRecordReader<VALUEIN> {
+    public static final Log LOG = LogFactory.getLog(DelimitedTextReader.class);
     protected String[] fields;
     protected String DELIM;
     protected static String ROOT_START = "<root>";
@@ -71,6 +74,11 @@ public class DelimitedTextReader<VALUEIN> extends
             DELIM = conf.get(ConfigConstants.CONF_DELIMITER,
                 ConfigConstants.DEFAULT_DELIMITER);
         }
+        if( DELIM.length() == 1){
+            DELIM = "\\" + DELIM;
+        } else {
+            LOG.error("Incorrect delimitor: " + DELIM);
+        }
         idName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
     }
 
@@ -95,12 +103,6 @@ public class DelimitedTextReader<VALUEIN> extends
             return false;
         }
         if (fields == null) {
-            if( DELIM.length() == 1){
-                DELIM = "\\" + DELIM;
-            } else {
-                LOG.error("Incorrect delimitor: " + DELIM);
-                return false;
-            }
             fields = line.split(DELIM);
             boolean found = false;
             for (int i = 0; i < fields.length; i++) {
@@ -141,13 +143,13 @@ public class DelimitedTextReader<VALUEIN> extends
         sb.append(ROOT_START);
         for (int i = 0; i < fields.length; i++) {
             if (idName.equals(fields[i])) {
-                if (values[i] == null || values[i].equals("")) {
+                if (values[i] == null || values[i].trim().equals("")) {
                     LOG.error(line + ":column used for uri_id is empty");
                     //clear the key of previous record 
                     key = null;
                     return true;
                 }
-                String uri = getEncodedURI(values[i]);
+                String uri = getEncodedURI(values[i].trim());
                 if (uri != null) {
                     setKey(uri);
                 } else {
