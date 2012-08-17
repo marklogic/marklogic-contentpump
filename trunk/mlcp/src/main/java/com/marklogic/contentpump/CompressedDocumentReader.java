@@ -118,14 +118,14 @@ public class CompressedDocumentReader<VALUEIN> extends
             ZipEntry zipEntry;
             ZipInputStream zis = (ZipInputStream) zipIn;
             while ((zipEntry = zis.getNextEntry()) != null) {
-                if (zipEntry != null) {
+                if (zipEntry != null && zipEntry.getSize() != 0) {
                     String uri = getEncodedURI(zipEntry.getName());
                     if (uri != null) {
                         setKey(zipEntry.getName());
                         setValue(zipEntry.getSize());
                     } else {
                         key = null;
-                    }       
+                    }
                     return true;
                 }
             }
@@ -135,6 +135,9 @@ public class CompressedDocumentReader<VALUEIN> extends
             zipIn = null;
             hasNext = false;
             return true;
+        } else {
+            throw new UnsupportedOperationException("Unsupported codec: "
+                + codec.name());
         }
         hasNext = false;
         return false;
@@ -149,9 +152,9 @@ public class CompressedDocumentReader<VALUEIN> extends
             baos = new ByteArrayOutputStream();
         }
          
-        long size;
+        int size;
         while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
-            baos.write(buf, 0, (int) size);
+            baos.write(buf, 0, size);
         }
         if (value instanceof Text) {
             ((Text) value).set(baos.toString());

@@ -18,6 +18,8 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.Iterator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -39,7 +41,8 @@ import com.marklogic.mapreduce.MarkLogicConstants;
  */
 public class CombineDocumentReader<VALUEIN> 
 extends ImportRecordReader<VALUEIN> {
-    
+    public static final Log LOG = LogFactory
+        .getLog(CombineDocumentReader.class);
     protected long bytesRead;
     protected long bytesTotal;
     protected Iterator<FileSplit> iterator;

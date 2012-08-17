@@ -21,6 +21,8 @@ import java.io.StringReader;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -40,6 +42,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
 public class ArchiveRecordReader extends
     ImportRecordReader<MarkLogicDocumentWithMeta> implements 
     ConfigConstants {
+    public static final Log LOG = LogFactory.getLog(ArchiveRecordReader.class);
     private ZipInputStream zipIn;
     private boolean hasNext = true;
     private static String EXTENSION = ".zip";
@@ -111,9 +114,10 @@ public class ArchiveRecordReader extends
         }
         while ((zipEntry = zis.getNextEntry()) != null) {
             String name = zipEntry.getName();
+            long length = zipEntry.getSize();
             if (name.endsWith(DocumentMetadata.NAKED)) {
                 ((MarkLogicDocumentWithMeta) value)
-                    .setMeta(getMetadataFromStream());
+                    .setMeta(getMetadataFromStream(length));
                 setKey(zipEntry.getName());
                 value.setContent(null);
                 count++;
@@ -121,7 +125,7 @@ public class ArchiveRecordReader extends
             }
             if (name.endsWith(DocumentMetadata.EXTENSION)) {
                 ((MarkLogicDocumentWithMeta) value)
-                    .setMeta(getMetadataFromStream());
+                    .setMeta(getMetadataFromStream(length));
                 count++;
                 continue;
             }
@@ -133,7 +137,7 @@ public class ArchiveRecordReader extends
                 return true;
             } else {
                 setKey(zipEntry.getName());
-                readDocFromStream((MarkLogicDocument) value);
+                readDocFromStream(length, (MarkLogicDocument) value);
                 count++;
                 return true;
             }
@@ -143,22 +147,34 @@ public class ArchiveRecordReader extends
         return false;
     }
 
-    private void readDocFromStream(MarkLogicDocument doc) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        long size;
+    private void readDocFromStream(long entryLength, MarkLogicDocument doc)
+        throws IOException {
+        ByteArrayOutputStream baos;
+        if (entryLength == -1) {
+            baos = new ByteArrayOutputStream();
+        } else {
+            baos = new ByteArrayOutputStream((int) entryLength);
+        }
+        int size;
         while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
-            baos.write(buf, 0, (int) size);
+            baos.write(buf, 0, size);
         }
         doc.setContentType(type);
         doc.setContent(baos.toByteArray());
         baos.close();
     }
 
-    private DocumentMetadata getMetadataFromStream() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        long size;
+    private DocumentMetadata getMetadataFromStream(long entryLength)
+        throws IOException {
+        ByteArrayOutputStream baos;
+        if (entryLength == -1) {
+            baos = new ByteArrayOutputStream();
+        } else {
+            baos = new ByteArrayOutputStream((int) entryLength);
+        }
+        int size;
         while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
-            baos.write(buf, 0, (int) size);
+            baos.write(buf, 0, size);
         }
         String metaStr = baos.toString();
         DocumentMetadata metadata = DocumentMetadata.fromXML(new StringReader(

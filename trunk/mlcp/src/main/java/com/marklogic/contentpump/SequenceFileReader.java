@@ -17,6 +17,8 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -30,6 +32,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 
 public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
+    public static final Log LOG = LogFactory.getLog(SequenceFileReader.class);
     protected SequenceFile.Reader reader;
     protected Writable seqKey;
     protected Writable seqValue;

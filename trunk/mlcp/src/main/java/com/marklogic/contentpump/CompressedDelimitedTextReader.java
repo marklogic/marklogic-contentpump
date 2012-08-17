@@ -25,6 +25,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
@@ -37,6 +39,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.mapreduce.CompressionCodec;
 
 public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
+    public static final Log LOG = LogFactory
+        .getLog(CompressedDelimitedTextReader.class);
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private ZipEntry currZipEntry;
@@ -75,27 +79,76 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
         }
         if (br == null) {
             if (codec.equals(CompressionCodec.ZIP)) {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ZipInputStream zis = (ZipInputStream) zipIn;
-                while ((currZipEntry = zis.getNextEntry()) != null) {
-                    System.err.println(currZipEntry.getName());
-                    if (currZipEntry.isDirectory()
-                        || currZipEntry.getSize() == 0) {
-                        continue;
-                    }
-                    long size;
-                    while ((size = zis.read(buf, 0, buf.length)) != -1) {
-                        baos.write(buf, 0, (int) size);
-                    }
-                    br = new BufferedReader(new InputStreamReader(
-                        new ByteArrayInputStream(baos.toByteArray())));
-                    break;
-                }
+                return nextKeyValueInZip();
             } else if (codec.equals(CompressionCodec.GZIP)) {
                 br = new BufferedReader(new InputStreamReader(zipIn));
+                return super.nextKeyValue();
+            } else {
+                throw new UnsupportedOperationException("Unsupported codec: "
+                    + codec.name());
+            }
+        } else {
+            if (codec.equals(CompressionCodec.ZIP)) {
+                if (super.nextKeyValue()) {
+                    // current delim txt has next
+                    return true;
+                }
+                return nextKeyValueInZip();
+            } else if (codec.equals(CompressionCodec.GZIP)) {
+                return super.nextKeyValue();
+            } else {
+                throw new UnsupportedOperationException("Unsupported codec: "
+                    + codec.name());
             }
         }
-        return super.nextKeyValue();
+    }
+    
+    private boolean nextKeyValueInZip() throws IOException, InterruptedException{
+        ByteArrayOutputStream baos;
+        ZipInputStream zis = (ZipInputStream) zipIn;
+        
+        while ((currZipEntry = zis.getNextEntry()) != null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ZipEntry: " + currZipEntry.getName());
+            }
+            if (currZipEntry.getSize() == 0) {
+                continue;
+            }
+            long size = currZipEntry.getSize();
+            if (size == -1) {
+                baos = new ByteArrayOutputStream();
+            } else {
+                baos = new ByteArrayOutputStream((int) size);
+            }
+            int nb;
+            while ((nb = zis.read(buf, 0, buf.length)) != -1) {
+                baos.write(buf, 0, nb);
+            }
+            br = new BufferedReader(new InputStreamReader(
+                new ByteArrayInputStream(baos.toByteArray())));
+            //clear metadata
+            fields = null;
+            if (super.nextKeyValue()) {
+                // current delim txt has next
+                return true;
+            }
+            // continue read next zip entry if any
+        }
+        // end of zip
+        hasNext = false;
+        return false;
+    }
+    
+    @Override
+    public void close() throws IOException {
+        super.close();
+        if (zipIn != null) {
+            zipIn.close();
+        }
     }
 
+    @Override
+    public float getProgress() throws IOException, InterruptedException {
+        return hasNext ? 0 : 1;
+    }
 }
