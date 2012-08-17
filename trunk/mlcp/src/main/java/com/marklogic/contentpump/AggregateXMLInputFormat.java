@@ -326,7 +326,9 @@ public class AggregateXMLInputFormat extends FileAndDirectoryInputFormat<Documen
         int stop = xmlSR.getNamespaceCount();
         if (stop > 0) {
             String nsDeclPrefix;
-            LOG.debug("checking namespace declarations");
+            if(LOG.isTraceEnabled()) {
+                LOG.trace("checking namespace declarations");
+            }
             for (int i = 0; i < stop; i++) {
                 nsDeclPrefix = xmlSR.getNamespacePrefix(i);
                 if (nameSpaces.containsKey(nsDeclPrefix)) {
@@ -334,7 +336,7 @@ public class AggregateXMLInputFormat extends FileAndDirectoryInputFormat<Documen
                         nameSpaces.get(nsDeclPrefix).pop();
                     }
                 } else {
-                    LOG.warn("Namespace " + nsDeclPrefix + " in scope");
+                    LOG.warn("Namespace " + nsDeclPrefix + " not in scope");
                 }
             }
         }
