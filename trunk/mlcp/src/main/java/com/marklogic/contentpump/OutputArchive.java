@@ -65,6 +65,7 @@ public class OutputArchive {
         if (fs.exists(zpath)) {
             throw new IOException(zpath + " already exists.");
         }
+        LOG.info("Creating output archive: " + zpath);
         FSDataOutputStream fsout = fs.create(zpath, false);
 
         outputStream = new ZipOutputStream(fsout);
@@ -106,8 +107,6 @@ public class OutputArchive {
         ZipEntry entry = new ZipEntry(outputPath);
 
         if (outputStream == null) {
-            // lazily construct a new zipfile outputstream
-            LOG.info("constructing new output stream");
             newOutputStream();
         }
 
@@ -128,12 +127,8 @@ public class OutputArchive {
              * (currentEntries % 10 == 0) { outputStream.flush(); }
              */
         } catch (ZipException e) {
-            // if (configuration.isSkipExisting()
-            // && e.getMessage().startsWith("duplicate entry")) {
             LOG.warn("skipping duplicate entry: " + entry.getName());
             return 0;
-            // }
-//            throw e;
         }
 
         currentFileBytes += total;
@@ -145,6 +140,9 @@ public class OutputArchive {
 
     public void close() throws IOException {
         if (outputStream != null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("closing output archive: " + path);
+            }           
             outputStream.flush();
             outputStream.close();
         }
