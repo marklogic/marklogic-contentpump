@@ -142,6 +142,5 @@ public interface ConfigConstants {
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
     static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = 
         "mapreduce.marklogic.input.archive.metadataoptional";
-    static final String CONF_STREAMING = "mapreduce.marklogic.streaming";
     static final String CONF_AGGREGATE_SPLIT = "mapreduce.marklogic.aggregate.split";
 }

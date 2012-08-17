@@ -103,7 +103,7 @@ public abstract class ImportRecordReader<VALUEIN> extends
         suffix = conf.get(ConfigConstants.CONF_OUTPUT_URI_SUFFIX);
         String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
             MarkLogicConstants.DEFAULT_CONTENT_TYPE);
-        if (!conf.getBoolean(CONF_STREAMING, false)) {
+        if (!conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false)) {
             ContentType contentType = ContentType.valueOf(type);
             Class<? extends Writable> valueClass = contentType.getWritableClass();
             value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
