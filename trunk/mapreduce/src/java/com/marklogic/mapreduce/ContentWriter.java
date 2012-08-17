@@ -100,6 +100,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     private FileSystem fs;
     
     private InputStream is;
+    
+    private boolean streaming;
 
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -193,6 +195,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         else if (DocumentRepairLevel.FULL.toString().equals(repairLevel)){
             options.setRepairLevel(DocumentRepairLevel.FULL);
         }
+        
+        streaming = conf.getBoolean(OUTPUT_STREAMING, false);
     }
 
     @Override
@@ -283,8 +287,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         LOG.error("Unsupported compression codec: " + value);
                         return;
                 }
-                content = ContentFactory.newUnBufferedContent(uri, is, 
-                        options);
+                if (streaming) {
+                    content = ContentFactory.newUnBufferedContent(uri, is, 
+                            options);
+                } else {
+                    content = ContentFactory.newContent(uri, is, options);
+                }
+                
             } else {
                 throw new UnsupportedOperationException(value.getClass()
                     + " is not supported.");

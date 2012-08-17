@@ -516,6 +516,16 @@ public interface MarkLogicConstants {
         "mapreduce.marklogic.output.content.quality";
     /**
      * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to use streaming to insert
+     * content.  When streaming is set to true, the content will 
+     * not be fully buffered in memory, hence will consume less
+     * memory but will disable auto-retry if there is a problem 
+     * inserting the content.
+     */
+    static final String OUTPUT_STREAMING =
+        "mapreduce.marklogic.output.content.streaming";
+    /**
+     * The config property name (<code>{@value}</code>)
      * which, if set, indicates whether or not to remove the output
      * directory. Only applicable to {@link ContentOutputFormat}. 
      * Default: false.
@@ -608,7 +618,8 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates type of content to be inserted when using 
-     * ContentOutputFormat.  Optional.  Valid choices: XML, TEXT, BINARY.
+     * ContentOutputFormat.  Optional.  Valid choices: XML, TEXT, BINARY,
+     * MIXED, UNKNOWN.
      * Default: XML.
      */
     static final String CONTENT_TYPE = 
