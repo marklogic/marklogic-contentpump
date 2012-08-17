@@ -17,6 +17,8 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -25,10 +27,10 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
 public class DocumentPathFilter implements PathFilter, Configurable {
-
+    public static final Log LOG = LogFactory.getLog(DocumentPathFilter.class);
     private String pattern;
     private Configuration conf;
-    private boolean pathIsLocal;
+    private FileSystem fs;
     
     public String getPattern() {
         return pattern;
@@ -45,14 +47,12 @@ public class DocumentPathFilter implements PathFilter, Configurable {
             return true;
         }
         // take care of the case when INPUT_FILE_PATH is a DIR
-        FileSystem fs;
         try {
-            if (pathIsLocal == true && !inPath.toString().startsWith("file://")) {
-            	//prefix has been lost in LocalFileSystem.globStatusInternal
-                inPath = new Path("file://" + inPath.toString());
-            }
-            fs = inPath.getFileSystem(conf);
             FileStatus[] status = fs.globStatus(inPath);
+            if (status == null) {
+                throw new IOException(
+                    "Path in input_file_path doesn't exist: " + inPath);
+            }
             for (FileStatus s : status) {
                 if (s.isDir()) {
                     return true;
@@ -74,10 +74,15 @@ public class DocumentPathFilter implements PathFilter, Configurable {
         this.conf = conf;
         pattern = conf.get(ConfigConstants.CONF_INPUT_FILE_PATTERN, ".*");
         String inPath = conf.get("mapred.input.dir");
-        if (inPath != null && inPath.startsWith("file://")) {
-            pathIsLocal = true;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("mapred.input.dir: " + inPath);
         }
-        
+        Path path = new Path(inPath);
+        try {
+            fs = FileSystem.get(path.toUri(), conf);
+        } catch (IOException e) {
+            LOG.error("Please check path: " + inPath, e);
+        }
     }
 
 }
