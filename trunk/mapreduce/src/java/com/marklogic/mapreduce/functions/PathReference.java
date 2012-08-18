@@ -4,7 +4,9 @@
 package com.marklogic.mapreduce.functions;
 
 /**
- * Wrapper class for the <code>cts:path-reference<code> function.
+ * Wrapper class for the <code>cts:path-reference</code> function.
+ * This class represents a reference to a path value lexicon
+ * (path range index).
  * 
  * @author jchen
  */
@@ -24,6 +26,14 @@ public abstract class PathReference extends Reference {
         buf.append(")");    
     }
     
+    /**
+     * The path range expression represented by this lexicon.
+     * <p>
+     *   This path expression must correspond to the path expression
+     *   used to create an existing path range index.
+     * </p>
+     * @return
+     */
     public abstract String getPathExpression();
     
     /**
@@ -31,7 +41,8 @@ public abstract class PathReference extends Reference {
      * <p>
      *   This method corresponds to the $options parameter of the path
      *   reference function.  Override this method to pass options to the path 
-     *   reference function. 
+     *   reference function. For a list of available options, see 
+     *   <code>cts:path-reference</code> in the <em>XQuery and XSLT Reference</em>.
      * </p>
      */
     public String[] getUserDefinedOptions() {
