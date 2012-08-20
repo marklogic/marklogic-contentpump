@@ -15,7 +15,6 @@
  */
 package com.marklogic.contentpump;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -31,19 +30,12 @@ FileAndDirectoryInputFormat<DocumentURI, Text> {
     @Override
     public RecordReader<DocumentURI, Text> createRecordReader(
         InputSplit split, TaskAttemptContext context) {
-        Configuration conf = context.getConfiguration();
-        String recordName = conf
-            .get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
-        String recordNamespace = conf
-            .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
-        return new CompressedAggXMLReader<Text>(recordName, recordNamespace,
-            null);
+        return new CompressedAggXMLReader<Text>();
     }
 
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
         return false;
     }
-    
  
 }
