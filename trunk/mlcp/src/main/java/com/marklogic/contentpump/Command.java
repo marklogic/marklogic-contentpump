@@ -214,15 +214,6 @@ public enum Command implements ConfigConstants {
                         + " MarkLogic")
                 .create(STREAMING);
             options.addOption(streaming);
-            Option splitAgg = OptionBuilder
-                .withArgName("true,false")
-                .hasOptionalArg()
-                .withDescription("Whether to split up an aggregate XML into "
-                        + "multiple chunks for processing")
-                .create(AGGREGATE_SPLIT);
-            CommandlineOption option = new CommandlineOption(splitAgg);
-            option.setHidden(true);
-            options.addOption(option);
         }
 
         @Override
@@ -435,17 +426,6 @@ public enum Command implements ConfigConstants {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, false);
                 } else {
                     LOG.warn("Unrecognized option argument for " + FAST_LOAD
-                                    + ": " + arg);
-                }
-            }
-            if (cmdline.hasOption(AGGREGATE_SPLIT)) {
-                String arg = cmdline.getOptionValue(AGGREGATE_SPLIT);
-                if (arg == null || arg.equalsIgnoreCase("false")) {
-                    conf.setBoolean(CONF_AGGREGATE_SPLIT, false);
-                } else if (arg.equalsIgnoreCase("true")) {
-                    conf.setBoolean(CONF_AGGREGATE_SPLIT, true);
-                } else {
-                    LOG.warn("Unrecognized option argument for " + AGGREGATE_SPLIT
                                     + ": " + arg);
                 }
             }

@@ -21,9 +21,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-import com.marklogic.contentpump.utilities.AggregateXMLInputFactoryImpl;
 import com.marklogic.mapreduce.CompressionCodec;
-import com.sun.org.apache.xerces.internal.xni.NamespaceContext;
 
 public class CompressedAggXMLReader<VALUEIN> extends
     AggregateXMLReader<VALUEIN> {
@@ -48,7 +46,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
         initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
-        factory = new AggregateXMLInputFactoryImpl();
+        factory = XMLInputFactory.newInstance();
 
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
@@ -155,9 +153,8 @@ public class CompressedAggXMLReader<VALUEIN> extends
         }
         return true;
     }
-    public CompressedAggXMLReader(String recordElem,
-        String namespace, NamespaceContext nsctx) {
-        super(recordElem, namespace, nsctx);
+    public CompressedAggXMLReader() {
+        super();
     }
 
 }
