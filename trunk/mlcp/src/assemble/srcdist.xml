@@ -9,6 +9,9 @@
         <fileSet>
             <directory>src</directory>
             <outputDirectory>/src</outputDirectory>
+            <excludes>
+            	<exclude>**/test/**</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
     <files>
