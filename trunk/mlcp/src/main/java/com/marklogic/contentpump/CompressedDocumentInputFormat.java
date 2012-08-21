@@ -26,6 +26,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 
@@ -47,7 +48,11 @@ FileAndDirectoryInputFormat<DocumentURI, VALUE> {
 	public RecordReader<DocumentURI, VALUE> createRecordReader(InputSplit arg0,
 			TaskAttemptContext arg1) throws IOException, InterruptedException {
 	    Configuration conf = arg1.getConfiguration();
-	    if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false)) {
+	    boolean streaming = conf.getBoolean(
+	            MarkLogicConstants.OUTPUT_STREAMING, false);
+	    String typeString = conf.get(MarkLogicConstants.CONTENT_TYPE);
+	    if (streaming ||
+	        ContentType.MIXED == ContentType.forName(typeString)) {
 	        return (RecordReader<DocumentURI, VALUE>) 
 	            new CompressedStreamingReader();
 	    } else {
