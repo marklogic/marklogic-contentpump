@@ -5,6 +5,7 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
@@ -21,6 +22,7 @@ public class ZipEntryInputStream extends InputStream {
     
     private ZipInputStream zipIn;
     private String fileName;
+    private String entryName;
     
     public ZipEntryInputStream(ZipInputStream zipIn, String fileName) {
         this.zipIn = zipIn;   
@@ -30,11 +32,20 @@ public class ZipEntryInputStream extends InputStream {
     }
     
     public boolean hasNext() {
-        try {
-            return zipIn.getNextEntry() != null;
+        try {        
+            ZipEntry entry;
+            while ((entry = zipIn.getNextEntry()) != null) {
+                if (entry.getSize() > 0) {
+                    entryName = entry.getName();
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Zip entry name: " + entryName);
+                    }
+                    return true;
+                }    
+            }
+            return false;
         } catch (IOException e) {
-            LOG.error("Error getting next zip entry from " + fileName,
-                    e);
+            LOG.error("Error getting next zip entry from " + fileName, e);
             return false;
         }
     }
@@ -44,10 +55,11 @@ public class ZipEntryInputStream extends InputStream {
         int bytes = zipIn.read();
         if (bytes == -1) {
             // advance the stream to the next entry if done with this one.
-            zipIn.getNextEntry();
+            hasNext();
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("bytes read from " + fileName + ": " + bytes);
+            LOG.debug("bytes read from " + fileName + " " + entryName + 
+                    ": " + bytes);
         }
         return bytes;
     }
@@ -56,10 +68,11 @@ public class ZipEntryInputStream extends InputStream {
     public int read(byte[] buf) throws IOException {
         int bytes = zipIn.read(buf);
         if (bytes == -1) {
-            zipIn.getNextEntry();
+            hasNext();
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("bytes read from " + fileName + ": " + bytes);
+            LOG.debug("bytes read from " + fileName + " " + entryName + 
+                    ": " + bytes);
         }
         return bytes;
     }
@@ -68,10 +81,11 @@ public class ZipEntryInputStream extends InputStream {
     public int read(byte[] b, int off, int len) throws IOException {
         int bytes = zipIn.read();
         if (bytes == -1) {
-            zipIn.getNextEntry();
+            hasNext();
         }
         if (LOG.isDebugEnabled()) {
-            LOG.debug("bytes read from " + fileName + ": " + bytes);
+            LOG.debug("bytes read from " + fileName + " " + entryName + 
+                    ": " + bytes);
         }
         return bytes;
     }  
