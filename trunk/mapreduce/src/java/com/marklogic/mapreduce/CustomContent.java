@@ -11,6 +11,13 @@ import com.marklogic.xcc.ContentCreateOptions;
 
 /**
  * This is a Writable Interface for custom content.
+ *
+ * Use this class with ContentOutputFormat and your own Reader to
+ * load documents into MarkLogic Server with finer grained control
+ * over permissions, properties, collections, and content quality
+ * than is provided by the per-job configuration properties such
+ * as mapreduce.marklogic.output.content.permission.
+ *
  * @author ali
  */
 public interface CustomContent extends Writable{
