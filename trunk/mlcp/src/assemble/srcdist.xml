@@ -2,23 +2,29 @@
 <assembly>
     <id>src</id>
     <formats>
-        <format>zip</format>
+      <format>zip</format>
     </formats>
     <includeBaseDirectory>true</includeBaseDirectory>
     <fileSets>
-        <fileSet>
-            <directory>src</directory>
-            <outputDirectory>/src</outputDirectory>
-            <excludes>
-            	<exclude>**/test/**</exclude>
-            </excludes>
-        </fileSet>
+      <fileSet>
+        <directory>src</directory>
+        <outputDirectory>/src</outputDirectory>
+        <excludes>
+          <exclude>**/test/**</exclude>
+        </excludes>
+      </fileSet>
+      <fileSet>
+        <includes>
+          <include>LICENSE*</include>
+          <include>LEGAL*</include>
+        </includes>
+      </fileSet>
     </fileSets>
     <files>
-        <file>
-            <source>pom.xml</source>
-            <outputDirectory>/</outputDirectory>
-        </file>
+      <file>
+        <source>pom.xml</source>
+        <outputDirectory>/</outputDirectory>
+      </file>
     </files>
 </assembly>
 
