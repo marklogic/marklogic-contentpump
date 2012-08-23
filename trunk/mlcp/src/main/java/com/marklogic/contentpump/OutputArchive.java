@@ -28,6 +28,11 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+/**
+ * Archive for export, create zip file(s).
+ * @author ali
+ *
+ */
 public class OutputArchive {
     public static final Log LOG = LogFactory.getLog(OutputArchive.class);
     public static String EXTENSION = ".zip";

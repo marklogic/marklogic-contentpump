@@ -31,6 +31,12 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 
+/**
+ * Reader for SequenceFileInputFormat.
+ * @author ali
+ *
+ * @param <VALUEIN>
+ */
 public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(SequenceFileReader.class);
     protected SequenceFile.Reader reader;

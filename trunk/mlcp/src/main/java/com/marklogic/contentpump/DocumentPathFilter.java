@@ -26,6 +26,11 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 
+/**
+ * The configured input file pattern applied to input file path.
+ * @author ali
+ *
+ */
 public class DocumentPathFilter implements PathFilter, Configurable {
     public static final Log LOG = LogFactory.getLog(DocumentPathFilter.class);
     private String pattern;

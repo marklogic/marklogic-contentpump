@@ -27,6 +27,13 @@ import com.marklogic.xcc.exceptions.UnimplementedFeatureException;
 import com.marklogic.xcc.types.XSInteger;
 import com.thoughtworks.xstream.XStream;
 
+/**
+ * Metadata of a MarkLogicDocument, includes properties, permissions, quality
+ * and collections.
+ * 
+ * @author ali
+ * 
+ */
 public class DocumentMetadata {
     static XStream xstream = new XStream();
     /**

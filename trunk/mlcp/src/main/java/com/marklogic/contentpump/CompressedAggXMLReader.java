@@ -23,6 +23,12 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.mapreduce.CompressionCodec;
 
+/**
+ * Reader for CompressedAggXMLInputFormat.
+ * @author ali
+ *
+ * @param <VALUEIN>
+ */
 public class CompressedAggXMLReader<VALUEIN> extends
     AggregateXMLReader<VALUEIN> {
     public static final Log LOG = LogFactory

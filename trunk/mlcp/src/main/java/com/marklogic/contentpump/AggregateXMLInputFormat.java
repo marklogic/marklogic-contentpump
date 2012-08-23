@@ -26,7 +26,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.marklogic.mapreduce.DocumentURI;
 
 /**
- * InputFormat for aggregate XML
+ * InputFormat for aggregate XML.
  */
 public class AggregateXMLInputFormat extends FileAndDirectoryInputFormat<DocumentURI, Text> {
    

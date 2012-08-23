@@ -25,10 +25,11 @@ import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicInputFormat;
 
 /**
- * MarkLogic-based InputFormat for Database Content, taking DocumentURI as key class and a generic value 
- * class.
+ * MarkLogic-based InputFormat for Database Content, taking DocumentURI as key
+ * class and a generic value class.
+ * 
  * @author ali
- *
+ * 
  * @param <VALUE>
  */
 public class DatabaseContentInputFormat<VALUE> extends

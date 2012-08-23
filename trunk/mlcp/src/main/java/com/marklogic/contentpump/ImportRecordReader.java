@@ -33,6 +33,12 @@ import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 
+/**
+ * Abstract class of RecorderReader for import.
+ * @author ali
+ *
+ * @param <VALUEIN>
+ */
 public abstract class ImportRecordReader<VALUEIN> extends
     RecordReader<DocumentURI, VALUEIN> implements ConfigConstants {
     public static final Log LOG = LogFactory.getLog(ImportRecordReader.class);

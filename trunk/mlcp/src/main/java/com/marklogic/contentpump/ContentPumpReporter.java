@@ -20,7 +20,10 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.StatusReporter;
-
+/**
+ * Reporter for Content Pump.
+ *
+ */
 public class ContentPumpReporter extends StatusReporter {
     public static final Log LOG = LogFactory.getLog(ContentPumpReporter.class);
     protected Counters counters = new Counters();

@@ -38,6 +38,11 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.mapreduce.CompressionCodec;
 
+/**
+ * Reader for CompressedDelimitedTextInputFormat.
+ * @author ali
+ *
+ */
 public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
     public static final Log LOG = LogFactory
         .getLog(CompressedDelimitedTextReader.class);

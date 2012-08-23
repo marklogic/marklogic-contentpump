@@ -22,7 +22,11 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.mapreduce.DocumentInputFormat;
-
+/**
+ * Enum of output types for export.
+ * @author ali
+ *
+ */
 @SuppressWarnings("unchecked")
 public enum ExportOutputType {
     DOCUMENT {

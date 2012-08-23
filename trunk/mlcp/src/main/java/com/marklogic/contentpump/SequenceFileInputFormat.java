@@ -23,7 +23,12 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.DocumentURI;
 
-
+/**
+ * InputFromat for SequenceFile.
+ * @author ali
+ *
+ * @param <VALUE>
+ */
 public class SequenceFileInputFormat <VALUE> extends 
 FileAndDirectoryInputFormat<DocumentURI, VALUE> {
 
