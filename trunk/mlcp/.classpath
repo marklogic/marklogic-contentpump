@@ -7,10 +7,12 @@
 	<classpathentry kind="lib" path="/space/projects/xcc/mlcp/marklogic-contentpump-1.0/lib/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="/space/hadoop-0.23.1/share/hadoop/common/lib/avro-1.5.3.jar"/>
 	<classpathentry kind="lib" path="/space/hadoop-0.23.1/share/hadoop/common/lib/log4j-1.2.15.jar"/>
-	<classpathentry kind="lib" path="/space/projects/xcc/mlcp/marklogic-contentpump-1.0/conf"/>
+	<classpathentry kind="lib" path="/space/projects/xcc/mlcp/src/conf"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/xcc"/>
 	<classpathentry kind="lib" path="/space/projects/xcc/mapreduce/buildtmp/java/marklogic-mapreduce-1.1.jar" sourcepath="/Mapreduce"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/src"/>
 	<classpathentry kind="lib" path="/space/hadoop-0.20.2/build/hadoop-0.20.3-dev-core.jar"/>
+	<classpathentry kind="lib" path="target/dependency/xpp3-1.1.3.3.jar"/>
+	<classpathentry kind="lib" path="target/dependency/xstream-1.4.2.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

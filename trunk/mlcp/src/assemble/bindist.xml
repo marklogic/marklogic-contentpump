@@ -22,20 +22,26 @@
     </fileSet>
     <fileSet>
       <directory>src/main</directory>
-        <outputDirectory>/bin</outputDirectory>
-        <fileMode>0755</fileMode>
-        <includes>
-          <include>*.sh</include>
-          <include>*.bat</include>
-        </includes>
+      <outputDirectory>/bin</outputDirectory>
+      <fileMode>0755</fileMode>
+      <includes>
+        <include>*.sh</include>
+        <include>*.bat</include>
+      </includes>
     </fileSet>
     <fileSet>
       <directory>src/conf</directory>
-        <outputDirectory>/conf</outputDirectory>
-        <fileMode>0755</fileMode>
-        <includes>
-          <include>log4j.properties</include>
-        </includes>
+      <outputDirectory>/conf</outputDirectory>
+      <fileMode>0755</fileMode>
+      <includes>
+        <include>log4j.properties</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <includes>
+        <include>LICENSE*</include>
+        <include>LEGAL*</include>
+      </includes>
     </fileSet>
   </fileSets>
 </assembly>
