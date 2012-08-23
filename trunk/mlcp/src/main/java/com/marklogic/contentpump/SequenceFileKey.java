@@ -17,6 +17,11 @@ package com.marklogic.contentpump;
 
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * Interface for SequenceFile key class.
+ * @author ali
+ *
+ */
 public interface SequenceFileKey {
     DocumentURI getDocumentURI();
 }

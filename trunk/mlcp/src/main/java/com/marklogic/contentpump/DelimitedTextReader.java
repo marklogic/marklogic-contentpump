@@ -31,6 +31,12 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+/**
+ * Reader for DelimitedTextInputFormat.
+ * @author ali
+ *
+ * @param <VALUEIN>
+ */
 public class DelimitedTextReader<VALUEIN> extends
     ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(DelimitedTextReader.class);

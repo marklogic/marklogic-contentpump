@@ -15,6 +15,12 @@
  */
 package com.marklogic.contentpump;
 
+/**
+ * Interface for SequenceFile value class.
+ * @author ali
+ *
+ * @param <T>
+ */
 public interface SequenceFileValue<T> {
     T getValue();
 }

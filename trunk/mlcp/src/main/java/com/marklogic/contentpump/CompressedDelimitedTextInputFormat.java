@@ -26,6 +26,11 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * InputFormat for compressed delimited text.
+ * @author ali
+ *
+ */
 public class CompressedDelimitedTextInputFormat extends 
 FileAndDirectoryInputFormat<DocumentURI, Text> {
     @Override

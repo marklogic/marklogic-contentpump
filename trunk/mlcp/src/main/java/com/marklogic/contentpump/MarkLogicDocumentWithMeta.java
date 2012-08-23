@@ -24,6 +24,11 @@ import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
 
+/**
+ * MarkLogicDocument with metadata, usually constructed when importing archive.
+ * @author ali
+ *
+ */
 public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
     protected DocumentMetadata meta;
 

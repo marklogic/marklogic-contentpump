@@ -26,6 +26,13 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * InputFormat for delimited text. Each line after metadata(1st line) is a
+ * record.
+ * 
+ * @author ali
+ * 
+ */
 public class DelimitedTextInputFormat extends
 FileAndDirectoryInputFormat<DocumentURI, Text> {
 

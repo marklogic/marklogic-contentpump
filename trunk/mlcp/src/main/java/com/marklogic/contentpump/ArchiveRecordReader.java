@@ -35,7 +35,8 @@ import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
 /**
- * Read archive, construct MarkLogicDocumentWithMeta as value
+ * Read archive, construct MarkLogicDocumentWithMeta as value.
+ * 
  * @author ali
  *
  */

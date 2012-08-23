@@ -18,7 +18,7 @@ package com.marklogic.contentpump;
 import com.marklogic.mapreduce.StreamLocator;
 
 /**
- * InputFormat for reading compressed documents from file systems and produce
+ * Reader for compressed documents from file systems and produce
  * <DocumentURI, Path> pairs. 
  * 
  * @author jchen

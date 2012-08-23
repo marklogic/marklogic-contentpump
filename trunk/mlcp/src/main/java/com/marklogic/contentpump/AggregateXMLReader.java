@@ -40,6 +40,13 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.contentpump.utilities.LocalIdGenerator;
 
+/**
+ * Reader for AggregateXMLInputFormat.
+ * 
+ * @author ali
+ *
+ * @param <VALUEIN>
+ */
 public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(AggregateXMLReader.class);
     protected static Pattern[] patterns = new Pattern[] {

@@ -36,7 +36,12 @@ import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
-
+/**
+ * Custom content that has stored its own file name.
+ * @author ali
+ *
+ * @param <VALUE>
+ */
 public class ContentWithFileNameWritable<VALUE> implements CustomContent {
     public static final Log LOG = 
         LogFactory.getLog(ContentWithFileNameWritable.class);

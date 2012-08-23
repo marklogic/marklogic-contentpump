@@ -36,7 +36,7 @@ import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
  * ContentOutputFormat for importing archive to MarkLogic and copying from
- * source MarkLogic Server to destination MarkLogic Server
+ * source MarkLogic Server to destination MarkLogic Server.
  * 
  * @author ali
  * 

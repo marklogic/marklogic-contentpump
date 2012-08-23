@@ -24,6 +24,11 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * InputFormat for compressed aggregate XML.
+ * @author ali
+ *
+ */
 public class CompressedAggXMLInputFormat extends
 FileAndDirectoryInputFormat<DocumentURI, Text> {
 

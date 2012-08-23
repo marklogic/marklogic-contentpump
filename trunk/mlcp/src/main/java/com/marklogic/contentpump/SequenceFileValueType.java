@@ -21,6 +21,11 @@ import org.apache.hadoop.io.Writable;
 
 import com.marklogic.mapreduce.MarkLogicNode;
 
+/**
+ * Enum for SequenceFile value types.
+ * @author ali
+ *
+ */
 public enum SequenceFileValueType {
     MARKLOGICNODE {
         @Override

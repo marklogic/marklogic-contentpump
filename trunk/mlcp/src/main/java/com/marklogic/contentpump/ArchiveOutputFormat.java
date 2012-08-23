@@ -26,6 +26,11 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
+/**
+ * OutputFormat for archive exported from MarkLogic.
+ * @author ali
+ *
+ */
 public class ArchiveOutputFormat extends
     FileOutputFormat<DocumentURI, MarkLogicDocument> {
     @Override

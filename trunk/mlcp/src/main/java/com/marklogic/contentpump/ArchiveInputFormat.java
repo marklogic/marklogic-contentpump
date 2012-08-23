@@ -25,7 +25,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.DocumentURI;
 /**
- * FileInputFormat for reading archive
+ * FileInputFormat for reading archive.
  * @author ali
  *
  */
