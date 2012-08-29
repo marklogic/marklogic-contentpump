@@ -60,7 +60,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private int recordDepth = Integer.MAX_VALUE;
     private StringBuilder buffer;
     protected String idName;
-    private boolean skippingRecord = false;
     protected String currentId = null;
     private boolean keepGoing = true;
     protected HashMap<String, Stack<String>> nameSpaces = 
@@ -151,13 +150,10 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     private void write(String str) {
-        if (skippingRecord) {
-            return;
-        }
         if (buffer == null) {
             buffer = new StringBuilder();
         }
-        if (currDepth >= recordDepth) {
+        if (newDoc && currDepth >= recordDepth) {
             buffer.append(str);
         }
 
@@ -263,6 +259,9 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         
         copyNameSpaceDecl();
 
+        if (!newDoc) {
+            return;
+        }
         StringBuilder sb = new StringBuilder();
         sb.append("<");
         if (prefix != null && !prefix.equals("")) {
@@ -338,6 +337,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         // return;
         // }
         write(sb.toString());
+        
     }
 
     /**
@@ -347,10 +347,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
      */
     @SuppressWarnings("unchecked")
     private boolean processEndElement() throws XMLStreamException {
-        if (skippingRecord) {
-            return false;
-        }
-        
         String name = xmlSR.getLocalName();
         String namespace = xmlSR.getNamespaceURI();
         if (LOG.isTraceEnabled()) {
