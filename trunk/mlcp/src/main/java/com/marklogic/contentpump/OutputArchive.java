@@ -95,7 +95,6 @@ public class OutputArchive {
         } else {
             path = path + "-" + count;
         }
-        assert path.equals(canonicalPath);
         return path;
     }
 
