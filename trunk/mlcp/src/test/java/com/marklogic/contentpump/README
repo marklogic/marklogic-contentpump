@@ -1,0 +1,5 @@
+To run unit tests, a XDBC server with port 5275 is required to associate with Documents database in MarkLogic Server running on localhost.
+TestDistributedXXXs require Hadoop running on localhost.
+TestCopy requires a XDBC server with port 6275 associated with database "CopyDst".
+
+Modify the constants in Constants.java according to your environment.
