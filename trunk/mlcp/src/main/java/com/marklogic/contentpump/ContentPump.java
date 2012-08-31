@@ -68,7 +68,7 @@ public class ContentPump implements ConfigConstants {
     }
 
     @SuppressWarnings("deprecation")
-    private static int runCommand(String[] args) throws IOException {
+    public static int runCommand(String[] args) throws IOException {
         // get command
         String cmd = args[0];
         if (cmd.equalsIgnoreCase("help")) {
