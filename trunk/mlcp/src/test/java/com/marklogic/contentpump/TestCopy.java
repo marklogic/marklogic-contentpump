@@ -12,7 +12,7 @@ public class TestCopy extends TestCase {
         super(name);
     }
     
-    public void testExportArchive() throws Exception {
+    public void testCopy() throws Exception {
         Utils.deleteDirectory(new File(Constants.OUT_PATH.toUri().getPath()));
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"
@@ -24,7 +24,8 @@ public class TestCopy extends TestCase {
         String[] args = cmd.split(" ");
 
         Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
-
+        Utils.clearDB("xcc://admin:admin@localhost:6275", "CopyDst");
+        
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
