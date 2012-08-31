@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page xml:lang="en" xmlns="http://www.mediawiki.org/xml/export-0.4/">
+    <title>Aristotle</title>
+    <id>308</id>
+    <revision>
+      <id>320983677</id>
+      <timestamp>2009-10-20T11:27:15Z</timestamp>
+      <contributor>
+        <username>FoxBot</username>
+        <id>10254013</id>
+      </contributor>
+      <minor/>
+      <comment>
+<p>robot Modifying: <a href="http://ta.wikipedia.org/wiki/%E0%AE%85%E0%AE%B0%E0%AE%BF%E0%AE%9A%E0%AF%81%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AE%BE%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AE%BF%E0%AE%B2%E0%AF%8D">ta:அரிசுட்டாட்டில்</a></p></comment>
+      <text xml:space="preserve">
+<p>{{pp-semi-protected}}
+{{Otheruses}}
+{{Infobox Philosopher}}</p>
+<p>{{Aristotelianism}}
+<b>Aristotle</b> ({{lang-el}}, <i>Aristotélēs</i>) (384 BC – 322 BC) was a <a href="Greeks" title="Greeks">Greek</a> philosopher, a student of <a href="Plato" title="Plato">Plato</a> and teacher of <a href="Alexander_the_Great" title="Alexander the Great">Alexander the Great</a>. He wrote on many subjects, including physics, <a href="Metaphysics" title="metaphysics">metaphysics</a>, <a href="Poetics_(Aristotle)" title="Poetics (Aristotle)">poetry</a>, theater, music, logic, rhetoric, politics, government, ethics, biology, and zoology.
+Together with Plato and <a href="Socrates" title="Socrates">Socrates</a> (Plato's teacher), Aristotle is one of the most important founding figures in <a href="Western_philosophy" title="Western philosophy">Western philosophy</a>. He was the first to create a comprehensive system of Western philosophy, encompassing morality and aesthetics, logic and science, politics and metaphysics.</p>
+<p>Aristotle's views on the <a href="Aristotelian_physics" title="Aristotelian physics">physical sciences</a> profoundly shaped medieval scholarship, and their influence extended well into the <a href="Renaissance" title="Renaissance">Renaissance</a>, although they were ultimately replaced by Newtonian physics. In the biological sciences, some of his observations were confirmed to be accurate only in the nineteenth century. His works contain the earliest known formal study of logic, which was incorporated in the late nineteenth century into modern <a href="Formal_logic" title="formal logic">formal logic</a>. In metaphysics, <a href="Aristotelianism" title="Aristotelianism">Aristotelianism</a> had a profound influence on <a href="Judeo-Islamic_philosophies_(800_-_1400)" title="Judeo-Islamic philosophies (800 - 1400)">philosophical and theological thinking in the Islamic and Jewish traditions</a> in the <a href="Middle_Ages" title="Middle Ages">Middle Ages</a>, and it continues to influence <a href="Christian_theology" title="Christian theology">Christian theology</a>, especially <a href="Eastern_Orthodox_Christian_theology" title="Eastern Orthodox Christian theology">Eastern Orthodox theology</a>, and the <a href="Scholasticism" title="scholasticism">scholastic</a> tradition of the <a href="Catholic_Church" title="Catholic Church">Catholic Church</a>. His ethics, though always influential, gained renewed interest with the modern advent of <a href="Virtue_ethics" title="virtue ethics">virtue ethics</a>. All aspects of Aristotle's philosophy continue to be the object of active academic study today. Though Aristotle wrote many elegant treatises and dialogues (<a href="Cicero" title="Cicero">Cicero</a> described his literary style as "a river of gold"),<sup id="_ref-1" class="reference"><a href="#_note-1" title="">[1]</a></sup> it is thought that the majority of his writings are now lost and only about one-third of the original works have survived.<sup id="_ref-2" class="reference"><a href="#_note-2" title="">[2]</a></sup></p>
+<table id="toc" class="toc" summary="Contents">
+<tr>
+<td>
+<div id="toctitle">
+<h2>Contents</h2>
+</div>
+<ul>
+<ul>
+<li class="toclevel-1"><a href="#Life">Life</a>
+</li>
+<li class="toclevel-1"><a href="#Logic">Logic</a>
+</li>
+<ul>
+<li class="toclevel-2"><a href="#History">History</a>
+</li>
+<li class="toclevel-2"><a href="#Analytics_and_the_Organon">Analytics and the Organon</a>
+</li>
+</ul>
+<li class="toclevel-1"><a href="#Aristotle's_scientific_method">Aristotle's scientific method</a>
+</li>
+<li class="toclevel-1"><a href="#Physics">Physics</a>
+</li>
+<ul>
+<li class="toclevel-2"><a href="#The_five_elements">The five elements</a>
+</li>
+<li class="toclevel-2"><a href="#Causality.2C_The_Four_Causes">Causality, The Four Causes</a>
+</li>
+<li class="toclevel-2"><a href="#Optics">Optics</a>
+</li>
+<li class="toclevel-2"><a href="#Chance_and_spontaneity">Chance and spontaneity</a>
+</li>
+</ul>
+<li class="toclevel-1"><a href="#Metaphysics">Metaphysics</a>
+</li>
+<ul>
+<li class="toclevel-2"><a href="#Substance.2C_potentiality_and_actuality">Substance, potentiality and actuality</a>
+</li>
+<li class="toclevel-2"><a href="#Universals_and_particulars">Universals and particulars</a>
+</li>
+</ul>
+<li class="toclevel-1"><a href="#Biology_and_medicine">Biology and medicine</a>
+</li>
+<ul>
+<li class="toclevel-2"><a href="#Empirical_research_program">Empirical research program</a>
+</li>
+<li class="toclevel-2"><a href="#Classification_of_living_things">Classification of living things</a>
+</li>
+</ul>
+<li class="toclevel-1"><a href="#Legacy">Legacy</a>
+</li>
+<ul>
+<li class="toclevel-2"><a href="#Development_of_logic">Development of logic</a>
+</li>
+<li class="toclevel-2"><a href="#Later_Greek_philosophers">Later Greek philosophers</a>
+</li>
+<li class="toclevel-2"><a href="#Influence_on_Christian_theologians">Influence on Christian theologians</a>
+</li>
+<li class="toclevel-2"><a href="#Views_on_women">Views on women</a>
+</li>
+<li class="toclevel-2"><a href="#Post-Enlightenment_thinkers">Post-Enlightenment thinkers</a>
+</li>
+</ul>
+<li class="toclevel-1"><a href="#List_of_works">List of works</a>
+</li>
+<li class="toclevel-1"><a href="#See_also">See also</a>
+</li>
+<li class="toclevel-1"><a href="#Notes_and_references">Notes and references</a>
+</li>
+<li class="toclevel-1"><a href="#Further_reading">Further reading</a>
+</li>
+<li class="toclevel-1"><a href="#External_links">External links</a>
+</li>
+</ul>
+</ul></td></tr></table><hr/>
+<a id="Life" name="Life"/><h2>Life</h2>
+<p>Aristotle was born in <a href="Stageira" title="Stageira">Stageira</a>, <a href="Chalcidice" title="Chalcidice">Chalcidice</a>, in 384 BC, about {{convert}} east of modern-day <a href="Thessaloniki" title="Thessaloniki">Thessaloniki</a>.<sup id="_ref-3" class="reference"><a href="#_note-3" title="">[3]</a></sup> His father <a href="Nicomachus_(father_of_Aristotle)" title="Nicomachus (father of Aristotle)">Nicomachus</a> was the personal physician to <a href="Amyntas_III_of_Macedon" title="Amyntas III of Macedon">King Amyntas of Macedon</a>. Aristotle was trained and educated as a member of the <a href="Aristocracy" title="aristocracy">aristocracy</a>. At about the age of eighteen, he went to <a href="Athens" title="Athens">Athens</a> to continue his education at <a href="Platonic_Academy" title="Platonic Academy">Plato's Academy</a>. Aristotle remained at the academy for nearly twenty years, not leaving until after Plato's death in 347 BC. He then traveled with <a href="Xenocrates" title="Xenocrates">Xenocrates</a> to the court of his friend <a href="Hermias_of_Atarneus" title="Hermias of Atarneus">Hermias of Atarneus</a> in Asia Minor. While in Asia, Aristotle traveled with <a href="Theophrastus" title="Theophrastus">Theophrastus</a> to the island of <a href="Lesbos_Island" title="Lesbos Island">Lesbos</a>, where together they researched the <a href="Botany" title="botany">botany</a> and zoology of the island. Aristotle married Hermias's adoptive daughter (or niece) <a href="Pythias" title="Pythias">Pythias</a>. She bore him a daughter, whom they named Pythias. Soon after Hermias' death, Aristotle was invited by <a href="Philip_II_of_Macedon" title="Philip II of Macedon">Philip II of Macedon</a> to become the tutor to his son <a href="Alexander_the_Great" title="Alexander the Great">Alexander the Great</a> in 343 B.C.<sup id="_ref-philosophy1972_a" class="reference"><a href="#_note-philosophy1972" title="">[4]</a></sup></p>
+<p><a class="internal" href="Image:Arabic_aristotle.jpg" title="Early Islamic portrayal of Aristotle"><img src="Arabic_aristotle.jpg" alt="Early Islamic portrayal of Aristotle" title="Early Islamic portrayal of Aristotle" class="location-left type-thumb"/>
+</a>
+<div class="thumbcaption">Early Islamic portrayal of Aristotle</div>
+Aristotle was appointed as the head of the royal academy of <a href="Macedon" title="Macedon">Macedon</a>. During that time he gave lessons not only to Alexander, but also to two other future kings: <a href="Ptolemy_I_Soter" title="Ptolemy I Soter">Ptolemy</a> and <a href="Cassander" title="Cassander">Cassander</a>. In his <i>Politics</i>, Aristotle states that only one thing could justify monarchy, and that was if the virtue of the king and his family were greater than the virtue of the rest of the citizens put together. Tactfully, he included the young prince and his father in that category. Aristotle encouraged Alexander toward eastern conquest, and his attitude towards Persia was unabashedly ethnocentric. In one famous example, he counsels Alexander to be 'a leader to the Greeks and a despot to the barbarians, to look after the former as after friends and relatives, and to deal with the latter as with beasts or plants'.<sup id="_ref-5" class="reference"><a href="#_note-5" title="">[5]</a></sup></p>
+<p>By 335 BC he had returned to Athens, establishing his own school there known as the <a href="Lyceum" title="Lyceum">Lyceum</a>. Aristotle conducted courses at the school for the next twelve years. While in Athens, his wife Pythias died and Aristotle became involved with <a href="Herpyllis" title="Herpyllis">Herpyllis</a> of <a href="Stageira" title="Stageira">Stageira</a>, who bore him a son whom he named after his father, <a href="Nicomachus_(son_of_Aristotle)" title="Nicomachus (son of Aristotle)">Nicomachus</a>. According to the <a href="Suda" title="Suda">Suda</a>, he also had an <a href="Eromenos" title="eromenos">eromenos</a>, <a href="Palaephatus" title="Palaephatus">Palaephatus of Abydus</a>.<sup id="_ref-6" class="reference"><a href="#_note-6" title="">[6]</a></sup></p>
+<p>It is during this period in Athens from 335 to 323 BC when Aristotle is believed to have composed many of his works.<sup id="_ref-philosophy1972_b" class="reference"><a href="#_note-philosophy1972" title="">[4]</a></sup> Aristotle wrote many dialogues, only fragments of which survived. The works that have survived are in <a href="Treatise" title="treatise">treatise</a> form and were not, for the most part, intended for widespread publication, as they are generally thought to be lecture aids for his students. His most important treatises include <i><a href="Physics_(Aristotle)" title="Physics (Aristotle)">Physics</a></i>, <i><a href="Metaphysics_(Aristotle)" title="Metaphysics (Aristotle)">Metaphysics</a></i>, <i><a href="Nicomachean_Ethics" title="Nicomachean Ethics">Nicomachean Ethics</a></i>, <i><a href="Politics_(Aristotle)" title="Politics (Aristotle)">Politics</a></i>, <i><a href="De_Anima" title="De Anima">De Anima</a> (On the Soul)</i> and <i><a href="Poetics_(Aristotle)" title="Poetics (Aristotle)">Poetics</a></i>.</p>
+<p>Aristotle not only studied almost every subject possible at the time, but made significant contributions to most of them. In physical science, Aristotle studied anatomy, astronomy, economics, <a href="Embryology" title="embryology">embryology</a>, geography, geology, meteorology, physics and zoology. In philosophy, he wrote on aesthetics, ethics, government, metaphysics, politics, psychology, rhetoric and theology. He also studied education, foreign customs, literature and poetry. His combined works constitute a virtual encyclopedia of Greek knowledge. It has been suggested that Aristotle was probably the last person to know everything there was to be known in his own time.<sup id="_ref-7" class="reference"><a href="#_note-7" title="">[7]</a></sup></p>
+<p>Near the end of Alexander's life, Alexander began to suspect plots against himself, and threatened Aristotle in letters. Aristotle had made no secret of his contempt for Alexander's pretense of divinity, and the king had executed Aristotle's grandnephew <a href="Callisthenes" title="Callisthenes">Callisthenes</a> as a traitor. A widespread tradition in antiquity suspected Aristotle of playing a role in Alexander's death, but there is little evidence for this.<sup id="_ref-8" class="reference"><a href="#_note-8" title="">[8]</a></sup></p>
+<p>Upon Alexander's death, anti-Macedonian sentiment in Athens once again flared. <a href="Eurymedon_the_hierophant" title="Eurymedon the hierophant">Eurymedon the hierophant</a> denounced Aristotle for not holding the gods in honor. Aristotle fled the city to his mother's family estate in <a href="Chalcis" title="Chalcis">Chalcis</a>, explaining, "I will not allow the Athenians to sin twice against philosophy,"<sup id="_ref-9" class="reference"><a href="#_note-9" title="">[9]</a></sup> a reference to Athens's prior <a href="Trial_of_Socrates" title="Trial of Socrates">trial and execution of Socrates</a>. However, he died in Euboea of natural causes within the year (in 322 BC). Aristotle named chief executor his student <a href="Antipater" title="Antipater">Antipater</a> and left a <a href="Will_(law)" title="Will (law)">will</a> in which he asked to be buried next to his wife.<sup id="_ref-10" class="reference"><a href="#_note-10" title="">[10]</a></sup></p>
+<a id="Logic" name="Logic"/><h2>Logic</h2>
+<p><a class="internal" href="Image:Aristotle_in_Nuremberg_Chronicle.jpg" title="Aristotle portrayed in the 1493 Nuremberg Chronicle as a 15th-century-A.D. scholar"><img src="Aristotle_in_Nuremberg_Chronicle.jpg" alt="Aristotle portrayed in the 1493 Nuremberg Chronicle as a 15th-century-A.D. scholar" title="Aristotle portrayed in the 1493 Nuremberg Chronicle as a 15th-century-A.D. scholar" class="location-none type-thumb"/>
+</a>
+<div class="thumbcaption">Aristotle portrayed in the 1493 <i><a href="Nuremberg_Chronicle" title="Nuremberg Chronicle">Nuremberg Chronicle</a></i> as a 15th-century-A.D. scholar</div>
+{{Main}}
+{{details}}</p>
+<p>With the <i><a href="Prior_Analytics" title="Prior Analytics">Prior Analytics</a></i>, Aristotle is credited with the earliest study of <a href="Formal_logic" title="formal logic">formal logic</a>, and his conception of it was the dominant form of Western logic until 19th century advances in <a href="Mathematical_logic" title="mathematical logic">mathematical logic</a>. <a href="Kant" title="Kant">Kant</a> stated in the <i>Critique of Pure Reason</i> that Aristotle's theory of logic completely accounted for the core of deductive inference.
+</p><a id="History" name="History"/><h3>History</h3>
+<p>Aristotle "says that 'on the subject of reasoning' he 'had nothing else on an earlier date to speak of'".<sup id="_ref-11" class="reference"><a href="#_note-11" title="">[11]</a></sup> However, Plato reports that <a href="Syntax" title="syntax">syntax</a> was devised before him, by <a href="Prodicus_of_Ceos" title="Prodicus of Ceos">Prodicus of Ceos</a>, who was concerned by the correct use of words. Logic seems to have emerged from <a href="Dialectics" title="dialectics">dialectics</a>; the earlier philosophers made frequent use of concepts like <i><a href="Reductio_ad_absurdum" title="reductio ad absurdum">reductio ad absurdum</a></i> in their discussions, but never truly understood the logical implications. Even Plato had difficulties with logic; although he had a reasonable conception of a <a href="Deduction" title="deduction">deduction</a> system, he could never actually construct one and relied instead on his <a href="Dialectic" title="dialectic">dialectic</a>.<sup id="_ref-Boche.C5.84ski.2C_1951_a" class="reference"><a href="#_note-Boche.C5.84ski.2C_1951" title="">[12]</a></sup> Plato believed that deduction would simply follow from <a href="Premise" title="premise">premises</a>, hence he focused on maintaining solid premises so that the <a href="Logical_consequence" title="Logical consequence">conclusion</a> would logically follow. Consequently, Plato realized that a method for obtaining conclusions would be most beneficial. He never succeeded in devising such a method, but his best attempt was published in his book <i><a href="Sophist_(dialogue)" title="Sophist (dialogue)">Sophist</a></i>, where he introduced his division method.<sup id="_ref-13" class="reference"><a href="#_note-13" title="">[13]</a></sup></p>
+<a id="Analytics_and_the_Organon" name="Analytics_and_the_Organon"/><h3>Analytics and the <i>Organon</i></h3>
+<p>{{Main}}
+What we today call <i>Aristotelian logic</i>, Aristotle himself would have labeled "analytics". The term "logic" he reserved to mean <i>dialectics</i>. Most of Aristotle's work is probably not in its original form, since it was most likely edited by students and later lecturers. The logical works of Aristotle were compiled into six books in about the early 1st century AD:
+</p>
+<ol>
+<li><i>Categories</i></li>
+<li><i>On Interpretation</i></li>
+<li><i>Prior Analytics</i></li>
+<li><i>Posterior Analytics</i></li>
+<li><i>Topics</i></li>
+<li><i>On Sophistical Refutations</i></li></ol>
+
+<p>The order of the books (or the teachings from which they are composed) is not certain, but this list was derived from analysis of Aristotle's writings. It goes from the basics, the analysis of simple terms in the <i>Categories,</i> the analysis of propositions and their elementary relations in <i>On Interpretation</i>, to the study of more complex forms, namely, syllogisms (in the <i>Analytics</i>) and dialectics (in the <i>Topics</i> and <i>Sophistical Refutations</i>). The first three treatises form the core of the logical theory <i>stricto sensu</i>: the grammar of the language of logic and the correctness rules of reasoning. There is one volume of Aristotle's concerning logic not found in the <i>Organon</i>, namely the fourth book of <i>Metaphysics.</i>.<sup id="_ref-Boche.C5.84ski.2C_1951_b" class="reference"><a href="#_note-Boche.C5.84ski.2C_1951" title="">[12]</a></sup></p>
+<a id="Aristotle's_scientific_method" name="Aristotle's_scientific_method"/><h2>Aristotle's scientific method</h2>
+<p><a class="internal" href="Image:Sanzio_01_Plato_Aristotle.jpg" title="Plato (left) and Aristotle (right), a detail of The School of Athens, a fresco by Raphael. Aristotle gestures to the earth, representing his belief in knowledge through empirical observation and experience, while holding a copy of his Nicomachean Ethics in his hand, whilst Plato gestures to the heavens, representing his belief in The Forms."><img src="Sanzio_01_Plato_Aristotle.jpg" alt="Plato (left) and Aristotle (right), a detail of The School of Athens, a fresco by Raphael. Aristotle gestures to the earth, representing his belief in knowledge through empirical observation and experience, while holding a copy of his Nicomachean Ethics in his hand, whilst Plato gestures to the heavens, representing his belief in The Forms." title="Plato (left) and Aristotle (right), a detail of The School of Athens, a fresco by Raphael. Aristotle gestures to the earth, representing his belief in knowledge through empirical observation and experience, while holding a copy of his Nicomachean Ethics in his hand, whilst Plato gestures to the heavens, representing his belief in The Forms." class="location-none type-thumb"/>
+</a>
+<div class="thumbcaption">Plato (left) and Aristotle (right), a detail of <i><a href="The_School_of_Athens" title="The School of Athens">The School of Athens</a></i>, a fresco by <a href="Raphael" title="Raphael">Raphael</a>. Aristotle gestures to the earth, representing his belief in knowledge through empirical observation and experience, while holding a copy of his <i><a href="Nicomachean_Ethics" title="Nicomachean Ethics">Nicomachean Ethics</a></i> in his hand, whilst Plato gestures to the heavens, representing his belief in <a href="The_Forms" title="The Forms">The Forms</a>.</div>
+{{details}}</p>
+<p>Like his teacher Plato, Aristotle's philosophy aims at the <a href="Universality_(philosophy)" title="Universality (philosophy)">universal</a>. Aristotle, however, found the universal in <a href="Particular" title="particular">particular</a> things, which he called the essence of things, while Plato finds that the universal exists apart from particular things, and is related to them as their <a href="Prototype" title="prototype">prototype</a> or <a href="Exemplar" title="exemplar">exemplar</a>. For Aristotle, therefore, philosophic method implies the ascent from the study of particular phenomena to the knowledge of essences, while for Plato philosophic method means the descent from a knowledge of universal <a href="Theory_of_Forms" title="Theory of Forms">Forms</a> (or ideas) to a contemplation of particular imitations of these. For Aristotle, "form" still refers to the unconditional basis of <a href="Phenomena" title="phenomena">phenomena</a> but is "instantiated" in a particular substance (see <i><a href="Aristotle#Universals_and_particulars" title="Aristotle">Universals and particulars</a></i>, below). In a certain sense, Aristotle's method is both <a href="Inductive_reasoning" title="Inductive reasoning">inductive</a> and <a href="Deductive_reasoning" title="Deductive reasoning">deductive</a>, while Plato's is essentially deductive from <i><a href="A_priori_and_a_posteriori_(philosophy)" title="A priori and a posteriori (philosophy)">a priori</a></i> principles.<sup id="_ref-14" class="reference"><a href="#_note-14" title="">[14]</a></sup></p>
+<p>In Aristotle's terminology, "natural philosophy" is a branch of philosophy examining the phenomena of the natural world, and includes fields that would be regarded today as physics, biology and other natural sciences. In modern times, the scope of <i>philosophy</i> has become limited to more generic or abstract inquiries, such as ethics and metaphysics, in which logic plays a major role. Today's philosophy tends to exclude empirical study of the natural world by means of the <a href="Scientific_method" title="scientific method">scientific method</a>. In contrast, Aristotle's philosophical endeavors encompassed virtually all facets of intellectual inquiry.</p>
+<p>In the larger sense of the word, Aristotle makes philosophy coextensive with reasoning, which he also would describe as "science". Note, however, that his use of the term <i>science</i> carries a different meaning than that covered by the term "scientific method". For Aristotle, "all science (<i>dianoia</i>) is either practical, poetical or theoretical" (<i>Metaphysics</i> 1025b25). By practical science, he means ethics and politics; by poetical science, he means the study of poetry and the other fine arts; by theoretical science, he means physics, <a href="Mathematics" title="mathematics">mathematics</a> and metaphysics.</p>
+<p>If logic (or "analytics") is regarded as a study preliminary to philosophy, the divisions of Aristotelian philosophy would consist of: (1) <a href="Logic" title="Logic">Logic</a>; (2) Theoretical Philosophy, including Metaphysics, Physics, Mathematics, (3) Practical Philosophy and (4) Poetical Philosophy.</p>
+<p>In the period between his two stays in Athens, between his times at the Academy and the Lyceum, Aristotle conducted most of the scientific thinking and research for which he is renowned today. In fact, most of Aristotle's life was devoted to the study of the objects of natural science. Aristotle's metaphysics contains observations on the nature of numbers but he made no original contributions to mathematics. He did, however, perform <a href="Original_research" title="original research">original research</a> in the natural sciences, e.g., botany, zoology, physics, astronomy, chemistry, meteorology, and several other sciences.</p>
+<p>Aristotle's writings on science are largely qualitative, as opposed to quantitative. Beginning in the sixteenth century, scientists began applying mathematics to the physical sciences, and Aristotle's work in this area was deemed hopelessly inadequate. His failings were largely due to the absence of concepts like mass, velocity, force and temperature. He had a conception of speed and temperature, but no quantitative understanding of them, which was partly due to the absence of basic experimental devices, like clocks and thermometers.</p>
+<p>His writings provide an account of many scientific observations, a mixture of precocious accuracy and curious errors. For example, in his <i><a href="History_of_Animals" title="History of Animals">History of Animals</a></i> he claimed that human males have more teeth than females<sup id="_ref-15" class="reference"><a href="#_note-15" title="">[15]</a></sup> and in the <i><a href="Generation_of_Animals" title="Generation of Animals">Generation of Animals</a></i> he said the female is as it were a deformed male.<sup id="_ref-16" class="reference"><a href="#_note-16" title="">[16]</a></sup></p>
+<p>In a similar vein, <a href="John_Philoponus" title="John Philoponus">John Philoponus</a>, and later <a href="Galileo_Galilei" title="Galileo Galilei">Galileo</a>, showed by simple experiments that Aristotle's theory that a heavier object falls faster than a lighter object is incorrect.<sup id="_ref-17" class="reference"><a href="#_note-17" title="">[17]</a></sup> On the other hand, Aristotle refuted <a href="Democritus" title="Democritus">Democritus</a>'s claim that the <a href="Milky_Way" title="Milky Way">Milky Way</a> was made up of "those stars which are shaded by the earth from the sun's rays," pointing out (correctly, even if such reasoning was bound to be dismissed for a long time) that, given "current astronomical demonstrations" that "the size of the sun is greater than that of the earth and the distance of the stars from the earth many times greater than that of the sun, then...the sun shines on all the stars and the earth screens none of them."<sup id="_ref-18" class="reference"><a href="#_note-18" title="">[18]</a></sup></p>
+<p>In places, Aristotle goes too far in deriving 'laws of the universe' from simple observation and over-stretched <a href="Reason" title="reason">reason</a>. Today's <a href="Scientific_method" title="scientific method">scientific method</a> assumes that such thinking without sufficient facts is ineffective, and that discerning the validity of one's hypothesis requires far more rigorous experimentation than that which Aristotle used to support his laws.</p>
+<p>Aristotle also had some scientific blind spots. He posited a geocentric cosmology that we may discern in selections of the <i>Metaphysics</i>, which was widely accepted up until the 1500s. From the 3rd century to the 1500s, the dominant view held that the Earth was the center of the universe (<a href="Geocentrism" title="geocentrism">geocentrism</a>).</p>
+<p>Since he was perhaps the philosopher most respected by European thinkers during and after the Renaissance, these thinkers often took Aristotle's erroneous positions as given, which held back science in this epoch.<sup id="_ref-19" class="reference"><a href="#_note-19" title="">[19]</a></sup> However, Aristotle's scientific shortcomings should not mislead one into forgetting his great advances in the many scientific fields. For instance, he founded logic as a formal science and created foundations to biology that were not superseded for two millennia. Moreover, he introduced the fundamental notion that nature is composed of things that change and that studying such changes can provide useful knowledge of underlying constants.</p>
+<a id="Physics" name="Physics"/><h2>Physics</h2>
+<p>{{Main}}
+</p><a id="The_five_elements" name="The_five_elements"/><h3>The five elements</h3>
+<p>{{Main}}
+</p>
+<ul>
+<li><a href="Fire_(classical_element)" title="Fire (classical element)">Fire</a>, which is hot and dry.</li>
+<li><a href="Earth_(classical_element)" title="Earth (classical element)">Earth</a>, which is cold and dry.</li>
+<li><a href="Air_(classical_element)" title="Air (classical element)">Air</a>, which is hot and wet.</li>
+<li><a href="Water_(classical_element)" title="Water (classical element)">Water</a>, which is cold and wet.</li>
+<li><a href="Aether_(classical_element)" title="Aether (classical element)">Aether</a>, which is the divine substance that makes up the <a href="Celestial_spheres" title="Celestial spheres">heavenly spheres</a> and heavenly bodies (stars and planets).</li></ul>
+
+<p>Each of the four earthly elements has its natural place; the earth at the centre of the universe, then water, then air, then fire. When they are out of their natural place they have natural motion, requiring no external cause, which is towards that place; so bodies sink in water, air bubbles rise up, rain falls, flame rises in air. The heavenly element has perpetual circular motion.</p>
+<a id="Causality.2C_The_Four_Causes" name="Causality.2C_The_Four_Causes"/><h3>Causality, The Four Causes</h3>
+<p>{{Main}}
+</p>
+<ul>
+<li><a href="Material_cause" title="Material cause">Material cause</a> describes the material out of which something is composed. Thus the material cause of a table is wood, and the material cause of a car is rubber and steel. It is not about action. It does not mean one domino knocks over another domino.</li>
+<li>The <a href="Formal_cause" title="formal cause">formal cause</a> tells us what a thing is, that any thing is determined by the definition, form, pattern, essence, whole, synthesis or archetype. It embraces the account of causes in terms of fundamental principles or general laws, as the whole (i.e., macrostructure) is the cause of its parts, a relationship known as the whole-part causation. Plainly put the formal cause according to which a statue or a domino, is made is the idea existing in the first place as exemplar in the mind of the sculptor, and in the second place as intrinsic, determining cause, embodied in the matter. Formal cause could only refer to the essential quality of causation. A more simple example of the formal cause is the blueprint or plan that one has before making or causing a human made object to exist.</li>
+<li>The <a href="Efficient_cause" title="efficient cause">efficient cause</a> is that from which the change or the ending of the change first starts. It identifies 'what makes of what is made and what causes change of what is changed' and so suggests all sorts of agents, nonliving or living, acting as the sources of change or movement or rest. Representing the current understanding of causality as the relation of cause and effect, this covers the modern definitions of "cause" as either the agent or agency or particular events or states of affairs. More simply again that which immediately sets the thing in motion. So take the two dominos this time of equal weighting, the first is knocked over causing the second also to fall over. This is effectively efficient cause.</li>
+<li>The <a href="Final_cause" title="final cause">final cause</a> is that for the sake of which a thing exists or is done, including both purposeful and instrumental actions and activities. The final cause or telos is the purpose or end that something is supposed to serve, or it is that from which and that to which the change is. This also covers modern ideas of mental causation involving such psychological causes as volition, need, motivation or motives, rational, irrational, ethical, and all that gives purpose to behavior.</li></ul>
+
+<p>Additionally, things can be causes of one another, causing each other reciprocally, as hard work causes fitness and vice versa, although not in the same way or function, the one is as the beginning of change, the other as the goal. (Thus Aristotle first suggested a reciprocal or circular causality as a relation of mutual dependence or influence of cause upon effect). Moreover, Aristotle indicated that the same thing can be the cause of contrary effects; its presence and absence may result in different outcomes. Simply it is the goal or purpose that brings about an event (not necessarily a mental goal). Taking our two dominos, it requires someone to intentionally knock the dominos over as they cannot fall themselves.</p>
+<p>Aristotle marked two modes of causation: proper (prior) causation and accidental (chance) causation. All causes, proper and incidental, can be spoken as potential or as actual, particular or generic. The same language refers to the effects of causes, so that generic effects assigned to generic causes, particular effects to particular causes, operating causes to actual effects. Essentially, causality does not suggest a temporal relation between the cause and the effect.</p>
+<p>All further investigations of causality will consist of imposing the favorite hierarchies on the order causes, such as final &gt; efficient &gt; material &gt; formal (<a href="Thomas_Aquinas" title="Thomas Aquinas">Thomas Aquinas</a>), or of restricting all causality to the material and efficient causes or to the efficient causality (deterministic or chance) or just to regular sequences and correlations of natural phenomena (the natural sciences describing how things happen instead of explaining the whys and wherefores).</p>
+<a id="Optics" name="Optics"/><h3>Optics</h3>
+<p>Aristotle held more accurate theories on some optical concepts than other philosophers of his day. The earliest known written evidence of a <a href="Camera_obscura" title="camera obscura">camera obscura</a> can be found in Aristotle's documentation of such a device in 350 BC in <i>Problemata</i>. Aristotle's apparatus contained a dark chamber that had a single small hole, or <a href="Aperture" title="aperture">aperture</a>, to allow for sunlight to enter. Aristotle used the device to make observations of the sun and noted that no matter what shape the hole was, the sun would still be correctly displayed as a round object. In modern cameras, this is analogous to the <a href="Diaphragm" title="diaphragm">diaphragm</a>. Aristotle also made the observation that when the distance between the tiny hole and the surface with the image increased, the image was amplified.<sup id="_ref-20" class="reference"><a href="#_note-20" title="">[20]</a></sup></p>
+<a id="Chance_and_spontaneity" name="Chance_and_spontaneity"/><h3>Chance and spontaneity</h3>
+<p>Spontaneity and chance are causes of effects. Chance as an incidental cause lies in the realm of <a href="Sumbebekos" title="sumbebekos">accidental things</a>. It is "from what is spontaneous" (but note that what is spontaneous does not come from chance). For a better understanding of Aristotle's conception of "chance" it might be better to think of "coincidence": Something takes place by chance if a person sets out with the intent of having one thing take place, but with the result of another thing (not intended) taking place. For example: A person seeks donations. That person may find another person willing to donate a substantial sum. However, if the person seeking the donations met the person donating, not for the purpose of collecting donations, but for some other purpose, Aristotle would call the collecting of the donation by that particular donator a result of chance. It must be unusual that something happens by chance. In other words, if something happens all or most of the time, we cannot say that it is by chance.</p>
+<p>There is also more specific kind of chance, which Aristotle names "luck", that can only apply to human beings, since it is in the sphere of moral actions. According to Aristotle, luck must involve choice (and thus deliberation), and only humans are capable of deliberation and choice. "What is not capable of action cannot do anything by chance".<sup id="_ref-21" class="reference"><a href="#_note-21" title="">[21]</a></sup></p>
+<a id="Metaphysics" name="Metaphysics"/><h2>Metaphysics</h2>
+<p><a class="internal" href="Image:Uni_Freiburg_-_Philosophen_4.jpg" title="Statue of Aristotle (1915) by Cipri Adolf Bermann at the University of Freiburg im Breisgau"><img src="Uni_Freiburg_-_Philosophen_4.jpg" alt="Statue of Aristotle (1915) by Cipri Adolf Bermann at the University of Freiburg im Breisgau" title="Statue of Aristotle (1915) by Cipri Adolf Bermann at the University of Freiburg im Breisgau" class="location-none type-thumb"/>
+</a>
+<div class="thumbcaption">Statue of Aristotle (1915) by Cipri Adolf Bermann at the <a href="University_of_Freiburg" title="University of Freiburg">University of Freiburg</a> <a href="Freiburg_im_Breisgau" title="Freiburg im Breisgau">im Breisgau</a></div>
+{{Main}}
+Aristotle defines metaphysics as "the knowledge of <a href="Immaterial" title="immaterial">immaterial</a> being," or of "being in the highest degree of abstraction." He refers to metaphysics as "first philosophy", as well as "the theologic science."</p>
+<a id="Substance.2C_potentiality_and_actuality" name="Substance.2C_potentiality_and_actuality"/><h3>Substance, potentiality and actuality</h3>
+<p>{{See also}}
+Aristotle examines the concept of substance and essence (<i><a href="Ousia" title="ousia">ousia</a></i>) in his <i>Metaphysics</i>, Book VII and he concludes that a particular substance is a combination of both matter and form. As he proceeds to the book VIII, he concludes that the matter of the substance is the <a href="Material_substratum" title="Material substratum">substratum</a> or the stuff of which it is composed, <i>e.g.</i> the matter of the house are the bricks, stones, timbers etc., or whatever constitutes the <i>potential</i> house. While the form of the substance, is the <i>actual</i> house, namely 'covering for bodies and chattels' or any other <a href="Genus-differentia_definition" title="Genus-differentia definition">differentia</a> (see also <a href="Predicables" title="predicables">predicables</a>). The formula that gives the components is the account of the matter, and the formula that gives the differentia is the account of the form.<sup id="_ref-22" class="reference"><a href="#_note-22" title="">[22]</a></sup></p>
+<p>With regard to the change (<i><a href="Kinesis" title="kinesis">kinesis</a></i>) and its causes now, as he defines in his <a href="Physics_(Aristotle)" title="Physics (Aristotle)">Physics</a> and <a href="On_Generation_and_Corruption" title="On Generation and Corruption">On Generation and Corruption</a> 319b-320a, he distinguishes the coming to be from: 1) growth and diminution, which is change in quantity; 2) locomotion, which is change in space; and 3) alteration, which is change in quality.</p>
+<p>The coming to be is a change where nothing persists of which the resultant is a property. In that particular change he introduces the concept of potentiality (<i><a href="Dynamis" title="dynamis">dynamis</a></i>) and actuality (<i><a href="Entelecheia" title="entelecheia">entelecheia</a></i>) in association with the matter and the form.</p>
+<p>Referring to potentiality, this is what a thing is capable of doing, or being acted upon, if it is not prevented by something else. For example, the seed of a plant in the soil is potentially (<i>dynamei</i>) plant, and if is not prevented by something, it will become a plant. Potentially beings can either 'act' (<i><a href="Poiein" title="poiein">poiein</a></i>) or 'be acted upon' (<i><a href="Paschein" title="paschein">paschein</a></i>), which can be either innate or learned. For example, the eyes possess the potentiality of sight (innate – being acted upon), while the capability of playing the flute can be possessed by learning (exercise – acting).</p>
+<p>Actuality is the fulfillment of the end of the potentiality. Because the end (<i>telos</i>) is the principle of every change, and for the sake of the end exists potentiality, therefore actuality is the end. Referring then to our previous example, we could say that actuality is when the seed of the plant becomes a plant.</p>
+<p>" For that for the sake of which a thing is, is its principle, and the becoming is for the sake of the end; and the actuality is the end, and it is for the sake of this that the potentiality is acquired. For animals do not see in order that they may have sight, but they have sight that they may see."<sup id="_ref-23" class="reference"><a href="#_note-23" title="">[23]</a></sup></p>
+<p>In conclusion, the matter of the house is its potentiality and the form is its actuality. The <a href="Formal_cause" title="formal cause">formal cause</a> (<i>aitia</i>) then of that change from potential to actual house, is the <a href="Reason" title="reason">reason</a> (<i>logos</i>) of the house builder and the <a href="Final_cause" title="final cause">final cause</a> is the end, namely the house itself. Then Aristotle proceeds and concludes that the actuality is prior to potentiality in formula, in time and in substantiality.</p>
+<p>With this <a href="Definition" title="definition">definition</a> of the particular substance (i.e., matter and form), Aristotle tries to solve the problem of the unity of the beings, <i>e.g.</i>, what is that makes the man one? Since, according to Plato there are two Ideas: animal and biped, how then is man a unity? However, according to Aristotle, the potential being (matter) and the actual one (form) are one and the same thing.<sup id="_ref-24" class="reference"><a href="#_note-24" title="">[24]</a></sup></p>
+<a id="Universals_and_particulars" name="Universals_and_particulars"/><h3>Universals and particulars</h3>
+<p>{{Main}}</p>
+<p>Aristotle's predecessor, Plato, argued that all things have a universal form, which could be either a property, or a relation to other things. When we look at an apple, for example, we see an apple, and we can also analyze a form of an apple. In this distinction, there is a particular apple and a universal form of an apple. Moreover, we can place an apple next to a book, so that we can speak of both the book and apple as being next to each other.</p>
+<p>Plato argued that there are some universal forms that are not a part of particular things. For example, it is possible that there is no particular good in existence, but "good" is still a proper universal form. <a href="Bertrand_Russell" title="Bertrand Russell">Bertrand Russell</a> is a contemporary philosopher that agreed with Plato on the existence of "uninstantiated universals".</p>
+<p>Aristotle disagreed with Plato on this point, arguing that all universals are instantiated. Aristotle argued that there are no universals that are unattached to existing things. According to Aristotle, if a universal exists, either as a particular or a relation, then there must have been, must be currently, or must be in the future, something on which the universal can be predicated. Consequently, according to Aristotle, if it is not the case that some universal can be predicated to an object that exists at some period of time, then it does not exist.</p>
+<p>One way for contemporary philosophers to justify this position is by asserting the <a href="Eleatic" title="eleatic">eleatic</a> principle.</p>
+<p>In addition, Aristotle disagreed with Plato about the location of universals. As Plato spoke of the world of the forms, a location where all universal forms subsist, Aristotle maintained that universals exist within each thing on which each universal is predicated. So, according to Aristotle, the form of apple exists within each apple, rather than in the world of the forms.</p>
+<a id="Biology_and_medicine" name="Biology_and_medicine"/><h2>Biology and medicine</h2>
+<p>In Aristotelian science, most especially in biology, things he saw himself have stood the test of time better than his retelling of the reports of others, which contain error and superstition. He dissected animals, but not humans and his ideas on how the human body works have been almost entirely superseded.</p>
+<a id="Empirical_research_program" name="Empirical_research_program"/><h3>Empirical research program</h3>
+<p><a class="internal" href="Image:Octo2.jpg" title="Octopus swimming"><img src="Octo2.jpg" alt="Octopus swimming" title="Octopus swimming" class="location-none type-thumb"/>
+</a>
+<div class="thumbcaption">Octopus swimming</div>
+<a class="internal" href="Image:Torpedo_fuscomaculata2.jpg" title="Torpedo fuscomaculata"><img src="Torpedo_fuscomaculata2.jpg" alt="Torpedo fuscomaculata" title="Torpedo fuscomaculata" class="location-none type-thumb"/>
+</a>
+<div class="thumbcaption"><i>Torpedo fuscomaculata</i></div>
+Aristotle is the earliest natural historian whose work has survived in some detail. Aristotle certainly did research on the natural history of <a href="Lesbos" title="Lesbos">Lesbos</a>, and the surrounding seas and neighbouring areas. The works that reflect this research, such as <i><a href="History_of_Animals" title="History of Animals">History of Animals</a></i>, <i><a href="Generation_of_Animals" title="Generation of Animals">Generation of Animals</a></i>, and <i><a href="Parts_of_Animals" title="Parts of Animals">Parts of Animals</a></i>, contain some observations and interpretations, along with sundry myths and mistakes. The most striking passages are about the sea-life visible from observation on Lesbos and available from the catches of fishermen. His observations on <a href="Catfish" title="catfish">catfish</a>, <a href="Electric_ray" title="Electric ray">electric fish</a> (<i><a href="Torpedo_(genus)" title="Torpedo (genus)">Torpedo</a></i>) and angler-fish are detailed, as is his writing on <a href="Cephalopod" title="cephalopod">cephalopods</a>, namely, <i><a href="Octopus" title="Octopus">Octopus</a></i>, <i>Sepia</i> (<a href="Cuttlefish" title="cuttlefish">cuttlefish</a>) and the paper nautilus (<i><a href="Argonauta_argo" title="Argonauta argo">Argonauta argo</a></i>). His description of the <a href="Hectocotylus" title="hectocotylus">hectocotyl arm</a> was about two thousand years ahead of its time, and widely disbelieved until its rediscovery in the nineteenth century. He separated the aquatic mammals from fish, and knew that sharks and rays were part of the group he called Selachē (<a href="Selachians" title="selachians">selachians</a>).<sup id="_ref-Singer.2C_Charles_1931_a" class="reference"><a href="#_note-Singer.2C_Charles_1931" title="">[25]</a></sup></p>
+<p><a class="internal" href="Image:Triakis_semifasciata.jpg" title="Leopard shark"><img src="Triakis_semifasciata.jpg" alt="Leopard shark" title="Leopard shark" class="location-none type-thumb"/>
+</a>
+<div class="thumbcaption">Leopard shark</div></p>
+<p>Another good example of his methods comes from the <i>Generation of Animals</i> in which Aristotle describes breaking open fertilized chicken eggs at intervals to observe when visible organs were generated.</p>
+<p>He gave accurate descriptions of <a href="Ruminant" title="ruminant">ruminants</a>' four-chambered fore-stomachs, and of the <a href="Ovoviviparity" title="Ovoviviparity">ovoviviparous</a> embryological development of the <a href="Hound_shark" title="hound shark">hound shark</a> <i><a href="Mustelus_mustelus" title="Mustelus mustelus">Mustelus mustelus</a></i>.<sup id="_ref-26" class="reference"><a href="#_note-26" title="">[26]</a></sup></p>
+<a id="Classification_of_living_things" name="Classification_of_living_things"/><h3>Classification of living things</h3>
+<p>Aristotle's classification of living things contains some elements which still existed in the nineteenth century. What the modern zoologist would call vertebrates and invertebrates, Aristotle called 'animals with blood' and 'animals without blood' (he was not to know that complex invertebrates do make use of <a href="Haemoglobin" title="haemoglobin">haemoglobin</a>, but of a different kind from vertebrates). Animals with blood were divided into live-bearing (humans and mammals), and egg-bearing (birds and fish). Invertebrates ('animals without blood') are insects, crustacea (divided into non-shelled – cephalopods – and shelled) and testacea (molluscs). In some respects, this incomplete classification is better than that of <a href="Linnaeus" title="Linnaeus">Linnaeus</a>, who crowded the invertebrata together into two groups, Insecta and Vermes (worms).</p>
+<p>For <a href="Charles_Singer" title="Charles Singer">Charles Singer</a>, "Nothing is more remarkable than [Aristotle's] efforts to [exhibit] the relationships of living things as a <i>scala naturae</i>"<sup id="_ref-Singer.2C_Charles_1931_b" class="reference"><a href="#_note-Singer.2C_Charles_1931" title="">[25]</a></sup> Aristotle's <i>History of Animals</i> classified organisms in relation to a hierarchical "<a href="Great_chain_of_being" title="Great chain of being">Ladder of Life</a>" (<i>scala naturae</i>), placing them according to complexity of structure and function so that higher organisms showed greater vitality and ability to move.<sup id="_ref-27" class="reference"><a href="#_note-27" title="">[27]</a></sup></p>
+<p>Aristotle believed that intellectual purposes, i.e., <a href="Formal_cause" title="formal cause">formal causes</a>, guided all natural processes. Such a <a href="Teleological" title="teleological">teleological</a> view gave Aristotle cause to justify his observed data as an expression of formal design. Noting that "no animal has, at the same time, both tusks and horns," and "a single-hooved animal with two horns I have never seen," Aristotle suggested that Nature, giving no animal both horns and tusks, was staving off vanity, and giving creatures faculties only to such a degree as they are necessary. Noting that ruminants had a multiple stomachs and weak teeth, he supposed the first was to compensate for the latter, with Nature trying to preserve a type of balance.<sup id="_ref-28" class="reference"><a href="#_note-28" title="">[28]</a></sup></p>
+<p>In a similar fashion, Aristotle believed that creatures were arranged in a graded scale of perfection rising from plants on up to man, the <i>scala naturae</i> or <a href="Great_Chain_of_Being" title="Great Chain of Being">Great Chain of Being</a>.<sup id="_ref-29" class="reference"><a href="#_note-29" title="">[29]</a></sup> His system had eleven grades, arranged according "to the degree to which they are infected with potentiality", expressed in their form at birth. The highest animals laid warm and wet creatures alive, the lowest bore theirs cold, dry, and in thick eggs.</p>
+<p>Aristotle also held that the level of a creature's perfection was reflected in its form, but not preordained by that form. Ideas like this, and his ideas about souls, are not regarded as science at all in modern times.</p>
+<p>He placed emphasis on the type(s) of soul an organism possessed, asserting that plants possess a vegetative soul, responsible for reproduction and growth, animals a vegetative and a sensitive soul, responsible for mobility and sensation, and humans a vegetative, a sensitive, and a rational soul, capable of thought and reflection.<sup id="_ref-30" class="reference"><a href="#_note-30" title="">[30]</a></sup></p>
+<p>Aristotle, in contrast to earlier philosophers, but in accordance with the Egyptians, placed the rational soul in the heart, rather than the brain.<sup id="_ref-32" class="reference"><a href="#_note-32" title="">[32]</a></sup> it is hard for many modern readers to accept that one could seriously so admire the style of those works currently available to us.<sup id="_ref-33" class="reference"><a href="#_note-33" title="">[33]</a></sup> However, some modern scholars have warned that we cannot know for certain that Cicero's praise was reserved specifically for the exoteric works; a few modern scholars have actually admired the concise writing style found in Aristotle's extant works.<sup id="_ref-34" class="reference"><a href="#_note-34" title="">[34]</a></sup></p>
+<p>One major question in the history of Aristotle's works, then, is how were the exoteric writings all lost, and how did the ones we now possess come to us?<sup id="_ref-35" class="reference"><a href="#_note-35" title="">[35]</a></sup> The story of the original manuscripts of the esoteric treatises is described by <a href="Strabo" title="Strabo">Strabo</a> in his <i>Geography</i> and <a href="Plutarch" title="Plutarch">Plutarch</a> in his <i><a href="Parallel_Lives" title="Parallel Lives">Parallel Lives</a></i>.<sup id="_ref-36" class="reference"><a href="#_note-36" title="">[36]</a></sup> The manuscripts were left from Aristotle to his successor <a href="Theophrastus" title="Theophrastus">Theophrastus</a>, who in turn willed them to <a href="Neleus_of_Scepsis" title="Neleus of Scepsis">Neleus of Scepsis</a>. Neleus supposedly took the writings from Athens to <a href="Scepsis" title="Scepsis">Scepsis</a>, where his heirs let them languish in a cellar until the first century BC, when <a href="Apellicon_of_Teos" title="Apellicon of Teos">Apellicon of Teos</a> discovered and purchased the manuscripts, bringing them back to Athens. According to the story, Apellicon tried to repair some of the damage that was done during the manuscripts' stay in the basement, introducing a number of errors into the text. When <a href="Lucius_Cornelius_Sulla" title="Lucius Cornelius Sulla">Lucius Cornelius Sulla</a> occupied Athens in 86 BC, he carried off the library of Apellicon to <a href="Rome" title="Rome">Rome</a>, where they were first published in 60 BC by the grammarian <a href="Tyrannion_of_Amisus" title="Tyrannion of Amisus">Tyrannion of Amisus</a> and then by philosopher <a href="Andronicus_of_Rhodes" title="Andronicus of Rhodes">Andronicus of Rhodes</a>.{{Citation needed}}</p>
+<p><a href="Carnes_Lord" title="Carnes Lord">Carnes Lord</a> attributes the popular belief in this story to the fact that it provides "the most plausible explanation for the rapid eclipse of the Peripatetic school after the middle of the third century, and for the absence of widespread knowledge of the specialized treatises of Aristotle throughout the Hellenistic period, as well as for the sudden reappearance of a flourishing Aristotelianism during the first century B.C."<sup id="_ref-37" class="reference"><a href="#_note-37" title="">[37]</a></sup> Lord voices a number of reservations concerning this story, however. First, the condition of the texts is far too good for them to have suffered considerable damage followed by Apellicon's inexpert attempt at repair. Second, there is "incontrovertible evidence," Lord says, that the treatises were in circulation during the time in which Strabo and Plutarch suggest they were confined within the cellar in Scepsis. Third, the definitive edition of Aristotle's texts seems to have been made in Athens some fifty years before Andronicus supposedly compiled his. And fourth, ancient library catalogues predating Andronicus' intervention list an Aristotelian corpus quite similar to the one we currently possess. Lord sees a number of post-Aristotelian interpolations in the <i><a href="Politics_(Aristotle)" title="Politics (Aristotle)">Politics</a></i>, for example, but is generally confident that the work has come down to us relatively intact.</p>
+<p>As the influence of the <i>falsafa</i>{{Clarify}} grew in the West, in part due to <a href="Gerard_of_Cremona" title="Gerard of Cremona">Gerard of Cremona</a>'s translations and the spread of <a href="Averroism" title="Averroism">Averroism</a>, the demand for Aristotle's works grew. <a href="William_of_Moerbeke" title="William of Moerbeke">William of Moerbeke</a> translated a number of them into Latin. When <a href="Thomas_Aquinas" title="Thomas Aquinas">Thomas Aquinas</a> wrote his <a href="Theology" title="theology">theology</a>, working from Moerbeke's translations, the demand for Aristotle's writings grew and the <a href="Greek_language" title="Greek language">Greek</a> manuscripts returned to the West, stimulating a revival of Aristotelianism in <a href="Europe" title="Europe">Europe</a>, and ultimately revitalizing European thought through Muslim influence in Spain to fan the embers of the Renaissance.{{Citation needed}}</p>
+<a id="Legacy" name="Legacy"/><h2>Legacy</h2>
+
+<p><a class="internal" href="Image:Aristoteles_Louvre.jpg" title="Portrait of Aristoteles. Pentelic marble, copy of the Imperial Period (1st or 2nd century) of a lost bronze sculpture made by Lysippos"><img src="Aristoteles_Louvre.jpg" alt="Portrait of Aristoteles. Pentelic marble, copy of the Imperial Period (1st or 2nd century) of a lost bronze sculpture made by Lysippos" title="Portrait of Aristoteles. Pentelic marble, copy of the Imperial Period (1st or 2nd century) of a lost bronze sculpture made by Lysippos" class="location-none type-thumb"/>
+</a>
+<div class="thumbcaption">Portrait of Aristoteles. Pentelic marble, copy of the Imperial Period (1st or 2nd century) of a lost <a href="Bronze_sculpture" title="bronze sculpture">bronze sculpture</a> made by <a href="Lysippos" title="Lysippos">Lysippos</a></div>
+</p><a id="Development_of_logic" name="Development_of_logic"/><h3>Development of logic</h3>
+<p>Twenty-three hundred years after his death, Aristotle remains one of the most influential people who ever lived. He was the founder of <a href="Formal_logic" title="formal logic">formal logic</a>, pioneered the study of <a href="Zoology" title="zoology">zoology</a>, and left every future scientist and philosopher in his debt through his contributions to the scientific method.<sup id="_ref-38" class="reference"><a href="#_note-38" title="">[38]</a></sup><sup id="_ref-39" class="reference"><a href="#_note-39" title="">[39]</a></sup> Despite these accolades, many of Aristotle's errors held back science considerably. <a href="Bertrand_Russell" title="Bertrand Russell">Bertrand Russell</a> notes that "almost every serious intellectual advance has had to begin with an attack on some Aristotelian doctrine". Russell also refers to Aristotle's ethics as "repulsive", and calls his logic "as definitely antiquated as Ptolemaic astronomy". Russell notes that these errors make it difficult to do historical justice to Aristotle, until one remembers how large of an advance he made upon all of his predecessors.<sup id="_ref-philosophy1972_c" class="reference"><a href="#_note-philosophy1972" title="">[4]</a></sup> Of course, the problem of excessive devotion to Aristotle is more a problem of those later centuries and not of Aristotle himself.</p>
+<a id="Later_Greek_philosophers" name="Later_Greek_philosophers"/><h3>Later Greek philosophers</h3>
+<p>The immediate influence of Aristotle's work was felt as the Lyceum grew into the <a href="Peripatetic_school" title="Peripatetic school">Peripatetic school</a>. Aristotle's notable students included <a href="Aristoxenus" title="Aristoxenus">Aristoxenus</a>, <a href="Dicaearchus" title="Dicaearchus">Dicaearchus</a>, <a href="Demetrius_of_Phalerum" title="Demetrius of Phalerum">Demetrius of Phalerum</a>, <a href="Eudemos_of_Rhodes" title="Eudemos of Rhodes">Eudemos of Rhodes</a>, <a href="Harpalus" title="Harpalus">Harpalus</a>, <a href="Hephaestion" title="Hephaestion">Hephaestion</a>, <a href="Meno" title="Meno">Meno</a>, <a href="Mnason_of_Phocis" title="Mnason of Phocis">Mnason of Phocis</a>, <a href="Nicomachus_(son_of_Aristotle)" title="Nicomachus (son of Aristotle)">Nicomachus</a>, and <a href="Theophrastus" title="Theophrastus">Theophrastus</a>. Aristotle's influence over Alexander the Great is seen in the latter's bringing with him on his expedition a host of zoologists, botanists, and researchers. He had also learned a great deal about Persian customs and traditions from his teacher. Although his respect for Aristotle was diminished as his travels made it clear that much of Aristotle's geography was clearly wrong, when the old philosopher released his works to the public, Alexander complained "Thou hast not done well to publish thy acroamatic doctrines; for in what shall I surpass other men if those doctrines wherein I have been trained are to be all men's common property?"<sup id="_ref-40" class="reference"><a href="#_note-40" title="">[40]</a></sup></p>
+<a id="Influence_on_Christian_theologians" name="Influence_on_Christian_theologians"/><h3>Influence on Christian theologians</h3>
+<p>Aristotle is referred to as "The Philosopher" by <a href="Scholasticism" title="Scholasticism">Scholastic</a> thinkers such as <a href="Thomas_Aquinas" title="Thomas Aquinas">Thomas Aquinas</a>. See <i><a href="Summa_Theologica" title="Summa Theologica">Summa Theologica</a></i>, Part I, Question 3, etc. These thinkers blended Aristotelian philosophy with Christianity, bringing the thought of Ancient Greece into the Middle Ages. It required a repudiation of some Aristotelian principles for the sciences and the arts to free themselves for the discovery of modern scientific laws and empirical methods. The medieval English poet <a href="Geoffrey_Chaucer" title="Geoffrey Chaucer">Chaucer</a> describes his student as being happy by having
+</p>
+<dl>
+<dd>                     <i> at his beddes heed</i></dd>
+<dd><i>Twenty bookes, clad in blak or reed,</i></dd>
+<dd><i>Of aristotle and his philosophie,</i><sup id="_ref-41" class="reference"><a href="#_note-41" title="">[41]</a></sup></dd></dl>
+<p>The Italian poet <a href="Dante_Alighieri" title="Dante Alighieri">Dante</a> says of Aristotle in <a href="The_Divine_Comedy" title="The Divine Comedy">the first circles of hell</a>,
+</p>
+<dl>
+<dd><i>I saw the Master there of those who know,</i></dd>
+<dd><i>Amid the philosophic family,</i></dd>
+<dd><i>By all admired, and by all reverenced;</i></dd>
+<dd><i>There Plato too I saw, and Socrates,</i></dd>
+<dd><i>Who stood beside him closer than the rest.</i><sup id="_ref-42" class="reference"><a href="#_note-42" title="">[42]</a></sup></dd></dl>
+<p><i>seder tra filosofica famiglia.</i>
+<i>Tutti lo miran, tutti onor li fanno</i>:
+<i>quivi vid’ïo Socrate e Platone</i>
+<i>che ’nnanzi a li altri più presso li stanno;</i> Dante, <i>L’Inferno</i> (Hell), Canto IV. Lines 131–135</p>
+<a id="Views_on_women" name="Views_on_women"/><h3>Views on women</h3>
+<p>{{Main}}
+Aristotle believed that women are colder than men and thus a lower form of life.<sup id="_ref-43" class="reference"><a href="#_note-43" title="">[43]</a></sup> His assumption carried forward unexamined to <a href="Galen" title="Galen">Galen</a> and others for almost two thousand years until the sixteenth century.<sup id="_ref-Tuana_a" class="reference"><a href="#_note-Tuana" title="">[44]</a></sup> He also believed that females could not be fully human.<sup id="_ref-45" class="reference"><a href="#_note-45" title="">[45]</a></sup> His analysis of procreation is frequently criticized on the grounds that it presupposes an active, ensouling masculine element bringing life to an inert, passive, lumpen female element; it is on these grounds that Aristotle is considered by some feminist critics to have been a <a href="Misogyny" title="Misogyny">misogynist</a>.<sup id="_ref-46" class="reference"><a href="#_note-46" title="">[46]</a></sup>
+On the other hand, Aristotle gave equal weight to women's happiness as he did to men's, and commented in his Rhetoric that a society cannot be happy unless women are happy too. In places like Sparta where the lot of women is bad, there can only be half-happiness in society.(see Rhetoric 1.5.6)</p>
+<a id="Post-Enlightenment_thinkers" name="Post-Enlightenment_thinkers"/><h3>Post-Enlightenment thinkers</h3>
+<p>The German philosopher <a href="Friedrich_Nietzsche" title="Friedrich Nietzsche">Friedrich Nietzsche</a> has been said to have taken nearly all of his political philosophy from Aristotle.<sup id="_ref-47" class="reference"><a href="#_note-47" title="">[47]</a></sup> However implausible this is, it is certainly the case that Aristotle's rigid separation of action from production, and his justification of the subservience of slaves and others to the virtue – or <i>arete</i> – of a few justified the ideal of aristocracy. It is <a href="Martin_Heidegger" title="Martin Heidegger">Martin Heidegger</a>, not Nietzsche, who elaborated a new interpretation of Aristotle, intended to warrant his deconstruction of scholastic and philosophical tradition. More recently, <a href="Alasdair_MacIntyre" title="Alasdair MacIntyre">Alasdair MacIntyre</a> has attempted to reform what he calls the Aristotelian tradition in a way that is anti-elitist and capable of disputing the claims of both liberals and Nietzscheans.<sup id="_ref-48" class="reference"><a href="#_note-48" title="">[48]</a></sup></p>
+<a id="List_of_works" name="List_of_works"/><h2>List of works</h2>
+<p>{{Main}}</p>
+<a id="See_also" name="See_also"/><h2>See also</h2>
+
+<ul>
+<li><a href="Aristotelian_ethics" title="Aristotelian ethics">Aristotelian ethics</a></li>
+<li><a href="Aristotelian_physics" title="Aristotelian physics">Aristotelian physics</a></li>
+<li><a href="Aristotelian_view_of_God" title="Aristotelian view of God">Aristotelian view of God</a></li>
+<li><a href="List_of_writers_influenced_by_Aristotle" title="List of writers influenced by Aristotle">List of writers influenced by Aristotle</a></li>
+<li><a href="List_of_teachings_attributed_to_Aristotle" title="List of teachings attributed to Aristotle">List of teachings attributed to Aristotle</a></li>
+<li><a href="Corpus_Aristotelicum" title="Corpus Aristotelicum">Corpus Aristotelicum</a></li>
+<li><a href="Conimbricenses" title="Conimbricenses">Conimbricenses</a></li>
+<li><a href="Hylomorphism" title="Hylomorphism">Hylomorphism</a></li>
+<li><a href="Philia" title="Philia">Philia</a></li>
+<li><a href="Phronesis" title="Phronesis">Phronesis</a></li></ul>
+
+<a id="Notes_and_references" name="Notes_and_references"/><h2>Notes and references</h2>
+<p>{{reflist}}</p>
+<a id="Further_reading" name="Further_reading"/><h2>Further reading</h2>
+<p>The secondary literature on Aristotle is vast. The following references are only a small selection.
+</p>
+<ul>
+<li><a href="J._L._Ackrill" title="J. L. Ackrill">Ackrill J. L.</a> 2001. Essays on Plato and Aristotle, Oxford University Press, USA</li>
+<li>{{cite book}} A popular exposition for the general reader.</li>
+<li>Bakalis Nikolaos. 2005. Handbook of Greek Philosophy: From Thales to the Stoics Analysis and Fragments, Trafford Publishing <a class="external text" href="http://www.amazon.com/exec/obidos/ASIN/1412048435" rel="nofollow" title="http://www.amazon.com/exec/obidos/ASIN/1412048435">ISBN 1-4120-4843-5</a></li>
+<li>Barnes J. 1995. The Cambridge Companion to Aristotle, Cambridge University Press</li>
+<li>{{cite book}}</li>
+<li>Bolotin, David (1998). <i>An Approach to Aristotle's Physics: With Particular Attention to the Role of His Manner of Writing.</i> Albany: SUNY Press. A contribution to our understanding of how to read Aristotle's scientific works.</li>
+<li><a href="Myles_Burnyeat" title="Myles Burnyeat">Burnyeat, M. F.</a> <i>et al.</i> 1979. Notes on Book Zeta of Aristotle's Metaphysics. Oxford: Sub-faculty of Philosophy</li>
+<li>Chappell, V. 1973. Aristotle's Conception of Matter, Journal of Philosophy 70: 679–696</li>
+<li>Code, Alan. 1995. Potentiality in Aristotle's Science and Metaphysics, Pacific Philosophical Quarterly 76</li>
+<li>Frede, Michael. 1987. Essays in Ancient Philosophy. Minneapolis: University of Minnesota Press</li>
+<li>Gill, Mary Louise. 1989. Aristotle on Substance: The Paradox of Unity. Princeton: Princeton University Press</li>
+<li>{{cite book}}</li>
+<li>Halper, Edward C. (2007) <i>One and Many in Aristotle's Metaphysics, Volume 1: Books Alpha — Delta</i>, Parmenides Publishing, <a class="external text" href="http://www.amazon.com/exec/obidos/ASIN/9781930972216" rel="nofollow" title="http://www.amazon.com/exec/obidos/ASIN/9781930972216">ISBN 978-1-930972-21-6</a></li>
+<li>Halper, Edward C. (2005) <i>One and Many in Aristotle's Metaphysics, Volume 2: The Central Books</i>, Parmenides Publishing, <a class="external text" href="http://www.amazon.com/exec/obidos/ASIN/9781930972056" rel="nofollow" title="http://www.amazon.com/exec/obidos/ASIN/9781930972056">ISBN 978-1-930972-05-6</a></li>
+<li>Irwin, T. H. 1988. Aristotle's First Principles. Oxford: Clarendon Press</li>
+<li><a href="Alberto_Jori" title="Alberto Jori">Jori, Alberto</a>. 2003. <i>Aristotele</i>, Milano: Bruno Mondadori Editore (Prize 2003 of the "International Academy of the History of Science") <a class="external text" href="http://www.amazon.com/exec/obidos/ASIN/8842497371" rel="nofollow" title="http://www.amazon.com/exec/obidos/ASIN/8842497371">ISBN 88-424-9737-1</a></li>
+<li>Knight, Kelvin. 2007. <i>Aristotelian Philosophy: Ethics and Politics from Aristotle to MacIntyre</i>, Polity Press.</li>
+<li>Lewis, Frank A. 1991. <i>Substance and Predication in Aristotle</i>. Cambridge: Cambridge University Press.</li>
+<li><a href="G._E._R._Lloyd" title="G. E. R. Lloyd">Lloyd, G. E. R.</a> 1968. <i>Aristotle: The Growth and Structure of his Thought</i>. Cambridge: Cambridge Univ. Pr., <a class="external text" href="http://www.amazon.com/exec/obidos/ASIN/0521094569" rel="nofollow" title="http://www.amazon.com/exec/obidos/ASIN/0521094569">ISBN 0-521-09456-9</a>.</li>
+<li>Lord, Carnes. 1984. Introduction to <i>The Politics</i>, by Aristotle. Chicago: Chicago University Press.</li>
+<li>Loux, Michael J. 1991. Primary Ousia: An Essay on Aristotle's Metaphysics Ζ and Η. Ithaca, NY: Cornell University Press</li>
+<li>Owen, G. E. L. 1965c. The Platonism of Aristotle, Proceedings of the British Academy 50 125–150. Reprinted in J. Barnes, M. Schofield, and R. R. K. Sorabji (eds.), Articles on Aristotle, Vol 1. Science. London: Duckworth (1975). 14–34</li>
+<li>Pangle, Lorraine Smith (2003). <i>Aristotle and the Philosophy of Friendship</i>. Cambridge: Cambridge University Press. Aristotle's conception of the deepest human relationship viewed in the light of the history of philosophic thought on friendship.</li>
+<li>Reeve, C. D. C. 2000. Substantial Knowledge: Aristotle's Metaphysics. Indianapolis: Hackett.</li>
+<li>{{cite book}}</li>
+<li>{{cite book}} A classic overview by one of Aristotle's most prominent English translators, in print since 1923.</li>
+<li>Scaltsas, T. 1994. Substances and Universals in Aristotle's Metaphysics. Ithaca: Cornell University Press.</li>
+<li>Strauss, Leo. "On Aristotle's <i>Politics</i>" (1964), in <i>The City and Man</i>, Chicago; Rand McNally.</li>
+<li>{{cite book}}</li>
+<li>{{cite book}}</li>
+<li>{{cite book}} For the general reader.</li>
+<li>Woods, M. J. 1991b. "Universals and Particular Forms in Aristotle's Metaphysics." Oxford Studies in Ancient Philosophy supplement. 41–56</li></ul>
+
+<a id="External_links" name="External_links"/><h2>External links</h2>
+<p>{{sisterlinks}}
+</p>
+<ul>
+<li><a class="externallink" href="http://www.newadvent.org/cathen/01713a.htm" rel="nofollow" title="http://www.newadvent.org/cathen/01713a.htm">The Catholic Encyclopedia</a> (general article)</li>
+<li><a class="externallink" href="http://www.utm.edu/research/iep/a/aristotl.htm" rel="nofollow" title="http://www.utm.edu/research/iep/a/aristotl.htm">The Internet Encyclopedia of Philosophy</a> (general article)</li>
+<li>Scholarly surveys of focused topics from the <i><a href="Stanford_Encyclopedia_of_Philosophy" title="Stanford Encyclopedia of Philosophy">Stanford Encyclopedia of Philosophy</a></i>: articles on <a class="externallink" href="http://plato.stanford.edu/entries/aristotle/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle/">Aristotle</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotelianism-renaissance/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotelianism-renaissance/">Aristotle in the Renaissance</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-biology/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-biology/">Biology</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-causality/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-causality/">Causality</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-commentators/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-commentators/">Commentators on Aristotle</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-ethics/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-ethics/">Ethics</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-logic/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-logic/">Logic</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-mathematics/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-mathematics/">Mathematics</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-metaphysics/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-metaphysics/">Metaphysics</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-natphil/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-natphil/">Natural philosophy</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-noncontradiction/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-noncontradiction/">Non-contradiction</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-politics/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-politics/">Political theory</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-psychology/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-psychology/">Psychology</a>, <a class="externallink" href="http://plato.stanford.edu/entries/aristotle-rhetoric/" rel="nofollow" title="http://plato.stanford.edu/entries/aristotle-rhetoric/">Rhetoric</a></li></ul>
+
+<p><b>Collections of works</b>
+</p>
+<ul>
+<li><a class="externallink" href="http://classics.mit.edu/Browse/index-Aristotle.html" rel="nofollow" title="http://classics.mit.edu/Browse/index-Aristotle.html">Massachusetts Institute of Technology</a> – primarily in English</li>
+<li><a class="externallink" href="http://remacle.org/bloodwolf/philosophes/Aristote/table.htm" rel="nofollow" title="http://remacle.org/bloodwolf/philosophes/Aristote/table.htm">P. Remacle's collection</a> – primarily <a href="Greek_language" title="Greek language">Greek</a> texts</li>
+<li><a class="externallink" href="http://www.gutenberg.org/browse/authors/a#a2747" rel="nofollow" title="http://www.gutenberg.org/browse/authors/a#a2747">Project Gutenberg</a> – English texts</li>
+<li><a class="externallink" href="http://www.perseus.tufts.edu/cgi-bin/perscoll?.submit=Change&amp;collection=Any&amp;type=text&amp;lang=Any&amp;lookup=Aristotle" rel="nofollow" title="http://www.perseus.tufts.edu/cgi-bin/perscoll?.submit=Change&amp;collection=Any&amp;type=text&amp;lang=Any&amp;lookup=Aristotle">Tufts University</a> – at the <a href="Perseus_Project" title="Perseus Project">Perseus Project</a>, in both English and Greek</li>
+<li><a class="externallink" href="http://etext.library.adelaide.edu.au/a/aristotle/" rel="nofollow" title="http://etext.library.adelaide.edu.au/a/aristotle/">University of Adelaide</a> – primarily in English</li></ul>
+
+<p><b>Other</b>
+</p>
+<ul>
+<li>{{worldcat id}}</li>
+<li><a class="externallink" href="http://www.concharto.org/search/eventsearch.htm?_tag=timeline%20of%20aristotle&amp;_maptype=0" rel="nofollow" title="http://www.concharto.org/search/eventsearch.htm?_tag=timeline%20of%20aristotle&amp;_maptype=0">Timeline of Aristotle's life</a></li></ul>
+<p>{{planetmath}}
+{{Template group}}</p>
+<p>{{Persondata}}
+{{DEFAULTSORT:Aristotle}}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+<p>{{Link FA}}
+{{Link FA}}
+{{Link FA}}</p>
+<p><a href="http://af.wikipedia.org/wiki/Aristoteles">af:Aristoteles</a>
+<a href="http://als.wikipedia.org/wiki/Aristoteles">als:Aristoteles</a>
+<a href="http://ar.wikipedia.org/wiki/%D8%A3%D8%B1%D8%B3%D8%B7%D9%88">ar:أرسطو</a>
+<a href="http://an.wikipedia.org/wiki/Arist%C3%B3til">an:Aristótil</a>
+<a href="http://ast.wikipedia.org/wiki/Arist%C3%B3teles">ast:Aristóteles</a>
+<a href="http://az.wikipedia.org/wiki/Aristotel">az:Aristotel</a>
+<a href="http://bn.wikipedia.org/wiki/%E0%A6%8F%E0%A6%B0%E0%A6%BF%E0%A6%B8%E0%A7%8D%E0%A6%9F%E0%A6%9F%E0%A6%B2">bn:এরিস্টটল</a>
+<a href="http://zh-min-nan.wikipedia.org/wiki/Aristot%C3%A9l%C4%93s">zh-min-nan:Aristotélēs</a>
+<a href="http://ba.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB%D1%8C">ba:Аристотель</a>
+<a href="http://be.wikipedia.org/wiki/%D0%90%D1%80%D1%8B%D1%81%D1%82%D0%BE%D1%86%D0%B5%D0%BB%D1%8C">be:Арыстоцель</a>
+<a href="http://be-x-old.wikipedia.org/wiki/%D0%90%D1%80%D1%8B%D1%81%D1%82%D0%BE%D1%82%D1%8D%D0%BB%D1%8C">be-x-old:Арыстотэль</a>
+<a href="http://bs.wikipedia.org/wiki/Aristotel">bs:Aristotel</a>
+<a href="http://br.wikipedia.org/wiki/Aristoteles">br:Aristoteles</a>
+<a href="http://bg.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB">bg:Аристотел</a>
+<a href="http://ca.wikipedia.org/wiki/Arist%C3%B2til">ca:Aristòtil</a>
+<a href="http://cv.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB%D1%8C">cv:Аристотель</a>
+<a href="Ceb:Arist%C3%B3teles" title="ceb:Aristóteles">ceb:Aristóteles</a>
+<a href="http://cs.wikipedia.org/wiki/Aristotel%C3%A9s">cs:Aristotelés</a>
+<a href="http://cy.wikipedia.org/wiki/Aristoteles">cy:Aristoteles</a>
+<a href="http://da.wikipedia.org/wiki/Aristoteles">da:Aristoteles</a>
+<a href="http://de.wikipedia.org/wiki/Aristoteles">de:Aristoteles</a>
+<a href="http://et.wikipedia.org/wiki/Aristoteles">et:Aristoteles</a>
+<a href="http://el.wikipedia.org/wiki/%CE%91%CF%81%CE%B9%CF%83%CF%84%CE%BF%CF%84%CE%AD%CE%BB%CE%B7%CF%82">el:Αριστοτέλης</a>
+<a href="http://es.wikipedia.org/wiki/Arist%C3%B3teles">es:Aristóteles</a>
+<a href="http://eo.wikipedia.org/wiki/Aristotelo">eo:Aristotelo</a>
+<a href="Ext:Arist%C3%B3teli" title="ext:Aristóteli">ext:Aristóteli</a>
+<a href="http://eu.wikipedia.org/wiki/Aristoteles">eu:Aristoteles</a>
+<a href="http://fa.wikipedia.org/wiki/%D8%A7%D8%B1%D8%B3%D8%B7%D9%88">fa:ارسطو</a>
+<a href="Hif:Aristotle" title="hif:Aristotle">hif:Aristotle</a>
+<a href="http://fo.wikipedia.org/wiki/Aristoteles">fo:Aristoteles</a>
+<a href="http://fr.wikipedia.org/wiki/Aristote">fr:Aristote</a>
+<a href="http://fy.wikipedia.org/wiki/Aristoteles">fy:Aristoteles</a>
+<a href="http://ga.wikipedia.org/wiki/Arastotail">ga:Arastotail</a>
+<a href="http://gd.wikipedia.org/wiki/Aristotle">gd:Aristotle</a>
+<a href="http://gl.wikipedia.org/wiki/Arist%C3%B3teles">gl:Aristóteles</a>
+<a href="Gan:%E4%BA%9E%E9%87%8C%E6%96%AF%E5%A4%9A%E5%BE%B7" title="gan:亞里斯多德">gan:亞里斯多德</a>
+<a href="http://gu.wikipedia.org/wiki/%E0%AA%8F%E0%AA%B0%E0%AA%BF%E0%AA%B8%E0%AB%8D%E0%AA%9F%E0%AB%8B%E0%AA%9F%E0%AA%B2">gu:એરિસ્ટોટલ</a>
+<a href="http://ko.wikipedia.org/wiki/%EC%95%84%EB%A6%AC%EC%8A%A4%ED%86%A0%ED%85%94%EB%A0%88%EC%8A%A4">ko:아리스토텔레스</a>
+<a href="http://hy.wikipedia.org/wiki/%D4%B1%D6%80%D5%AB%D5%BD%D5%BF%D5%B8%D5%BF%D5%A5%D5%AC">hy:Արիստոտել</a>
+<a href="http://hi.wikipedia.org/wiki/%E0%A4%85%E0%A4%B0%E0%A4%B8%E0%A5%8D%E0%A4%A4%E0%A5%81">hi:अरस्तु</a>
+<a href="http://hr.wikipedia.org/wiki/Aristotel">hr:Aristotel</a>
+<a href="http://io.wikipedia.org/wiki/Aristoteles">io:Aristoteles</a>
+<a href="http://id.wikipedia.org/wiki/Aristoteles">id:Aristoteles</a>
+<a href="http://ia.wikipedia.org/wiki/Aristotele">ia:Aristotele</a>
+<a href="http://ie.wikipedia.org/wiki/Aristoteles">ie:Aristoteles</a>
+<a href="http://os.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB%D1%8C">os:Аристотель</a>
+<a href="http://is.wikipedia.org/wiki/Arist%C3%B3teles">is:Aristóteles</a>
+<a href="http://it.wikipedia.org/wiki/Aristotele">it:Aristotele</a>
+<a href="http://he.wikipedia.org/wiki/%D7%90%D7%A8%D7%99%D7%A1%D7%98%D7%95">he:אריסטו</a>
+<a href="http://jv.wikipedia.org/wiki/Aristoteles">jv:Aristoteles</a>
+<a href="http://ka.wikipedia.org/wiki/%E1%83%90%E1%83%A0%E1%83%98%E1%83%A1%E1%83%A2%E1%83%9D%E1%83%A2%E1%83%94%E1%83%9A%E1%83%94">ka:არისტოტელე</a>
+<a href="http://kk.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB%D1%8C">kk:Аристотель</a>
+<a href="http://sw.wikipedia.org/wiki/Aristoteli">sw:Aristoteli</a>
+<a href="http://ht.wikipedia.org/wiki/Aristotle">ht:Aristotle</a>
+<a href="http://ku.wikipedia.org/wiki/Ar%C3%AEstoteles">ku:Arîstoteles</a>
+<a href="Lad:Aristoteles" title="lad:Aristoteles">lad:Aristoteles</a>
+<a href="http://la.wikipedia.org/wiki/Aristoteles">la:Aristoteles</a>
+<a href="http://lv.wikipedia.org/wiki/Aristotelis">lv:Aristotelis</a>
+<a href="http://lb.wikipedia.org/wiki/Aristoteles">lb:Aristoteles</a>
+<a href="http://lt.wikipedia.org/wiki/Aristotelis">lt:Aristotelis</a>
+<a href="http://jbo.wikipedia.org/wiki/aristoteles">jbo:aristoteles</a>
+<a href="http://hu.wikipedia.org/wiki/Arisztotel%C3%A9sz">hu:Arisztotelész</a>
+<a href="http://mk.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB">mk:Аристотел</a>
+<a href="http://ml.wikipedia.org/wiki/%E0%B4%85%E0%B4%B0%E0%B4%BF%E0%B4%B8%E0%B5%8D%E0%B4%B1%E0%B5%8D%E0%B4%B1%E0%B5%8B%E0%B4%9F%E0%B5%8D%E0%B4%9F%E0%B4%BF%E0%B4%B2%E0%B5%8D%E2%80%8D">ml:അരിസ്റ്റോട്ടില്‍</a>
+<a href="http://mt.wikipedia.org/wiki/Aristotile">mt:Aristotile</a>
+<a href="http://mr.wikipedia.org/wiki/%E0%A4%8D%E0%A4%B0%E0%A4%BF%E0%A4%B8%E0%A5%8D%E0%A4%9F%E0%A5%8B%E0%A4%9F%E0%A4%B2">mr:ऍरिस्टोटल</a>
+<a href="Arz:%D8%A7%D8%B1%D9%8A%D8%B3%D8%B7%D9%88" title="arz:اريسطو">arz:اريسطو</a>
+<a href="http://ms.wikipedia.org/wiki/Aristotle">ms:Aristotle</a>
+<a href="Cdo:%C4%80-l%C4%AB-s%C3%AA%CC%A4%E1%B9%B3-d%C5%8F%CC%A4-d%C3%A1ik" title="cdo:Ā-lī-sê̤ṳ-dŏ̤-dáik">cdo:Ā-lī-sê̤ṳ-dŏ̤-dáik</a>
+<a href="Mwl:Arist%C3%B3teles" title="mwl:Aristóteles">mwl:Aristóteles</a>
+<a href="http://mn.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB%D1%8C">mn:Аристотель</a>
+<a href="http://nah.wikipedia.org/wiki/Aristotel%C4%93s">nah:Aristotelēs</a>
+<a href="http://nl.wikipedia.org/wiki/Aristoteles">nl:Aristoteles</a>
+<a href="Nds-nl:Aristoteles" title="nds-nl:Aristoteles">nds-nl:Aristoteles</a>
+<a href="New:%E0%A4%8F%E0%A4%B0%E0%A4%BF%E0%A4%B8%E0%A5%8D%E0%A4%9F%E0%A5%8B%E0%A4%9F%E0%A4%B2" title="new:एरिस्टोटल">new:एरिस्टोटल</a>
+<a href="http://ja.wikipedia.org/wiki/%E3%82%A2%E3%83%AA%E3%82%B9%E3%83%88%E3%83%86%E3%83%AC%E3%82%B9">ja:アリストテレス</a>
+<a href="http://no.wikipedia.org/wiki/Aristoteles">no:Aristoteles</a>
+<a href="http://nn.wikipedia.org/wiki/Aristoteles">nn:Aristoteles</a>
+<a href="Nov:Aristot%C3%A9les" title="nov:Aristotéles">nov:Aristotéles</a>
+<a href="http://oc.wikipedia.org/wiki/Arist%C3%B2tel">oc:Aristòtel</a>
+<a href="http://uz.wikipedia.org/wiki/Arastu">uz:Arastu</a>
+<a href="Pag:Aristotle" title="pag:Aristotle">pag:Aristotle</a>
+<a href="Pnb:%D8%A7%D8%B1%D8%B3%D8%B7%D9%88" title="pnb:ارسطو">pnb:ارسطو</a>
+<a href="http://ps.wikipedia.org/wiki/%D8%A7%D8%B1%D8%B3%D8%B7%D9%88">ps:ارسطو</a>
+<a href="Pms:Arist%C3%B2til" title="pms:Aristòtil">pms:Aristòtil</a>
+<a href="http://nds.wikipedia.org/wiki/Aristoteles">nds:Aristoteles</a>
+<a href="http://pl.wikipedia.org/wiki/Arystoteles">pl:Arystoteles</a>
+<a href="http://pt.wikipedia.org/wiki/Arist%C3%B3teles">pt:Aristóteles</a>
+<a href="Kaa:Aristotel" title="kaa:Aristotel">kaa:Aristotel</a>
+<a href="http://ro.wikipedia.org/wiki/Aristotel">ro:Aristotel</a>
+<a href="http://qu.wikipedia.org/wiki/Aristotelis">qu:Aristotelis</a>
+<a href="http://ru.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB%D1%8C">ru:Аристотель</a>
+<a href="Sah:%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB%D1%8C" title="sah:Аристотель">sah:Аристотель</a>
+<a href="http://sa.wikipedia.org/wiki/%E0%A4%85%E0%A4%B0%E0%A4%B8%E0%A5%8D%E0%A4%A4%E0%A5%81">sa:अरस्तु</a>
+<a href="http://sc.wikipedia.org/wiki/Aristotele">sc:Aristotele</a>
+<a href="Sco:Aristotle" title="sco:Aristotle">sco:Aristotle</a>
+<a href="http://sq.wikipedia.org/wiki/Aristoteli">sq:Aristoteli</a>
+<a href="http://scn.wikipedia.org/wiki/Arist%C3%B2tili">scn:Aristòtili</a>
+<a href="http://simple.wikipedia.org/wiki/Aristotle">simple:Aristotle</a>
+<a href="http://sk.wikipedia.org/wiki/Aristoteles">sk:Aristoteles</a>
+<a href="http://sl.wikipedia.org/wiki/Aristotel">sl:Aristotel</a>
+<a href="Szl:Arystoteles" title="szl:Arystoteles">szl:Arystoteles</a>
+<a href="http://sr.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB">sr:Аристотел</a>
+<a href="http://sh.wikipedia.org/wiki/Aristotel">sh:Aristotel</a>
+<a href="http://fi.wikipedia.org/wiki/Aristoteles">fi:Aristoteles</a>
+<a href="http://sv.wikipedia.org/wiki/Aristoteles">sv:Aristoteles</a>
+<a href="http://tl.wikipedia.org/wiki/Aristoteles">tl:Aristoteles</a>
+<a href="http://ta.wikipedia.org/wiki/%E0%AE%85%E0%AE%B0%E0%AE%BF%E0%AE%9A%E0%AF%81%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AE%BE%E0%AE%9F%E0%AF%8D%E0%AE%9F%E0%AE%BF%E0%AE%B2%E0%AF%8D">ta:அரிசுட்டாட்டில்</a>
+<a href="Kab:Aristot" title="kab:Aristot">kab:Aristot</a>
+<a href="http://te.wikipedia.org/wiki/%E0%B0%85%E0%B0%B0%E0%B0%BF%E0%B0%B8%E0%B1%8D%E0%B0%9F%E0%B0%BE%E0%B0%9F%E0%B0%BF%E0%B0%B2%E0%B1%8D">te:అరిస్టాటిల్</a>
+<a href="http://th.wikipedia.org/wiki/%E0%B8%AD%E0%B8%A3%E0%B8%B4%E0%B8%AA%E0%B9%82%E0%B8%95%E0%B9%80%E0%B8%95%E0%B8%B4%E0%B8%A5">th:อริสโตเติล</a>
+<a href="http://tg.wikipedia.org/wiki/%D0%90%D1%80%D0%B0%D1%81%D1%82%D1%83">tg:Арасту</a>
+<a href="http://to.wikipedia.org/wiki/Aristotle">to:Aristotle</a>
+<a href="http://tr.wikipedia.org/wiki/Aristoteles">tr:Aristoteles</a>
+<a href="http://uk.wikipedia.org/wiki/%D0%90%D1%80%D0%B8%D1%81%D1%82%D0%BE%D1%82%D0%B5%D0%BB%D1%8C">uk:Аристотель</a>
+<a href="http://ur.wikipedia.org/wiki/%D8%A7%D8%B1%D8%B3%D8%B7%D9%88">ur:ارسطو</a>
+<a href="http://vi.wikipedia.org/wiki/Aristoteles">vi:Aristoteles</a>
+<a href="http://vo.wikipedia.org/wiki/Aristoteles">vo:Aristoteles</a>
+<a href="Fiu-vro:Aristoteles" title="fiu-vro:Aristoteles">fiu-vro:Aristoteles</a>
+<a href="War:Arist%C3%B3teles" title="war:Aristóteles">war:Aristóteles</a>
+<a href="http://yi.wikipedia.org/wiki/%D7%90%D7%A8%D7%99%D7%A1%D7%98%D7%95">yi:אריסטו</a>
+<a href="http://yo.wikipedia.org/wiki/Aristotulu">yo:Aristotulu</a>
+<a href="Diq:Aristoteles" title="diq:Aristoteles">diq:Aristoteles</a>
+<a href="Bat-smg:Aristuotelis" title="bat-smg:Aristuotelis">bat-smg:Aristuotelis</a>
+<a href="http://zh.wikipedia.org/wiki/%E4%BA%9A%E9%87%8C%E5%A3%AB%E5%A4%9A%E5%BE%B7">zh:亚里士多德</a></p></text>
+    </revision>
+  </page>
