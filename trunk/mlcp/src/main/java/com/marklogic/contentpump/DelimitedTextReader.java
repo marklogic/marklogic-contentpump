@@ -41,7 +41,7 @@ public class DelimitedTextReader<VALUEIN> extends
     ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(DelimitedTextReader.class);
     protected String[] fields;
-    protected String DELIM;
+    protected String delimiter;
     protected static String ROOT_START = "<root>";
     protected static String ROOT_END = "</root>";
     protected BufferedReader br;
@@ -49,6 +49,7 @@ public class DelimitedTextReader<VALUEIN> extends
     protected String idName;
     protected long fileLen = Long.MAX_VALUE;
     protected long bytesRead;
+    
     @Override
     public void close() throws IOException {
         if (br != null) {
@@ -64,9 +65,9 @@ public class DelimitedTextReader<VALUEIN> extends
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
+        initConfig(context);
+        
         Path file = ((FileSplit) inSplit).getPath();
-        initCommonConfigurations(conf, file);
         configFileNameAsCollection(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
@@ -76,14 +77,12 @@ public class DelimitedTextReader<VALUEIN> extends
     }
 
     protected void initDelimConf(Configuration conf) {
-        if (DELIM == null) {
-            DELIM = conf.get(ConfigConstants.CONF_DELIMITER,
+        delimiter = conf.get(ConfigConstants.CONF_DELIMITER,
                 ConfigConstants.DEFAULT_DELIMITER);
-        }
-        if( DELIM.length() == 1){
-            DELIM = "\\" + DELIM;
+        if (delimiter.length() == 1) {
+            delimiter = "\\" + delimiter;
         } else {
-            LOG.error("Incorrect delimitor: " + DELIM);
+            LOG.error("Incorrect delimitor: " + delimiter);
         }
         idName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
     }
@@ -109,7 +108,7 @@ public class DelimitedTextReader<VALUEIN> extends
             return false;
         }
         if (fields == null) {
-            fields = line.split(DELIM);
+            fields = line.split(delimiter);
             boolean found = false;
             for (int i = 0; i < fields.length; i++) {
                 if (i == 0 && idName == null || fields[i].equals(idName)) {
@@ -120,9 +119,11 @@ public class DelimitedTextReader<VALUEIN> extends
             }
             if (found == false) {
                 // idname doesn't match any columns
-                LOG.error("delimited_uri_id doesn't match any column");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Header: " + line);
+                }
                 throw new IOException(
-                    "delimited_uri_id doesn't match any column");
+                    "Delimited_uri_id " + idName + " is not found.");
             }
             line = br.readLine();
             
@@ -140,7 +141,7 @@ public class DelimitedTextReader<VALUEIN> extends
             } 
         }
 
-        String[] values = line.split(DELIM);
+        String[] values = line.split(delimiter);
         if (values.length != fields.length) {
             LOG.error(line + " is inconsistent with column definition");
             return true;

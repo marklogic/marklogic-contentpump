@@ -72,7 +72,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected String mode;
     protected IdGenerator idGen;
 
-    protected Configuration conf;
     protected XMLInputFactory f;
     protected FileSystem fs;
     protected Path file;
@@ -101,19 +100,14 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     @Override
-    public void initialize(InputSplit is, TaskAttemptContext context)
+    public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        conf = context.getConfiguration();
-        start = 0;
-        end = is.getLength();
-        initializeBasics(is, context);
-    }
-    
-    public void initializeBasics(InputSplit inSplit, TaskAttemptContext context)
-        throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
+        initConfig(context);
+        
         file = ((FileSplit) inSplit).getPath();
-        initCommonConfigurations(conf, file);
+        start = 0;
+        end = inSplit.getLength();
+        
         configFileNameAsCollection(conf, file);
         fs = file.getFileSystem(context.getConfiguration());
         fInputStream = fs.open(file);
@@ -125,7 +119,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             e.printStackTrace();
         }
         initAggConf(inSplit, context);
-        
     }
     
     protected void initAggConf(InputSplit inSplit, TaskAttemptContext context) {
@@ -327,15 +320,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             sb.append(">");
             currDepth--;
         }
-
-        // TODO
-        // if the startId is still defined, and the uri has been found,
-        // we should skip as much of this work as possible
-        // this avoids OutOfMemory errors, too
-        // if (skippingRecord) {
-        // LOG.trace("skipping record");
-        // return;
-        // }
+        
         write(sb.toString());
         
     }
@@ -533,10 +518,10 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     
     @Override
     protected void setKey(String val) {
-        String uri = getEncodedURI(val);
-        if (uri == null) {
+        if (val == null) {
             key = null;
         } else {
+            String uri = getEncodedURI(val);
             super.setKey(uri);
         }
     }

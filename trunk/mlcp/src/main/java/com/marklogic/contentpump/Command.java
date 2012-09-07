@@ -1103,8 +1103,26 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(OUTPUT_URI_REPLACE)) {
             String uriReplace = cmdline.getOptionValue(OUTPUT_URI_REPLACE);
             if (uriReplace == null) {
-                LOG.error(OUTPUT_URI_REPLACE + " is not configured correctly.");
+                throw new IllegalArgumentException("Missing option argument: "
+                        + OUTPUT_URI_REPLACE);
             } else {
+                String[] replace = uriReplace.split(",");
+                // URI replace comes in pattern and replacement pairs.
+                if (replace.length % 2 != 0) {
+                    throw new IllegalArgumentException(
+                            "Invalid option argument for "
+                            + OUTPUT_URI_REPLACE + " :" + uriReplace);
+                }
+                // Replacement string is expected to be in ''
+                for (int i = 0; i < replace.length - 1; i++) {
+                    String replacement = replace[++i].trim();
+                    if (!replacement.startsWith("'") || 
+                        !replacement.endsWith("'")) {
+                        throw new IllegalArgumentException(
+                                "Invalid option argument for "
+                                + OUTPUT_URI_REPLACE + " :" + uriReplace);
+                    }
+                }
                 conf.setStrings(CONF_OUTPUT_URI_REPLACE, uriReplace);
             }
         }

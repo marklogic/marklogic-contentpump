@@ -24,7 +24,6 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -73,9 +72,9 @@ public class CompressedDocumentReader<VALUEIN> extends
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        file = ((FileSplit) inSplit).getPath();
-        initCommonConfigurations(conf, file);
+        initConfig(context);
+        
+        file = ((FileSplit) inSplit).getPath();  
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
 
