@@ -28,6 +28,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.mapreduce.lib.input.InvalidInputException;
 
 /**
  * An InputFormat that flattens directories and returns file-only splits.
@@ -48,8 +49,19 @@ FileInputFormat<K, V> {
 
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
-        List<InputSplit> splits = super.getSplits(job);
+        List<InputSplit> splits;
         Configuration conf = job.getConfiguration();
+        try {
+            splits = super.getSplits(job);
+        } catch (InvalidInputException ex) {
+            String inPath = conf.get("mapred.input.dir");
+            String pattern = conf.get(ConfigConstants.CONF_INPUT_FILE_PATTERN,
+                    ".*");
+            throw new IOException(
+                "No input files found with the specified input path " + inPath
+                + " and input file pattern " + pattern, ex);
+        }        
+        
         PathFilter jobFilter = getInputPathFilter(job);
         List<PathFilter> filters = new ArrayList<PathFilter>();
         filters.add(hiddenFileFilter);
