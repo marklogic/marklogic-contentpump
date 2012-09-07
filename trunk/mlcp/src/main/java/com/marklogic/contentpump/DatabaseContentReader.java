@@ -30,6 +30,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.marklogic.contentpump.utilities.URIUtil;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.InternalUtilities;
@@ -296,7 +297,7 @@ public class DatabaseContentReader extends
         ResultItem item = result.next();
         String uri = item.asString();
         if (uri == null) {
-            throw new IOException("no uri");
+            throw new IOException("Missing document URI for metadata.");
         }
         item = result.next();
         //node-kind, must exist
@@ -369,8 +370,10 @@ public class DatabaseContentReader extends
             String uri = null;
             uri = currItem.getDocumentURI();
             if (uri == null) {
-                throw new IOException("no uri");
+                throw new IOException("Missing document URI for result " + count);
             }
+            uri = URIUtil.applyUriReplace(uri, conf);
+            uri = URIUtil.applyPrefixSuffix(uri, conf);
             if (metasTurn) {
                 currentKey.setUri(uri + DocumentMetadata.EXTENSION);
                 DocumentMetadata metadata = metadataMap.get(uri);
@@ -411,6 +414,8 @@ public class DatabaseContentReader extends
                 DocumentMetadata metadata = new DocumentMetadata();
                 String uri = parseMetadata(metadata) + DocumentMetadata.NAKED;
                 metadata.setNakedProps(true);
+                uri = URIUtil.applyUriReplace(uri, conf);
+                uri = URIUtil.applyPrefixSuffix(uri, conf);
                 currentKey.setUri(uri);
                 currentValue.setContent(metadata.toXML().getBytes());
                 currentValue.setContentType(ContentType.XML);

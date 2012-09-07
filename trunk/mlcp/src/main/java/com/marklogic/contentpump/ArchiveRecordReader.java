@@ -23,7 +23,6 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -74,7 +73,8 @@ public class ArchiveRecordReader extends
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
+        initConfig(context);
+        
         Path file = ((FileSplit) inSplit).getPath();
         zipfile = file.toUri().getPath();
         if(LOG.isDebugEnabled()) {
@@ -91,7 +91,6 @@ public class ArchiveRecordReader extends
         }
         String typeStr = subStr.substring(index + 1, subStr.length());
         type = ContentType.valueOf(typeStr);
-        initCommonConfigurations(conf, file);
         value = new MarkLogicDocumentWithMeta();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);

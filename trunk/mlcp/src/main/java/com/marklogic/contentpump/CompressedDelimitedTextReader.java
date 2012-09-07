@@ -27,7 +27,6 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -54,14 +53,13 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
+        initConfig(context);
+        initDelimConf(conf);
+        
         Path file = ((FileSplit) inSplit).getPath();
-        initCommonConfigurations(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
-
-        initDelimConf(conf);
-
+        
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
             CompressionCodec.ZIP.toString());
@@ -73,7 +71,6 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             zipIn = new GZIPInputStream(fileIn);
             codec = CompressionCodec.GZIP;
         }
-
     }
 
     @Override

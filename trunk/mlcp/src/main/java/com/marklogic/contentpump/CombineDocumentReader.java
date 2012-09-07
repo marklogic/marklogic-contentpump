@@ -47,7 +47,6 @@ extends ImportRecordReader<VALUEIN> {
     protected long bytesTotal;
     protected Iterator<FileSplit> iterator;
     protected TaskAttemptContext context;
-    protected Configuration conf;
     protected int batchSize;
     
     public CombineDocumentReader() {     
@@ -65,9 +64,8 @@ extends ImportRecordReader<VALUEIN> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
     throws IOException, InterruptedException {
-        conf = context.getConfiguration();
-        //we don't know the file yet until nextKeyValue()
-        initCommonConfigurations(conf, null);
+        initConfig(context);
+
         iterator = ((CombineDocumentSplit)inSplit).getSplits().iterator();
         bytesTotal = inSplit.getLength();
         this.context = context;

@@ -13,7 +13,6 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -47,9 +46,9 @@ public class CompressedAggXMLReader<VALUEIN> extends
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
-        Path file = ((FileSplit) inSplit).getPath();
-        initCommonConfigurations(conf, file);
+        super.initialize(inSplit, context);
+        
+        Path file = ((FileSplit) inSplit).getPath();       
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         factory = XMLInputFactory.newInstance();

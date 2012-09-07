@@ -3,6 +3,7 @@ package com.marklogic.contentpump;
 import junit.framework.TestCase;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestImportDocs extends TestCase {
@@ -13,8 +14,9 @@ public class TestImportDocs extends TestCase {
     public void testImportMixedDocs() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
-            + " -thread_count 1 -mode local -output_uri_prefix ABC"
-            + " -output_collections test,ML -port 5275";
+            + " -mode local -output_uri_prefix test/"
+            + " -output_collections test,ML -port 5275"
+            + " -output_uri_replace wiki,'wiki1'";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
@@ -28,8 +30,20 @@ public class TestImportDocs extends TestCase {
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection(\"ML\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
+        result.close();
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "xdmp:directory(\"test/\", \"infinity\")");
+        int count = 0;
+        while (result.hasNext()) {
+            ResultItem item = result.next();
+            String uri = item.getDocumentURI();
+            assertTrue(uri.contains("wiki1"));
+            count++;
+        }
+        assertTrue(count == 93);
     }
-    
+   
     public void testImportText() throws Exception {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
@@ -72,5 +86,5 @@ public class TestImportDocs extends TestCase {
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
     }
- 
+
 }

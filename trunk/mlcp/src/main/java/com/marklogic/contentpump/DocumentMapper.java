@@ -17,7 +17,6 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 
@@ -45,29 +44,6 @@ public class DocumentMapper<VALUE> extends
         } else {
             inputRecordCount.increment(1);
         }
-        String sb = new String(uri.toString());
-        Configuration conf = context.getConfiguration();
-        String[] uriReplace = conf
-            .getStrings(ConfigConstants.CONF_OUTPUT_URI_REPLACE);
-        if (uriReplace != null && uriReplace.length % 2 != 0) {
-            throw new IOException("Argument for -output_uri_replace should be"
-                + " Comma_separated list of regex pattern and string pairs");
-        }
-        int i = 0;
-        while (uriReplace != null && i < uriReplace.length) {
-            String replacement = uriReplace[i + 1];
-            if (replacement.startsWith("'") && replacement.endsWith("'")) {
-                String trim = replacement.substring(1,
-                    replacement.length() - 1);
-                sb = sb.replaceAll(uriReplace[i], trim);
-            } else {
-                throw new IOException(
-                    "replacement string should be wrapped by a pair of "
-                        + "single quotes");
-            }
-            i += 2;
-        }
-        uri.setUri(sb);
         context.write(uri, fileContent);
     }
     

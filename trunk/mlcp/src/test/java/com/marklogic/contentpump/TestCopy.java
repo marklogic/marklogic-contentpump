@@ -5,6 +5,7 @@ import java.io.File;
 import junit.framework.TestCase;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestCopy extends TestCase {
@@ -19,7 +20,9 @@ public class TestCopy extends TestCase {
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
             + " -delimited_uri_id first"
             + " -input_compressed -input_compression_codec zip"
-            + " -input_file_type delimited_text";
+            + " -input_file_type delimited_text"
+            + " -output_uri_suffix .xml"
+            + " -output_uri_prefix test/";
         
         String[] args = cmd.split(" ");
 
@@ -49,5 +52,14 @@ public class TestCopy extends TestCase {
             "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
+        
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:6275", "fn:doc()");
+        while (result.hasNext()) {
+            ResultItem item = result.next();
+            String uri = item.getDocumentURI();
+            assertTrue(uri.endsWith(".xml"));
+            assertTrue(uri.startsWith("test/"));
+        }
     }
 }

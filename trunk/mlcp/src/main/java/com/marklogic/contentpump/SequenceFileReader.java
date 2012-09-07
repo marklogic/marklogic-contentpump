@@ -60,11 +60,8 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        Configuration conf = context.getConfiguration();
+        initConfig(context);
         Path file = ((FileSplit) inSplit).getPath();
-
-        prefix = conf.get(ConfigConstants.CONF_OUTPUT_URI_PREFIX);
-        suffix = conf.get(ConfigConstants.CONF_OUTPUT_URI_SUFFIX);
 
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         reader = new SequenceFile.Reader(fs, file, conf);

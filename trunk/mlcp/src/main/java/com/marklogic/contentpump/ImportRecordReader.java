@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.contentpump.utilities.URIUtil;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
@@ -44,24 +45,28 @@ public abstract class ImportRecordReader<VALUEIN> extends
     public static final Log LOG = LogFactory.getLog(ImportRecordReader.class);
     protected DocumentURI key = new DocumentURI();
     protected VALUEIN value;
-    protected String prefix;
-    protected String suffix;
     protected String mode;
     protected boolean streaming = false;
+    protected Configuration conf;
+    
+    /**
+     * Apply URI prefix and suffix configuration options and set the result as 
+     * DocumentURI key.
+     * 
+     * @param uri Source string of document URI.
+     */
     protected void setKey(String uri) {
-        StringBuilder sb = new StringBuilder();
-        if (prefix != null) {
-            sb.append(prefix);
+        if (uri == null) {
+            key = null;
+            return;
         }
-        sb.append(uri);
-        if (suffix != null) {
-            sb.append(suffix);
-        }
-        //key may be set to null previously for empty delim uri_id
-        if(key == null) {
+        // reconstruct key if set to null
+        if (key == null) {
             key = new DocumentURI();
         }
-        key.setUri(sb.toString());
+        // apply prefix and suffix for URI
+        uri = URIUtil.applyPrefixSuffix(uri, conf);
+        key.setUri(uri);      
     }
 
     @Override
@@ -83,8 +88,23 @@ public abstract class ImportRecordReader<VALUEIN> extends
         InterruptedException;
 
     @Override
-    public abstract void initialize(InputSplit arg0, TaskAttemptContext context)
-        throws IOException, InterruptedException;
+    public abstract void initialize(InputSplit arg0, 
+            TaskAttemptContext context) 
+    throws IOException, InterruptedException;
+    
+    @SuppressWarnings("unchecked")
+    protected void initConfig(TaskAttemptContext context) 
+        {
+        conf = context.getConfiguration();
+        String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
+            MarkLogicConstants.DEFAULT_CONTENT_TYPE);
+        if (!conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false)) {
+            ContentType contentType = ContentType.valueOf(type);
+            Class<? extends Writable> valueClass = 
+                contentType.getWritableClass();
+            value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
+        } 
+    }
 
     @SuppressWarnings("unchecked")
     protected void configFileNameAsCollection(Configuration conf, Path file) {
@@ -102,23 +122,14 @@ public abstract class ImportRecordReader<VALUEIN> extends
             }
         }
     }
-    
-    @SuppressWarnings("unchecked")
-    public void initCommonConfigurations(Configuration conf, Path file) {
-        prefix = conf.get(ConfigConstants.CONF_OUTPUT_URI_PREFIX);
-        suffix = conf.get(ConfigConstants.CONF_OUTPUT_URI_SUFFIX);
-        String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
-            MarkLogicConstants.DEFAULT_CONTENT_TYPE);
-        if (!conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false)) {
-            ContentType contentType = ContentType.valueOf(type);
-            Class<? extends Writable> valueClass = contentType.getWritableClass();
-            value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
-        } 
-    }
-    
+
     protected String makeURIFromPath(Path file) {
         // get path portion of the file
        String path = file.toUri().getPath();
+       
+       // apply URI replace
+       path = URIUtil.applyUriReplace(path, conf);
+       
        // create a URI out of it
        try {
            URI uri = new URI(null, null, null, 0, path, null, null);
@@ -131,6 +142,7 @@ public abstract class ImportRecordReader<VALUEIN> extends
     }
     
     protected String getEncodedURI(String val) {  
+        val = URIUtil.applyUriReplace(val, conf);
         try {
             URI uri = new URI(null, null, null, 0, val, null, null);
             return uri.toString();
