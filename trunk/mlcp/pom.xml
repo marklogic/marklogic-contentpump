@@ -19,8 +19,19 @@
   <version>1.0</version>
   <name>marklogic-contentpump</name>
   <packaging>jar</packaging>
+  <properties>
+    <skipTests>true</skipTests>
+  </properties>
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.12.3</version>
+        <configuration>
+          <skipTests>${skipTests}</skipTests>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
