@@ -1,15 +1,24 @@
 package com.marklogic.contentpump;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
 
-public class TestDistributedImportDelimitedText extends TestCase {
-    public TestDistributedImportDelimitedText(String name) {
-        super(name);
+public class TestDistributedImportDelimitedText {
+
+
+    @After
+    public void tearDown() {
+        Utils.closeSession();
     }
     
+    @Test
     public void testImportDelimitedText() throws Exception {
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"
@@ -31,6 +40,7 @@ public class TestDistributedImportDelimitedText extends TestCase {
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
+        Utils.closeSession();
         
         result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
 
@@ -39,6 +49,8 @@ public class TestDistributedImportDelimitedText extends TestCase {
             String s = result.next().asString();
             sb.append(s);
         }
+        Utils.closeSession();
+        
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
         assertTrue(sb.toString().equals(key));

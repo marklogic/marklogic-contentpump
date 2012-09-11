@@ -1,15 +1,22 @@
 package com.marklogic.contentpump;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
+public class TestDistributedImportAggregate {
 
-public class TestDistributedImportAggregate extends TestCase {
-    public TestDistributedImportAggregate(String name) {
-        super(name);
+    @After
+    public void tearDown() {
+        Utils.closeSession();
     }
     
+    @Test
     public void testImportMedline() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
@@ -30,6 +37,7 @@ public class TestDistributedImportAggregate extends TestCase {
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
+        Utils.closeSession();
     }
 
 }

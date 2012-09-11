@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Properties;
 
 import com.marklogic.xcc.AdhocQuery;
@@ -21,19 +22,26 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 
 public class Utils {
-    
+    private static HashMap<String, ContentSource> csMap = new HashMap<String, ContentSource>();
+    private static Session session;
     public static void prepareDistributedMode() {
         Properties props = System.getProperties();
-        props.setProperty(ConfigConstants.CONTENTPUMP_HOME_PROPERTY_NAME, Constants.CONTENTPUMP_HOME);
-        props.setProperty(ConfigConstants.CONTENTPUMP_VERSION_PROPERTY_NAME, Constants.CONTENTPUMP_VERSION);
+        props.setProperty(ConfigConstants.CONTENTPUMP_HOME_PROPERTY_NAME,
+            Constants.CONTENTPUMP_HOME);
+        props.setProperty(ConfigConstants.CONTENTPUMP_VERSION_PROPERTY_NAME,
+            Constants.CONTENTPUMP_VERSION);
         System.setProperties(props);
     }
     
     public static ResultSequence runQuery(String xccUri, String query)
         throws XccConfigException, URISyntaxException, RequestException {
-        ContentSource cs = ContentSourceFactory.newContentSource(new URI(
+        ContentSource cs = csMap.get(xccUri);
+        if (cs == null) {
+            cs = ContentSourceFactory.newContentSource(new URI(
             xccUri));
-        Session session = cs.newSession();
+            csMap.put(xccUri, cs);
+        }
+        session = cs.newSession();
         AdhocQuery aquery = session.newAdhocQuery(query);
 
         RequestOptions options = new RequestOptions();
@@ -47,6 +55,7 @@ public class Utils {
         String q = "for $forest in xdmp:database-forests(xdmp:database(\""
             + dbName + "\"))\n return xdmp:forest-clear($forest)";
         runQuery(xccUri, q);
+        session.close();
     }
     
     /**
@@ -103,10 +112,16 @@ public class Utils {
             return;
         }
         if (f.isDirectory()) {
-          for (File c : f.listFiles())
-              deleteDirectory(c);
+            for (File c : f.listFiles())
+                deleteDirectory(c);
         }
         if (!f.delete())
-          throw new FileNotFoundException("Failed to delete file: " + f);
-      }
- }
+            throw new FileNotFoundException("Failed to delete file: " + f);
+    }
+
+    public static void closeSession() {
+        if (!session.isClosed()) {
+            session.close();
+        }
+    }
+}

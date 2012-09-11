@@ -1,16 +1,23 @@
 package com.marklogic.contentpump;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
 
-public class TestImportAggregate extends TestCase {
-    public TestImportAggregate(String name) {
-        super(name);
+public class TestImportAggregate {
+
+    @After
+    public void tearDown() {
+        Utils.closeSession();
     }
     
-
+    @Test
     public void testImportMedline() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
@@ -30,9 +37,10 @@ public class TestImportAggregate extends TestCase {
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
+        Utils.closeSession();
     }
     
-
+    @Test
     public void testBug19146() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
@@ -52,9 +60,10 @@ public class TestImportAggregate extends TestCase {
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
+        Utils.closeSession();
     }
     
-
+    @Test
     public void testImportAggZip() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -mode local" +
         		" -username admin" + " -password admin" + 
@@ -76,6 +85,7 @@ public class TestImportAggregate extends TestCase {
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
+        Utils.closeSession();
         
         result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
 
@@ -84,6 +94,8 @@ public class TestImportAggregate extends TestCase {
             String s = result.next().asString();
             sb.append(s);
         }
+        Utils.closeSession();
+        
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath() + "/keys/TestImportAggregate#testImportAggZip.txt");
         assertTrue(sb.toString().equals(key));
     }
