@@ -1,16 +1,23 @@
 package com.marklogic.contentpump;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import org.junit.After;
+import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
-public class TestImportDocs extends TestCase {
-     public TestImportDocs(String name) {
-        super(name);
+public class TestImportDocs {
+    @After
+    public void tearDown() {
+        Utils.closeSession();
     }
     
+    @Test
     public void testImportMixedDocs() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
@@ -27,13 +34,14 @@ public class TestImportDocs extends TestCase {
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection(\"ML\"))");
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection(\"ML\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
-        result.close();
+        Utils.closeSession();
         
-        result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275", "xdmp:directory(\"test/\", \"infinity\")");
+        result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+            "xdmp:directory(\"test/\", \"infinity\")");
         int count = 0;
         while (result.hasNext()) {
             ResultItem item = result.next();
@@ -42,8 +50,10 @@ public class TestImportDocs extends TestCase {
             count++;
         }
         assertTrue(count == 93);
+        Utils.closeSession();
     }
-   
+    
+    @Test
     public void testImportText() throws Exception {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
@@ -63,8 +73,10 @@ public class TestImportDocs extends TestCase {
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
+        Utils.closeSession();
     }
     
+    @Test
     public void testImportMixedDocsZip() throws Exception {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
@@ -82,9 +94,12 @@ public class TestImportDocs extends TestCase {
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection(\"test\"))");
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
+        Utils.closeSession();
     }
+
 
 }

@@ -1,18 +1,25 @@
 package com.marklogic.contentpump;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
-public class TestCopy extends TestCase {
-    public TestCopy(String name) {
-        super(name);
+public class TestCopy{
+
+    @After
+    public void tearDown() {
+        Utils.closeSession();
     }
     
+    @Test
     public void testCopy() throws Exception {
         Utils.deleteDirectory(new File(Constants.OUT_PATH.toUri().getPath()));
         String cmd = 
@@ -37,6 +44,7 @@ public class TestCopy extends TestCase {
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
+        Utils.closeSession();
         
         //copy
         cmd = "COPY -input_host localhost -input_port 5275"
@@ -52,6 +60,7 @@ public class TestCopy extends TestCase {
             "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
+        Utils.closeSession();
         
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:6275", "fn:doc()");
@@ -61,5 +70,6 @@ public class TestCopy extends TestCase {
             assertTrue(uri.endsWith(".xml"));
             assertTrue(uri.startsWith("test/"));
         }
+        Utils.closeSession();
     }
 }
