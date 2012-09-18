@@ -71,7 +71,12 @@ public class DelimitedTextReader<VALUEIN> extends
         configFileNameAsCollection(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
-        br = new BufferedReader(new InputStreamReader(fileIn));
+        if (encoding == null) {
+            br = new BufferedReader(new InputStreamReader(fileIn));
+        } else {
+            br = new BufferedReader(new InputStreamReader(fileIn, encoding));
+            //String will be converted and read as UTF-8 String
+        }
         fileLen = inSplit.getLength();
         initDelimConf(conf);
     }
@@ -111,8 +116,18 @@ public class DelimitedTextReader<VALUEIN> extends
             fields = line.split(delimiter);
             boolean found = false;
             for (int i = 0; i < fields.length; i++) {
-                if (i == 0 && idName == null || fields[i].equals(idName)) {
-                    idName = fields[i];
+                // Oracle jdk bug 4508058: UTF-8 encoding does not recognize
+                // initial BOM
+                // will not be fixed. Work Around :
+                // Application code must recognize and skip the BOM itself.
+                byte[] buf = fields[i].getBytes();
+                if (buf[0] == (byte) 0xEF && buf[1] == (byte) 0xBB
+                    && buf[2] == (byte) 0xBF) {
+                    fields[i] = new String(buf, 3, buf.length - 3);
+                }
+                if (i == 0 && idName == null
+                    || fields[i].trim().equals(idName)) {
+                    idName = fields[i].trim();
                     found = true;
                     break;
                 }

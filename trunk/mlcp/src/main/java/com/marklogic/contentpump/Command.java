@@ -214,6 +214,13 @@ public enum Command implements ConfigConstants {
                         + " MarkLogic")
                 .create(STREAMING);
             options.addOption(streaming);
+            Option encoding = OptionBuilder
+                .withArgName("encoding")
+                .hasOptionalArg()
+                .withDescription(
+                    "The charset encoding to be used by the MarkLogic when "
+                        + "loading documents").create(CONTENT_ENCODING);
+            options.addOption(encoding);
         }
 
         @Override
@@ -428,6 +435,10 @@ public enum Command implements ConfigConstants {
                     LOG.warn("Unrecognized option argument for " + FAST_LOAD
                                     + ": " + arg);
                 }
+            }
+            if (cmdline.hasOption(CONTENT_ENCODING)) {
+                String arg = cmdline.getOptionValue(CONTENT_ENCODING);
+                conf.set(ConfigConstants.CONF_CONTENT_ENCODING, arg);
             }
         } 
     },

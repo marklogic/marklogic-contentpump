@@ -83,7 +83,11 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             if (codec.equals(CompressionCodec.ZIP)) {
                 return nextKeyValueInZip();
             } else if (codec.equals(CompressionCodec.GZIP)) {
-                br = new BufferedReader(new InputStreamReader(zipIn));
+                if (encoding == null) {
+                    br = new BufferedReader(new InputStreamReader(zipIn));
+                } else {
+                    br = new BufferedReader(new InputStreamReader(zipIn, encoding));
+                }
                 return super.nextKeyValue();
             } else {
                 throw new UnsupportedOperationException("Unsupported codec: "
@@ -126,8 +130,13 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             while ((nb = zis.read(buf, 0, buf.length)) != -1) {
                 baos.write(buf, 0, nb);
             }
-            br = new BufferedReader(new InputStreamReader(
-                new ByteArrayInputStream(baos.toByteArray())));
+            if (encoding == null) {
+                br = new BufferedReader(new InputStreamReader(
+                    new ByteArrayInputStream(baos.toByteArray())));
+            } else {
+                br = new BufferedReader(new InputStreamReader(
+                    new ByteArrayInputStream(baos.toByteArray()), encoding));
+            }
             //clear metadata
             fields = null;
             if (super.nextKeyValue()) {

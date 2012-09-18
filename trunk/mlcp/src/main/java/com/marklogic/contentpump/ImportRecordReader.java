@@ -33,6 +33,7 @@ import com.marklogic.contentpump.utilities.URIUtil;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.StreamLocator;
 
 /**
  * Abstract class of RecorderReader for import.
@@ -48,7 +49,8 @@ public abstract class ImportRecordReader<VALUEIN> extends
     protected String mode;
     protected boolean streaming = false;
     protected Configuration conf;
-    
+    protected String encoding;
+
     /**
      * Apply URI prefix and suffix configuration options and set the result as 
      * DocumentURI key.
@@ -103,7 +105,12 @@ public abstract class ImportRecordReader<VALUEIN> extends
             Class<? extends Writable> valueClass = 
                 contentType.getWritableClass();
             value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
-        } 
+        }
+        if (value instanceof StreamLocator) {
+            encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
+        } else {
+            encoding = conf.get(ConfigConstants.CONF_CONTENT_ENCODING);
+        }
     }
 
     @SuppressWarnings("unchecked")

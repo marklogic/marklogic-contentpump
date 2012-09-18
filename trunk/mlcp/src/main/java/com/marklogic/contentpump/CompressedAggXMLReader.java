@@ -81,7 +81,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
             try {
                 xmlSR = factory
                     .createXMLStreamReader(new ByteArrayInputStream(baos
-                        .toByteArray()));
+                        .toByteArray()), encoding);
             } catch (XMLStreamException e) {
                 e.printStackTrace();
             }
@@ -91,7 +91,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
             zipIn = new GZIPInputStream(fileIn);
             codec = CompressionCodec.GZIP;
             try {
-                xmlSR = factory.createXMLStreamReader(zipIn);
+                xmlSR = factory.createXMLStreamReader(zipIn, encoding);
             } catch (XMLStreamException e) {
                 e.printStackTrace();
             }
@@ -142,7 +142,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
                     }
                     xmlSR = factory
                         .createXMLStreamReader(new ByteArrayInputStream(baos
-                            .toByteArray()));
+                            .toByteArray()), encoding);
                     nameSpaces.clear();
 
                     return nextRecordInAggregate();

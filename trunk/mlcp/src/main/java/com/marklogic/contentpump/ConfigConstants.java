@@ -112,6 +112,7 @@ public interface ConfigConstants {
     // TODO: merge with "aggregate_uri_id" ??
     static final String DELIMITED_URI_ID = "delimited_uri_id";
     static final String FAST_LOAD = "fastload";
+    static final String CONTENT_ENCODING = "content_encoding";
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = "mapreduce.marklogic.input.compressioncodec";
     static final String CONF_MAX_SPLIT_SIZE = "mapred.max.split.size";
@@ -141,4 +142,5 @@ public interface ConfigConstants {
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
     static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = 
         "mapreduce.marklogic.input.archive.metadataoptional";
+    static final String CONF_CONTENT_ENCODING = "mapreduce.marklogic.content.encoding";
 }
