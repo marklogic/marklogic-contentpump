@@ -24,6 +24,8 @@ import com.marklogic.xcc.exceptions.XccConfigException;
 public class Utils {
     private static HashMap<String, ContentSource> csMap = new HashMap<String, ContentSource>();
     private static Session session;
+    public static String newLine = System.getProperty("line.separator");
+    
     public static void prepareDistributedMode() {
         Properties props = System.getProperties();
         props.setProperty(ConfigConstants.CONTENTPUMP_HOME_PROPERTY_NAME,
@@ -79,6 +81,15 @@ public class Utils {
         return runQuery(xccUri, q);
     }
     
+    /**
+     * Get all uris and document contents from the datasource of the XccUri
+     * 
+     * @param xccUri
+     * @return
+     * @throws XccConfigException
+     * @throws RequestException
+     * @throws URISyntaxException
+     */
     public static ResultSequence getAllDocs(String xccUri) throws XccConfigException,
         RequestException, URISyntaxException {
         String q = "xquery version \"1.0-ml\";"
@@ -93,10 +104,10 @@ public class Utils {
         StringBuilder content = new StringBuilder();
         String line;
         while( (line = br.readLine()) != null) {
-            content.append(line);
+            content.append(line + newLine);
         }
         br.close();
-        return content.toString();
+        return content.toString().trim();
     }
 
     public static void writeFile(String filename, StringBuilder sb)

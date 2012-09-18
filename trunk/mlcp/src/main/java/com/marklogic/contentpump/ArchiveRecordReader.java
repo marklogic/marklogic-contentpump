@@ -176,7 +176,14 @@ public class ArchiveRecordReader extends
         while ((size = zipIn.read(buf, 0, buf.length)) != -1) {
             baos.write(buf, 0, size);
         }
-        String metaStr = baos.toString();
+        // in case the platform that generates the archives has a different
+        // charset from the one of the platform that imports the archive
+        String metaStr;
+        if (encoding == null ) {
+            metaStr = baos.toString();
+        } else {
+            metaStr = baos.toString(encoding);
+        }
         DocumentMetadata metadata = DocumentMetadata.fromXML(new StringReader(
             metaStr));
         baos.close();

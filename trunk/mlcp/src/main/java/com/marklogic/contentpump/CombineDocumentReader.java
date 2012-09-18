@@ -16,6 +16,8 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
@@ -90,10 +92,16 @@ extends ImportRecordReader<VALUEIN> {
                 } else {
                     key = null;
                     return true;
-                }             
+                }
                 fileIn.readFully(buf);
                 if (value instanceof Text) {
-                    ((Text) value).set(new String(buf));
+                    String encoding = conf
+                        .get(ConfigConstants.CONF_CONTENT_ENCODING);
+                    if (encoding == null) {
+                        ((Text) value).set(new String(buf));
+                    } else {
+                        ((Text) value).set(new String(buf, encoding));
+                    }
                 } else if (value instanceof BytesWritable) {
                     if (batchSize > 1) {
                         // Copy data since XCC won't do it when Content is 
