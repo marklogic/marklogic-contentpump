@@ -109,13 +109,13 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 txtArchive = new OutputArchive(dst, conf);
             }
             txtArchive.write(zipEntryName, 
-                    content.getContentAsText().toString().getBytes());
+                    content.getContentAsText().getBytes());
         } else if(ContentType.XML.equals(type)) {
             if(xmlArchive == null) {
                 xmlArchive = new OutputArchive(dst, conf);
             }
             xmlArchive.write(zipEntryName, 
-                    content.getContentAsText().toString().getBytes());
+                    content.getContentAsText().getBytes());
         } else {
             throw new IOException ("incorrect type: " + type);
         }

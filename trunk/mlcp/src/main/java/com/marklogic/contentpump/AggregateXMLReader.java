@@ -116,7 +116,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         try {
             xmlSR = f.createXMLStreamReader(fInputStream, encoding);
         } catch (XMLStreamException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage(), e);
         }
         initAggConf(inSplit, context);
     }
