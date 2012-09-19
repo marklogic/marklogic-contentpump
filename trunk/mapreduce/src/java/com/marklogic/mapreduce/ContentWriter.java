@@ -225,8 +225,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     options.setFormat(DocumentFormat.TEXT);
                     formatNeeded = false;
                 }
-                content = ContentFactory.newContent(uri, 
-                        ((Text)value).toString(), options);             
+                content = ContentFactory.newContent(uri,
+                    ((Text) value).getBytes(), options);
             } else if (value instanceof MarkLogicNode) {
                 if (formatNeeded) {
                     options.setFormat(DocumentFormat.XML);
