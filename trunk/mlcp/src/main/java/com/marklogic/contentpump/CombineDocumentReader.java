@@ -16,13 +16,10 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -96,7 +93,7 @@ extends ImportRecordReader<VALUEIN> {
                 fileIn.readFully(buf);
                 if (value instanceof Text) {
                     String encoding = conf
-                        .get(ConfigConstants.CONF_CONTENT_ENCODING);
+                        .get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
                     if (encoding == null) {
                         ((Text) value).set(new String(buf));
                     } else {
