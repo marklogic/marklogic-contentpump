@@ -181,8 +181,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         
         options.setLanguage(conf.get(OUTPUT_CONTENT_LANGUAGE));
-        options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
-                DEFAULT_OUTPUT_CONTENT_ENCODING));
         String repairLevel = conf.get(OUTPUT_XML_REPAIR_LEVEL,
                 DEFAULT_OUTPUT_XML_REPAIR_LEVEL).toLowerCase();
         options.setNamespace(conf.get(OUTPUT_CONTENT_NAMESPACE));
@@ -225,6 +223,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     options.setFormat(DocumentFormat.TEXT);
                     formatNeeded = false;
                 }
+                options.setEncoding(DEFAULT_OUTPUT_CONTENT_ENCODING);
                 content = ContentFactory.newContent(uri,
                     ((Text) value).getBytes(), options);
             } else if (value instanceof MarkLogicNode) {
@@ -243,6 +242,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         ((BytesWritable) value).getBytes(), 0, 
                         ((BytesWritable) value).getLength(), options);               
             } else if (value instanceof CustomContent) {
+                options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
+                    DEFAULT_OUTPUT_CONTENT_ENCODING));
                 ContentCreateOptions newOptions = options;
                 if (batchSize > 1) {
                     newOptions = (ContentCreateOptions)options.clone();
@@ -255,12 +256,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     options.setFormat(doc.getContentType().getDocumentFormat());
                     formatNeeded = false;
                 }
+                options.setEncoding(DEFAULT_OUTPUT_CONTENT_ENCODING);
                 if (doc.getContentType() == ContentType.BINARY) {
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsByteArray(), options);
                 } else {
                     content = ContentFactory.newContent(uri, 
-                              doc.getContentAsText().toString(), options);
+                              doc.getContentAsText().getBytes(), options);
                 }     
             } else if (value instanceof StreamLocator) {
                 Path path = ((StreamLocator)value).getPath();
@@ -287,6 +289,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         LOG.error("Unsupported compression codec: " + value);
                         return;
                 }
+                options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
+                    DEFAULT_OUTPUT_CONTENT_ENCODING));
                 if (streaming) {
                     content = ContentFactory.newUnBufferedContent(uri, is, 
                             options);
