@@ -199,22 +199,51 @@ public class TestImportDocs {
         Utils.closeSession();
         
         result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        result.next();//skip uri
-        InputStream is = result.next().asInputStream();
-        int size;
-        byte[] buf = new byte[65536];
-        while ((size = is.read(buf, 0, buf.length)) != -1) {
-            baos.write(buf, 0, size);
+        StringBuilder sb = new StringBuilder();
+        while(result.hasNext()) {
+            sb.append(result.next().asString());
         }
 
         Utils.closeSession();
-        
+        Utils.writeFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportText#testImportMixedUTF16LE.txt", sb);
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportText#testImportMixedUTF16LE.txt");
-        //because of mixed, .enc is loaded as binary, ML preserves the encoding
-        String str = new String(baos.toByteArray(), "UTF-16LE");
-        assertTrue(str.trim().equals(key));
+        assertTrue(sb.toString().trim().equals(key));
+    }
+    
+    @Test
+    public void testImportMixedTxtUTF16LE() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-16le.txt"
+            + " -thread_count 1 -mode local -content_encoding UTF-16LE"
+            + " -output_collections test,ML";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        StringBuilder sb = new StringBuilder();
+        while(result.hasNext()) {
+            sb.append(result.next().asString());
+        }
+        Utils.closeSession();
+
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportText#testImportMixedTxtUTF16LE.txt");
+        assertTrue(sb.toString().trim().equals(key));
 
     }
  

@@ -438,7 +438,12 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(CONTENT_ENCODING)) {
                 String arg = cmdline.getOptionValue(CONTENT_ENCODING);
-                conf.set(ConfigConstants.CONF_CONTENT_ENCODING, arg);
+                if (ContentType.MIXED == contentType
+                    || Command.isStreaming(cmdline, conf)) {
+                    conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
+                } else {
+                    conf.set(ConfigConstants.CONF_CONTENT_ENCODING, arg);
+                }
             }
         } 
     },
