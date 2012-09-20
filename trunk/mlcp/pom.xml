@@ -16,7 +16,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>marklogic-contentpump</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
   <name>marklogic-contentpump</name>
   <packaging>jar</packaging>
   <properties>
