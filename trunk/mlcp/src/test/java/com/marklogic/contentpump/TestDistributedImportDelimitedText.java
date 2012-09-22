@@ -39,7 +39,7 @@ public class TestDistributedImportDelimitedText {
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("5", result.next().asString());
+        assertEquals("6", result.next().asString());
         Utils.closeSession();
         
         result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");

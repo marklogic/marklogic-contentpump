@@ -16,10 +16,11 @@
 
 package com.marklogic.contentpump;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -31,6 +32,8 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.sun.org.apache.xml.internal.utils.XMLChar;
+
 /**
  * Reader for DelimitedTextInputFormat.
  * @author ali
@@ -40,20 +43,26 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 public class DelimitedTextReader<VALUEIN> extends
     ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(DelimitedTextReader.class);
+    protected static final char encapsulator = '"';
+    /**
+     * header of delimited text
+     */
     protected String[] fields;
-    protected String delimiter;
+    protected char delimiter;
     protected static String ROOT_START = "<root>";
     protected static String ROOT_END = "</root>";
-    protected BufferedReader br;
+    protected CSVParser parser;
+    protected InputStreamReader instream;
     protected boolean hasNext = true;
     protected String idName;
     protected long fileLen = Long.MAX_VALUE;
     protected long bytesRead;
+    protected Path file;
     
     @Override
     public void close() throws IOException {
-        if (br != null) {
-            br.close();
+        if (instream != null) {
+            instream.close();
         }
     }
 
@@ -67,27 +76,31 @@ public class DelimitedTextReader<VALUEIN> extends
         throws IOException, InterruptedException {
         initConfig(context);
         
-        Path file = ((FileSplit) inSplit).getPath();
+        file = ((FileSplit) inSplit).getPath();
         configFileNameAsCollection(conf, file);
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         if (encoding == null) {
-            br = new BufferedReader(new InputStreamReader(fileIn));
+            instream = new InputStreamReader(fileIn);
         } else {
-            br = new BufferedReader(new InputStreamReader(fileIn, encoding));
+            instream = new InputStreamReader(fileIn, encoding);
             //String will be converted and read as UTF-8 String
         }
         fileLen = inSplit.getLength();
         initDelimConf(conf);
+        parser = new CSVParser(instream, new CSVStrategy(delimiter,
+            encapsulator, CSVStrategy.COMMENTS_DISABLED,
+            CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
     }
 
     protected void initDelimConf(Configuration conf) {
-        delimiter = conf.get(ConfigConstants.CONF_DELIMITER,
+        String delimStr = conf.get(ConfigConstants.CONF_DELIMITER,
                 ConfigConstants.DEFAULT_DELIMITER);
-        if (delimiter.length() == 1) {
-            delimiter = "\\" + delimiter;
+        if (delimStr.length() == 1) {
+            delimiter = delimStr.charAt(0);
         } else {
-            LOG.error("Incorrect delimitor: " + delimiter);
+            LOG.error("Incorrect delimitor: " + delimiter
+                + ". Expects single character.");
         }
         idName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
     }
@@ -95,25 +108,17 @@ public class DelimitedTextReader<VALUEIN> extends
     @SuppressWarnings("unchecked")
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (br == null) {
+        if (parser == null) {
             return false;
         }
-        String line = br.readLine();
-        
-        // skip empty lines
-        while (line != null) {
-            bytesRead += line.getBytes().length;
-            if (!"".equals(line.trim())) {
-                break;
-            }
-            line = br.readLine();
-        }
-        if (line == null) {
+        String[] values = parser.getLine();
+
+        if (values == null) {
             bytesRead = fileLen;
             return false;
         }
         if (fields == null) {
-            fields = line.split(delimiter);
+            fields = values;
             boolean found = false;
             for (int i = 0; i < fields.length; i++) {
                 // Oracle jdk bug 4508058: UTF-8 encoding does not recognize
@@ -121,13 +126,26 @@ public class DelimitedTextReader<VALUEIN> extends
                 // will not be fixed. Work Around :
                 // Application code must recognize and skip the BOM itself.
                 byte[] buf = fields[i].getBytes();
+                if (LOG.isDebugEnabled()) {
+                    StringBuilder sb = new StringBuilder();
+                    for (byte b : buf){
+                        sb.append(Byte.toString(b));
+                        sb.append(" ");
+                    }
+                    LOG.debug(fields[i]);
+                    LOG.debug(sb.toString());
+                }
                 if (buf[0] == (byte) 0xEF && buf[1] == (byte) 0xBB
                     && buf[2] == (byte) 0xBF) {
                     fields[i] = new String(buf, 3, buf.length - 3);
                 }
+                
+                if (!XMLChar.isValidName(fields[i])) {
+                    fields[i] = getValidName(fields[i]);
+                }
                 if (i == 0 && idName == null
-                    || fields[i].trim().equals(idName)) {
-                    idName = fields[i].trim();
+                    || fields[i].equals(idName)) {
+                    idName = fields[i];
                     found = true;
                     break;
                 }
@@ -135,43 +153,41 @@ public class DelimitedTextReader<VALUEIN> extends
             if (found == false) {
                 // idname doesn't match any columns
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Header: " + line);
+                    LOG.debug("Header: " + convertToLine(fields));
                 }
                 throw new IOException(
                     "Delimited_uri_id " + idName + " is not found.");
             }
-            line = br.readLine();
+            values = parser.getLine();
             
-            // skip empty lines
-            while (line != null) {
-                bytesRead += line.getBytes().length;
-                if (!"".equals(line.trim())) {
-                    break;
-                }
-                line = br.readLine();
-            }
-            if (line == null) {
+            if (values == null) {
                 bytesRead = fileLen;
                 return false;
-            } 
+            }
         }
 
-        String[] values = line.split(delimiter);
         if (values.length != fields.length) {
-            LOG.error(line + " is inconsistent with column definition");
+            LOG.error(file.toUri() + " line " + parser.getLineNumber()
+                + " is inconsistent with column definition: "
+                + convertToLine(values));
+            key = null;
             return true;
         }
         StringBuilder sb = new StringBuilder();
         sb.append(ROOT_START);
         for (int i = 0; i < fields.length; i++) {
+            if (!XMLChar.isValidName(fields[i])) {
+                fields[i] = getValidName(fields[i]);
+            }
             if (idName.equals(fields[i])) {
-                if (values[i] == null || values[i].trim().equals("")) {
-                    LOG.error(line + ":column used for uri_id is empty");
-                    //clear the key of previous record 
+                if (values[i] == null || values[i].equals("")) {
+                    LOG.error(convertToLine(fields)
+                        + ":column used for uri_id is empty");
+                    // clear the key of previous record
                     key = null;
                     return true;
                 }
-                String uri = getEncodedURI(values[i].trim());
+                String uri = getEncodedURI(values[i]);
                 if (uri != null) {
                     setKey(uri);
                 } else {
@@ -180,7 +196,13 @@ public class DelimitedTextReader<VALUEIN> extends
                 }
             }
             sb.append("<").append(fields[i]).append(">");
-            sb.append(values[i]);
+            if (isValidText(values[i])) {
+                sb.append(values[i]);
+            } else {
+                String validText = convertToCDATA(values[i]);
+                sb.append(validText);
+            }
+            
             sb.append("</").append(fields[i]).append(">");
         }
         sb.append(ROOT_END);
@@ -200,5 +222,52 @@ public class DelimitedTextReader<VALUEIN> extends
             key = null;
         }
         return true;
+    }
+    
+    private String convertToLine(String[] values) {
+        StringBuilder sb = new StringBuilder();
+        for (String s : fields) {
+            sb.append(s);
+            sb.append(delimiter);
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
+    
+    private String getValidName(String name) {
+        StringBuilder validname = new StringBuilder();
+        char ch = name.charAt(0);
+        if(!XMLChar.isNameStart(ch)) {
+            LOG.warn("Prepend _ to " + name);
+            validname.append("_");
+        }
+        for (int i = 0; i < name.length(); i++ ) {
+            ch = name.charAt(i);
+            if (!XMLChar.isName(ch)) {
+                LOG.warn("Character " + ch + " in " + name + " is converted to _");
+                validname.append("_");
+            } else {
+                validname.append(ch);
+            }
+         }
+
+        return validname.toString();
+    }
+    
+    private boolean isValidText(String arg) {
+        for (int i = 0; i < arg.length(); i++) {
+            char c = arg.charAt(i);
+            if (c == '<' || c == '>' || c == '%' || c == '&') {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    private String convertToCDATA(String arg) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<![CDATA[");
+        sb.append(arg);
+        sb.append("]]>");
+        return sb.toString();
     }
 }
