@@ -35,7 +35,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("5", result.next().asString());
+        assertEquals("6", result.next().asString());
         Utils.closeSession();
         
         result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
@@ -46,9 +46,158 @@ public class TestImportDelimitedText{
             sb.append(s);
         }
         Utils.closeSession();
-        
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
+        assertTrue(sb.toString().equals(key));
+    }
+    
+    
+    @Test
+    public void testImportDelimitedTextBad() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.bad"
+            + " -input_file_type delimited_text";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportDelimitedTextElemNames() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.ename"
+            + " -input_file_type delimited_text";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+
+        StringBuilder sb = new StringBuilder();
+        while(result.hasNext()) {
+            String s = result.next().asString();
+            sb.append(s);
+        }
+        Utils.closeSession();
+        
+        Utils.writeFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportDelimitedText#testImportDelimitedTextElemNames.txt", sb);
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportDelimitedText#testImportDelimitedTextElemNames.txt");
+        assertTrue(sb.toString().equals(key));
+    }
+    
+    @Test
+    public void testImportDelimitedTextWithQuotes() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample.quote.csv"
+            + " -delimited_uri_id first"
+            + " -input_file_type delimited_text";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportDelimitedTextHard() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.hard"
+            + " -delimited_uri_id first"
+            + " -input_file_type delimited_text";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+
+        StringBuilder sb = new StringBuilder();
+        while(result.hasNext()) {
+            String s = result.next().asString();
+            sb.append(s);
+        }
+        Utils.closeSession();
+
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportDelimitedText#testImportDelimitedTextHard.txt");
+        assertTrue(sb.toString().equals(key));
+    }
+    
+    @Test
+    public void testImportDelimitedTextHardZip() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.hard.zip"
+            + " -delimited_uri_id first -input_compressed"
+            + " -input_file_type delimited_text";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+
+        StringBuilder sb = new StringBuilder();
+        while(result.hasNext()) {
+            String s = result.next().asString();
+            sb.append(s);
+        }
+        Utils.closeSession();
+
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportDelimitedText#testImportDelimitedTextHardZip.txt");
         assertTrue(sb.toString().equals(key));
     }
     

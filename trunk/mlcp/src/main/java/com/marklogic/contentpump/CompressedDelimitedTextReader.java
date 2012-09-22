@@ -15,7 +15,6 @@
  */
 package com.marklogic.contentpump;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,6 +24,8 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -79,15 +80,18 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             hasNext = false;
             return false;
         }
-        if (br == null) {
+        if (instream == null) {
             if (codec.equals(CompressionCodec.ZIP)) {
                 return nextKeyValueInZip();
             } else if (codec.equals(CompressionCodec.GZIP)) {
                 if (encoding == null) {
-                    br = new BufferedReader(new InputStreamReader(zipIn));
+                    instream = new InputStreamReader(zipIn);
                 } else {
-                    br = new BufferedReader(new InputStreamReader(zipIn, encoding));
+                    instream = new InputStreamReader(zipIn, encoding);
                 }
+                parser = new CSVParser(instream, new CSVStrategy(delimiter,
+                    encapsulator, CSVStrategy.COMMENTS_DISABLED,
+                    CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
                 return super.nextKeyValue();
             } else {
                 throw new UnsupportedOperationException("Unsupported codec: "
@@ -131,12 +135,15 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                 baos.write(buf, 0, nb);
             }
             if (encoding == null) {
-                br = new BufferedReader(new InputStreamReader(
-                    new ByteArrayInputStream(baos.toByteArray())));
+                instream = new InputStreamReader(
+                    new ByteArrayInputStream(baos.toByteArray()));
             } else {
-                br = new BufferedReader(new InputStreamReader(
-                    new ByteArrayInputStream(baos.toByteArray()), encoding));
+                instream = new InputStreamReader(
+                    new ByteArrayInputStream(baos.toByteArray()), encoding);
             }
+            parser = new CSVParser(instream, new CSVStrategy(delimiter,
+                encapsulator, CSVStrategy.COMMENTS_DISABLED,
+                CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
             //clear metadata
             fields = null;
             if (super.nextKeyValue()) {
