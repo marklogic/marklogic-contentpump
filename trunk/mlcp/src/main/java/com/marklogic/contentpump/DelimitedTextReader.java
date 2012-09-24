@@ -196,13 +196,7 @@ public class DelimitedTextReader<VALUEIN> extends
                 }
             }
             sb.append("<").append(fields[i]).append(">");
-            if (isValidText(values[i])) {
-                sb.append(values[i]);
-            } else {
-                String validText = convertToCDATA(values[i]);
-                sb.append(validText);
-            }
-            
+            sb.append(convertToCDATA(values[i]));
             sb.append("</").append(fields[i]).append(">");
         }
         sb.append(ROOT_END);
@@ -251,16 +245,6 @@ public class DelimitedTextReader<VALUEIN> extends
          }
 
         return validname.toString();
-    }
-    
-    private boolean isValidText(String arg) {
-        for (int i = 0; i < arg.length(); i++) {
-            char c = arg.charAt(i);
-            if (c == '<' || c == '>' || c == '%' || c == '&') {
-                return false;
-            }
-        }
-        return true;
     }
     
     private String convertToCDATA(String arg) {
