@@ -26,11 +26,11 @@ public class Constants {
     /**
      * lib directory of mlcp binary package extracted. Must set if unit tests run in distributed mode
      */
-    public static String CONTENTPUMP_HOME = WORKSPACE + "/xcc/mlcp/target/marklogic-contentpump-1.0/lib";
+    public static String CONTENTPUMP_HOME = WORKSPACE + "/xcc/mlcp/target/marklogic-contentpump-1.1/lib";
     /**
      * mlcp version. Must set if unit tests run in distributed mode
      */
-    public static String CONTENTPUMP_VERSION = "1.0";
+    public static String CONTENTPUMP_VERSION = "1.1";
     /**
      * conf directory of hadoop. Must set if unit tests run in distributed mode
      */
