@@ -101,9 +101,7 @@ public class TestImportDelimitedText{
             sb.append(s);
         }
         Utils.closeSession();
-        
-        Utils.writeFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportDelimitedText#testImportDelimitedTextElemNames.txt", sb);
+
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedTextElemNames.txt");
         assertTrue(sb.toString().equals(key));
