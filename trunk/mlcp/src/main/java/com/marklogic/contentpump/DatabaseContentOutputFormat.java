@@ -16,7 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -65,9 +64,7 @@ public class DatabaseContentOutputFormat extends ContentOutputFormat<MarkLogicDo
                         hostSourceMap.put(hostName, cs);
                     } catch (XccConfigException e) {
                         throw new IOException(e);
-                    } catch (URISyntaxException e) {
-                        throw new IOException(e);
-                    }
+                    } 
                 }
             }
             
@@ -90,8 +87,6 @@ public class DatabaseContentOutputFormat extends ContentOutputFormat<MarkLogicDo
                     conf, host.toString());
                 sourceMap.put(ID_PREFIX, cs);
             } catch (XccConfigException e) {
-                throw new IOException(e);
-            } catch (URISyntaxException e) {
                 throw new IOException(e);
             }
         }
