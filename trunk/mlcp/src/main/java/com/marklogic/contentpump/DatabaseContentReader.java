@@ -100,20 +100,12 @@ public class DatabaseContentReader extends
         count = 0;
 
         // construct the server URI
-        URI serverUri;
-        try {
-            String[] hostNames = mlSplit.getLocations();
-            if (hostNames == null || hostNames.length < 1) {
-                throw new IllegalStateException("Empty split locations.");
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("split location: " + hostNames[0]);
-            }
-            serverUri = InternalUtilities
-                .getInputServerUri(conf, hostNames[0]);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-            throw new IOException(e);
+        String[] hostNames = mlSplit.getLocations();
+        if (hostNames == null || hostNames.length < 1) {
+            throw new IllegalStateException("Empty split locations.");
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("split location: " + hostNames[0]);
         }
 
         // initialize the total length
@@ -236,7 +228,7 @@ public class DatabaseContentReader extends
         // set up a connection to the server
         try {
             ContentSource cs = InternalUtilities.getInputContentSource(conf,
-                serverUri);
+                hostNames[0]);
             session = cs.newSession("#" + mlSplit.getForestId().toString());
             AdhocQuery aquery = session.newAdhocQuery(queryText);
             aquery.setNewIntegerVariable(MR_NAMESPACE, SPLIT_START_VARNAME,

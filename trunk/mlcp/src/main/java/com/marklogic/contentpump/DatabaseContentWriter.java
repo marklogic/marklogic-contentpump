@@ -114,7 +114,7 @@ public class DatabaseContentWriter<VALUE> extends
 
     public DatabaseContentWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
-        super(null, conf);
+        super(conf, null);
 
         this.fastLoad = fastLoad;
 
