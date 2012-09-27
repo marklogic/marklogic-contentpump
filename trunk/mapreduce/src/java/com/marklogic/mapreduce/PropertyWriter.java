@@ -1,7 +1,6 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.net.URI;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,8 +27,8 @@ implements MarkLogicConstants {
     
     private String query;
     
-    public PropertyWriter(URI serverUri, Configuration conf) {
-        super(serverUri, conf);
+    public PropertyWriter(Configuration conf, String host) {
+        super(conf, host);
         String propOpType = conf.get(PROPERTY_OPERATION_TYPE, 
                 DEFAULT_PROPERTY_OPERATION_TYPE);
         PropertyOpType opType = PropertyOpType.valueOf(propOpType);

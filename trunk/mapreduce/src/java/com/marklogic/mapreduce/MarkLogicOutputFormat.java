@@ -67,12 +67,10 @@ implements MarkLogicConstants, Configurable {
                     " is not specified.");
         }                     
 
-        try {
-            URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
-            
+        try {            
             // try getting a connection
             ContentSource cs = InternalUtilities.getOutputContentSource(conf, 
-                    serverUri);
+                    host);
             
             // query forest host mapping            
             LinkedMapWritable forestHostMap = queryForestHostMap(cs);
@@ -117,13 +115,11 @@ implements MarkLogicConstants, Configurable {
             return DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
                             LinkedMapWritable.class);
         } else {
-            try {
-                URI serverUri = InternalUtilities.getOutputServerUri(conf, 
-                                conf.get(OUTPUT_HOST));
-                
+            try {                
                 // try getting a connection
                 ContentSource cs = 
-                    InternalUtilities.getOutputContentSource(conf, serverUri);
+                    InternalUtilities.getOutputContentSource(conf, 
+                            conf.get(OUTPUT_HOST));
                 
                 // query forest host mapping            
                 return queryForestHostMap(cs);

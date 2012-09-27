@@ -4,8 +4,6 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -95,21 +93,14 @@ implements MarkLogicConstants {
         mlSplit = (MarkLogicInputSplit)split;
         count = 0;
         
-        // construct the server URI
-        URI serverUri;
-        try {
-            String[] hostNames = mlSplit.getLocations();
-            if (hostNames == null || hostNames.length < 1) {
-                throw new IllegalStateException("Empty split locations.");
-            }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("split location: " + hostNames[0]);
-            }
-            serverUri = InternalUtilities.getInputServerUri(conf, hostNames[0]);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-            throw new IOException(e);
-        } 
+        // check hostnames
+        String[] hostNames = mlSplit.getLocations();
+        if (hostNames == null || hostNames.length < 1) {
+            throw new IllegalStateException("Empty split locations.");
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("split location: " + hostNames[0]);
+        }
         
         // get job config properties
         boolean advancedMode = 
@@ -185,7 +176,7 @@ implements MarkLogicConstants {
         // set up a connection to the server
         try {
             ContentSource cs = InternalUtilities.getInputContentSource(conf, 
-                    serverUri);
+                    hostNames[0]);
             session = cs.newSession("#"+mlSplit.getForestId().toString());
             AdhocQuery query = session.newAdhocQuery(queryText);
             if (advancedMode) {

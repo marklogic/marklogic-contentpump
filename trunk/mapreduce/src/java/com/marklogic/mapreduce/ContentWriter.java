@@ -105,7 +105,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
 
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
-        super(null, conf);
+        super(conf, null);
         
         this.fastLoad = fastLoad;
         

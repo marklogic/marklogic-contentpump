@@ -1,8 +1,6 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,15 +47,9 @@ extends MarkLogicOutputFormat<DocumentURI, MarkLogicNode> {
         Configuration conf = context.getConfiguration();
         LinkedMapWritable forestHostMap = getForestHostMap(conf);
         
-        try {
-            int taskId = context.getTaskAttemptID().getTaskID().getId();
-            String host = InternalUtilities.getHost(taskId, forestHostMap);
-            URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
-            return new PropertyWriter(serverUri, conf);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-            throw new IOException(e);
-        }
+        int taskId = context.getTaskAttemptID().getTaskID().getId();
+        String host = InternalUtilities.getHost(taskId, forestHostMap);
+        return new PropertyWriter(conf, host);
     }
 
     @Override

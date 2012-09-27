@@ -58,62 +58,6 @@ public class InternalUtilities implements MarkLogicConstants {
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-forest-host-map()";
     
-    /**
-     * Get input server URI based on the job configuration.
-     * @param conf job configuration
-     * @return server URI
-     * @throws URISyntaxException
-     */
-    public static URI getInputServerUri(Configuration conf) throws URISyntaxException {
-        String host = conf.get(INPUT_HOST);
-        if (host == null || host.isEmpty()) {
-            throw new IllegalArgumentException(INPUT_HOST + 
-                    " is not specified.");
-        }
-        return getInputServerUri(conf, host);
-    }
-    
-    /**
-     * Get input server URI based on the job configuration and server host 
-     * name.
-     * @param conf job configuration
-     * @param hostName name of targeted input server host
-     * @return server URI
-     * @throws URISyntaxException
-     */
-    public static URI getInputServerUri(Configuration conf, String hostName) 
-    throws URISyntaxException {
-        String user = conf.get(INPUT_USERNAME, "");
-        String password = conf.get(INPUT_PASSWORD, "");
-        String port = conf.get(INPUT_PORT);
-        if (port == null || port.isEmpty()) {
-            throw new IllegalArgumentException(INPUT_PORT + 
-            " is not specified.");
-        }
-        boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
-        return getServerUri(user, password, hostName, port, useSsl);
-    }
-    
-    /**
-     * Get output server URI based on the job configuration and server host 
-     * name.
-     * @param conf job configuration
-     * @return server URI
-     * @throws URISyntaxException
-     */
-    static URI getOutputServerUri(Configuration conf, String hostName)
-    throws URISyntaxException {
-        String user = conf.get(OUTPUT_USERNAME, "");
-        String password = conf.get(OUTPUT_PASSWORD, "");
-        String port = conf.get(OUTPUT_PORT);
-        if (port == null) {
-            throw new IllegalArgumentException(OUTPUT_PORT + 
-            " is not specified.");
-        }
-        boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
-        return getServerUri(user, password, hostName, port, useSsl);
-    }
-    
     static URI getServerUri(String user, String password, String hostName, 
             String port, boolean useSsl) throws URISyntaxException {        
         StringBuilder buf = new StringBuilder();
@@ -143,27 +87,37 @@ public class InternalUtilities implements MarkLogicConstants {
      */
     public static ContentSource getInputContentSource(Configuration conf) 
     throws URISyntaxException, XccConfigException, IOException {
-        return getInputContentSource(conf, getInputServerUri(conf));
+        String host = conf.get(INPUT_HOST);
+        if (host == null || host.isEmpty()) {
+            throw new IllegalArgumentException(INPUT_HOST + 
+                    " is not specified.");
+        }
+        
+        return getInputContentSource(conf, host);
     }
     
     /**
      * Get input content source.
      *
      * @param conf job configuration
-     * @param serverUri server URI
+     * @param host host to connect to
      * @return content source
      * @throws IOException 
      * @throws XccConfigException
-     * @throws URISyntaxException 
-     * @throws IOException 
      */
-    public static ContentSource getInputContentSource(Configuration conf, 
-            URI serverUri)
-    throws IOException, XccConfigException { 
+    public static ContentSource getInputContentSource(Configuration conf,
+            String host) 
+    throws XccConfigException, IOException {      
+        String user = conf.get(INPUT_USERNAME, "");
+        String password = conf.get(INPUT_PASSWORD, "");
+        String port = conf.get(INPUT_PORT);
+        if (port == null || port.isEmpty()) {
+            throw new IllegalArgumentException(INPUT_PORT + 
+            " is not specified.");
+        }
+        int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
-        if (!useSsl) {
-            return ContentSourceFactory.newContentSource(serverUri);
-        } else {
+        if (useSsl) {
             Class<? extends SslConfigOptions> sslOptionClass = 
                 conf.getClass(INPUT_SSL_OPTIONS_CLASS, 
                 null, SslConfigOptions.class);
@@ -171,47 +125,19 @@ public class InternalUtilities implements MarkLogicConstants {
                 SslConfigOptions sslOptions = 
                     (SslConfigOptions)ReflectionUtils.newInstance(
                             sslOptionClass, conf);
-                return getSecureContentSource(serverUri, sslOptions);
-            } else {
-                return ContentSourceFactory.newContentSource(serverUri);
+                
+                // construct content source
+                return getSecureContentSource(host, portInt, user, password,
+                        sslOptions);
             }
         }
+        return ContentSourceFactory.newContentSource(host, portInt, 
+                user, password);
     }
     
-    /**
-     * Get output content source.
-     *
-     * @param conf job configuration
-     * @param serverUri server URI
-     * @return content source
-     * @throws IOException 
-     * @throws XccConfigException
-     * @throws URISyntaxException 
-     * @throws IOException 
-     */
-    public static ContentSource getOutputContentSource(Configuration conf,
-            URI serverUri)
-    throws IOException, XccConfigException { 
-        boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
-        if (!useSsl) {
-            return ContentSourceFactory.newContentSource(serverUri);
-        } else {
-            Class<? extends SslConfigOptions> sslOptionClass = 
-                conf.getClass(OUTPUT_SSL_OPTIONS_CLASS, 
-                null, SslConfigOptions.class);
-            if (sslOptionClass != null) {
-                SslConfigOptions sslOptions = 
-                    (SslConfigOptions)ReflectionUtils.newInstance(
-                            sslOptionClass, conf);
-                return getSecureContentSource(serverUri, sslOptions);
-            } else {
-                return ContentSourceFactory.newContentSource(serverUri);
-            }
-        }
-    }
-    
-    static ContentSource getSecureContentSource(URI serverUri, 
-            SslConfigOptions sslOptions) throws XccConfigException {
+    static ContentSource getSecureContentSource(String host, int port,
+            String user, String password, SslConfigOptions sslOptions) 
+    throws XccConfigException {
         ContentSource contentSource = null;
       
         // construct XCC SecurityOptions
@@ -222,7 +148,7 @@ public class InternalUtilities implements MarkLogicConstants {
   
         // construct content source
         contentSource = ContentSourceFactory.newContentSource(
-                serverUri, options);        
+                host, port, user, password, null, options);        
  
         return contentSource;
     }
@@ -296,11 +222,44 @@ public class InternalUtilities implements MarkLogicConstants {
         }
     }
 
+    /**
+     * Get output content source.
+     *
+     * @param conf job configuration
+     * @param hostName host name
+     * @return content source
+     * @throws IOException 
+     * @throws XccConfigException 
+     * @throws IOException 
+     */
     public static ContentSource getOutputContentSource(Configuration conf,
             String hostName) 
-    throws URISyntaxException, XccConfigException, IOException {
-        URI serverUri = getOutputServerUri(conf, hostName);
-        return getOutputContentSource(conf, serverUri);
+    throws XccConfigException, IOException {
+        String user = conf.get(OUTPUT_USERNAME, "");
+        String password = conf.get(OUTPUT_PASSWORD, "");
+        String port = conf.get(OUTPUT_PORT);
+        if (port == null) {
+            throw new IllegalArgumentException(OUTPUT_PORT + 
+            " is not specified.");
+        }
+        int portInt = Integer.parseInt(port);
+        boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
+        if (useSsl) {
+            Class<? extends SslConfigOptions> sslOptionClass = 
+                conf.getClass(OUTPUT_SSL_OPTIONS_CLASS, 
+                null, SslConfigOptions.class);
+            if (sslOptionClass != null) {
+                SslConfigOptions sslOptions = 
+                    (SslConfigOptions)ReflectionUtils.newInstance(
+                            sslOptionClass, conf);
+                
+                // construct content source
+                return getSecureContentSource(hostName, portInt, user, password,
+                        sslOptions);
+            }
+        }
+        return ContentSourceFactory.newContentSource(hostName, portInt, 
+                user, password);
     }
 
     /**

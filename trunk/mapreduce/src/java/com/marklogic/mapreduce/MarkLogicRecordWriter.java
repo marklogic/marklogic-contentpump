@@ -30,19 +30,16 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
         LogFactory.getLog(MarkLogicRecordWriter.class);
 
     /**
-     * Server URI.
-     */
-    private URI serverUri;
-    /**
      * Session to the MarkLogic server.
      */
     private Session session;
     private int count = 0;
     protected Configuration conf;
     protected int txnSize;
+    protected String hostName;
     
-    public MarkLogicRecordWriter(URI serverUri, Configuration conf) {
-        this.serverUri = serverUri;
+    public MarkLogicRecordWriter(Configuration conf, String hostName) {
+        this.hostName = hostName;
         this.conf = conf;
         this.txnSize = getTransactionSize(conf);
     }
@@ -73,7 +70,7 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
             // start a session
             try {
                 ContentSource cs = InternalUtilities.getOutputContentSource(
-                        conf, serverUri);
+                        conf, hostName);
                 session = cs.newSession();
                 if (txnSize > 1) {
                     session.setTransactionMode(TransactionMode.UPDATE);
