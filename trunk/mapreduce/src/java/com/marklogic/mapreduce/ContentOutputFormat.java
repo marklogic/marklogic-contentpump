@@ -1,7 +1,6 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.*;
 
 import org.apache.commons.logging.Log;
@@ -180,9 +179,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                         hostSourceMap.put(hostName, cs);
                     } catch (XccConfigException e) {
                         throw new IOException(e);
-                    } catch (URISyntaxException e) {
-                        throw new IOException(e);
-                    }
+                    } 
                 }
             }
             
@@ -205,8 +202,6 @@ public class ContentOutputFormat<VALUEOUT> extends
                     conf, host.toString());
                 sourceMap.put(ContentOutputFormat.ID_PREFIX, cs);
             } catch (XccConfigException e) {
-                throw new IOException(e);
-            } catch (URISyntaxException e) {
                 throw new IOException(e);
             }
         }

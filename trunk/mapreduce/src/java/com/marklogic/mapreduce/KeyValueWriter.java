@@ -29,8 +29,8 @@ extends MarkLogicRecordWriter<KEYOUT, VALUEOUT> {
     private ValueType valueType;
     private String statement;
 
-    public KeyValueWriter(URI serverUri, Configuration conf) {
-        super(serverUri, conf);
+    public KeyValueWriter(Configuration conf, String host) {
+        super(conf, host);
         
         String keyDataType = conf.get(OUTPUT_KEY_TYPE, "xs:string");
         keyType = ValueType.valueOf(keyDataType);

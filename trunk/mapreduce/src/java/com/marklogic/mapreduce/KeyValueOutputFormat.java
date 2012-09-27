@@ -4,8 +4,6 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -29,15 +27,9 @@ public class KeyValueOutputFormat<KEYOUT, VALUEOUT> extends
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         LinkedMapWritable forestHostMap = getForestHostMap(conf);
-        try {
-            int taskId = context.getTaskAttemptID().getTaskID().getId();
-            String host = InternalUtilities.getHost(taskId, forestHostMap);
-            URI serverUri = InternalUtilities.getOutputServerUri(conf, host);
-            return new KeyValueWriter<KEYOUT, VALUEOUT>(serverUri, conf);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-            throw new IOException(e);
-        }
+        int taskId = context.getTaskAttemptID().getTaskID().getId();
+        String host = InternalUtilities.getHost(taskId, forestHostMap);
+        return new KeyValueWriter<KEYOUT, VALUEOUT>(conf, host);
     }
 
     @Override

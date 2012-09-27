@@ -33,8 +33,8 @@ implements MarkLogicConstants {
     
     private String query;
     
-    public NodeWriter(URI serverUri, Configuration conf) {
-        super(serverUri, conf);
+    public NodeWriter(Configuration conf, String host) {
+        super(conf, host);
         String opTypeStr = conf.get(NODE_OPERATION_TYPE);
         if (opTypeStr == null || opTypeStr.isEmpty()) {
             throw new IllegalArgumentException(
