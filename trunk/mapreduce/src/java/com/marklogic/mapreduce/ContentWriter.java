@@ -326,7 +326,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         } catch (RequestException e) {
             LOG.error(e);
-            counts[fId] = 0;
+            if (counts != null) counts[fId] = 0;
             stmtCounts[fId] = 0;
 
             if (e instanceof ServerConnectionException
