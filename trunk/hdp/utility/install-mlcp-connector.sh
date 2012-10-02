@@ -1,6 +1,6 @@
 #!/bin/sh
 
-usage="Usage: install.sh --hosts hostlistfile"
+usage="Usage: install-mlcp-connector.sh --hosts hostlistfile"
 
 # if no args specified, show usage
 if [ $# -le 1 ]; then
@@ -21,8 +21,8 @@ then
 fi
 
 
-unzip -o MarkLogic-Connector-for-Hadoop-1.*.zip -d /tmp/mlconnector
-unzip -o MarkXCC.Java-6.*.zip -d /tmp/xcc
+unzip -o ../MarkLogic-Connector-for-Hadoop-1.*.zip -d /tmp/mlconnector
+unzip -o ../MarkXCC.Java-6.*.zip -d /tmp/xcc
 
 for host in `cat $hostsfile`; do
 	echo $host
@@ -38,6 +38,6 @@ done
 rm -rf /tmp/mlconnector
 rm -rf /tmp/xcc
 
-sudo unzip -o marklogic-contentpump-1.*-bin.zip -d /usr/lib/
-sudo cp utility/mlcp /usr/bin/
+sudo unzip -o ../marklogic-contentpump-1.*-bin.zip -d /usr/lib/
+sudo cp mlcp /usr/bin/
 

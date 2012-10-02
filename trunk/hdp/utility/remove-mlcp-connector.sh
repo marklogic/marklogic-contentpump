@@ -5,9 +5,7 @@ usage="Usage: remove-mlcp-connector.sh [--hosts hostlistfile]"
 # if no args specified, show usage
 if [ $# -le 1 ]; then
 	echo "removing on localhost"
-	rm -rf /usr/lib/marklogic-contentpump-1.1
-	rm -f /usr/bin/mlcp
-	rm -rf /usr/lib/MarkLogic
+	sudo rm -rf /usr/lib/marklogic-contentpump-1.1 /usr/bin/mlcp /usr/lib/MarkLogic
 	echo $usage
 	exit 1
 fi
@@ -25,9 +23,9 @@ then
 fi
 
 #remove mlcp locally
-rm -rf /usr/lib/marklogic-contentpump-1.1
-rm -f /usr/bin/mlcp
+sudo rm -rf /usr/lib/marklogic-contentpump-1.1 /usr/bin/mlcp
 
+#remove connector and XCC
 for host in `cat $hostsfile`; do
 	echo $host
 	ssh -t $(whoami)@$host 'sudo rm -rf /usr/lib/MarkLogic'
