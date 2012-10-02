@@ -1,6 +1,13 @@
 1. Installation of HDP, mlcp and connector
-Run as root which already has passwordless ssh setup for localhost and hosts in HOSTLISTFILE
 
+Please read through http://docs.hortonworks.com/CURRENT/index.htm ->Deploying Hortonworks Data Platform before running the installation script.
+
+tar zxvf HDP-gsInstaller-1.1.0.15.tar.gz
+
+Modify HDP-gsInstaller-1.1.0.15/gsInstaller/gsInstaller.properties
+
+Run as root which already has passwordless ssh setup for localhost and hosts in HOSTLISTFILE
+./install.sh
 
 2. Separate Installation of mlcp and connector
 Run as root which already has passwordless ssh setup for localhost and hosts in HOSTLISTFILE

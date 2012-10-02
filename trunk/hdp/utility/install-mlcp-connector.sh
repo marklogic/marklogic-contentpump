@@ -8,7 +8,6 @@ if [ $# -le 1 ]; then
 	exit 1
 fi
 
-
 if [ $# -gt 1 ]
 then
     if [ "--hosts" = "$1" ]
@@ -19,7 +18,6 @@ then
     	echo $usage
     fi
 fi
-
 
 unzip -o ../MarkLogic-Connector-for-Hadoop-1.*.zip -d /tmp/mlconnector
 unzip -o ../MarkXCC.Java-6.*.zip -d /tmp/xcc
