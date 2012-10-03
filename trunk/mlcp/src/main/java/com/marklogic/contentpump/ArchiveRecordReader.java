@@ -90,7 +90,13 @@ public class ArchiveRecordReader extends
             throw new IOException("Not type information in Archive name");
         }
         String typeStr = subStr.substring(index + 1, subStr.length());
-        type = ContentType.valueOf(typeStr);
+        try {
+            type = ContentType.valueOf(typeStr);
+        } catch (IllegalArgumentException ex) {
+            LOG.error("Not a valid archive: " + zipfile);
+            throw new IOException("Invalid type information in Archive name: "
+                + typeStr);
+        }
         value = new MarkLogicDocumentWithMeta();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
