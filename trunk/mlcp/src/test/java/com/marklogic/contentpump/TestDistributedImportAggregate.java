@@ -21,8 +21,9 @@ public class TestDistributedImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.xml"
-            + " -mode local -thread_count 1 -aggregate_uri_id PMID"
-            + " -input_file_type aggregates";
+            + " -thread_count 1 -aggregate_uri_id PMID"
+            + " -input_file_type aggregates"
+            + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
