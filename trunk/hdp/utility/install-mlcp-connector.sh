@@ -19,8 +19,10 @@ then
     fi
 fi
 
-unzip -o ../MarkLogic-Connector-for-Hadoop-1.*.zip -d /tmp/mlconnector
-unzip -o ../MarkXCC.Java-6.*.zip -d /tmp/xcc
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../
+
+unzip -o $DIR/MarkLogic-Connector-for-Hadoop-1.*.zip -d /tmp/mlconnector
+unzip -o $DIR/MarkXCC.Java-6.*.zip -d /tmp/xcc
 
 for host in `cat $hostsfile`; do
 	echo $host
@@ -36,6 +38,6 @@ done
 rm -rf /tmp/mlconnector
 rm -rf /tmp/xcc
 
-sudo unzip -o ../marklogic-contentpump-1.*-bin.zip -d /usr/lib/
-sudo cp mlcp /usr/bin/
+sudo unzip -o $DIR/marklogic-contentpump-1.*-bin.zip -d /usr/lib/
+sudo cp $DIR/utility/mlcp /usr/bin/
 
