@@ -1,4 +1,4 @@
-/space/workspace/xcc/mlcp/src/test/resources/encoding/ML-utf-16le.enc﻿
+﻿
 UTF-8 encoded sample plain-text file
 ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
