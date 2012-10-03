@@ -30,6 +30,8 @@ for host in `cat $hostsfile`; do
 	
 	scp /tmp/mlconnector/lib/marklogic-mapreduce-1.1.jar $(whoami)@$host:/tmp/
 	ssh -t $(whoami)@$host 'sudo mv /tmp/marklogic-mapreduce-1.1.jar /usr/lib/MarkLogic/'
+	scp /tmp/mlconnector/lib/commons-modeler-2.0.1.jar $(whoami)@$host:/tmp/
+	ssh -t $(whoami)@$host 'sudo mv /tmp/commons-modeler-2.0.1.jar /usr/lib/MarkLogic/'
 	
 	scp /tmp/xcc/lib/marklogic-xcc-6.0.jar $(whoami)@$host:/tmp/
 	ssh -t $(whoami)@$host 'sudo mv /tmp/marklogic-xcc-6.0.jar /usr/lib/MarkLogic/'
