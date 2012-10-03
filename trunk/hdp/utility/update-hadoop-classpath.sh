@@ -19,13 +19,16 @@ then
     fi
 fi
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/
+
 for host in `cat $hostsfile`; do
 	echo $host
-	scp hadoop-env.sh $(whoami)@$host:/tmp/
+	scp $DIR/hadoop-env.sh $(whoami)@$host:/tmp/
 	ssh -t $(whoami)@$host 'sudo mv /etc/hadoop/conf/hadoop-env.sh /etc/hadoop/conf/hadoop-env.sh.bak'
 	ssh -t $(whoami)@$host 'sudo mv /tmp/hadoop-env.sh /etc/hadoop/conf/'
-	
-	#bounce mapred and hdfs
-	
 done 
 
+
+#bounce mapred and hdfs
+sh $DIR/MLHDP-stop-script.sh --hosts $hostsfile
+sh $DIR/MLHDP-start-script.sh --hosts $hostsfile
