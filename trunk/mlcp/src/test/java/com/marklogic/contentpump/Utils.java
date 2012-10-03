@@ -99,6 +99,26 @@ public class Utils {
             + "order by $uri " + "return ($uri, $doc/node()) ";
         return runQuery(xccUri, q);
     }
+    
+    /**
+     * Get all document contents from the datasource of the XccUri
+     * 
+     * @param xccUri
+     * @return
+     * @throws XccConfigException
+     * @throws RequestException
+     * @throws URISyntaxException
+     */
+    public static ResultSequence getOnlyDocs(String xccUri) throws XccConfigException,
+        RequestException, URISyntaxException {
+        String q = "xquery version \"1.0-ml\";"
+            + "for $doc in fn:collection() "
+            + "let $uri := fn:base-uri($doc) "
+            + "where fn:empty($doc) eq fn:false() \n"
+            + "order by $uri " + "return ($doc/node()) ";
+        return runQuery(xccUri, q);
+    }
+    
     public static String readSmallFile(String filename) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(filename));
         StringBuilder content = new StringBuilder();

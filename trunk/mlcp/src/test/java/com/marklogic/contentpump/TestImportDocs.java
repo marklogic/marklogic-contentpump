@@ -163,7 +163,7 @@ public class TestImportDocs {
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getOnlyDocs("xcc://admin:admin@localhost:5275");
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());
@@ -198,15 +198,14 @@ public class TestImportDocs {
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getOnlyDocs("xcc://admin:admin@localhost:5275");
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());
         }
 
         Utils.closeSession();
-        Utils.writeFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportText#testImportMixedUTF16LE.txt", sb);
+
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportText#testImportMixedUTF16LE.txt");
         assertTrue(sb.toString().trim().equals(key));
@@ -234,7 +233,7 @@ public class TestImportDocs {
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getOnlyDocs("xcc://admin:admin@localhost:5275");
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());
