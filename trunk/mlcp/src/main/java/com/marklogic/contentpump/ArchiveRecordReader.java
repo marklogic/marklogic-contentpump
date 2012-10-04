@@ -77,26 +77,11 @@ public class ArchiveRecordReader extends
         
         Path file = ((FileSplit) inSplit).getPath();
         zipfile = file.toUri().getPath();
-        if(LOG.isDebugEnabled()) {
-            LOG.debug("Zip file name: " + zipfile);
-        }
         int index = file.toUri().getPath().lastIndexOf(EXTENSION);
-        if (index == -1) {
-            throw new IOException("Archive file should have suffix .zip");
-        }
         String subStr = file.toUri().getPath().substring(0, index);
         index = subStr.lastIndexOf('-');
-        if (index == -1) {
-            throw new IOException("Not type information in Archive name");
-        }
         String typeStr = subStr.substring(index + 1, subStr.length());
-        try {
-            type = ContentType.valueOf(typeStr);
-        } catch (IllegalArgumentException ex) {
-            LOG.error("Not a valid archive: " + zipfile);
-            throw new IOException("Invalid type information in Archive name: "
-                + typeStr);
-        }
+        type = ContentType.valueOf(typeStr);
         value = new MarkLogicDocumentWithMeta();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);

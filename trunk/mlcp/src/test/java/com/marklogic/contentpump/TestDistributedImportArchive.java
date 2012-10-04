@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
 
-public class TestImportArchive {
+public class TestDistributedImportArchive {
     @After
     public void tearDown() {
         Utils.closeSession();
@@ -21,7 +21,8 @@ public class TestImportArchive {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/archive"
-            + " -input_file_type archive";
+            + " -input_file_type archive"
+            + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
@@ -29,6 +30,7 @@ public class TestImportArchive {
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
+        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
@@ -43,7 +45,8 @@ public class TestImportArchive {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/archive/wiki-000001.zip"
-            + " -input_file_type archive";
+            + " -input_file_type archive"
+            + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
@@ -51,6 +54,7 @@ public class TestImportArchive {
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
+        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
