@@ -238,9 +238,6 @@ public enum Command implements ConfigConstants {
             job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
 
             job.setMapperClass(type.getMapperClass(cmdline, conf));
-            job.setMapOutputKeyClass(DocumentURI.class);
-            job.setMapOutputValueClass(type.getOutputValueClass(cmdline, 
-                    conf));
             job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
 
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
