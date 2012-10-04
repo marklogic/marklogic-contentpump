@@ -19,12 +19,10 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
-import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.ContentWriter;
 
 /**
  * Enum of supported input type.
@@ -61,12 +59,6 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline, Configuration conf) {
-            return ContentWriter.class;
-        }
-
-        @Override
         public ContentType getContentType(CommandLine cmdline) {
             String type = cmdline.getOptionValue(DOCUMENT_TYPE, 
                     ContentType.MIXED.name());
@@ -94,12 +86,6 @@ public enum InputType implements ConfigConstants {
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
             return ContentOutputFormat.class;
-        }
-
-        @Override
-        public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline, Configuration conf) {
-            return ContentWriter.class;
         }
 
         @Override
@@ -131,12 +117,6 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline, Configuration conf) {
-            return ContentWriter.class;
-        }
-
-        @Override
         public ContentType getContentType(CommandLine cmdline) {
             return ContentType.XML;   
         }
@@ -159,11 +139,6 @@ public enum InputType implements ConfigConstants {
             return DatabaseContentOutputFormat.class;
         }
 
-        @Override
-        public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline, Configuration conf) {
-            return DatabaseContentWriter.class;
-        }
         
         @Override
         public ContentType getContentType(CommandLine cmdline) {
@@ -190,12 +165,6 @@ public enum InputType implements ConfigConstants {
             return ContentOutputFormat.class;
         }
 
-        @Override
-        public Class<? extends RecordWriter> getOutputValueClass(
-                        CommandLine cmdline, Configuration conf) {
-            return ContentWriter.class;
-        }
-        
         @Override
         public ContentType getContentType(CommandLine cmdline) {
             String type = cmdline.getOptionValue(DOCUMENT_TYPE, 
@@ -240,9 +209,6 @@ public enum InputType implements ConfigConstants {
     
     public abstract Class<? extends OutputFormat> getOutputFormatClass(
                     CommandLine cmdline, Configuration conf);
-    
-    public abstract Class<? extends RecordWriter> getOutputValueClass(
-        CommandLine cmdline, Configuration conf);
     
     public abstract ContentType getContentType(CommandLine cmdline);
 }
