@@ -236,8 +236,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     formatNeeded = false;
                 }
                 options.setEncoding(DEFAULT_OUTPUT_CONTENT_ENCODING);
-                content = ContentFactory.newContent(uri,
-                    ((Text) value).getBytes(), options);
+                
+                content = ContentFactory.newContent(uri, 
+                        ((Text) value).getBytes(), 0, 
+                        ((Text)value).getLength(), options);
             } else if (value instanceof MarkLogicNode) {
                 if (formatNeeded) {
                     options.setFormat(DocumentFormat.XML);
@@ -339,7 +341,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         } catch (RequestException e) {
             LOG.error(e);
             if (counts != null) counts[fId] = 0;
-            stmtCounts[fId] = 0;
+            stmtCounts[fId] = 0;        
 
             if (e instanceof ServerConnectionException
                 || e instanceof RequestPermissionException) {
