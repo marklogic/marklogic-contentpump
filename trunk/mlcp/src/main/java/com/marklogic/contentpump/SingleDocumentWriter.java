@@ -90,7 +90,7 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             } else if (ContentType.TEXT.equals(type) || 
                     ContentType.XML.equals(type)) {
                 Text t = content.getContentAsText();
-                os.write(t.toString().getBytes());
+                os.write(t.getBytes(), 0, t.getLength());
             } else {
                 LOG.warn("Skipping " + uri + 
                         ".  Unsupported content type: " + 
