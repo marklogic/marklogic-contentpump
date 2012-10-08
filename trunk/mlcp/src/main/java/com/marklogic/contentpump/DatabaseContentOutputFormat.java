@@ -40,11 +40,13 @@ import com.marklogic.xcc.exceptions.XccConfigException;
  * @author ali
  * 
  */
-public class DatabaseContentOutputFormat extends ContentOutputFormat<MarkLogicDocumentWithMeta> {
+public class DatabaseContentOutputFormat 
+extends ContentOutputFormat<MarkLogicDocumentWithMeta> {
     public static final String ID_PREFIX = "#";
     @Override
     public RecordWriter<DocumentURI, MarkLogicDocumentWithMeta> getRecordWriter(
-            TaskAttemptContext context) throws IOException, InterruptedException {
+            TaskAttemptContext context) 
+    throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         LinkedMapWritable forestHostMap = getForestHostMap(conf);
          
