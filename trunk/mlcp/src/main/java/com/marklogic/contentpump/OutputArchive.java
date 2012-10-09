@@ -15,6 +15,8 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
@@ -27,6 +29,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 
 /**
  * Archive for export, create zip file(s).
@@ -71,9 +74,22 @@ public class OutputArchive {
             throw new IOException(zpath + " already exists.");
         }
         LOG.info("Creating output archive: " + zpath);
-        FSDataOutputStream fsout = fs.create(zpath, false);
+        
+        // if fs instanceof DistributedFileSystem, use hadoop api; otherwise,
+        // use java api
+        if (fs instanceof DistributedFileSystem) {
+            FSDataOutputStream fsout = fs.create(zpath, false);
+            outputStream = new ZipOutputStream(fsout);
+        } else {
+            File f = new File(zpath.toUri().getPath());
+            if (!f.exists()) {
+                f.getParentFile().mkdirs();
+                f.createNewFile();
+            }
+            FileOutputStream fos = new FileOutputStream(f, false);
+            outputStream = new ZipOutputStream(fos);
+        }
 
-        outputStream = new ZipOutputStream(fsout);
     }
 
     /**

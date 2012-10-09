@@ -17,8 +17,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
