@@ -34,11 +34,11 @@ fi
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/
 
-#sh $DIR/utility/install-mlcp-connector.sh --hosts $hostsfile
+sh $DIR/utility/install-mlcp-connector.sh --hosts $hostsfile
 
 echo "Now updating hadoop classpath"
 
-#sh $DIR/utility/update-hadoop-classpath.sh --hosts $hostsfile
+sh $DIR/utility/update-hadoop-classpath.sh --hosts $hostsfile
 
 echo "done"
 
