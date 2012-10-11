@@ -41,5 +41,4 @@ rm -rf /tmp/mlconnector
 rm -rf /tmp/xcc
 
 sudo unzip -o $DIR/marklogic-contentpump-1.*-bin.zip -d /usr/lib/
-sudo cp $DIR/utility/mlcp /usr/bin/
 
