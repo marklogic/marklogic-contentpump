@@ -2,12 +2,14 @@
 
 Please read through http://docs.hortonworks.com/CURRENT/index.htm ->Deploying Hortonworks Data Platform before running the installation script.
 
+Set Up Password-less SSH (after installation, Password-less SSH for root is not needed)
 tar zxvf HDP-gsInstaller-1.1.0.15.tar.gz
-
+For minimum install (mapred and hdfs), create gateway, namenode, snamenode, jobtracker, nodes 
+under HDP-gsInstaller-1.1.0.15/gsInstallerHDP-gsInstaller-1.1.0.15/gsInstaller
 Modify HDP-gsInstaller-1.1.0.15/gsInstaller/gsInstaller.properties
 
-Run as root which already has passwordless ssh setup for localhost and hosts in HOSTLISTFILE
-./install.sh
+Run as root which already has passwordless ssh set up for localhost and hosts in HOSTLISTFILE
+./install.sh --hosts HOSTLISTFILE
 
 2. Separate Installation of mlcp and connector
 Run as root which already has passwordless ssh setup for localhost and hosts in HOSTLISTFILE
@@ -20,3 +22,4 @@ cd utility
 cd utility
 ./remove-mlcp-connector.sh [ --hosts HOSTLISTFILE ]
 if --hosts HOSTLISTFILE is not specified, only remove mlcp from localhost
+

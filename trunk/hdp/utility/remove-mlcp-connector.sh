@@ -23,7 +23,7 @@ then
 fi
 
 #remove mlcp locally
-sudo rm -rf /usr/lib/marklogic-contentpump-1.1 /usr/bin/mlcp
+sudo rm -rf /usr/lib/marklogic-contentpump-1.1
 
 #remove connector and XCC
 for host in `cat $hostsfile`; do
