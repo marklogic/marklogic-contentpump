@@ -28,5 +28,5 @@ sudo rm -rf /usr/lib/marklogic-contentpump-1.1
 #remove connector and XCC
 for host in `cat $hostsfile`; do
 	echo $host
-	ssh -t $(whoami)@$host 'sudo rm -rf /usr/lib/MarkLogic'
+	ssh -t root@$host 'rm -rf /usr/lib/MarkLogic'
 done
