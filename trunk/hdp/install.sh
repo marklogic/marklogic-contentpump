@@ -16,6 +16,7 @@ then
         hostsfile=$1
     else
     	echo $usage
+    	exit 1
     fi
 fi
 
