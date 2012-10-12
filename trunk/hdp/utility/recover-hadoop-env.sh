@@ -1,6 +1,6 @@
 #!/bin/sh
 
-usage="Usage: recover-hadoop-classpath.sh --hosts hostlistfile"
+usage="Usage: recover-hadoop-env.sh --hosts hostlistfile"
 
 # if no args specified, show usage
 if [ $# -le 1 ]; then
@@ -28,5 +28,5 @@ done
 
 
 #bounce mapred and hdfs
-sh $DIR/MLHDP-stop-script.sh --hosts $hostsfile
-sh $DIR/MLHDP-start-script.sh --hosts $hostsfile
+sh $DIR/mlhdp-stop.sh --hosts $hostsfile
+sh $DIR/mlhdp-start.sh --hosts $hostsfile

@@ -2,7 +2,7 @@
 
 #run as root, and make sure root has passwordless ssh setup on each node
 
-usage="Usage: MLHDP-stop-script.sh --hosts hostlistfile"
+usage="Usage: mlhdp-stop.sh --hosts hostlistfile"
 
 # if no args specified, show usage
 if [ $# -le 1 ]; then

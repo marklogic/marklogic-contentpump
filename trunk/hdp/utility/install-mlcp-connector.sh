@@ -26,19 +26,21 @@ unzip -o $DIR/MarkXCC.Java-6.*.zip -d /tmp/xcc
 
 for host in `cat $hostsfile`; do
 	echo $host
-	ssh -t $(whoami)@$host 'sudo mkdir /usr/lib/MarkLogic'
+	ssh -t root@$host 'mkdir /usr/lib/MarkLogic'
 	
-	scp /tmp/mlconnector/lib/marklogic-mapreduce-1.1.jar $(whoami)@$host:/tmp/
-	ssh -t $(whoami)@$host 'sudo mv /tmp/marklogic-mapreduce-1.1.jar /usr/lib/MarkLogic/'
-	scp /tmp/mlconnector/lib/commons-modeler-2.0.1.jar $(whoami)@$host:/tmp/
-	ssh -t $(whoami)@$host 'sudo mv /tmp/commons-modeler-2.0.1.jar /usr/lib/MarkLogic/'
+	scp /tmp/mlconnector/lib/marklogic-mapreduce-1.1.jar root@$host:/tmp/
+	ssh -t root@$host 'mv /tmp/marklogic-mapreduce-1.1.jar /usr/lib/MarkLogic/'
+	scp /tmp/mlconnector/lib/commons-modeler-2.0.1.jar root@$host:/tmp/
+	ssh -t root@$host 'mv /tmp/commons-modeler-2.0.1.jar /usr/lib/MarkLogic/'
 	
-	scp /tmp/xcc/lib/marklogic-xcc-6.0.jar $(whoami)@$host:/tmp/
-	ssh -t $(whoami)@$host 'sudo mv /tmp/marklogic-xcc-6.0.jar /usr/lib/MarkLogic/'
+	scp /tmp/xcc/lib/marklogic-xcc-6.0.jar root@$host:/tmp/
+	ssh -t root@$host 'mv /tmp/marklogic-xcc-6.0.jar /usr/lib/MarkLogic/'
+	
+	ssh -t root@$host 'echo "HADOOP_DIST=HDP" >>/etc/profile'
 done 
 
 rm -rf /tmp/mlconnector
 rm -rf /tmp/xcc
 
-sudo unzip -o $DIR/marklogic-contentpump-1.*-bin.zip -d /usr/lib/
+unzip -o $DIR/marklogic-contentpump-1.*-bin.zip -d /usr/lib/
 
