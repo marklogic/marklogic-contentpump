@@ -36,7 +36,7 @@ for host in `cat $hostsfile`; do
 	scp /tmp/xcc/lib/marklogic-xcc-6.0.jar root@$host:/tmp/
 	ssh -t root@$host 'mv /tmp/marklogic-xcc-6.0.jar /usr/lib/MarkLogic/'
 	
-	ssh -t root@$host 'echo "HADOOP_DIST=HDP" >>/etc/profile'
+	ssh -t root@$host 'echo "export HADOOP_DIST=HDP" >>/etc/profile'
 done 
 
 rm -rf /tmp/mlconnector
