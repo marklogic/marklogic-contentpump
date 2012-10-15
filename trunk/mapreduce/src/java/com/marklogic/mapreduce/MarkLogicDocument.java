@@ -18,7 +18,10 @@ package com.marklogic.mapreduce;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.io.WritableUtils;
@@ -36,7 +39,7 @@ import com.marklogic.xcc.types.XdmBinary;
 public class MarkLogicDocument implements Writable {
     private byte[] content;
     private ContentType contentType;
-    
+    public static final Log LOG = LogFactory.getLog(MarkLogicDocument.class);
     public ContentType getContentType() {
         return contentType;
     }
@@ -64,18 +67,22 @@ public class MarkLogicDocument implements Writable {
                             "Cannot convert binary data to Text.");        
     }
     
-    public void set(ResultItem item) {
-        if (item.getValueType() == ValueType.DOCUMENT) {
-            content = item.asString().getBytes();
-            contentType = ContentType.XML;
-        } else if (item.getValueType() == ValueType.TEXT) {
-            content = item.asString().getBytes();
-            contentType = ContentType.TEXT;
-        } else if (item.getValueType() == ValueType.BINARY) {
-            content = ((XdmBinary)item.getItem()).asBinaryData();
-            contentType = ContentType.BINARY;
-        } else {
-            contentType = ContentType.UNKNOWN;
+    public void set(ResultItem item){
+        try {
+            if (item.getValueType() == ValueType.DOCUMENT) {
+                content = item.asString().getBytes("UTF-8");
+                contentType = ContentType.XML;
+            } else if (item.getValueType() == ValueType.TEXT) {
+                content = item.asString().getBytes("UTF-8");
+                contentType = ContentType.TEXT;
+            } else if (item.getValueType() == ValueType.BINARY) {
+                content = ((XdmBinary) item.getItem()).asBinaryData();
+                contentType = ContentType.BINARY;
+            } else {
+                contentType = ContentType.UNKNOWN;
+            }
+        } catch (UnsupportedEncodingException e) {
+            LOG.error(e);
         }
     }
     
