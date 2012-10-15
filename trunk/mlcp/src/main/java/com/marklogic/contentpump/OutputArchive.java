@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
@@ -74,7 +75,9 @@ public class OutputArchive {
             throw new IOException(zpath + " already exists.");
         }
         LOG.info("Creating output archive: " + zpath);
-        
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Default charset: " + Charset.defaultCharset());
+        }
         // if fs instanceof DistributedFileSystem, use hadoop api; otherwise,
         // use java api
         if (fs instanceof DistributedFileSystem) {
