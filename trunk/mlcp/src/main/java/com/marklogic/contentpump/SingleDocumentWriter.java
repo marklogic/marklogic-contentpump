@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -84,10 +85,13 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             } else {
                 path = new Path(dir, childPath);
             }
-            
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Default charset: " + Charset.defaultCharset());
+            }
             FileSystem fs = path.getFileSystem(conf);
             if (fs instanceof DistributedFileSystem) {
-                os = fs.create(path, true);
+                os = fs.create(path, false);
             } else {
                 File f = new File(path.toUri().getPath());
                 if (!f.exists()) {
@@ -96,25 +100,34 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 }
                 os = new FileOutputStream(f, false);
             }
-            
+
             ContentType type = content.getContentType();
-            if (ContentType.BINARY.equals(type)){
+            if (ContentType.BINARY.equals(type)) {
                 os.write(content.getContentAsByteArray());
-            } else if (ContentType.TEXT.equals(type) || 
-                    ContentType.XML.equals(type)) {
+            } else if (ContentType.TEXT.equals(type)
+                || ContentType.XML.equals(type)) {
                 Text t = content.getContentAsText();
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace(t);
+                    byte[] bytes = content.getContentAsByteArray();
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < bytes.length; i++) {
+                        sb.append(Byte.toString(bytes[i]));
+                        sb.append(" ");
+                    }
+                    LOG.trace(sb);
+                }
                 os.write(t.getBytes(), 0, t.getLength());
             } else {
-                LOG.warn("Skipping " + uri + 
-                        ".  Unsupported content type: " + 
-                        type.name());
+                LOG.warn("Skipping " + uri + ".  Unsupported content type: "
+                    + type.name());
             }
         } catch (URISyntaxException e) {
             LOG.warn("Error parsing URI, skipping: " + uri, e);
         } finally {
             if (os != null) {
                 os.close();
-            }          
+            }
         }      
     }
 }
