@@ -4,22 +4,10 @@
 
 usage="Usage: mlhdp-start.sh --hosts hostlistfile"
 
-# if no args specified, show usage
-if [ $# -le 1 ]; then
-        echo $usage
-        exit 1
-fi
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/
 
-if [ $# -gt 1 ]
-then
-    if [ "--hosts" = "$1" ]
-    then
-        shift
-        hostsfile=$1
-    else
-        echo $usage
-    fi
-fi
+source $DIR/lib.sh
+checkArgs "$1" "$2" "$usage"
 
 #start HDFS
 su - hdfs -c "/usr/lib/hadoop/bin/hadoop-daemon.sh --config /etc/hadoop/conf start namenode"
