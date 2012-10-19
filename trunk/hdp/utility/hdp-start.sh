@@ -2,7 +2,7 @@
 
 #run as root, and make sure root has passwordless ssh setup on each node
 
-usage="Usage: mlhdp-start.sh --hosts hostlistfile"
+usage="Usage: hdp-start.sh --hosts hostlistfile"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/
 

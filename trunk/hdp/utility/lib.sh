@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 
 checkArgs() {
 	# if no args specified, show usage
@@ -24,4 +24,21 @@ checkArgs() {
 	    	exit 1
 	    fi
 	fi
+}
+
+checkStatus() {
+	if [ $? -ne 0 ]; then
+		echo "Operation failed."
+		exit 1
+	fi
+}
+
+rssh() {
+	ssh -t $1@$2 $3
+	checkStatus
+}
+
+rscp() {
+	scp $1 $2@$3:$4
+	checkStatus
 }
