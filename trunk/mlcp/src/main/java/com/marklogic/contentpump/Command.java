@@ -56,8 +56,8 @@ public enum Command implements ConfigConstants {
             Option inputFilePath = OptionBuilder
                 .withArgName("path")
                 .hasArg()
-                .withDescription("The file system path in which to look for "
-                        + "input")
+                .withDescription("The file system location for input, as a "
+                        + "regular expression")
                 .create(INPUT_FILE_PATH);
             inputFilePath.setRequired(true);
             options.addOption(inputFilePath);
