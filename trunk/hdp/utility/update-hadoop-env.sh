@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 usage="Usage: update-hadoop-env.sh --hosts hostlistfile"
 
@@ -10,13 +10,12 @@ checkArgs "$1" "$2" "$usage"
 
 for host in `cat $hostsfile`; do
 	echo $host
-	scp $DIR/hadoop-env.sh root@$host:/tmp/
-	ssh -t root@$host 'mv /etc/hadoop/conf/hadoop-env.sh /etc/hadoop/conf/hadoop-env.sh.bak'
-	ssh -t root@$host 'mv /tmp/hadoop-env.sh /etc/hadoop/conf/'
+	rssh "root" "$host" "mv /etc/hadoop/conf/hadoop-env.sh /etc/hadoop/conf/hadoop-env.sh.bak"
+	rscp "$DIR/hadoop-env.sh" "root" "$host" "/etc/hadoop/conf/"
 done 
 
 
 #bounce mapred and hdfs
 echo "bounce mapred and hdfs"
-sh $DIR/mlhdp-stop.sh --hosts $hostsfile
-sh $DIR/mlhdp-start.sh --hosts $hostsfile
+$DIR/hdp-stop.sh --hosts $hostsfile
+$DIR/hdp-start.sh --hosts $hostsfile

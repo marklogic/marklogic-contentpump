@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 usage="Usage: install.sh --hosts hostlistfile"
 
@@ -18,15 +18,11 @@ while true; do
 done
 
 cd ../..
-echo "Now install mlcp and connector"
+echo "Installing mlcp and connector"
 
 chmod 755 -R install.sh utility/
 $DIR/utility/install-mlcp-connector.sh --hosts $hostsfile
 
-echo "Now updating hadoop env"
-
-$DIR/utility/update-hadoop-env.sh --hosts $hostsfile
-
-echo "done"
+echo "DONE"
 
 
