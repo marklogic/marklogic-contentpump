@@ -30,6 +30,8 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.mapreduce.MarkLogicConstants;
+
 /**
  * Reader for SequenceFileInputFormat.
  * @author ali
@@ -42,7 +44,7 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected Writable seqKey;
     protected Writable seqValue;
     protected boolean hasNext = true;
-
+    protected int batchSize;
     @Override
     public void close() throws IOException {
         if (reader != null) {
@@ -91,6 +93,8 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             conf);
         seqValue = (Writable) ReflectionUtils.newInstance(
             reader.getValueClass(), conf);
+        batchSize = conf.getInt(MarkLogicConstants.BATCH_SIZE, 
+            MarkLogicConstants.DEFAULT_BATCH_SIZE);
     }
 
     @SuppressWarnings("unchecked")
@@ -104,12 +108,19 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             setKey(((SequenceFileKey) seqKey).getDocumentURI().getUri());
 
             if (value instanceof Text) {
-                ((Text) value).set(((SequenceFileValue<Text>) seqValue)
-                    .getValue());
+                ((Text) value)
+                    .set(new String(((SequenceFileValue<Text>) seqValue)
+                        .getValue().getBytes(), "UTF-8"));
             } else if (value instanceof BytesWritable) {
-                ((BytesWritable) value)
-                    .set(((SequenceFileValue<BytesWritable>) seqValue)
-                        .getValue());
+                if (batchSize > 1) {
+                    value = (VALUEIN) new BytesWritable(
+                        ((SequenceFileValue<BytesWritable>) seqValue)
+                            .getValue().getBytes());
+                } else {
+                    ((BytesWritable) value).set(new BytesWritable(
+                        ((SequenceFileValue<BytesWritable>) seqValue)
+                            .getValue().getBytes()));
+                }
             } else {
                 LOG.error("Unexpected type: " + value.getClass());
                 key = null;
