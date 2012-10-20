@@ -53,6 +53,29 @@ public class TestImportDelimitedText{
     
     
     @Test
+    public void testImportDelimitedTextPipe() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
+            + " -delimited_uri_id NAME -delimiter |"
+            + " -input_file_type delimited_text -input_file_pattern .*\\.tpch";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    
+    @Test
     public void testImportDelimitedTextBad() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.bad"
