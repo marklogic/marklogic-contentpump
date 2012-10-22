@@ -1,5 +1,5 @@
 #!/bin/bash
-#should be run as root on the 
+#should be run as root on the jobtracker node
 usage="Usage: install-mlcp-connector.sh --hosts hostlistfile"
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../
 
@@ -19,7 +19,7 @@ for host in `cat $hostsfile`; do
 	ssh root@$host 'su - mapred -c "/usr/lib/hadoop/bin/hadoop-daemon.sh --config /etc/hadoop/conf stop tasktracker"'	
 	
 	#propagate xcc and connector jars
-	rssh "root" "$host" 'mkdir /usr/lib/MarkLogic'
+	rssh "root" "$host" 'mkdir -p /usr/lib/MarkLogic'
 	rscp "/tmp/mlconnector/lib/marklogic-mapreduce-$connector_version.jar" "root" "$host" "/usr/lib/MarkLogic/"
 	rscp "/tmp/mlconnector/lib/$commons_modeler" "root" "$host" "/usr/lib/MarkLogic/"
 	rscp "/tmp/xcc/lib/marklogic-xcc-$xcc_version.jar" "root" "$host" "/usr/lib/MarkLogic/"
