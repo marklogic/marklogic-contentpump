@@ -45,7 +45,9 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestPermissionException;
+import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.exceptions.ServerConnectionException;
+import com.marklogic.xcc.exceptions.XQueryException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -323,7 +325,18 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     if (sessions[fId] == null) {
                         sessions[fId] = getSession(forestId);
                     }        
-                    sessions[fId].insertContent(forestContents[fId]);
+                    List<RequestException> errors = 
+                        sessions[fId].insertContentCollectErrors(
+                                forestContents[fId]);
+                    if (errors != null) {
+                        for (RequestException ex : errors) {
+                            if (ex instanceof XQueryException) {
+                                LOG.warn(((XQueryException) ex).getFormatString());
+                            } else {
+                                LOG.warn(ex.getMessage());
+                            }
+                        }                       
+                    }
                     stmtCounts[fId]++;
                     counts[fId] = 0;
                 }
@@ -334,22 +347,33 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 sessions[fId].insertContent(content);
                 stmtCounts[fId]++;
             }
-            if (txnSize > 1 && stmtCounts[fId] == txnSize) {
+            if (stmtCounts[fId] == txnSize && 
+                sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
             }
-        } catch (RequestException e) {
-            LOG.error(e);
-            if (counts != null) counts[fId] = 0;
-            stmtCounts[fId]--;        
-
-            if (e instanceof ServerConnectionException
-                || e instanceof RequestPermissionException) {
-                if (sessions[fId] != null) {
-                    sessions[fId].close();
-                }
-                throw new IOException(e);
+        } catch (ServerConnectionException e) {
+            if (sessions[fId] != null) {
+                sessions[fId].close();
             }
+            throw new IOException(e);
+        } catch (RequestPermissionException e) {
+            if (sessions[fId] != null) {
+                sessions[fId].close();
+            }
+            throw new IOException(e);
+        } catch (RequestServerException e) {
+            // log error and continue on RequestServerException
+            if (e instanceof XQueryException) {
+                LOG.warn(((XQueryException) e).getFormatString());
+            } else {
+                LOG.warn(e.getMessage());
+            }
+        } catch (RequestException e) {
+            if (sessions[fId] != null) {
+                sessions[fId].close();
+            }
+            throw new IOException(e);
         }
     }
 
@@ -362,7 +386,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         } else {
             session = cs.newSession();
         }      
-        if (txnSize > 1) {
+        if (txnSize > 1 || batchSize > 1) {
             session.setTransactionMode(TransactionMode.UPDATE);
         }
         return session;
@@ -384,7 +408,18 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     }
                                           
                     try {
-                        sessions[i].insertContent(remainder);
+                        List<RequestException> errors = 
+                            sessions[i].insertContentCollectErrors(remainder);
+                        if (errors != null) {
+                            for (RequestException ex : errors) {
+                                if (ex instanceof XQueryException) {
+                                    LOG.warn(((XQueryException) ex).
+                                            getFormatString());
+                                } else {
+                                    LOG.warn(ex.getMessage());
+                                }
+                            }                       
+                        }
                         stmtCounts[i]++;        
                     } catch (RequestException e) {
                         LOG.error(e);
@@ -401,7 +436,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         for (int i = 0; i < sessions.length; i++) {  
             if (sessions[i] != null) {
-                if (stmtCounts[i] > 0 && txnSize > 1) {
+                if (stmtCounts[i] > 0 && 
+                    sessions[i].getTransactionMode() == 
+                        TransactionMode.UPDATE) {
                     try {
                         sessions[i].commit();
                     } catch (RequestException e) {
@@ -427,7 +464,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     public int getTransactionSize(Configuration conf) {
         // return the specified txn size
         if (conf.get(TXN_SIZE) != null) {
-            return conf.getInt(TXN_SIZE, 0);
+            int txnSize = conf.getInt(TXN_SIZE, 0);
+            return txnSize <= 0 ? 1 : txnSize;
         } 
         return 1000 / conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
     }
