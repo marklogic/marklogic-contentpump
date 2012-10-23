@@ -235,35 +235,42 @@ public class LocalJobRunner implements ConfigConstants {
         @SuppressWarnings("unchecked")
         @Override
         public Object call() {
+            TaskAttemptContext context = null;
             Mapper.Context mapperContext = null;
+            TrackingRecordReader trackingReader = null;
+            RecordWriter<OUTKEY, OUTVALUE> writer = null;
+            OutputCommitter committer = null;
             try {
                 TaskID taskId = new TaskID(new JobID(), true, id);
                 TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
-                TaskAttemptContext context = new TaskAttemptContext(conf, 
-                        taskAttemptId);
+                context = new TaskAttemptContext(conf, taskAttemptId);
                 RecordReader<INKEY, INVALUE> reader = 
                     inputFormat.createRecordReader(split, context);
-                RecordWriter<OUTKEY, OUTVALUE> writer = 
-                    outputFormat.getRecordWriter(context);
-                OutputCommitter committer = 
-                    outputFormat.getOutputCommitter(context);
+                writer = outputFormat.getRecordWriter(context);
+                committer = outputFormat.getOutputCommitter(context);
                 mapper = 
                     (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)
                     ReflectionUtils.newInstance(job.getMapperClass(), conf);
-                TrackingRecordReader trackingReader = 
+                trackingReader = 
                     new TrackingRecordReader(reader, pctProgress);
                 mapperContext = mapper.new Context(conf,
                         taskAttemptId, trackingReader, writer, committer, 
-                        reporter, split);
-                
+                        reporter, split);             
                 trackingReader.initialize(split, mapperContext);
-                mapper.run(mapperContext);
-                trackingReader.close();
-                writer.close(mapperContext);
-                committer.commitTask(context);                
+                mapper.run(mapperContext);            
             } catch (Throwable t) {
                 LOG.error("Error running task: " + 
                                 mapperContext.getTaskAttemptID(), t);
+            } finally {
+                try {
+                    if (trackingReader != null) {
+                        trackingReader.close();
+                    }
+                    if (writer != null) {
+                        writer.close(mapperContext);
+                    }
+                    committer.commitTask(context);
+                } catch (Throwable t) {} 
             }
             return null;
         }      
