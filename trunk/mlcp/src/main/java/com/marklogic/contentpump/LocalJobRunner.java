@@ -17,6 +17,8 @@ package com.marklogic.contentpump;
 
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -104,13 +106,20 @@ public class LocalJobRunner implements ConfigConstants {
      * @throws Exception
      */
     @SuppressWarnings("unchecked")
-    public <INKEY,INVALUE,OUTKEY,OUTVALUE>
+    public <INKEY,INVALUE,OUTKEY,OUTVALUE,
+        T extends org.apache.hadoop.mapreduce.InputSplit> 
     void run() throws Exception {
         Configuration conf = job.getConfiguration();
         InputFormat<INKEY,INVALUE> inputFormat = 
             (InputFormat<INKEY, INVALUE>)ReflectionUtils.newInstance(
                 job.getInputFormatClass(), conf);
         List<InputSplit> splits = inputFormat.getSplits(job);
+        T[] array = (T[])splits.toArray(
+                new org.apache.hadoop.mapreduce.InputSplit[splits.size()]);
+
+        // sort the splits into order based on size, so that the biggest
+        // go first
+        Arrays.sort(array, new SplitLengthComparator());
         OutputFormat<OUTKEY, OUTVALUE> outputFormat = 
             (OutputFormat<OUTKEY, OUTVALUE>)ReflectionUtils.newInstance(
                 job.getOutputFormatClass(), conf);
@@ -137,8 +146,8 @@ public class LocalJobRunner implements ConfigConstants {
         monitor.start();
         ContentPumpReporter reporter = new ContentPumpReporter();
         
-        for (int i = 0; i < splits.size(); i++) {        
-            InputSplit split = splits.get(i);
+        for (int i = 0; i < array.length; i++) {        
+            InputSplit split = array[i];
             if (pool != null) {
                 LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE> task = 
                     new LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE>(job,
@@ -355,5 +364,29 @@ public class LocalJobRunner implements ConfigConstants {
             result += pct.longValue();
         }
         return (double)result / progress.length / 100;
+    }
+    
+    private static class SplitLengthComparator implements
+            Comparator<org.apache.hadoop.mapreduce.InputSplit> {
+
+        @Override
+        public int compare(org.apache.hadoop.mapreduce.InputSplit o1,
+                org.apache.hadoop.mapreduce.InputSplit o2) {
+            try {
+                long len1 = o1.getLength();
+                long len2 = o2.getLength();
+                if (len1 < len2) {
+                    return 1;
+                } else if (len1 == len2) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } catch (IOException ie) {
+                throw new RuntimeException("exception in compare", ie);
+            } catch (InterruptedException ie) {
+                throw new RuntimeException("exception in compare", ie);
+            }
+        }
     }
 }
