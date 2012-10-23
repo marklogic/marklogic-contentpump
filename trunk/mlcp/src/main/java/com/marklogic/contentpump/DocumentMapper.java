@@ -50,7 +50,7 @@ public class DocumentMapper<VALUE> extends
     @Override
     public void setup(Context context) {
         inputRecordCount = context.getCounter(
-                        ContentPumpStats.VALID_INPUT_RECORD_COUNT);
+                        ContentPumpStats.ATTEMPTED_INPUT_RECORD_COUNT);
         skippedRecordCount = context.getCounter(
                         ContentPumpStats.SKIPPED_INPUT_RECORD_COUNT);
     }
