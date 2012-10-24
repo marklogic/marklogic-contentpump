@@ -34,11 +34,19 @@ checkStatus() {
 }
 
 rssh() {
+	if [ $# -lt 3 ]; then
+		echo "rssh expects 3 arguments"
+		exit 1
+	fi
 	ssh -t $1@$2 $3
 	checkStatus
 }
 
 rscp() {
+	if [ $# -lt 4 ]; then
+		echo "rscp expects 4 arguments"
+		exit 1
+	fi
 	scp $1 $2@$3:$4
 	checkStatus
 }
