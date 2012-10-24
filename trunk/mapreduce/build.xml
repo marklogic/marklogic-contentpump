@@ -26,7 +26,7 @@
 	<property name="java.source" value="src/java"/>
 	<property name="junit.source" value="src/junit"/>
 	<property name="buildtmp" value="buildtmp"/>
-	<property name="stagedir" value="${buildtmp}/stage"/>
+	<property name="stagedir-src" value="${buildtmp}/stage-src"/>
 	<property name="mapreduce.stagedir" value="${buildtmp}/stage"/>
 	<property name="compiled.classes.dir" value="${buildtmp}/classes"/>
 	<property name="test.data.dir" value="src/testdata"/>
@@ -60,6 +60,7 @@
 	<property name="mapreduce.test.jar" value="${java.intermediate.dir}/mapreduce.test.jar"/>
 	<property name="mapreduce.javadoczip" value="${java.intermediate.dir}/${mapreduce.javadoczip.name}"/>
 	<property name="mapreduce.bundle.zip" value="${products}/${mapreduce.bundle.name}.zip"/>
+	<property name="mapreduce.source.zip" value="${products}/${mapreduce.bundle.name}-src.zip"/>
 
 	<!-- Configurable flags that will affect how targets run -->
 	<property name="junit.output.format" value="plain"/>	<!-- plain | brief | xml -->
@@ -266,11 +267,31 @@
 		</copy>
 	</target>
 
-	<target name="mapreduce.package" depends="mapreduce.stage">
+        <target name="stage-src">
+                <delete dir="${stagedir-src}"/>
+                <mkdir dir="${stagedir-src}"/>
+                <copy todir="${stagedir-src}">
+                        <fileset dir="${java.source}">
+                                <include name="com/marklogic/*/*.java"/>
+                                <include name="com/marklogic/*/*/*.java"/>
+                                <exclude name="com/marklogic/mapreduce/test/"/>
+                                <exclude name="com/marklogic/mapreduce/examples/"/>
+                        </fileset>
+                </copy>
+                <copy todir="${stagedir-src}" file="LICENSE.txt"/>
+                <copy todir="${stagedir-src}" file="LEGALNOTICES.txt"/>
+        </target>
+
+	<target name="mapreduce.package" depends="mapreduce.stage,stage-src">
 		<delete file="${mapreduce.bundle.zip}"/>
 		<zip zipfile="${mapreduce.bundle.zip}">
 			<fileset dir="${mapreduce.stagedir}"/>
 		</zip>
+		<delete file="${mapreduce.source.zip}"/>
+		<zip zipfile="${mapreduce.source.zip}">
+		        <fileset dir="${stagedir-src}"/>
+		</zip>
+
 	</target>
 
 	<!-- ************************************************************** -->
