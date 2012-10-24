@@ -25,7 +25,7 @@ for host in `cat $hostsfile`; do
 	rscp "/tmp/xcc/lib/marklogic-xcc-$xcc_version.jar" "root" "$host" "/usr/lib/MarkLogic/"
 	
 	#add a script that sets env variable
-	rscp "$DIR/utility/hadist.sh" "root" "$host:/etc/profile.d/"
+	rscp "$DIR/utility/hadist.sh" "root" "$host" "/etc/profile.d/"
 	
 	#backup update hadoop-env.sh
 	rssh "root" "$host" 'mv /etc/hadoop/conf/hadoop-env.sh /etc/hadoop/conf/.hadoop-env.sh.bak'

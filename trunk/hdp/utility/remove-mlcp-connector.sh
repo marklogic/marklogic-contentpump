@@ -23,7 +23,7 @@ for host in `cat $hostsfile`; do
 	rssh "root" "$host" "rm -rf /usr/lib/MarkLogic"
 	
 	#remove env variable (not critical, allow failure)
-	ssh root@$host "rm -rf /etc/profile.d/ml.sh"
+	ssh root@$host "rm -rf /etc/profile.d/hadist.sh"
 	
 	#recover hadoop-env
 	rssh "root" "$host" "mv /etc/hadoop/conf/.hadoop-env.sh.bak /etc/hadoop/conf/hadoop-env.sh"
