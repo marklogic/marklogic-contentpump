@@ -11,18 +11,19 @@ Modify HDP-gsInstaller-1.1.0.15/gsInstaller/gsInstaller.properties
 Run as root which already has passwordless ssh set up for localhost and hosts in HOSTLISTFILE
 ./install.sh --hosts HOSTLISTFILE
 
-mlcp's destination directory is /usr/lib/marklogic-contentpump-1.1
+mlcp's destination directory is /opt/marklogic-contentpump-1.0
+connector's destination directory is /opt/marklogic-connector-for-hadoop-1.1
 xcc and hadoop connector jars are at /usr/lib/MarkLogic
 
 2. Separate Installation of mlcp and connector
 Run as root which already has passwordless ssh setup for localhost and hosts in HOSTLISTFILE
-Or run as a user which has sudo. May need to manually input password.
 
 cd utility
 ./install-mlcp-connector.sh --hosts HOSTLISTFILE
 
 3. Remove mlcp, MarkLogic Connector for Hadoop and XCC
+Run as root which already has passwordless ssh setup for localhost and hosts in HOSTLISTFILE
 cd utility
-./remove-mlcp-connector.sh [ --hosts HOSTLISTFILE ]
-if --hosts HOSTLISTFILE is not specified, only remove mlcp from localhost
+./remove-mlcp-connector.sh --hosts HOSTLISTFILE
+
 

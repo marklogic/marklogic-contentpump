@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#should be run as root on the jobtracker node
 usage="Usage: remove-mlcp-connector.sh --hosts hostlistfile"
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/
@@ -9,7 +9,10 @@ source $DIR/../MANIFEST
 checkArgs "$1" "$2" "$usage"
 
 #remove mlcp locally
-sudo rm -rf /opt/marklogic-contentpump-$mlcp_version
+rm -rf /opt/marklogic-contentpump-$mlcp_version
+
+#remove connector locally
+rm -rf /opt/marklogic-connector-for-hadoop-$connector_version
 
 #stop jobtracker, allow failure(in case jobtracker already stopped)
 su - mapred -c "/usr/lib/hadoop/bin/hadoop-daemon.sh --config /etc/hadoop/conf stop jobtracker"
