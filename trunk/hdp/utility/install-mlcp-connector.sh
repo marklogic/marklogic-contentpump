@@ -7,11 +7,11 @@ source $DIR/utility/lib.sh
 source $DIR/MANIFEST
 checkArgs "$1" "$2" "$usage"
 
-#extract connector, and check if it suceeds
+#extract connector, and check if it succeeds
 unzip -o -q $DIR/$connector_zip -d /opt/marklogic-connector-for-hadoop-$connector_version
 checkStatus
 
-#extract xcc to /tmp, and check if it suceeds
+#extract xcc to /tmp, and check if it succeeds
 unzip -o -q $DIR/$xcc_zip -d /tmp/xcc
 checkStatus
 
