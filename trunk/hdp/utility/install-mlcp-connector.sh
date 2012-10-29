@@ -32,6 +32,11 @@ for host in `cat $hostsfile`; do
 	#add a script that sets env variable
 	rscp "$DIR/utility/hadist.sh" "root" "$host" "/etc/profile.d/"
 	
+	#add symbolic links for jars
+	rssh "root" "$host" "ln -sf /usr/lib/MarkLogic/marklogic-mapreduce-$connector_version.jar /usr/lib/MarkLogic/marklogic-mapreduce.jar"
+	rssh "root" "$host" "ln -sf /usr/lib/MarkLogic/$commons_modeler /usr/lib/MarkLogic/commons-modeler.jar"
+	rssh "root" "$host" "ln -sf /usr/lib/MarkLogic/marklogic-xcc-$xcc_version.jar /usr/lib/MarkLogic/marklogic-xcc.jar"
+	
 	#backup update hadoop-env.sh
 	rssh "root" "$host" 'mv /etc/hadoop/conf/hadoop-env.sh /etc/hadoop/conf/.hadoop-env.sh.bak'
 	rscp "$DIR/utility/hadoop-env.sh" "root" "$host" "/etc/hadoop/conf/"

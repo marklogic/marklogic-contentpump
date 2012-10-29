@@ -1,5 +1,5 @@
 # Set Hadoop-specific environment variables here.
-export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/MarkLogic/marklogic-mapreduce-1.1.jar:/usr/lib/MarkLogic/commons-modeler-2.0.1.jar:/usr/lib/MarkLogic/marklogic-xcc-6.0.jar
+export HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/MarkLogic/marklogic-mapreduce.jar:/usr/lib/MarkLogic/commons-modeler.jar:/usr/lib/MarkLogic/marklogic-xcc.jar
 
 # The only required environment variable is JAVA_HOME.  All others are
 # optional.  When running a distributed configuration it is best to
