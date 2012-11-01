@@ -50,7 +50,9 @@ public class TestCopy{
         cmd = "COPY -input_host localhost -input_port 5275"
             + " -input_username admin -input_password admin"
             + " -output_host localhost -output_port 6275"
-            + " -output_username admin -output_password admin";
+            + " -output_username admin -output_password admin"
+            + " -output_uri_suffix .suffix"
+            + " -output_uri_prefix prefix/";
         args = cmd.split(" ");
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
@@ -67,8 +69,8 @@ public class TestCopy{
         while (result.hasNext()) {
             ResultItem item = result.next();
             String uri = item.getDocumentURI();
-            assertTrue(uri.endsWith(".xml"));
-            assertTrue(uri.startsWith("test/"));
+            assertTrue(uri.endsWith(".xml.suffix"));
+            assertTrue(uri.startsWith("prefix/test/"));
         }
         Utils.closeSession();
     }
