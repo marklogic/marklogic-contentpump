@@ -362,11 +362,11 @@ public class DatabaseContentReader extends
             if (uri == null) {
                 throw new IOException("Missing document URI for result " + count);
             }
-            uri = URIUtil.applyUriReplace(uri, conf);
-            uri = URIUtil.applyPrefixSuffix(uri, conf);
             if (metasTurn) {
-                currentKey.setUri(uri + DocumentMetadata.EXTENSION);
                 DocumentMetadata metadata = metadataMap.get(uri);
+                uri = URIUtil.applyUriReplace(uri, conf);
+                uri = URIUtil.applyPrefixSuffix(uri, conf);
+                currentKey.setUri(uri + DocumentMetadata.EXTENSION);
                 if (metadata != null) {
                     byte[] metacontent = metadata.toXML().getBytes();
                     currentValue.setContent(metacontent);
@@ -384,6 +384,8 @@ public class DatabaseContentReader extends
                 metasTurn = false;
                 return true;
             } else {
+                uri = URIUtil.applyUriReplace(uri, conf);
+                uri = URIUtil.applyPrefixSuffix(uri, conf);
                 currentKey.setUri(uri);
                 // handle document-node
                 currentValue.set(currItem);
