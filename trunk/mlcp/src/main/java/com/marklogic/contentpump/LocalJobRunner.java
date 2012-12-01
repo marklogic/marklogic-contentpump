@@ -249,9 +249,9 @@ public class LocalJobRunner implements ConfigConstants {
             TrackingRecordReader trackingReader = null;
             RecordWriter<OUTKEY, OUTVALUE> writer = null;
             OutputCommitter committer = null;
+            TaskID taskId = new TaskID(new JobID(), true, id);
+            TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
             try {
-                TaskID taskId = new TaskID(new JobID(), true, id);
-                TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
                 context = new TaskAttemptContext(conf, taskAttemptId);
                 RecordReader<INKEY, INVALUE> reader = 
                     inputFormat.createRecordReader(split, context);
@@ -268,8 +268,7 @@ public class LocalJobRunner implements ConfigConstants {
                 trackingReader.initialize(split, mapperContext);
                 mapper.run(mapperContext);            
             } catch (Throwable t) {
-                LOG.error("Error running task: " + 
-                                mapperContext.getTaskAttemptID(), t);
+                LOG.error("Error running task: " + taskAttemptId, t);
             } finally {
                 try {
                     if (trackingReader != null) {
