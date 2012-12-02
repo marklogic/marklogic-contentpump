@@ -16,7 +16,7 @@ if [ ! -z "$HADOOP_DIST" ] && [ "$HADOOP_DIST" = "HDP" ]; then
   HDP=true
 fi
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../
-VMARGS="-DCONTENTPUMP_HOME=$DIR/lib -DCONTENTPUMP_VERSION=1.1" 
+VMARGS="-DCONTENTPUMP_HOME=$DIR/lib" 
 LIB_HOME=$DIR/lib
 for file in ${LIB_HOME}/*.jar
 do

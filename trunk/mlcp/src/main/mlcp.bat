@@ -9,7 +9,7 @@ REM echo %cmdppath%
 set LIB_HOME=%cmdppath%lib
 REM echo LIB_HOME: %LIB_HOME%
 
-SET "VMARGS=-DCONTENTPUMP_HOME=%LIB_HOME% -DCONTENTPUMP_VERSION=1.0"
+SET "VMARGS=-DCONTENTPUMP_HOME=%LIB_HOME%"
 
 SetLocal EnableDelayedExpansion
 
