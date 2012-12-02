@@ -16,7 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -248,23 +247,37 @@ public class ContentPump implements ConfigConstants {
     private static void submitJob(Job job) throws Exception {
         String cpHome = 
             System.getProperty(CONTENTPUMP_HOME_PROPERTY_NAME);
-        String cpVersion =
-            System.getProperty(CONTENTPUMP_VERSION_PROPERTY_NAME);
-        String cpJarName = CONTENTPUMP_JAR_NAME.replace("<VERSION>", 
-                cpVersion);
-        // set job jar
-        File cpJar = new File(cpHome, cpJarName);
-        if (!cpJar.exists()) {
-            throw new FileNotFoundException(cpJar.getAbsolutePath());
-        }
         
-        Configuration conf = job.getConfiguration();
-        
-        conf.set("mapred.jar", cpJar.toURI().toURL().toString());
-
+        // find job jar
         File cpHomeDir= new File(cpHome);
-        FilenameFilter filter = new FilenameFilter() {
+        FilenameFilter jobJarFilter = new FilenameFilter() {
+        	@Override
+            public boolean accept(File dir, String name) {
+                if (name.endsWith(".jar") && 
+                    name.startsWith(CONTENTPUMP_JAR_PREFIX)) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        };
+        File[] cpJars = cpHomeDir.listFiles(jobJarFilter);
+        if (cpJars == null || cpJars.length == 0) {
+        	throw new RuntimeException("Content Pump jar file " + 
+                CONTENTPUMP_JAR_NAME + " in not found under " + 
+        	    cpHome);
+        }
+        if (cpJars.length > 1) {
+        	throw new RuntimeException("More than one Content Pump jar file " +
+                    CONTENTPUMP_JAR_NAME + " in found under " + 
+            	    cpHome);
+        }
+        // set job jar
+        Configuration conf = job.getConfiguration();       
+        conf.set("mapred.jar", cpJars[0].toURI().toURL().toString());
 
+        // find lib jars
+        FilenameFilter filter = new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
                 if (name.endsWith(".jar") && !name.startsWith("hadoop")) {
