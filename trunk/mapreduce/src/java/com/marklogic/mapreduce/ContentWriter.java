@@ -116,6 +116,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     private InputStream is;
     
     private boolean streaming;
+    
+    private boolean tolerateErrors;
 
     public ContentWriter(Configuration conf, 
             Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -209,6 +211,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         
         streaming = conf.getBoolean(OUTPUT_STREAMING, false);
+        tolerateErrors = conf.getBoolean(OUTPUT_TOLERATE_ERRORS, false);
     }
 
     @Override
@@ -386,7 +389,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         } else {
             session = cs.newSession();
         }      
-        if (txnSize > 1 || batchSize > 1) {
+        if (txnSize > 1 || (batchSize > 1 && tolerateErrors)) {
             session.setTransactionMode(TransactionMode.UPDATE);
         }
         return session;
