@@ -697,6 +697,13 @@ public interface MarkLogicConstants {
     static final String OUTPUT_XML_REPAIR_LEVEL = 
         "mapreduce.marklogic.output.content.repairlevel";
     /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to tolerate insertion errors and 
+     * make sure all successful inserts are committed. 
+     */
+    static final String OUTPUT_TOLERATE_ERRORS = 
+        "mapreduce.marklogic.output.content.tolerateerrors";
+    /**
      * Default output XML repair level
      */
     static final String DEFAULT_OUTPUT_XML_REPAIR_LEVEL = "DEFAULT";

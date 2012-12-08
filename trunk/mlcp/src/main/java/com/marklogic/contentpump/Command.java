@@ -219,8 +219,17 @@ public enum Command implements ConfigConstants {
                 .hasOptionalArg()
                 .withDescription(
                     "The charset encoding to be used by the MarkLogic when "
-                        + "loading documents").create(CONTENT_ENCODING);
+                        + "loading documents")
+                .create(CONTENT_ENCODING);
             options.addOption(encoding);
+            Option tolerateErrors = OptionBuilder
+                .withArgName("true,false")
+                .hasOptionalArg()
+                .withDescription(
+                    "Whether to tolerate insertion errors and make sure all "
+                    + "successful inserts are committed")
+                .create(TOLERATE_ERRORS);
+            options.addOption(tolerateErrors);
         }
 
         @Override
@@ -437,6 +446,10 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(CONTENT_ENCODING);
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
             }
+            if (cmdline.hasOption(TOLERATE_ERRORS)) {
+                String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
+                conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
+            }
         } 
     },
     EXPORT {
@@ -630,6 +643,14 @@ public enum Command implements ConfigConstants {
                 .withDescription("Output directory in MarkLogic.")
                 .create(OUTPUT_DIRECTORY);
             options.addOption(outputDir);
+            Option tolerateErrors = OptionBuilder
+                .withArgName("tolerate errors")
+                .hasOptionalArg()
+                .withDescription(
+                    "Whether to tolerate insertion errors and make sure all "
+                    + "successful inserts are committed")
+                .create(TOLERATE_ERRORS);
+            options.addOption(tolerateErrors);
         }
 
         @Override
@@ -712,6 +733,11 @@ public enum Command implements ConfigConstants {
             String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
             if (txnSize != null) {
                 conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
+            }
+            
+            if (cmdline.hasOption(TOLERATE_ERRORS)) {
+                String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
+                conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
             }
         }
     };
@@ -817,14 +843,6 @@ public enum Command implements ConfigConstants {
             .withDescription("Override $HADOOP_CONF_DIR")
             .create(HADOOP_CONF_DIR);
         options.addOption(hadoopConfDir);
-        Option hadoopHome = OptionBuilder
-            .withArgName(HADOOP_HOME)
-            .hasArg()
-            .withDescription("Override $HADOOP_HOME")
-            .create(HADOOP_HOME);
-        CommandlineOption opt = new CommandlineOption(hadoopHome);
-        opt.setHidden(true);
-        options.addOption(opt);
         Option threadCount = OptionBuilder
             .withArgName("count")
             .hasArg()
