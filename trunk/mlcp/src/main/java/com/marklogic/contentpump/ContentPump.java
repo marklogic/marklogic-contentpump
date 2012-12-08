@@ -122,18 +122,6 @@ public class ContentPump implements ConfigConstants {
         if (cmdline.hasOption(HADOOP_CONF_DIR)) {
             hadoopConfDir = cmdline.getOptionValue(HADOOP_CONF_DIR);
         }
-    
-        if (hadoopConfDir == null) {
-            // -hadoop_home option are deprecated.
-            String hadoopHome = null;
-            if (cmdline.hasOption(HADOOP_HOME)) {
-                hadoopHome = cmdline.getOptionValue(HADOOP_HOME);
-            }
-            if (hadoopHome != null) {
-                hadoopConfDir = hadoopHome + 
-                    System.getProperty("file.separator") + "conf";
-            }
-        }       
         
         boolean distributed = hadoopConfDir != null && (mode == null ||
                 mode.equals(MODE_DISTRIBUTED));

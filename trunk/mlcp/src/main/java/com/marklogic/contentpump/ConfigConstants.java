@@ -34,9 +34,7 @@ public interface ConfigConstants {
     static final String MODE = "mode";
     static final String MODE_DISTRIBUTED = "distributed";
     static final String MODE_LOCAL = "local";
-    /** Deprecated. Use HADOOP_CONF_DIR instead */
-    @Deprecated
-    static final String HADOOP_HOME = "hadoop_home";
+
     static final String HADOOP_CONF_DIR = "hadoop_conf_dir";
     static final String THREAD_COUNT = "thread_count";
     static final String MAX_SPLIT_SIZE = "max_split_size";
@@ -114,6 +112,7 @@ public interface ConfigConstants {
     static final String DELIMITED_URI_ID = "delimited_uri_id";
     static final String FAST_LOAD = "fastload";
     static final String CONTENT_ENCODING = "content_encoding";
+    static final String TOLERATE_ERRORS = "tolerate_errors";
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = "mapreduce.marklogic.input.compressioncodec";
     static final String CONF_MAX_SPLIT_SIZE = "mapred.max.split.size";
