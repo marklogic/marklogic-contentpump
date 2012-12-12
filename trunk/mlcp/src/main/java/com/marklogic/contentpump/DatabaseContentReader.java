@@ -140,7 +140,7 @@ public class DatabaseContentReader extends
         if (copyCollection || copyPermission || copyProperties || copyQuality) {
             buf.append("'META',");
             buf.append("$uri,");
-            buf.append("xdmp:node-kind(($doc/element(),$doc/text(),$doc/binary(),$doc/processing-instruction(),$doc/comment())),");
+            buf.append("if(fn:empty($doc/node())) then 0 else xdmp:node-kind($doc/node()),");
             if (copyCollection) {
                 buf.append("xdmp:document-get-collections($uri),\n");
             }
@@ -331,7 +331,7 @@ public class DatabaseContentReader extends
             item = result.next();
         }
         if (ValueType.XS_INTEGER != item.getItemType()) {
-            throw new IOException("unexpected " + item.getItemType() + " "
+            throw new IOException(uri + " unexpected " + item.getItemType() + " "
                 + item.asString() + ", expected " + ValueType.XS_INTEGER
                 + " 0");
         }
