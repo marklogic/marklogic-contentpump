@@ -4,13 +4,21 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
+import java.net.URI;
 
 import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.xcc.Content;
+import com.marklogic.xcc.ContentCreateOptions;
+import com.marklogic.xcc.ContentFactory;
+import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.ContentSourceFactory;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
+import com.marklogic.xcc.Session;
+import com.marklogic.xcc.Session.TransactionMode;
 
 public class TestCopy{
 
@@ -19,6 +27,48 @@ public class TestCopy{
         Utils.closeSession();
     }
     
+	@Test
+	public void testBug20168() throws Exception {
+		String cmd = "COPY -mode local -input_host localhost -input_port 5275 "
+				+ "-input_username admin -input_password admin "
+				+ "-output_host localhost -output_username admin "
+				+ "-output_password admin -output_port 6275 -thread_count 1";
+
+		String[] args = cmd.split(" ");
+
+		Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+		ContentCreateOptions options = new ContentCreateOptions();
+		options.setFormatXml();
+
+		ContentSource cs = ContentSourceFactory.newContentSource(new URI(
+				"xcc://admin:admin@localhost:5275"));
+		Session session = cs.newSession();
+
+		session.setTransactionMode(TransactionMode.UPDATE);
+		Content content = ContentFactory.newContent("nocontent", new byte[0],
+				0, 0, options);
+		session.insertContent(content);
+		byte[] str = "some content".getBytes();
+		content = ContentFactory.newContent("hascontent", str, 0, str.length,
+				options);
+		session.insertContent(content);
+		session.commit();
+		session.close();
+
+		Utils.clearDB("xcc://admin:admin@localhost:6275", "CopyDst");
+
+		String[] expandedArgs = null;
+		expandedArgs = OptionsFileUtil.expandArguments(args);
+		ContentPump.runCommand(expandedArgs);
+		
+		ResultSequence result = Utils
+				.runQuery("xcc://admin:admin@localhost:6275",
+						"fn:count(fn:collection())");
+		assertTrue(result.hasNext());
+		assertEquals("2", result.next().asString());
+		Utils.closeSession();
+	}
+
     @Test
     public void testCopy() throws Exception {
         Utils.deleteDirectory(new File(Constants.OUT_PATH.toUri().getPath()));
