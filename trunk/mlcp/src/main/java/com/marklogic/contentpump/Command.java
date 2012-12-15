@@ -471,6 +471,7 @@ public enum Command implements ConfigConstants {
                 .hasArg()
                 .withDescription("export output file path")
                 .create(OUTPUT_FILE_PATH);
+            outputFilePath.setRequired(true);                
             options.addOption(outputFilePath);
             Option exportCompress = OptionBuilder
                 .withArgName("true,false")
