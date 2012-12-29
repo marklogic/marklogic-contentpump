@@ -28,6 +28,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.map.MultithreadedMapper;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.contentpump.utilities.CommandlineOption;
@@ -222,6 +223,18 @@ public enum Command implements ConfigConstants {
                         + "loading documents")
                 .create(CONTENT_ENCODING);
             options.addOption(encoding);
+
+            Option threadsPerMap = OptionBuilder.withArgName("threadsPerMap")
+                .hasOptionalArg()
+                .withDescription("The number of threads per map task")
+                .create(THREADS_PER_MAP);
+            options.addOption(threadsPerMap);
+            Option threadsCapMap = OptionBuilder.withArgName("true,false")
+                .hasOptionalArg()
+                .withDescription("Whether threads per map has a cap")
+                .create(THREADS_CAP_MAP);
+            options.addOption(threadsCapMap);
+
             Option tolerateErrors = OptionBuilder
                 .withArgName("true,false")
                 .hasOptionalArg()
@@ -245,10 +258,31 @@ public enum Command implements ConfigConstants {
             Job job = new Job(conf);
             job.setJarByClass(this.getClass());
             job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
-
-            job.setMapperClass(type.getMapperClass(cmdline, conf));
             job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
 
+            String mode = conf.get("mapred.job.tracker");
+            boolean isLocal = "local".equals(mode);
+            if (isLocal) {
+                if(LOG.isDebugEnabled()){
+                    LOG.debug("May use Multithreaded Mapper in local mode");
+                }
+            } else {
+                //distributed mode
+                if (cmdline.hasOption(THREADS_PER_MAP)) {
+                    job.setMapperClass(MultithreadedWriteMapper.class);
+                    MultithreadedWriteMapper.setMapperClass(job,
+                        DocumentMapper.class);
+                    int threads = Integer.parseInt(cmdline
+                        .getOptionValue(THREADS_PER_MAP));
+                    MultithreadedWriteMapper.setNumberOfThreads(job, threads);
+                    if(LOG.isDebugEnabled()){
+                        LOG.debug("Use Multithreaded Mapper in distributed mode");
+                    }
+                } else {
+                    job.setMapperClass(type.getMapperClass(cmdline, conf));
+                }
+            }
+            
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(INPUT_FILE_PATH);
                 FileInputFormat.setInputPaths(job, path);
@@ -446,6 +480,11 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(CONTENT_ENCODING);
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
             }
+//            if (cmdline.hasOption(THREADS_PER_MAP)) {
+//                String arg = cmdline.getOptionValue(THREADS_PER_MAP);
+//                conf.set(ConfigConstants.CONF_THREADS_PER_MAP, arg);
+//            }
+
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
