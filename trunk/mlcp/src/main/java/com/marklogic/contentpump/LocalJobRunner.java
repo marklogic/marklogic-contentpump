@@ -17,6 +17,7 @@ package com.marklogic.contentpump;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,16 +64,20 @@ public class LocalJobRunner implements ConfigConstants {
     public static final int DEFAULT_COPY_THREAD_COUNT = 4;
     public static final int DEFAULT_EXPORT_THREAD_COUNT = 4;
     
+    public static final int BYTES_PER_THREAD = 20 * 1024 * 1024;
     
     private Job job;
     private ExecutorService pool;
     private AtomicInteger[] progress;
     private AtomicBoolean jobComplete;
     private long startTime;
-    
+    private int threadsPerMap;
+    private int splitCount;
+    private int threadCount;
+    private boolean isCapEnforced = false;
     public LocalJobRunner(Job job, CommandLine cmdline, Command cmd) {
         this.job = job;
-        int threadCount = 1;
+        threadCount = 1;
         switch (cmd) {
         case IMPORT:
             threadCount = DEFAULT_IMPORT_THREAD_COUNT;
@@ -89,11 +95,43 @@ public class LocalJobRunner implements ConfigConstants {
         }
         if (threadCount > 1) {
             pool = Executors.newFixedThreadPool(threadCount);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("ThreadPool Size: " + threadCount);
+            }
         }
+        
+        if (cmdline.hasOption(THREADS_PER_MAP)) {
+            threadsPerMap = Integer.parseInt(cmdline
+                .getOptionValue(THREADS_PER_MAP));
+        } /*else {
+            //by default, half thread pool is used per map
+            threadsPerMap = threadCount >> 1;
+        }*/
+        if (cmdline.hasOption(THREADS_CAP_MAP)) {
+            isCapEnforced = Boolean.getBoolean(cmdline
+                .getOptionValue(THREADS_CAP_MAP));
+        }
+        
         jobComplete = new AtomicBoolean();
         startTime = System.currentTimeMillis();
     }
     
+    /**
+     * Use threads_Per_Map if it is set.
+     * If it is not set, use threadpool size -1 if only one split
+     * Use half thread pool for each split if more than one split 
+     * 
+     * @return number of threads for each map task
+     */
+    private int getThreadCount() {
+        // TODO if CAP enforced
+        if (isCapEnforced && threadsPerMap > (threadCount >> 1)
+            && splitCount > 1) {
+            return threadCount >> 1;
+        }
+        return threadsPerMap;
+    }
+
     /**
      * Run the job.  Get the input splits, create map tasks and submit it to
      * the thread pool if there is one; otherwise, runs the the task one by
@@ -116,7 +154,8 @@ public class LocalJobRunner implements ConfigConstants {
         List<InputSplit> splits = inputFormat.getSplits(job);
         T[] array = (T[])splits.toArray(
                 new org.apache.hadoop.mapreduce.InputSplit[splits.size()]);
-
+        splitCount = array.length;
+        
         // sort the splits into order based on size, so that the biggest
         // go first
         Arrays.sort(array, new SplitLengthComparator());
@@ -145,7 +184,7 @@ public class LocalJobRunner implements ConfigConstants {
         Monitor monitor = new Monitor();
         monitor.start();
         ContentPumpReporter reporter = new ContentPumpReporter();
-        
+        List<Future<Object>> taskList = new ArrayList<Future<Object>>();
         for (int i = 0; i < array.length; i++) {        
             InputSplit split = array[i];
             if (pool != null) {
@@ -153,7 +192,15 @@ public class LocalJobRunner implements ConfigConstants {
                     new LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE>(job,
                         inputFormat, outputFormat, conf, i, split, reporter,
                         progress[i]);
-                pool.submit(task);
+                synchronized(pool){
+                    taskList.add(pool.submit(task));
+                    if (threadsPerMap > 0) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Wait for writer threads to enqueue");
+                        }
+                        pool.wait();
+                    }
+                }
             } else {
                 TaskID taskId = new TaskID(new JobID(), true, i);
                 TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
@@ -167,12 +214,19 @@ public class LocalJobRunner implements ConfigConstants {
                     outputFormat.getOutputCommitter(context);
                 TrackingRecordReader trackingReader = 
                     new TrackingRecordReader(reader, progress[i]);
-                
+
                 Mapper.Context mapperContext = mapper.new Context(conf,
                         taskAttemptId, trackingReader, writer, committer, 
                         reporter, split);
                 
                 trackingReader.initialize(split, mapperContext);
+                
+                  //no thread pool (only 1 thread specified) , use DocumentMapper
+                mapperContext.getConfiguration().setClass(
+                    "mapreduce.map.class", DocumentMapper.class, Mapper.class);
+                mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) ReflectionUtils
+                    .newInstance(DocumentMapper.class,
+                        mapperContext.getConfiguration());
                 mapper.run(mapperContext);
                 trackingReader.close();
                 writer.close(mapperContext);
@@ -180,6 +234,9 @@ public class LocalJobRunner implements ConfigConstants {
             }
         }
         if (pool != null) {
+            for (Future<Object> f : taskList) {
+                f.get();
+            }
             pool.shutdown();
             // wait forever till all tasks are done
             while (!pool.awaitTermination(1, TimeUnit.DAYS));
@@ -257,16 +314,45 @@ public class LocalJobRunner implements ConfigConstants {
                     inputFormat.createRecordReader(split, context);
                 writer = outputFormat.getRecordWriter(context);
                 committer = outputFormat.getOutputCommitter(context);
-                mapper = 
-                    (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)
-                    ReflectionUtils.newInstance(job.getMapperClass(), conf);
                 trackingReader = 
                     new TrackingRecordReader(reader, pctProgress);
-                mapperContext = mapper.new Context(conf,
-                        taskAttemptId, trackingReader, writer, committer, 
-                        reporter, split);             
-                trackingReader.initialize(split, mapperContext);
-                mapper.run(mapperContext);            
+                
+                if (threadsPerMap > 0) {
+                    mapper = 
+                        (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)ReflectionUtils.newInstance(
+                            MultithreadedWriteMapper.class, conf);
+                    //conf is cloned, according to Configuration.java
+                    mapperContext = mapper.new Context(conf, taskAttemptId,
+                        trackingReader, writer, committer, reporter, split);
+                    mapperContext.getConfiguration().setClass(
+                        "mapreduce.map.class", MultithreadedWriteMapper.class,
+                        Mapper.class);
+                    mapperContext.getConfiguration().setClass(
+                        "mapred.map.multithreadedrunner.class",
+                        DocumentMapper.class, Mapper.class);
+                    mapperContext.getConfiguration().setInt(
+                        "mapred.map.multithreadedrunner.threads", getThreadCount());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("THREADS_PER_MAP:" + threadsPerMap);
+                    }
+                    trackingReader.initialize(split, mapperContext);
+                    ((MultithreadedWriteMapper)mapper).run(mapperContext, pool);
+                } else {
+                    mapper = 
+                        (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)ReflectionUtils.newInstance(
+                            DocumentMapper.class, conf);
+                    //conf is cloned, according to Configuration.java
+                    mapperContext = mapper.new Context(conf,
+                            taskAttemptId, trackingReader, writer, committer, 
+                            reporter, split);  
+                  //no need to use multithreaded mapper, use original mapper
+                    mapperContext.getConfiguration().setClass(
+                        "mapreduce.map.class", DocumentMapper.class,
+                        Mapper.class);
+                    trackingReader.initialize(split, mapperContext);
+                    mapper.run(mapperContext);
+                }
+                           
             } catch (Throwable t) {
                 LOG.error("Error running task: " + taskAttemptId, t);
             } finally {
@@ -278,7 +364,9 @@ public class LocalJobRunner implements ConfigConstants {
                         writer.close(mapperContext);
                     }
                     committer.commitTask(context);
-                } catch (Throwable t) {} 
+                } catch (Throwable t) {
+                	LOG.error("Error running task: " + taskAttemptId, t);
+                } 
             }
             return null;
         }      
