@@ -1,7 +1,7 @@
 PRODUCT NOTICES
 MARKLOGIC CONTENT PUMP (mlcp) v.1.0
 Creation date:  August 20, 2012 in conjunction with MarkLogic Server 6.0
-Copyright 2012 MarkLogic Corporation.  All rights reserved.
+Copyright 2012-2013 MarkLogic Corporation.  All rights reserved.
 
 All MarkLogic software products are protected by United States and 
 international copyright laws, and incorporate certain third party libraries 
