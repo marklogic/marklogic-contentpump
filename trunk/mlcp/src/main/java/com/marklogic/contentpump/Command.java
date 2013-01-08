@@ -227,13 +227,8 @@ public enum Command implements ConfigConstants {
             Option threadsPerMap = OptionBuilder.withArgName("threadsPerMap")
                 .hasOptionalArg()
                 .withDescription("The number of threads per map task")
-                .create(THREADS_PER_MAP);
+                .create(THREADS_PER_SPLIT);
             options.addOption(threadsPerMap);
-            Option threadsCapMap = OptionBuilder.withArgName("true,false")
-                .hasOptionalArg()
-                .withDescription("Whether threads per map has a cap")
-                .create(THREADS_CAP_MAP);
-            options.addOption(threadsCapMap);
 
             Option tolerateErrors = OptionBuilder
                 .withArgName("true,false")
@@ -268,16 +263,24 @@ public enum Command implements ConfigConstants {
                 }
             } else {
                 //distributed mode
-                if (cmdline.hasOption(THREADS_PER_MAP)) {
-                    job.setMapperClass(MultithreadedWriteMapper.class);
-                    MultithreadedWriteMapper.setMapperClass(job,
-                        DocumentMapper.class);
+                if (cmdline.hasOption(THREADS_PER_SPLIT)) {
                     int threads = Integer.parseInt(cmdline
-                        .getOptionValue(THREADS_PER_MAP));
-                    MultithreadedWriteMapper.setNumberOfThreads(job, threads);
-                    if(LOG.isDebugEnabled()){
-                        LOG.debug("Use Multithreaded Mapper in distributed mode");
+                        .getOptionValue(THREADS_PER_SPLIT));
+                    if (threads > 1) {
+                        job.setMapperClass(MultithreadedWriterMapper.class);
+                        MultithreadedWriterMapper.setMapperClass(job,
+                            DocumentMapper.class);
+
+                        MultithreadedWriterMapper.setNumberOfThreads(job,
+                            threads - 1);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Use Multithreaded Mapper in distributed mode: "
+                                + threads + " threads per split");
+                        }
+                    } else {
+                        job.setMapperClass(type.getMapperClass(cmdline, conf));
                     }
+
                 } else {
                     job.setMapperClass(type.getMapperClass(cmdline, conf));
                 }
@@ -869,7 +872,6 @@ public enum Command implements ConfigConstants {
     public abstract void applyConfigOptions(Configuration conf,
                     CommandLine cmdline);
 
-    @SuppressWarnings("deprecation")
     static void configCommonOptions(Options options) {
         Option mode = OptionBuilder
             .withArgName(MODE)

@@ -54,10 +54,10 @@ import org.apache.hadoop.util.ReflectionUtils;
  *       10 threads.
  *       <p>
  */
-public class MultithreadedWriteMapper<K1, V1, K2, V2> extends
+public class MultithreadedWriterMapper<K1, V1, K2, V2> extends
     Mapper<K1, V1, K2, V2> {
     private static final Log LOG = LogFactory
-        .getLog(MultithreadedWriteMapper.class);
+        .getLog(MultithreadedWriterMapper.class);
     private Class<? extends Mapper<K1, V1, K2, V2>> mapClass;
     private Context outer;
     private List<MapRunner> runners;
@@ -132,9 +132,10 @@ public class MultithreadedWriteMapper<K1, V1, K2, V2> extends
      * @param cls
      *            the class to use as the mapper
      */
+    @SuppressWarnings("rawtypes")
     public static <K1, V1, K2, V2> void setMapperClass(Job job,
         Class<? extends Mapper> cls) {
-        if (MultithreadedWriteMapper.class.isAssignableFrom(cls)) {
+        if (MultithreadedWriterMapper.class.isAssignableFrom(cls)) {
             throw new IllegalArgumentException("Can't have recursive "
                 + "MultithreadedMapper instances.");
         }
@@ -142,6 +143,7 @@ public class MultithreadedWriteMapper<K1, V1, K2, V2> extends
             "mapred.map.multithreadedrunner.class", cls, Mapper.class);
     }
 
+    @SuppressWarnings("unchecked")
     public void run(Context context, ExecutorService pool) throws IOException,
         InterruptedException, ExecutionException {
         outer = context;
@@ -149,7 +151,7 @@ public class MultithreadedWriteMapper<K1, V1, K2, V2> extends
         mapClass = getMapperClass(context);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Configuring multithread runner to use "
-                + numberOfThreads + " threads");
+                + numberOfThreads + " writer threads");
         }
 
         runners = new ArrayList<MapRunner>(numberOfThreads);
@@ -246,6 +248,8 @@ public class MultithreadedWriteMapper<K1, V1, K2, V2> extends
                 if (!outer.nextKeyValue()) {
                     return false;
                 }
+                if (outer.getCurrentKey() == null)
+                    return true;
                 key = ReflectionUtils.copy(outer.getConfiguration(),
                     outer.getCurrentKey(), key);
                 value = (V1) ReflectionUtils.newInstance(outer
@@ -297,6 +301,7 @@ public class MultithreadedWriteMapper<K1, V1, K2, V2> extends
         private Throwable throwable;
         private RecordWriter writer;
 
+        @SuppressWarnings("rawtypes")
         MapRunner(Context context) throws IOException, InterruptedException,
             ClassNotFoundException {
             mapper = ReflectionUtils.newInstance(mapClass,
