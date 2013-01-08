@@ -78,6 +78,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected FSDataInputStream fInputStream;
     protected long start;
     protected long pos;
+    protected boolean overflow;
     protected long end;
     
     public AggregateXMLReader() {
@@ -96,6 +97,9 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
+        if (!hasNext) {
+            return 1;
+        }
         return (pos > end) ? 1 : ((float) (pos - start)) / (end - start);
     }
 
@@ -107,6 +111,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         file = ((FileSplit) inSplit).getPath();
         start = 0;
         end = inSplit.getLength();
+        overflow = false;
         
         configFileNameAsCollection(conf, file);
         fs = file.getFileSystem(context.getConfiguration());
@@ -421,7 +426,16 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         try {
             while (xmlSR.hasNext()) {
                 int eventType;
-                pos = xmlSR.getLocation().getCharacterOffset();
+                //getCharacterOffset() returns int; 
+                //int will overflows if file is larger than 2GB
+                if (xmlSR.getLocation().getCharacterOffset() < -1) {
+                    overflow = true;
+                    LOG.warn("File Split is larger than 2GB, progress report gets inaccurate");
+                }
+                //do not update pos if offset overflows
+                if (!overflow) {
+                    pos = xmlSR.getLocation().getCharacterOffset();
+                }
                 eventType = xmlSR.next();
                 switch (eventType) {
                 case XMLStreamConstants.START_ELEMENT:

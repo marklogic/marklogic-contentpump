@@ -112,8 +112,7 @@ public interface ConfigConstants {
     static final String DELIMITED_URI_ID = "delimited_uri_id";
     static final String FAST_LOAD = "fastload";
     static final String CONTENT_ENCODING = "content_encoding";
-    static final String THREADS_PER_MAP = "threads_per_map";
-    static final String THREADS_CAP_MAP = "threads_cap_map";
+    static final String THREADS_PER_SPLIT = "thread_count_per_split";
     static final String TOLERATE_ERRORS = "tolerate_errors";
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = "mapreduce.marklogic.input.compressioncodec";

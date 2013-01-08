@@ -64,20 +64,19 @@ public class LocalJobRunner implements ConfigConstants {
     public static final int DEFAULT_COPY_THREAD_COUNT = 4;
     public static final int DEFAULT_EXPORT_THREAD_COUNT = 4;
     
-    public static final int BYTES_PER_THREAD = 20 * 1024 * 1024;
-    
     private Job job;
     private ExecutorService pool;
     private AtomicInteger[] progress;
     private AtomicBoolean jobComplete;
     private long startTime;
-    private int threadsPerMap;
-    private int splitCount;
+    private int threadsPerSplit;
     private int threadCount;
-    private boolean isCapEnforced = false;
+    private int threadsCurrSplit;
     public LocalJobRunner(Job job, CommandLine cmdline, Command cmd) {
         this.job = job;
         threadCount = 1;
+        threadsPerSplit = 0;
+        threadsCurrSplit = 1;
         switch (cmd) {
         case IMPORT:
             threadCount = DEFAULT_IMPORT_THREAD_COUNT;
@@ -100,36 +99,32 @@ public class LocalJobRunner implements ConfigConstants {
             }
         }
         
-        if (cmdline.hasOption(THREADS_PER_MAP)) {
-            threadsPerMap = Integer.parseInt(cmdline
-                .getOptionValue(THREADS_PER_MAP));
-        } /*else {
-            //by default, half thread pool is used per map
-            threadsPerMap = threadCount >> 1;
-        }*/
-        if (cmdline.hasOption(THREADS_CAP_MAP)) {
-            isCapEnforced = Boolean.getBoolean(cmdline
-                .getOptionValue(THREADS_CAP_MAP));
+        if (cmdline.hasOption(THREADS_PER_SPLIT)) {
+            threadsPerSplit = Integer.parseInt(cmdline
+                .getOptionValue(THREADS_PER_SPLIT));
         }
         
         jobComplete = new AtomicBoolean();
         startTime = System.currentTimeMillis();
     }
     
+   
     /**
-     * Use threads_Per_Map if it is set.
-     * If it is not set, use threadpool size -1 if only one split
-     * Use half thread pool for each split if more than one split 
+     * Assign thread count for a given split
      * 
-     * @return number of threads for each map task
+     * @param spIdx split index
+     * @param splitCount
+     * @return
      */
-    private int getThreadCount() {
-        // TODO if CAP enforced
-        if (isCapEnforced && threadsPerMap > (threadCount >> 1)
-            && splitCount > 1) {
-            return threadCount >> 1;
+    private int getThreadCount(int spIdx, int splitCount) {
+        if (splitCount == 1) {
+            return threadCount;
         }
-        return threadsPerMap;
+        if (spIdx % threadCount < threadCount % splitCount) {
+            return threadCount / splitCount + 1;
+        } else {
+            return threadCount / splitCount;
+        }
     }
 
     /**
@@ -143,7 +138,7 @@ public class LocalJobRunner implements ConfigConstants {
      * @param <OUTVALUE>
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public <INKEY,INVALUE,OUTKEY,OUTVALUE,
         T extends org.apache.hadoop.mapreduce.InputSplit> 
     void run() throws Exception {
@@ -154,7 +149,6 @@ public class LocalJobRunner implements ConfigConstants {
         List<InputSplit> splits = inputFormat.getSplits(job);
         T[] array = (T[])splits.toArray(
                 new org.apache.hadoop.mapreduce.InputSplit[splits.size()]);
-        splitCount = array.length;
         
         // sort the splits into order based on size, so that the biggest
         // go first
@@ -193,9 +187,16 @@ public class LocalJobRunner implements ConfigConstants {
                         inputFormat, outputFormat, conf, i, split, reporter,
                         progress[i]);
                 synchronized(pool){
+                    threadsCurrSplit = getThreadCount(i, array.length);
                     taskList.add(pool.submit(task));
-                    if (threadsPerMap > 0) {
+                    if (threadsPerSplit > 1 
+                        || (threadsPerSplit == 0 && threadsCurrSplit > 1)) {
                         if (LOG.isDebugEnabled()) {
+                            if (threadsPerSplit > 0) {
+                                LOG.debug("THREADS_PER_SPLIT:" + threadsPerSplit);
+                            } else if (threadsCurrSplit>1) {
+                                LOG.debug("Thread Count for Split#" + i + " : "+ threadsCurrSplit);
+                            }
                             LOG.debug("Wait for writer threads to enqueue");
                         }
                         pool.wait();
@@ -298,7 +299,7 @@ public class LocalJobRunner implements ConfigConstants {
             this.reporter = reporter;
         }
         
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         @Override
         public Object call() {
             TaskAttemptContext context = null;
@@ -317,27 +318,39 @@ public class LocalJobRunner implements ConfigConstants {
                 trackingReader = 
                     new TrackingRecordReader(reader, pctProgress);
                 
-                if (threadsPerMap > 0) {
+                if (threadsPerSplit > 1 
+                    || (threadsPerSplit == 0 && threadsCurrSplit > 1)) {
+                    //thread_count_per_split is set, and value > 1
+                    //or thread_count_per_split is not set and thread_count > split count
                     mapper = 
                         (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)ReflectionUtils.newInstance(
-                            MultithreadedWriteMapper.class, conf);
+                            MultithreadedWriterMapper.class, conf);
                     //conf is cloned, according to Configuration.java
                     mapperContext = mapper.new Context(conf, taskAttemptId,
                         trackingReader, writer, committer, reporter, split);
                     mapperContext.getConfiguration().setClass(
-                        "mapreduce.map.class", MultithreadedWriteMapper.class,
+                        "mapreduce.map.class", MultithreadedWriterMapper.class,
                         Mapper.class);
                     mapperContext.getConfiguration().setClass(
                         "mapred.map.multithreadedrunner.class",
                         DocumentMapper.class, Mapper.class);
-                    mapperContext.getConfiguration().setInt(
-                        "mapred.map.multithreadedrunner.threads", getThreadCount());
+                    // minus one because reader takes one thread per split
+                    if (threadsPerSplit > 1) {
+                        mapperContext.getConfiguration().setInt(
+                            "mapred.map.multithreadedrunner.threads",
+                            threadsPerSplit -1);
+                    } else {
+                        mapperContext.getConfiguration().setInt(
+                            "mapred.map.multithreadedrunner.threads",
+                            threadsCurrSplit -1);
+                    }
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("THREADS_PER_MAP:" + threadsPerMap);
+                        LOG.debug(mapper.getClass() + " used in task#" + taskAttemptId);
                     }
                     trackingReader.initialize(split, mapperContext);
-                    ((MultithreadedWriteMapper)mapper).run(mapperContext, pool);
+                    ((MultithreadedWriterMapper)mapper).run(mapperContext, pool);
                 } else {
+                    //use DocumentMapper
                     mapper = 
                         (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)ReflectionUtils.newInstance(
                             DocumentMapper.class, conf);
@@ -349,10 +362,13 @@ public class LocalJobRunner implements ConfigConstants {
                     mapperContext.getConfiguration().setClass(
                         "mapreduce.map.class", DocumentMapper.class,
                         Mapper.class);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(mapper.getClass() + " used in task#" + taskAttemptId);
+                    }
                     trackingReader.initialize(split, mapperContext);
                     mapper.run(mapperContext);
                 }
-                           
+
             } catch (Throwable t) {
                 LOG.error("Error running task: " + taskAttemptId, t);
             } finally {
