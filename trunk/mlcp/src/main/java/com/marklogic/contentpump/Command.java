@@ -28,10 +28,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.map.MultithreadedMapper;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import com.marklogic.contentpump.utilities.CommandlineOption;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.Indentation;
@@ -224,11 +222,11 @@ public enum Command implements ConfigConstants {
                 .create(CONTENT_ENCODING);
             options.addOption(encoding);
 
-            Option threadsPerMap = OptionBuilder.withArgName("threadsPerMap")
+            Option threadsPerSplit = OptionBuilder.withArgName("threads per split")
                 .hasOptionalArg()
-                .withDescription("The number of threads per map task")
+                .withDescription("The number of threads per split")
                 .create(THREADS_PER_SPLIT);
-            options.addOption(threadsPerMap);
+            options.addOption(threadsPerSplit);
 
             Option tolerateErrors = OptionBuilder
                 .withArgName("true,false")
@@ -255,34 +253,28 @@ public enum Command implements ConfigConstants {
             job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
             job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
 
-            String mode = conf.get("mapred.job.tracker");
-            boolean isLocal = "local".equals(mode);
-            if (isLocal) {
-                if(LOG.isDebugEnabled()){
-                    LOG.debug("May use Multithreaded Mapper in local mode");
-                }
-            } else {
-                //distributed mode
-                if (cmdline.hasOption(THREADS_PER_SPLIT)) {
-                    int threads = Integer.parseInt(cmdline
-                        .getOptionValue(THREADS_PER_SPLIT));
+            String mode = conf.get(ConfigConstants.CONF_MODE);
+            if (mode.equals(ConfigConstants.MODE_DISTRIBUTED)) {
+                String ts = conf.get(ConfigConstants.CONF_THREADS_PER_SPLIT);
+                if (ts == null) {
+                    //thread_count_per_split is not set
+                    job.setMapperClass(type.getMapperClass(cmdline, conf));
+                } else {
+                    int threads = Integer.parseInt(ts);
                     if (threads > 1) {
-                        job.setMapperClass(MultithreadedWriterMapper.class);
-                        MultithreadedWriterMapper.setMapperClass(job,
-                            DocumentMapper.class);
-
-                        MultithreadedWriterMapper.setNumberOfThreads(job,
-                            threads - 1);
+                        job.setMapperClass(MultithreadedMapper.class);
+                        MultithreadedMapper.setMapperClass(
+                            job.getConfiguration(), DocumentMapper.class);
+                        MultithreadedMapper.setNumberOfThreads(job,
+                            threads);
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Use Multithreaded Mapper in distributed mode: "
-                                + threads + " threads per split");
+                            LOG.debug("Use Multithreaded Mapper: " + threads
+                                + " threads per split");
                         }
                     } else {
+                        // thread_count_per_split is not greater than 1
                         job.setMapperClass(type.getMapperClass(cmdline, conf));
                     }
-
-                } else {
-                    job.setMapperClass(type.getMapperClass(cmdline, conf));
                 }
             }
             
@@ -483,10 +475,10 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(CONTENT_ENCODING);
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
             }
-//            if (cmdline.hasOption(THREADS_PER_MAP)) {
-//                String arg = cmdline.getOptionValue(THREADS_PER_MAP);
-//                conf.set(ConfigConstants.CONF_THREADS_PER_MAP, arg);
-//            }
+            if (cmdline.hasOption(THREADS_PER_SPLIT)) {
+                String arg = cmdline.getOptionValue(THREADS_PER_SPLIT);
+                conf.set(ConfigConstants.CONF_THREADS_PER_SPLIT, arg);
+            }
 
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
