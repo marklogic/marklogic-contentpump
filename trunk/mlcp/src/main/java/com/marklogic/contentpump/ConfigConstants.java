@@ -15,7 +15,6 @@
  */
 package com.marklogic.contentpump;
 
-
 /**
  * Constants for configuration option names and values.
  * 
@@ -45,22 +44,17 @@ public interface ConfigConstants {
     static final String INPUT_FILE_PATH = "input_file_path";
     static final String INPUT_FILE_PATTERN = "input_file_pattern";
     static final String AGGREGATE_RECORD_ELEMENT = "aggregate_record_element";
-    static final String AGGREGATE_RECORD_NAMESPACE = 
-        "aggregate_record_namespace";
+    static final String AGGREGATE_RECORD_NAMESPACE = "aggregate_record_namespace";
     static final String AGGREGATE_URI_ID = "aggregate_uri_id";
     static final String INPUT_FILE_TYPE = "input_file_type";
     static final String INPUT_FILE_TYPE_DEFAULT = "documents";
-    static final String ARCHIVE_METADATA_OPTIONAL = 
-        "archive_metadata_optional";
+    static final String ARCHIVE_METADATA_OPTIONAL = "archive_metadata_optional";
     static final String DEFAULT_ARCHIVE_METADATA_OPTIONAL = "false";
     static final String INPUT_COMPRESSED = "input_compressed";
     static final String INPUT_COMPRESSION_CODEC = "input_compression_codec";
-    static final String INPUT_SEQUENCEFILE_KEY_CLASS = 
-        "sequencefile_key_class";
-    static final String INPUT_SEQUENCEFILE_VALUE_CLASS = 
-        "sequencefile_value_class";
-    static final String INPUT_SEQUENCEFILE_VALUE_TYPE = 
-        "sequencefile_value_type";
+    static final String INPUT_SEQUENCEFILE_KEY_CLASS = "sequencefile_key_class";
+    static final String INPUT_SEQUENCEFILE_VALUE_CLASS = "sequencefile_value_class";
+    static final String INPUT_SEQUENCEFILE_VALUE_TYPE = "sequencefile_value_type";
     static final String DEFAULT_SEQUENCEFILE_VALUE_TYPE = "TEXT";
     static final String USERNAME = "username";
     static final String PASSWORD = "password";
@@ -141,7 +135,7 @@ public interface ConfigConstants {
     static final String CONF_COPY_PERMISSIONS = "mapreduce.marklogic.copypermissions";
     static final String CONF_COPY_PROPERTIES = "mapreduce.marklogic.copyproperties";
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
-    static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = 
-        "mapreduce.marklogic.input.archive.metadataoptional";
-    static final String CONF_THREADS_PER_MAP = "mapred.map.multithreadedrunner.threads";
+    static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = "mapreduce.marklogic.input.archive.metadataoptional";
+    static final String CONF_THREADS_PER_SPLIT = "mapreduce.marklogic.multithreadedmapper.threads";
+    static final String CONF_MULTITHREADEDMAPPER_CLASS = "mapreduce.marklogic.multithreadedmapper.class";
 }

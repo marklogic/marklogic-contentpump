@@ -186,19 +186,20 @@ public class LocalJobRunner implements ConfigConstants {
                     new LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE>(job,
                         inputFormat, outputFormat, conf, i, split, reporter,
                         progress[i]);
-                synchronized(pool){
-                    threadsCurrSplit = getThreadCount(i, array.length);
+                threadsCurrSplit = getThreadCount(i, array.length);
+                if (LOG.isDebugEnabled()) {
+                    if (threadsPerSplit > 0) {
+                        LOG.debug("THREADS_PER_SPLIT:" + threadsPerSplit);
+                    } else if (threadsCurrSplit > 1) {
+                        LOG.debug("Thread Count for Split#" + i + " : "
+                            + threadsCurrSplit);
+                    }
+                }
+                synchronized (pool) {
                     taskList.add(pool.submit(task));
-                    if (threadsPerSplit > 1 
-                        || (threadsPerSplit == 0 && threadsCurrSplit > 1)) {
-                        if (LOG.isDebugEnabled()) {
-                            if (threadsPerSplit > 0) {
-                                LOG.debug("THREADS_PER_SPLIT:" + threadsPerSplit);
-                            } else if (threadsCurrSplit>1) {
-                                LOG.debug("Thread Count for Split#" + i + " : "+ threadsCurrSplit);
-                            }
-                            LOG.debug("Wait for writer threads to enqueue");
-                        }
+                    if (threadsPerSplit > 1
+                        || (threadsPerSplit == 0 && threadsCurrSplit > 1)
+                        && (!job.getMapperClass().equals(DocumentMapper.class))) {
                         pool.wait();
                     }
                 }
@@ -318,37 +319,37 @@ public class LocalJobRunner implements ConfigConstants {
                 trackingReader = 
                     new TrackingRecordReader(reader, pctProgress);
                 
-                if (threadsPerSplit > 1 
-                    || (threadsPerSplit == 0 && threadsCurrSplit > 1)) {
+                if ((threadsPerSplit > 1 
+                    || (threadsPerSplit == 0 && threadsCurrSplit > 1))
+                    && (!job.getMapperClass().equals(DocumentMapper.class))) {
                     //thread_count_per_split is set, and value > 1
                     //or thread_count_per_split is not set and thread_count > split count
+                    //and if mapper not set ( COPY and EXPORT have set its mapper)
                     mapper = 
                         (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)ReflectionUtils.newInstance(
-                            MultithreadedWriterMapper.class, conf);
+                            MultithreadedMapper.class, conf);
                     //conf is cloned, according to Configuration.java
                     mapperContext = mapper.new Context(conf, taskAttemptId,
                         trackingReader, writer, committer, reporter, split);
                     mapperContext.getConfiguration().setClass(
-                        "mapreduce.map.class", MultithreadedWriterMapper.class,
+                        "mapreduce.map.class", MultithreadedMapper.class,  
                         Mapper.class);
-                    mapperContext.getConfiguration().setClass(
-                        "mapred.map.multithreadedrunner.class",
-                        DocumentMapper.class, Mapper.class);
-                    // minus one because reader takes one thread per split
+                    MultithreadedMapper.setMapperClass(mapperContext.getConfiguration(), DocumentMapper.class);
+                    // minus one because mapper takes one thread per split
                     if (threadsPerSplit > 1) {
                         mapperContext.getConfiguration().setInt(
-                            "mapred.map.multithreadedrunner.threads",
-                            threadsPerSplit -1);
+                            ConfigConstants.CONF_THREADS_PER_SPLIT,
+                            threadsPerSplit);
                     } else {
                         mapperContext.getConfiguration().setInt(
-                            "mapred.map.multithreadedrunner.threads",
-                            threadsCurrSplit -1);
+                            ConfigConstants.CONF_THREADS_PER_SPLIT,
+                            threadsCurrSplit);
                     }
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(mapper.getClass() + " used in task#" + taskAttemptId);
                     }
                     trackingReader.initialize(split, mapperContext);
-                    ((MultithreadedWriterMapper)mapper).run(mapperContext, pool);
+                    ((MultithreadedMapper)mapper).run(mapperContext, pool);
                 } else {
                     //use DocumentMapper
                     mapper = 
