@@ -428,7 +428,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 int eventType;
                 //getCharacterOffset() returns int; 
                 //int will overflows if file is larger than 2GB
-                if (xmlSR.getLocation().getCharacterOffset() < -1) {
+                if (!overflow && xmlSR.getLocation().getCharacterOffset() < -1) {
                     overflow = true;
                     LOG.warn("File Split is larger than 2GB, progress report gets inaccurate");
                 }

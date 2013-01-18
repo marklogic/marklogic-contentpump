@@ -64,5 +64,32 @@ public class TestDistributedImportDocs {
         assertEquals("1", result.next().asString());
         Utils.closeSession();
     }
+    
+    @Test
+    public void testImportMixedDocsZipMultiplewriter() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips"
+            + " -thread_count_per_split 3"
+            + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR
+            + " -input_compressed -input_compression_codec zip"
+            + " -output_collections test,ML";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        Utils.prepareDistributedMode();
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection(\"test\"))");
+        assertTrue(result.hasNext());
+        assertEquals("93", result.next().asString());
+        Utils.closeSession();
+    }
  
 }

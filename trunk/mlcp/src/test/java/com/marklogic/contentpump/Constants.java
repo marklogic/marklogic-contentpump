@@ -9,13 +9,13 @@ import org.apache.hadoop.fs.Path;
  *
  */
 public class Constants {
-    private static String WORKSPACE = "/space/projects/";
+    private static String WORKSPACE = "/space/workspace";
     /**
      * Home of mlcp. Must set if unit tests run in distributed mode
      */
     public static String MLCP_HOME = WORKSPACE + "/xcc/mlcp";
     
-    private static String TEST_DATA = "/home/jchen/tmp/test/resources";
+    private static String TEST_DATA =  MLCP_HOME + "/src/test/resources";
     /**
      * Path of test data
      */
@@ -34,5 +34,5 @@ public class Constants {
     /**
      * conf directory of hadoop. Must set if unit tests run in distributed mode
      */
-    public static String HADOOP_CONF_DIR = "/space/hadoop-0.20.2/conf";
+    public static String HADOOP_CONF_DIR = "/space/Downloads/hadoop-0.20.2/conf";
 }
