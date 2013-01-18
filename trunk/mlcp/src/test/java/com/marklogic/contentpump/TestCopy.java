@@ -48,7 +48,7 @@ public class TestCopy{
 		Content content = ContentFactory.newContent("nocontent", new byte[0],
 				0, 0, options);
 		session.insertContent(content);
-		byte[] str = "some content".getBytes();
+		byte[] str = "<r>some content</r>".getBytes();
 		content = ContentFactory.newContent("hascontent", str, 0, str.length,
 				options);
 		session.insertContent(content);
