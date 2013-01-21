@@ -2,21 +2,26 @@
 set argss=%*
 
 set cmdpath=%~dp0
-REM echo Command Path:  %cmdpath%
+REM echo ******* Command Path:  %cmdpath%
 set cmdpath=%cmdpath:~0,-1%
-for %%d in (%cmdpath%) do set cmdppath=%%~dpd
-REM echo %cmdppath%
-set LIB_HOME=%cmdppath%lib
-REM echo LIB_HOME: %LIB_HOME%
+REM echo ******* Command Path 2:  %cmdpath%
 
-SET "VMARGS=-DCONTENTPUMP_HOME=%LIB_HOME%"
+for %%d in ("%cmdpath%") do set cmdppath=%%~dpd
+REM echo ******* Command Parent Path: %cmdppath%
+
+set LIB_HOME=%cmdppath%lib\
+REM echo ******* LIB_HOME: LIB_HOME: %LIB_HOME%
 
 SetLocal EnableDelayedExpansion
 
 set classpath=%cmdppath%conf
 
-for %%X in (%LIB_HOME%\*) do (
+for /F %%X in ('dir /B /D "%LIB_HOME%"') do (
   set tmp=%%X
-  set classpath=!classpath!;!tmp!
+  set classpath=!classpath!;%LIB_HOME%!tmp!
 )
-java -cp %classpath% %VMARGS% %JVM_OPTS% com.marklogic.contentpump.ContentPump %*
+set LIB_HOME=%cmdppath%lib
+
+REM echo ******** classpath: %classpath%
+
+java -cp "%classpath%" -DCONTENTPUMP_HOME="%LIB_HOME%" %JVM_OPTS% com.marklogic.contentpump.ContentPump %*
