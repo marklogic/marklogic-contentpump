@@ -430,7 +430,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 //int will overflows if file is larger than 2GB
                 if (!overflow && xmlSR.getLocation().getCharacterOffset() < -1) {
                     overflow = true;
-                    LOG.warn("In progress...");
+                    LOG.info("In progress...");
                 }
                 //do not update pos if offset overflows
                 if (!overflow) {
