@@ -221,7 +221,7 @@ public class TestImportDocs {
     /*
      * ingest two zip files
      * each loaded with MultithreadedMapper using 2 threads
-     * 
+     * thread_count is 3
      */
     @Test
     public void testImportMixedDocsZipMultithreadedMapper2() throws Exception {
@@ -229,6 +229,37 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips" 
             + " -thread_count 3 -mode local"
+            + " -input_compressed -input_compression_codec zip"
+            + " -output_collections test,ML" 
+            + " -thread_count_per_split 2";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection(\"test\"))");
+        assertTrue(result.hasNext());
+        assertEquals("93", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    /*
+     * ingest two zip files
+     * each loaded with MultithreadedMapper using 2 threads
+     * 
+     */
+    @Test
+    public void testImportMixedDocsZipMultithreadedMapper3() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips" 
+            + " -mode local"
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML" 
             + " -thread_count_per_split 2";
