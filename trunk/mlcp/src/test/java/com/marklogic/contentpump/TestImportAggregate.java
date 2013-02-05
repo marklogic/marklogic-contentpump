@@ -22,7 +22,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.xml"
-            + " -mode local -thread_count 1 -aggregate_uri_id PMID"
+            + " -mode local -thread_count 1"// -aggregate_uri_id PMID"
             + " -input_file_type aggregates";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -40,6 +40,10 @@ public class TestImportAggregate {
         Utils.closeSession();
     }
     
+    /*
+     * multithread mapper to load a file with 4 threads (thread_count is 4 by
+     * default)
+     */
     @Test
     public void testImportMedlineMultiWriter() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
