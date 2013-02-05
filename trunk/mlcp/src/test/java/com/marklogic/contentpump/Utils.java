@@ -151,7 +151,7 @@ public class Utils {
     }
 
     public static void closeSession() {
-        if (!session.isClosed()) {
+        if (session!= null && !session.isClosed()) {
             session.close();
         }
     }
