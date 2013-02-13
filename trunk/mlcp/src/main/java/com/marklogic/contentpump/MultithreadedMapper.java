@@ -38,21 +38,9 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
 
 /**
- * Multithreaded implementation for @link org.apache.hadoop.mapreduce.Mapper.
- * <p>
- * It can be used instead of the default implementation,
- * 
- * @link org.apache.hadoop.mapred.MapRunner, when the Map operation is neither
- *       CPU bound nor IO bound in order to improve throughput.
- *       <p>
- *       Mapper implementations using this MapRunnable must be thread-safe.
- *       <p>
- *       The Map-Reduce job can be configured with the mapper to use via
- *       {@link #setMapperClass(Configuration, Class)} and the number of thread
- *       the thread-pool can use with the
- *       {@link #getNumberOfThreads(Configuration) method. The default value is
- *       10 threads.
- *       <p>
+ * Multithreaded implementation for @link org.apache.hadoop.mapreduce.Mapper,
+ * currently used by import operations when applicable to leverage concurrent
+ * updates to MarkLogic.
  */
 public class MultithreadedMapper<K1, V1, K2, V2> extends
     Mapper<K1, V1, K2, V2> {
@@ -61,8 +49,46 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
     private Class<? extends Mapper<K1, V1, K2, V2>> mapClass;
     private Context outer;
     private List<MapRunner> runners;
+    private int threadCount = 0;
+    private ExecutorService threadPool;
 
     /**
+     * Get thread count set for this mapper.
+     * @return thread count set for this mapper.
+     */
+    public int getThreadCount(Context context) {
+		if (threadCount > 0) {
+			return threadCount;
+		} else {
+			return getNumberOfThreads(context);
+		}
+	}
+
+    /**
+     * Set thread count for this mapper.
+     * @param threadCount Thread count for this mapper.
+     */
+	public void setThreadCount(int threadCount) {
+		this.threadCount = threadCount;
+	}
+
+	/**
+	 * Get a thread pool to be used for this mapper.
+	 * @return thread pool to be used for this mapper.
+	 */
+	public ExecutorService getThreadPool() {
+		return threadPool;
+	}
+
+	/**
+	 * Set the thread pool for this mapper.
+	 * @param pool thread pool to be used for this mapper.
+	 */
+	public void setThreadPool(ExecutorService pool) {
+		this.threadPool = pool;
+	}
+
+	/**
      * The number of threads in the thread pool that will run the map function.
      * 
      * @param job
@@ -83,15 +109,12 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
      *            the new number of threads
      */
     public static void setNumberOfThreads(Job job, int threads) {
-
         job.getConfiguration().setInt(ConfigConstants.CONF_THREADS_PER_SPLIT,
             threads);
     }
 
     public static void setNumberOfThreads(Configuration conf, int threads) {
-
         conf.setInt(ConfigConstants.CONF_THREADS_PER_SPLIT, threads);
-
     }
 
     /**
@@ -112,9 +135,9 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
     @SuppressWarnings("unchecked")
     public static <K1, V1, K2, V2> Class<Mapper<K1, V1, K2, V2>> getMapperClass(
         JobContext job) {
-        return (Class<Mapper<K1, V1, K2, V2>>) job.getConfiguration()
-            .getClass(ConfigConstants.CONF_MULTITHREADEDMAPPER_CLASS,
-                Mapper.class);
+    	Configuration conf = job.getConfiguration();
+        return (Class<Mapper<K1, V1, K2, V2>>)conf.getClass(
+        		ConfigConstants.CONF_MULTITHREADEDMAPPER_CLASS, Mapper.class);
     }
 
     /**
@@ -130,102 +153,91 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
      *            the map output value type
      * @param job
      *            the job to modify
-     * @param cls
+     * @param internalMapperClass
      *            the class to use as the mapper
      */
-    @SuppressWarnings("rawtypes")
     public static <K1, V1, K2, V2> void setMapperClass(Configuration conf,
-        Class<? extends Mapper> cls) {
-        if (MultithreadedMapper.class.isAssignableFrom(cls)) {
+        Class<? extends Mapper<?, ?, ?, ?>> internalMapperClass) {
+        if (MultithreadedMapper.class.isAssignableFrom(internalMapperClass)) {
             throw new IllegalArgumentException("Can't have recursive "
                 + "MultithreadedMapper instances.");
         }
-        conf.setClass(ConfigConstants.CONF_MULTITHREADEDMAPPER_CLASS, cls,
+        conf.setClass(ConfigConstants.CONF_MULTITHREADEDMAPPER_CLASS, internalMapperClass,
             Mapper.class);
-    }
-
-    @SuppressWarnings("unchecked")
-    public void run(Context context, ExecutorService pool) throws IOException,
-        InterruptedException, ExecutionException, ClassNotFoundException {
-        outer = context;
-        int numberOfThreads = getNumberOfThreads(context);
-        mapClass = getMapperClass(context);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Configuring multithread mapper to use "
-                + numberOfThreads + " threads");
-        }
-        // current mapper takes 1 thread
-        numberOfThreads--;
-
-        runners = new ArrayList<MapRunner>(numberOfThreads);
-        List<Future<Object>> taskList = new ArrayList<Future<Object>>();
-        synchronized (pool) {
-            for (int i = 0; i < numberOfThreads; ++i) {
-                MapRunner thread;
-                thread = new MapRunner(context);
-                if (!pool.isShutdown()) {
-                    taskList.add((Future<Object>) pool.submit(thread));
-                } else {
-                    throw new InterruptedException(
-                        "Thread Pool has been shut down");
-                }
-            }
-            pool.notify();
-        }
-
-        // MapRunner that runs in current thread
-        MapRunner r = new MapRunner(context);
-        r.run();
-
-        for (Future<Object> f : taskList) {
-            f.get();
-        }
     }
 
     /**
      * Run the application's maps using a thread pool.
      */
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void run(Context context) throws IOException, InterruptedException {
         outer = context;
-        int numberOfThreads = getNumberOfThreads(context);
+        int numberOfThreads = getThreadCount(context);
         mapClass = getMapperClass(context);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Configuring multithread runner to use "
-                + numberOfThreads + " threads");
+            LOG.debug("Running with " + numberOfThreads + " threads");
         }
         // current mapper takes 1 thread
         numberOfThreads--;
 
-        runners = new ArrayList<MapRunner>(numberOfThreads);
+        // submit runners
         try {
-            for (int i = 0; i < numberOfThreads; ++i) {
-                MapRunner thread;
-                thread = new MapRunner(context);
-                thread.start();
-                runners.add(i, thread);
-            }
-            // MapRunner runs in current thread
-            MapRunner r = new MapRunner(context);
-            r.run();
+	        runners = new ArrayList<MapRunner>(numberOfThreads);
+	        List<Future<Object>> taskList = null;
+	        if (threadPool != null) {
+	        	taskList = new ArrayList<Future<Object>>();
+	            synchronized (threadPool) {
+	                for (int i = 0; i < numberOfThreads; ++i) {
+	                    MapRunner thread;
+	                    thread = new MapRunner(context);
+	                    if (!threadPool.isShutdown()) {
+	                        taskList.add((Future<Object>) threadPool.submit(thread));
+	                    } else {
+	                        throw new InterruptedException(
+	                            "Thread Pool has been shut down");
+	                    }
+	                }
+	                threadPool.notify();
+	            }
+	            // MapRunner that runs in current thread
+	            MapRunner r = new MapRunner(context);
+	            r.run();
+	
+	            for (Future<Object> f : taskList) {
+	                f.get();
+	            }
+	        } else {
+	            for (int i = 0; i < numberOfThreads; ++i) {
+	                MapRunner thread;
+	                thread = new MapRunner(context);
+	                thread.start();
+	                runners.add(i, thread);
+	            }
+	            // MapRunner runs in current thread
+	            MapRunner r = new MapRunner(context);
+	            r.run();
+	            
+	            for (int i = 0; i < numberOfThreads; ++i) {
+	                MapRunner thread = runners.get(i);
+	                thread.join();
+	                Throwable th = thread.throwable;
+	                if (th != null) {
+	                    if (th instanceof IOException) {
+	                        throw (IOException) th;
+	                    } else if (th instanceof InterruptedException) {
+	                        throw (InterruptedException) th;
+	                    } else {
+	                        throw new RuntimeException(th);
+	                    }
+	                }
+	            }
+	        }
         } catch (ClassNotFoundException e) {
-            LOG.error(e);
-        }
-
-        for (int i = 0; i < numberOfThreads; ++i) {
-            MapRunner thread = runners.get(i);
-            thread.join();
-            Throwable th = thread.throwable;
-            if (th != null) {
-                if (th instanceof IOException) {
-                    throw (IOException) th;
-                } else if (th instanceof InterruptedException) {
-                    throw (InterruptedException) th;
-                } else {
-                    throw new RuntimeException(th);
-                }
-            }
-        }
+            LOG.error("MapRunner class not found", e);
+        } catch (ExecutionException e) {
+        	LOG.error("Error waiting for MapRunner threads to complete", e);
+		}        
     }
 
     private class SubMapRecordReader extends RecordReader<K1, V1> {
@@ -304,15 +316,15 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         private Mapper<K1, V1, K2, V2> mapper;
         private Context subcontext;
         private Throwable throwable;
-        private RecordWriter writer;
+        private RecordWriter<K2, V2> writer;
 
-        @SuppressWarnings("rawtypes")
         MapRunner(Context context) throws IOException, InterruptedException,
             ClassNotFoundException {
             // initiate the real mapper (DocumentMapper) that does the work
             mapper = ReflectionUtils.newInstance(mapClass,
                 context.getConfiguration());
-            OutputFormat outputFormat = (OutputFormat) ReflectionUtils
+            @SuppressWarnings("unchecked")
+			OutputFormat<K2, V2> outputFormat = (OutputFormat<K2, V2>) ReflectionUtils
                 .newInstance(outer.getOutputFormatClass(),
                     outer.getConfiguration());
             writer = outputFormat.getRecordWriter(outer);

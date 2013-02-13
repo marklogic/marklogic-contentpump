@@ -27,6 +27,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
@@ -41,7 +42,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
  * 
  * @author jchen
  */
-@SuppressWarnings("static-access")
+@SuppressWarnings("static-access") 
 public enum Command implements ConfigConstants {
     IMPORT {        
         @Override
@@ -52,7 +53,7 @@ public enum Command implements ConfigConstants {
             configCommonOutputOptions(options);
             configBatchTxn(options);
 
-            Option inputFilePath = OptionBuilder
+			Option inputFilePath = OptionBuilder
                 .withArgName("path")
                 .hasArg()
                 .withDescription("The file system location for input, as a "
@@ -253,30 +254,8 @@ public enum Command implements ConfigConstants {
             job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
             job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
 
-            String mode = conf.get(ConfigConstants.CONF_MODE);
-            if (mode.equals(ConfigConstants.MODE_DISTRIBUTED)) {
-                String ts = conf.get(ConfigConstants.CONF_THREADS_PER_SPLIT);
-                if (ts == null) {
-                    //thread_count_per_split is not set
-                    job.setMapperClass(type.getMapperClass(cmdline, conf));
-                } else {
-                    int threads = Integer.parseInt(ts);
-                    if (threads > 1) {
-                        job.setMapperClass(MultithreadedMapper.class);
-                        MultithreadedMapper.setMapperClass(
-                            job.getConfiguration(), DocumentMapper.class);
-                        MultithreadedMapper.setNumberOfThreads(job,
-                            threads);
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Use Multithreaded Mapper: " + threads
-                                + " threads per split");
-                        }
-                    } else {
-                        // thread_count_per_split is not greater than 1
-                        job.setMapperClass(type.getMapperClass(cmdline, conf));
-                    }
-                }
-            }
+            // set mapper class
+            setMapperClass(job, conf, cmdline);
             
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(INPUT_FILE_PATH);
@@ -484,7 +463,45 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
             }
-        } 
+        }
+
+		@Override
+		public void setMapperClass(Job job, Configuration conf,
+				CommandLine cmdline) {
+			String inputTypeOption = cmdline.getOptionValue(INPUT_FILE_TYPE,
+                    INPUT_FILE_TYPE_DEFAULT);
+            InputType type = InputType.forName(inputTypeOption);
+			int threadCnt = conf.getInt(ConfigConstants.CONF_THREADS_PER_SPLIT,
+					                    0);
+			Class<? extends Mapper<?, ?, ?, ?>> internalMapperClass =
+					type.getMapperClass(cmdline, conf);
+            if (threadCnt > 1) {
+                job.setMapperClass(MultithreadedMapper.class);
+                MultithreadedMapper.setMapperClass(job.getConfiguration(), 
+                		internalMapperClass);
+                MultithreadedMapper.setNumberOfThreads(job, threadCnt);
+            } else {
+                // thread_count_per_split is not greater than 1
+                job.setMapperClass(internalMapperClass);
+            }
+		}
+
+		@SuppressWarnings("unchecked")
+        @Override
+		public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(Job job,
+				Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
+				int availableThreads) {
+			if (threadCnt == 0 && availableThreads > 1) {
+				Class<? extends Mapper<?,?,?,?>> mapperClass = 
+			        (Class<? extends Mapper<?,?,?,?>>) (Class)
+                     MultithreadedMapper.class;
+				MultithreadedMapper.setMapperClass(job.getConfiguration(), 
+	                		mapper);
+				 return mapperClass;
+			} else {
+			    return mapper;
+			}
+		} 
     },
     EXPORT {
         @Override
@@ -547,7 +564,7 @@ public enum Command implements ConfigConstants {
             job.setJarByClass(this.getClass());
             job.setInputFormatClass(outputType.getInputFormatClass());
 
-            job.setMapperClass(DocumentMapper.class);
+            setMapperClass(job, conf, cmdline);
             job.setMapOutputKeyClass(DocumentURI.class);
             job.setMapOutputValueClass(MarkLogicDocument.class);
             job.setOutputFormatClass(
@@ -599,6 +616,20 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
             }
         }
+
+		@Override
+		public void setMapperClass(Job job, Configuration conf,
+				CommandLine cmdline) {
+			job.setMapperClass(DocumentMapper.class);			
+		}
+
+		@Override
+		public Class<? extends Mapper<?,?,?,?>> 
+	    getRuntimeMapperClass(Job job, 
+				Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
+				int availableThreads) {
+			return mapper;
+		}
     },
     COPY {
         @Override
@@ -775,6 +806,19 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
             }
         }
+
+		@Override
+		public void setMapperClass(Job job, Configuration conf,
+				CommandLine cmdline) {
+			job.setMapperClass(DocumentMapper.class);			
+		}
+
+		@Override
+		public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(Job job, 
+		        Class<? extends Mapper<?,?,?,?>> mapper,
+		        int threadCnt, int availableThreads) {
+			return mapper;
+		}
     };
 
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
@@ -863,6 +907,19 @@ public enum Command implements ConfigConstants {
      */
     public abstract void applyConfigOptions(Configuration conf,
                     CommandLine cmdline);
+    
+    /**
+     * Set Mapper class for a job
+     * @param job the Hadoop job 
+     * @param conf Hadoop configuration
+     * @param CommandLine command line
+     */
+    public abstract void setMapperClass(Job job, Configuration conf, 
+    		CommandLine cmdline);
+    
+    public abstract Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(
+            Job job, Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
+            int availableThreads);
 
     static void configCommonOptions(Options options) {
         Option mode = OptionBuilder

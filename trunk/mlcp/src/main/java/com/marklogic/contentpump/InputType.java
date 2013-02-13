@@ -47,9 +47,10 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public Class<? extends Mapper> getMapperClass(CommandLine cmdline,
-                Configuration conf) {
-            return DocumentMapper.class;
+        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        getMapperClass(CommandLine cmdline, Configuration conf) {
+            return (Class<? extends Mapper<K1, V1, K2, V2>>) (Class)
+            DocumentMapper.class;
         }
 
         @Override
@@ -77,9 +78,10 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public Class<? extends Mapper> getMapperClass(
-                        CommandLine cmdline, Configuration conf) {
-            return DocumentMapper.class;
+        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        getMapperClass(CommandLine cmdline, Configuration conf) {
+            return (Class<? extends Mapper<K1, V1, K2, V2>>) (Class)
+            DocumentMapper.class;
         }
 
         @Override
@@ -105,9 +107,10 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public Class<? extends Mapper> getMapperClass(
-                        CommandLine cmdline, Configuration conf) {
-            return DocumentMapper.class;
+        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        getMapperClass(CommandLine cmdline, Configuration conf) {
+            return (Class<? extends Mapper<K1, V1, K2, V2>>) (Class)
+            DocumentMapper.class;
         }
 
         @Override
@@ -129,16 +132,16 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public Class<? extends Mapper> getMapperClass(
-                        CommandLine cmdline, Configuration conf) {
-            return DocumentMapper.class;
+        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        getMapperClass(CommandLine cmdline, Configuration conf) {
+            return (Class<? extends Mapper<K1, V1, K2, V2>>) (Class)
+            DocumentMapper.class;
         }
         
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
             return DatabaseContentOutputFormat.class;
         }
-
         
         @Override
         public ContentType getContentType(CommandLine cmdline) {
@@ -154,9 +157,10 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public Class<? extends Mapper> getMapperClass(
-                        CommandLine cmdline, Configuration conf) {
-            return DocumentMapper.class;
+        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        getMapperClass(CommandLine cmdline, Configuration conf) {
+            return (Class<? extends Mapper<K1, V1, K2, V2>>)(Class)
+            DocumentMapper.class;
         }
 
         @Override
@@ -204,8 +208,9 @@ public enum InputType implements ConfigConstants {
      * @param contentType content type
      * @return Mapper class
      */
-    public abstract Class<? extends Mapper> getMapperClass(CommandLine cmdline,
-            Configuration conf);
+    public abstract <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+    getMapperClass(
+            CommandLine cmdline, Configuration conf);
     
     public abstract Class<? extends OutputFormat> getOutputFormatClass(
                     CommandLine cmdline, Configuration conf);
