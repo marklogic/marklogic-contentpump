@@ -69,8 +69,8 @@ public class ZipEntryInputStream extends InputStream {
             // advance the stream to the next entry if done with this one.
             hasNext();
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("bytes read from " + fileName + " " + entryName + 
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("bytes read from " + fileName + " " + entryName + 
                     ": " + bytes);
         }
         return bytes;
@@ -82,8 +82,8 @@ public class ZipEntryInputStream extends InputStream {
         if (bytes == -1) {
             hasNext();
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("bytes read from " + fileName + " " + entryName + 
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("bytes read from " + fileName + " " + entryName + 
                     ": " + bytes);
         }
         return bytes;
@@ -95,8 +95,8 @@ public class ZipEntryInputStream extends InputStream {
         if (bytes == -1) {
             hasNext();
         }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("bytes read from " + fileName + " " + entryName + 
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("bytes read from " + fileName + " " + entryName + 
                     ": " + bytes);
         }
         return bytes;

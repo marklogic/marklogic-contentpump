@@ -69,7 +69,7 @@ public enum ContentType {
 
         @Override
         public Class<? extends Writable> getWritableClass() {
-            return MarkLogicDocument.class;
+            return BytesWritable.class;
         }       
     },
     /**
@@ -84,7 +84,7 @@ public enum ContentType {
 
         @Override
         public Class<? extends Writable> getWritableClass() {
-            return StreamLocator.class;
+            return BytesWritable.class;
         }       
     };
     
