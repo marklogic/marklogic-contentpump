@@ -39,8 +39,7 @@ public enum InputType implements ConfigConstants {
             if (Command.isInputCompressed(cmdline)) {
                 return CompressedDocumentInputFormat.class;
             }
-            if (Command.isStreaming(cmdline, conf) ||
-                ContentType.MIXED == getContentType(cmdline)) {
+            if (Command.isStreaming(cmdline, conf)) {
                 return StreamingDocumentInputFormat.class;    
             }
             return CombineDocumentInputFormat.class;

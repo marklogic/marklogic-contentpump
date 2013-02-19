@@ -50,9 +50,7 @@ FileAndDirectoryInputFormat<DocumentURI, VALUE> {
 	    Configuration conf = arg1.getConfiguration();
 	    boolean streaming = conf.getBoolean(
 	            MarkLogicConstants.OUTPUT_STREAMING, false);
-	    String typeString = conf.get(MarkLogicConstants.CONTENT_TYPE);
-	    if (streaming ||
-	        ContentType.MIXED == ContentType.forName(typeString)) {
+	    if (streaming) {
 	        return (RecordReader<DocumentURI, VALUE>) 
 	            new CompressedStreamingReader();
 	    } else {
