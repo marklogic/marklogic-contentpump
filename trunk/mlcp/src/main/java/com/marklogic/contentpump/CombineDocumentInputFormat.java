@@ -96,6 +96,7 @@ extends FileAndDirectoryInputFormat<DocumentURI, VALUE> {
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("Total # of splits: " + splits.size());
+            LOG.debug("Total # of combined splits: " + combinedSplits.size());
         }
         
         return combinedSplits;

@@ -275,6 +275,9 @@ public class LocalJobRunner implements ConfigConstants {
         if (splitCount == 1) {
             return threadCount;
         }
+        if (splitCount > threadCount) {
+            return 1;
+        }
         if (splitIndex % threadCount < threadCount % splitCount) {
             return threadCount / splitCount + 1;
         } else {

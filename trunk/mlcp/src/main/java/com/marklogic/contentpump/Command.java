@@ -456,7 +456,12 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(THREADS_PER_SPLIT)) {
                 String arg = cmdline.getOptionValue(THREADS_PER_SPLIT);
-                conf.set(ConfigConstants.CONF_THREADS_PER_SPLIT, arg);
+                if (Integer.parseInt(arg) > 1 && isStreaming(cmdline, conf)) {
+                    LOG.warn("The setting for " + THREADS_PER_SPLIT + 
+                            " is ignored because streaming is enabled.");
+                } else {
+                    conf.set(ConfigConstants.CONF_THREADS_PER_SPLIT, arg);
+                }
             }
 
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
@@ -475,7 +480,7 @@ public enum Command implements ConfigConstants {
 					                    0);
 			Class<? extends Mapper<?, ?, ?, ?>> internalMapperClass =
 					type.getMapperClass(cmdline, conf);
-            if (threadCnt > 1) {
+            if (threadCnt > 1 && !isStreaming(cmdline, conf)) {
                 job.setMapperClass(MultithreadedMapper.class);
                 MultithreadedMapper.setMapperClass(job.getConfiguration(), 
                 		internalMapperClass);
@@ -491,7 +496,9 @@ public enum Command implements ConfigConstants {
 		public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(Job job,
 				Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
 				int availableThreads) {
-			if (threadCnt == 0 && availableThreads > 1) {
+			if (threadCnt == 0 && availableThreads > 1 &&
+			    !job.getConfiguration().getBoolean(
+			            MarkLogicConstants.OUTPUT_STREAMING, false)) {
 				Class<? extends Mapper<?,?,?,?>> mapperClass = 
 			        (Class<? extends Mapper<?,?,?,?>>) (Class)
                      MultithreadedMapper.class;
