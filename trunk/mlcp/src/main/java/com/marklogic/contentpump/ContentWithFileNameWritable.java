@@ -52,6 +52,9 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
      *  type: 0 is text; 1 is MarkLogicNode; 2 is BinaryWritable 
      */
     private byte type;
+    
+    public ContentWithFileNameWritable() {}
+    
     public ContentWithFileNameWritable(VALUE value, String fileName) {
         super();
         this.value = value;
