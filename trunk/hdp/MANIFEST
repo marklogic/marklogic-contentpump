@@ -1,7 +1,7 @@
 mlcp_version=1.1
-mlcp_zip=marklogic-contentpump-1.1-20130222-bin.zip
-connector_version=1.1.20130222
-connector_zip=MarkLogic-Connector-for-Hadoop-1.1-20130222.zip
-xcc_version=6.0.20130222
-xcc_zip=MarkXCC.Java-6.0-20130222.zip
+mlcp_zip=marklogic-contentpump-1.1-20130223-bin.zip
+connector_version=1.1.20130223
+connector_zip=MarkLogic-Connector-for-Hadoop-1.1-20130223.zip
+xcc_version=6.0.20130223
+xcc_zip=MarkXCC.Java-6.0-20130223.zip
 commons_modeler=commons-modeler-2.0.1.jar
