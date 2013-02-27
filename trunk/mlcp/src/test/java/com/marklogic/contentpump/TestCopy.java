@@ -1,9 +1,9 @@
 package com.marklogic.contentpump;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.File;
 import java.net.URI;
 
 import org.junit.After;
@@ -71,7 +71,6 @@ public class TestCopy{
 
     @Test
     public void testCopy() throws Exception {
-        Utils.deleteDirectory(new File(Constants.OUT_PATH.toUri().getPath()));
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
@@ -122,6 +121,58 @@ public class TestCopy{
             assertTrue(uri.endsWith(".xml.suffix"));
             assertTrue(uri.startsWith("prefix/test/"));
         }
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testBug20059() throws Exception {
+        String cmd = "IMPORT -password admin -username admin -host localhost"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/20059"
+            + " -mode local -output_uri_prefix test/"
+            + " -output_collections test,ML -port 5275"
+            + " -output_uri_replace wiki,'wiki1'";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection(\"ML\"))");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        Utils.closeSession();
+        Utils.clearDB("xcc://admin:admin@localhost:6275", "CopyDst");
+        
+        //copy
+        cmd = "COPY -input_host localhost -input_port 5275"
+            + " -input_username admin -input_password admin"
+            + " -output_host localhost -output_port 6275"
+            + " -output_username admin -output_password admin"
+            ;
+        args = cmd.split(" ");
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        Utils.closeSession();
+//        
+//        result = Utils.runQuery(
+//                "xcc://admin:admin@localhost:6275", "fn:doc()");
+//        while (result.hasNext()) {
+//            ResultItem item = result.next();
+//            String uri = item.getDocumentURI();
+//            assertTrue(uri.endsWith(".xml.suffix"));
+//            assertTrue(uri.startsWith("prefix/test/"));
+//        }
         Utils.closeSession();
     }
 }
