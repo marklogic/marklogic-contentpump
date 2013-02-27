@@ -4,6 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+
 import org.junit.After;
 import org.junit.Test;
 
@@ -141,7 +146,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki.zip"
-//            + " -thread_count 1 -mode local"
+            + " -thread_count 4 -mode local"
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -163,11 +168,11 @@ public class TestImportDocs {
     
     @Test
     public void testImportMixedDocsZipHTTP() throws Exception {
-        System.setProperty("xcc.usehttprequestline", "true");
+        System.setProperty("xcc.httpcompliant", "true");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
-            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki.zip"
-//            + " -thread_count 1 -mode local"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki.zip" //"/space/tmp/cpox/tmp/WikiToZip-00000080.zip"
+            + " -thread_count 4 -mode local"
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -375,6 +380,53 @@ public class TestImportDocs {
         Utils.closeSession();
         
         result = Utils.getOnlyDocs("xcc://admin:admin@localhost:5275");
+
+        assertTrue(result.hasNext());
+        InputStream is = result.next().asInputStream();
+        String str = getResult(is, "UTF-16LE");
+
+        Utils.closeSession();
+
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportText#testImportMixedUTF16LE.txt");
+        assertTrue(str.trim().equals(key));
+    }
+    
+    private String getResult(InputStream is, String encoding) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        InputStreamReader isr = new InputStreamReader(is, "UTF-16LE");
+        char [] buffer = new char[65535];
+        int num = -1;
+        while((num = isr.read(buffer))!=-1) {
+            sb.append(buffer,0, num);
+        }
+        return sb.toString();
+    }
+    
+//    @Test
+    public void testImportBug20697() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + "/space2/qa/mlcp/data/xml/bigdata"
+            + " -input_file_pattern doc108.*"
+            + " -thread_count 1 -mode local -content_encoding UTF-8LE"
+            + " -output_collections test,ML";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getOnlyDocs("xcc://admin:admin@localhost:5275");
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());
@@ -382,9 +434,9 @@ public class TestImportDocs {
 
         Utils.closeSession();
 
-        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportText#testImportMixedUTF16LE.txt");
-        assertTrue(sb.toString().trim().equals(key));
+//        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+//            + "/keys/TestImportText#testImportMixedUTF16LE.txt");
+//        assertTrue(sb.toString().trim().equals(key));
     }
     
     @Test
