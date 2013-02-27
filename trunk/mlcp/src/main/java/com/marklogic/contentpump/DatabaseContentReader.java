@@ -59,7 +59,7 @@ import com.marklogic.xcc.types.XdmElement;
 
 public class DatabaseContentReader extends
     MarkLogicRecordReader<DocumentURI, MarkLogicDocument> {
-    static final float DOCUMENT_TO_FRAGMENT_RATIO = 2;
+    static final float DOCUMENT_TO_FRAGMENT_RATIO = 1;
     public static final Log LOG = LogFactory
         .getLog(DatabaseContentReader.class);
     protected boolean copyCollection;
@@ -67,7 +67,6 @@ public class DatabaseContentReader extends
     protected boolean copyProperties;
     protected boolean copyQuality;
     protected HashMap<String, DocumentMetadata> metadataMap;
-    protected boolean metasTurn = true;
     /**
      * Current key.
      */
@@ -75,7 +74,7 @@ public class DatabaseContentReader extends
     /**
      * Current value.
      */
-    protected MarkLogicDocument currentValue;
+    protected MarkLogicDocumentWithMeta currentValue;
 
     public DatabaseContentReader(Configuration conf) {
         super(conf);
@@ -194,7 +193,7 @@ public class DatabaseContentReader extends
 
             buf.append("'META',");
             buf.append("$uri,");
-            buf.append("xdmp:node-kind(($doc/element(),$doc/text(),$doc/binary(),$doc/processing-instruction(),$doc/comment())),");
+            buf.append("if(fn:empty($doc/node())) then 0 else xdmp:node-kind($doc/node()),");
             if (copyCollection) {
                 buf.append("xdmp:document-get-collections($uri),\n");
             }
@@ -339,61 +338,37 @@ public class DatabaseContentReader extends
     }
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (result == null || (!result.hasNext() && metasTurn)) {
+        if (result == null || (!result.hasNext())) {
             return false;
         }
-        
         ResultItem currItem = null;
-        if (metasTurn) {
-        	//move to next doc node
-            currItem = result.next();
-        } else {
-            currItem = result.current();
-        }
-        
-        //naked properties are excluded from count
+        currItem = result.next();
+
+        // naked properties are excluded from count
         if (count < length) {
             count++;
-            //docs
-            currentValue = new MarkLogicDocument();
-
+            // docs
             String uri = null;
             uri = currItem.getDocumentURI();
             if (uri == null) {
-                throw new IOException("Missing document URI for result " + count);
+                throw new IOException("Missing document URI for result "
+                    + count);
             }
-            if (metasTurn) {
-                DocumentMetadata metadata = metadataMap.get(uri);
-                uri = URIUtil.applyUriReplace(uri, conf);
-                uri = URIUtil.applyPrefixSuffix(uri, conf);
-                currentKey.setUri(uri + DocumentMetadata.EXTENSION);
-                if (metadata != null) {
-                    byte[] metacontent = metadata.toXML().getBytes();
-                    currentValue.setContent(metacontent);
-                    // the type of metadata is the same as type of the content,
-                    // so that it goes into the same archive
-                    String format = metadata.getFormatName();
-                    format = format.replaceAll("\\(\\)", "");
-                    currentValue.setContentType(ContentType.forName(format));
-                } else {
-                    LOG.error("no meta for " + uri);
-                }
-                // cache the item, otherwise doc node will be lost on second
-                // visit
-                currItem.cache();
-                metasTurn = false;
-                return true;
-            } else {
-                uri = URIUtil.applyUriReplace(uri, conf);
-                uri = URIUtil.applyPrefixSuffix(uri, conf);
-                currentKey.setUri(uri);
-                // handle document-node
+            currentValue = new MarkLogicDocumentWithMeta();
+            DocumentMetadata metadata = metadataMap.get(uri);
+            uri = URIUtil.applyUriReplace(uri, conf);
+            uri = URIUtil.applyPrefixSuffix(uri, conf);
+            currentKey.setUri(uri);
+            if (metadata != null) {
+                currentValue.setMeta(metadata);
                 currentValue.set(currItem);
-                metasTurn = true;
+            } else {
+                LOG.error("no meta for " + uri);
             }
+            return true;
         } else {
             // naked properties
-            currentValue = new MarkLogicDocument();
+            currentValue = new MarkLogicDocumentWithMeta();
             ResultItem item = currItem;
             String type = null;
             if (item != null && item.getItemType() == ValueType.XS_STRING) {
@@ -404,12 +379,12 @@ public class DatabaseContentReader extends
             }
             if ("META".equals(type)) {
                 DocumentMetadata metadata = new DocumentMetadata();
-                String uri = parseMetadata(metadata) + DocumentMetadata.NAKED;
+                String uri = parseMetadata(metadata);
                 metadata.setNakedProps(true);
                 uri = URIUtil.applyUriReplace(uri, conf);
                 uri = URIUtil.applyPrefixSuffix(uri, conf);
                 currentKey.setUri(uri);
-                currentValue.setContent(metadata.toXML().getBytes());
+                currentValue.setMeta(metadata);
                 currentValue.setContentType(ContentType.XML);
             } else {
                 throw new IOException("incorrect type");

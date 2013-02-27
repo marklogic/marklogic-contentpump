@@ -102,18 +102,27 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             if(binaryArchive == null) {
                 binaryArchive = new OutputArchive(dst, conf);
             }
+            binaryArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
+                ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
+                    .getBytes());
             binaryArchive.write(zipEntryName, 
                     content.getContentAsByteArray());
         } else if(ContentType.TEXT.equals(type)) {
             if(txtArchive == null) {
                 txtArchive = new OutputArchive(dst, conf);
             }
+            txtArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
+                ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
+                    .getBytes());
             txtArchive.write(zipEntryName, 
                     content.getContentAsText().getBytes());
         } else if(ContentType.XML.equals(type)) {
             if(xmlArchive == null) {
                 xmlArchive = new OutputArchive(dst, conf);
             }
+            xmlArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
+                ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
+                    .getBytes());
             xmlArchive.write(zipEntryName, 
                     content.getContentAsText().getBytes());
         } else {

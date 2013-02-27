@@ -16,7 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +43,9 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestPermissionException;
+import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.exceptions.ServerConnectionException;
+import com.marklogic.xcc.exceptions.XQueryException;
 
 /**
  * MarkLogicRecordWriter that can 
@@ -109,7 +110,8 @@ public class DatabaseContentWriter<VALUE> extends
      * Sessions per forest.
      */
     private Session[] sessions;
-
+    private boolean tolerateErrors;
+    
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
     public DatabaseContentWriter(Configuration conf,
@@ -230,42 +232,11 @@ public class DatabaseContentWriter<VALUE> extends
             Content content = null;
             DocumentMetadata meta = null;
             if (value instanceof MarkLogicDocumentWithMeta) {
-                // this is particularly for importing archive
                 meta = ((MarkLogicDocumentWithMeta) value).getMeta();
                 newContentCreateOptions(meta);
                 MarkLogicDocument doc = (MarkLogicDocument) value;
                 options.setFormat(doc.getContentType().getDocumentFormat());
                 if (!meta.isNakedProps()) {
-                    if (doc.getContentType() == ContentType.BINARY) {
-                        content = ContentFactory.newContent(uri,
-                            doc.getContentAsByteArray(), options);
-                    } else {
-                        content = ContentFactory.newContent(uri, doc
-                            .getContentAsText().toString(), options);
-                    }
-                }// else naked property
-            } else if (value instanceof MarkLogicDocument) {
-                // this is particularly for copy
-                if (uri.endsWith(DocumentMetadata.EXTENSION)) {
-                    // contenttype of metadata is same as the doc, set it to XML
-                    ((MarkLogicDocument) value)
-                        .setContentType(ContentType.XML);
-                    String metaStr = ((MarkLogicDocument) value)
-                        .getContentAsText().toString();
-                    meta = DocumentMetadata.fromXML(new StringReader(metaStr));
-                    newContentCreateOptions(meta);
-                    metaOnly = true;
-                } else if (uri.endsWith(DocumentMetadata.NAKED)){
-                    ((MarkLogicDocument) value)
-                        .setContentType(ContentType.XML);
-                    String metaStr = ((MarkLogicDocument) value)
-                        .getContentAsText().toString();
-                    meta = DocumentMetadata.fromXML(new StringReader(metaStr));
-                    newContentCreateOptions(meta);
-                } else {
-                    MarkLogicDocument doc = (MarkLogicDocument) value;
-                    options
-                        .setFormat(doc.getContentType().getDocumentFormat());
                     if (doc.getContentType() == ContentType.BINARY) {
                         content = ContentFactory.newContent(uri,
                             doc.getContentAsByteArray(), options);
@@ -281,56 +252,41 @@ public class DatabaseContentWriter<VALUE> extends
             boolean isCopyProps = conf.getBoolean(
                 ConfigConstants.CONF_COPY_PROPERTIES, true);
             if (batchSize > 1) {
-                if (value instanceof MarkLogicDocumentWithMeta) {
-                    if (!meta.isNakedProps()) {
-                        // add new content
-                        forestContents[fId][counts[fId]] = content;
-                        metadatas[fId][counts[fId]++] = new URIMetadata(uri,
-                            meta);
-                    } else {
-                     // naked properties
-                        if (isCopyProps) {
-                            if (sessions[fId] == null) {
-                                sessions[fId] = getSession(forestId);
-                            }
-                            uri = uri.substring(0,
-                                uri.length() - DocumentMetadata.NAKED.length());
-                            setDocumentProperties(uri, meta.getProperties(),
-                                sessions[fId]);
-                            stmtCounts[fId]++;
+                if (!meta.isNakedProps()) {
+                    // add new content
+                    forestContents[fId][counts[fId]] = content;
+                    metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
+                } else {
+                    // naked properties
+                    if (isCopyProps) {
+                        if (sessions[fId] == null) {
+                            sessions[fId] = getSession(forestId);
                         }
-                    }
-                } else if (value instanceof MarkLogicDocument) {
-                    if (meta != null) {
-                        if (meta.isNakedProps()) {
-                            if (isCopyProps) {
-                                if (sessions[fId] == null) {
-                                    sessions[fId] = getSession(forestId);
-                                }
-                                uri = uri.substring(0, uri.length()
-                                    - DocumentMetadata.NAKED.length());
-                                setDocumentProperties(uri,
-                                    meta.getProperties(), sessions[fId]);
-                                stmtCounts[fId]++;
-                            }
-                        } else {
-                            if (metaOnly) {
-                                uri = uri.substring(0, uri.length()
-                                    - DocumentMetadata.EXTENSION.length());
-                            }
-                            metadatas[fId][counts[fId]] = new URIMetadata(uri,
-                                meta);
-                        }
-                    } else {
-                        forestContents[fId][counts[fId]++] = content;
+                        uri = uri.substring(0, uri.length()
+                            - DocumentMetadata.NAKED.length());
+                        setDocumentProperties(uri, meta.getProperties(),
+                            sessions[fId]);
+                        stmtCounts[fId]++;
                     }
                 }
-
                 if (counts[fId] == batchSize) {
                     if (sessions[fId] == null) {
                         sessions[fId] = getSession(forestId);
                     }
-                    sessions[fId].insertContent(forestContents[fId]);
+                    
+                    List<RequestException> errors = 
+                        sessions[fId].insertContentCollectErrors(
+                                forestContents[fId]);
+                    if (errors != null) {
+                        for (RequestException ex : errors) {
+                            if (ex instanceof XQueryException) {
+                                LOG.warn(((XQueryException) ex).getFormatString());
+                            } else {
+                                LOG.warn(ex.getMessage());
+                            }
+                        }                       
+                    }
+                    
                     stmtCounts[fId]++;
                     if (isCopyProps) {
                         // insert properties
@@ -366,22 +322,23 @@ public class DatabaseContentWriter<VALUE> extends
                     stmtCounts[fId]++;
                 }
             }
-            if (txnSize > 1 && stmtCounts[fId] >= txnSize) {
+            if (stmtCounts[fId] >= txnSize
+                && sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
             }
-        } catch (RequestException e) {
-            LOG.error(e);
-            counts[fId] = 0;
-            stmtCounts[fId] = 0;
-
-            if (e instanceof ServerConnectionException
-                || e instanceof RequestPermissionException) {
-                if (sessions[fId] != null) {
-                    sessions[fId].close();
-                }
-                throw new IOException(e);
+        } catch (RequestServerException e) {
+            // log error and continue on RequestServerException
+            if (e instanceof XQueryException) {
+                LOG.warn(((XQueryException) e).getFormatString());
+            } else {
+                LOG.warn(e.getMessage());
             }
+        } catch (RequestException e) {
+            if (sessions[fId] != null) {
+                sessions[fId].close();
+            }
+            throw new IOException(e);
         }
     }
 
@@ -394,7 +351,7 @@ public class DatabaseContentWriter<VALUE> extends
         } else {
             session = cs.newSession();
         }
-        if (txnSize > 1) {
+        if (txnSize > 1 || (batchSize > 1 && tolerateErrors)) {
             session.setTransactionMode(TransactionMode.UPDATE);
         }
         return session;
@@ -416,7 +373,18 @@ public class DatabaseContentWriter<VALUE> extends
                     }
 
                     try {
-                        sessions[i].insertContent(remainder);
+                        List<RequestException> errors = 
+                            sessions[i].insertContentCollectErrors(remainder);
+                        if (errors != null) {
+                            for (RequestException ex : errors) {
+                                if (ex instanceof XQueryException) {
+                                    LOG.warn(((XQueryException) ex).
+                                            getFormatString());
+                                } else {
+                                    LOG.warn(ex.getMessage());
+                                }
+                            }                       
+                        }
                         stmtCounts[i]++;
                         if (!conf.getBoolean(
                             ConfigConstants.CONF_COPY_PROPERTIES, true)) {
@@ -431,12 +399,22 @@ public class DatabaseContentWriter<VALUE> extends
                                 stmtCounts[i]++;
                             }
                         }
+                    } catch (RequestServerException e) {
+                        // log error and continue on RequestServerException
+                        if (e instanceof XQueryException) {
+                            LOG.warn(((XQueryException) e).getFormatString());
+                        } else {
+                            LOG.warn(e.getMessage());
+                        }
                     } catch (RequestException e) {
                         LOG.error(e);
                         if (sessions[i] != null) {
                             sessions[i].close();
                         }
-                        throw new IOException(e);
+                        if (e instanceof ServerConnectionException
+                            || e instanceof RequestPermissionException) {
+                            throw new IOException(e);
+                        }
                     }
                 }
             }
@@ -463,8 +441,9 @@ public class DatabaseContentWriter<VALUE> extends
     public int getTransactionSize(Configuration conf) {
         // return the specified txn size
         if (conf.get(TXN_SIZE) != null) {
-            return conf.getInt(TXN_SIZE, 0);
-        }
+            int txnSize = conf.getInt(TXN_SIZE, 0);
+            return txnSize <= 0 ? 1 : txnSize;
+        } 
         return 1000 / conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
     }
 
