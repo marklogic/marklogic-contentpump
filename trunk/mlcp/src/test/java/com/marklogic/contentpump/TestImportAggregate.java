@@ -23,7 +23,8 @@ public class TestImportAggregate {
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.xml"
             + " -mode local -thread_count 1"// -aggregate_uri_id PMID"
-            + " -input_file_type aggregates";
+            + " -input_file_type aggregates"
+            + " -output_uri_replace " + Constants.TEST_PATH.toUri().getPath() + ",'/medline'";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 

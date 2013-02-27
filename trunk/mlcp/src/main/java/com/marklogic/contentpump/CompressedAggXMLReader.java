@@ -100,7 +100,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
                 + codec.name());
         }
 
-        initAggConf(inSplit, context);
+        initAggConf(context);
     }
 
     private boolean nextRecordInAggregate() throws IOException,
