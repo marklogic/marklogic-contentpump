@@ -123,10 +123,10 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         } catch (XMLStreamException e) {
             LOG.error(e.getMessage(), e);
         }
-        initAggConf(context);
+        initAggConf((FileSplit)inSplit, context);
     }
     
-    protected void initAggConf(TaskAttemptContext context) {
+    protected void initAggConf(FileSplit inSplit, TaskAttemptContext context) {
         Configuration conf = context.getConfiguration();
         idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
         if (idName == null) {
@@ -136,7 +136,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         recordNamespace = conf
             .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
         if (useAutomaticId) {
-            idGen = new LocalIdGenerator(file.toUri().getPath() + "-" + pos);
+            idGen = new LocalIdGenerator(file.toUri().getPath() + "-"
+                + inSplit.getStart());
         }
     }
 
