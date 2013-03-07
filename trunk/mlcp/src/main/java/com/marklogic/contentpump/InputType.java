@@ -17,7 +17,6 @@ package com.marklogic.contentpump;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
@@ -46,9 +45,9 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
         getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends Mapper<K1, V1, K2, V2>>) (Class)
+            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
             DocumentMapper.class;
         }
 
@@ -77,9 +76,9 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
         getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends Mapper<K1, V1, K2, V2>>) (Class)
+            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
             DocumentMapper.class;
         }
 
@@ -106,9 +105,9 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
         getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends Mapper<K1, V1, K2, V2>>) (Class)
+            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
             DocumentMapper.class;
         }
 
@@ -131,9 +130,9 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
         getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends Mapper<K1, V1, K2, V2>>) (Class)
+            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
             DocumentMapper.class;
         }
         
@@ -156,9 +155,9 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
         getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends Mapper<K1, V1, K2, V2>>)(Class)
+            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
             DocumentMapper.class;
         }
 
@@ -207,7 +206,7 @@ public enum InputType implements ConfigConstants {
      * @param contentType content type
      * @return Mapper class
      */
-    public abstract <K1, V1, K2, V2> Class<? extends Mapper<K1, V1, K2, V2>> 
+    public abstract <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
     getMapperClass(
             CommandLine cmdline, Configuration conf);
     

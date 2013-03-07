@@ -18,7 +18,6 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 
 import org.apache.hadoop.mapreduce.Counter;
-import org.apache.hadoop.mapreduce.Mapper;
 
 import com.marklogic.mapreduce.DocumentURI;
 
@@ -31,7 +30,7 @@ import com.marklogic.mapreduce.DocumentURI;
  * @param <VALUE>
  */
 public class DocumentMapper<VALUE> extends
-    Mapper<DocumentURI, VALUE, DocumentURI, VALUE> {
+    BaseMapper<DocumentURI, VALUE, DocumentURI, VALUE> {
     
     protected Counter inputRecordCount;
     protected Counter skippedRecordCount;

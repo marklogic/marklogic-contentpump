@@ -157,7 +157,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
      *            the class to use as the mapper
      */
     public static <K1, V1, K2, V2> void setMapperClass(Configuration conf,
-        Class<? extends Mapper<?, ?, ?, ?>> internalMapperClass) {
+        Class<? extends BaseMapper<?, ?, ?, ?>> internalMapperClass) {
         if (MultithreadedMapper.class.isAssignableFrom(internalMapperClass)) {
             throw new IllegalArgumentException("Can't have recursive "
                 + "MultithreadedMapper instances.");
@@ -190,7 +190,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 	            synchronized (threadPool) {
 	                for (int i = 0; i < numberOfThreads; ++i) {
 	                    MapRunner thread;
-	                    thread = new MapRunner(context);
+	                    thread = new MapRunner();
 	                    if (!threadPool.isShutdown()) {
 	                        taskList.add((Future<Object>) threadPool.submit(thread));
 	                    } else {
@@ -201,7 +201,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 	                threadPool.notify();
 	            }
 	            // MapRunner that runs in current thread
-	            MapRunner r = new MapRunner(context);
+	            MapRunner r = new MapRunner();
 	            r.run();
 	
 	            for (Future<Object> f : taskList) {
@@ -210,12 +210,12 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 	        } else {
 	            for (int i = 0; i < numberOfThreads; ++i) {
 	                MapRunner thread;
-	                thread = new MapRunner(context);
+	                thread = new MapRunner();
 	                thread.start();
 	                runners.add(i, thread);
 	            }
 	            // MapRunner runs in current thread
-	            MapRunner r = new MapRunner(context);
+	            MapRunner r = new MapRunner();
 	            r.run();
 	            
 	            for (int i = 0; i < numberOfThreads; ++i) {
@@ -261,21 +261,21 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         @SuppressWarnings("unchecked")
         @Override
         public boolean nextKeyValue() throws IOException, InterruptedException {
-            synchronized (outer) {
-                if (!outer.nextKeyValue()) {
-                    return false;
-                }
-                if (outer.getCurrentKey() == null) {
-                    return true;
-                }
-                key = ReflectionUtils.copy(outer.getConfiguration(),
-                    outer.getCurrentKey(), key);
-                value = (V1) ReflectionUtils.newInstance(outer
-                    .getCurrentValue().getClass(), outer.getConfiguration());
-                value = ReflectionUtils.copy(outer.getConfiguration(),
-                    outer.getCurrentValue(), value);
+            if (!outer.nextKeyValue()) {
+                return false;
+            }
+            if (outer.getCurrentKey() == null) {
                 return true;
             }
+            key = (K1) ReflectionUtils.newInstance(outer.getCurrentKey()
+                .getClass(), outer.getConfiguration());
+            key = ReflectionUtils.copy(outer.getConfiguration(),
+                outer.getCurrentKey(), key);
+            value = (V1) ReflectionUtils.newInstance(outer.getCurrentValue()
+                .getClass(), outer.getConfiguration());
+            value = ReflectionUtils.copy(outer.getConfiguration(),
+                outer.getCurrentValue(), value);
+            return true;
         }
 
         public K1 getCurrentKey() {
@@ -318,11 +318,11 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         private Throwable throwable;
         private RecordWriter<K2, V2> writer;
 
-        MapRunner(Context context) throws IOException, InterruptedException,
+        MapRunner() throws IOException, InterruptedException,
             ClassNotFoundException {
             // initiate the real mapper (DocumentMapper) that does the work
             mapper = ReflectionUtils.newInstance(mapClass,
-                context.getConfiguration());
+                outer.getConfiguration());
             @SuppressWarnings("unchecked")
 			OutputFormat<K2, V2> outputFormat = (OutputFormat<K2, V2>) ReflectionUtils
                 .newInstance(outer.getOutputFormatClass(),
@@ -330,14 +330,16 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             writer = outputFormat.getRecordWriter(outer);
             subcontext = new Context(outer.getConfiguration(),
                 outer.getTaskAttemptID(), new SubMapRecordReader(), writer,
-                context.getOutputCommitter(), new SubMapStatusReporter(),
+                outer.getOutputCommitter(), new SubMapStatusReporter(),
                 outer.getInputSplit());
         }
 
         @Override
         public void run() {
             try {
-                mapper.run(subcontext);
+                BaseMapper<K1, V1, K2, V2> real = 
+                    (BaseMapper<K1, V1, K2, V2>) mapper;
+                real.runThreadSafe(outer, subcontext);
                 writer.close(subcontext);
             } catch (Throwable ie) {
                 LOG.error(ie.getMessage(), ie);

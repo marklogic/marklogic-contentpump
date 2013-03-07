@@ -478,12 +478,12 @@ public enum Command implements ConfigConstants {
             InputType type = InputType.forName(inputTypeOption);
 			int threadCnt = conf.getInt(ConfigConstants.CONF_THREADS_PER_SPLIT,
 					                    0);
-			Class<? extends Mapper<?, ?, ?, ?>> internalMapperClass =
+			Class<? extends BaseMapper<?, ?, ?, ?>> internalMapperClass =
 					type.getMapperClass(cmdline, conf);
             if (threadCnt > 1 && !isStreaming(cmdline, conf)) {
                 job.setMapperClass(MultithreadedMapper.class);
-                MultithreadedMapper.setMapperClass(job.getConfiguration(), 
-                		internalMapperClass);
+                MultithreadedMapper.setMapperClass(job.getConfiguration(),
+                    internalMapperClass);
                 MultithreadedMapper.setNumberOfThreads(job, threadCnt);
             } else {
                 // thread_count_per_split is not greater than 1
@@ -499,15 +499,14 @@ public enum Command implements ConfigConstants {
 			if (threadCnt == 0 && availableThreads > 1 &&
 			    !job.getConfiguration().getBoolean(
 			            MarkLogicConstants.OUTPUT_STREAMING, false)) {
-				Class<? extends Mapper<?,?,?,?>> mapperClass = 
-			        (Class<? extends Mapper<?,?,?,?>>) (Class)
-                     MultithreadedMapper.class;
-				MultithreadedMapper.setMapperClass(job.getConfiguration(), 
-	                		mapper);
-				 return mapperClass;
-			} else {
-			    return mapper;
-			}
+                Class<? extends Mapper<?, ?, ?, ?>> mapperClass = 
+                	(Class<? extends Mapper<?, ?, ?, ?>>) (Class) MultithreadedMapper.class;
+                MultithreadedMapper.setMapperClass(job.getConfiguration(),
+                    (Class<? extends BaseMapper<?, ?, ?, ?>>) mapper);
+                return mapperClass;
+            } else {
+                return mapper;
+            }
 		} 
     },
     EXPORT {
