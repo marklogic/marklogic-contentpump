@@ -212,6 +212,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         streaming = conf.getBoolean(OUTPUT_STREAMING, false);
         tolerateErrors = conf.getBoolean(OUTPUT_TOLERATE_ERRORS, false);
+        
+        String encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
+        if (encoding != null) {
+            options.setEncoding(encoding);
+        }
     }
 
     @Override
@@ -240,8 +245,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     options.setFormat(DocumentFormat.TEXT);
                     formatNeeded = false;
                 }
-                options.setEncoding(DEFAULT_OUTPUT_CONTENT_ENCODING);
-                
+                options.setEncoding(DEFAULT_OUTPUT_CONTENT_ENCODING);              
                 content = ContentFactory.newContent(uri, 
                         ((Text) value).getBytes(), 0, 
                         ((Text)value).getLength(), options);
@@ -256,13 +260,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 if (formatNeeded) {
                     options.setFormat(DocumentFormat.BINARY);
                     formatNeeded = false;
-                }
+                }            
                 content = ContentFactory.newContent(uri, 
                         ((BytesWritable) value).getBytes(), 0, 
                         ((BytesWritable) value).getLength(), options);               
-            } else if (value instanceof CustomContent) {
-                options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
-                    DEFAULT_OUTPUT_CONTENT_ENCODING));
+            } else if (value instanceof CustomContent) { 
                 ContentCreateOptions newOptions = options;
                 if (batchSize > 1) {
                     newOptions = (ContentCreateOptions)options.clone();
@@ -308,8 +310,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         LOG.error("Unsupported compression codec: " + value);
                         return;
                 }
-                options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
-                    DEFAULT_OUTPUT_CONTENT_ENCODING));
                 if (streaming) {
                     content = ContentFactory.newUnBufferedContent(uri, is, 
                             options);
