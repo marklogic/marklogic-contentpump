@@ -92,8 +92,6 @@ extends ImportRecordReader<VALUEIN> {
                 }
                 fileIn.readFully(buf);
                 if (value instanceof Text) {
-                    String encoding = conf
-                        .get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
                     if (encoding == null) {
                         ((Text) value).set(new String(buf));
                     } else {
