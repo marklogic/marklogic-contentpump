@@ -17,9 +17,7 @@ package com.marklogic.mapreduce;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
-import java.io.DataInputStream;
 import java.io.DataOutput;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -30,13 +28,13 @@ import javax.xml.transform.TransformerException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.modeler.util.DomUtil;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import com.marklogic.io.IOHelper;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.types.ItemType;
 import com.marklogic.xcc.types.XdmAttribute;
@@ -74,7 +72,7 @@ public class MarkLogicNode implements Writable {
         }     
     }; 
     
-    static DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+    static DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();   
     
     public MarkLogicNode() {}
     
@@ -135,50 +133,47 @@ public class MarkLogicNode implements Writable {
     
     public void readFields(DataInput in) throws IOException {
         int type = in.readInt();
-        if (type == Node.ATTRIBUTE_NODE) {
-            String name = Text.readString(in);
-            String value = Text.readString(in);
-            try {
-                node = (new AttributeImpl(name, value)).asW3cAttr();
-            } catch (ParserConfigurationException e) {
-                LOG.error(e);
-            } catch (SAXException e) {
-                LOG.error(e);
-            }
-        } else {
-            try {
-                node = DomUtil.readXml((DataInputStream)in);
-            } catch (ParserConfigurationException e) {
-                LOG.error(e);
-                throw new IOException(e);
-            } catch (SAXException e) {
-                LOG.error(e);
-                throw new IOException(e);
-            }
-        }
+        DocumentBuilder docBuilder = builderLocal.get();
+        String val = Text.readString(in);
+        try {
+            if (type == Node.ATTRIBUTE_NODE) {
+                AttributeImpl attr = new AttributeImpl(Text.readString(in),
+                        Text.readString(in));
+                node = attr.asW3cNode(docBuilder);
+            } else {
+                node = DomUtil.readXml(IOHelper.newStream(val));
+            } 
+        } catch (SAXException e) {
+            LOG.error("error parsing input", e);
+            throw new IOException(e);
+        } catch (ParserConfigurationException e) {
+            LOG.error("error parsing input", e);
+            throw new IOException(e);
+        }   
     }
 
     public void write(DataOutput out) throws IOException {
         if (node != null) {
-            short type = node.getNodeType();
-            IntWritable typeWritable = new IntWritable(type);
-            typeWritable.write(out);
+            int type = node.getNodeType();
+            out.writeInt(type);
             if (type == Node.ATTRIBUTE_NODE) {
-                Attr attr = (Attr)node;
-                Text.writeString(out, attr.getName());
-                Text.writeString(out, attr.getValue());
-            } else {       
+                Text.writeString(out, node.getNodeName());
+                Text.writeString(out, node.getNodeValue());
+            } else {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 try {
-                    DomUtil.writeXml(node, (DataOutputStream)out);
+                    DomUtil.writeXml(node, baos);
+                    Text.writeString(out, baos.toString());
                 } catch (TransformerException e) {
-                    LOG.error(e);
+                    LOG.error("error transforming node", e);
+                    throw new IOException(e);
                 }
-            }           
+            }
         } else {
             LOG.error("Node to write is null.");
         }
     }
-    
+ 
     @Override
     public String toString() {
         if (node != null) {
@@ -201,5 +196,4 @@ public class MarkLogicNode implements Writable {
         }
         return null;
     }
-
 }
