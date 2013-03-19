@@ -141,6 +141,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                 instream = new InputStreamReader(
                     new ByteArrayInputStream(baos.toByteArray()), encoding);
             }
+            baos.close();
             parser = new CSVParser(instream, new CSVStrategy(delimiter,
                 encapsulator, CSVStrategy.COMMENTS_DISABLED,
                 CSVStrategy.ESCAPE_DISABLED, true, true, false, true));

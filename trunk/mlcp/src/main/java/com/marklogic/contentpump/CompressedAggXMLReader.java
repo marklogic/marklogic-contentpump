@@ -41,6 +41,10 @@ public class CompressedAggXMLReader<VALUEIN> extends
     @Override
     public void close() throws IOException {
         super.close();
+        //close the zip
+        if (zipIn != null) {
+            zipIn.close();
+        }
     }
 
     @Override
@@ -144,7 +148,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
                         .createXMLStreamReader(new ByteArrayInputStream(baos
                             .toByteArray()), encoding);
                     nameSpaces.clear();
-
+                    baos.close();
                     return nextRecordInAggregate();
                 }
                 // end of zip
