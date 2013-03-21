@@ -14,7 +14,6 @@ import javax.xml.stream.XMLStreamException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -34,7 +33,6 @@ public class CompressedAggXMLReader<VALUEIN> extends
         .getLog(CompressedAggXMLReader.class);
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
-    private XMLInputFactory factory;
     private ZipEntry currZipEntry;
     private CompressionCodec codec;
 
@@ -50,12 +48,13 @@ public class CompressedAggXMLReader<VALUEIN> extends
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
-        super.initialize(inSplit, context);
-        
-        Path file = ((FileSplit) inSplit).getPath();       
-        FileSystem fs = file.getFileSystem(context.getConfiguration());
+
+        initConfig(context);
+
+        Path file = ((FileSplit) inSplit).getPath();
+        fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
-        factory = XMLInputFactory.newInstance();
+        f = XMLInputFactory.newInstance();
 
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
@@ -69,6 +68,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
                 }
             }
             if (currZipEntry == null) { // no entry in zip
+                LOG.warn("No valid entry in zip:" + file.toUri());
                 return;
             }
             ByteArrayOutputStream baos;
@@ -83,11 +83,12 @@ public class CompressedAggXMLReader<VALUEIN> extends
                 baos.write(buf, 0, nb);
             }
             try {
-                xmlSR = factory
-                    .createXMLStreamReader(new ByteArrayInputStream(baos
-                        .toByteArray()), encoding);
+                start = 0;
+                end = baos.size();
+                xmlSR = f.createXMLStreamReader(
+                    new ByteArrayInputStream(baos.toByteArray()), encoding);
             } catch (XMLStreamException e) {
-                e.printStackTrace();
+            	LOG.error(e.getMessage(), e);
             }
 
         } else if (codecString.equalsIgnoreCase(CompressionCodec.GZIP
@@ -95,9 +96,11 @@ public class CompressedAggXMLReader<VALUEIN> extends
             zipIn = new GZIPInputStream(fileIn);
             codec = CompressionCodec.GZIP;
             try {
-                xmlSR = factory.createXMLStreamReader(zipIn, encoding);
+                start = 0;
+                end = inSplit.getLength();
+                xmlSR = f.createXMLStreamReader(zipIn, encoding);
             } catch (XMLStreamException e) {
-                e.printStackTrace();
+            	LOG.error(e.getMessage(), e);
             }
         } else {
             throw new UnsupportedOperationException("Unsupported codec: "
@@ -114,7 +117,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (zipIn == null) {
+        if (zipIn == null || xmlSR == null) {
             hasNext = false;
             return false;
         }
@@ -128,7 +131,8 @@ public class CompressedAggXMLReader<VALUEIN> extends
                         return true;
                     }
                 }
-                // xmlSR does not hasNext, try next zipEntry if any
+                // xmlSR does not hasNext, 
+                // if there is next zipEntry, close xmlSR then create a new one
                 ByteArrayOutputStream baos;
                 while ((currZipEntry = zis.getNextEntry()) != null) {
                     if (currZipEntry.getSize() == 0) {
@@ -144,9 +148,11 @@ public class CompressedAggXMLReader<VALUEIN> extends
                     while ((nb = zis.read(buf, 0, buf.length)) != -1) {
                         baos.write(buf, 0, nb);
                     }
-                    xmlSR = factory
-                        .createXMLStreamReader(new ByteArrayInputStream(baos
-                            .toByteArray()), encoding);
+                    xmlSR.close();
+                    start = 0;
+                    end = baos.size();
+                    xmlSR = f.createXMLStreamReader(new ByteArrayInputStream(
+                        baos.toByteArray()), encoding);
                     nameSpaces.clear();
                     baos.close();
                     return nextRecordInAggregate();
@@ -157,13 +163,18 @@ public class CompressedAggXMLReader<VALUEIN> extends
             } else if (codec.equals(CompressionCodec.GZIP)) {
                 return nextRecordInAggregate();
             }
-        } catch (XMLStreamException e1) {
-            e1.printStackTrace();
+        } catch (XMLStreamException e) {
+            LOG.error(e.getMessage(), e);
         }
         return true;
     }
     public CompressedAggXMLReader() {
         super();
+    }
+    
+    @Override
+    public float getProgress() throws IOException, InterruptedException {
+        return hasNext ? 0 : 1;
     }
 
 }
