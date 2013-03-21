@@ -53,10 +53,24 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
      * Archive for Binary
      */
     private OutputArchive binaryArchive;
+    /**
+     * is exporting docs
+     */
+    private boolean isExportDoc;
 
     public ArchiveWriter(Path path, TaskAttemptContext context) {
         dir = path.toString();
         this.context = context;
+        Configuration conf = context.getConfiguration();
+        String type = conf.get(ConfigConstants.CONF_OUTPUT_TYPE, ConfigConstants.DEFAULT_OUTPUT_TYPE);
+        ExportOutputType outputType = ExportOutputType.valueOf(
+                        type.toUpperCase());
+        if (outputType.equals(ExportOutputType.DOCUMENT)) {
+            isExportDoc = true;
+        } else {
+            //archive uses DatabaseContentReader
+            isExportDoc = false;
+        }
     }
 
     @Override
@@ -102,27 +116,33 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             if(binaryArchive == null) {
                 binaryArchive = new OutputArchive(dst, conf);
             }
-            binaryArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
-                ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
-                    .getBytes());
+            if (!isExportDoc) {
+                binaryArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
+                    ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
+                        .getBytes());
+            }
             binaryArchive.write(zipEntryName, 
                     content.getContentAsByteArray());
         } else if(ContentType.TEXT.equals(type)) {
             if(txtArchive == null) {
                 txtArchive = new OutputArchive(dst, conf);
             }
-            txtArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
-                ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
-                    .getBytes());
+            if (!isExportDoc) {
+                txtArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
+                    ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
+                        .getBytes());
+            }
             txtArchive.write(zipEntryName, 
                     content.getContentAsText().getBytes());
         } else if(ContentType.XML.equals(type)) {
             if(xmlArchive == null) {
                 xmlArchive = new OutputArchive(dst, conf);
             }
-            xmlArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
-                ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
-                    .getBytes());
+            if (!isExportDoc) {
+                xmlArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
+                    ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
+                        .getBytes());
+            }
             xmlArchive.write(zipEntryName, 
                     content.getContentAsText().getBytes());
         } else {
