@@ -143,8 +143,11 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                     ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
                         .getBytes());
             }
-            xmlArchive.write(zipEntryName, 
-                    content.getContentAsText().getBytes());
+            // naked property's content is null
+            if (content.getContentAsByteArray() != null) {
+                xmlArchive.write(zipEntryName, content.getContentAsText()
+                    .getBytes());
+            }
         } else {
             throw new IOException ("incorrect type: " + type);
         }
