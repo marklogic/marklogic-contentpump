@@ -114,7 +114,7 @@ public class ArchiveRecordReader extends
                 count++;
                 return true;
             }
-            if (name.endsWith(DocumentMetadata.EXTENSION)) {
+            if (count % 2 == 0 && name.endsWith(DocumentMetadata.EXTENSION)) {
                 ((MarkLogicDocumentWithMeta) value)
                     .setMeta(getMetadataFromStream(length));
                 count++;
