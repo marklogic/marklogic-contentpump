@@ -139,12 +139,19 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 xmlArchive = new OutputArchive(dst, conf);
             }
             if (!isExportDoc) {
-                xmlArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
-                    ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
+                if (((MarkLogicDocumentWithMeta) content).getMeta().isNakedProps) {
+                    xmlArchive.write(zipEntryName + DocumentMetadata.NAKED,
+                        ((MarkLogicDocumentWithMeta) content).getMeta()
+                            .toXML().getBytes());
+                } else {
+                    xmlArchive.write(
+                        zipEntryName + DocumentMetadata.EXTENSION,
+                        ((MarkLogicDocumentWithMeta) content).getMeta()
+                            .toXML().getBytes());
+                    xmlArchive.write(zipEntryName, content.getContentAsText()
                         .getBytes());
-            }
-            // naked property's content is null
-            if (content.getContentAsByteArray() != null) {
+                }
+            } else {
                 xmlArchive.write(zipEntryName, content.getContentAsText()
                     .getBytes());
             }
