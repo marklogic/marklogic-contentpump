@@ -66,7 +66,6 @@ public class ContentPump implements ConfigConstants {
         System.exit(rc);
     }
 
-    @SuppressWarnings("deprecation")
     public static int runCommand(String[] args) throws IOException {
         // get command
         String cmd = args[0];
