@@ -26,11 +26,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.MarkLogicRecordWriter;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
+import com.marklogic.mapreduce.utilities.AssignmentPolicy;
+import com.marklogic.mapreduce.utilities.StatisticalAssignmentPolicy;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCapability;
@@ -112,16 +116,27 @@ public class DatabaseContentWriter<VALUE> extends
     private Session[] sessions;
     private boolean tolerateErrors;
     
+    private AssignmentManager am;
+    private long []docCount;
+    //default boolean is false
+    private boolean needDocCount;
+    
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
     public DatabaseContentWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
+        this(conf, forestSourceMap, fastLoad, null); 
+    }
+    
+    public DatabaseContentWriter(Configuration conf,
+        Map<String, ContentSource> forestSourceMap, boolean fastLoad, AssignmentManager am) {
         super(conf, null);
 
         this.fastLoad = fastLoad;
 
         this.forestSourceMap = forestSourceMap;
-
+        this.am = am;
+        
         // arraySize is the number of forests in fast load mode; 1 otherwise.
         int arraySize = forestSourceMap.size();
         forestIds = new String[arraySize];
@@ -135,6 +150,11 @@ public class DatabaseContentWriter<VALUE> extends
             forestContents = new Content[arraySize][batchSize];
             counts = new int[arraySize];
             metadatas = new URIMetadata[arraySize][batchSize];
+        }
+        if (fastLoad
+            && am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL) {
+            docCount = new long[arraySize];
+            needDocCount = true;
         }
     }
 
@@ -204,7 +224,7 @@ public class DatabaseContentWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {
         String uri = key.getUri();
-        String forestId = DatabaseContentOutputFormat.ID_PREFIX;
+        String forestId = ContentOutputFormat.ID_PREFIX;
         int fId = 0;
         if (fastLoad) {
             // compute forest to write to
@@ -222,7 +242,7 @@ public class DatabaseContentWriter<VALUE> extends
                 key.setUri(uri);
             }
             key.validate();
-            fId = key.getPlacementId(forestIds.length);
+            fId = am.getPlacementForestIndex(key);
 
             forestId = forestIds[fId];
         }
@@ -301,6 +321,11 @@ public class DatabaseContentWriter<VALUE> extends
                         }
                     }
                     counts[fId] = 0;
+                    //update doc count for statistical
+                    if (needDocCount) {
+                        updateDocCount(fId, batchSize
+                            - (errors != null ? errors.size() : 0));
+                    }
                 }
 
             } else {
@@ -310,6 +335,10 @@ public class DatabaseContentWriter<VALUE> extends
                 if (content != null) {
                     sessions[fId].insertContent(content);
                     stmtCounts[fId]++;
+                }
+                //update doc count for statistical
+                if (needDocCount) {
+                    updateDocCount(fId, 1);
                 }
                 // meta's properties is null if CONF_COPY_PROPERTIES is false
                 if (meta != null && meta.getProperties() != null) {
@@ -326,6 +355,9 @@ public class DatabaseContentWriter<VALUE> extends
                 && sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
+                if (needDocCount) {
+                    docCount[fId] = 0;
+                }
             }
         } catch (RequestServerException e) {
             // log error and continue on RequestServerException
@@ -337,6 +369,9 @@ public class DatabaseContentWriter<VALUE> extends
         } catch (RequestException e) {
             if (sessions[fId] != null) {
                 sessions[fId].close();
+            }
+            if (needDocCount) {
+                rollbackDocCount(fId);
             }
             throw new IOException(e);
         }
@@ -386,6 +421,12 @@ public class DatabaseContentWriter<VALUE> extends
                             }                       
                         }
                         stmtCounts[i]++;
+                        //RequestException if any is thrown before docCount is updated
+                        //so docCount doesn't need to rollback in this try-catch
+                        if (needDocCount) {
+                            updateDocCount(i, counts[i]
+                                - (errors != null ? errors.size() : 0));
+                        }
                         if (!conf.getBoolean(
                             ConfigConstants.CONF_COPY_PROPERTIES, true)) {
                             continue;
@@ -410,6 +451,9 @@ public class DatabaseContentWriter<VALUE> extends
                         LOG.error(e);
                         if (sessions[i] != null) {
                             sessions[i].close();
+                        }
+                        if (needDocCount) {
+                            rollbackDocCount(i);
                         }
                         if (e instanceof ServerConnectionException
                             || e instanceof RequestPermissionException) {
@@ -513,6 +557,27 @@ public class DatabaseContentWriter<VALUE> extends
             }
         }
     }
+    
+    //TODO may need refactoring to share logic with ContentWriter
+    /**
+     * 
+     * @param fId forest index
+     * @param count count of newly added docs
+     */
+    private void updateDocCount(int fId, int count) {
+        StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
+            .getPolicy();
+        docCount[fId] += count;
+        sap.updateStats(fId, count);
+    }
+
+    private void rollbackDocCount(int fId) {
+        StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
+            .getPolicy();
+        sap.updateStats(fId, -docCount[fId]);
+        LOG.error("rollback doc count of forest " + fId + ":" + docCount[fId]);
+    }
+    
 }
 
 class URIMetadata {

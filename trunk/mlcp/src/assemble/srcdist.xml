@@ -11,6 +11,7 @@
         <outputDirectory>/src</outputDirectory>
         <excludes>
           <exclude>**/test/**</exclude>
+          <exclude>**/test.properties</exclude> 
         </excludes>
       </fileSet>
       <fileSet>
