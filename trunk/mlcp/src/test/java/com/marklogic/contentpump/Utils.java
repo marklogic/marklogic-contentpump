@@ -48,6 +48,7 @@ public class Utils {
 
         RequestOptions options = new RequestOptions();
         options.setCacheResult(false);
+        options.setDefaultXQueryVersion("1.0-ml");
         aquery.setOptions(options);
         return session.submitRequest(aquery);
     }
