@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;

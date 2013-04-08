@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.ResultItem;
 
 /**

@@ -22,6 +22,8 @@ import java.io.IOException;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
 
+import com.marklogic.mapreduce.utilities.InternalUtilities;
+
 /**
  * Node path usable as a key for a node record. Use with
  * {@link NodeInputFormat} and {@link NodeOutputFormat}.

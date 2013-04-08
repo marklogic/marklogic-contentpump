@@ -16,7 +16,9 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +28,8 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.mapreduce.utilities.ForestStatus;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentSource;
@@ -69,7 +73,7 @@ public class ContentOutputFormat<VALUEOUT> extends
     
     // Prepend to a forest id to form a database name parsed by XDBC.
     // Also used here alone as the forest id placeholder in non-fast-mode.
-    static final String ID_PREFIX = "#";
+    public static final String ID_PREFIX = "#";
  
     @Override
     public void checkOutputSpecs(Configuration conf, ContentSource cs) 
@@ -171,27 +175,26 @@ public class ContentOutputFormat<VALUEOUT> extends
         }
     }
     
-    @Override
-    public RecordWriter<DocumentURI, VALUEOUT> getRecordWriter(
-            TaskAttemptContext context) throws IOException, InterruptedException {
+    protected Map<String, ContentSource> getSourceMap(boolean fastLoad, TaskAttemptContext context) throws IOException{
         Configuration conf = context.getConfiguration();
+        LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
         
-        LinkedMapWritable forestHostMap = getForestHostMap(conf);
-       
-        boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false) ||
-            (conf.get(OUTPUT_DIRECTORY) != null);
         Map<String, ContentSource> sourceMap = 
             new LinkedHashMap<String, ContentSource>();
-        if (fastLoad) {        
+        if (fastLoad) {
             // get host->contentSource mapping
             Map<Writable, ContentSource> hostSourceMap = 
                 new HashMap<Writable, ContentSource>();
-            for (Writable hostName : forestHostMap.values()) {
-                if (hostSourceMap.get(hostName) == null) {
+            //TODO value is ForestStatus
+            for (Writable v : forestStatusMap.values()) {
+                ForestStatus fs = (ForestStatus)v;
+                //unupdatable forests
+                if(fs.getUpdatable().get() == false) continue;
+                if (hostSourceMap.get(fs.getHostName()) == null) {
                     try {
                         ContentSource cs = InternalUtilities.getOutputContentSource(
-                            conf, hostName.toString());
-                        hostSourceMap.put(hostName, cs);
+                            conf, fs.getHostName().toString());
+                        hostSourceMap.put(fs.getHostName(), cs);
                     } catch (XccConfigException e) {
                         throw new IOException(e);
                     } 
@@ -200,28 +203,37 @@ public class ContentOutputFormat<VALUEOUT> extends
             
             // consolidate forest->host map and host-contentSource map to 
             // forest-contentSource map
-            for (Writable forestId : forestHostMap.keySet()) {
+            for (Writable forestId : forestStatusMap.keySet()) {
                 String forest = ((Text)forestId).toString();
-                Writable hostName = forestHostMap.get(forestId);
+                Writable hostName = ((ForestStatus)forestStatusMap.get(forestId)).getHostName();
                 ContentSource cs = hostSourceMap.get(hostName);
-                sourceMap.put(ContentOutputFormat.ID_PREFIX + forest, cs);
-            }           
+                sourceMap.put(ID_PREFIX + forest, cs);
+            }
         } else {
             // treating the non-fast-load case as a special case of the 
             // fast-load case with only one content source
             int taskId = context.getTaskAttemptID().getTaskID().getId();
-            String host = InternalUtilities.getHost(taskId, forestHostMap);
+            String host = InternalUtilities.getHost(taskId, forestStatusMap);
             
             try {
                 ContentSource cs = InternalUtilities.getOutputContentSource(
                     conf, host.toString());
-                sourceMap.put(ContentOutputFormat.ID_PREFIX, cs);
+                sourceMap.put(ID_PREFIX, cs);
             } catch (XccConfigException e) {
                 throw new IOException(e);
             }
         }
-        
+        return sourceMap;
+    }
+    
+    @Override
+    public RecordWriter<DocumentURI, VALUEOUT> getRecordWriter(
+            TaskAttemptContext context) throws IOException, InterruptedException {
+        Configuration conf = context.getConfiguration();
+        boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false) ||
+        (conf.get(OUTPUT_DIRECTORY) != null);
+        Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the ContentWriter
-        return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad);
+        return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
     }
 }

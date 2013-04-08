@@ -21,10 +21,12 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.text.Normalizer;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
+
+import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.LegacyAssignmentPolicy;
 
 /**
  * Document URI, used as a key for a document record. Use with
@@ -33,9 +35,7 @@ import org.apache.hadoop.io.WritableComparable;
  * @author jchen
  */
 public class DocumentURI implements WritableComparable<DocumentURI> {
-    private static final long HASH64_STEP = 15485863;
-    private static final long HASH64_SEED = 0x39a51471f80aabf7l;
-    private static final BigInteger URI_KEY_HASH = hash64("uri()");
+
     
     private String uri;
 
@@ -78,42 +78,6 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
         return uri;
     }
     
-    private static BigInteger hash64(String str) {
-        BigInteger value = BigInteger.valueOf(HASH64_SEED);
-
-        for(int cp, i = 0; i < str.length(); i += Character.charCount(cp)) {
-            cp = str.codePointAt(i);
-            value = value.add(BigInteger.valueOf(cp)).multiply(
-                    BigInteger.valueOf(HASH64_STEP));
-        }
-        byte[] valueBytes = value.toByteArray();
-        byte[] longBytes = new byte[8];
-        System.arraycopy(valueBytes, valueBytes.length - longBytes.length, 
-                longBytes, 0, longBytes.length);
-        BigInteger hash = new BigInteger(1, longBytes);
-        return hash;
-    }
-    
-    private static long rotl(BigInteger value, int shift) {
-        return value.shiftLeft(shift).xor(
-                value.shiftRight(64-shift)).longValue();
-    }
-    
-    protected void normalize() {
-        uri = Normalizer.normalize(uri, Normalizer.Form.NFC);
-    }
-    
-    protected BigInteger getUriKey() {       
-        BigInteger value = 
-            hash64(uri).multiply(BigInteger.valueOf(5)).add(URI_KEY_HASH);
-        byte[] valueBytes = value.toByteArray();
-        byte[] longBytes = new byte[8];
-        System.arraycopy(valueBytes, valueBytes.length - longBytes.length, 
-                longBytes, 0, longBytes.length);
-        BigInteger key = new BigInteger(1, longBytes);
-        return key;
-    }
-    
     /**
      * Assign a forest based on the URI key and the number of forests.  Return
      * a zero-based index to the forest list.
@@ -121,20 +85,23 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
      * @param size size 
      * @return index to the forest list.
      */
+    @Deprecated
     public int getPlacementId(int size) {
+        LegacyAssignmentPolicy lap = new LegacyAssignmentPolicy();
         switch (size) {
             case 0: 
                 throw new IllegalArgumentException("getPlacementId(size = 0)");
             case 1: return 0;
             default:
-                normalize();
-                BigInteger uriKey = getUriKey();
-                long u = uriKey.longValue();
-                for (int i = 8; i <= 56; i += 8) {
-                    u += rotl(uriKey, i);
-                }
-                long v = (0xffff + size) / size;
-                return (int) ((u & 0xffff) / v);
+//                normalize();
+//                BigInteger uriKey = getUriKey();
+//                long u = uriKey.longValue();
+//                for (int i = 8; i <= 56; i += 8) {
+//                    u += rotl(uriKey, i);
+//                }
+//                long v = (0xffff + size) / size;
+//                return (int) ((u & 0xffff) / v);
+                return lap.getPlacementId(this, size);
         }
     }
     

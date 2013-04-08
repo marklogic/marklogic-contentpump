@@ -33,6 +33,9 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.mapreduce.utilities.AssignmentManager;
+import com.marklogic.mapreduce.utilities.AssignmentPolicy;
+import com.marklogic.mapreduce.utilities.StatisticalAssignmentPolicy;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentCreateOptions;
@@ -119,17 +122,31 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     
     private boolean tolerateErrors;
 
+    private AssignmentManager am;
+    
+    private long []docCount;
+    //default boolean is false
+    private boolean needDocCount;
+    
     public ContentWriter(Configuration conf, 
-            Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
+        Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
+        this(conf, forestSourceMap, fastLoad, null);
+    }
+    
+    public ContentWriter(Configuration conf, 
+            Map<String, ContentSource> forestSourceMap, boolean fastLoad, AssignmentManager am) {
         super(conf, null);
         
         this.fastLoad = fastLoad;
         
         this.forestSourceMap = forestSourceMap;
         
+        this.am = am;
         // arraySize is the number of forests in fast load mode; 1 otherwise.
         int arraySize = forestSourceMap.size();
         forestIds = new String[arraySize];
+        // key order in key set is guaranteed by LinkedHashMap,
+        // i.e., the order keys are inserted
         forestIds = forestSourceMap.keySet().toArray(forestIds);
         sessions = new Session[arraySize];
         stmtCounts = new int[arraySize];
@@ -139,6 +156,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (batchSize > 1) {           
             forestContents = new Content[arraySize][batchSize];
             counts = new int[arraySize];
+        }
+        if (fastLoad
+            && am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL) {
+            docCount = new long[arraySize];
+            needDocCount = true;
         }
         
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
@@ -233,8 +255,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }    
             key.setUri(uri);
             key.validate();
-            fId = key.getPlacementId(forestIds.length);
-            
+            // placement based on assignment policy
+            fId = am.getPlacementForestIndex(key);
             forestId = forestIds[fId];
         }
  
@@ -245,7 +267,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     options.setFormat(DocumentFormat.TEXT);
                     formatNeeded = false;
                 }
-                options.setEncoding(DEFAULT_OUTPUT_CONTENT_ENCODING);              
+                options.setEncoding(DEFAULT_OUTPUT_CONTENT_ENCODING);
                 content = ContentFactory.newContent(uri, 
                         ((Text) value).getBytes(), 0, 
                         ((Text)value).getLength(), options);
@@ -284,7 +306,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 } else {
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsText().getBytes(), options);
-                }     
+                }
             } else if (value instanceof StreamLocator) {
                 Path path = ((StreamLocator)value).getPath();
                 if (fs == null) {         
@@ -324,7 +346,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (batchSize > 1) {
                 forestContents[fId][counts[fId]++] = content;
  
-                if (counts[fId] == batchSize) {                
+                if (counts[fId] == batchSize) {
                     if (sessions[fId] == null) {
                         sessions[fId] = getSession(forestId);
                     }        
@@ -338,31 +360,49 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                             } else {
                                 LOG.warn(ex.getMessage());
                             }
-                        }                       
+                        }
                     }
                     stmtCounts[fId]++;
                     counts[fId] = 0;
+                    //update doc count for statistical
+                    if (needDocCount) {
+                        updateDocCount(fId, batchSize
+                            - (errors != null ? errors.size() : 0));
+                    }
                 }
             } else {
                 if (sessions[fId] == null) {
                     sessions[fId] = getSession(forestId);
-                }            
+                }
                 sessions[fId].insertContent(content);
                 stmtCounts[fId]++;
+                //update doc count for statistical
+                if (needDocCount) {
+                    updateDocCount(fId, 1);
+                }
             }
             if (stmtCounts[fId] == txnSize && 
                 sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
+                if (needDocCount) {
+                    docCount[fId] = 0;
+                }
             }
         } catch (ServerConnectionException e) {
             if (sessions[fId] != null) {
                 sessions[fId].close();
             }
+            if (needDocCount) {
+                rollbackDocCount(fId);
+            }
             throw new IOException(e);
         } catch (RequestPermissionException e) {
             if (sessions[fId] != null) {
                 sessions[fId].close();
+            }
+            if (needDocCount) {
+                rollbackDocCount(fId);
             }
             throw new IOException(e);
         } catch (RequestServerException e) {
@@ -376,10 +416,32 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (sessions[fId] != null) {
                 sessions[fId].close();
             }
+            if (needDocCount) {
+                rollbackDocCount(fId);
+            }
             throw new IOException(e);
         }
     }
 
+    /**
+     * 
+     * @param fId forest index
+     * @param count count of newly added docs
+     */
+    private void updateDocCount(int fId, int count) {
+        StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
+            .getPolicy();
+        docCount[fId] += count;
+        sap.updateStats(fId, count);
+    }
+
+    private void rollbackDocCount(int fId) {
+        StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
+            .getPolicy();
+        sap.updateStats(fId, -docCount[fId]);
+        LOG.error("rollback doc count of forest " + fId + ":" + docCount[fId]);
+    }
+    
     private Session getSession(String forestId) {
         Session session = null;
         ContentSource cs = forestSourceMap.get(forestId);
@@ -421,9 +483,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                                 } else {
                                     LOG.warn(ex.getMessage());
                                 }
-                            }                       
+                            }    
                         }
-                        stmtCounts[i]++;        
+                        stmtCounts[i]++;     
+                        //RequestException if any is thrown before docCount is updated
+                        //so docCount doesn't need to rollback in this try-catch
+                        if (needDocCount) {
+                            updateDocCount(i, counts[i]
+                                - (errors != null ? errors.size() : 0));
+                        }
                     } catch (RequestException e) {
                         LOG.error(e);
                         if (sessions[i] != null) {
@@ -437,15 +505,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
             }
         }
-        for (int i = 0; i < sessions.length; i++) {  
+        for (int i = 0; i < sessions.length; i++) {
             if (sessions[i] != null) {
-                if (stmtCounts[i] > 0 && 
-                    sessions[i].getTransactionMode() == 
-                        TransactionMode.UPDATE) {
+                if (stmtCounts[i] > 0
+                    && sessions[i].getTransactionMode() == TransactionMode.UPDATE) {
                     try {
                         sessions[i].commit();
                     } catch (RequestException e) {
                         LOG.error(e);
+                        if (needDocCount) {
+                            rollbackDocCount(i);
+                        }
                         throw new IOException(e);
                     } finally {
                         sessions[i].close();

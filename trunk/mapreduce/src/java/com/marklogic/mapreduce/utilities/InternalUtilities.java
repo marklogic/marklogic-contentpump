@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.marklogic.mapreduce;
+package com.marklogic.mapreduce.utilities;
 
 import java.io.IOException;
 import java.net.URI;
@@ -33,17 +33,17 @@ import org.apache.hadoop.io.VIntWritable;
 import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
-import org.apache.hadoop.util.VersionInfo;
 
-import com.marklogic.xcc.AdhocQuery;
+import com.marklogic.mapreduce.LinkedMapWritable;
+import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.MarkLogicDocument;
+import com.marklogic.mapreduce.MarkLogicNode;
+import com.marklogic.mapreduce.SslConfigOptions;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.ContentSourceFactory;
-import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
-import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.SecurityOptions;
-import com.marklogic.xcc.Session;
-import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.ValueFactory;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XSBase64Binary;
@@ -54,10 +54,9 @@ import com.marklogic.xcc.types.XSHexBinary;
 import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XdmBinary;
 import com.marklogic.xcc.types.XdmValue;
-import com.marklogic.xcc.ValueFactory;
 
 /**
- * Internal utilities shared by the package.  No need to document.
+ * Internal utilities shared by mapreduce package.  No need to document.
  * 
  * @author jchen
  */
@@ -172,7 +171,7 @@ public class InternalUtilities implements MarkLogicConstants {
      * @param result
      * @param value
      */
-    static <VALUEIN> void assignResultValue(Class<? extends Writable> valueClass, 
+    public static <VALUEIN> void assignResultValue(Class<? extends Writable> valueClass, 
             ResultItem result, VALUEIN value) {
         if (valueClass.equals(Text.class)) {
             ((Text)value).set(result.asString());
@@ -279,17 +278,18 @@ public class InternalUtilities implements MarkLogicConstants {
      * robin fashion.
      * 
      * @param taskId
-     * @param forestHostMap
+     * @param forestStatusMap
      * @return host name
      */
     public static String getHost(int taskId,
-            LinkedMapWritable forestHostMap) {
-        int count = forestHostMap.size();
+            LinkedMapWritable forestStatusMap) {
+        int count = forestStatusMap.size();
         int position = taskId % count;
         int i = 0;
-        for (Writable hostName : forestHostMap.values()) {
+        for (Writable v : forestStatusMap.values()) {
+            ForestStatus fs = (ForestStatus)v;
             if (i++ == position) {
-                return hostName.toString();
+                return fs.getHostName().toString();
             }
         }
         throw new IllegalStateException("No host found while taskId = " + 
@@ -327,7 +327,7 @@ public class InternalUtilities implements MarkLogicConstants {
         }
     }
     
-    protected static String unparse(String s) {
+    public static String unparse(String s) {
         int len = s.length();
         StringBuilder buf = new StringBuilder(len * 2);
         for(int cp, i = 0; i < s.length(); i += Character.charCount(cp)) {
