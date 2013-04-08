@@ -20,8 +20,10 @@ public class TestDistributedImportDocs {
     public void testImportMixedDocs() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
-            + " -port 5275 -output_uri_prefix ABC"
-            + " -output_collections test,ML" 
+            + " -port 5275 -output_uri_replace wiki,'wiki1'"
+            + " -output_uri_prefix test/"
+            + " -output_collections test,ML"
+            + " -fastload true"
             + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
