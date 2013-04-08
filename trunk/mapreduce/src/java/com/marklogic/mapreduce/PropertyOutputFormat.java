@@ -23,6 +23,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.ContentSource;
 
 /**
@@ -60,7 +61,7 @@ extends MarkLogicOutputFormat<DocumentURI, MarkLogicNode> {
     public RecordWriter<DocumentURI, MarkLogicNode> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {        
         Configuration conf = context.getConfiguration();
-        LinkedMapWritable forestHostMap = getForestHostMap(conf);
+        LinkedMapWritable forestHostMap = getForestStatusMap(conf);
         
         int taskId = context.getTaskAttemptID().getTaskID().getId();
         String host = InternalUtilities.getHost(taskId, forestHostMap);

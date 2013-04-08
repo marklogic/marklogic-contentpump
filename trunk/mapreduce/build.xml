@@ -124,7 +124,7 @@
 
 	<target name="mapreduce.jar" depends="compile.mapreduce" unless="classes.current">
 		<jar jarfile="${mapreduce.output.jar}" basedir="${compiled.classes.dir}"
-			includes="com/marklogic/mapreduce/*,com/marklogic/mapreduce/functions/*">
+			includes="com/marklogic/mapreduce/*,com/marklogic/mapreduce/functions/*,com/marklogic/mapreduce/utilities/*">
 			<manifest>
 				<section name="mapreduce">
 					<attribute name="Vendor" value="MarkLogic Corporation"/>
@@ -172,7 +172,7 @@
 		        <exclude name="com/marklogic/mapreduce/test/*" />
 		        <exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS.java"/>
 		        <exclude name="com/marklogic/mapreduce/examples/WikiLoader.java"/>
-		        <exclude name="com/marklogic/mapreduce/InternalUtilities.java"/>
+<!--		        <exclude name="com/marklogic/mapreduce/InternalUtilities.java"/>  -->
 			</fileset>
 			<classpath>
 				<pathelement path="${compiled.classes.dir}"/>

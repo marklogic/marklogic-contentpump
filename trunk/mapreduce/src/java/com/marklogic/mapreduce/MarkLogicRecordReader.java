@@ -28,6 +28,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.functions.LexiconFunction;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;

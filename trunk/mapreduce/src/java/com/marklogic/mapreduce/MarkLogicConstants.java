@@ -729,4 +729,7 @@ public interface MarkLogicConstants {
      */
     static final String TXN_SIZE = 
         "mapreduce.marklogic.output.transactionsize";
+    
+    static final String ASSIGNMENT_POLICY =
+        "mapreduce.marklogic.output.assignmentpolicy";
 }

@@ -16,13 +16,18 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -30,6 +35,10 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
+import com.marklogic.mapreduce.utilities.AssignmentManager;
+import com.marklogic.mapreduce.utilities.AssignmentPolicy;
+import com.marklogic.mapreduce.utilities.ForestStatus;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
@@ -60,19 +69,34 @@ implements MarkLogicConstants, Configurable {
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-forest-host-map()";
+    public static final String FOREST_HOST_MAP_REBALANCING_QUERY =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "hadoop:get-forest-host-map-for-rebalancing()";
     static final String DIRECTORY_CREATE_QUERY = 
         "import module namespace hadoop = " + 
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-directory-creation()";
+    public static final String ASSIGNMENT_POLICY_QUERY =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "hadoop:get-assignment-policy()";
+    public static final String REBALANCER_ENABLE_CHECK_QUERY =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "hadoop:get-rebalancer-enable()";
     static final String MANUAL_DIRECTORY_MODE = "manual";
-    
     protected Configuration conf;
+    protected AssignmentManager am = AssignmentManager.getInstance();
+    /**
+     * whether server has assignment policy
+     */
+    protected boolean serverHasPolicy;
     
     @Override
     public void checkOutputSpecs(JobContext context) throws IOException,
             InterruptedException {
         String host = conf.get(OUTPUT_HOST);
-
         if (host == null || host.isEmpty()) {
             throw new IllegalStateException(OUTPUT_HOST +
                     " is not specified.");
@@ -84,10 +108,13 @@ implements MarkLogicConstants, Configurable {
                     host);
             
             // query forest host mapping            
-            LinkedMapWritable forestHostMap = queryForestHostMap(cs);
+            LinkedMapWritable forestStatusMap = queryForestStatusMap(cs);
             
             // store it into config system
-            DefaultStringifier.store(conf, forestHostMap, OUTPUT_FOREST_HOST);
+            DefaultStringifier.store(conf, forestStatusMap, OUTPUT_FOREST_HOST);
+            
+            // initialize assignment policy in to conf
+//            initAssignmentPolicy();
             
             checkOutputSpecs(conf, cs);
         } catch (Exception ex) {
@@ -95,6 +122,10 @@ implements MarkLogicConstants, Configurable {
         }
     }
 
+    
+//    protected void initAssignmentPolicy() {
+//        conf.set(ASSIGNMENT_POLICY, s);
+//    }
     @Override
     public OutputCommitter getOutputCommitter(TaskAttemptContext context)
             throws IOException, InterruptedException {
@@ -119,55 +150,194 @@ implements MarkLogicConstants, Configurable {
     // be found from the config, re-query the database to get this info.  It is
     // possible that each task gets a different version of the map if the 
     // forest config changes while the job runs.
-    protected LinkedMapWritable getForestHostMap(Configuration conf) 
+    protected LinkedMapWritable getForestStatusMap(Configuration conf) 
     throws IOException {
         String forestHost = conf.get(OUTPUT_FOREST_HOST);
         if (forestHost != null) {
-            return DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
-                            LinkedMapWritable.class);
+            //Restores the object from the configuration.
+            LinkedMapWritable fhmap = DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
+                LinkedMapWritable.class);
+            String s = conf.get(ASSIGNMENT_POLICY);
+            AssignmentPolicy.Kind kind = null;
+            if (s == null) {
+                // server prior to 7, no assignment policy, use legacy
+                kind = AssignmentPolicy.Kind.LEGACY;
+            } else {
+                kind = AssignmentPolicy.Kind.valueOf(s.toUpperCase());
+            }
+            am.initialize(kind, fhmap);
+            return fhmap;
         } else {
-            try {                
+            try {
                 // try getting a connection
                 ContentSource cs = 
                     InternalUtilities.getOutputContentSource(conf, 
                             conf.get(OUTPUT_HOST));
                 
-                // query forest host mapping            
-                return queryForestHostMap(cs);
+                // query forest host mapping
+                return queryForestStatusMap(cs);
             } catch (Exception ex) {
                 throw new IOException(ex);
             }
         }
     }
     
-    protected LinkedMapWritable queryForestHostMap(ContentSource cs) 
-    throws IOException {      
+    //initialize assignment policy
+//    protected void initAssignmentPolicy(ContentSource cs) throws IOException {
+//        Session session = null;
+//        ResultSequence result = null;
+//        try {
+//            session = cs.newSession();
+//            AdhocQuery query = session.newAdhocQuery(ASSIGNMENT_POLICY_QUERY);
+//            RequestOptions options = new RequestOptions();
+//            options.setDefaultXQueryVersion("1.0-ml");
+//            query.setOptions(options);
+//
+//            result = session.submitRequest(query);
+//            AssignmentPolicy.Kind kind = null;
+//            if (result.hasNext()) {
+//                ResultItem item = result.next();
+//                String s = item.asString();
+//                conf.set(ASSIGNMENT_POLICY, s);
+//                kind = AssignmentPolicy.Kind.valueOf(s.toUpperCase());
+//            }
+//            //initialize policy
+//            switch (kind) {
+//            case BUCKET:
+//                LinkedHashSet<String> forests = new LinkedHashSet<String>();
+//                String[] allForests = null;
+//                LinkedHashSet<String> updatableForests = null;
+//                //get forest number
+//                query = session.newAdhocQuery(ROUTINGTABLE_FORESTS_QUERY);
+//                while (result.hasNext()) {
+//                    ResultItem item = result.next();
+//                    forests.add(item.asString()); 
+//                }
+//                
+//                allForests = forests.toArray(new String[forests.size()]);
+//                
+//                query = session.newAdhocQuery(UNUPDATABLE_FORESTS_QUERY);
+//                while (result.hasNext()) {
+//                    ResultItem item = result.next();
+//                    forests.remove(item.asString());
+//                }
+//                updatableForests = forests;
+//                
+//                am.initBucketPolicy(allForests, updatableForests);
+//                
+//                break;
+//            case RANGE:
+//                break;
+//            case STATISTICAL:
+//                break;
+//            default:
+//            }
+//            
+//        } catch (RequestException e) {
+//            throw new IOException(e);
+//        } finally {
+//            if (result != null) {
+//                result.close();
+//            }
+//            if (session != null) {
+//                session.close();
+//            }
+//        }
+//    }
+    
+    protected AssignmentPolicy.Kind getAssignmentPolicy(Session session) throws IOException, RequestException {
+        AdhocQuery query = session.newAdhocQuery(ASSIGNMENT_POLICY_QUERY);
+        RequestOptions options = new RequestOptions();
+        options.setDefaultXQueryVersion("1.0-ml");
+        query.setOptions(options);
+        ResultSequence result = null;
+        result = session.submitRequest(query);
+
+        AssignmentPolicy.Kind kind = null;
+        ResultItem item = result.next();
+        String s = item.asString();
+        conf.set(ASSIGNMENT_POLICY, s);
+        kind = AssignmentPolicy.Kind.valueOf(s.toUpperCase());
+        item = result.next();
+        if (kind == AssignmentPolicy.Kind.STATISTICAL
+            && Boolean.parseBoolean(item.asString())
+            && conf.getBoolean(OUTPUT_FAST_LOAD, false)) {
+            throw new IOException(
+                "Fastload can't be used while rebalancer is on and assignment policy is statistical");
+        }
+        return kind;
+    }
+    
+    protected boolean hasAssignmentPolicy(Session session) throws RequestException {
+        AdhocQuery query = session.newAdhocQuery("import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "let $f := fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0) return exists($f)");
+        RequestOptions options = new RequestOptions();
+        options.setDefaultXQueryVersion("1.0-ml");
+        query.setOptions(options);
+        ResultSequence result = null;
+        result = session.submitRequest(query);
+        String item = result.asString();
+        return Boolean.parseBoolean(item);
+    }
+    
+    protected LinkedMapWritable queryForestStatusMap(ContentSource cs) 
+    throws IOException {
         Session session = null;
         ResultSequence result = null;
         try {
             session = cs.newSession();   
+            AssignmentPolicy.Kind kind = null;
+            AdhocQuery query = null;
+            serverHasPolicy = hasAssignmentPolicy(session);
+            if (!serverHasPolicy) {
+                LOG.warn("No assignment policy in server, use legacy assignment policy.");
+                kind = AssignmentPolicy.Kind.LEGACY;
+                query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
+            } else {
+                kind = getAssignmentPolicy(session);
+                query = session.newAdhocQuery(FOREST_HOST_MAP_REBALANCING_QUERY);
+            }
             
-            // query forest host mapping            
-            AdhocQuery query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
+            // query forest host mapping       
+            
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
             query.setOptions(options);
-            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(query);
+            }
             result = session.submitRequest(query);
-            LinkedMapWritable forestHostMap = new LinkedMapWritable();
+
+            LinkedMapWritable forestStatusMap = new LinkedMapWritable();
             Text forest = null;
             while (result.hasNext()) {
                 ResultItem item = result.next();
                 if (forest == null) {
-                    forest = new Text(item.asString());            
+                    forest = new Text(item.asString());
                 } else {
                     Text hostName = new Text(item.asString());
-                    forestHostMap.put(forest, hostName);
+                    if (serverHasPolicy) {
+                        item = result.next();
+                        BooleanWritable updatable = new BooleanWritable(
+                            Boolean.parseBoolean(item.asString()));
+                        item = result.next();
+                        LongWritable dc = new LongWritable(Long.parseLong(item
+                            .asString()));
+                        forestStatusMap.put(forest, new ForestStatus(hostName,
+                            dc, updatable));
+                    } else {
+                        forestStatusMap.put(forest, new ForestStatus(hostName,
+                            new LongWritable(0), new BooleanWritable(true)));
+                    }
                     forest = null;
                 }
             }
-            return forestHostMap;
+            
+            am.initialize(kind, forestStatusMap);
+            return forestStatusMap;
         } catch (RequestException e) {
+            LOG.error(e.getMessage(), e);
             throw new IOException(e);
         } finally {
             if (result != null) {
