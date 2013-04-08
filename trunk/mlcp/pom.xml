@@ -21,7 +21,16 @@
   <packaging>jar</packaging>
   <properties>
     <skipTests>true</skipTests>
+	<distributed.test.excludes>nothing-to-exclude</distributed.test.excludes>     
   </properties>
+  <profiles>
+    <profile>
+      <id>local</id>
+      <properties>
+        <distributed.test.excludes>**/*TestDistributed*</distributed.test.excludes>
+      </properties>
+    </profile>
+  </profiles>  
   <build>
     <plugins>
       <plugin>
@@ -30,6 +39,9 @@
         <version>2.12.3</version>
         <configuration>
           <skipTests>${skipTests}</skipTests>
+          <excludes>
+            <exclude>${distributed.test.excludes}</exclude>
+          </excludes>          
         </configuration>
       </plugin>
       <plugin>
@@ -77,6 +89,7 @@
             <descriptors>
               <descriptor>src/assemble/srcdist.xml</descriptor>
               <descriptor>src/assemble/bindist.xml</descriptor>
+              <descriptor>src/assemble/testdist.xml</descriptor>
             </descriptors>
         </configuration>
         <executions>
