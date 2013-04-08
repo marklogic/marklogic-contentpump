@@ -7,16 +7,17 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestImportDocs {
+    
     @After
     public void tearDown() {
         Utils.closeSession();
@@ -28,6 +29,7 @@ public class TestImportDocs {
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
             + " -mode local -output_uri_prefix test/"
             + " -output_collections test,ML -port 5275"
+            + " -fastload true"
             + " -output_uri_replace wiki,'wiki1'";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -140,6 +142,7 @@ public class TestImportDocs {
         assertEquals("89", result.next().asString());
         Utils.closeSession();
     }
+    
     
     @Test
     public void testImportMixedDocsZip() throws Exception {

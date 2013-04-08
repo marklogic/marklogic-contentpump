@@ -1,5 +1,27 @@
-To run unit tests, a XDBC server with port 5275 is required to associate with Documents database in MarkLogic Server running on localhost.
-TestDistributedXXXs require Hadoop running on localhost.
-TestCopy requires a XDBC server with port 6275 associated with database "CopyDst".
+*Configurations*
 
-Modify the constants in Constants.java according to your environment.
+To run unit tests, the following configurations on MarkLogic Server are required:
+1) MarkLogic Server runs on localhost
+2) a XDBC server with port 5275 is required to associate with Documents database
+3) create database "CopyDst"
+4) create a forest, and attach it to database "CopyDst" 
+5) create a XDBC server with port 6275 associated with database "CopyDst".
+
+hadoop runs on localhost
+
+Check out mlcp source code to some directory, say MLCP_HOME.
+Modify MLCP_HOME/src/conf/test.properties
+1) set HADOOP_CONF_DIR to the hadoop's conf directory 
+2) set OUT_PATH to some temporary path for output
+
+*Run tests*
+
+Run all tests on Linux:
+mvn test -DskipTests=false
+
+Run all tests (tests for distributed mode excluded) on Linux:
+mvn test -DskipTests=false -Plocal
+
+As Windows is not supported for mlcp distributed mode, use the following command to 
+skip tests for distributed mode on Windows:
+mvn.bat test -DskipTests=false -Plocal

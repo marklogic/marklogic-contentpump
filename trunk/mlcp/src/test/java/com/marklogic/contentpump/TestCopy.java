@@ -125,6 +125,62 @@ public class TestCopy{
     }
     
     @Test
+    public void testCopyFast() throws Exception {
+        String cmd = 
+            "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
+            + " -delimited_uri_id first"
+            + " -input_compressed -input_compression_codec zip"
+            + " -fastload true"
+            + " -input_file_type delimited_text"
+            + " -output_uri_suffix .xml"
+            + " -output_uri_prefix test/";
+        
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB("xcc://admin:admin@localhost:6275", "CopyDst");
+        
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        Utils.closeSession();
+        
+        //copy
+        cmd = "COPY -input_host localhost -input_port 5275"
+            + " -input_username admin -input_password admin"
+            + " -output_host localhost -output_port 6275"
+            + " -output_username admin -output_password admin"
+            + " -output_uri_suffix .suffix"
+            + " -output_uri_prefix prefix/";
+        args = cmd.split(" ");
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:6275", "fn:doc()");
+        while (result.hasNext()) {
+            ResultItem item = result.next();
+            String uri = item.getDocumentURI();
+            assertTrue(uri.endsWith(".xml.suffix"));
+            assertTrue(uri.startsWith("prefix/test/"));
+        }
+        Utils.closeSession();
+    }
+    
+    @Test
     public void testBug20059() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/20059"

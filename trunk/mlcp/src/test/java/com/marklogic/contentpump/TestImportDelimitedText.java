@@ -75,6 +75,28 @@ public class TestImportDelimitedText{
     }
     
     @Test
+    public void testImportDelimitedTextTab() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
+            + " -delimited_uri_id NAME -delimiter \t"
+            + " -input_file_type delimited_text -input_file_pattern .*\\.tab -thread_count 1";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
     public void testImportDelimitedTextPipe2() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/1.pipe"

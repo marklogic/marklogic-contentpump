@@ -1,0 +1,19 @@
+ <r>
+  <p pid="p125" >
+    <id>125</id>
+    <comment attr="com">test</comment>
+  </p>
+ </r>
+  <r>
+    <p pid="p126" xmlns="changed">
+        <id>126</id>
+        <comment attr="com">test</comment>
+    </p>
+  </r>
+
+ <r>
+   <p pid="p127">
+     <id>127</id>
+     <comment attr="com">test2</comment>
+   </p>
+ </r>
