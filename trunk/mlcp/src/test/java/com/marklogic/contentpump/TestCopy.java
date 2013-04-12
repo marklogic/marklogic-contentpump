@@ -209,26 +209,67 @@ public class TestCopy{
             + " -input_username admin -input_password admin"
             + " -output_host localhost -output_port 6275"
             + " -output_username admin -output_password admin"
+            + " -thread_count 1"
             ;
         args = cmd.split(" ");
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        
         result = Utils.runQuery(
             "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
+
         Utils.closeSession();
-//        
-//        result = Utils.runQuery(
-//                "xcc://admin:admin@localhost:6275", "fn:doc()");
-//        while (result.hasNext()) {
-//            ResultItem item = result.next();
-//            String uri = item.getDocumentURI();
-//            assertTrue(uri.endsWith(".xml.suffix"));
-//            assertTrue(uri.startsWith("prefix/test/"));
-//        }
+    }
+    
+    @Test
+    public void testCopyNakedProps() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/mixnakedzip"
+            + " -input_file_type archive";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.setDirectoryCreation("xcc://admin:admin@localhost:5275", "automatic");
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        Utils.closeSession();
+        Utils.clearDB("xcc://admin:admin@localhost:6275", "CopyDst");
+        
+        //copy
+        cmd = "COPY -input_host localhost -input_port 5275"
+            + " -input_username admin -input_password admin"
+            + " -output_host localhost -output_port 6275"
+            + " -output_username admin -output_password admin"
+            + " -thread_count 1"
+            + " -output_uri_suffix .x"
+            ;
+        args = cmd.split(" ");
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:6275", 
+            "fn:count(" +
+            "for $i in cts:search(xdmp:document-properties(),cts:not-query(cts:document-fragment-query(cts:and-query( () )))) \n" +
+            "where fn:contains(fn:base-uri($i),\"\\.naked\") eq fn:false() \n" +
+            "return fn:base-uri($i)" +
+            ")");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        Utils.closeSession();
+        
+        Utils.setDirectoryCreation("xcc://admin:admin@localhost:5275", "manual");
         Utils.closeSession();
     }
 }

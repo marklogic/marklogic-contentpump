@@ -52,6 +52,16 @@ public class Utils {
         aquery.setOptions(options);
         return session.submitRequest(aquery);
     }
+    
+    public static void setDirectoryCreation(String xccUri, String mode)
+        throws XccConfigException, RequestException, URISyntaxException {
+        String query = "xquery version \"1.0-ml\"\n;"
+            + "import module namespace admin = \"http://marklogic.com/xdmp/admin\" at \"/MarkLogic/admin.xqy\";\n"
+            + "let $config := admin:get-configuration()\n"
+            + "return admin:database-set-directory-creation($config, xdmp:database(), \""
+            + mode + "\")";
+        runQuery(xccUri, query);
+    }
 
     public static void clearDB(String xccUri, String dbName)
         throws XccConfigException, RequestException, URISyntaxException {
