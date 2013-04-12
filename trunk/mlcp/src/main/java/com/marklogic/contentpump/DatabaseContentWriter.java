@@ -233,14 +233,7 @@ public class DatabaseContentWriter<VALUE> extends
                     + uri
                     : outputDir + '/' + uri;
             }
-            if (uri.endsWith(DocumentMetadata.EXTENSION)) {
-                //let the metadata stay in the same forest as its doc
-                //because forestContents and metadatas need to be aligned 
-                key.setUri(uri.substring(0, uri.length()
-                    - DocumentMetadata.EXTENSION.length()));
-            } else {
-                key.setUri(uri);
-            }
+            key.setUri(uri);
             key.validate();
             fId = am.getPlacementForestIndex(key);
 
@@ -282,8 +275,6 @@ public class DatabaseContentWriter<VALUE> extends
                         if (sessions[fId] == null) {
                             sessions[fId] = getSession(forestId);
                         }
-                        uri = uri.substring(0, uri.length()
-                            - DocumentMetadata.NAKED.length());
                         setDocumentProperties(uri, meta.getProperties(),
                             sessions[fId]);
                         stmtCounts[fId]++;
