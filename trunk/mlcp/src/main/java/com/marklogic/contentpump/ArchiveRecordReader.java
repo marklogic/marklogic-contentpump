@@ -109,7 +109,8 @@ public class ArchiveRecordReader extends
             if (name.endsWith(DocumentMetadata.NAKED)) {
                 ((MarkLogicDocumentWithMeta) value)
                     .setMeta(getMetadataFromStream(length));
-                setKey(zipEntry.getName());
+                setKey(name.substring(0, name.length()
+                    - DocumentMetadata.NAKED.length()));
                 value.setContent(null);
                 count++;
                 return true;
@@ -127,7 +128,7 @@ public class ArchiveRecordReader extends
                     + " in " + zipfile);
                 return true;
             } else {
-                setKey(zipEntry.getName());
+                setKey(name);
                 readDocFromStream(length, (MarkLogicDocument) value);
                 count++;
                 return true;
