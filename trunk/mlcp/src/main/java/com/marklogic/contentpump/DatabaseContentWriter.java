@@ -152,7 +152,8 @@ public class DatabaseContentWriter<VALUE> extends
             metadatas = new URIMetadata[arraySize][batchSize];
         }
         if (fastLoad
-            && am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL) {
+            && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
+            || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
             docCount = new long[arraySize];
             needDocCount = true;
         }
@@ -230,13 +231,11 @@ public class DatabaseContentWriter<VALUE> extends
             // compute forest to write to
             if (outputDir != null && !outputDir.isEmpty()) {
                 uri = outputDir.endsWith("/") || uri.startsWith("/") ? outputDir
-                    + uri
-                    : outputDir + '/' + uri;
+                    + uri : outputDir + '/' + uri;
             }
             key.setUri(uri);
             key.validate();
             fId = am.getPlacementForestIndex(key);
-
             forestId = forestIds[fId];
         }
 
@@ -456,11 +455,15 @@ public class DatabaseContentWriter<VALUE> extends
         }
         for (int i = 0; i < sessions.length; i++) {
             if (sessions[i] != null) {
-                if (stmtCounts[i] > 0 && txnSize > 1) {
+                if (stmtCounts[i] > 0
+                    && sessions[i].getTransactionMode() == TransactionMode.UPDATE) {
                     try {
                         sessions[i].commit();
                     } catch (RequestException e) {
                         LOG.error(e);
+                        if (needDocCount) {
+                            rollbackDocCount(i);
+                        }
                         throw new IOException(e);
                     } finally {
                         sessions[i].close();

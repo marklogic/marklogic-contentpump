@@ -108,6 +108,8 @@ public interface ConfigConstants {
     static final String CONTENT_ENCODING = "content_encoding";
     static final String THREADS_PER_SPLIT = "thread_count_per_split";
     static final String TOLERATE_ERRORS = "tolerate_errors";
+    static final String OUTPUT_PARTITION_NAME = "output_partition_name";
+    
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = "mapreduce.marklogic.input.compressioncodec";
     static final String CONF_MAX_SPLIT_SIZE = "mapred.max.split.size";
