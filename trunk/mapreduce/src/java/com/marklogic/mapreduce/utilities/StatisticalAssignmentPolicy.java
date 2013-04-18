@@ -1,3 +1,18 @@
+/*
+ * Copyright 2003-2013 MarkLogic Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.marklogic.mapreduce.utilities;
 
 import java.util.LinkedHashSet;
@@ -18,10 +33,8 @@ public class StatisticalAssignmentPolicy extends AssignmentPolicy {
      * can we reuse the forest array in ContentWriter?
      */
     private String[] forests;
-   
     
     public StatisticalAssignmentPolicy (long [] stats, LinkedHashSet<String> uForests) {
-//        this.stats = stats;
         this.forests = uForests.toArray(new String[uForests.size()]);
         policy = AssignmentPolicy.Kind.STATISTICAL;
         docCount = new long[stats.length];
@@ -58,9 +71,11 @@ public class StatisticalAssignmentPolicy extends AssignmentPolicy {
             //remove the stats object with the same fIdx
             pq.remove(tmp);
             pq.add(tmp);
-            LOG.debug("update forest " + fIdx);
         }
         //TODO change to fine
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("update forest " + fIdx);
+        }
     }
     
     @Override

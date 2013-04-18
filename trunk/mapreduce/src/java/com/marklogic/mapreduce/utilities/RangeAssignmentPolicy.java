@@ -1,28 +1,27 @@
+/*
+ * Copyright 2003-2013 MarkLogic Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.marklogic.mapreduce.utilities;
 
-import com.marklogic.mapreduce.DocumentURI;
+import java.util.LinkedHashSet;
 
-public class RangeAssignmentPolicy extends AssignmentPolicy {
-    //MarkLogicOuputFormat should get the partition and the corresponnding forests
-    // initialize Range Assignement policy there
-    
-    /**
-     * forests ( RO/DO, retired forests are excluded)
-     * can we reuse the forest array in ContentWriter?
-     */
-    private String[] forests;
-    
-    @Override
-    public String getPlacementForestId(DocumentURI uri) {
-        // TODO Auto-generated method stub
-        // determine the range based on uri?
-        return null;
+public class RangeAssignmentPolicy extends StatisticalAssignmentPolicy {
+    public RangeAssignmentPolicy(long[] stats, LinkedHashSet<String> uForests) {
+        super(stats, uForests);
+        policy = AssignmentPolicy.Kind.RANGE;
     }
 
-    @Override
-    public int getPlacementForestIndex(DocumentURI uri) {
-        // TODO Auto-generated method stub
-        return 0;
-    }
 
 }
