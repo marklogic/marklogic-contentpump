@@ -237,6 +237,12 @@ public enum Command implements ConfigConstants {
                     + "successful inserts are committed")
                 .create(TOLERATE_ERRORS);
             options.addOption(tolerateErrors);
+            
+            Option partition = OptionBuilder.withArgName("partition name")
+                .hasOptionalArg()
+                .withDescription("The partition where docs are inserted")
+                .create(OUTPUT_PARTITION_NAME);
+            options.addOption(partition);
         }
 
         @Override
@@ -467,6 +473,11 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
+            }
+            
+            if (cmdline.hasOption(OUTPUT_PARTITION_NAME)) {
+                String arg = cmdline.getOptionValue(OUTPUT_PARTITION_NAME);
+                conf.set(MarkLogicConstants.OUTPUT_PARTITION_NAME, arg);
             }
         }
 
@@ -723,6 +734,12 @@ public enum Command implements ConfigConstants {
                     + "successful inserts are committed")
                 .create(TOLERATE_ERRORS);
             options.addOption(tolerateErrors);
+            
+            Option partition = OptionBuilder.withArgName("partition name")
+                .hasOptionalArg()
+                .withDescription("The partition where docs are inserted")
+                .create(OUTPUT_PARTITION_NAME);
+            options.addOption(partition);
         }
 
         @Override
@@ -810,6 +827,11 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
+            }
+            
+            if (cmdline.hasOption(OUTPUT_PARTITION_NAME)) {
+                String arg = cmdline.getOptionValue(OUTPUT_PARTITION_NAME);
+                conf.set(MarkLogicConstants.OUTPUT_PARTITION_NAME, arg);
             }
         }
 
