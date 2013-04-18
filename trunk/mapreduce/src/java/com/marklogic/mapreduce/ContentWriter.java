@@ -158,7 +158,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             counts = new int[arraySize];
         }
         if (fastLoad
-            && am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL) {
+            && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
+            || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
             docCount = new long[arraySize];
             needDocCount = true;
         }

@@ -704,6 +704,14 @@ public interface MarkLogicConstants {
     static final String OUTPUT_TOLERATE_ERRORS = 
         "mapreduce.marklogic.output.content.tolerateerrors";
     /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the partition  
+     * where output documents are created. 
+     */
+    static final String OUTPUT_PARTITION_NAME =
+        "mapreduce.marklogic.output.partitionname";
+    
+    /**
      * Default output XML repair level
      */
     static final String DEFAULT_OUTPUT_XML_REPAIR_LEVEL = "DEFAULT";
@@ -729,7 +737,11 @@ public interface MarkLogicConstants {
      */
     static final String TXN_SIZE = 
         "mapreduce.marklogic.output.transactionsize";
-    
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, indicates assignment policy for output documents. 
+     * Optional.
+     */    
     static final String ASSIGNMENT_POLICY =
         "mapreduce.marklogic.output.assignmentpolicy";
 }

@@ -81,11 +81,8 @@ implements MarkLogicConstants, Configurable {
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-assignment-policy()";
-    public static final String REBALANCER_ENABLE_CHECK_QUERY =
-        "import module namespace hadoop = " +
-        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
-        "hadoop:get-rebalancer-enable()";
     static final String MANUAL_DIRECTORY_MODE = "manual";
+    
     protected Configuration conf;
     protected AssignmentManager am = AssignmentManager.getInstance();
     /**
@@ -182,68 +179,6 @@ implements MarkLogicConstants, Configurable {
         }
     }
     
-    //initialize assignment policy
-//    protected void initAssignmentPolicy(ContentSource cs) throws IOException {
-//        Session session = null;
-//        ResultSequence result = null;
-//        try {
-//            session = cs.newSession();
-//            AdhocQuery query = session.newAdhocQuery(ASSIGNMENT_POLICY_QUERY);
-//            RequestOptions options = new RequestOptions();
-//            options.setDefaultXQueryVersion("1.0-ml");
-//            query.setOptions(options);
-//
-//            result = session.submitRequest(query);
-//            AssignmentPolicy.Kind kind = null;
-//            if (result.hasNext()) {
-//                ResultItem item = result.next();
-//                String s = item.asString();
-//                conf.set(ASSIGNMENT_POLICY, s);
-//                kind = AssignmentPolicy.Kind.valueOf(s.toUpperCase());
-//            }
-//            //initialize policy
-//            switch (kind) {
-//            case BUCKET:
-//                LinkedHashSet<String> forests = new LinkedHashSet<String>();
-//                String[] allForests = null;
-//                LinkedHashSet<String> updatableForests = null;
-//                //get forest number
-//                query = session.newAdhocQuery(ROUTINGTABLE_FORESTS_QUERY);
-//                while (result.hasNext()) {
-//                    ResultItem item = result.next();
-//                    forests.add(item.asString()); 
-//                }
-//                
-//                allForests = forests.toArray(new String[forests.size()]);
-//                
-//                query = session.newAdhocQuery(UNUPDATABLE_FORESTS_QUERY);
-//                while (result.hasNext()) {
-//                    ResultItem item = result.next();
-//                    forests.remove(item.asString());
-//                }
-//                updatableForests = forests;
-//                
-//                am.initBucketPolicy(allForests, updatableForests);
-//                
-//                break;
-//            case RANGE:
-//                break;
-//            case STATISTICAL:
-//                break;
-//            default:
-//            }
-//            
-//        } catch (RequestException e) {
-//            throw new IOException(e);
-//        } finally {
-//            if (result != null) {
-//                result.close();
-//            }
-//            if (session != null) {
-//                session.close();
-//            }
-//        }
-//    }
     
     protected AssignmentPolicy.Kind getAssignmentPolicy(Session session) throws IOException, RequestException {
         AdhocQuery query = session.newAdhocQuery(ASSIGNMENT_POLICY_QUERY);
@@ -287,16 +222,41 @@ implements MarkLogicConstants, Configurable {
         ResultSequence result = null;
         try {
             session = cs.newSession();   
-            AssignmentPolicy.Kind kind = null;
             AdhocQuery query = null;
-            serverHasPolicy = hasAssignmentPolicy(session);
+            AssignmentPolicy.Kind kind = null;
+            if (!serverHasPolicy) {
+                serverHasPolicy = hasAssignmentPolicy(session);
+            }
             if (!serverHasPolicy) {
                 LOG.warn("No assignment policy in server, use legacy assignment policy.");
                 kind = AssignmentPolicy.Kind.LEGACY;
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
             } else {
                 kind = getAssignmentPolicy(session);
-                query = session.newAdhocQuery(FOREST_HOST_MAP_REBALANCING_QUERY);
+                if (kind == AssignmentPolicy.Kind.RANGE) {
+                    String pName = conf.get(OUTPUT_PARTITION_NAME);
+                    if (pName == null) {
+                        if (conf.get(OUTPUT_DIRECTORY) != null) {
+                            throw new IOException(
+                                "output_partition_name is not set while server"
+                                    + " uses range assignment policy: "
+                                    + "can't use output_directory");
+                        }
+                        if (conf.getBoolean(OUTPUT_FAST_LOAD, false) == true) {
+                            LOG.warn("output_partition_name is not set while server uses"
+                                + " range assignment policy: disable faseload");
+                            conf.set(OUTPUT_FAST_LOAD, "false");
+                        }
+                        query = session
+                            .newAdhocQuery(FOREST_HOST_MAP_REBALANCING_QUERY);
+                    } else {
+                        query = session
+                            .newAdhocQuery(getForestHostMapPartitionQuery(pName));
+                    }
+                } else {
+                    query = session
+                        .newAdhocQuery(FOREST_HOST_MAP_REBALANCING_QUERY);
+                }
             }
             
             // query forest host mapping       
@@ -347,6 +307,14 @@ implements MarkLogicConstants, Configurable {
                 session.close();
             }
         }    
+    }
+    
+    private String getForestHostMapPartitionQuery(String pName) {
+        String query =
+            "import module namespace hadoop = " +
+            "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+            "hadoop:get-forest-host-map-for-partition(\"" + pName + "\")";
+        return query;
     }
     
     public abstract void checkOutputSpecs(Configuration conf, ContentSource cs) 
