@@ -23,6 +23,7 @@ import java.net.URISyntaxException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.DoubleWritable;
@@ -295,6 +296,13 @@ public class InternalUtilities implements MarkLogicConstants {
         }
         throw new IllegalStateException("No host found while taskId = " + 
                 taskId + ", forestHostMap.size() = " + count);
+    }
+    
+    public static String getHost(int taskId, ArrayWritable hosts) {
+        String [] hostStrings = hosts.toStrings();
+        int count = hostStrings.length;
+        int position = taskId % count;
+        return hostStrings[position];
     }
     
     /**
