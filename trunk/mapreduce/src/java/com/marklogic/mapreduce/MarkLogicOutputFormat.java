@@ -16,8 +16,7 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,7 +26,6 @@ import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -39,6 +37,7 @@ import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
 import com.marklogic.mapreduce.utilities.ForestStatus;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
@@ -81,6 +80,8 @@ implements MarkLogicConstants, Configurable {
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-assignment-policy()";
+    public static final String HOSTS_QUERY = 
+        "for $id in xdmp:hosts() return xdmp:host-name($id)";
     static final String MANUAL_DIRECTORY_MODE = "manual";
     
     protected Configuration conf;
@@ -99,22 +100,32 @@ implements MarkLogicConstants, Configurable {
                     " is not specified.");
         }                     
 
-        try {            
+        boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false) ||
+        (conf.get(OUTPUT_DIRECTORY) != null);
+
+        try {
             // try getting a connection
-            ContentSource cs = InternalUtilities.getOutputContentSource(conf, 
-                    host);
-            
-            // query forest host mapping            
-            LinkedMapWritable forestStatusMap = queryForestStatusMap(cs);
-            
-            // store it into config system
-            DefaultStringifier.store(conf, forestStatusMap, OUTPUT_FOREST_HOST);
-            
-            // initialize assignment policy in to conf
-//            initAssignmentPolicy();
-            
+            ContentSource cs = InternalUtilities.getOutputContentSource(conf,
+                host);
+            if (fastLoad) {
+                // query forest host mapping
+                LinkedMapWritable forestStatusMap = queryForestStatusMap(cs);
+                if (forestStatusMap == null) {
+                    fastLoad = false;
+                } else {
+                    // store it into config system
+                    DefaultStringifier.store(conf, forestStatusMap,
+                        OUTPUT_FOREST_HOST);
+                }
+            }
+            if (!fastLoad) {
+                TextArrayWritable hostArray = queryHosts(cs);
+                // store it into config system
+                DefaultStringifier.store(conf, hostArray, OUTPUT_FOREST_HOST);
+            }
             checkOutputSpecs(conf, cs);
-        } catch (Exception ex) {
+        } 
+        catch (Exception ex) {
             throw new IOException(ex);
         }
     }
@@ -179,6 +190,27 @@ implements MarkLogicConstants, Configurable {
         }
     }
     
+    protected TextArrayWritable getHosts(Configuration conf) throws IOException {
+        String forestHost = conf.get(OUTPUT_FOREST_HOST);
+        if (forestHost != null) {
+            // Restores the object from the configuration.
+            TextArrayWritable hosts = DefaultStringifier.load(conf,
+                OUTPUT_FOREST_HOST, TextArrayWritable.class);
+            // assignment policy does not matter in non-fast load mode
+            return hosts;
+        } else {
+            try {
+                // try getting a connection
+                ContentSource cs = InternalUtilities.getOutputContentSource(
+                    conf, conf.get(OUTPUT_HOST));
+                // query forest host mapping
+                return queryHosts(cs);
+            } catch (Exception ex) {
+                throw new IOException(ex);
+            }
+        }
+    }
+    
     
     protected AssignmentPolicy.Kind getAssignmentPolicy(Session session) throws IOException, RequestException {
         AdhocQuery query = session.newAdhocQuery(ASSIGNMENT_POLICY_QUERY);
@@ -216,6 +248,38 @@ implements MarkLogicConstants, Configurable {
         return Boolean.parseBoolean(item);
     }
     
+    protected TextArrayWritable queryHosts(ContentSource cs) throws IOException {
+        Session session = null;
+        ResultSequence result = null;
+        try {
+            session = cs.newSession();
+            AdhocQuery query = session.newAdhocQuery(HOSTS_QUERY);
+            // query hosts
+            RequestOptions options = new RequestOptions();
+            options.setDefaultXQueryVersion("1.0-ml");
+            query.setOptions(options);
+            result = session.submitRequest(query);
+
+            ArrayList<Text> hosts = new ArrayList<Text>();
+            while (result.hasNext()) {
+                ResultItem item = result.next();
+                Text host = new Text(item.asString());
+                hosts.add(host);
+            }
+            return new TextArrayWritable(hosts.toArray(new Text[hosts.size()]));
+        } catch (RequestException e) {
+            LOG.error(e.getMessage(), e);
+            throw new IOException(e);
+        } finally {
+            if (result != null) {
+                result.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
     protected LinkedMapWritable queryForestStatusMap(ContentSource cs) 
     throws IOException {
         Session session = null;
@@ -228,6 +292,7 @@ implements MarkLogicConstants, Configurable {
                 serverHasPolicy = hasAssignmentPolicy(session);
             }
             if (!serverHasPolicy) {
+                //server prior to 7
                 LOG.warn("No assignment policy in server, use legacy assignment policy.");
                 kind = AssignmentPolicy.Kind.LEGACY;
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
@@ -241,14 +306,12 @@ implements MarkLogicConstants, Configurable {
                                 "output_partition_name is not set while server"
                                     + " uses range assignment policy: "
                                     + "can't use output_directory");
-                        }
-                        if (conf.getBoolean(OUTPUT_FAST_LOAD, false) == true) {
+                        } else {
                             LOG.warn("output_partition_name is not set while server uses"
                                 + " range assignment policy: disable faseload");
                             conf.set(OUTPUT_FAST_LOAD, "false");
+                            return null;
                         }
-                        query = session
-                            .newAdhocQuery(FOREST_HOST_MAP_REBALANCING_QUERY);
                     } else {
                         query = session
                             .newAdhocQuery(getForestHostMapPartitionQuery(pName));
@@ -258,7 +321,7 @@ implements MarkLogicConstants, Configurable {
                         .newAdhocQuery(FOREST_HOST_MAP_REBALANCING_QUERY);
                 }
             }
-            
+
             // query forest host mapping       
             
             RequestOptions options = new RequestOptions();
@@ -293,7 +356,9 @@ implements MarkLogicConstants, Configurable {
                     forest = null;
                 }
             }
-            
+            if(forestStatusMap.size() == 0) {
+                throw new IOException("forestStatusMap.size() == 0");
+            }
             am.initialize(kind, forestStatusMap);
             return forestStatusMap;
         } catch (RequestException e) {

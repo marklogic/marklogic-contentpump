@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.ForestStatus;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentSource;
@@ -177,11 +178,10 @@ public class ContentOutputFormat<VALUEOUT> extends
     
     protected Map<String, ContentSource> getSourceMap(boolean fastLoad, TaskAttemptContext context) throws IOException{
         Configuration conf = context.getConfiguration();
-        LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
-        
         Map<String, ContentSource> sourceMap = 
             new LinkedHashMap<String, ContentSource>();
         if (fastLoad) {
+            LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
             // get host->contentSource mapping
             Map<Writable, ContentSource> hostSourceMap = 
                 new HashMap<Writable, ContentSource>();
@@ -210,14 +210,12 @@ public class ContentOutputFormat<VALUEOUT> extends
                 sourceMap.put(ID_PREFIX + forest, cs);
             }
         } else {
-            // treating the non-fast-load case as a special case of the 
-            // fast-load case with only one content source
+            TextArrayWritable hosts = getHosts(conf);
             int taskId = context.getTaskAttemptID().getTaskID().getId();
-            String host = InternalUtilities.getHost(taskId, forestStatusMap);
-            
+            String host = InternalUtilities.getHost(taskId, hosts);
             try {
                 ContentSource cs = InternalUtilities.getOutputContentSource(
-                    conf, host.toString());
+                    conf, host);
                 sourceMap.put(ID_PREFIX, cs);
             } catch (XccConfigException e) {
                 throw new IOException(e);
