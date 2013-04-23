@@ -42,10 +42,7 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
     }
     
     private void initBucketsTable(int maxSize) {
-        // long[] assignment = new long[NUM_BUCKET];
-        // long i = 10;
-        // long [] a = new long[i];
-        for (int i = 2; i < maxSize; i++) {
+        for (int i = 1; i < maxSize; i++) {
             // bucket to forest assignment
             int[] assignment = new int [NUM_BUCKET]; 
             int expectCount[] = new int[maxSize];
@@ -112,18 +109,15 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
         LegacyAssignmentPolicy lap = new LegacyAssignmentPolicy();
         int bucket = lap.getPlacementId(uri, numBuckets);
         int fIdx = buckets[numForests-1][bucket];
-        boolean allUpdateable = true;
-        int [] partv = new int[uForests];
-        for (int i = 0; i<numForests; i++) {
-            if (!isUpdatable(fIdx)) {
-                if (i==fIdx) {
-                    allUpdateable = false;
+        boolean allUpdatble = numForests == uForests;
+        if (!allUpdatble) {
+            int[] partv = new int[uForests];
+            int j = 0;
+            for (int i = 0; i < numForests; i++) {
+                if (isUpdatable(i)) {
+                    partv[j++] = i;
                 }
-            } else {
-                partv[i] = fIdx;
             }
-        }
-        if (!allUpdateable) {
             fIdx = partv[lap.getPlacementId(uri, uForests)];
         }
         return fIdx;
