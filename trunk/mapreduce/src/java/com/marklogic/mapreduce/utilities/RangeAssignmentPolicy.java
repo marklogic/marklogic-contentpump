@@ -23,5 +23,4 @@ public class RangeAssignmentPolicy extends StatisticalAssignmentPolicy {
         policy = AssignmentPolicy.Kind.RANGE;
     }
 
-
 }

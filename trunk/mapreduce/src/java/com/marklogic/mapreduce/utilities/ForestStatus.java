@@ -28,10 +28,12 @@ public class ForestStatus implements Writable {
     private Text hostName;
     private LongWritable docCount;
     private BooleanWritable updatable;
-    
-    public ForestStatus() {}
-    
-    public ForestStatus(Text hostName, LongWritable docCount, BooleanWritable updatable) {
+
+    public ForestStatus() {
+    }
+
+    public ForestStatus(Text hostName, LongWritable docCount,
+        BooleanWritable updatable) {
         super();
         this.hostName = hostName;
         this.docCount = docCount;
@@ -41,7 +43,7 @@ public class ForestStatus implements Writable {
     public LongWritable getDocCount() {
         return docCount;
     }
-    
+
     public Text getHostName() {
         return hostName;
     }
