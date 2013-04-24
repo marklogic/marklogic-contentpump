@@ -19,17 +19,16 @@ import java.util.LinkedHashSet;
 
 import com.marklogic.mapreduce.DocumentURI;
 
-
 public class BucketAssignmentPolicy extends AssignmentPolicy {
-    static final int NUM_BUCKET = 1<<14;
-    //TODO maybe use int[][] is better than ArrayList<ArrayList>, since bucket table doesn't grow in mlcp
-    private int [][] buckets;
+    static final int NUM_BUCKET = 1 << 14;
+    private int[][] buckets;
     /**
      * forests ( including RO/DO, but retired forests are excluded)
      */
     private String[] forests;
-    
-    public BucketAssignmentPolicy(String[] forests, LinkedHashSet<String> uForests) {
+
+    public BucketAssignmentPolicy(String[] forests,
+        LinkedHashSet<String> uForests) {
         buckets = new int[forests.length][NUM_BUCKET];
         initBucketsTable(forests.length);
         this.forests = forests;
@@ -40,11 +39,11 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
     public int[][] getBucketsTable() {
         return buckets;
     }
-    
+
     private void initBucketsTable(int maxSize) {
         for (int i = 1; i < maxSize; i++) {
             // bucket to forest assignment
-            int[] assignment = new int [NUM_BUCKET]; 
+            int[] assignment = new int[NUM_BUCKET];
             int expectCount[] = new int[maxSize];
             int currentCount[] = new int[maxSize];
 
@@ -75,7 +74,7 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
                     if (currentCount[forest] < expectCount[forest]) {
                         currentCount[forest]++;
                     } else {
-                        assignment[j] =  newForest;
+                        assignment[j] = newForest;
                         currentCount[newForest]++;
                     }
                 }
@@ -83,32 +82,38 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
             buckets[i] = assignment;
         }
     }
-    
+
     /**
      * return the forest id
+     * 
      * @param uri
      * @return
      */
     public String getPlacementForestId(DocumentURI uri) {
-        int fIdx = getBucketPlacementId(uri, buckets, NUM_BUCKET, forests.length, uForests.size());
+        int fIdx = getBucketPlacementId(uri, buckets, NUM_BUCKET,
+            forests.length, uForests.size());
         return forests[fIdx];
 
     }
-    
+
     /**
-     * return the index to the list of updatable forests (all forest - retired - RO/DO)
+     * return the index to the list of updatable forests (all forest - retired -
+     * RO/DO)
+     * 
      * @param uri
      * @return
      */
     public int getPlacementForestIndex(DocumentURI uri) {
-        return getBucketPlacementId(uri, buckets, NUM_BUCKET, forests.length, uForests.size());
+        return getBucketPlacementId(uri, buckets, NUM_BUCKET, forests.length,
+            uForests.size());
     }
-    
-    //return the index to the forest list (all forest - retired - RO/DO)
-    private int getBucketPlacementId(DocumentURI uri, int [][]buckets, int numBuckets, int numForests, int uForests) {
+
+    // return the index to the forest list (all forest - retired - RO/DO)
+    private int getBucketPlacementId(DocumentURI uri, int[][] buckets,
+        int numBuckets, int numForests, int uForests) {
         LegacyAssignmentPolicy lap = new LegacyAssignmentPolicy();
         int bucket = lap.getPlacementId(uri, numBuckets);
-        int fIdx = buckets[numForests-1][bucket];
+        int fIdx = buckets[numForests - 1][bucket];
         boolean allUpdatble = numForests == uForests;
         if (!allUpdatble) {
             int[] partv = new int[uForests];
@@ -122,10 +127,10 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
         }
         return fIdx;
     }
-    
+
     private boolean isUpdatable(int fIdx) {
         String forestId = forests[fIdx];
         return uForests.contains(forestId);
     }
-    
+
 }

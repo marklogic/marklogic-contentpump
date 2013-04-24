@@ -298,6 +298,13 @@ public class InternalUtilities implements MarkLogicConstants {
                 taskId + ", forestHostMap.size() = " + count);
     }
     
+    /**
+     * Return the host from the host array based on the task id in a round
+     * robin fashion
+     * @param taskId
+     * @param hosts a WritableArray of host names
+     * @return
+     */
     public static String getHost(int taskId, ArrayWritable hosts) {
         String [] hostStrings = hosts.toStrings();
         int count = hostStrings.length;
