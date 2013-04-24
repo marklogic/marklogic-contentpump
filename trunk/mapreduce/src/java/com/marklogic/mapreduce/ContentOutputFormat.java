@@ -185,7 +185,6 @@ public class ContentOutputFormat<VALUEOUT> extends
             // get host->contentSource mapping
             Map<Writable, ContentSource> hostSourceMap = 
                 new HashMap<Writable, ContentSource>();
-            //TODO value is ForestStatus
             for (Writable v : forestStatusMap.values()) {
                 ForestStatus fs = (ForestStatus)v;
                 //unupdatable forests
