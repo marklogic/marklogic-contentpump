@@ -68,7 +68,7 @@ implements MarkLogicConstants, Configurable {
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-forest-host-map()";
-    public static final String FOREST_HOST_MAP_REBALANCING_QUERY =
+    public static final String FOREST_STATUS_MAP_REBALANCING_QUERY =
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-forest-host-map-for-rebalancing()";
@@ -81,7 +81,9 @@ implements MarkLogicConstants, Configurable {
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-assignment-policy()";
     public static final String HOSTS_QUERY = 
-        "for $id in xdmp:hosts() return xdmp:host-name($id)";
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "hadoop:get-host-names()";
     static final String MANUAL_DIRECTORY_MODE = "manual";
     
     protected Configuration conf;
@@ -130,10 +132,6 @@ implements MarkLogicConstants, Configurable {
         }
     }
 
-    
-//    protected void initAssignmentPolicy() {
-//        conf.set(ASSIGNMENT_POLICY, s);
-//    }
     @Override
     public OutputCommitter getOutputCommitter(TaskAttemptContext context)
             throws IOException, InterruptedException {
@@ -181,8 +179,7 @@ implements MarkLogicConstants, Configurable {
                 ContentSource cs = 
                     InternalUtilities.getOutputContentSource(conf, 
                             conf.get(OUTPUT_HOST));
-                
-                // query forest host mapping
+                // query forest status mapping
                 return queryForestStatusMap(cs);
             } catch (Exception ex) {
                 throw new IOException(ex);
@@ -196,14 +193,13 @@ implements MarkLogicConstants, Configurable {
             // Restores the object from the configuration.
             TextArrayWritable hosts = DefaultStringifier.load(conf,
                 OUTPUT_FOREST_HOST, TextArrayWritable.class);
-            // assignment policy does not matter in non-fast load mode
             return hosts;
         } else {
             try {
                 // try getting a connection
                 ContentSource cs = InternalUtilities.getOutputContentSource(
                     conf, conf.get(OUTPUT_HOST));
-                // query forest host mapping
+                // query hosts
                 return queryHosts(cs);
             } catch (Exception ex) {
                 throw new IOException(ex);
@@ -212,7 +208,8 @@ implements MarkLogicConstants, Configurable {
     }
     
     
-    protected AssignmentPolicy.Kind getAssignmentPolicy(Session session) throws IOException, RequestException {
+    protected AssignmentPolicy.Kind getAssignmentPolicy(Session session)
+        throws IOException, RequestException {
         AdhocQuery query = session.newAdhocQuery(ASSIGNMENT_POLICY_QUERY);
         RequestOptions options = new RequestOptions();
         options.setDefaultXQueryVersion("1.0-ml");
@@ -230,15 +227,19 @@ implements MarkLogicConstants, Configurable {
             && Boolean.parseBoolean(item.asString())
             && conf.getBoolean(OUTPUT_FAST_LOAD, false)) {
             throw new IOException(
-                "Fastload can't be used while rebalancer is on and assignment policy is statistical");
+                "Fastload can't be used:" +
+                "rebalancer is on and assignment policy is statistical");
         }
         return kind;
     }
     
-    protected boolean hasAssignmentPolicy(Session session) throws RequestException {
-        AdhocQuery query = session.newAdhocQuery("import module namespace hadoop = " +
-        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
-        "let $f := fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0) return exists($f)");
+    protected boolean hasAssignmentPolicy(Session session)
+        throws RequestException {
+        AdhocQuery query = session
+            .newAdhocQuery("import module namespace hadoop = "
+                + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
+                + "let $f := fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
+                + "return exists($f)");
         RequestOptions options = new RequestOptions();
         options.setDefaultXQueryVersion("1.0-ml");
         query.setOptions(options);
@@ -248,7 +249,8 @@ implements MarkLogicConstants, Configurable {
         return Boolean.parseBoolean(item);
     }
     
-    protected TextArrayWritable queryHosts(ContentSource cs) throws IOException {
+    protected TextArrayWritable queryHosts(ContentSource cs)
+        throws IOException {
         Session session = null;
         ResultSequence result = null;
         try {
@@ -318,11 +320,11 @@ implements MarkLogicConstants, Configurable {
                     }
                 } else {
                     query = session
-                        .newAdhocQuery(FOREST_HOST_MAP_REBALANCING_QUERY);
+                        .newAdhocQuery(FOREST_STATUS_MAP_REBALANCING_QUERY);
                 }
             }
 
-            // query forest host mapping       
+            // query forest status mapping       
             
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
@@ -357,7 +359,8 @@ implements MarkLogicConstants, Configurable {
                 }
             }
             if(forestStatusMap.size() == 0) {
-                throw new IOException("forestStatusMap.size() == 0");
+                throw new IOException("Size of forest-status map is 0: " +
+                		"check server license for tiered storage");
             }
             am.initialize(kind, forestStatusMap);
             return forestStatusMap;
