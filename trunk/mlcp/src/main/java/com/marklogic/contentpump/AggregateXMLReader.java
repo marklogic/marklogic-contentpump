@@ -93,6 +93,9 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 LOG.error("Error closing stream reader", e);
             }
         }
+        if (fInputStream != null) {
+            fInputStream.close();
+        }
     }
 
     @Override
