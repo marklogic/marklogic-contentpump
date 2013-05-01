@@ -71,7 +71,7 @@ implements MarkLogicConstants, Configurable {
     public static final String FOREST_STATUS_MAP_REBALANCING_QUERY =
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
-        "hadoop:get-forest-host-map-for-rebalancing()";
+        "hadoop:get-forest-status-map-for-rebalancing()";
     static final String DIRECTORY_CREATE_QUERY = 
         "import module namespace hadoop = " + 
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
@@ -207,7 +207,13 @@ implements MarkLogicConstants, Configurable {
         }
     }
     
-    
+    /**
+     * it is called only if the server has policy
+     * @param session
+     * @return
+     * @throws IOException
+     * @throws RequestException
+     */
     protected AssignmentPolicy.Kind getAssignmentPolicy(Session session)
         throws IOException, RequestException {
         AdhocQuery query = session.newAdhocQuery(ASSIGNMENT_POLICY_QUERY);
@@ -358,9 +364,15 @@ implements MarkLogicConstants, Configurable {
                     forest = null;
                 }
             }
-            if(forestStatusMap.size() == 0) {
-                throw new IOException("Size of forest-status map is 0: " +
-                		"check server license for tiered storage");
+            if (forestStatusMap.size() == 0) {
+                if (kind == AssignmentPolicy.Kind.RANGE) {
+                    throw new IOException("Number of forests is 0: "
+                        + "check server license for tiered storage; "
+                        + "check partition_name");
+                } else {
+                    throw new IOException("Number of forests is 0: "
+                        + "check forests in database");
+                }
             }
             am.initialize(kind, forestStatusMap);
             return forestStatusMap;
@@ -381,7 +393,7 @@ implements MarkLogicConstants, Configurable {
         String query =
             "import module namespace hadoop = " +
             "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
-            "hadoop:get-forest-host-map-for-partition(\"" + pName + "\")";
+            "hadoop:get-forest-status-map-for-partition(\"" + pName + "\")";
         return query;
     }
     
