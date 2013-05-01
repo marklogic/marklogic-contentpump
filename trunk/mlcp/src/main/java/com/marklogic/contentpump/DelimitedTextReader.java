@@ -111,109 +111,118 @@ public class DelimitedTextReader<VALUEIN> extends
         if (parser == null) {
             return false;
         }
-        String[] values = parser.getLine();
+        try {
+            String[] values = parser.getLine();
 
-        if (values == null) {
-            bytesRead = fileLen;
-            return false;
-        }
-        if (fields == null) {
-            fields = values;
-            boolean found = false;
-            for (int i = 0; i < fields.length; i++) {
-                // Oracle jdk bug 4508058: UTF-8 encoding does not recognize
-                // initial BOM
-                // will not be fixed. Work Around :
-                // Application code must recognize and skip the BOM itself.
-                byte[] buf = fields[i].getBytes();
-                if (LOG.isDebugEnabled()) {
-                    StringBuilder sb = new StringBuilder();
-                    for (byte b : buf){
-                        sb.append(Byte.toString(b));
-                        sb.append(" ");
-                    }
-                    LOG.debug(fields[i]);
-                    LOG.debug(sb.toString());
-                }
-                if (buf[0] == (byte) 0xEF && buf[1] == (byte) 0xBB
-                    && buf[2] == (byte) 0xBF) {
-                    fields[i] = new String(buf, 3, buf.length - 3);
-                }
-                
-                if (!XMLChar.isValidName(fields[i])) {
-                    fields[i] = getValidName(fields[i]);
-                }
-                if (i == 0 && idName == null
-                    || fields[i].equals(idName)) {
-                    idName = fields[i];
-                    found = true;
-                    break;
-                }
-            }
-            if (found == false) {
-                // idname doesn't match any columns
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Header: " + convertToLine(fields));
-                }
-                throw new IOException(
-                    "Delimited_uri_id " + idName + " is not found.");
-            }
-            values = parser.getLine();
-            
             if (values == null) {
                 bytesRead = fileLen;
                 return false;
             }
-        }
+            if (fields == null) {
+                fields = values;
+                boolean found = false;
+                for (int i = 0; i < fields.length; i++) {
+                    // Oracle jdk bug 4508058: UTF-8 encoding does not recognize
+                    // initial BOM
+                    // will not be fixed. Work Around :
+                    // Application code must recognize and skip the BOM itself.
+                    byte[] buf = fields[i].getBytes();
+                    if (LOG.isDebugEnabled()) {
+                        StringBuilder sb = new StringBuilder();
+                        for (byte b : buf) {
+                            sb.append(Byte.toString(b));
+                            sb.append(" ");
+                        }
+                        LOG.debug(fields[i]);
+                        LOG.debug(sb.toString());
+                    }
+                    if (buf[0] == (byte) 0xEF && buf[1] == (byte) 0xBB
+                        && buf[2] == (byte) 0xBF) {
+                        fields[i] = new String(buf, 3, buf.length - 3);
+                    }
 
-        if (values.length != fields.length) {
-            LOG.error(file.toUri() + " line " + parser.getLineNumber()
-                + " is inconsistent with column definition: "
-                + convertToLine(values));
-            key = null;
-            return true;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(ROOT_START);
-        for (int i = 0; i < fields.length; i++) {
-            if (!XMLChar.isValidName(fields[i])) {
-                fields[i] = getValidName(fields[i]);
-            }
-            if (idName.equals(fields[i])) {
-                if (values[i] == null || values[i].equals("")) {
-                    LOG.error(convertToLine(fields)
-                        + ":column used for uri_id is empty");
-                    // clear the key of previous record
-                    key = null;
-                    return true;
+                    if (!XMLChar.isValidName(fields[i])) {
+                        fields[i] = getValidName(fields[i]);
+                    }
+                    if (i == 0 && idName == null || fields[i].equals(idName)) {
+                        idName = fields[i];
+                        found = true;
+                        break;
+                    }
                 }
-                String uri = getEncodedURI(values[i]);
-                if (uri != null) {
-                    setKey(uri);
+                if (found == false) {
+                    // idname doesn't match any columns
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Header: " + convertToLine(fields));
+                    }
+                    throw new IOException("Delimited_uri_id " + idName
+                        + " is not found.");
+                }
+                values = parser.getLine();
+
+                if (values == null) {
+                    bytesRead = fileLen;
+                    return false;
+                }
+            }
+
+            if (values.length != fields.length) {
+                LOG.error(file.toUri() + " line " + parser.getLineNumber()
+                    + " is inconsistent with column definition: "
+                    + convertToLine(values));
+                key = null;
+                return true;
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append(ROOT_START);
+            for (int i = 0; i < fields.length; i++) {
+                if (!XMLChar.isValidName(fields[i])) {
+                    fields[i] = getValidName(fields[i]);
+                }
+                if (idName.equals(fields[i])) {
+                    if (values[i] == null || values[i].equals("")) {
+                        LOG.error(convertToLine(fields)
+                            + ":column used for uri_id is empty");
+                        // clear the key of previous record
+                        key = null;
+                        return true;
+                    }
+                    String uri = getEncodedURI(values[i]);
+                    if (uri != null) {
+                        setKey(uri);
+                    } else {
+                        key = null;
+                        return true;
+                    }
+                }
+                sb.append("<").append(fields[i]).append(">");
+                sb.append(convertToCDATA(values[i]));
+                sb.append("</").append(fields[i]).append(">");
+            }
+            sb.append(ROOT_END);
+            if (value instanceof Text) {
+                ((Text) value).set(sb.toString());
+            } else if (value instanceof ContentWithFileNameWritable) {
+                VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
+                    .getValue();
+                if (realValue instanceof Text) {
+                    ((Text) realValue).set(sb.toString());
                 } else {
+                    LOG.error("Expects Text in delimited text");
                     key = null;
-                    return true;
                 }
-            }
-            sb.append("<").append(fields[i]).append(">");
-            sb.append(convertToCDATA(values[i]));
-            sb.append("</").append(fields[i]).append(">");
-        }
-        sb.append(ROOT_END);
-        if (value instanceof Text) {
-            ((Text) value).set(sb.toString());
-        } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                .getValue();
-            if (realValue instanceof Text) {
-                ((Text) realValue).set(sb.toString());
             } else {
                 LOG.error("Expects Text in delimited text");
                 key = null;
             }
-        } else {
-            LOG.error("Expects Text in delimited text");
-            key = null;
+        } catch (IOException ex) {
+            if (ex.getMessage().contains(
+                "invalid char between encapsulated token end delimiter")) {
+                LOG.error(ex.getMessage());
+                key = null;
+            } else {
+                throw ex;
+            }
         }
         return true;
     }
