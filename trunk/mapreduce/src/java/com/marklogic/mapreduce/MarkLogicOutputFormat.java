@@ -102,29 +102,10 @@ implements MarkLogicConstants, Configurable {
                     " is not specified.");
         }                     
 
-        boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false) ||
-        (conf.get(OUTPUT_DIRECTORY) != null);
-
         try {
             // try getting a connection
             ContentSource cs = InternalUtilities.getOutputContentSource(conf,
                 host);
-            if (fastLoad) {
-                // query forest host mapping
-                LinkedMapWritable forestStatusMap = queryForestStatusMap(cs);
-                if (forestStatusMap == null) {
-                    fastLoad = false;
-                } else {
-                    // store it into config system
-                    DefaultStringifier.store(conf, forestStatusMap,
-                        OUTPUT_FOREST_HOST);
-                }
-            }
-            if (!fastLoad) {
-                TextArrayWritable hostArray = queryHosts(cs);
-                // store it into config system
-                DefaultStringifier.store(conf, hostArray, OUTPUT_FOREST_HOST);
-            }
             checkOutputSpecs(conf, cs);
         } 
         catch (Exception ex) {
@@ -309,17 +290,9 @@ implements MarkLogicConstants, Configurable {
                 if (kind == AssignmentPolicy.Kind.RANGE) {
                     String pName = conf.get(OUTPUT_PARTITION_NAME);
                     if (pName == null) {
-                        if (conf.get(OUTPUT_DIRECTORY) != null) {
-                            throw new IOException(
-                                "output_partition_name is not set while server"
-                                    + " uses range assignment policy: "
-                                    + "can't use output_directory");
-                        } else {
-                            LOG.warn("output_partition_name is not set while server uses"
-                                + " range assignment policy: disable faseload");
-                            conf.set(OUTPUT_FAST_LOAD, "false");
-                            return null;
-                        }
+                        throw new IOException(
+                            "output_partition_name is not set in fastload "
+                                + "mode while server uses range assignment policy");
                     } else {
                         query = session
                             .newAdhocQuery(getForestHostMapPartitionQuery(pName));

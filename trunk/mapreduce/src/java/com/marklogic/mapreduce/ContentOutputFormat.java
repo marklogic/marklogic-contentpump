@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -123,6 +124,10 @@ public class ContentOutputFormat<VALUEOUT> extends
             // ensure manual directory creation 
             if (fastLoad) {
                 LOG.info("Running in fast load mode");
+                    // store forest-stats map into config system
+                DefaultStringifier.store(conf, queryForestStatusMap(cs),
+                    OUTPUT_FOREST_HOST);
+
                 AdhocQuery query = session.newAdhocQuery(
                                 DIRECTORY_CREATE_QUERY);
                 result = session.submitRequest(query);
@@ -138,7 +143,11 @@ public class ContentOutputFormat<VALUEOUT> extends
                     throw new IllegalStateException(
                             "Failed to query directory creation mode.");
                 }
-            }     
+            } else {
+                TextArrayWritable hostArray = queryHosts(cs);
+                // store hosts into config system
+                DefaultStringifier.store(conf, hostArray, OUTPUT_FOREST_HOST);
+            }
     
             // validate capabilities
             String[] perms = conf.getStrings(OUTPUT_PERMISSION);

@@ -18,6 +18,7 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
@@ -61,5 +62,8 @@ public class KeyValueOutputFormat<KEYOUT, VALUEOUT> extends
                     "supported for " + this.getClass().getName() + 
                     " and will be ignored.");
         }
+
+        // store hosts into config system
+        DefaultStringifier.store(conf, queryHosts(cs), OUTPUT_FOREST_HOST);
     }
 }

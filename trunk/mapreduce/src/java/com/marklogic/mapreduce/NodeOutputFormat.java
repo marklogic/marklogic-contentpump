@@ -20,6 +20,7 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
@@ -71,6 +72,8 @@ extends MarkLogicOutputFormat<NodePath, MarkLogicNode> {
                     "supported for " + this.getClass().getName() + 
                     " and will be ignored.");
         }     
+        // store hosts into config system
+        DefaultStringifier.store(conf, queryHosts(cs), OUTPUT_FOREST_HOST);
     }
 
 }
