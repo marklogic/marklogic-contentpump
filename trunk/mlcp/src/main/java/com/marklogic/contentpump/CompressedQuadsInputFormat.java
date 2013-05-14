@@ -28,13 +28,13 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * @author nwalsh
  *
  */
-public class CompressedRDFInputFormat extends
+public class CompressedQuadsInputFormat extends
 FileAndDirectoryInputFormat<DocumentURI, Text> {
 
     @Override
     public RecordReader<DocumentURI, Text> createRecordReader(
         InputSplit split, TaskAttemptContext context) {
-        return new CompressedRDFReader<Text>();
+        return new CompressedQuadsReader<Text>();
     }
 
     @Override

@@ -24,10 +24,10 @@ import java.util.zip.ZipInputStream;
  *
  * @param <VALUEIN>
  */
-public class CompressedRDFReader<VALUEIN> extends
-        RDFReader<VALUEIN> {
+public class CompressedQuadsReader<VALUEIN> extends
+        QuadsReader<VALUEIN> {
     public static final Log LOG = LogFactory
-        .getLog(CompressedRDFReader.class);
+        .getLog(CompressedQuadsReader.class);
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private ZipEntry currZipEntry;
@@ -101,12 +101,12 @@ public class CompressedRDFReader<VALUEIN> extends
 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (zipIn == null || statementIter == null) {
+        if (zipIn == null || rdfIter == null) {
             hasNext = false;
             return false;
         }
 
-        if (statementIter.hasNext()) {
+        if (rdfIter.hasNext()) {
             hasNext = nextRecordInAggregate();
             if (hasNext) {
                 return true;
@@ -116,7 +116,7 @@ public class CompressedRDFReader<VALUEIN> extends
         if (codec.equals(CompressionCodec.ZIP)) {
             ZipInputStream zis = (ZipInputStream) zipIn;
 
-            // statementIter has run out of statements.
+            // rdfIter has run out of statements.
             // If there is next zipEntry, build a new model and iterate over it
             ByteArrayOutputStream baos;
             while ((currZipEntry = zis.getNextEntry()) != null) {
@@ -146,7 +146,7 @@ public class CompressedRDFReader<VALUEIN> extends
         }
         return true;
     }
-    public CompressedRDFReader() {
+    public CompressedQuadsReader() {
         super();
     }
     
