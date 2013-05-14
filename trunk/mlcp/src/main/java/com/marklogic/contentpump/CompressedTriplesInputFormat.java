@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.marklogic.contentpump;
 
 import com.marklogic.mapreduce.DocumentURI;
@@ -25,19 +24,22 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 /**
- * InputFormat for RDF.
+ * InputFormat for compressed RDF.
+ * @author nwalsh
+ *
  */
-public class RDFInputFormat extends FileAndDirectoryInputFormat<DocumentURI, Text> {
-   
+public class CompressedTriplesInputFormat extends
+FileAndDirectoryInputFormat<DocumentURI, Text> {
+
+    @Override
+    public RecordReader<DocumentURI, Text> createRecordReader(
+        InputSplit split, TaskAttemptContext context) {
+        return new CompressedTriplesReader<Text>();
+    }
+
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
         return false;
-    }
-    
-    @Override
-    public RecordReader<DocumentURI, Text> createRecordReader(InputSplit is,
-        TaskAttemptContext tac) {
-        return new RDFReader<Text>();
     }
  
 }
