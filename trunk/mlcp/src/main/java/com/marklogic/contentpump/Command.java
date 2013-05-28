@@ -1107,18 +1107,25 @@ public enum Command implements ConfigConstants {
     }
 
     static void configFilteringOptions(Options options) {
-        Option filter = OptionBuilder
+        Option df = OptionBuilder
             .withArgName("String")
             .hasArg()
             .withDescription("Comma-separated list of directories")
             .create(DIRECTORY_FILTER);
-        options.addOption(filter);
-        Option ns = OptionBuilder
+        options.addOption(df);
+        Option cf = OptionBuilder
             .withArgName("String")
             .hasArg()
             .withDescription("Comma-separated list of collections")
             .create(COLLECTION_FILTER);
-        options.addOption(ns);
+        options.addOption(cf);
+        Option ds = OptionBuilder
+            .withArgName("String")
+            .hasArg()
+            .withDescription("Path expression used to retrieve documents or " +
+                    "element nodes from the server")
+            .create(DOCUMENT_SELECTOR);
+        options.addOption(ds);
     }
 
     static void applyCopyConfigOptions(Configuration conf, CommandLine cmdline) {
@@ -1178,12 +1185,19 @@ public enum Command implements ConfigConstants {
 
     static void applyFilteringConfigOptions(Configuration conf,
                     CommandLine cmdline) {
-        if (cmdline.hasOption(COLLECTION_FILTER)
-            && cmdline.hasOption(DIRECTORY_FILTER)) {
-            LOG.error(COLLECTION_FILTER + " and " + DIRECTORY_FILTER
-                + " cannot be set at the same time");
-            return;
+        int filters = cmdline.hasOption(COLLECTION_FILTER) ? 1 : 0;
+        filters += cmdline.hasOption(DIRECTORY_FILTER) ? 1 : 0;
+        filters += cmdline.hasOption(DOCUMENT_SELECTOR) ? 1 : 0;
+        if (filters > 1) {
+            LOG.error("Only one of " + COLLECTION_FILTER + ", " +
+                    DIRECTORY_FILTER + ", " + DOCUMENT_SELECTOR +
+                    " can be specified.");
+            throw new IllegalArgumentException(
+                    "Only one of " + COLLECTION_FILTER + ", " +
+                    DIRECTORY_FILTER + ", " + DOCUMENT_SELECTOR +
+                    " can be specified.");
         }
+        
         if (cmdline.hasOption(COLLECTION_FILTER)) {
             String c = cmdline.getOptionValue(COLLECTION_FILTER);
             String[] cf = c.split(",");
@@ -1239,7 +1253,10 @@ public enum Command implements ConfigConstants {
                     "xdmp:directory(\"" + d + "\",\"infinity\")");
             }
         }
-        // if neither is set, default is fn:collection
+        if (cmdline.hasOption(DOCUMENT_SELECTOR)) {
+            conf.set(MarkLogicConstants.DOCUMENT_SELECTOR, 
+                    cmdline.getOptionValue(DOCUMENT_SELECTOR));
+        }
     }
 
     static void applyCommonOutputConfigOptions(Configuration conf,

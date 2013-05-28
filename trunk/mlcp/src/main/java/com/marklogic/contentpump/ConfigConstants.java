@@ -87,6 +87,7 @@ public interface ConfigConstants {
     static final String DEFAULT_COPY_QUALITY = "true";
     static final String COLLECTION_FILTER = "collection_filter";
     static final String DIRECTORY_FILTER = "directory_filter";
+    static final String DOCUMENT_SELECTOR = "document_selector";
     static final String OUTPUT_TYPE = "output_type";
     static final String DEFAULT_OUTPUT_TYPE = "document";
     static final String OUTPUT_FILE_PATH = "output_file_path";
