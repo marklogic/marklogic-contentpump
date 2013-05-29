@@ -118,8 +118,7 @@ implements MarkLogicConstants, Configurable {
             throws IOException, InterruptedException {
         return new FileOutputCommitter(FileOutputFormat.getOutputPath(context),
                 context);
-    }
-    
+    }  
 
     @Override
     public Configuration getConf() {

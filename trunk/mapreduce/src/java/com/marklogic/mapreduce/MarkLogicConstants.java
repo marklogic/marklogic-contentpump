@@ -304,6 +304,14 @@ public interface MarkLogicConstants {
     static final String INPUT_QUERY =
         "mapreduce.marklogic.input.query";
     /**
+     *  The config property name (<code>{@value}</code>)
+     *  which, if set, specifies data retrieval from MarkLogic Server at the 
+     *  specified timestamp. 
+     * </p>
+     */
+    static final String INPUT_QUERY_TIMESTAMP = 
+        "mapreduce.marklogic.input.querytimestamp";
+    /**
      * The config property name (<code>{@value}</code>)
      * which, if set to true, specifies that the input query declares and 
      * references external variables <code>{@value #SPLIT_START_VARNAME}</code>
