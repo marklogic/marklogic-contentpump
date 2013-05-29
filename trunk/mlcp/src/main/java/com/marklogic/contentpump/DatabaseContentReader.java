@@ -17,6 +17,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
@@ -233,6 +234,13 @@ public class DatabaseContentReader extends
             aquery.setNewIntegerVariable(MR_NAMESPACE, SPLIT_END_VARNAME, end);
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
+            String ts = conf.get(INPUT_QUERY_TIMESTAMP);
+            if (ts != null) {
+                options.setEffectivePointInTime(new BigInteger(ts));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Query timestamp: " + ts);
+                }
+            } 
             aquery.setOptions(options);
             result = session.submitRequest(aquery);
             
