@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -36,6 +37,11 @@ import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.Indentation;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
  * Enum of supported commands.
@@ -549,10 +555,17 @@ public enum Command implements ConfigConstants {
             options.addOption(exportCompress);
             Option exportIndented = OptionBuilder
                 .withArgName("true,false")
-                .hasArg()
+                .hasOptionalArg()
                 .withDescription("Whether to format data with indentation")
                 .create(OUTPUT_INDENTED);
             options.addOption(exportIndented);
+            Option snapshot = OptionBuilder
+                .withArgName("true,false")
+                .hasOptionalArg()
+                .withDescription("Whether to use a consistent timestamp to " +
+                        "fetch data from the source database")
+                .create(SNAPSHOT);
+            options.addOption(snapshot);
         }
 
         @Override
@@ -574,6 +587,16 @@ public enum Command implements ConfigConstants {
                 // for record reader
                 conf.set(MarkLogicConstants.INPUT_MODE,
                                 MarkLogicConstants.BASIC_MODE);
+            }
+            
+            if (cmdline.hasOption(SNAPSHOT)) {
+                String arg = cmdline.getOptionValue(SNAPSHOT);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    setQueryTimestamp(conf, cmdline);
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    LOG.warn("Unrecognized option argument for " + SNAPSHOT
+                            + ": " + arg);
+                }
             }
             
             // construct a job
@@ -740,13 +763,29 @@ public enum Command implements ConfigConstants {
                 .withDescription("The partition where docs are inserted")
                 .create(OUTPUT_PARTITION_NAME);
             options.addOption(partition);
+            Option snapshot = OptionBuilder
+                .withArgName("true,false")
+                .hasOptionalArg()
+                .withDescription("Whether to use a consistent timestamp to " +
+                    "fetch data from the source database")
+                .create(SNAPSHOT);
+            options.addOption(snapshot);
         }
 
         @Override
         public Job createJob(Configuration conf, CommandLine cmdline)
                         throws IOException {
             applyConfigOptions(conf, cmdline);
-
+            
+            if (cmdline.hasOption(SNAPSHOT)) {
+                String arg = cmdline.getOptionValue(SNAPSHOT);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    setQueryTimestamp(conf, cmdline);
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    LOG.warn("Unrecognized option argument for " + SNAPSHOT
+                            + ": " + arg);
+                } 
+            }
             Job job = new Job(conf);
             job.setJarByClass(this.getClass());
             job.setInputFormatClass(DatabaseContentInputFormat.class);
@@ -949,6 +988,18 @@ public enum Command implements ConfigConstants {
             Job job, Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
             int availableThreads);
 
+    static void setQueryTimestamp(Configuration conf, CommandLine cmdline) 
+    throws IOException {
+        try {
+            ContentSource cs = InternalUtilities.getInputContentSource(conf);
+            Session session = cs.newSession();
+            conf.set(MarkLogicConstants.INPUT_QUERY_TIMESTAMP, 
+                    session.getCurrentServerPointInTime().toString());
+        } catch (Exception ex) {
+            throw new IOException("Error getting query timestamp", ex);
+        }     
+    }
+    
     static void configCommonOptions(Options options) {
         Option mode = OptionBuilder
             .withArgName(MODE)
