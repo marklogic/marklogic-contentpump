@@ -16,6 +16,7 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -210,7 +211,14 @@ implements MarkLogicConstants {
             }
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
-            query.setOptions(options);
+            String ts = conf.get(INPUT_QUERY_TIMESTAMP);
+            if (ts != null) {
+                options.setEffectivePointInTime(new BigInteger(ts));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Query timestamp: " + ts);
+                }
+            }
+            query.setOptions(options);       
             result = session.submitRequest(query);
         } catch (XccConfigException e) {
             LOG.error(e);
