@@ -44,13 +44,14 @@ public class DelimitedTextReader<VALUEIN> extends
     ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(DelimitedTextReader.class);
     protected static final char encapsulator = '"';
+    static final String DEFAULT_ROOT_NAME = "root";
     /**
      * header of delimited text
      */
     protected String[] fields;
     protected char delimiter;
-    protected static String ROOT_START = "<root>";
-    protected static String ROOT_END = "</root>";
+    protected static String rootStart;
+    protected static String rootEnd;
     protected CSVParser parser;
     protected InputStreamReader instream;
     protected boolean hasNext = true;
@@ -91,6 +92,11 @@ public class DelimitedTextReader<VALUEIN> extends
         parser = new CSVParser(instream, new CSVStrategy(delimiter,
             encapsulator, CSVStrategy.COMMENTS_DISABLED,
             CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
+        
+        String rootName = conf.get(CONF_DELIMITED_ROOT_NAME, 
+                DEFAULT_ROOT_NAME);
+        rootStart = '<' + rootName + '>';
+        rootEnd = "</" + rootName + '>';
     }
 
     protected void initDelimConf(Configuration conf) {
@@ -174,7 +180,7 @@ public class DelimitedTextReader<VALUEIN> extends
                 return true;
             }
             StringBuilder sb = new StringBuilder();
-            sb.append(ROOT_START);
+            sb.append(rootStart);
             for (int i = 0; i < fields.length; i++) {
                 if (!XMLChar.isValidName(fields[i])) {
                     fields[i] = getValidName(fields[i]);
@@ -199,7 +205,7 @@ public class DelimitedTextReader<VALUEIN> extends
                 sb.append(convertToCDATA(values[i]));
                 sb.append("</").append(fields[i]).append(">");
             }
-            sb.append(ROOT_END);
+            sb.append(rootEnd);
             if (value instanceof Text) {
                 ((Text) value).set(sb.toString());
             } else if (value instanceof ContentWithFileNameWritable) {
