@@ -106,6 +106,7 @@ public interface ConfigConstants {
     static final String DEFAULT_DELIMITER = ",";
     // TODO: merge with "aggregate_uri_id" ??
     static final String DELIMITED_URI_ID = "delimited_uri_id";
+    static final String DELIMITED_ROOT_NAME = "delimited_root_name";
     static final String FAST_LOAD = "fastload";
     static final String CONTENT_ENCODING = "content_encoding";
     static final String THREADS_PER_SPLIT = "thread_count_per_split";
@@ -122,6 +123,7 @@ public interface ConfigConstants {
     static final String CONF_DELIMITER = "mapreduce.marklogic.delimited.delimiter";
 
     static final String CONF_DELIMITED_URI_ID = "mapreduce.marklogic.delimited.uriid";
+    static final String CONF_DELIMITED_ROOT_NAME = "mapreduce.marklogic.delimited.rootname";
     static final String CONF_OUTPUT_URI_REPLACE = "mapreduce.marklogic.output.urireplace";
     static final String CONF_OUTPUT_URI_PREFIX = "mapreduce.marklogic.output_uriprefix";
     static final String CONF_OUTPUT_URI_SUFFIX = "mapreduce.marklogic.output_urisuffix";

@@ -16,7 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -40,8 +39,6 @@ import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
-import com.marklogic.xcc.exceptions.RequestException;
-import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
  * Enum of supported commands.
@@ -139,6 +136,14 @@ public enum Command implements ConfigConstants {
                 .withDescription("Delimited uri id for delimited text.")
                 .create(DELIMITED_URI_ID);
             options.addOption(delimitedUri);
+            Option delimitedRoot = OptionBuilder
+                .withArgName("root name")
+                .hasArg()
+                .withDescription("Root element local name of the XML " +
+                        "document constructed from one delimited text record.")
+                .create(DELIMITED_ROOT_NAME);
+            options.addOption(delimitedRoot);
+        options.addOption(delimitedUri);
             Option namespace = OptionBuilder
                 .withArgName(NAMESPACE)
                 .hasArg()
@@ -350,6 +355,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(DELIMITED_URI_ID)) {
                 String delimId = cmdline.getOptionValue(DELIMITED_URI_ID);
                 conf.set(CONF_DELIMITED_URI_ID, delimId);
+            }
+            if (cmdline.hasOption(DELIMITED_ROOT_NAME)) {
+                String delimRoot = cmdline.getOptionValue(DELIMITED_ROOT_NAME);
+                conf.set(CONF_DELIMITED_ROOT_NAME, delimRoot);
             }
             if (cmdline.hasOption(OUTPUT_FILENAME_AS_COLLECTION)) {
                 String arg = cmdline.getOptionValue(
