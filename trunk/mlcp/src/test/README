@@ -22,6 +22,9 @@ mvn test -DskipTests=false
 Run all tests (tests for distributed mode excluded) on Linux:
 mvn test -DskipTests=false -Plocal
 
+Run a specific test on Linux:
+mvn test -DskipTests=false  -Dtest=TestImportDelimitedText
+
 As Windows is not supported for mlcp distributed mode, use the following command to 
 skip tests for distributed mode on Windows:
 mvn.bat test -DskipTests=false -Plocal

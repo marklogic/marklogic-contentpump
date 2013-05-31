@@ -38,7 +38,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.IdGenerator;
-import com.marklogic.contentpump.utilities.LocalIdGenerator;
 
 /**
  * Reader for AggregateXMLInputFormat.
@@ -139,7 +138,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         recordNamespace = conf
             .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
         if (useAutomaticId) {
-            idGen = new LocalIdGenerator(file.toUri().getPath() + "-"
+            idGen = new IdGenerator(file.toUri().getPath() + "-"
                 + inSplit.getStart());
         }
     }

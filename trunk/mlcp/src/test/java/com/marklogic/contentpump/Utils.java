@@ -64,11 +64,13 @@ public class Utils {
     }
 
     public static void clearDB(String xccUri, String dbName)
-        throws XccConfigException, RequestException, URISyntaxException {
+        throws XccConfigException, RequestException, URISyntaxException, 
+        InterruptedException {
         String q = "for $forest in xdmp:database-forests(xdmp:database(\""
             + dbName + "\"))\n return xdmp:forest-clear($forest)";
         runQuery(xccUri, q);
         session.close();
+        Thread.sleep(2000);
     }
     
     /**

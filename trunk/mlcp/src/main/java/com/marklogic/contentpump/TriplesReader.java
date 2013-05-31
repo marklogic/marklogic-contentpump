@@ -16,7 +16,7 @@
 package com.marklogic.contentpump;
 
 import com.hp.hpl.jena.graph.Triple;
-import com.marklogic.contentpump.utilities.LocalIdGenerator;
+import com.marklogic.contentpump.utilities.IdGenerator;
 import org.apache.hadoop.io.Text;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.lang.PipedRDFIterator;
@@ -58,7 +58,7 @@ public class TriplesReader<VALUEIN> extends RDFReader<VALUEIN> {
         }
 
         inputFn = fsname;
-        idGen = new LocalIdGenerator(inputFn + "-" + splitStart);
+        idGen = new IdGenerator(inputFn + "-" + splitStart);
 
         rdfIter = new PipedRDFIterator<Triple>();
         rdfInputStream = new PipedTriplesStream(rdfIter);

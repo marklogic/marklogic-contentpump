@@ -32,6 +32,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.IdGenerator;
 import com.sun.org.apache.xml.internal.utils.XMLChar;
 
 /**
@@ -55,10 +56,13 @@ public class DelimitedTextReader<VALUEIN> extends
     protected CSVParser parser;
     protected InputStreamReader instream;
     protected boolean hasNext = true;
-    protected String idName;
+    protected String uriName; // the column name used for URI
     protected long fileLen = Long.MAX_VALUE;
     protected long bytesRead;
     protected Path file;
+    protected boolean generateId;
+    protected IdGenerator idGen;
+    protected int uriId = -1; // the column index used for URI
     
     @Override
     public void close() throws IOException {
@@ -88,18 +92,13 @@ public class DelimitedTextReader<VALUEIN> extends
             //String will be converted and read as UTF-8 String
         }
         fileLen = inSplit.getLength();
-        initDelimConf(conf);
+        initDelimConf(conf, inSplit);
         parser = new CSVParser(instream, new CSVStrategy(delimiter,
             encapsulator, CSVStrategy.COMMENTS_DISABLED,
             CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
-        
-        String rootName = conf.get(CONF_DELIMITED_ROOT_NAME, 
-                DEFAULT_ROOT_NAME);
-        rootStart = '<' + rootName + '>';
-        rootEnd = "</" + rootName + '>';
     }
 
-    protected void initDelimConf(Configuration conf) {
+    protected void initDelimConf(Configuration conf, InputSplit inSplit) {
         String delimStr = conf.get(ConfigConstants.CONF_DELIMITER,
                 ConfigConstants.DEFAULT_DELIMITER);
         if (delimStr.length() == 1) {
@@ -108,7 +107,20 @@ public class DelimitedTextReader<VALUEIN> extends
             LOG.error("Incorrect delimitor: " + delimiter
                 + ". Expects single character.");
         }
-        idName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
+        uriName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
+        String rootName = conf.get(CONF_DELIMITED_ROOT_NAME, 
+                DEFAULT_ROOT_NAME);
+        rootStart = '<' + rootName + '>';
+        rootEnd = "</" + rootName + '>';
+        if (uriName == null) {
+            generateId = conf.getBoolean(CONF_DELIMITED_GENERATE_URI, false);
+            if (generateId) {
+                idGen = new IdGenerator(file.toUri().getPath() + "-"
+                        + ((FileSplit)inSplit).getStart());
+            } else {
+                uriId = 0;
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -126,8 +138,8 @@ public class DelimitedTextReader<VALUEIN> extends
             }
             if (fields == null) {
                 fields = values;
-                boolean found = false;
-                for (int i = 0; i < fields.length; i++) {
+                boolean found = generateId || uriId == 0;
+                for (int i = 0; i < fields.length && !found; i++) {
                     // Oracle jdk bug 4508058: UTF-8 encoding does not recognize
                     // initial BOM
                     // will not be fixed. Work Around :
@@ -150,8 +162,8 @@ public class DelimitedTextReader<VALUEIN> extends
                     if (!XMLChar.isValidName(fields[i])) {
                         fields[i] = getValidName(fields[i]);
                     }
-                    if (i == 0 && idName == null || fields[i].equals(idName)) {
-                        idName = fields[i];
+                    if (fields[i].equals(uriName)) {
+                        uriId = i;
                         found = true;
                         break;
                     }
@@ -161,7 +173,7 @@ public class DelimitedTextReader<VALUEIN> extends
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Header: " + convertToLine(fields));
                     }
-                    throw new IOException("Delimited_uri_id " + idName
+                    throw new IOException("Delimited_uri_id " + uriName
                         + " is not found.");
                 }
                 values = parser.getLine();
@@ -185,7 +197,7 @@ public class DelimitedTextReader<VALUEIN> extends
                 if (!XMLChar.isValidName(fields[i])) {
                     fields[i] = getValidName(fields[i]);
                 }
-                if (idName.equals(fields[i])) {
+                if (!generateId && uriId == i) {
                     if (values[i] == null || values[i].equals("")) {
                         LOG.error(convertToLine(fields)
                             + ":column used for uri_id is empty");
@@ -201,11 +213,14 @@ public class DelimitedTextReader<VALUEIN> extends
                         return true;
                     }
                 }
-                sb.append("<").append(fields[i]).append(">");
+                sb.append('<').append(fields[i]).append('>');
                 sb.append(convertToCDATA(values[i]));
-                sb.append("</").append(fields[i]).append(">");
+                sb.append("</").append(fields[i]).append('>');
             }
             sb.append(rootEnd);
+            if (generateId) {
+                setKey(idGen.incrementAndGet());
+            }
             if (value instanceof Text) {
                 ((Text) value).set(sb.toString());
             } else if (value instanceof ContentWithFileNameWritable) {

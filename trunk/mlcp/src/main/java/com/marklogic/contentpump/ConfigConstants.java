@@ -107,6 +107,7 @@ public interface ConfigConstants {
     // TODO: merge with "aggregate_uri_id" ??
     static final String DELIMITED_URI_ID = "delimited_uri_id";
     static final String DELIMITED_ROOT_NAME = "delimited_root_name";
+    static final String DELIMITED_GENERATE_URI = "generate_uri";
     static final String FAST_LOAD = "fastload";
     static final String CONTENT_ENCODING = "content_encoding";
     static final String THREADS_PER_SPLIT = "thread_count_per_split";
@@ -114,34 +115,60 @@ public interface ConfigConstants {
     static final String OUTPUT_PARTITION_NAME = "output_partition_name";
     
     // configurations to be overwritten in hadoop conf
-    static final String CONF_INPUT_COMPRESSION_CODEC = "mapreduce.marklogic.input.compressioncodec";
+    static final String CONF_INPUT_COMPRESSION_CODEC = 
+        "mapreduce.marklogic.input.compressioncodec";
     static final String CONF_MAX_SPLIT_SIZE = "mapred.max.split.size";
     static final String CONF_MIN_SPLIT_SIZE = "mapred.min.split.size";
-    static final String CONF_AGGREGATE_URI_ID = "mapreduce.marklogic.aggregate.uriid";
-    static final String CONF_AGGREGATE_RECORD_ELEMENT = "mapreduce.marklogic.aggregate.recordelement";
-    static final String CONF_AGGREGATE_RECORD_NAMESPACE = "mapreduce.marklogic.aggregate.recordnamespace";
-    static final String CONF_DELIMITER = "mapreduce.marklogic.delimited.delimiter";
+    static final String CONF_AGGREGATE_URI_ID = 
+        "mapreduce.marklogic.aggregate.uriid";
+    static final String CONF_AGGREGATE_RECORD_ELEMENT = 
+        "mapreduce.marklogic.aggregate.recordelement";
+    static final String CONF_AGGREGATE_RECORD_NAMESPACE = 
+        "mapreduce.marklogic.aggregate.recordnamespace";
+    static final String CONF_DELIMITER = 
+        "mapreduce.marklogic.delimited.delimiter";
 
-    static final String CONF_DELIMITED_URI_ID = "mapreduce.marklogic.delimited.uriid";
-    static final String CONF_DELIMITED_ROOT_NAME = "mapreduce.marklogic.delimited.rootname";
-    static final String CONF_OUTPUT_URI_REPLACE = "mapreduce.marklogic.output.urireplace";
-    static final String CONF_OUTPUT_URI_PREFIX = "mapreduce.marklogic.output_uriprefix";
-    static final String CONF_OUTPUT_URI_SUFFIX = "mapreduce.marklogic.output_urisuffix";
-    static final String CONF_OUTPUT_FILEPATH = "mapreduce.marklogic.output.filepath";
-    static final String CONF_INPUT_FILE_PATTERN = "mapreduce.marklogic.input.filepattern";
-    static final String CONF_OUTPUT_FILENAME_AS_COLLECTION = "mapreduce.marklogic.output.filenameascollection";
+    static final String CONF_DELIMITED_URI_ID = 
+        "mapreduce.marklogic.delimited.uriid";
+    static final String CONF_DELIMITED_ROOT_NAME = 
+        "mapreduce.marklogic.delimited.rootname";
+    static final String CONF_DELIMITED_GENERATE_URI = 
+        "mapreduce.marklogic.delimited.generateuri";
+    static final String CONF_OUTPUT_URI_REPLACE = 
+        "mapreduce.marklogic.output.urireplace";
+    static final String CONF_OUTPUT_URI_PREFIX = 
+        "mapreduce.marklogic.output_uriprefix";
+    static final String CONF_OUTPUT_URI_SUFFIX = 
+        "mapreduce.marklogic.output_urisuffix";
+    static final String CONF_OUTPUT_FILEPATH = 
+        "mapreduce.marklogic.output.filepath";
+    static final String CONF_INPUT_FILE_PATTERN = 
+        "mapreduce.marklogic.input.filepattern";
+    static final String CONF_OUTPUT_FILENAME_AS_COLLECTION = 
+        "mapreduce.marklogic.output.filenameascollection";
     static final String CONF_MODE = "mapreduce.marklogic.mode";
-    static final String CONF_INPUT_SEQUENCEFILE_KEY_CLASS = "mapreduce.marklogic.input.sequencefile.keyclass";
-    static final String CONF_INPUT_SEQUENCEFILE_VALUE_CLASS = "mapreduce.marklogic.input.sequencefile.valueclass";
-    static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE = "mapreduce.marklogic.input.sequencefile.valuetype";
-    static final String CONF_DIRECTORY_FILTER = "mapreduce.marklogic.directory.filter";
-    static final String CONF_COLLECTION_FILTER = "mapreduce.marklogic.collection.filter";
+    static final String CONF_INPUT_SEQUENCEFILE_KEY_CLASS = 
+        "mapreduce.marklogic.input.sequencefile.keyclass";
+    static final String CONF_INPUT_SEQUENCEFILE_VALUE_CLASS = 
+        "mapreduce.marklogic.input.sequencefile.valueclass";
+    static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE = 
+        "mapreduce.marklogic.input.sequencefile.valuetype";
+    static final String CONF_DIRECTORY_FILTER = 
+        "mapreduce.marklogic.directory.filter";
+    static final String CONF_COLLECTION_FILTER = 
+        "mapreduce.marklogic.collection.filter";
     static final String CONF_OUTPUT_TYPE = "mapreduce.marklogic.output.type";
-    static final String CONF_COPY_COLLECTIONS = "mapreduce.marklogic.copycollections";
-    static final String CONF_COPY_PERMISSIONS = "mapreduce.marklogic.copypermissions";
-    static final String CONF_COPY_PROPERTIES = "mapreduce.marklogic.copyproperties";
+    static final String CONF_COPY_COLLECTIONS = 
+        "mapreduce.marklogic.copycollections";
+    static final String CONF_COPY_PERMISSIONS = 
+        "mapreduce.marklogic.copypermissions";
+    static final String CONF_COPY_PROPERTIES = 
+        "mapreduce.marklogic.copyproperties";
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
-    static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = "mapreduce.marklogic.input.archive.metadataoptional";
-    static final String CONF_THREADS_PER_SPLIT = "mapreduce.marklogic.multithreadedmapper.threads";
-    static final String CONF_MULTITHREADEDMAPPER_CLASS = "mapreduce.marklogic.multithreadedmapper.class";
+    static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = 
+        "mapreduce.marklogic.input.archive.metadataoptional";
+    static final String CONF_THREADS_PER_SPLIT = 
+        "mapreduce.marklogic.multithreadedmapper.threads";
+    static final String CONF_MULTITHREADEDMAPPER_CLASS = 
+        "mapreduce.marklogic.multithreadedmapper.class";
 }
