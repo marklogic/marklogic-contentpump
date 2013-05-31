@@ -94,8 +94,7 @@ public abstract class ImportRecordReader<VALUEIN> extends
     throws IOException, InterruptedException;
     
     @SuppressWarnings("unchecked")
-    protected void initConfig(TaskAttemptContext context) 
-        {
+    protected void initConfig(TaskAttemptContext context) {
         conf = context.getConfiguration();
         String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
             MarkLogicConstants.DEFAULT_CONTENT_TYPE);

@@ -51,6 +51,61 @@ public class TestImportDelimitedText{
         assertTrue(sb.toString().equals(key));
     }
     
+    @Test
+    public void testImportDelimitedTextGenerateId() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
+            + " -generate_uri"
+            + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
+
+        StringBuilder sb = new StringBuilder();
+        while(result.hasNext()) {
+            String s = result.next().asString();
+            sb.append(s);
+        }
+        Utils.closeSession();
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportDelimitedText#testImportDelimitedGenerateId.txt");
+        assertTrue(sb.toString().equals(key));
+    }
+    
+    @Test
+    public void testImportDelimitedTextRootName() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
+            + " -delimited_root_name rot"
+            + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(/rot)");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        Utils.closeSession();
+    }
     
     @Test
     public void testImportDelimitedTextPipe() throws Exception {

@@ -15,10 +15,20 @@
  */
 package com.marklogic.contentpump.utilities;
 
-public interface IdGenerator {
-    /**
-     * Increment the id and return the id as String
-     * @return id
-     */
-    public String incrementAndGet();
+import java.util.concurrent.atomic.AtomicInteger;
+
+
+public class IdGenerator {
+    private AtomicInteger autoid;
+    private String base;
+    
+    public IdGenerator(String base) {
+        autoid = new AtomicInteger(0);
+        this.base = base != null ? base + "-" : "";
+    }
+
+    public String incrementAndGet() {
+        return base + autoid.incrementAndGet();
+    }
+
 }

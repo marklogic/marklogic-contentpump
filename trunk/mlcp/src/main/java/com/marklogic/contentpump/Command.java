@@ -143,7 +143,13 @@ public enum Command implements ConfigConstants {
                         "document constructed from one delimited text record.")
                 .create(DELIMITED_ROOT_NAME);
             options.addOption(delimitedRoot);
-        options.addOption(delimitedUri);
+            Option generateUri = OptionBuilder
+                .withArgName("true, false")
+                .hasOptionalArg()
+                .withDescription("Enables automatic URI generation for " +
+                        "delimited text records.")
+                .create(DELIMITED_GENERATE_URI);
+            options.addOption(generateUri);
             Option namespace = OptionBuilder
                 .withArgName(NAMESPACE)
                 .hasArg()
@@ -316,9 +322,9 @@ public enum Command implements ConfigConstants {
                     conf.setBoolean(CONF_INPUT_ARCHIVE_METADATA_OPTIONAL,
                                     false);
                 } else {
-                    LOG.warn("Unrecognized option argument for "
-                        + ARCHIVE_METADATA_OPTIONAL + ": "
-                        + arg);
+                    throw new IllegalArgumentException(
+                        "Unrecognized option argument for "
+                        + ARCHIVE_METADATA_OPTIONAL + ": "+ arg);
                 }
             }
 
@@ -355,10 +361,37 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(DELIMITED_URI_ID)) {
                 String delimId = cmdline.getOptionValue(DELIMITED_URI_ID);
                 conf.set(CONF_DELIMITED_URI_ID, delimId);
+                
+                if (cmdline.hasOption(DELIMITED_GENERATE_URI)) {
+                    String arg = 
+                        cmdline.getOptionValue(DELIMITED_GENERATE_URI);
+                    if (arg == null || arg.equalsIgnoreCase("true")) {
+                        throw new IllegalArgumentException("The setting for " +
+                            DELIMITED_GENERATE_URI + " option conflicts with " 
+                            + DELIMITED_URI_ID);
+                    }
+                }
             }
             if (cmdline.hasOption(DELIMITED_ROOT_NAME)) {
                 String delimRoot = cmdline.getOptionValue(DELIMITED_ROOT_NAME);
                 conf.set(CONF_DELIMITED_ROOT_NAME, delimRoot);
+            }
+            if (cmdline.hasOption(DELIMITED_GENERATE_URI)) {
+                String arg = 
+                    cmdline.getOptionValue(DELIMITED_GENERATE_URI);
+                if (arg == null || arg.equalsIgnoreCase("true")) {
+                    conf.setBoolean(CONF_DELIMITED_GENERATE_URI, true);
+                    if (getInputType(cmdline) != InputType.DELIMITED_TEXT) {
+                        throw new IllegalArgumentException(
+                                DELIMITED_GENERATE_URI + 
+                                " is only applicable to " +
+                                InputType.DELIMITED_TEXT.name());
+                    }
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                            DELIMITED_GENERATE_URI + ": " + arg);
+                }
             }
             if (cmdline.hasOption(OUTPUT_FILENAME_AS_COLLECTION)) {
                 String arg = cmdline.getOptionValue(
@@ -381,8 +414,9 @@ public enum Command implements ConfigConstants {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_CLEAN_DIR, 
                             false);
                 } else {
-                    LOG.warn("Unrecognized option argument for "
-                                    + OUTPUT_CLEANDIR + ": " + arg);
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                            OUTPUT_CLEANDIR + ": " + arg);
                 }
             }
             String batchSize = cmdline.getOptionValue(BATCH_SIZE);
@@ -467,7 +501,8 @@ public enum Command implements ConfigConstants {
                 } else if (arg.equalsIgnoreCase("false")) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, false);
                 } else {
-                    LOG.warn("Unrecognized option argument for " + FAST_LOAD
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + FAST_LOAD
                                     + ": " + arg);
                 }
             }
@@ -601,9 +636,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(SNAPSHOT)) {
                 String arg = cmdline.getOptionValue(SNAPSHOT);
                 if (arg == null || arg.equalsIgnoreCase("true")){
-                    setQueryTimestamp(conf, cmdline);
+                    setQueryTimestamp(conf);
                 } else if (!arg.equalsIgnoreCase("false")) {
-                    LOG.warn("Unrecognized option argument for " + SNAPSHOT
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SNAPSHOT
                             + ": " + arg);
                 }
             }
@@ -789,9 +825,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(SNAPSHOT)) {
                 String arg = cmdline.getOptionValue(SNAPSHOT);
                 if (arg == null || arg.equalsIgnoreCase("true")){
-                    setQueryTimestamp(conf, cmdline);
+                    setQueryTimestamp(conf);
                 } else if (!arg.equalsIgnoreCase("false")) {
-                    LOG.warn("Unrecognized option argument for " + SNAPSHOT
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SNAPSHOT
                             + ": " + arg);
                 } 
             }
@@ -997,7 +1034,7 @@ public enum Command implements ConfigConstants {
             Job job, Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
             int availableThreads);
 
-    static void setQueryTimestamp(Configuration conf, CommandLine cmdline) 
+    static void setQueryTimestamp(Configuration conf) 
     throws IOException {
         try {
             ContentSource cs = InternalUtilities.getInputContentSource(conf);
@@ -1196,9 +1233,9 @@ public enum Command implements ConfigConstants {
             } else if (arg.equalsIgnoreCase("false")) {
                 conf.setBoolean(CONF_COPY_COLLECTIONS, false);
             } else {
-                LOG.warn("Unrecognized option argument for " + COPY_COLLECTIONS
+                throw new IllegalArgumentException(
+                        "Unrecognized option argument for " + COPY_COLLECTIONS
                                 + ": " + arg);
-                conf.set(CONF_COPY_COLLECTIONS, DEFAULT_COPY_COLLECTIONS);
             }
         } else {
             conf.set(CONF_COPY_COLLECTIONS, DEFAULT_COPY_COLLECTIONS);
@@ -1210,9 +1247,9 @@ public enum Command implements ConfigConstants {
             } else if (arg.equalsIgnoreCase("false")) {
                 conf.setBoolean(CONF_COPY_PERMISSIONS, false);
             } else {
-                LOG.warn("Unrecognized option argument for " + COPY_PERMISSIONS
+                throw new IllegalArgumentException(
+                        "Unrecognized option argument for " + COPY_PERMISSIONS
                                 + ": " + arg);
-                conf.set(CONF_COPY_PERMISSIONS, DEFAULT_COPY_PERMISSIONS);
             }
         } else {
             conf.set(CONF_COPY_PERMISSIONS, DEFAULT_COPY_PERMISSIONS);
@@ -1234,9 +1271,9 @@ public enum Command implements ConfigConstants {
             } else if (arg.equalsIgnoreCase("false")) {
                 conf.setBoolean(CONF_COPY_QUALITY, false);
             } else {
-                LOG.warn("Unrecognized option argument for " + COPY_QUALITY
+                throw new IllegalArgumentException(
+                        "Unrecognized option argument for " + COPY_QUALITY
                                 + ": " + arg);
-                conf.set(CONF_COPY_QUALITY, DEFAULT_COPY_QUALITY);
             }
         } else {
             conf.set(CONF_COPY_QUALITY, DEFAULT_COPY_QUALITY);

@@ -17,7 +17,7 @@ package com.marklogic.contentpump;
 
 import com.hp.hpl.jena.graph.Node;
 import com.marklogic.contentpump.utilities.IdGenerator;
-import com.marklogic.contentpump.utilities.LocalIdGenerator;
+import com.marklogic.contentpump.utilities.IdGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
@@ -95,7 +95,7 @@ public abstract class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         configFileNameAsCollection(conf, file);
         fs = file.getFileSystem(context.getConfiguration());
         loadModel(file.getName(), fs.open(file));
-        idGen = new LocalIdGenerator(inputFn + "-" + splitStart);
+        idGen = new IdGenerator(inputFn + "-" + splitStart);
     }
 
     protected abstract void loadModel(String fsname, final InputStream in) throws IOException;

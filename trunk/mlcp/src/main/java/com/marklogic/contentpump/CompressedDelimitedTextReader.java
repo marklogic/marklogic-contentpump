@@ -55,7 +55,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         initConfig(context);
-        initDelimConf(conf);
+        initDelimConf(conf, inSplit);
         
         Path file = ((FileSplit) inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());

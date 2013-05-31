@@ -1,6 +1,6 @@
 package com.marklogic.contentpump;
 
-import com.marklogic.contentpump.utilities.LocalIdGenerator;
+import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.mapreduce.CompressionCodec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,7 +92,7 @@ public class CompressedQuadsReader<VALUEIN> extends
                 + codec.name());
         }
 
-        idGen = new LocalIdGenerator(inputFn + "-" + splitStart);
+        idGen = new IdGenerator(inputFn + "-" + splitStart);
     }
 
     private boolean nextRecordInAggregate() throws IOException, InterruptedException {
