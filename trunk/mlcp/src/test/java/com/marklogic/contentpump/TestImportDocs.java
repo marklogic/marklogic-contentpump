@@ -144,6 +144,7 @@ public class TestImportDocs {
      
     @Test
     public void testImportTransformMixed() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"///AbacuS.xml"
@@ -174,6 +175,7 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransformBinary() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/2012-06-13_16-26-58_431.jpg"
@@ -203,6 +205,7 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransformText() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
