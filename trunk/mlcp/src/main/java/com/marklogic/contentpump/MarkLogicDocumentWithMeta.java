@@ -45,9 +45,10 @@ public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
             return;
         }
         options.setQuality(meta.quality);
-        options.setCollections(meta.collectionsList.toArray(new String[0]));
+        options.setCollections(meta.collectionsList
+            .toArray(new String[meta.collectionsList.size()]));
         options.setPermissions(meta.permissionsList
-            .toArray(new ContentPermission[0]));
+            .toArray(new ContentPermission[meta.permissionsList.size()]));
     }
 
     public String getProperties() {

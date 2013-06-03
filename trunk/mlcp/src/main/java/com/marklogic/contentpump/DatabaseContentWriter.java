@@ -67,17 +67,17 @@ public class DatabaseContentWriter<VALUE> extends
     /**
      * Directory of the output documents.
      */
-    private String outputDir;
+    protected String outputDir;
 
     /**
      * Content options of the output documents.
      */
-    private ContentCreateOptions options;
+    protected ContentCreateOptions options;
 
     /**
      * A map from a forest id to a ContentSource.
      */
-    private Map<String, ContentSource> forestSourceMap;
+    protected Map<String, ContentSource> forestSourceMap;
 
     /**
      * Content lists for each forest.
@@ -88,7 +88,7 @@ public class DatabaseContentWriter<VALUE> extends
     /**
      * An array of forest ids
      */
-    private String[] forestIds;
+    protected String[] forestIds;
 
     /**
      * Counts of documents per forest.
@@ -98,7 +98,7 @@ public class DatabaseContentWriter<VALUE> extends
     /**
      * Whether in fast load mode.
      */
-    private boolean fastLoad;
+    protected boolean fastLoad;
 
     /**
      * Batch size.
@@ -108,18 +108,18 @@ public class DatabaseContentWriter<VALUE> extends
     /**
      * Counts of requests per forest.
      */
-    private int[] stmtCounts;
+    protected int[] stmtCounts;
 
     /**
      * Sessions per forest.
      */
-    private Session[] sessions;
+    protected Session[] sessions;
     private boolean tolerateErrors;
     
-    private AssignmentManager am;
-    private long []docCount;
+    protected AssignmentManager am;
+    protected long []docCount;
     //default boolean is false
-    private boolean needDocCount;
+    protected boolean needDocCount;
     
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
@@ -202,7 +202,7 @@ public class DatabaseContentWriter<VALUE> extends
      * fetch the options information from conf and metadata, set to the field
      * "options"
      */
-    private void newContentCreateOptions(DocumentMetadata meta) {
+    protected void newContentCreateOptions(DocumentMetadata meta) {
         options = new ContentCreateOptions();
 
         updateCopyOptions(options, meta);
@@ -224,23 +224,18 @@ public class DatabaseContentWriter<VALUE> extends
     @Override
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {
-        String uri = key.getUri();
-        String forestId = ContentOutputFormat.ID_PREFIX;
         int fId = 0;
+        String uri = null;
+        String forestId = ContentOutputFormat.ID_PREFIX;
         if (fastLoad) {
-            // compute forest to write to
-            if (outputDir != null && !outputDir.isEmpty()) {
-                uri = outputDir.endsWith("/") || uri.startsWith("/") ? outputDir
-                    + uri : outputDir + '/' + uri;
-            }
-            key.setUri(uri);
-            key.validate();
+            uri = getUriWithOutputDir(key, outputDir);
             fId = am.getPlacementForestIndex(key);
             forestId = forestIds[fId];
+        } else {
+            uri = key.getUri();
         }
 
         try {
-            boolean metaOnly = false;
             Content content = null;
             DocumentMetadata meta = null;
             if (value instanceof MarkLogicDocumentWithMeta) {
@@ -332,10 +327,6 @@ public class DatabaseContentWriter<VALUE> extends
                 }
                 // meta's properties is null if CONF_COPY_PROPERTIES is false
                 if (meta != null && meta.getProperties() != null) {
-                    if (metaOnly) {
-                        uri = uri.substring(0, uri.length()
-                            - DocumentMetadata.EXTENSION.length());
-                    }
                     setDocumentProperties(uri, meta.getProperties(),
                         sessions[fId]);
                     stmtCounts[fId]++;
@@ -494,7 +485,7 @@ public class DatabaseContentWriter<VALUE> extends
      * @param forestId
      * @throws RequestException
      */
-    private void setDocumentProperties(String _uri, String _xmlString,
+    protected void setDocumentProperties(String _uri, String _xmlString,
         Session s) throws RequestException {
         String query = XQUERY_VERSION_1_0_ML
             + "declare variable $URI as xs:string external;\n"
@@ -558,14 +549,14 @@ public class DatabaseContentWriter<VALUE> extends
      * @param fId forest index
      * @param count count of newly added docs
      */
-    private void updateDocCount(int fId, int count) {
+    protected void updateDocCount(int fId, int count) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
         docCount[fId] += count;
         sap.updateStats(fId, count);
     }
 
-    private void rollbackDocCount(int fId) {
+    protected void rollbackDocCount(int fId) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
         sap.updateStats(fId, -docCount[fId]);

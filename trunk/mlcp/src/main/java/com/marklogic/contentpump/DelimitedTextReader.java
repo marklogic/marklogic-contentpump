@@ -199,6 +199,7 @@ public class DelimitedTextReader<VALUEIN> extends
                 }
                 if (!generateId && uriId == i) {
                     if (values[i] == null || values[i].equals("")) {
+                        //TODO log file name and line number
                         LOG.error(convertToLine(fields)
                             + ":column used for uri_id is empty");
                         // clear the key of previous record

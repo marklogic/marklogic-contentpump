@@ -55,7 +55,8 @@ public enum Command implements ConfigConstants {
             configCopyOptions(options);
             configCommonOutputOptions(options);
             configBatchTxn(options);
-
+            configModule(options);
+            
 			Option inputFilePath = OptionBuilder
                 .withArgName("path")
                 .hasArg()
@@ -260,6 +261,7 @@ public enum Command implements ConfigConstants {
                 .withDescription("The partition where docs are inserted")
                 .create(OUTPUT_PARTITION_NAME);
             options.addOption(partition);
+            
         }
 
         @Override
@@ -529,6 +531,8 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(OUTPUT_PARTITION_NAME);
                 conf.set(MarkLogicConstants.OUTPUT_PARTITION_NAME, arg);
             }
+            
+            applyModuleConfigOptions(conf, cmdline, batchSize);
         }
 
 		@Override
@@ -724,7 +728,8 @@ public enum Command implements ConfigConstants {
             configCommonOutputOptions(options);
             configFilteringOptions(options);
             configBatchTxn(options);
-
+            configModule(options);
+            
             Option inputUsername = OptionBuilder
                 .withArgName("username")
                 .hasArg()
@@ -838,7 +843,11 @@ public enum Command implements ConfigConstants {
             job.setMapperClass(DocumentMapper.class);
             job.setMapOutputKeyClass(DocumentURI.class);
             job.setMapOutputValueClass(MarkLogicDocument.class);
-            job.setOutputFormatClass(DatabaseContentOutputFormat.class);
+            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+                job.setOutputFormatClass(DatabaseTransformOutputFormat.class);
+            } else {
+                job.setOutputFormatClass(DatabaseContentOutputFormat.class);
+            }
             job.setOutputKeyClass(DocumentURI.class);
             return job;
         }
@@ -918,6 +927,8 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(OUTPUT_PARTITION_NAME);
                 conf.set(MarkLogicConstants.OUTPUT_PARTITION_NAME, arg);
             }
+            
+            applyModuleConfigOptions(conf, cmdline, batchSize);
         }
 
 		@Override
@@ -1202,6 +1213,28 @@ public enum Command implements ConfigConstants {
             .create(TRANSACTION_SIZE);
         options.addOption(txnSize);
     }
+    
+    static void configModule(Options options) {
+        Option moduleUri = OptionBuilder
+            .withArgName("number")
+            .hasArg()
+            .withDescription(
+                "Path to the module containing the transform function")
+            .create(TRANSFORM_MODULE);
+        options.addOption(moduleUri);
+        Option ns = OptionBuilder.withArgName("number").hasArg()
+            .withDescription("Namespace of the transform function")
+            .create(TRANSFORM_NAMESPACE);
+        options.addOption(ns);
+        Option func = OptionBuilder.withArgName("number").hasArg()
+            .withDescription("Name of the transform function")
+            .create(TRANSFORM_FUNCTION);
+        options.addOption(func);
+        Option param = OptionBuilder.withArgName("number").hasArg()
+            .withDescription("Name of the transform function")
+            .create(TRANSFORM_PARAM);
+        options.addOption(param);
+    }
 
     static void configFilteringOptions(Options options) {
         Option df = OptionBuilder
@@ -1223,6 +1256,36 @@ public enum Command implements ConfigConstants {
                     "element nodes from the server")
             .create(DOCUMENT_SELECTOR);
         options.addOption(ds);
+    }
+    
+    static void applyModuleConfigOptions(Configuration conf,
+        CommandLine cmdline, String batchSize) {
+        if (cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (batchSize !=null && Integer.valueOf(batchSize)> 1) {
+                //batch size is set explicitly to > 1
+                throw new UnsupportedOperationException(
+                    "Server-side transformation can't work with batch size greater than 1");
+            }
+            if(batchSize == null) {
+                conf.setInt(MarkLogicConstants.BATCH_SIZE, 1);
+            }
+            String arg = cmdline.getOptionValue(TRANSFORM_MODULE);
+            conf.set(CONF_TRANSFORM_MODULE, arg);
+            
+            if (cmdline.hasOption(TRANSFORM_NAMESPACE)) {
+                arg = cmdline.getOptionValue(TRANSFORM_NAMESPACE);
+                conf.set(CONF_TRANSFORM_NAMESPACE, arg);
+            }
+            if (cmdline.hasOption(TRANSFORM_FUNCTION)) {
+                arg = cmdline.getOptionValue(TRANSFORM_FUNCTION);
+                conf.set(CONF_TRANSFORM_FUNCTION, arg);
+            }
+            if (cmdline.hasOption(TRANSFORM_PARAM)) {
+                arg = cmdline.getOptionValue(TRANSFORM_PARAM);
+                conf.set(CONF_TRANSFORM_PARAM, arg);
+            }
+        }
+
     }
 
     static void applyCopyConfigOptions(Configuration conf, CommandLine cmdline) {
