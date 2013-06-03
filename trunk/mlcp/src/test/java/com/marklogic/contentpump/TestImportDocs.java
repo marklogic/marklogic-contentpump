@@ -12,7 +12,6 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
-import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
@@ -100,9 +99,121 @@ public class TestImportDocs {
     public void testImportText() throws Exception {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
-            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
             + " -thread_count 1 -mode local -output_uri_prefix ABC"
             + " -output_collections test,ML -document_type text";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportTextAsBinary() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
+            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -output_collections test,ML -document_type binary";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        Utils.closeSession();
+    }
+    
+     
+    @Test
+    public void testImportTransformMixed() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"///AbacuS.xml"
+            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -output_collections test,ML"
+            + " -output_permissions admin,read,admin,update,admin,insert,admin,execute"
+            + " -output_quality 1"
+            + " -output_language fr"
+            + " -namespace test"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_module /lc.xqy"
+            + " -transaction_size 10";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("93", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportTransformBinary() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/2012-06-13_16-26-58_431.jpg"
+            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -output_collections test,ML -document_type binary"
+            + " -output_permissions admin,read,admin,update,admin,insert,admin,execute"
+            + " -output_quality 1"
+            + " -output_language fr"
+            + " -namespace test"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_module /lc.xqy";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportTransformText() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
+            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -output_collections test,ML -document_type text"
+            + " -output_permissions admin,read,admin,update,admin,insert,admin,execute"
+            + " -output_quality 1"
+            + " -output_language fr"
+            + " -namespace test"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_module /lc.xqy";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
@@ -150,6 +261,31 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki.zip"
             + " -thread_count 4 -mode local"
+            + " -input_compressed -input_compression_codec zip"
+            + " -output_collections test,ML";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection(\"test\"))");
+        assertTrue(result.hasNext());
+        assertEquals("93", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportMixedDocsZipFast() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki.zip"
+            + " -thread_count 4 -mode local -fastload"
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -240,6 +376,38 @@ public class TestImportDocs {
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML" 
             + " -thread_count_per_split 2";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection(\"test\"))");
+        assertTrue(result.hasNext());
+        assertEquals("93", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    /*
+     * ingest two zip files
+     * each loaded with MultithreadedMapper using 1 threads
+     * use thread_count_per_split =1 to enforce old behavior
+     * thread_count is 3
+     */
+    @Test
+    public void testImportMixedDocsZipMultithreadedMapperOldBehavior() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips" 
+            + " -thread_count 3 -mode local"
+            + " -input_compressed -input_compression_codec zip"
+            + " -output_collections test,ML" 
+            + " -thread_count_per_split 1";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
