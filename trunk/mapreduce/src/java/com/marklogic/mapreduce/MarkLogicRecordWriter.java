@@ -105,4 +105,23 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
     public int getTransactionSize(Configuration conf) {
         return conf.getInt(TXN_SIZE, 1000);
     }
+    
+    /**
+     * if outputDir is available and valid, modify DocumentURI, and return uri
+     * in string
+     * 
+     * @param key
+     * @param outputDir
+     * @return URI
+     */
+    protected String getUriWithOutputDir(DocumentURI key, String outputDir){
+        String uri = key.getUri();
+        if (outputDir != null && !outputDir.isEmpty()) {
+            uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
+                  outputDir + uri : outputDir + '/' + uri;
+        }    
+        key.setUri(uri);
+        key.validate();
+        return uri;
+    }
 }
