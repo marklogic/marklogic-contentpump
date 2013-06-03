@@ -65,17 +65,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     /**
      * Directory of the output documents.
      */
-    private String outputDir;
+    protected String outputDir;
     
     /**
      * Content options of the output documents.
      */
-    private ContentCreateOptions options;
+    protected ContentCreateOptions options;
     
     /**
      * A map from a forest id to a ContentSource. 
      */
-    private Map<String, ContentSource> forestSourceMap;
+    protected Map<String, ContentSource> forestSourceMap;
     
     /**
      * Content lists for each forest.
@@ -85,7 +85,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     /**
      * An array of forest ids
      */
-    private String[] forestIds;
+    protected String[] forestIds;
     
     /** 
      * Counts of documents per forest.
@@ -95,38 +95,38 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     /**
      * Whether in fast load mode.
      */
-    private boolean fastLoad;
+    protected boolean fastLoad;
     
     /**
      * Batch size.
      */
-    private int batchSize;
+    protected int batchSize;
     
     /**
      * Counts of requests per forest.
      */
-    private int[] stmtCounts;
+    protected int[] stmtCounts;
     
     /**
      * Sessions per forest.
      */
-    private Session[] sessions;
+    protected Session[] sessions;
     
     private boolean formatNeeded;
     
     private FileSystem fs;
     
-    private InputStream is;
+    protected InputStream is;
     
     private boolean streaming;
     
     private boolean tolerateErrors;
 
-    private AssignmentManager am;
+    protected AssignmentManager am;
     
-    private long []docCount;
+    protected long []docCount;
     //default boolean is false
-    private boolean needDocCount;
+    protected boolean needDocCount;
     
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -242,23 +242,27 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
     }
 
+
+    
     @Override
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
-        String uri = key.getUri();
+        String uri = null;/*key.getUri();*/
         String forestId = ContentOutputFormat.ID_PREFIX;
         int fId = 0;
         if (fastLoad) {
-            // compute forest to write to 
-            if (outputDir != null && !outputDir.isEmpty()) {
-                uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
-                      outputDir + uri : outputDir + '/' + uri;
-            }    
-            key.setUri(uri);
-            key.validate();
+            uri = getUriWithOutputDir(key, outputDir);
+//            if (outputDir != null && !outputDir.isEmpty()) {
+//                uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
+//                      outputDir + uri : outputDir + '/' + uri;
+//            }    
+//            key.setUri(uri);
+//            key.validate();
             // placement based on assignment policy
             fId = am.getPlacementForestIndex(key);
             forestId = forestIds[fId];
+        } else {
+            uri = key.getUri();
         }
  
         try {
@@ -429,21 +433,21 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * @param fId forest index
      * @param count count of newly added docs
      */
-    private void updateDocCount(int fId, int count) {
+    protected void updateDocCount(int fId, int count) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
         docCount[fId] += count;
         sap.updateStats(fId, count);
     }
 
-    private void rollbackDocCount(int fId) {
+    protected void rollbackDocCount(int fId) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
         sap.updateStats(fId, -docCount[fId]);
         LOG.error("rollback doc count of forest " + fId + ":" + docCount[fId]);
     }
     
-    private Session getSession(String forestId) {
+    protected Session getSession(String forestId) {
         Session session = null;
         ContentSource cs = forestSourceMap.get(forestId);
         if (fastLoad) {

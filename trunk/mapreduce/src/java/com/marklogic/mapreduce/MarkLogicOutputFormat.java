@@ -190,7 +190,7 @@ implements MarkLogicConstants, Configurable {
     /**
      * it is called only if the server has policy
      * @param session
-     * @return
+     * @return assignment policy
      * @throws IOException
      * @throws RequestException
      */
