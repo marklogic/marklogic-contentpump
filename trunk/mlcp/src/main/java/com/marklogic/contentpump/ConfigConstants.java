@@ -113,6 +113,10 @@ public interface ConfigConstants {
     static final String THREADS_PER_SPLIT = "thread_count_per_split";
     static final String TOLERATE_ERRORS = "tolerate_errors";
     static final String OUTPUT_PARTITION_NAME = "output_partition_name";
+    static final String TRANSFORM_MODULE = "transform_module";
+    static final String TRANSFORM_NAMESPACE = "transform_namespace";
+    static final String TRANSFORM_FUNCTION = "transform_function";
+    static final String TRANSFORM_PARAM = "transform_param";
     
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
@@ -171,4 +175,9 @@ public interface ConfigConstants {
         "mapreduce.marklogic.multithreadedmapper.threads";
     static final String CONF_MULTITHREADEDMAPPER_CLASS = 
         "mapreduce.marklogic.multithreadedmapper.class";
+    static final String CONF_TRANSFORM_MODULE = "mapreduce.marklogic.transformmodule";
+    static final String CONF_TRANSFORM_NAMESPACE = "mapreduce.marklogic.transformnamespace";
+    static final String CONF_TRANSFORM_FUNCTION = "mapreduce.marklogic.transformfunction";
+    static final String CONF_TRANSFORM_PARAM = "mapreduce.marklogic.transformparam";
+    static final String CONF_MIMETYPES = "mapreduce.marklogic.mimetypes";
 }

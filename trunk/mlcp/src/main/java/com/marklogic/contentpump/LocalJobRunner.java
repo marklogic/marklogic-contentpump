@@ -71,6 +71,7 @@ public class LocalJobRunner implements ConfigConstants {
     private long startTime;
     private int threadsPerSplit = 0;
     private int threadCount;
+    //TODO confusing, rename it
     private int availableThreads = 1;
     private Command cmd;
     
