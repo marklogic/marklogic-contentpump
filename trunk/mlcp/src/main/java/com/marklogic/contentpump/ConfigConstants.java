@@ -112,7 +112,7 @@ public interface ConfigConstants {
     static final String CONTENT_ENCODING = "content_encoding";
     static final String THREADS_PER_SPLIT = "thread_count_per_split";
     static final String TOLERATE_ERRORS = "tolerate_errors";
-    static final String OUTPUT_PARTITION_NAME = "output_partition_name";
+    static final String OUTPUT_PARTITION = "output_partition";
     static final String TRANSFORM_MODULE = "transform_module";
     static final String TRANSFORM_NAMESPACE = "transform_namespace";
     static final String TRANSFORM_FUNCTION = "transform_function";

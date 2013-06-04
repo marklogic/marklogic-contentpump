@@ -259,7 +259,7 @@ public enum Command implements ConfigConstants {
             Option partition = OptionBuilder.withArgName("partition name")
                 .hasOptionalArg()
                 .withDescription("The partition where docs are inserted")
-                .create(OUTPUT_PARTITION_NAME);
+                .create(OUTPUT_PARTITION);
             options.addOption(partition);
             
         }
@@ -527,9 +527,9 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
             }
             
-            if (cmdline.hasOption(OUTPUT_PARTITION_NAME)) {
-                String arg = cmdline.getOptionValue(OUTPUT_PARTITION_NAME);
-                conf.set(MarkLogicConstants.OUTPUT_PARTITION_NAME, arg);
+            if (cmdline.hasOption(OUTPUT_PARTITION)) {
+                String arg = cmdline.getOptionValue(OUTPUT_PARTITION);
+                conf.set(MarkLogicConstants.OUTPUT_PARTITION, arg);
             }
             
             applyModuleConfigOptions(conf, cmdline, batchSize);
@@ -811,7 +811,7 @@ public enum Command implements ConfigConstants {
             Option partition = OptionBuilder.withArgName("partition name")
                 .hasOptionalArg()
                 .withDescription("The partition where docs are inserted")
-                .create(OUTPUT_PARTITION_NAME);
+                .create(OUTPUT_PARTITION);
             options.addOption(partition);
             Option snapshot = OptionBuilder
                 .withArgName("true,false")
@@ -923,9 +923,9 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
             }
             
-            if (cmdline.hasOption(OUTPUT_PARTITION_NAME)) {
-                String arg = cmdline.getOptionValue(OUTPUT_PARTITION_NAME);
-                conf.set(MarkLogicConstants.OUTPUT_PARTITION_NAME, arg);
+            if (cmdline.hasOption(OUTPUT_PARTITION)) {
+                String arg = cmdline.getOptionValue(OUTPUT_PARTITION);
+                conf.set(MarkLogicConstants.OUTPUT_PARTITION, arg);
             }
             
             applyModuleConfigOptions(conf, cmdline, batchSize);
