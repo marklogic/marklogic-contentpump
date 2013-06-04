@@ -241,7 +241,7 @@ public enum Command implements ConfigConstants {
                 .create(CONTENT_ENCODING);
             options.addOption(encoding);
 
-            Option threadsPerSplit = OptionBuilder.withArgName("threads per split")
+            Option threadsPerSplit = OptionBuilder.withArgName("count")
                 .hasOptionalArg()
                 .withDescription("The number of threads per split")
                 .create(THREADS_PER_SPLIT);
@@ -257,7 +257,6 @@ public enum Command implements ConfigConstants {
             options.addOption(tolerateErrors);
             
             Option partition = OptionBuilder.withArgName("partition name")
-                .hasOptionalArg()
                 .withDescription("The partition where docs are inserted")
                 .create(OUTPUT_PARTITION);
             options.addOption(partition);
@@ -809,7 +808,6 @@ public enum Command implements ConfigConstants {
             options.addOption(tolerateErrors);
             
             Option partition = OptionBuilder.withArgName("partition name")
-                .hasOptionalArg()
                 .withDescription("The partition where docs are inserted")
                 .create(OUTPUT_PARTITION);
             options.addOption(partition);
@@ -1264,10 +1262,15 @@ public enum Command implements ConfigConstants {
             if (batchSize !=null && Integer.valueOf(batchSize)> 1) {
                 //batch size is set explicitly to > 1
                 throw new UnsupportedOperationException(
-                    "Server-side transformation can't work with batch size greater than 1");
+                    "Server-side transformation can't work with batch size "
+                        + "greater than 1");
             }
             if(batchSize == null) {
                 conf.setInt(MarkLogicConstants.BATCH_SIZE, 1);
+            }
+            if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false) == true) {
+                throw new UnsupportedOperationException(
+                    "Server-side transformation can't work with streaming");
             }
             String arg = cmdline.getOptionValue(TRANSFORM_MODULE);
             conf.set(CONF_TRANSFORM_MODULE, arg);
