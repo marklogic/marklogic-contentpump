@@ -716,8 +716,8 @@ public interface MarkLogicConstants {
      * which, if set, specifies the partition  
      * where output documents are created. 
      */
-    static final String OUTPUT_PARTITION_NAME =
-        "mapreduce.marklogic.output.partitionname";
+    static final String OUTPUT_PARTITION =
+        "mapreduce.marklogic.output.partition";
     
     /**
      * Default output XML repair level

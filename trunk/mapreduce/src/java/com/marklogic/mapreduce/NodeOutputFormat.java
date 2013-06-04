@@ -20,12 +20,12 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.InternalUtilities;
-import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.ContentSource;
 
 /**
@@ -56,7 +56,7 @@ extends MarkLogicOutputFormat<NodePath, MarkLogicNode> {
     public RecordWriter<NodePath, MarkLogicNode> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        TextArrayWritable hosts = getHosts(conf);
+        ArrayWritable hosts = getHosts(conf);
         int taskId = context.getTaskAttemptID().getTaskID().getId();
         String host = InternalUtilities.getHost(taskId, hosts);
         return new NodeWriter(conf, host);
