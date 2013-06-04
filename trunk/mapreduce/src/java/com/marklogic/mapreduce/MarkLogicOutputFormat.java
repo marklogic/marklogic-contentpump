@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.LongWritable;
@@ -168,7 +167,7 @@ implements MarkLogicConstants, Configurable {
         }
     }
     
-    protected ArrayWritable getHosts(Configuration conf) throws IOException {
+    protected TextArrayWritable getHosts(Configuration conf) throws IOException {
         String forestHost = conf.get(OUTPUT_FOREST_HOST);
         if (forestHost != null) {
             // Restores the object from the configuration.
@@ -236,7 +235,7 @@ implements MarkLogicConstants, Configurable {
         return Boolean.parseBoolean(item);
     }
     
-    protected ArrayWritable queryHosts(ContentSource cs)
+    protected TextArrayWritable queryHosts(ContentSource cs)
         throws IOException {
         Session session = null;
         ResultSequence result = null;
@@ -255,7 +254,7 @@ implements MarkLogicConstants, Configurable {
                 Text host = new Text(item.asString());
                 hosts.add(host);
             }
-            return new ArrayWritable(Text.class, hosts.toArray(new Text[hosts.size()]));
+            return new TextArrayWritable(hosts.toArray(new Text[hosts.size()]));
         } catch (RequestException e) {
             LOG.error(e.getMessage(), e);
             throw new IOException(e);

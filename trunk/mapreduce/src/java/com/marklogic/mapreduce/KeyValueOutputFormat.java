@@ -18,12 +18,12 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.ContentSource;
 
 /**
@@ -41,7 +41,7 @@ public class KeyValueOutputFormat<KEYOUT, VALUEOUT> extends
     public RecordWriter<KEYOUT, VALUEOUT> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        ArrayWritable hosts = getHosts(conf);
+        TextArrayWritable hosts = getHosts(conf);
         int taskId = context.getTaskAttemptID().getTaskID().getId();
         String host = InternalUtilities.getHost(taskId, hosts);
         return new KeyValueWriter<KEYOUT, VALUEOUT>(conf, host);
