@@ -23,6 +23,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -31,7 +32,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.ForestStatus;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
-import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentSource;
@@ -144,7 +144,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                             "Failed to query directory creation mode.");
                 }
             } else {
-                TextArrayWritable hostArray = queryHosts(cs);
+                ArrayWritable hostArray = queryHosts(cs);
                 // store hosts into config system
                 DefaultStringifier.store(conf, hostArray, OUTPUT_FOREST_HOST);
             }
@@ -218,7 +218,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                 sourceMap.put(ID_PREFIX + forest, cs);
             }
         } else {
-            TextArrayWritable hosts = getHosts(conf);
+            ArrayWritable hosts = getHosts(conf);
             int taskId = context.getTaskAttemptID().getTaskID().getId();
             String host = InternalUtilities.getHost(taskId, hosts);
             try {
