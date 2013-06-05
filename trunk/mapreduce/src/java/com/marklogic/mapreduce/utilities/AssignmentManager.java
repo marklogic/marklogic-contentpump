@@ -28,8 +28,9 @@ public class AssignmentManager {
     protected AssignmentPolicy policy;
 
     private static final AssignmentManager instance = new AssignmentManager();
-
+    private boolean initialized;
     private AssignmentManager() {
+        initialized = false;
     }
 
     public static AssignmentManager getInstance() {
@@ -40,8 +41,11 @@ public class AssignmentManager {
         return policy;
     }
 
-    public void initialize(AssignmentPolicy.Kind kind, LinkedMapWritable map) {
-        // TODO get forests and uForests from map
+    public synchronized void initialize(AssignmentPolicy.Kind kind, LinkedMapWritable map) {
+        if(initialized) 
+            return;
+        else 
+            initialized = true;
         LinkedHashSet<String> forests = new LinkedHashSet<String>();
         LinkedHashSet<String> updatableForests = new LinkedHashSet<String>();
         for (Writable f : map.keySet()) {
@@ -108,7 +112,7 @@ public class AssignmentManager {
      * this will be called each doc is inserted
      * 
      * @param uri
-     * @return
+     * @return forest ID in string
      */
 
     public String getPlacementForestId(DocumentURI uri) {

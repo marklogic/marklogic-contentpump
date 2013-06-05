@@ -87,7 +87,7 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
      * return the forest id
      * 
      * @param uri
-     * @return
+     * @return forest ID in string
      */
     public String getPlacementForestId(DocumentURI uri) {
         int fIdx = getBucketPlacementId(uri, buckets, NUM_BUCKET,
@@ -101,7 +101,7 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
      * RO/DO)
      * 
      * @param uri
-     * @return
+     * @return index in the list of updatable forests
      */
     public int getPlacementForestIndex(DocumentURI uri) {
         return getBucketPlacementId(uri, buckets, NUM_BUCKET, forests.length,

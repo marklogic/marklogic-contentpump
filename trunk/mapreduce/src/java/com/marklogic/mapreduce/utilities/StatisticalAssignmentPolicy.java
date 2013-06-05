@@ -48,11 +48,12 @@ public class StatisticalAssignmentPolicy extends AssignmentPolicy {
         Stats min = null;
         synchronized (pq) {
             min = pq.peek();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("picked forest# " + min.getfIdx() + " with "
+                    + min.getDocCount() + " docs");
+            }
         }
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("picked forest# " + min.getfIdx() + " with "
-                + min.getDocCount() + " docs");
-        }
+
         return min.getfIdx();
     }
 
