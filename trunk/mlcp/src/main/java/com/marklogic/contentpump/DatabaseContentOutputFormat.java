@@ -39,8 +39,7 @@ public class DatabaseContentOutputFormat extends
     public RecordWriter<DocumentURI, MarkLogicDocumentWithMeta> getRecordWriter(
         TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false)
-            || (conf.get(OUTPUT_DIRECTORY) != null);
+        boolean fastLoad = isFastLoad();
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the DatabaseContentWriter
         return new DatabaseContentWriter<MarkLogicDocumentWithMeta>(conf,
