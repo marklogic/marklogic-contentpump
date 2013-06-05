@@ -23,12 +23,16 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.mapreduce.utilities.AssignmentManager;
+import com.marklogic.mapreduce.utilities.AssignmentPolicy;
 import com.marklogic.mapreduce.utilities.ForestStatus;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
@@ -76,11 +80,31 @@ public class ContentOutputFormat<VALUEOUT> extends
     // Prepend to a forest id to form a database name parsed by XDBC.
     // Also used here alone as the forest id placeholder in non-fast-mode.
     public static final String ID_PREFIX = "#";
- 
+    
+    static final String FOREST_HOST_MAP_QUERY =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "hadoop:get-forest-host-map()";
+    public static final String FOREST_STATUS_MAP_REBALANCING_QUERY =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "declare variable $policy as xs:string external;\n" +
+        "declare variable $partition-name as xs:string external;\n" + 
+        "hadoop:get-forest-status-map-for-rebalancing($policy,$partition-name)";
+    public static final String ASSIGNMENT_POLICY_QUERY =
+        "import module namespace hadoop = "
+        + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
+        + "let $f := "
+        + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
+        + "let $hasPolicy := exists($f)"
+        + "return  if($hasPolicy eq fn:true()) then "
+        + "hadoop:get-assignment-policy()\n" + "else ()";
+    
+    protected AssignmentManager am = AssignmentManager.getInstance();
+    
     @Override
     public void checkOutputSpecs(Configuration conf, ContentSource cs) 
     throws IOException { 
-        boolean fastLoad;
         Session session = null;
         ResultSequence result = null;
         try {
@@ -92,7 +116,6 @@ public class ContentOutputFormat<VALUEOUT> extends
             // clear output dir if specified
             String outputDir = conf.get(OUTPUT_DIRECTORY);
             if (outputDir != null) {
-                fastLoad = true;
                 outputDir = outputDir.endsWith("/") ? 
                         outputDir : outputDir + "/";
                 if (conf.getBoolean(OUTPUT_CLEAN_DIR, false)) {
@@ -117,12 +140,12 @@ public class ContentOutputFormat<VALUEOUT> extends
                                 "Failed to query directory content.");
                     }
                 }
-            } else {
-                fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false);
             }
-    
+//            else {
+//                fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false);
+//            }
             // ensure manual directory creation 
-            if (fastLoad) {
+            if (isFastLoad()) {
                 LOG.info("Running in fast load mode");
                     // store forest-stats map into config system
                 DefaultStringifier.store(conf, queryForestStatusMap(cs),
@@ -236,10 +259,215 @@ public class ContentOutputFormat<VALUEOUT> extends
     public RecordWriter<DocumentURI, VALUEOUT> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false) ||
-        (conf.get(OUTPUT_DIRECTORY) != null);
+        boolean fastLoad = isFastLoad();
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the ContentWriter
         return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
     }
+    
+    protected boolean isFastLoad() {
+      //fastLoad default: not set
+        boolean fastLoad = false;
+        if (conf.get(OUTPUT_FAST_LOAD) == null) {
+            // fastload not set
+            if (conf.get(OUTPUT_DIRECTORY) != null) {
+                // output_dir is set
+                fastLoad = true;
+            } else {
+                //neither fastload nor output_dir is set
+                fastLoad = false;
+            }
+        } else {
+            //if fastload is set, we honor it
+            fastLoad = new Boolean(conf.get(OUTPUT_FAST_LOAD));
+        }
+        return fastLoad;
+    }
+    
+    // forest host map is saved when checkOutputSpecs() is called.  In certain 
+    // versions of Hadoop, the config is not persisted as part of the job hence
+    // will be lost.  See MAPREDUCE-3377 for details.  When this entry cannot
+    // be found from the config, re-query the database to get this info.  It is
+    // possible that each task gets a different version of the map if the 
+    // forest config changes while the job runs.
+    protected LinkedMapWritable getForestStatusMap(Configuration conf) 
+    throws IOException {
+        String forestHost = conf.get(OUTPUT_FOREST_HOST);
+        if (forestHost != null) {
+            //Restores the object from the configuration.
+            LinkedMapWritable fhmap = DefaultStringifier.load(conf, OUTPUT_FOREST_HOST, 
+                LinkedMapWritable.class);
+            // must be in fast load mode, otherwise won't reach here
+            String s = conf.get(ASSIGNMENT_POLICY);
+            AssignmentPolicy.Kind kind = null;
+            if (s == null) {
+                // server prior to 7, no assignment policy, use legacy
+                kind = AssignmentPolicy.Kind.LEGACY;
+            } else {
+                kind = AssignmentPolicy.Kind.valueOf(s.toUpperCase());
+            }
+            am.initialize(kind, fhmap);
+            return fhmap;
+        } else {
+            try {
+                // try getting a connection
+                ContentSource cs = 
+                    InternalUtilities.getOutputContentSource(conf, 
+                            conf.get(OUTPUT_HOST));
+                // query forest status mapping
+                return queryForestStatusMap(cs);
+            } catch (Exception ex) {
+                throw new IOException(ex);
+            }
+        }
+    }
+    
+    /**
+     * it is called only if the server has policy
+     * 
+     * @param session
+     * @return assignment policy
+     * @throws IOException
+     * @throws RequestException
+     */
+    protected AssignmentPolicy.Kind getAssignmentPolicy(Session session)
+        throws IOException, RequestException {
+        AdhocQuery query = session.newAdhocQuery(ASSIGNMENT_POLICY_QUERY);
+        RequestOptions options = new RequestOptions();
+        options.setDefaultXQueryVersion("1.0-ml");
+        query.setOptions(options);
+        ResultSequence result = null;
+        result = session.submitRequest(query);
+        if (!result.hasNext())
+            return null;
+
+        ResultItem item = result.next();
+        String s = item.asString();
+        conf.set(ASSIGNMENT_POLICY, s);
+        AssignmentPolicy.Kind kind = AssignmentPolicy.Kind.valueOf(s
+            .toUpperCase());
+        item = result.next();
+        if ((kind == AssignmentPolicy.Kind.STATISTICAL 
+            || kind == AssignmentPolicy.Kind.RANGE)
+            && Boolean.parseBoolean(item.asString()) && isFastLoad()) {
+            throw new IOException(
+                "Fastload can't be used:"
+                    + "rebalancer is on and assignment policy is statistical or range");
+        }
+        return kind;
+    }
+
+    /**
+     * result format of the query varies based on policy
+     * 
+     * bucket:(fid, host, updateAllow)*
+     * range:(fid, host, fragmentCount)*
+     * statistical: (fid, host, fragmentCount)*
+     * @param cs
+     * @return a forest-info map
+     * @throws IOException
+     */
+    protected LinkedMapWritable queryForestStatusMap(ContentSource cs) 
+    throws IOException {
+        Session session = null;
+        ResultSequence result = null;
+        try {
+            session = cs.newSession();   
+            AdhocQuery query = null;
+            AssignmentPolicy.Kind kind = getAssignmentPolicy(session);
+            boolean hasPolicy = kind != null;
+            if (!hasPolicy) {
+                //no assignment policy, server prior to 7
+                LOG.warn("No assignment policy in server, use legacy assignment policy.");
+                kind = AssignmentPolicy.Kind.LEGACY;
+                query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
+            } else {
+                if (kind == AssignmentPolicy.Kind.RANGE) {
+                    String pName = conf.get(OUTPUT_PARTITION);
+                    if (pName == null) {
+                        throw new IOException(
+                            "output_partition is not set in fastload "
+                                + "mode while server uses range assignment policy");
+                    } else {
+                        query = session
+                        .newAdhocQuery(FOREST_STATUS_MAP_REBALANCING_QUERY);
+                        query.setNewStringVariable("partition-name", pName);
+                    }
+                } else {
+                    query = session
+                        .newAdhocQuery(FOREST_STATUS_MAP_REBALANCING_QUERY);
+                    query.setNewStringVariable("partition-name", "");
+                }
+                query.setNewStringVariable("policy", kind.toString()
+                    .toLowerCase());
+            }
+
+            // query forest status mapping       
+            
+            RequestOptions options = new RequestOptions();
+            options.setDefaultXQueryVersion("1.0-ml");
+            query.setOptions(options);
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(query.toString());
+            }
+            result = session.submitRequest(query);
+
+            LinkedMapWritable forestStatusMap = new LinkedMapWritable();
+            Text forest = null;
+            while (result.hasNext()) {
+                ResultItem item = result.next();
+                if (forest == null) {
+                    forest = new Text(item.asString());
+                } else {
+                    Text hostName = new Text(item.asString());
+                    if (hasPolicy) {
+                        if (kind == AssignmentPolicy.Kind.BUCKET) {
+                            item = result.next();
+                            BooleanWritable updatable = new BooleanWritable(
+                                Boolean.parseBoolean(item.asString()));
+                            forestStatusMap.put(forest, new ForestStatus(
+                                hostName, new LongWritable(-1), updatable));
+                        } else if (kind == AssignmentPolicy.Kind.LEGACY) {
+                            forestStatusMap.put(forest, new ForestStatus(
+                                hostName, new LongWritable(-1), new BooleanWritable(true)));
+                        } else {
+                            //range or statistical
+                            item = result.next();
+                            LongWritable dc = new LongWritable(
+                                Long.parseLong(item.asString()));
+                            forestStatusMap.put(forest, new ForestStatus(
+                                hostName, dc, new BooleanWritable(true)));
+                        }
+                    } else {
+                        forestStatusMap.put(forest, new ForestStatus(hostName,
+                            new LongWritable(-1), new BooleanWritable(true)));
+                    }
+                    forest = null;
+                }
+            }
+            if (forestStatusMap.size() == 0) {
+                if (kind == AssignmentPolicy.Kind.RANGE) {
+                    throw new IOException("Number of forests is 0: "
+                        + "check server license for tiered storage; "
+                        + "check partition_name");
+                } else {
+                    throw new IOException("Number of forests is 0: "
+                        + "check forests in database");
+                }
+            }
+            am.initialize(kind, forestStatusMap);
+            return forestStatusMap;
+        } catch (RequestException e) {
+            LOG.error(e.getMessage(), e);
+            throw new IOException(e);
+        } finally {
+            if (result != null) {
+                result.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+        }    
+    }
+    
 }
