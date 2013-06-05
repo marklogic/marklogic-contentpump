@@ -34,9 +34,7 @@ public class DatabaseTransformOutputFormat extends DatabaseContentOutputFormat {
     public RecordWriter<DocumentURI, MarkLogicDocumentWithMeta> getRecordWriter(
         TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        //TODO: refactor fastload
-        boolean fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false)
-            || (conf.get(OUTPUT_DIRECTORY) != null);
+        boolean fastLoad = isFastLoad();
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the DatabaseTransformContentWriter
         return new DatabaseTransformWriter<MarkLogicDocumentWithMeta>(conf,

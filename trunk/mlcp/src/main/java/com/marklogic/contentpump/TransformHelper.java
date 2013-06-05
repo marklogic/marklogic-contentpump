@@ -190,7 +190,6 @@ public class TransformHelper {
         }
 
         String optionElem = mapToElement(optionsMap);
-        // TODO
         query.setNewVariable("INSERT-OPTIONS", ValueType.ELEMENT, optionElem);
         return query;
     }
@@ -294,7 +293,6 @@ public class TransformHelper {
         }
 
         String optionElem = mapToElement(optionsMap);
-        // TODO
         query.setNewVariable("INSERT-OPTIONS", ValueType.ELEMENT, optionElem);
         return query;
     }
