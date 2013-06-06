@@ -75,6 +75,7 @@ public class DatabaseTransformWriter<VALUE> extends
             newContentCreateOptions(meta);
             if (!meta.isNakedProps()) {
                 options.setFormat(doc.getContentType().getDocumentFormat());
+                //TODO do we care copy_property?
                 boolean isCopyProps = conf.getBoolean(
                     ConfigConstants.CONF_COPY_PROPERTIES, true);
 
@@ -89,7 +90,7 @@ public class DatabaseTransformWriter<VALUE> extends
                 sessions[fId].submitRequest(qry);
                 stmtCounts[fId]++;
                 // update doc count for statistical
-                if (needDocCount) {
+                if (needFrmtCount) {
                     updateDocCount(fId, 1);
                 }
             }
@@ -108,8 +109,8 @@ public class DatabaseTransformWriter<VALUE> extends
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
 
-                if (needDocCount) {
-                    docCount[fId] = 0;
+                if (needFrmtCount) {
+                    frmtCount[fId] = 0;
                 }
             }
         } catch (RequestServerException e) {
@@ -123,7 +124,7 @@ public class DatabaseTransformWriter<VALUE> extends
             if (sessions[fId] != null) {
                 sessions[fId].close();
             }
-            if (needDocCount) {
+            if (needFrmtCount) {
                 rollbackDocCount(fId);
             }
             throw new IOException(e);
@@ -141,7 +142,7 @@ public class DatabaseTransformWriter<VALUE> extends
                         sessions[i].commit();
                     } catch (RequestException e) {
                         LOG.error(e);
-                        if (needDocCount) {
+                        if (needFrmtCount) {
                             rollbackDocCount(i);
                         }
                         throw new IOException(e);

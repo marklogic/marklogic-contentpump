@@ -117,9 +117,9 @@ public class DatabaseContentWriter<VALUE> extends
     private boolean tolerateErrors;
     
     protected AssignmentManager am;
-    protected long []docCount;
+    protected long []frmtCount;
     //default boolean is false
-    protected boolean needDocCount;
+    protected boolean needFrmtCount;
     
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
@@ -154,8 +154,8 @@ public class DatabaseContentWriter<VALUE> extends
         if (fastLoad
             && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
             || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
-            docCount = new long[arraySize];
-            needDocCount = true;
+            frmtCount = new long[arraySize];
+            needFrmtCount = true;
         }
     }
 
@@ -307,7 +307,7 @@ public class DatabaseContentWriter<VALUE> extends
                     }
                     counts[fId] = 0;
                     //update doc count for statistical
-                    if (needDocCount) {
+                    if (needFrmtCount) {
                         updateDocCount(fId, batchSize
                             - (errors != null ? errors.size() : 0));
                     }
@@ -322,7 +322,7 @@ public class DatabaseContentWriter<VALUE> extends
                     stmtCounts[fId]++;
                 }
                 //update doc count for statistical
-                if (needDocCount) {
+                if (needFrmtCount) {
                     updateDocCount(fId, 1);
                 }
                 // meta's properties is null if CONF_COPY_PROPERTIES is false
@@ -336,8 +336,8 @@ public class DatabaseContentWriter<VALUE> extends
                 && sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
-                if (needDocCount) {
-                    docCount[fId] = 0;
+                if (needFrmtCount) {
+                    frmtCount[fId] = 0;
                 }
             }
         } catch (RequestServerException e) {
@@ -351,7 +351,7 @@ public class DatabaseContentWriter<VALUE> extends
             if (sessions[fId] != null) {
                 sessions[fId].close();
             }
-            if (needDocCount) {
+            if (needFrmtCount) {
                 rollbackDocCount(fId);
             }
             throw new IOException(e);
@@ -404,7 +404,7 @@ public class DatabaseContentWriter<VALUE> extends
                         stmtCounts[i]++;
                         //RequestException if any is thrown before docCount is updated
                         //so docCount doesn't need to rollback in this try-catch
-                        if (needDocCount) {
+                        if (needFrmtCount) {
                             updateDocCount(i, counts[i]
                                 - (errors != null ? errors.size() : 0));
                         }
@@ -433,7 +433,7 @@ public class DatabaseContentWriter<VALUE> extends
                         if (sessions[i] != null) {
                             sessions[i].close();
                         }
-                        if (needDocCount) {
+                        if (needFrmtCount) {
                             rollbackDocCount(i);
                         }
                         if (e instanceof ServerConnectionException
@@ -452,7 +452,7 @@ public class DatabaseContentWriter<VALUE> extends
                         sessions[i].commit();
                     } catch (RequestException e) {
                         LOG.error(e);
-                        if (needDocCount) {
+                        if (needFrmtCount) {
                             rollbackDocCount(i);
                         }
                         throw new IOException(e);
@@ -552,15 +552,15 @@ public class DatabaseContentWriter<VALUE> extends
     protected void updateDocCount(int fId, int count) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
-        docCount[fId] += count;
+        frmtCount[fId] += count;
         sap.updateStats(fId, count);
     }
 
     protected void rollbackDocCount(int fId) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
-        sap.updateStats(fId, -docCount[fId]);
-        LOG.error("rollback doc count of forest " + fId + ":" + docCount[fId]);
+        sap.updateStats(fId, -frmtCount[fId]);
+        LOG.error("rollback doc count of forest " + fId + ":" + frmtCount[fId]);
     }
     
 }
