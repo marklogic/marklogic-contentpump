@@ -35,7 +35,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
-import com.marklogic.mapreduce.utilities.ForestStatus;
+import com.marklogic.mapreduce.utilities.ForestInfo;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.AdhocQuery;
@@ -70,10 +70,13 @@ implements MarkLogicConstants, Configurable {
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-directory-creation()";
 
-    public static final String HOSTS_QUERY = 
-        "import module namespace hadoop = " +
-        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
-        "hadoop:get-host-names()";
+    public static final String HOSTS_QUERY = "import module namespace hadoop = "
+        + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
+        + "let $f := "
+        + "  fn:function-lookup(xs:QName('hadoop:get-host-names'),0)\n"
+        + "let $hasNewFn := exists($f)\n"
+        + "return  if($hasNewFn eq fn:true()) then $f()"
+        + " else hadoop:get-forest-host-map()";
     static final String MANUAL_DIRECTORY_MODE = "manual";
     
     protected Configuration conf;
@@ -153,6 +156,9 @@ implements MarkLogicConstants, Configurable {
             ArrayList<Text> hosts = new ArrayList<Text>();
             while (result.hasNext()) {
                 ResultItem item = result.next();
+                // skip the forestid in case MLCP 7 runs against ML6
+                if(item.asString().matches("-?\\d+"))
+                    continue;
                 Text host = new Text(item.asString());
                 hosts.add(host);
             }

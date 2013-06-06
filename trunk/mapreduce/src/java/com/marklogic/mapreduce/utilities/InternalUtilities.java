@@ -288,7 +288,7 @@ public class InternalUtilities implements MarkLogicConstants {
         int position = taskId % count;
         int i = 0;
         for (Writable v : forestStatusMap.values()) {
-            ForestStatus fs = (ForestStatus)v;
+            ForestInfo fs = (ForestInfo)v;
             if (i++ == position) {
                 return fs.getHostName().toString();
             }

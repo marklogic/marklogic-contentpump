@@ -124,9 +124,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
 
     protected AssignmentManager am;
     
-    protected long []docCount;
+    protected long []frmtCount;
     //default boolean is false
-    protected boolean needDocCount;
+    protected boolean needFrmtCount;
     
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -160,8 +160,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (fastLoad
             && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
             || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
-            docCount = new long[arraySize];
-            needDocCount = true;
+            frmtCount = new long[arraySize];
+            needFrmtCount = true;
         }
         
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
@@ -370,7 +370,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     stmtCounts[fId]++;
                     counts[fId] = 0;
                     //update doc count for statistical
-                    if (needDocCount) {
+                    if (needFrmtCount) {
                         updateDocCount(fId, batchSize
                             - (errors != null ? errors.size() : 0));
                     }
@@ -382,7 +382,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 sessions[fId].insertContent(content);
                 stmtCounts[fId]++;
                 //update doc count for statistical
-                if (needDocCount) {
+                if (needFrmtCount) {
                     updateDocCount(fId, 1);
                 }
             }
@@ -390,15 +390,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
-                if (needDocCount) {
-                    docCount[fId] = 0;
+                if (needFrmtCount) {
+                    frmtCount[fId] = 0;
                 }
             }
         } catch (ServerConnectionException e) {
             if (sessions[fId] != null) {
                 sessions[fId].close();
             }
-            if (needDocCount) {
+            if (needFrmtCount) {
                 rollbackDocCount(fId);
             }
             throw new IOException(e);
@@ -406,7 +406,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (sessions[fId] != null) {
                 sessions[fId].close();
             }
-            if (needDocCount) {
+            if (needFrmtCount) {
                 rollbackDocCount(fId);
             }
             throw new IOException(e);
@@ -421,7 +421,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (sessions[fId] != null) {
                 sessions[fId].close();
             }
-            if (needDocCount) {
+            if (needFrmtCount) {
                 rollbackDocCount(fId);
             }
             throw new IOException(e);
@@ -436,15 +436,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected void updateDocCount(int fId, int count) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
-        docCount[fId] += count;
+        frmtCount[fId] += count;
         sap.updateStats(fId, count);
     }
 
     protected void rollbackDocCount(int fId) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
-        sap.updateStats(fId, -docCount[fId]);
-        LOG.error("rollback doc count of forest " + fId + ":" + docCount[fId]);
+        sap.updateStats(fId, -frmtCount[fId]);
+        LOG.error("rollback doc count of forest " + fId + ":" + frmtCount[fId]);
     }
     
     protected Session getSession(String forestId) {
@@ -493,7 +493,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         stmtCounts[i]++;     
                         //RequestException if any is thrown before docCount is updated
                         //so docCount doesn't need to rollback in this try-catch
-                        if (needDocCount) {
+                        if (needFrmtCount) {
                             updateDocCount(i, counts[i]
                                 - (errors != null ? errors.size() : 0));
                         }
@@ -518,7 +518,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         sessions[i].commit();
                     } catch (RequestException e) {
                         LOG.error(e);
-                        if (needDocCount) {
+                        if (needFrmtCount) {
                             rollbackDocCount(i);
                         }
                         throw new IOException(e);
