@@ -80,15 +80,15 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         try {
             sessions[fId].submitRequest(query);
             stmtCounts[fId]++;
-            if (needDocCount) {
+            if (needFrmtCount) {
                 updateDocCount(fId, 1);
             }
             if (stmtCounts[fId] == txnSize
                 && sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
-                if (needDocCount) {
-                    docCount[fId] = 0;
+                if (needFrmtCount) {
+                    frmtCount[fId] = 0;
                 }
             }
         } catch (RequestServerException e) {
@@ -102,7 +102,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             if (sessions[fId] != null) {
                 sessions[fId].close();
             }
-            if (needDocCount) {
+            if (needFrmtCount) {
                 rollbackDocCount(fId);
             }
             throw new IOException(e);
@@ -145,7 +145,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                         sessions[i].commit();
                     } catch (RequestException e) {
                         LOG.error(e);
-                        if (needDocCount) {
+                        if (needFrmtCount) {
                             rollbackDocCount(i);
                         }
                         throw new IOException(e);
