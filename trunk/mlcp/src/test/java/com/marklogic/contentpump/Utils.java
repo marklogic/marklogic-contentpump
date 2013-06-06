@@ -25,7 +25,7 @@ public class Utils {
     private static HashMap<String, ContentSource> csMap = new HashMap<String, ContentSource>();
     private static Session session;
     public static String newLine = System.getProperty("line.separator");
-    
+    public static boolean moduleReady = false;
     public static void prepareDistributedMode() {
         Properties props = System.getProperties();
         props.setProperty(ConfigConstants.CONTENTPUMP_HOME_PROPERTY_NAME,
@@ -53,6 +53,19 @@ public class Utils {
         return session.submitRequest(aquery);
     }
     
+    public static void prepareModule(String xccUri) throws XccConfigException,
+        RequestException, URISyntaxException {
+        if (moduleReady)
+            return;
+        String query = "xquery version \"1.0-ml\";\n"
+            + "xdmp:eval('xdmp:document-load(\""
+            + Constants.TEST_PATH
+            + "/lc.xqy\", <options xmlns=\"xdmp:document-load\">"
+            + "<uri>/lc.xqy</uri></options>)',(),<options xmlns=\"xdmp:eval\">"
+            + "<database>{xdmp:database-forests(xdmp:database(\"Modules\"))}</database></options>)";
+        runQuery(xccUri, query);
+    }
+
     public static void setDirectoryCreation(String xccUri, String mode)
         throws XccConfigException, RequestException, URISyntaxException {
         String query = "xquery version \"1.0-ml\"\n;"
@@ -71,6 +84,29 @@ public class Utils {
         runQuery(xccUri, q);
         session.close();
         Thread.sleep(2000);
+    }
+    
+    public static void setBucketPolicy(String xccUri)
+        throws XccConfigException, RequestException, URISyntaxException {
+        String query = "xquery version \"1.0-ml\"\n;"
+            + "import module namespace admin = \"http://marklogic.com/xdmp/admin\" at \"/MarkLogic/admin.xqy\";\n"
+            + "let $config := admin:get-configuration()\n"
+            + "let $dbid := xdmp:database()\n"
+            + "let $bucket-policy := admin:bucket-assignment-policy()\n"
+            + "let $config := admin:database-set-assignment-policy($config, $dbid, $bucket-policy)\n"
+            + "let $config := admin:database-set-rebalancer-enable($config, $dbid, fn:false())\n"
+            + "return admin:save-configuration($config)";
+        runQuery(xccUri, query);
+    }
+    
+    
+    public static void partitionDelete(String xccUri, String partitionName)
+        throws XccConfigException, RequestException, URISyntaxException {
+        String query = "xquery version \"1.0-ml\"\n;"
+        + "import module namespace ts = \"http://marklogic.com/xdmp/tieredstorage\"\n"
+        +      "at \"/MarkLogic/tieredstorage.xqy\";\n"
+        + "ts:partition-delete(xdmp:database(\"Documents\"),\""+ partitionName + "\",xs:boolean(\"true\"))";
+        runQuery(xccUri, query);
     }
     
     /**
