@@ -50,8 +50,8 @@ public class AssignmentManager {
         LinkedHashSet<String> updatableForests = new LinkedHashSet<String>();
         for (Writable f : map.keySet()) {
             String fId = ((Text) f).toString();
-            ForestStatus fs = (ForestStatus) map.get(f);
-            if (fs.getUpdatable().get()) {
+            ForestInfo fs = (ForestInfo) map.get(f);
+            if (fs.getUpdatable()) {
                 // updatable
                 updatableForests.add(fId);
             }
@@ -70,8 +70,8 @@ public class AssignmentManager {
                 .toArray(new String[updatableForests.size()]);
             long[] countAry = new long[updatableForests.size()];
             for (int i = 0; i < countAry.length; i++) {
-                countAry[i] = ((ForestStatus) map.get(new Text(uForests[i])))
-                    .getDocCount().get();
+                countAry[i] = ((ForestInfo) map.get(new Text(uForests[i])))
+                    .getFragmentCount();
             }
             initRangePolicy(countAry, updatableForests);
         }
@@ -81,8 +81,8 @@ public class AssignmentManager {
                 .toArray(new String[updatableForests.size()]);
             long[] countAry = new long[updatableForests.size()];
             for (int i = 0; i < countAry.length; i++) {
-                countAry[i] = ((ForestStatus) map.get(new Text(uForests[i])))
-                    .getDocCount().get();
+                countAry[i] = ((ForestInfo) map.get(new Text(uForests[i])))
+                    .getFragmentCount();
             }
             initStatisticalPolicy(countAry, updatableForests);
         }

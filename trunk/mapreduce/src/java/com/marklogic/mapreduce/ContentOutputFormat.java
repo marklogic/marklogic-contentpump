@@ -23,9 +23,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.RecordWriter;
@@ -33,7 +31,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
-import com.marklogic.mapreduce.utilities.ForestStatus;
+import com.marklogic.mapreduce.utilities.ForestInfo;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.AdhocQuery;
@@ -98,7 +96,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
         + "let $hasPolicy := exists($f)"
         + "return  if($hasPolicy eq fn:true()) then "
-        + "hadoop:get-assignment-policy()\n" + "else ()";
+        + "$f()\n" + "else ()";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     
@@ -141,9 +139,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                     }
                 }
             }
-//            else {
-//                fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false);
-//            }
+
             // ensure manual directory creation 
             if (isFastLoad()) {
                 LOG.info("Running in fast load mode");
@@ -215,12 +211,12 @@ public class ContentOutputFormat<VALUEOUT> extends
         if (fastLoad) {
             LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
             // get host->contentSource mapping
-            Map<Writable, ContentSource> hostSourceMap = 
-                new HashMap<Writable, ContentSource>();
+            Map<String, ContentSource> hostSourceMap = 
+                new HashMap<String, ContentSource>();
             for (Writable v : forestStatusMap.values()) {
-                ForestStatus fs = (ForestStatus)v;
+                ForestInfo fs = (ForestInfo)v;
                 //unupdatable forests
-                if(fs.getUpdatable().get() == false) continue;
+                if(fs.getUpdatable() == false) continue;
                 if (hostSourceMap.get(fs.getHostName()) == null) {
                     try {
                         ContentSource cs = InternalUtilities.getOutputContentSource(
@@ -236,7 +232,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             // forest-contentSource map
             for (Writable forestId : forestStatusMap.keySet()) {
                 String forest = ((Text)forestId).toString();
-                Writable hostName = ((ForestStatus)forestStatusMap.get(forestId)).getHostName();
+                String hostName = ((ForestInfo)forestStatusMap.get(forestId)).getHostName();
                 ContentSource cs = hostSourceMap.get(hostName);
                 sourceMap.put(ID_PREFIX + forest, cs);
             }
@@ -363,6 +359,8 @@ public class ContentOutputFormat<VALUEOUT> extends
      * bucket:(fid, host, updateAllow)*
      * range:(fid, host, fragmentCount)*
      * statistical: (fid, host, fragmentCount)*
+     * legacy: (fid, host)*
+     * 
      * @param cs
      * @return a forest-info map
      * @throws IOException
@@ -419,28 +417,27 @@ public class ContentOutputFormat<VALUEOUT> extends
                 if (forest == null) {
                     forest = new Text(item.asString());
                 } else {
-                    Text hostName = new Text(item.asString());
+                    String hostName = item.asString();
                     if (hasPolicy) {
                         if (kind == AssignmentPolicy.Kind.BUCKET) {
                             item = result.next();
-                            BooleanWritable updatable = new BooleanWritable(
-                                Boolean.parseBoolean(item.asString()));
-                            forestStatusMap.put(forest, new ForestStatus(
-                                hostName, new LongWritable(-1), updatable));
+                            boolean updatable = Boolean.parseBoolean(item
+                                .asString());
+                            forestStatusMap.put(forest, new ForestInfo(
+                                hostName, -1, updatable));
                         } else if (kind == AssignmentPolicy.Kind.LEGACY) {
-                            forestStatusMap.put(forest, new ForestStatus(
-                                hostName, new LongWritable(-1), new BooleanWritable(true)));
+                            forestStatusMap.put(forest, new ForestInfo(
+                                hostName, -1, true));
                         } else {
-                            //range or statistical
+                            // range or statistical
                             item = result.next();
-                            LongWritable dc = new LongWritable(
-                                Long.parseLong(item.asString()));
-                            forestStatusMap.put(forest, new ForestStatus(
-                                hostName, dc, new BooleanWritable(true)));
+                            long dc = Long.parseLong(item.asString());
+                            forestStatusMap.put(forest, new ForestInfo(
+                                hostName, dc, true));
                         }
                     } else {
-                        forestStatusMap.put(forest, new ForestStatus(hostName,
-                            new LongWritable(-1), new BooleanWritable(true)));
+                        forestStatusMap.put(forest, new ForestInfo(hostName,
+                            -1, true));
                     }
                     forest = null;
                 }

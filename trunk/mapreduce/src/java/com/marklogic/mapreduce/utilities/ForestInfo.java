@@ -19,52 +19,47 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import org.apache.hadoop.io.BooleanWritable;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
-public class ForestStatus implements Writable {
-    private Text hostName;
-    private LongWritable docCount;
-    private BooleanWritable updatable;
+public class ForestInfo implements Writable {
+    private String hostName;
+    private long frangmentCount;
+    private boolean updatable;
 
-    public ForestStatus() {
+    public ForestInfo() {
     }
 
-    public ForestStatus(Text hostName, LongWritable docCount,
-        BooleanWritable updatable) {
+    public ForestInfo(String hostName, long fmCount,
+        boolean updatable) {
         super();
         this.hostName = hostName;
-        this.docCount = docCount;
+        this.frangmentCount = fmCount;
         this.updatable = updatable;
     }
 
-    public LongWritable getDocCount() {
-        return docCount;
+    public long getFragmentCount() {
+        return frangmentCount;
     }
 
-    public Text getHostName() {
+    public String getHostName() {
         return hostName;
     }
 
-    public BooleanWritable getUpdatable() {
+    public boolean getUpdatable() {
         return updatable;
     }
 
     public void readFields(DataInput in) throws IOException {
-        hostName = new Text();
-        docCount = new LongWritable();
-        updatable = new BooleanWritable();
-        hostName.readFields(in);
-        docCount.readFields(in);
-        updatable.readFields(in);
+        hostName = Text.readString(in);
+        frangmentCount = in.readLong();
+        updatable = in.readBoolean();
     }
 
     public void write(DataOutput out) throws IOException {
-        hostName.write(out);
-        docCount.write(out);
-        updatable.write(out);
+        Text.writeString(out, hostName);
+        out.writeLong(frangmentCount);
+        out.writeBoolean(updatable);
     }
 
 }
