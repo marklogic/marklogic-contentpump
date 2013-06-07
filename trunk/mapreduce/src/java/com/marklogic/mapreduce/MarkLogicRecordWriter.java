@@ -119,9 +119,9 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
         if (outputDir != null && !outputDir.isEmpty()) {
             uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
                   outputDir + uri : outputDir + '/' + uri;
+            key.setUri(uri);
+            key.validate();
         }    
-        key.setUri(uri);
-        key.validate();
         return uri;
     }
 }

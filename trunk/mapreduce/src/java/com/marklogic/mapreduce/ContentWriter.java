@@ -247,22 +247,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     @Override
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
-        String uri = null;/*key.getUri();*/
+        String uri = getUriWithOutputDir(key, outputDir);
         String forestId = ContentOutputFormat.ID_PREFIX;
         int fId = 0;
         if (fastLoad) {
-            uri = getUriWithOutputDir(key, outputDir);
-//            if (outputDir != null && !outputDir.isEmpty()) {
-//                uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
-//                      outputDir + uri : outputDir + '/' + uri;
-//            }    
-//            key.setUri(uri);
-//            key.validate();
             // placement based on assignment policy
             fId = am.getPlacementForestIndex(key);
             forestId = forestIds[fId];
-        } else {
-            uri = key.getUri();
         }
  
         try {
