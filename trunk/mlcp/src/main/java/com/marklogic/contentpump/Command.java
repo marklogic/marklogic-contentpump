@@ -256,10 +256,7 @@ public enum Command implements ConfigConstants {
                 .create(TOLERATE_ERRORS);
             options.addOption(tolerateErrors);
             
-            Option partition = OptionBuilder.withArgName("partition name")
-                .withDescription("The partition where docs are inserted")
-                .create(OUTPUT_PARTITION);
-            options.addOption(partition);
+            configPartition(options);
             
         }
 
@@ -526,10 +523,7 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
             }
             
-            if (cmdline.hasOption(OUTPUT_PARTITION)) {
-                String arg = cmdline.getOptionValue(OUTPUT_PARTITION);
-                conf.set(MarkLogicConstants.OUTPUT_PARTITION, arg);
-            }
+            applyPartitionConfigOptions(conf, cmdline);
             
             applyModuleConfigOptions(conf, cmdline, batchSize);
         }
@@ -807,10 +801,8 @@ public enum Command implements ConfigConstants {
                 .create(TOLERATE_ERRORS);
             options.addOption(tolerateErrors);
             
-            Option partition = OptionBuilder.withArgName("partition name")
-                .withDescription("The partition where docs are inserted")
-                .create(OUTPUT_PARTITION);
-            options.addOption(partition);
+            configPartition(options);
+            
             Option snapshot = OptionBuilder
                 .withArgName("true,false")
                 .hasOptionalArg()
@@ -921,10 +913,7 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
             }
             
-            if (cmdline.hasOption(OUTPUT_PARTITION)) {
-                String arg = cmdline.getOptionValue(OUTPUT_PARTITION);
-                conf.set(MarkLogicConstants.OUTPUT_PARTITION, arg);
-            }
+            applyPartitionConfigOptions(conf, cmdline);
             
             applyModuleConfigOptions(conf, cmdline, batchSize);
         }
@@ -1233,6 +1222,13 @@ public enum Command implements ConfigConstants {
             .create(TRANSFORM_PARAM);
         options.addOption(param);
     }
+    
+    static void configPartition(Options options) {
+        Option partition = OptionBuilder.withArgName("partition name")
+            .hasArg().withDescription("The partition where docs are inserted")
+            .create(OUTPUT_PARTITION);
+        options.addOption(partition);
+    }
 
     static void configFilteringOptions(Options options) {
         Option df = OptionBuilder
@@ -1289,6 +1285,14 @@ public enum Command implements ConfigConstants {
             }
         }
 
+    }
+    
+    static void applyPartitionConfigOptions(Configuration conf,
+        CommandLine cmdline) {
+        if (cmdline.hasOption(OUTPUT_PARTITION)) {
+            String arg = cmdline.getOptionValue(OUTPUT_PARTITION);
+            conf.set(MarkLogicConstants.OUTPUT_PARTITION, arg);
+        }
     }
 
     static void applyCopyConfigOptions(Configuration conf, CommandLine cmdline) {

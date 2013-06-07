@@ -61,14 +61,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public void write(DocumentURI key, VALUEOUT value) throws IOException,
         InterruptedException {
         int fId = 0;
-        String uri = null;
+        String uri = getUriWithOutputDir(key, outputDir);
         String forestId = ContentOutputFormat.ID_PREFIX;
+        
         if (fastLoad) {
-            uri = getUriWithOutputDir(key, outputDir);
             fId = am.getPlacementForestIndex(key);
             forestId = forestIds[fId];
-        } else {
-            uri = key.getUri();
         }
         if (sessions[fId] == null) {
             sessions[fId] = getSession(forestId);
@@ -76,7 +74,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
 
         AdhocQuery query = TransformHelper.getTransformInsertQry(conf,
             sessions[fId], moduleUri, functionNs, functionName, functionParam,
-            key, value, contentType, options);
+            uri, value, contentType, options);
         try {
             sessions[fId].submitRequest(query);
             stmtCounts[fId]++;
