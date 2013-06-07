@@ -56,8 +56,7 @@ public class TransformHelper {
             .append("\", $URI, $CONTENT, $INSERT-OPTIONS)");
     }
 
-    private static String getTypeFromMap(DocumentURI key) {
-        String uri = key.getUri();
+    private static String getTypeFromMap(String uri) {
         int idx = uri.lastIndexOf(".");
         Text format = null;
         if (idx != -1) {
@@ -75,7 +74,7 @@ public class TransformHelper {
 
     public static AdhocQuery getTransformInsertQry(Configuration conf,
         Session session, String moduleUri, String functionNs,
-        String functionName, String functionParam, DocumentURI key,
+        String functionName, String functionParam, String uri,
         Object value, String type, ContentCreateOptions cOptions)
         throws InterruptedIOException, UnsupportedEncodingException {
         HashMap<String, String> optionsMap = new HashMap<String, String>();
@@ -91,13 +90,13 @@ public class TransformHelper {
         RequestOptions rOptions = new RequestOptions();
         rOptions.setDefaultXQueryVersion("1.0-ml");
         query.setOptions(rOptions);
-        query.setNewStringVariable("URI", key.getUri());
+        query.setNewStringVariable("URI", uri);
 
         ContentType contentType = ContentType.valueOf(type);
         if (contentType == ContentType.MIXED
             || contentType == ContentType.UNKNOWN) {
             // get type from mimetype map
-            contentType = ContentType.forName(getTypeFromMap(key));
+            contentType = ContentType.forName(getTypeFromMap(uri));
         }
 
         switch (contentType) {
@@ -198,7 +197,7 @@ public class TransformHelper {
     public static AdhocQuery getTransformMarkLogicDocumentQry(
         Configuration conf, Session session, String moduleUri,
         String functionNs, String functionName, String functionParam,
-        DocumentURI key, MarkLogicDocumentWithMeta doc, String type,
+        String uri, MarkLogicDocumentWithMeta doc, String type,
         ContentCreateOptions cOptions) throws InterruptedIOException,
         UnsupportedEncodingException {
         HashMap<String, String> optionsMap = new HashMap<String, String>();
@@ -214,7 +213,7 @@ public class TransformHelper {
         RequestOptions rOptions = new RequestOptions();
         rOptions.setDefaultXQueryVersion("1.0-ml");
         query.setOptions(rOptions);
-        query.setNewStringVariable("URI", key.getUri());
+        query.setNewStringVariable("URI", uri);
 
         ContentType contentType = doc.getContentType();
         // not sure in what case this would happen

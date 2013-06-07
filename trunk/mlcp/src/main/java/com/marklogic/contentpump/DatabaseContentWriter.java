@@ -204,9 +204,7 @@ public class DatabaseContentWriter<VALUE> extends
      */
     protected void newContentCreateOptions(DocumentMetadata meta) {
         options = new ContentCreateOptions();
-
         updateCopyOptions(options, meta);
-
         options.setLanguage(conf.get(OUTPUT_CONTENT_LANGUAGE));
         options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
             DEFAULT_OUTPUT_CONTENT_ENCODING));
@@ -225,16 +223,13 @@ public class DatabaseContentWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {
         int fId = 0;
-        String uri = null;
+        String uri = getUriWithOutputDir(key, outputDir);
         String forestId = ContentOutputFormat.ID_PREFIX;
+
         if (fastLoad) {
-            uri = getUriWithOutputDir(key, outputDir);
             fId = am.getPlacementForestIndex(key);
             forestId = forestIds[fId];
-        } else {
-            uri = key.getUri();
         }
-
         try {
             Content content = null;
             DocumentMetadata meta = null;
@@ -308,7 +303,7 @@ public class DatabaseContentWriter<VALUE> extends
                     counts[fId] = 0;
                     //update doc count for statistical
                     if (needFrmtCount) {
-                        updateDocCount(fId, batchSize
+                        updateFrmtCount(fId, batchSize
                             - (errors != null ? errors.size() : 0));
                     }
                 }
@@ -323,10 +318,10 @@ public class DatabaseContentWriter<VALUE> extends
                 }
                 //update doc count for statistical
                 if (needFrmtCount) {
-                    updateDocCount(fId, 1);
+                    updateFrmtCount(fId, 1);
                 }
-                // meta's properties is null if CONF_COPY_PROPERTIES is false
-                if (meta != null && meta.getProperties() != null) {
+                
+                if (isCopyProps && meta.getProperties() != null) {
                     setDocumentProperties(uri, meta.getProperties(),
                         sessions[fId]);
                     stmtCounts[fId]++;
@@ -405,7 +400,7 @@ public class DatabaseContentWriter<VALUE> extends
                         //RequestException if any is thrown before docCount is updated
                         //so docCount doesn't need to rollback in this try-catch
                         if (needFrmtCount) {
-                            updateDocCount(i, counts[i]
+                            updateFrmtCount(i, counts[i]
                                 - (errors != null ? errors.size() : 0));
                         }
                         if (!conf.getBoolean(
@@ -543,13 +538,12 @@ public class DatabaseContentWriter<VALUE> extends
         }
     }
     
-    //TODO may need refactoring to share logic with ContentWriter
     /**
      * 
      * @param fId forest index
      * @param count count of newly added docs
      */
-    protected void updateDocCount(int fId, int count) {
+    protected void updateFrmtCount(int fId, int count) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
         frmtCount[fId] += count;

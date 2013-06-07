@@ -57,28 +57,22 @@ public class DatabaseTransformWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {
         int fId = 0;
-        String uri = null;
+        String uri = getUriWithOutputDir(key, outputDir);
         String forestId = ContentOutputFormat.ID_PREFIX;
         if (fastLoad) {
-            uri = getUriWithOutputDir(key, outputDir);
             fId = am.getPlacementForestIndex(key);
             forestId = forestIds[fId];
-        } else {
-            uri = key.getUri();
-        }
+        } 
 
         try {
-            boolean metaOnly = false;
             DocumentMetadata meta = null;
             MarkLogicDocumentWithMeta doc = (MarkLogicDocumentWithMeta) value;
             meta = doc.getMeta();
             newContentCreateOptions(meta);
+            boolean isCopyProps = conf.getBoolean(
+                ConfigConstants.CONF_COPY_PROPERTIES, true);
             if (!meta.isNakedProps()) {
                 options.setFormat(doc.getContentType().getDocumentFormat());
-                //TODO do we care copy_property?
-                boolean isCopyProps = conf.getBoolean(
-                    ConfigConstants.CONF_COPY_PROPERTIES, true);
-
                 if (sessions[fId] == null) {
                     sessions[fId] = getSession(forestId);
                 }
@@ -86,20 +80,16 @@ public class DatabaseTransformWriter<VALUE> extends
                 AdhocQuery qry = TransformHelper
                     .getTransformMarkLogicDocumentQry(conf, sessions[fId],
                         moduleUri, functionNs, functionName, functionParam,
-                        key, doc, contentType, options);
+                        uri, doc, contentType, options);
                 sessions[fId].submitRequest(qry);
                 stmtCounts[fId]++;
                 // update doc count for statistical
                 if (needFrmtCount) {
-                    updateDocCount(fId, 1);
+                    updateFrmtCount(fId, 1);
                 }
             }
-            // meta's properties is null if CONF_COPY_PROPERTIES is false
-            if (meta != null && meta.getProperties() != null) {
-                if (metaOnly) {
-                    uri = uri.substring(0, uri.length()
-                        - DocumentMetadata.EXTENSION.length());
-                }
+            
+            if (isCopyProps && meta.getProperties() != null) {
                 setDocumentProperties(uri, meta.getProperties(), sessions[fId]);
                 stmtCounts[fId]++;
             }
