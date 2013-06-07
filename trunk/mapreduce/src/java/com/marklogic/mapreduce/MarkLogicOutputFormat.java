@@ -142,6 +142,9 @@ implements MarkLogicConstants, Configurable {
     
     protected TextArrayWritable queryHosts(ContentSource cs)
         throws IOException {
+        if( conf.get(OUTPUT_PARTITION)!= null) {
+            LOG.warn("output_partition is ommited in non-fastload mode");
+        }
         Session session = null;
         ResultSequence result = null;
         try {
