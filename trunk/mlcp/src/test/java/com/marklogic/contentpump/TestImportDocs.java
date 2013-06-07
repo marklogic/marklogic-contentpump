@@ -101,6 +101,7 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
             + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -fastload"
             + " -output_collections test,ML -document_type text";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -240,6 +241,31 @@ public class TestImportDocs {
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
             + " -thread_count 1 -mode local -output_uri_prefix ABC"
             + " -output_collections test,ML -document_type XML"
+            + " -input_file_pattern ^A.*";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("89", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportXMLOutputDirNonfast() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
+            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -document_type XML"
+            + " -output_directory /test -fastload false"
             + " -input_file_pattern ^A.*";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);

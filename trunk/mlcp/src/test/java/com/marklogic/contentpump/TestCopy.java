@@ -106,6 +106,61 @@ public class TestCopy{
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:6275", "fn:doc()");
+        while (result.hasNext()) {
+            ResultItem item = result.next();
+            String uri = item.getDocumentURI();
+            assertTrue(uri.endsWith(".xml.suffix"));
+            assertTrue(uri.startsWith("prefix/test/"));
+        }
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testCopyWOProps() throws Exception {
+        String cmd = 
+            "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
+            + " -delimited_uri_id first"
+            + " -input_compressed -input_compression_codec zip"
+            + " -input_file_type delimited_text"
+            + " -output_uri_suffix .xml"
+            + " -output_uri_prefix test/";
+        
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB("xcc://admin:admin@localhost:6275", "CopyDst");
+        
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        Utils.closeSession();
+        
+        //copy
+        cmd = "COPY -input_host localhost -input_port 5275"
+            + " -input_username admin -input_password admin"
+            + " -output_host localhost -output_port 6275"
+            + " -output_username admin -output_password admin"
+            + " -output_uri_suffix .suffix"
+            + " -output_uri_prefix prefix/"
+            + " -copy_properties false"
+            + " -batch_size 1";
+        args = cmd.split(" ");
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
         
         result = Utils.runQuery(
             "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");
@@ -123,6 +178,122 @@ public class TestCopy{
         }
         Utils.closeSession();
     }
+    
+    @Test
+    public void testCopyTransform() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        String cmd = 
+            "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
+            + " -delimited_uri_id first"
+            + " -input_compressed -input_compression_codec zip"
+            + " -input_file_type delimited_text"
+            + " -output_uri_suffix .xml -output_collections import"
+            + " -output_uri_prefix test/";
+        
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB("xcc://admin:admin@localhost:6275", "CopyDst");
+        
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        Utils.closeSession();
+        
+        //copy
+        cmd = "COPY -input_host localhost -input_port 5275"
+            + " -input_username admin -input_password admin"
+            + " -output_host localhost -output_port 6275"
+            + " -output_username admin -output_password admin"
+            + " -output_uri_suffix .suffix"
+            + " -output_uri_prefix prefix/ -output_collections copy"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_module /lc.xqy";
+        args = cmd.split(" ");
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:6275", "fn:doc()");
+        while (result.hasNext()) {
+            ResultItem item = result.next();
+            String uri = item.getDocumentURI();
+            assertTrue(uri.endsWith(".xml.suffix"));
+            assertTrue(uri.startsWith("prefix/test/"));
+        }
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testCopyTransformFast() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        String cmd = 
+            "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
+            + " -delimited_uri_id first"
+            + " -input_compressed -input_compression_codec zip"
+            + " -input_file_type delimited_text"
+            + " -output_uri_suffix .xml -output_collections import"
+            + " -output_uri_prefix test/";
+        
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB("xcc://admin:admin@localhost:6275", "CopyDst");
+        
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        Utils.closeSession();
+        
+        //copy
+        cmd = "COPY -input_host localhost -input_port 5275"
+            + " -input_username admin -input_password admin"
+            + " -output_host localhost -output_port 6275"
+            + " -output_username admin -output_password admin"
+            + " -fastload"
+            + " -output_uri_suffix .suffix"
+            + " -output_uri_prefix prefix/ -output_collections copy"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_module /lc.xqy";
+        args = cmd.split(" ");
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:6275", "fn:doc()");
+        while (result.hasNext()) {
+            ResultItem item = result.next();
+            String uri = item.getDocumentURI();
+            assertTrue(uri.endsWith(".xml.suffix"));
+            assertTrue(uri.startsWith("prefix/test/"));
+        }
+        Utils.closeSession();
+    }
+    
     
     @Test
     public void testCopyFast() throws Exception {
@@ -228,6 +399,7 @@ public class TestCopy{
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/mixnakedzip"
+            + " -batch_size 1"
             + " -input_file_type archive";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);

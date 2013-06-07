@@ -72,6 +72,78 @@ public class TestImportArchive {
     }
     
     @Test
+    public void testArchiveTransformWithNaked() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/mixnakedzip -fastload"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_module /lc.xqy"
+            + " -input_file_type archive";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", 
+            "fn:count(" +
+            "for $i in cts:search(xdmp:document-properties(),cts:not-query(cts:document-fragment-query(cts:and-query( () )))) \n" +
+            "where fn:contains(fn:base-uri($i),\"naked\") eq fn:false() \n" +
+            "return fn:base-uri($i)" +
+            ")");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testArchiveTransformWithNakedTxn1() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/mixnakedzip -fastload -transaction_size 1"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_module /lc.xqy"
+            + " -input_file_type archive";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", 
+            "fn:count(" +
+            "for $i in cts:search(xdmp:document-properties(),cts:not-query(cts:document-fragment-query(cts:and-query( () )))) \n" +
+            "where fn:contains(fn:base-uri($i),\"naked\") eq fn:false() \n" +
+            "return fn:base-uri($i)" +
+            ")");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+        
+        Utils.closeSession();
+    }
+    
+    @Test
     public void testBug19403_1() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
