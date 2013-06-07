@@ -58,6 +58,12 @@ public class Constants {
     /**
      * conf directory of hadoop. Must set if unit tests run in distributed mode
      */
-    //public static String HADOOP_CONF_DIR = prop.getProperty("HADOOP_CONF_DIR");
-    public static String HADOOP_CONF_DIR = null;
+    public static String HADOOP_CONF_DIR;
+    static {
+        HADOOP_CONF_DIR = System.getenv("HADOOP_CONF_DIR");
+        if (HADOOP_CONF_DIR == null) {
+            HADOOP_CONF_DIR = prop.getProperty("HADOOP_CONF_DIR");
+        }
+    }
+//    public static String HADOOP_CONF_DIR = null;
 }
