@@ -99,7 +99,8 @@ public class ContentOutputFormat<VALUEOUT> extends
         + "$f()\n" + "else ()";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
-    
+    protected boolean fastLoad;
+    protected AssignmentPolicy.Kind plcyKind;
     @Override
     public void checkOutputSpecs(Configuration conf, ContentSource cs) 
     throws IOException { 
@@ -139,12 +140,12 @@ public class ContentOutputFormat<VALUEOUT> extends
                     }
                 }
             }
-
+            fastLoad = isFastLoad(cs);
             // ensure manual directory creation 
-            if (isFastLoad()) {
+            if (fastLoad) {
                 LOG.info("Running in fast load mode");
-                    // store forest-stats map into config system
-                DefaultStringifier.store(conf, queryForestStatusMap(cs),
+                    // store forest-info map into config system
+                DefaultStringifier.store(conf, queryForestInfo(cs),
                     OUTPUT_FOREST_HOST);
 
                 AdhocQuery query = session.newAdhocQuery(
@@ -255,29 +256,75 @@ public class ContentOutputFormat<VALUEOUT> extends
     public RecordWriter<DocumentURI, VALUEOUT> getRecordWriter(
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        boolean fastLoad = isFastLoad();
+        fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the ContentWriter
         return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
     }
     
-    protected boolean isFastLoad() {
+    protected boolean isFastLoad(ContentSource cs) throws IOException {
       //fastLoad default: not set
         boolean fastLoad = false;
+        boolean isRange = isRangePolicy(cs);
         if (conf.get(OUTPUT_FAST_LOAD) == null) {
             // fastload not set
             if (conf.get(OUTPUT_DIRECTORY) != null) {
-                // output_dir is set
-                fastLoad = true;
+                // output_dir is set, attempt to do fastload
+                if(conf.get(OUTPUT_PARTITION)== null && isRange) {
+                    LOG.warn("output_partition is not set for range policy, fastload mode is off");
+                    fastLoad = false;
+                } else {
+                    fastLoad = true;
+                }
             } else {
                 //neither fastload nor output_dir is set
                 fastLoad = false;
             }
         } else {
-            //if fastload is set, we honor it
+            // if fastload is set, we honor it
             fastLoad = new Boolean(conf.get(OUTPUT_FAST_LOAD));
+            if (fastLoad && conf.get(OUTPUT_PARTITION) == null
+                && isRange) {
+                throw new IOException(
+                    "output_partition is not set in fastload "
+                        + "mode while server uses range assignment policy");
+            }
         }
+        conf.setBoolean(OUTPUT_FAST_LOAD, fastLoad);
         return fastLoad;
+    }
+    
+    /**
+     * check assignment policy, set plcyKind
+     * @param cs
+     * @return true if it is range policy
+     * @throws IOException
+     */
+    protected boolean isRangePolicy(ContentSource cs) throws IOException {
+        Session session = null;
+        ResultSequence result = null;
+        try {
+            session = cs.newSession();   
+            if (am.getPolicy() == null) {
+                plcyKind = getAssignmentPolicy(session);
+            } else {
+                plcyKind = am.getPolicy().getPolicyKind();
+            }
+            if (plcyKind != null && plcyKind == AssignmentPolicy.Kind.RANGE) {
+                return true;
+            }
+            return false;
+        } catch (RequestException e) {
+            LOG.error(e.getMessage(), e);
+            throw new IOException(e);
+        } finally {
+            if (result != null) {
+                result.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+        }   
     }
     
     // forest host map is saved when checkOutputSpecs() is called.  In certain 
@@ -311,7 +358,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                     InternalUtilities.getOutputContentSource(conf, 
                             conf.get(OUTPUT_HOST));
                 // query forest status mapping
-                return queryForestStatusMap(cs);
+                return queryForestInfo(cs);
             } catch (Exception ex) {
                 throw new IOException(ex);
             }
@@ -345,7 +392,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         item = result.next();
         if ((kind == AssignmentPolicy.Kind.STATISTICAL 
             || kind == AssignmentPolicy.Kind.RANGE)
-            && Boolean.parseBoolean(item.asString()) && isFastLoad()) {
+            && Boolean.parseBoolean(item.asString()) && fastLoad) {
             throw new IOException(
                 "Fastload can't be used:"
                     + "rebalancer is on and assignment policy is statistical or range");
@@ -354,6 +401,7 @@ public class ContentOutputFormat<VALUEOUT> extends
     }
 
     /**
+     * must be attempting or doing fastload when this method is called.
      * result format of the query varies based on policy
      * 
      * bucket:(fid, host, updateAllow)*
@@ -365,38 +413,29 @@ public class ContentOutputFormat<VALUEOUT> extends
      * @return a forest-info map
      * @throws IOException
      */
-    protected LinkedMapWritable queryForestStatusMap(ContentSource cs) 
+    protected LinkedMapWritable queryForestInfo(ContentSource cs) 
     throws IOException {
         Session session = null;
         ResultSequence result = null;
         try {
             session = cs.newSession();   
             AdhocQuery query = null;
-            AssignmentPolicy.Kind kind = getAssignmentPolicy(session);
-            boolean hasPolicy = kind != null;
+            boolean hasPolicy = plcyKind != null;
             if (!hasPolicy) {
                 //no assignment policy, server prior to 7
                 LOG.warn("No assignment policy in server, use legacy assignment policy.");
-                kind = AssignmentPolicy.Kind.LEGACY;
+                plcyKind = AssignmentPolicy.Kind.LEGACY;
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
             } else {
-                if (kind == AssignmentPolicy.Kind.RANGE) {
+                query = session
+                .newAdhocQuery(FOREST_STATUS_MAP_REBALANCING_QUERY);
+                if (plcyKind == AssignmentPolicy.Kind.RANGE) {
                     String pName = conf.get(OUTPUT_PARTITION);
-                    if (pName == null) {
-                        throw new IOException(
-                            "output_partition is not set in fastload "
-                                + "mode while server uses range assignment policy");
-                    } else {
-                        query = session
-                        .newAdhocQuery(FOREST_STATUS_MAP_REBALANCING_QUERY);
-                        query.setNewStringVariable("partition-name", pName);
-                    }
+                    query.setNewStringVariable("partition-name", pName);
                 } else {
-                    query = session
-                        .newAdhocQuery(FOREST_STATUS_MAP_REBALANCING_QUERY);
                     query.setNewStringVariable("partition-name", "");
                 }
-                query.setNewStringVariable("policy", kind.toString()
+                query.setNewStringVariable("policy", plcyKind.toString()
                     .toLowerCase());
             }
 
@@ -419,13 +458,13 @@ public class ContentOutputFormat<VALUEOUT> extends
                 } else {
                     String hostName = item.asString();
                     if (hasPolicy) {
-                        if (kind == AssignmentPolicy.Kind.BUCKET) {
+                        if (plcyKind == AssignmentPolicy.Kind.BUCKET) {
                             item = result.next();
                             boolean updatable = Boolean.parseBoolean(item
                                 .asString());
                             forestStatusMap.put(forest, new ForestInfo(
                                 hostName, -1, updatable));
-                        } else if (kind == AssignmentPolicy.Kind.LEGACY) {
+                        } else if (plcyKind == AssignmentPolicy.Kind.LEGACY) {
                             forestStatusMap.put(forest, new ForestInfo(
                                 hostName, -1, true));
                         } else {
@@ -443,16 +482,10 @@ public class ContentOutputFormat<VALUEOUT> extends
                 }
             }
             if (forestStatusMap.size() == 0) {
-                if (kind == AssignmentPolicy.Kind.RANGE) {
-                    throw new IOException("Number of forests is 0: "
-                        + "check server license for tiered storage; "
-                        + "check partition_name");
-                } else {
-                    throw new IOException("Number of forests is 0: "
-                        + "check forests in database");
-                }
+                throw new IOException("Number of forests is 0: "
+                    + "check forests in database");
             }
-            am.initialize(kind, forestStatusMap);
+            am.initialize(plcyKind, forestStatusMap);
             return forestStatusMap;
         } catch (RequestException e) {
             LOG.error(e.getMessage(), e);
