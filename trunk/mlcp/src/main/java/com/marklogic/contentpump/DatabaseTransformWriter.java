@@ -32,13 +32,18 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.exceptions.XQueryException;
 
+/**
+ * DatabaseContentWriter that does server-side transform and insert
+ * @author ali
+ *
+ * @param <VALUE>
+ */
 public class DatabaseTransformWriter<VALUE> extends
     DatabaseContentWriter<VALUE> {
     private String moduleUri;
     private String functionNs;
     private String functionName;
     private String functionParam;
-    private String contentType;
 
     public DatabaseTransformWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad,
@@ -49,8 +54,6 @@ public class DatabaseTransformWriter<VALUE> extends
         functionName = conf.get(ConfigConstants.CONF_TRANSFORM_FUNCTION,
             "transform");
         functionParam = conf.get(ConfigConstants.CONF_TRANSFORM_PARAM, "");
-        // contentType = conf.get(MarkLogicConstants.CONTENT_TYPE,
-        // MarkLogicConstants.DEFAULT_CONTENT_TYPE);
     }
 
     @Override
@@ -76,14 +79,13 @@ public class DatabaseTransformWriter<VALUE> extends
                 if (sessions[fId] == null) {
                     sessions[fId] = getSession(forestId);
                 }
-                contentType = doc.getContentType().toString();
                 AdhocQuery qry = TransformHelper
-                    .getTransformMarkLogicDocumentQry(conf, sessions[fId],
+                    .getTransformInsertQryMLDocWithMeta(conf, sessions[fId],
                         moduleUri, functionNs, functionName, functionParam,
-                        uri, doc, contentType, options);
+                        uri, doc, options);
                 sessions[fId].submitRequest(qry);
                 stmtCounts[fId]++;
-                // update doc count for statistical
+                // update fragment count for statistical
                 if (needFrmtCount) {
                     updateFrmtCount(fId, 1);
                 }
@@ -94,8 +96,8 @@ public class DatabaseTransformWriter<VALUE> extends
                 stmtCounts[fId]++;
             }
 
-            if (stmtCounts[fId] >= txnSize
-                && sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
+            if (stmtCounts[fId] >= txnSize && 
+                sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
 
@@ -125,24 +127,25 @@ public class DatabaseTransformWriter<VALUE> extends
     public void close(TaskAttemptContext context) throws IOException,
         InterruptedException {
         for (int i = 0; i < sessions.length; i++) {
-            if (sessions[i] != null) {
-                if (stmtCounts[i] > 0
-                    && sessions[i].getTransactionMode() == TransactionMode.UPDATE) {
-                    try {
-                        sessions[i].commit();
-                    } catch (RequestException e) {
-                        LOG.error(e);
-                        if (needFrmtCount) {
-                            rollbackDocCount(i);
-                        }
-                        throw new IOException(e);
-                    } finally {
-                        sessions[i].close();
+            if (sessions[i] == null)
+                continue;
+            if (stmtCounts[i] > 0 && 
+                sessions[i].getTransactionMode() == TransactionMode.UPDATE) {
+                try {
+                    sessions[i].commit();
+                } catch (RequestException e) {
+                    LOG.error(e);
+                    if (needFrmtCount) {
+                        rollbackDocCount(i);
                     }
-                } else {
+                    throw new IOException(e);
+                } finally {
                     sessions[i].close();
                 }
+            } else {
+                sessions[i].close();
             }
+
         }
     }
 

@@ -129,7 +129,8 @@ public class DatabaseContentWriter<VALUE> extends
     }
     
     public DatabaseContentWriter(Configuration conf,
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad, AssignmentManager am) {
+        Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+        AssignmentManager am) {
         super(conf, null);
 
         this.fastLoad = fastLoad;
@@ -151,8 +152,8 @@ public class DatabaseContentWriter<VALUE> extends
             counts = new int[arraySize];
             metadatas = new URIMetadata[arraySize][batchSize];
         }
-        if (fastLoad
-            && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
+        if (fastLoad && 
+            (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
             || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
             frmtCount = new long[arraySize];
             needFrmtCount = true;

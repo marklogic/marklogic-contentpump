@@ -29,7 +29,6 @@ import org.apache.hadoop.io.Text;
 
 import com.marklogic.io.Base64;
 import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentCreateOptions;
@@ -39,18 +38,28 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.types.ValueType;
 
+/**
+ * Helper class for server-side transform
+ * @author ali
+ *
+ */
 public class TransformHelper {
     public static final Log LOG = LogFactory.getLog(TransformHelper.class);
-
-    static private void getInvokeModuleQuery(StringBuilder q,
+    private static String MAP_ELEM_START_TAG = 
+        "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
+        + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
+        + "//marklogic.com/xdmp/map\">";
+    private static void getInvokeModuleQuery(StringBuilder q,
         String moduleUri, String functionNs, String functionName,
         String functionParam) {
-        q.append("xquery version \"1.0-ml\";\n");
-        q.append("import module namespace hadoop = \"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n");
-        q.append("declare variable $URI as xs:string external;\n");
-        q.append("declare variable $CONTENT as item() external;\n");
-        q.append("declare variable $INSERT-OPTIONS as element() external;\n");
-        q.append("hadoop:transform-and-insert(\"").append(moduleUri)
+        q.append("xquery version \"1.0-ml\";\n")
+            .append("import module namespace hadoop = \"http://marklogic.com")
+            .append("/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n")
+            .append("declare variable $URI as xs:string external;\n")
+            .append("declare variable $CONTENT as item() external;\n")
+            .append(
+                "declare variable $INSERT-OPTIONS as element() external;\n")
+            .append("hadoop:transform-and-insert(\"").append(moduleUri)
             .append("\",\"").append(functionNs).append("\",\"")
             .append(functionName).append("\",\"").append(functionParam)
             .append("\", $URI, $CONTENT, $INSERT-OPTIONS)");
@@ -193,11 +202,25 @@ public class TransformHelper {
         return query;
     }
 
-    // TODO maybe we don't need to pass in contentType?
-    public static AdhocQuery getTransformMarkLogicDocumentQry(
+    /**
+     * Get transform and insert query for MarkLogicDocumentWithMeta
+     * @param conf
+     * @param session
+     * @param moduleUri
+     * @param functionNs
+     * @param functionName
+     * @param functionParam
+     * @param uri
+     * @param doc
+     * @param cOptions
+     * @return
+     * @throws InterruptedIOException
+     * @throws UnsupportedEncodingException
+     */
+    public static AdhocQuery getTransformInsertQryMLDocWithMeta(
         Configuration conf, Session session, String moduleUri,
         String functionNs, String functionName, String functionParam,
-        String uri, MarkLogicDocumentWithMeta doc, String type,
+        String uri, MarkLogicDocumentWithMeta doc,
         ContentCreateOptions cOptions) throws InterruptedIOException,
         UnsupportedEncodingException {
         HashMap<String, String> optionsMap = new HashMap<String, String>();
@@ -216,12 +239,6 @@ public class TransformHelper {
         query.setNewStringVariable("URI", uri);
 
         ContentType contentType = doc.getContentType();
-        // not sure in what case this would happen
-        // if (contentType == ContentType.UNKNOWN) {
-        // //get type from mimetype map
-        // contentType = ContentType.forName(getTypeFromMap(key));
-        // }
-        //
         switch (contentType) {
         case BINARY:
             query.setNewVariable("CONTENT", ValueType.XS_BASE64_BINARY,
@@ -298,7 +315,7 @@ public class TransformHelper {
 
     private static String mapToElement(HashMap<String, String> map) {
         StringBuilder sb = new StringBuilder();
-        sb.append("<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http://marklogic.com/xdmp/map\">");
+        sb.append(MAP_ELEM_START_TAG);
         Set<String> keys = map.keySet();
         for (String k : keys) {
             addKeyValue(sb, k, map.get(k));
