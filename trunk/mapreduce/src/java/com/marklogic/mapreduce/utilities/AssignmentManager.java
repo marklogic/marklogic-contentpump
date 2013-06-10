@@ -37,7 +37,7 @@ public class AssignmentManager {
         return instance;
     }
 
-    public AssignmentPolicy getPolicy() {
+    public synchronized AssignmentPolicy getPolicy() {
         return policy;
     }
 

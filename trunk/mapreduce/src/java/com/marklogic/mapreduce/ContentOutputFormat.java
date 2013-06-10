@@ -83,12 +83,12 @@ public class ContentOutputFormat<VALUEOUT> extends
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-forest-host-map()";
-    public static final String FOREST_STATUS_MAP_REBALANCING_QUERY =
+    public static final String FOREST_HOST_QUERY =
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "declare variable $policy as xs:string external;\n" +
         "declare variable $partition-name as xs:string external;\n" + 
-        "hadoop:get-forest-status-map-for-rebalancing($policy,$partition-name)";
+        "hadoop:get-forest-host($policy,$partition-name)";
     public static final String ASSIGNMENT_POLICY_QUERY =
         "import module namespace hadoop = "
         + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
@@ -428,7 +428,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
             } else {
                 query = session
-                .newAdhocQuery(FOREST_STATUS_MAP_REBALANCING_QUERY);
+                .newAdhocQuery(FOREST_HOST_QUERY);
                 if (plcyKind == AssignmentPolicy.Kind.RANGE) {
                     String pName = conf.get(OUTPUT_PARTITION);
                     query.setNewStringVariable("partition-name", pName);
