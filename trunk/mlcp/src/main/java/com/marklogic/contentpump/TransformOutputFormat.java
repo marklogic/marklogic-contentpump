@@ -34,6 +34,14 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 
+/**
+ * OutputFormat for content of transformation. Use this class to transform the
+ * content on server-side and store results in a MarkLogic Server database.
+ * 
+ * @author ali
+ * 
+ * @param <VALUEOUT>
+ */
 public class TransformOutputFormat<VALUEOUT> extends
     ContentOutputFormat<VALUEOUT> {
     static final String MIMETYPES_QUERY = "import module namespace hadoop = "

@@ -28,7 +28,11 @@ import com.marklogic.contentpump.MarkLogicDocumentWithMeta;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.xcc.ContentSource;
 
-
+/**
+ * DatabaseContentOutputFormat for server-side transformation.
+ * @author ali
+ *
+ */
 public class DatabaseTransformOutputFormat extends DatabaseContentOutputFormat {
     @Override
     public RecordWriter<DocumentURI, MarkLogicDocumentWithMeta> getRecordWriter(

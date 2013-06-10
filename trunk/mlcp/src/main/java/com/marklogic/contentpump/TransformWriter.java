@@ -36,6 +36,12 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.exceptions.XQueryException;
 
+/**
+ * ContentWriter that does server-side transform and insert
+ * @author ali
+ *
+ * @param <VALUEOUT>
+ */
 public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     private String moduleUri;
     private String functionNs;
@@ -136,23 +142,23 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public void close(TaskAttemptContext context) throws IOException,
         InterruptedException {
         for (int i = 0; i < sessions.length; i++) {
-            if (sessions[i] != null) {
-                if (stmtCounts[i] > 0
-                    && sessions[i].getTransactionMode() == TransactionMode.UPDATE) {
-                    try {
-                        sessions[i].commit();
-                    } catch (RequestException e) {
-                        LOG.error(e);
-                        if (needFrmtCount) {
-                            rollbackDocCount(i);
-                        }
-                        throw new IOException(e);
-                    } finally {
-                        sessions[i].close();
+            if (sessions[i] == null)
+                continue;
+            if (stmtCounts[i] > 0 && 
+                sessions[i].getTransactionMode() == TransactionMode.UPDATE) {
+                try {
+                    sessions[i].commit();
+                } catch (RequestException e) {
+                    LOG.error(e);
+                    if (needFrmtCount) {
+                        rollbackDocCount(i);
                     }
-                } else {
+                    throw new IOException(e);
+                } finally {
                     sessions[i].close();
                 }
+            } else {
+                sessions[i].close();
             }
         }
         if (is != null) {
