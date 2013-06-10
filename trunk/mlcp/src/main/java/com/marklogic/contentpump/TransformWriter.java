@@ -87,8 +87,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             if (needFrmtCount) {
                 updateDocCount(fId, 1);
             }
-            if (stmtCounts[fId] == txnSize
-                && sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
+            if (stmtCounts[fId] == txnSize && 
+                sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
                 sessions[fId].commit();
                 stmtCounts[fId] = 0;
                 if (needFrmtCount) {
