@@ -19,14 +19,18 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.Quad;
 import com.marklogic.contentpump.utilities.IdGenerator;
+import com.marklogic.mapreduce.ContentType;
+import com.marklogic.mapreduce.MarkLogicConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.lang.PipedQuadsStream;
 import org.apache.jena.riot.lang.PipedRDFIterator;
@@ -65,6 +69,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected Hashtable<String, Vector> collectionHash = new Hashtable<String, Vector> ();
     protected int collectionCount = 0;
     private static final int MAX_COLLECTIONS = 100;
+    protected boolean ignoreCollectionQuad = false;
 
     protected StringBuilder buffer;
     protected boolean hasNext = true;
@@ -104,7 +109,21 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
             throws IOException, InterruptedException {
-        initConfig(context);
+        conf = context.getConfiguration();
+
+        String[] collections = conf.getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
+        ignoreCollectionQuad = (collections != null);
+
+        String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
+                MarkLogicConstants.DEFAULT_CONTENT_TYPE);
+        if (!conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false)) {
+            ContentType contentType = ContentType.valueOf(type);
+            Class<? extends Writable> valueClass = RDFWritable.class;
+            value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
+        }
+        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
+
+        // ===================
 
         file = ((FileSplit) inSplit).getPath();
         start = 0;
@@ -132,7 +151,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         inputFn = fsname;
         idGen = new IdGenerator(inputFn + "-" + splitStart);
 
-        if ("nq".equals(ext)) {
+        if (".nq".equals(ext)) {
             rdfIter = new PipedRDFIterator<Quad>();
             rdfInputStream = new PipedQuadsStream(rdfIter);
             readQuads = true;
@@ -271,6 +290,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         if (value instanceof Text) {
             ((Text) value).set(buffer.toString());
+        } else if (value instanceof RDFWritable) {
+            ((RDFWritable) value).set(buffer.toString());
         } else if (value instanceof ContentWithFileNameWritable) {
             VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
                     .getValue();
@@ -292,6 +313,57 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextQuadKeyValue() throws IOException, InterruptedException {
+        if (ignoreCollectionQuad) {
+            return nextQuadKeyValueIgnoreCollections();
+        } else {
+            return nextQuadKeyValueWithCollections();
+        }
+    }
+
+    protected boolean nextQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
+        setKey(idGen.incrementAndGet());
+        write("<triples xmlns='http://marklogic.com/semantics'>");
+        int max = MAXTRIPLESPERDOCUMENT;
+        while (max > 0 && rdfIter.hasNext()) {
+            Quad quad = (Quad) rdfIter.next();
+            write("<triple>");
+            write(subject(quad.getSubject()));
+            write(predicate(quad.getPredicate()));
+            write(object(quad.getObject()));
+            write("</triple>");
+            max--;
+        }
+        write("</triples>\n");
+
+        if (!rdfIter.hasNext()) {
+            pos = 1;
+        }
+
+        if (value instanceof Text) {
+            ((Text) value).set(buffer.toString());
+        } else if (value instanceof RDFWritable) {
+            ((RDFWritable) value).set(buffer.toString());
+        } else if (value instanceof ContentWithFileNameWritable) {
+            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
+                    .getValue();
+            if (realValue instanceof Text) {
+                ((Text) realValue).set(buffer.toString());
+            } else {
+                LOG.error("Expects Text in triples, but gets "
+                        + realValue.getClass().getCanonicalName());
+                key = null;
+            }
+        } else {
+            LOG.error("Expects Text in triples, but gets "
+                    + value.getClass().getCanonicalName());
+            key = null;
+        }
+
+        buffer.setLength(0);
+        return true;
+    }
+
+    public boolean nextQuadKeyValueWithCollections() throws IOException, InterruptedException {
         if (!rdfIter.hasNext() && collectionHash.isEmpty()) {
             hasNext = false;
             executor.shutdown();
@@ -319,7 +391,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             Vector<String> triples = collectionHash.get(collection);
             triples.add("<triple>" + triple + "</triple>");
 
-            System.err.println(triple);
+            //System.err.println(triple);
 
             if (triples.size() == MAXTRIPLESPERDOCUMENT) {
                 //System.err.println("Full doc " + collection + " (" + triples.size() + ")");
@@ -358,6 +430,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         if (value instanceof Text) {
             ((Text) value).set(buffer.toString());
+        } else if (value instanceof RDFWritable) {
+            ((RDFWritable) value).set(buffer.toString());
+            ((RDFWritable) value).setCollection(collection);
         } else if (value instanceof ContentWithFileNameWritable) {
             VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
                     .getValue();
