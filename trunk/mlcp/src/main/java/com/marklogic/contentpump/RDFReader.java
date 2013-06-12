@@ -51,8 +51,8 @@ import java.util.regex.Pattern;
  *
  * @param <VALUEIN>
  */
-public class CombinedRDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
-    public static final Log LOG = LogFactory.getLog(CombinedRDFReader.class);
+public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
+    public static final Log LOG = LogFactory.getLog(RDFReader.class);
     public static final int MAXTRIPLESPERDOCUMENT = 100;
     protected static Pattern[] patterns = new Pattern[] {
             Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
@@ -82,7 +82,7 @@ public class CombinedRDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long pos;
     protected long end;
 
-    public CombinedRDFReader() {
+    public RDFReader() {
         Random random = new Random();
         randomValue = random.nextLong();
         Calendar cal = Calendar.getInstance();
