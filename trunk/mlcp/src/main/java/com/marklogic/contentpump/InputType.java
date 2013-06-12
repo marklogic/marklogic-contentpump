@@ -194,43 +194,14 @@ public enum InputType implements ConfigConstants {
             return ContentType.forName(type);
         }
     },
-    QUADS {
+    RDF {
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
                 CommandLine cmdline, Configuration conf) {
             if (Command.isInputCompressed(cmdline)) {
-                return CompressedQuadsInputFormat.class;
+                return CompressedCombinedRDFInputFormat.class;
             } else {
-                return QuadsInputFormat.class;
-            }
-        }
-
-        @Override
-        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>>
-        getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-                    DocumentMapper.class;
-        }
-
-        @Override
-        public Class<? extends OutputFormat> getOutputFormatClass(
-                CommandLine cmdline, Configuration conf) {
-            return ContentOutputFormat.class;
-        }
-
-        @Override
-        public ContentType getContentType(CommandLine cmdline) {
-            return ContentType.XML;
-        }
-    },
-    TRIPLES {
-        @Override
-        public Class<? extends FileInputFormat> getInputFormatClass(
-                CommandLine cmdline, Configuration conf) {
-            if (Command.isInputCompressed(cmdline)) {
-                return CompressedTriplesInputFormat.class;
-            } else {
-                return TriplesInputFormat.class;
+                return CombinedRDFInputFormat.class;
             }
         }
 
@@ -264,10 +235,8 @@ public enum InputType implements ConfigConstants {
             return ARCHIVE;
         } else if (type.equalsIgnoreCase(SEQUENCEFILE.name())) {
             return SEQUENCEFILE;
-        } else if (type.equalsIgnoreCase(QUADS.name())) {
-            return QUADS;
-        } else if (type.equalsIgnoreCase(TRIPLES.name())) {
-            return TRIPLES;
+        } else if (type.equalsIgnoreCase(RDF.name())) {
+            return RDF;
         } else {
             throw new IllegalArgumentException("Unknown input type: " + type);
         }
