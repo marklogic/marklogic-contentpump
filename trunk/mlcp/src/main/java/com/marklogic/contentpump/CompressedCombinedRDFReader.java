@@ -1,6 +1,6 @@
 package com.marklogic.contentpump;
 
-import com.marklogic.contentpump.utilities.IdGenerator;
+import com.marklogic.contentpump.utilities.LocalIdGenerator;
 import com.marklogic.mapreduce.CompressionCodec;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -24,10 +24,9 @@ import java.util.zip.ZipInputStream;
  *
  * @param <VALUEIN>
  */
-public class CompressedQuadsReader<VALUEIN> extends
-        QuadsReader<VALUEIN> {
+public class CompressedCombinedRDFReader<VALUEIN> extends CombinedRDFReader<VALUEIN> {
     public static final Log LOG = LogFactory
-        .getLog(CompressedQuadsReader.class);
+        .getLog(CompressedCombinedRDFReader.class);
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private ZipEntry currZipEntry;
@@ -92,7 +91,7 @@ public class CompressedQuadsReader<VALUEIN> extends
                 + codec.name());
         }
 
-        idGen = new IdGenerator(inputFn + "-" + splitStart);
+        idGen = new LocalIdGenerator(inputFn + "-" + splitStart);
     }
 
     private boolean nextRecordInAggregate() throws IOException, InterruptedException {
@@ -146,7 +145,7 @@ public class CompressedQuadsReader<VALUEIN> extends
         }
         return true;
     }
-    public CompressedQuadsReader() {
+    public CompressedCombinedRDFReader() {
         super();
     }
     
