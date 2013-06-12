@@ -24,9 +24,9 @@ import java.util.zip.ZipInputStream;
  *
  * @param <VALUEIN>
  */
-public class CompressedCombinedRDFReader<VALUEIN> extends CombinedRDFReader<VALUEIN> {
+public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
     public static final Log LOG = LogFactory
-        .getLog(CompressedCombinedRDFReader.class);
+        .getLog(CompressedRDFReader.class);
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private ZipEntry currZipEntry;
@@ -145,7 +145,7 @@ public class CompressedCombinedRDFReader<VALUEIN> extends CombinedRDFReader<VALU
         }
         return true;
     }
-    public CompressedCombinedRDFReader() {
+    public CompressedRDFReader() {
         super();
     }
     

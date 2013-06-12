@@ -199,9 +199,9 @@ public enum InputType implements ConfigConstants {
         public Class<? extends FileInputFormat> getInputFormatClass(
                 CommandLine cmdline, Configuration conf) {
             if (Command.isInputCompressed(cmdline)) {
-                return CompressedCombinedRDFInputFormat.class;
+                return CompressedRDFInputFormat.class;
             } else {
-                return CombinedRDFInputFormat.class;
+                return RDFInputFormat.class;
             }
         }
 
