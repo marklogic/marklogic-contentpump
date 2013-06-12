@@ -19,7 +19,6 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.Quad;
 import com.marklogic.contentpump.utilities.IdGenerator;
-import com.marklogic.contentpump.utilities.LocalIdGenerator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileSystem;
@@ -115,7 +114,7 @@ public class CombinedRDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         configFileNameAsCollection(conf, file);
         fs = file.getFileSystem(context.getConfiguration());
         loadModel(file.getName(), fs.open(file));
-        idGen = new LocalIdGenerator(inputFn + "-" + splitStart);
+        idGen = new IdGenerator(inputFn + "-" + splitStart);
     }
 
     protected void loadModel(String fsname, final InputStream in) throws IOException {
@@ -131,7 +130,7 @@ public class CombinedRDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         inputFn = fsname;
-        idGen = new LocalIdGenerator(inputFn + "-" + splitStart);
+        idGen = new IdGenerator(inputFn + "-" + splitStart);
 
         if ("nq".equals(ext)) {
             rdfIter = new PipedRDFIterator<Quad>();
