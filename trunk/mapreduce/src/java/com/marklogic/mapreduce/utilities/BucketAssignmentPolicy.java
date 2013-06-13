@@ -15,10 +15,14 @@
  */
 package com.marklogic.mapreduce.utilities;
 
+import java.math.BigInteger;
 import java.util.LinkedHashSet;
 
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * Bucket Assignment Policy for fastload
+ */
 public class BucketAssignmentPolicy extends AssignmentPolicy {
     static final int NUM_BUCKET = 1 << 14;
     private int[][] buckets;
@@ -83,18 +87,6 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
         }
     }
 
-    /**
-     * return the forest id
-     * 
-     * @param uri
-     * @return forest ID in string
-     */
-    public String getPlacementForestId(DocumentURI uri) {
-        int fIdx = getBucketPlacementId(uri, buckets, NUM_BUCKET,
-            forests.length, uForests.size());
-        return forests[fIdx];
-
-    }
 
     /**
      * return the index to the list of updatable forests (all forest - retired -
@@ -111,8 +103,12 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
     // return the index to the forest list (all forest - retired - RO/DO)
     private int getBucketPlacementId(DocumentURI uri, int[][] buckets,
         int numBuckets, int numForests, int uForests) {
-        LegacyAssignmentPolicy lap = new LegacyAssignmentPolicy();
-        int bucket = lap.getPlacementId(uri, numBuckets);
+        BigInteger uriKey=LegacyAssignmentPolicy.getUriKey(uri.getUri());
+        long u = uriKey.longValue();
+        for (int i = 14; i <= 56; i += 14) {
+            u += LegacyAssignmentPolicy.rotl(uriKey, i);
+        }
+        int bucket = (int) (u&0x3fff);
         int fIdx = buckets[numForests - 1][bucket];
         boolean allUpdatble = numForests == uForests;
         if (!allUpdatble) {
@@ -123,7 +119,7 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
                     partv[j++] = i;
                 }
             }
-            fIdx = partv[lap.getPlacementId(uri, uForests)];
+            fIdx = partv[LegacyAssignmentPolicy.getPlacementId(uri, uForests)];
         }
         return fIdx;
     }

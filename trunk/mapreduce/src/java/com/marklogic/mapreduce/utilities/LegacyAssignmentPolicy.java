@@ -21,12 +21,14 @@ import java.util.LinkedHashSet;
 
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * Legacy Assignment Poilcy for fastload
+ */
 public class LegacyAssignmentPolicy extends AssignmentPolicy {
     private static final long HASH64_STEP = 15485863;
     private static final long HASH64_SEED = 0x39a51471f80aabf7l;
     private static final BigInteger URI_KEY_HASH = hash64("uri()");
 
-    private String uri;
     private String[] forests;
 
     public LegacyAssignmentPolicy() {
@@ -38,26 +40,15 @@ public class LegacyAssignmentPolicy extends AssignmentPolicy {
         policy = Kind.LEGACY;
     }
 
-    @Override
-    public String getPlacementForestId(DocumentURI uri) {
-        if (forests == null) {
-            return null;
-        }
-        this.uri = uri.getUri();
-        int fIdx = getPlacementId(uri, forests.length);
-        return forests[fIdx];
-    }
-
-    public int getPlacementId(DocumentURI uri, int size) {
-        this.uri = uri.getUri();
+    public static int getPlacementId(DocumentURI uri, int size) {
         switch (size) {
         case 0:
             throw new IllegalArgumentException("getPlacementId(size = 0)");
         case 1:
             return 0;
         default:
-            normalize();
-            BigInteger uriKey = getUriKey();
+            String nk = normalize(uri.getUri());
+            BigInteger uriKey = getUriKey(nk);
             long u = uriKey.longValue();
             for (int i = 8; i <= 56; i += 8) {
                 u += rotl(uriKey, i);
@@ -67,11 +58,11 @@ public class LegacyAssignmentPolicy extends AssignmentPolicy {
         }
     }
 
-    protected void normalize() {
-        uri = Normalizer.normalize(uri, Normalizer.Form.NFC);
+    protected static String normalize(String uri) {
+        return Normalizer.normalize(uri, Normalizer.Form.NFC);
     }
 
-    protected BigInteger getUriKey() {
+    public static BigInteger getUriKey(String uri) {
         BigInteger value = hash64(uri).multiply(BigInteger.valueOf(5)).add(
             URI_KEY_HASH);
         byte[] valueBytes = value.toByteArray();
@@ -98,7 +89,7 @@ public class LegacyAssignmentPolicy extends AssignmentPolicy {
         return hash;
     }
 
-    private static long rotl(BigInteger value, int shift) {
+    public static long rotl(BigInteger value, int shift) {
         return value.shiftLeft(shift).xor(value.shiftRight(64 - shift))
             .longValue();
     }
