@@ -71,29 +71,36 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         String forestId = ContentOutputFormat.ID_PREFIX;
         
         if (fastLoad) {
-            fId = am.getPlacementForestIndex(key);
+            if(!needFrmtCount) {
+                // placement for legacy or bucket
+                fId = am.getPlacementForestIndex(key);
+                sfId = fId;
+            } else {
+                if (sfId == -1) {
+                    sfId = am.getPlacementForestIndex(key);
+                }
+                fId = sfId;
+            }
             forestId = forestIds[fId];
         }
-        if (sessions[fId] == null) {
-            sessions[fId] = getSession(forestId);
+        int sid = fId;
+        if (sessions[sid] == null) {
+            sessions[sid] = getSession(forestId);
         }
 
         AdhocQuery query = TransformHelper.getTransformInsertQry(conf,
-            sessions[fId], moduleUri, functionNs, functionName, functionParam,
+            sessions[sid], moduleUri, functionNs, functionName, functionParam,
             uri, value, contentType, options);
         try {
-            sessions[fId].submitRequest(query);
-            stmtCounts[fId]++;
+            sessions[sid].submitRequest(query);
+            stmtCounts[sid]++;
             if (needFrmtCount) {
-                updateDocCount(fId, 1);
+                sfId = -1;
             }
-            if (stmtCounts[fId] == txnSize && 
-                sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
-                sessions[fId].commit();
-                stmtCounts[fId] = 0;
-                if (needFrmtCount) {
-                    frmtCount[fId] = 0;
-                }
+            if (stmtCounts[sid] == txnSize && 
+                sessions[sid].getTransactionMode() == TransactionMode.UPDATE) {
+                sessions[sid].commit();
+                stmtCounts[sid] = 0;
             }
         } catch (RequestServerException e) {
             // log error and continue on RequestServerException
@@ -103,11 +110,11 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 LOG.warn(e.getMessage());
             }
         } catch (RequestException e) {
-            if (sessions[fId] != null) {
-                sessions[fId].close();
+            if (sessions[sid] != null) {
+                sessions[sid].close();
             }
             if (needFrmtCount) {
-                rollbackDocCount(fId);
+                rollbackFrmtCount(sid);
             }
             throw new IOException(e);
         }
@@ -151,7 +158,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 } catch (RequestException e) {
                     LOG.error(e);
                     if (needFrmtCount) {
-                        rollbackDocCount(i);
+                        rollbackFrmtCount(i);
                     }
                     throw new IOException(e);
                 } finally {
