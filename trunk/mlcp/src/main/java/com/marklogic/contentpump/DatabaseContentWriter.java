@@ -117,7 +117,7 @@ public class DatabaseContentWriter<VALUE> extends
     private boolean tolerateErrors;
     
     protected AssignmentManager am;
-    protected long []frmtCount;
+    protected int sfId;
     //default boolean is false
     protected boolean needFrmtCount;
     
@@ -147,16 +147,23 @@ public class DatabaseContentWriter<VALUE> extends
 
         outputDir = conf.get(OUTPUT_DIRECTORY);
         batchSize = conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
-        if (batchSize > 1) {
-            forestContents = new Content[arraySize][batchSize];
-            counts = new int[arraySize];
-            metadatas = new URIMetadata[arraySize][batchSize];
-        }
-        if (fastLoad && 
-            (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
+        if (fastLoad
+            && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
             || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
-            frmtCount = new long[arraySize];
             needFrmtCount = true;
+            if (batchSize > 1) {           
+                forestContents = new Content[1][batchSize];
+                counts = new int[1];
+                metadatas = new URIMetadata[1][batchSize];
+            }
+            sfId = -1;
+        } else {
+            if (batchSize > 1) {           
+                forestContents = new Content[arraySize][batchSize];
+                counts = new int[arraySize];
+                metadatas = new URIMetadata[arraySize][batchSize];
+            }
+            sfId = 0;
         }
     }
 
@@ -228,9 +235,20 @@ public class DatabaseContentWriter<VALUE> extends
         String forestId = ContentOutputFormat.ID_PREFIX;
 
         if (fastLoad) {
-            fId = am.getPlacementForestIndex(key);
+            if(!needFrmtCount) {
+                // placement for legacy or bucket
+                fId = am.getPlacementForestIndex(key);
+                sfId = fId;
+            } else {
+                if (sfId == -1) {
+                    sfId = am.getPlacementForestIndex(key);
+                }
+                fId = sfId;
+            }
             forestId = forestIds[fId];
         }
+        int sid = fId;
+        
         try {
             Content content = null;
             DocumentMetadata meta = null;
@@ -254,6 +272,9 @@ public class DatabaseContentWriter<VALUE> extends
 
             boolean isCopyProps = conf.getBoolean(
                 ConfigConstants.CONF_COPY_PROPERTIES, true);
+            if(needFrmtCount) {
+                fId = 0;
+            }
             if (batchSize > 1) {
                 if (!meta.isNakedProps()) {
                     // add new content
@@ -262,21 +283,21 @@ public class DatabaseContentWriter<VALUE> extends
                 } else {
                     // naked properties
                     if (isCopyProps) {
-                        if (sessions[fId] == null) {
-                            sessions[fId] = getSession(forestId);
+                        if (sessions[sid] == null) {
+                            sessions[sid] = getSession(forestId);
                         }
                         setDocumentProperties(uri, meta.getProperties(),
-                            sessions[fId]);
-                        stmtCounts[fId]++;
+                            sessions[sid]);
+                        stmtCounts[sid]++;
                     }
                 }
                 if (counts[fId] == batchSize) {
-                    if (sessions[fId] == null) {
-                        sessions[fId] = getSession(forestId);
+                    if (sessions[sid] == null) {
+                        sessions[sid] = getSession(forestId);
                     }
                     
                     List<RequestException> errors = 
-                        sessions[fId].insertContentCollectErrors(
+                        sessions[sid].insertContentCollectErrors(
                                 forestContents[fId]);
                     if (errors != null) {
                         for (RequestException ex : errors) {
@@ -288,7 +309,7 @@ public class DatabaseContentWriter<VALUE> extends
                         }                       
                     }
                     
-                    stmtCounts[fId]++;
+                    stmtCounts[sid]++;
                     if (isCopyProps) {
                         // insert properties
                         for (int i = 0; i < counts[fId]; i++) {
@@ -296,45 +317,42 @@ public class DatabaseContentWriter<VALUE> extends
                             String u = metadatas[fId][i].getUri();
                             if (m != null && m.getProperties() != null) {
                                 setDocumentProperties(u, m.getProperties(),
-                                    sessions[fId]);
-                                stmtCounts[fId]++;
+                                    sessions[sid]);
+                                stmtCounts[sid]++;
                             }
                         }
                     }
-                    counts[fId] = 0;
-                    //update doc count for statistical
+                    
+                    //reset forest index for statistical
                     if (needFrmtCount) {
-                        updateFrmtCount(fId, batchSize
-                            - (errors != null ? errors.size() : 0));
+                        sfId = -1;
                     }
+                    counts[fId] = 0;
                 }
 
             } else {
-                if (sessions[fId] == null) {
-                    sessions[fId] = getSession(forestId);
+                if (sessions[sid] == null) {
+                    sessions[sid] = getSession(forestId);
                 }
                 if (content != null) {
-                    sessions[fId].insertContent(content);
-                    stmtCounts[fId]++;
+                    sessions[sid].insertContent(content);
+                    stmtCounts[sid]++;
                 }
-                //update doc count for statistical
+                //reset forest index for statistical
                 if (needFrmtCount) {
-                    updateFrmtCount(fId, 1);
+                    sfId = -1;
                 }
                 
                 if (isCopyProps && meta.getProperties() != null) {
                     setDocumentProperties(uri, meta.getProperties(),
-                        sessions[fId]);
-                    stmtCounts[fId]++;
+                        sessions[sid]);
+                    stmtCounts[sid]++;
                 }
             }
-            if (stmtCounts[fId] >= txnSize
-                && sessions[fId].getTransactionMode() == TransactionMode.UPDATE) {
-                sessions[fId].commit();
-                stmtCounts[fId] = 0;
-                if (needFrmtCount) {
-                    frmtCount[fId] = 0;
-                }
+            if (stmtCounts[sid] >= txnSize
+                && sessions[sid].getTransactionMode() == TransactionMode.UPDATE) {
+                sessions[sid].commit();
+                stmtCounts[sid] = 0;
             }
         } catch (RequestServerException e) {
             // log error and continue on RequestServerException
@@ -344,11 +362,11 @@ public class DatabaseContentWriter<VALUE> extends
                 LOG.warn(e.getMessage());
             }
         } catch (RequestException e) {
-            if (sessions[fId] != null) {
-                sessions[fId].close();
+            if (sessions[sid] != null) {
+                sessions[sid].close();
             }
             if (needFrmtCount) {
-                rollbackDocCount(fId);
+                rollbackDocCount(sid);
             }
             throw new IOException(e);
         }
@@ -373,20 +391,28 @@ public class DatabaseContentWriter<VALUE> extends
     public void close(TaskAttemptContext context) throws IOException,
         InterruptedException {
         if (batchSize > 1) {
-            for (int i = 0; i < forestIds.length; i++) {
+            int len, sid;
+            if (needFrmtCount) {
+                len = 1;
+                sid = sfId;
+            } else {
+                len = forestIds.length;
+                sid = 0;
+            }
+            for (int i = 0; i < len; i++, sid++) {
                 if (counts[i] > 0) {
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0,
                         counts[i]);
 
-                    if (sessions[i] == null) {
+                    if (sessions[sid] == null) {
                         String forestId = forestIds[i];
-                        sessions[i] = getSession(forestId);
+                        sessions[sid] = getSession(forestId);
                     }
 
                     try {
                         List<RequestException> errors = 
-                            sessions[i].insertContentCollectErrors(remainder);
+                            sessions[sid].insertContentCollectErrors(remainder);
                         if (errors != null) {
                             for (RequestException ex : errors) {
                                 if (ex instanceof XQueryException) {
@@ -397,12 +423,13 @@ public class DatabaseContentWriter<VALUE> extends
                                 }
                             }                       
                         }
-                        stmtCounts[i]++;
                         //RequestException if any is thrown before docCount is updated
                         //so docCount doesn't need to rollback in this try-catch
                         if (needFrmtCount) {
-                            updateFrmtCount(i, counts[i]
-                                - (errors != null ? errors.size() : 0));
+                            stmtCounts[sfId]++;
+                            sfId = -1;
+                        } else {
+                            stmtCounts[i]++;
                         }
                         if (!conf.getBoolean(
                             ConfigConstants.CONF_COPY_PROPERTIES, true)) {
@@ -413,8 +440,8 @@ public class DatabaseContentWriter<VALUE> extends
                             String u = metadatas[i][j].getUri();
                             if (m != null && m.getProperties() != null) {
                                 setDocumentProperties(u, m.getProperties(),
-                                    sessions[i]);
-                                stmtCounts[i]++;
+                                    sessions[sid]);
+                                stmtCounts[sid]++;
                             }
                         }
                     } catch (RequestServerException e) {
@@ -426,11 +453,11 @@ public class DatabaseContentWriter<VALUE> extends
                         }
                     } catch (RequestException e) {
                         LOG.error(e);
-                        if (sessions[i] != null) {
-                            sessions[i].close();
+                        if (sessions[sid] != null) {
+                            sessions[sid].close();
                         }
                         if (needFrmtCount) {
-                            rollbackDocCount(i);
+                            rollbackDocCount(sid);
                         }
                         if (e instanceof ServerConnectionException
                             || e instanceof RequestPermissionException) {
@@ -538,24 +565,11 @@ public class DatabaseContentWriter<VALUE> extends
             }
         }
     }
-    
-    /**
-     * 
-     * @param fId forest index
-     * @param count count of newly added docs
-     */
-    protected void updateFrmtCount(int fId, int count) {
-        StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
-            .getPolicy();
-        frmtCount[fId] += count;
-        sap.updateStats(fId, count);
-    }
 
     protected void rollbackDocCount(int fId) {
         StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
             .getPolicy();
-        sap.updateStats(fId, -frmtCount[fId]);
-        LOG.error("rollback doc count of forest " + fId + ":" + frmtCount[fId]);
+        sap.updateStats(fId, -batchSize);
     }
     
 }
