@@ -15,11 +15,12 @@
  */
 package com.marklogic.mapreduce.utilities;
 
-import java.util.LinkedHashSet;
-
+/**
+ * Range Assignment Policy for fastload
+ */
 public class RangeAssignmentPolicy extends StatisticalAssignmentPolicy {
-    public RangeAssignmentPolicy(long[] stats, LinkedHashSet<String> uForests) {
-        super(stats, uForests);
+    public RangeAssignmentPolicy(long[] stats, int batchSize) {
+        super(stats, batchSize);
         policy = AssignmentPolicy.Kind.RANGE;
     }
 

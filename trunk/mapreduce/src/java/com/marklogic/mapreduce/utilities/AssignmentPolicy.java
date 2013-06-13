@@ -22,6 +22,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * Abstract class for assignment policy
+ */
 public abstract class AssignmentPolicy {
     public static final Log LOG = LogFactory.getLog(AssignmentPolicy.class);
 
@@ -38,8 +41,6 @@ public abstract class AssignmentPolicy {
     public Kind getPolicyKind() {
         return policy;
     }
-
-    public abstract String getPlacementForestId(DocumentURI uri);
 
     public abstract int getPlacementForestIndex(DocumentURI uri);
 }

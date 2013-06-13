@@ -15,104 +15,107 @@
  */
 package com.marklogic.mapreduce.utilities;
 
-import java.util.LinkedHashSet;
-import java.util.PriorityQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 
 import com.marklogic.mapreduce.DocumentURI;
 
+/**
+ * Statistical Assignment Policy for fastload 
+ */
 public class StatisticalAssignmentPolicy extends AssignmentPolicy {
-    // since we need to synchronize both pq and docCount,
-    // we manually synchronize pq instead of using PriorityBlockingQueue
-    private PriorityQueue<Stats> pq;
-    private long[] docCount;
-    /**
-     * forests ( RO/DO, retired forests are excluded) can we reuse the forest
-     * array in ContentWriter?
-     */
-    private String[] forests;
-
-    public StatisticalAssignmentPolicy(long[] stats,
-        LinkedHashSet<String> uForests) {
-        this.forests = uForests.toArray(new String[uForests.size()]);
+    private PriorityBlockingQueue<Stats> pq;
+    private long[] frmtCount;
+    private int batch;
+    public StatisticalAssignmentPolicy(long[] stats, int batch) {
         policy = AssignmentPolicy.Kind.STATISTICAL;
-        docCount = new long[stats.length];
-        pq = new PriorityQueue<Stats>(stats.length);
+        frmtCount = new long[stats.length];
+        this.batch = batch;
+        pq = new PriorityBlockingQueue<Stats>(stats.length);
 
         for (int i = 0; i < stats.length; i++) {
             pq.add(new Stats(i, stats[i]));
-            docCount[i] = stats[i];
+            frmtCount[i] = stats[i];
         }
-    }
-
-    private int getIdxSmallestForest() {
-        Stats min = null;
-        synchronized (pq) {
-            min = pq.peek();
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("picked forest# " + min.getfIdx() + " with "
-                    + min.getDocCount() + " docs");
-            }
-        }
-
-        return min.getfIdx();
     }
 
     /**
-     * add doc count to forest with index fIdx, which may not the forest with
-     * minimum docCount
+     * Most of the time, frmtCount increase by batch; instead of waiting the
+     * batch actually accumulated, we increment the batch in the priority. In
+     * this way, we merge two operations (peek and remove) into one operation
+     * (take). What's more, the take operation only takes O(1) time while the
+     * remove operation takes O(n) time, where n is # forests.
+     * 
+     * The down-side is, if insertContentCollectErrors happens to collect
+     * errors, # of docs with errors is not excluded in the stats in the
+     * queue
+     * 
+     * @return forest index
+     * @throws InterruptedException
+     */
+    private int popAndInsert() throws InterruptedException {
+        //take() will wait if pq is temporarily empty
+        Stats min = pq.take();
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("picked forest# " + min.fIdx + " with "
+                + min.frmtCount + " docs");
+        }
+        min.frmtCount += batch;
+        pq.offer(min);
+        int idx = min.fIdx;
+        frmtCount[idx] = min.frmtCount;
+        return idx;
+    }
+
+    /**
+     * add count to forest with index fIdx, which may not be the forest with
+     * minimum frmtCount. Used by fragment count rollback.
      * 
      * @param fIdx
      * @param count
      */
     public void updateStats(int fIdx, long count) {
         synchronized (pq) {
-            docCount[fIdx] += count;
-            Stats tmp = new Stats(fIdx, docCount[fIdx]);
+            frmtCount[fIdx] += count;
+            Stats tmp = new Stats(fIdx, frmtCount[fIdx]);
             // remove the stats object with the same fIdx
             pq.remove(tmp);
-            pq.add(tmp);
+            pq.offer(tmp);
         }
         if (LOG.isTraceEnabled()) {
             LOG.trace("update forest " + fIdx);
         }
     }
 
-    @Override
-    public String getPlacementForestId(DocumentURI uri) {
-        // doesn't seem related to uri
-        return forests[getPlacementForestIndex(uri)];
-    }
+
 
     /**
      * get the index of the forest with smallest number of docs
      */
     @Override
     public int getPlacementForestIndex(DocumentURI uri) {
-        return getIdxSmallestForest();
+        int idx = 0;
+        try {
+            idx = popAndInsert();
+        } catch (InterruptedException e) {
+            LOG.error("Statistical assignment gets interrupted");
+        }
+        return idx;
     }
 
     private class Stats implements Comparable<Stats> {
         int fIdx;
-        long docCount;
+        long frmtCount;
 
-        public int getfIdx() {
-            return fIdx;
-        }
-
-        public long getDocCount() {
-            return docCount;
-        }
-
-        public Stats(int fIdx, long docCount) {
+        public Stats(int fIdx, long frmtCount) {
             super();
             this.fIdx = fIdx;
-            this.docCount = docCount;
+            this.frmtCount = frmtCount;
         }
 
         public int compareTo(Stats o) {
-            if (docCount > o.docCount)
+            if (frmtCount > o.frmtCount)
                 return 1;
-            else if (docCount < o.docCount)
+            else if (frmtCount < o.frmtCount)
                 return -1;
             else
                 return 0;
@@ -125,7 +128,7 @@ public class StatisticalAssignmentPolicy extends AssignmentPolicy {
                 return true;
             if (obj.getClass() != getClass())
                 return false;
-            return fIdx == ((Stats) obj).getfIdx();
+            return fIdx == ((Stats) obj).fIdx;
         }
     }
 

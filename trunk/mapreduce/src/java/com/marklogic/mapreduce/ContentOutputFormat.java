@@ -349,7 +349,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             } else {
                 kind = AssignmentPolicy.Kind.valueOf(s.toUpperCase());
             }
-            am.initialize(kind, fhmap);
+            am.initialize(kind, fhmap, conf.getInt(BATCH_SIZE, 10));
             return fhmap;
         } else {
             try {
@@ -485,7 +485,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                 throw new IOException("Number of forests is 0: "
                     + "check forests in database");
             }
-            am.initialize(plcyKind, forestStatusMap);
+            am.initialize(plcyKind, forestStatusMap, conf.getInt(BATCH_SIZE,10));
             return forestStatusMap;
         } catch (RequestException e) {
             LOG.error(e.getMessage(), e);
