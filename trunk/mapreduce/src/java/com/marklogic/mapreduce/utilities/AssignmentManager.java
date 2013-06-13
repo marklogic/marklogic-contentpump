@@ -23,6 +23,9 @@ import org.apache.hadoop.io.Writable;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.LinkedMapWritable;
 
+/**
+ * Assignment Manager, which is a singleton
+ */
 public class AssignmentManager {
     static final String ID_PREFIX = "#";
     protected AssignmentPolicy policy;
@@ -41,10 +44,11 @@ public class AssignmentManager {
         return policy;
     }
 
-    public synchronized void initialize(AssignmentPolicy.Kind kind, LinkedMapWritable map) {
-        if(initialized) 
+    public synchronized void initialize(AssignmentPolicy.Kind kind,
+        LinkedMapWritable map, int batchSize) {
+        if (initialized)
             return;
-        else 
+        else
             initialized = true;
         LinkedHashSet<String> forests = new LinkedHashSet<String>();
         LinkedHashSet<String> updatableForests = new LinkedHashSet<String>();
@@ -73,7 +77,7 @@ public class AssignmentManager {
                 countAry[i] = ((ForestInfo) map.get(new Text(uForests[i])))
                     .getFragmentCount();
             }
-            initRangePolicy(countAry, updatableForests);
+            initRangePolicy(countAry, batchSize);
         }
             break;
         case STATISTICAL: {
@@ -84,7 +88,7 @@ public class AssignmentManager {
                 countAry[i] = ((ForestInfo) map.get(new Text(uForests[i])))
                     .getFragmentCount();
             }
-            initStatisticalPolicy(countAry, updatableForests);
+            initStatisticalPolicy(countAry, batchSize);
         }
             break;
         }
@@ -95,28 +99,16 @@ public class AssignmentManager {
         policy = new BucketAssignmentPolicy(forests, uForests);
     }
 
-    public void initRangePolicy(long[] docCount, LinkedHashSet<String> uForests) {
-        policy = new RangeAssignmentPolicy(docCount, uForests);
+    public void initRangePolicy(long[] docCount, int batchSize) {
+        policy = new RangeAssignmentPolicy(docCount, batchSize);
     }
 
-    public void initStatisticalPolicy(long[] docCount,
-        LinkedHashSet<String> uForests) {
-        policy = new StatisticalAssignmentPolicy(docCount, uForests);
+    public void initStatisticalPolicy(long[] docCount, int batchSize) {
+        policy = new StatisticalAssignmentPolicy(docCount, batchSize);
     }
 
     public void initLegacyPolicy(LinkedHashSet<String> uForests) {
         policy = new LegacyAssignmentPolicy(uForests);
-    }
-
-    /**
-     * this will be called each doc is inserted
-     * 
-     * @param uri
-     * @return forest ID in string
-     */
-
-    public String getPlacementForestId(DocumentURI uri) {
-        return policy.getPlacementForestId(uri);
     }
 
     public int getPlacementForestIndex(DocumentURI uri) {
