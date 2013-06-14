@@ -105,8 +105,9 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
         int numBuckets, int numForests, int uForests) {
         BigInteger uriKey=LegacyAssignmentPolicy.getUriKey(uri.getUri());
         long u = uriKey.longValue();
+        long uk = u;
         for (int i = 14; i <= 56; i += 14) {
-            u += LegacyAssignmentPolicy.rotl(uriKey, i);
+            u ^= uk>>i;
         }
         int bucket = (int) (u&0x3fff);
         int fIdx = buckets[numForests - 1][bucket];
