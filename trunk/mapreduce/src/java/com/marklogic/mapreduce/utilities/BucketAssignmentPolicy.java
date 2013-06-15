@@ -103,7 +103,8 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
     // return the index to the forest list (all forest - retired - RO/DO)
     private int getBucketPlacementId(DocumentURI uri, int[][] buckets,
         int numBuckets, int numForests, int uForests) {
-        BigInteger uriKey=LegacyAssignmentPolicy.getUriKey(uri.getUri());
+        String nk = LegacyAssignmentPolicy.normalize(uri.getUri());
+        BigInteger uriKey=LegacyAssignmentPolicy.getUriKey(nk);
         long u = uriKey.longValue();
         long uk = u;
         for (int i = 14; i <= 56; i += 14) {
