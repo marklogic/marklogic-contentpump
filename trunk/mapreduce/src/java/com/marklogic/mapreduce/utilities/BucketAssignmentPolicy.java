@@ -106,10 +106,11 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
         String nk = LegacyAssignmentPolicy.normalize(uri.getUri());
         BigInteger uriKey=LegacyAssignmentPolicy.getUriKey(nk);
         long u = uriKey.longValue();
-        long uk = u;
+
         for (int i = 14; i <= 56; i += 14) {
-            u ^= uk>>i;
+            u ^= uriKey.shiftRight(i).longValue();
         }
+
         int bucket = (int) (u&0x3fff);
         int fIdx = buckets[numForests - 1][bucket];
         boolean allUpdatble = numForests == uForests;
