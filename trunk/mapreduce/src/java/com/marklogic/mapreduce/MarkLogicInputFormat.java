@@ -63,6 +63,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
      * @param jobContext job context
      * @return list of input splits    
      */
+    @SuppressWarnings("unchecked")
     @Override
     public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
             InterruptedException { 
@@ -270,18 +271,23 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
         
         // construct and return splits
-        List<InputSplit> splits = new ArrayList<InputSplit>();
+        List<InputSplit>[] splits = new List[forestSplits.size()];
         if (forestSplits == null || forestSplits.isEmpty()) {
-            return splits;
+            return new ArrayList<InputSplit>();
         }
         
-        for (ForestSplit fsplit : forestSplits) {
+        // construct a list of splits per forest
+        for (int i = 0; i < forestSplits.size(); i++) {
+            ForestSplit fsplit = forestSplits.get(i);
+            if (fsplit.recordCount > 0) {
+                splits[i] = new ArrayList<InputSplit>();
+            }
             if (fsplit.recordCount < maxSplitSize) {
                 MarkLogicInputSplit split = 
                     new MarkLogicInputSplit(0, fsplit.recordCount, 
                             fsplit.forestId, fsplit.hostName);
                 split.setLastSplit(true);
-                splits.add(split);
+                splits[i].add(split);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Added split " + split);
                 }    
@@ -312,7 +318,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     if (remainingCount <= maxSplitSize) {
                         split.setLastSplit(true);
                     }
-                    splits.add(split);
+                    splits[i].add(split);
                     remainingCount -= length;
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Added split " + split);
@@ -320,8 +326,22 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 }
             }
         }
-        LOG.info("Made " + splits.size() + " splits.");
-        return splits;
+        
+        // mix the lists of splits into one
+        List<InputSplit> splitList = new ArrayList<InputSplit>();
+        boolean more = true;
+        for (int i = 0; more; i++) {
+            more = false;
+            for (List<InputSplit> splitsPerForest : splits) {
+                if (i < splitsPerForest.size()) {
+                    splitList.add(splitsPerForest.get(i));
+                }
+                more = more || (i + 1 < splitsPerForest.size());
+            }
+        }
+        
+        LOG.info("Made " + splitList.size() + " splits.");
+        return splitList;
     }
     
     /**
