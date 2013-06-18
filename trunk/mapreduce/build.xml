@@ -29,6 +29,7 @@
 	<property name="stagedir-src" value="${buildtmp}/stage-src"/>
 	<property name="mapreduce.stagedir" value="${buildtmp}/stage"/>
 	<property name="compiled.classes.dir" value="${buildtmp}/classes"/>
+	<property name="compiled.classes.dir.cdh" value="${buildtmp}/classes-cdh"/>
 	<property name="test.data.dir" value="src/testdata"/>
 	<property name="java.intermediate.dir" value="${buildtmp}/java"/>
 	<property name="javadocdir" value="${buildtmp}/javadoc"/>
@@ -55,8 +56,10 @@
 	<!-- Products of this build -->
 	<property name="products" value="deliverable"/>
 	<property name="mapreduce.jar.name" value="marklogic-mapreduce-${jar.version.number.string}.jar"/>
+	<property name="mapreduce.cdh.jar.name" value="marklogic-mapreduce-cdh4.3-${jar.version.number.string}.jar"/>
 	<property name="mapreduce.examples.jar.name" value="marklogic-${mapreduce.app.name}-examples-${jar.version.number.string}.jar"/>
 	<property name="mapreduce.output.jar" value="${java.intermediate.dir}/${mapreduce.jar.name}"/>
+	<property name="mapreduce.cdh.output.jar" value="${java.intermediate.dir}/${mapreduce.cdh.jar.name}"/>
 	<property name="mapreduce.test.jar" value="${java.intermediate.dir}/mapreduce.test.jar"/>
 	<property name="mapreduce.javadoczip" value="${java.intermediate.dir}/${mapreduce.javadoczip.name}"/>
 	<property name="mapreduce.bundle.zip" value="${products}/${mapreduce.bundle.name}.zip"/>
@@ -80,6 +83,7 @@
 	<target name="init">
 		<mkdir dir="${buildtmp}"/>
 		<mkdir dir="${compiled.classes.dir}"/>
+		<mkdir dir="${compiled.classes.dir.cdh}"/>
 		<mkdir dir="${java.intermediate.dir}"/>
 		<mkdir dir="${products}"/>
 	</target>
@@ -98,20 +102,50 @@
     <path id="mapreduce.classpath">
         <pathelement path="${xcc.jar}"/>
         <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
-        <pathelement path="${jarlib}/commons-logging-1.0.4.jar"/>
+        <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
         <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
-        <pathelement path="${jarlib}/hadoop-0.20.2-core.jar"/>
-        <pathelement path="${jarlib}/log4j-1.2.15.jar"/>
+        <pathelement path="${jarlib}/hadoop-core-1.1.2.jar"/>
+        <pathelement path="${jarlib}/log4j-1.2.17.jar"/>
+        <pathelement path="${jarlib}/saxon9he.jar"/>
+        <pathelement path="${jarlib}/cpox.jar"/>
+        <pathelement path="${jarlib}/bliki-core-3.0.14-SNAPSHOT.jar"/>
+        <pathelement path="${jarlib}/xpp3-1.1.4c.jar"/>
+    </path>
+    <path id="mapreduce.cdh.classpath">
+        <pathelement path="${xcc.jar}"/>
+        <pathelement path="${jarlib}/avro-1.7.4.jar"/>
+        <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
+        <pathelement path="${jarlib}/commons-codec-1.4.jar"/>
+        <pathelement path="${jarlib}/commons-configuration-1.6.jar"/>
+        <pathelement path="${jarlib}/commons-lang-2.5.jar"/>
+        <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
+        <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
+        <pathelement path="${jarlib}/guava-11.0.2.jar"/>
+        <pathelement path="${jarlib}/hadoop-auth-2.0.0-cdh4.3.0.jar"/>
+        <pathelement path="${jarlib}/hadoop-common-2.0.0-cdh4.3.0.jar"/>
+        <pathelement path="${jarlib}/hadoop-core-2.0.0-mr1-cdh4.3.0.jar"/>
+        <pathelement path="${jarlib}/hadoop-hdfs-2.0.0-cdh4.3.0.jar"/>
+        <pathelement path="${jarlib}/jackson-core-asl-1.8.8.jar"/>
+        <pathelement path="${jarlib}/jackson-mapper-asl-1.8.8.jar"/>
+        <pathelement path="${jarlib}/log4j-1.2.17.jar"/>
+        <pathelement path="${jarlib}/protobuf-java-2.4.0a.jar"/>
+        <pathelement path="${jarlib}/slf4j-api-1.6.1.jar"/>
+        <pathelement path="${jarlib}/slf4j-log4j12-1.6.1.jar"/>
         <pathelement path="${jarlib}/saxon9he.jar"/>
         <pathelement path="${jarlib}/cpox.jar"/>
         <pathelement path="${jarlib}/bliki-core-3.0.14-SNAPSHOT.jar"/>
         <pathelement path="${jarlib}/xpp3-1.1.4c.jar"/>
     </path>
 
-	<path id="mapreduce.compile.classpath">
-		<pathelement path="${compiled.classes.dir}"/>
+    <path id="mapreduce.compile.classpath">
+        <pathelement path="${compiled.classes.dir}"/>
         <path refid="mapreduce.classpath"/>
-	</path>
+    </path>
+
+    <path id="mapreduce.cdh.compile.classpath">
+        <pathelement path="${compiled.classes.dir.cdh}"/>
+        <path refid="mapreduce.cdh.classpath"/>
+    </path>
 
 	<target name="compile.mapreduce" depends="init">
 		<javac classpathref="mapreduce.compile.classpath" srcdir="${java.source}"
@@ -120,10 +154,27 @@
 			source="1.6" target="1.6">
 			<compilerarg value="-Xlint"/>
 		</javac>
+		<javac classpathref="mapreduce.cdh.compile.classpath" srcdir="${java.source}"
+			destdir="${compiled.classes.dir.cdh}" deprecation="on"
+			debug="${compile.debug.symbols.flag}" failonerror="on"
+			source="1.6" target="1.6">
+			<compilerarg value="-Xlint"/>
+		</javac>
 	</target>
 
 	<target name="mapreduce.jar" depends="compile.mapreduce" unless="classes.current">
 		<jar jarfile="${mapreduce.output.jar}" basedir="${compiled.classes.dir}"
+			includes="com/marklogic/mapreduce/*,com/marklogic/mapreduce/functions/*,com/marklogic/mapreduce/utilities/*">
+			<manifest>
+				<section name="mapreduce">
+					<attribute name="Vendor" value="MarkLogic Corporation"/>
+					<attribute name="Description" value="Hadoop Connector for Java"/>
+					<attribute name="Build-Version" value="${version.number.string}"/>
+					<attribute name="Build-Date" value="${date-string}"/>
+				</section>
+			</manifest>
+		</jar>
+		<jar jarfile="${mapreduce.cdh.output.jar}" basedir="${compiled.classes.dir.cdh}"
 			includes="com/marklogic/mapreduce/*,com/marklogic/mapreduce/functions/*,com/marklogic/mapreduce/utilities/*">
 			<manifest>
 				<section name="mapreduce">
@@ -167,12 +218,12 @@
 			header="&lt;font color='#8A9B3C'&gt;${mapreduce.product.name.short} ${version.number.string}&lt;/font&gt;"
 			link="${javadoc.jdk.javadoc.base}"
 		>
-		    <fileset dir="${java.source}">
-		        <include name="**/*.java"/>
-		        <exclude name="com/marklogic/mapreduce/test/*" />
-		        <exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS.java"/>
-		        <exclude name="com/marklogic/mapreduce/examples/WikiLoader.java"/>
-<!--		        <exclude name="com/marklogic/mapreduce/InternalUtilities.java"/>  -->
+				<fileset dir="${java.source}">
+						<include name="**/*.java"/>
+						<exclude name="com/marklogic/mapreduce/test/*" />
+						<exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS.java"/>
+						<exclude name="com/marklogic/mapreduce/examples/WikiLoader.java"/>
+<!--						<exclude name="com/marklogic/mapreduce/InternalUtilities.java"/>  -->
 			</fileset>
 			<classpath>
 				<pathelement path="${compiled.classes.dir}"/>
@@ -224,6 +275,7 @@
                 <copy todir="${mapreduce.stagedir}" file="LEGALNOTICES.txt"/>
 		<mkdir dir="${mapreduce.stage.lib}"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${mapreduce.output.jar}"/>
+		<copy todir="${mapreduce.stage.lib}"  file="${mapreduce.cdh.output.jar}"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-modeler-2.0.1.jar"/>
 		<copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-license.txt"/>
 		<jar jarfile="${mapreduce.stage.lib}/${mapreduce.examples.jar.name}">
@@ -239,31 +291,31 @@
 			</fileset-->
 		</jar>
 
-	  <mkdir dir="${mapreduce.stage.docs}"/>
-	  <copy todir="${mapreduce.stage.docs}" file="${mapreduce.javadoczip}"/>
+		<mkdir dir="${mapreduce.stage.docs}"/>
+		<copy todir="${mapreduce.stage.docs}" file="${mapreduce.javadoczip}"/>
             <mkdir dir="${mapreduce.stage.api.docs}"/>
-	    <copy todir="${mapreduce.stage.api.docs}">
+			<copy todir="${mapreduce.stage.api.docs}">
 			<fileset dir="${javadocdir}/mapreduce"/>
 		</copy>
 
 		<mkdir dir="${mapreduce.stage.src}"/>
 		<copy todir="${mapreduce.stage.src}">
-		    <fileset dir="${java.source}">
-		        <include name="com/marklogic/mapreduce/examples/*.java"/>
-		        <exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS.java"/>
-		        <exclude name="com/marklogic/mapreduce/examples/WikiLoader.java"/>
+				<fileset dir="${java.source}">
+						<include name="com/marklogic/mapreduce/examples/*.java"/>
+						<exclude name="com/marklogic/mapreduce/examples/LinkCountHDFS.java"/>
+						<exclude name="com/marklogic/mapreduce/examples/WikiLoader.java"/>
 			</fileset>
 		</copy>
 		<mkdir dir="${mapreduce.stage.conf}"/>
 		<copy todir="${mapreduce.stage.conf}">
-		    <fileset dir="${conf.dir}">
-		        <include name="*.xml"/>
-		        <exclude name="marklogic-wiki.xml"/>
-		    </fileset>
+				<fileset dir="${conf.dir}">
+						<include name="*.xml"/>
+						<exclude name="marklogic-wiki.xml"/>
+				</fileset>
 		</copy>
 		<mkdir dir="${mapreduce.stage.sample-data}"/>
 		<copy todir="${mapreduce.stage.sample-data}">
-		    <fileset dir="${sample-data.dir}"/>
+				<fileset dir="${sample-data.dir}"/>
 		</copy>
 	</target>
 
@@ -289,7 +341,7 @@
 		</zip>
 		<delete file="${mapreduce.source.zip}"/>
 		<zip zipfile="${mapreduce.source.zip}">
-		        <fileset dir="${stagedir-src}"/>
+						<fileset dir="${stagedir-src}"/>
 		</zip>
 
 	</target>
