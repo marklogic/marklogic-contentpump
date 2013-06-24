@@ -281,6 +281,8 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             ForestSplit fsplit = forestSplits.get(i);
             if (fsplit.recordCount > 0) {
                 splits[i] = new ArrayList<InputSplit>();
+            } else {
+                continue;
             }
             if (fsplit.recordCount < maxSplitSize) {
                 MarkLogicInputSplit split = 
@@ -333,6 +335,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         for (int i = 0; more; i++) {
             more = false;
             for (List<InputSplit> splitsPerForest : splits) {
+                if (splitsPerForest == null) {
+                    continue;
+                }
                 if (i < splitsPerForest.size()) {
                     splitList.add(splitsPerForest.get(i));
                 }
