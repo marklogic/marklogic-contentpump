@@ -25,9 +25,7 @@ public interface ConfigConstants {
     // property names
     static final String HADOOP_CONFDIR_ENV_NAME = "HADOOP_CONF_DIR";
     static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
-    static final String CONTENTPUMP_VERSION_PROPERTY_NAME = "CONTENTPUMP_VERSION";
-    static final String CONTENTPUMP_JAR_NAME = "marklogic-contentpump-<VERSION>.jar";
-    static final String CONTENTPUMP_JAR_PREFIX = "marklogic-contentpump-";
+    static final String CONTENTPUMP_JAR_PREFIX = "mlcp-Hadoop";
 
     // common
     static final String MODE = "mode";

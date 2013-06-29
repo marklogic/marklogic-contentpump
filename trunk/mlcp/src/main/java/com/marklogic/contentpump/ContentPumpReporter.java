@@ -46,4 +46,7 @@ public class ContentPumpReporter extends StatusReporter {
     public void setStatus(String status) {
     }
 
+    public float getProgress() {
+        return 0;
+    }
 }

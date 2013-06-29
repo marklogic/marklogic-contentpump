@@ -39,7 +39,6 @@ import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -50,6 +49,8 @@ import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.TaskID;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
+
+import com.marklogic.contentpump.utilities.ReflectionUtil;
 
 /**
  * Runs a job in-process, potentially multi-threaded.  Only supports map-only
@@ -202,10 +203,10 @@ public class LocalJobRunner implements ConfigConstants {
                 	pool.submit(task);
                 }
             } else { // single-threaded
-                TaskID taskId = new TaskID(new JobID(), true, i);
+                TaskID taskId = new TaskID();
                 TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
-                TaskAttemptContext context = new TaskAttemptContext(conf, 
-                        taskAttemptId);
+                TaskAttemptContext context = 
+                    ReflectionUtil.createTaskAttemptContext(conf, taskAttemptId);
                 RecordReader<INKEY, INVALUE> reader = 
                     inputFormat.createRecordReader(split, context);
                 RecordWriter<OUTKEY, OUTVALUE> writer = 
@@ -215,17 +216,18 @@ public class LocalJobRunner implements ConfigConstants {
                 TrackingRecordReader trackingReader = 
                     new TrackingRecordReader(reader, progress[i]);
 
-                Mapper.Context mapperContext = mapper.new Context(conf,
+                Mapper.Context mapperContext = 
+                    ReflectionUtil.createMapperContext(mapper, conf, 
                         taskAttemptId, trackingReader, writer, committer, 
                         reporter, split);
                 
                 trackingReader.initialize(split, mapperContext);
                 
-                  //no thread pool (only 1 thread specified) , use DocumentMapper
+                //no thread pool (only 1 thread specified) , use DocumentMapper
                 mapperContext.getConfiguration().setClass(
                     "mapreduce.map.class", DocumentMapper.class, Mapper.class);
-                mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) ReflectionUtils
-                    .newInstance(DocumentMapper.class,
+                mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) 
+                    ReflectionUtils.newInstance(DocumentMapper.class,
                         mapperContext.getConfiguration());
                 mapper.run(mapperContext);
                 trackingReader.close();
@@ -302,7 +304,6 @@ public class LocalJobRunner implements ConfigConstants {
         private OutputFormat<OUTKEY, OUTVALUE> outputFormat;
         private Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE> mapper;
         private Configuration conf;
-        private int id;
         private InputSplit split;
         private AtomicInteger pctProgress;
         private ContentPumpReporter reporter;
@@ -316,7 +317,6 @@ public class LocalJobRunner implements ConfigConstants {
             this.inputFormat = inputFormat;
             this.outputFormat = outputFormat;
             this.conf = conf;
-            this.id = id;
             this.split = split;
             this.pctProgress = pctProgress;
             this.reporter = reporter;
@@ -352,21 +352,21 @@ public class LocalJobRunner implements ConfigConstants {
             TrackingRecordReader trackingReader = null;
             RecordWriter<OUTKEY, OUTVALUE> writer = null;
             OutputCommitter committer = null;
-            TaskID taskId = new TaskID(new JobID(), true, id);
+            TaskID taskId = new TaskID();
             TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
             try {
-                context = new TaskAttemptContext(conf, taskAttemptId);
+                context = ReflectionUtil.createTaskAttemptContext(conf, 
+                        taskAttemptId);
                 RecordReader<INKEY, INVALUE> reader = 
                     inputFormat.createRecordReader(split, context);
                 writer = outputFormat.getRecordWriter(context);
                 committer = outputFormat.getOutputCommitter(context);
                 trackingReader = 
                     new TrackingRecordReader(reader, pctProgress);
-                mapper = 
-                    (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)ReflectionUtils.newInstance(
-                        mapperClass, conf);
-                mapperContext = mapper.new Context(conf,
-                        taskAttemptId, trackingReader, writer, committer, 
+                mapper = (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)
+                  ReflectionUtils.newInstance(mapperClass, conf);
+                mapperContext = ReflectionUtil.createMapperContext(mapper, 
+                        conf, taskAttemptId, trackingReader, writer, committer,
                         reporter, split);
                 trackingReader.initialize(split, mapperContext);
                 if (mapperClass == (Class)MultithreadedMapper.class) {
@@ -375,7 +375,7 @@ public class LocalJobRunner implements ConfigConstants {
                 }
                 mapper.run(mapperContext);
             } catch (Throwable t) {
-                LOG.error("Error running task: " + taskAttemptId, t);
+                LOG.error("Error running task: ", t);
             } finally {
                 try {
                     if (trackingReader != null) {
@@ -386,7 +386,7 @@ public class LocalJobRunner implements ConfigConstants {
                     }
                     committer.commitTask(context);
                 } catch (Throwable t) {
-                	LOG.error("Error running task: " + taskAttemptId, t);
+                	LOG.error("Error committing task: ", t);
                 } 
             }
             return null;

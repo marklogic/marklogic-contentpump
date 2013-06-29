@@ -31,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.GenericOptionsParser;
+import org.apache.hadoop.util.VersionInfo;
 
 import com.marklogic.contentpump.utilities.CommandlineOptions;
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
@@ -114,6 +115,10 @@ public class ContentPump implements ConfigConstants {
             command.printUsage(command, options.getPublicOptions());
             return 1; // Exit on exception here.
         }
+        
+        // log the Hadoop version
+        String hadoopVersion = VersionInfo.getVersion();
+        LOG.info("Hadoop library version: " + hadoopVersion);     
         
         // check running mode and hadoop conf dir configuration 
         String mode = cmdline.getOptionValue(MODE);
@@ -251,13 +256,11 @@ public class ContentPump implements ConfigConstants {
         File[] cpJars = cpHomeDir.listFiles(jobJarFilter);
         if (cpJars == null || cpJars.length == 0) {
         	throw new RuntimeException("Content Pump jar file " + 
-                CONTENTPUMP_JAR_NAME + " in not found under " + 
-        	    cpHome);
+                 "is not found under " + cpHome);
         }
         if (cpJars.length > 1) {
         	throw new RuntimeException("More than one Content Pump jar file " +
-                    CONTENTPUMP_JAR_NAME + " in found under " + 
-            	    cpHome);
+                     "are found under " + cpHome);
         }
         // set job jar
         Configuration conf = job.getConfiguration();       

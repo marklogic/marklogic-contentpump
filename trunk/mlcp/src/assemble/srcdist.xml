@@ -15,6 +15,13 @@
         </excludes>
       </fileSet>
       <fileSet>
+        <directory>hadoop-deps</directory>
+        <outputDirectory>/hadoop-deps</outputDirectory>
+        <includes>
+          <include>pom*.xml</include>
+        </includes>
+      </fileSet>
+      <fileSet>
         <includes>
           <include>LICENSE*</include>
           <include>LEGAL*</include>

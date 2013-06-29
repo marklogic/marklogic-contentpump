@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -36,6 +37,8 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.StatusReporter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.util.ReflectionUtils;
+
+import com.marklogic.contentpump.utilities.ReflectionUtil;
 
 /**
  * Multithreaded implementation for @link org.apache.hadoop.mapreduce.Mapper,
@@ -169,7 +172,6 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
     /**
      * Run the application's maps using a thread pool.
      */
-    @SuppressWarnings("unchecked")
 	@Override
     public void run(Context context) throws IOException, InterruptedException {
         outer = context;
@@ -184,15 +186,16 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         // submit runners
         try {
 	        runners = new ArrayList<MapRunner>(numberOfThreads);
-	        List<Future<Object>> taskList = null;
+	        List<Future<?>> taskList = null;
 	        if (threadPool != null) {
-	        	taskList = new ArrayList<Future<Object>>();
+	        	taskList = new ArrayList<Future<?>>();
 	            synchronized (threadPool) {
 	                for (int i = 0; i < numberOfThreads; ++i) {
 	                    MapRunner thread;
 	                    thread = new MapRunner();
 	                    if (!threadPool.isShutdown()) {
-	                        taskList.add((Future<Object>) threadPool.submit(thread));
+	                        Future<?> future = threadPool.submit(thread);
+	                        taskList.add(future);
 	                    } else {
 	                        throw new InterruptedException(
 	                            "Thread Pool has been shut down");
@@ -204,7 +207,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 	            MapRunner r = new MapRunner();
 	            r.run();
 	
-	            for (Future<Object> f : taskList) {
+	            for (Future<?> f : taskList) {
 	                f.get();
 	            }
 	        } else {
@@ -310,6 +313,22 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             outer.setStatus(status);
         }
 
+        public float getProgress() {
+            Method getProgressMethod;
+            try {
+                getProgressMethod = outer.getClass().getMethod(
+                        "getProgress", new Class[0]);
+                if (getProgressMethod != null) {
+                    return (Float) getProgressMethod.invoke(outer, 
+                            new Object[0]);
+                }
+            } catch (Exception e) {
+                LOG.error("Error getting progress", e);
+            }
+            
+            return 0;
+        }
+
     }
 
     private class MapRunner extends Thread {
@@ -318,20 +337,25 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         private Throwable throwable;
         private RecordWriter<K2, V2> writer;
 
-        MapRunner() throws IOException, InterruptedException,
-            ClassNotFoundException {
+        MapRunner() throws IOException, InterruptedException, 
+        ClassNotFoundException {
             // initiate the real mapper (DocumentMapper) that does the work
             mapper = ReflectionUtils.newInstance(mapClass,
                 outer.getConfiguration());
             @SuppressWarnings("unchecked")
-			OutputFormat<K2, V2> outputFormat = (OutputFormat<K2, V2>) ReflectionUtils
-                .newInstance(outer.getOutputFormatClass(),
-                    outer.getConfiguration());
+			OutputFormat<K2, V2> outputFormat = (OutputFormat<K2, V2>) 
+			    ReflectionUtils.newInstance(outer.getOutputFormatClass(),
+                outer.getConfiguration());
             writer = outputFormat.getRecordWriter(outer);
-            subcontext = new Context(outer.getConfiguration(),
-                outer.getTaskAttemptID(), new SubMapRecordReader(), writer,
-                outer.getOutputCommitter(), new SubMapStatusReporter(),
-                outer.getInputSplit());
+            try {
+                subcontext = (Context)ReflectionUtil.createMapperContext(
+                    mapper, outer.getConfiguration(), outer.getTaskAttemptID(),                   
+                    new SubMapRecordReader(), writer,
+                    outer.getOutputCommitter(), new SubMapStatusReporter(),
+                    outer.getInputSplit());
+            } catch (Exception e) {
+                throw new IOException("Error creating mapper context", e);
+            }
         }
 
         @Override

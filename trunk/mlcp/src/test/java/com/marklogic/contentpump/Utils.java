@@ -30,8 +30,6 @@ public class Utils {
         Properties props = System.getProperties();
         props.setProperty(ConfigConstants.CONTENTPUMP_HOME_PROPERTY_NAME,
             Constants.CONTENTPUMP_HOME);
-        props.setProperty(ConfigConstants.CONTENTPUMP_VERSION_PROPERTY_NAME,
-            Constants.CONTENTPUMP_VERSION);
         System.setProperties(props);
     }
     
