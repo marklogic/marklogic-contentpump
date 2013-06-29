@@ -16,7 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -27,6 +26,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.contentpump.utilities.URIUtil;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicDocument;
@@ -107,7 +107,7 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
         } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
             dst = dir + "/" + timestamp + "-" + type.toString();
         }
-        String zipEntryName = getPathFromURI(uri);
+        String zipEntryName = URIUtil.getPathFromURI(uri);
         if (zipEntryName == null) {
             LOG.warn("Error parsing URI, skipping: " + uri);
             return;
@@ -157,23 +157,6 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             }
         } else {
             throw new IOException ("incorrect type: " + type);
-        }
-    }
-    
-    protected static String getPathFromURI(DocumentURI uri)  {
-        String uriStr = uri.getUri();
-        try {
-            URI child = new URI(uriStr);
-            String childPath;
-            if (child.isOpaque()) {
-                childPath = child.getSchemeSpecificPart();
-            } else {
-                childPath = child.getPath();
-            }
-            return childPath;
-        } catch (Exception ex) {
-            LOG.warn("Error parsing URI " + uriStr + ".");
-            return uriStr;
         }
     }
 }

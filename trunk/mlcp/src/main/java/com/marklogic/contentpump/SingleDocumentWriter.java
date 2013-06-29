@@ -33,6 +33,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.contentpump.utilities.URIUtil;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicDocument;
@@ -54,6 +55,9 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
     public SingleDocumentWriter(Path path, Configuration conf) {
         dir = path;
         this.conf = conf;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Default charset: " + Charset.defaultCharset());
+        }
     }
 
     @Override
@@ -66,28 +70,13 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             throws IOException, InterruptedException {
         OutputStream os = null;
         try {
-            String uriStr = uri.getUri();
-            URI child = new URI(uriStr);
+            String childPath = URIUtil.getPathFromURI(uri);
             Path path;
-            String childPath;
-            if (child.isOpaque()) {
-                childPath = child.getSchemeSpecificPart();
-            } else {
-                childPath = child.getPath();
-            }
-            if (childPath == null || childPath.isEmpty()) {
-                LOG.warn("Error parsing document URI: " + uriStr);
-                childPath = uriStr;
-            }
             if (childPath.charAt(0) == '/') {
                 // concatenate outputPath with path to form the path
                 path = new Path(dir.toString() + childPath);
             } else {
                 path = new Path(dir, childPath);
-            }
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Default charset: " + Charset.defaultCharset());
             }
             FileSystem fs = path.getFileSystem(conf);
             if (fs instanceof DistributedFileSystem) {
@@ -122,12 +111,29 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 LOG.warn("Skipping " + uri + ".  Unsupported content type: "
                     + type.name());
             }
-        } catch (URISyntaxException e) {
-            LOG.warn("Error parsing URI, skipping: " + uri, e);
+        } catch (Exception e) {
+            LOG.warn("Error saving: " + uri, e);
         } finally {
             if (os != null) {
                 os.close();
             }
         }      
+    }
+    
+    protected static String getPathFromURI(DocumentURI uri)  {
+        String uriStr = uri.getUri();
+        try {
+            URI child = new URI(uriStr);
+            String childPath;
+            if (child.isOpaque()) {
+                childPath = child.getSchemeSpecificPart();
+            } else {
+                childPath = child.getPath();
+            }
+            return childPath;
+        } catch (Exception ex) {
+            LOG.warn("Error parsing URI " + uriStr + ".");
+            return uriStr;
+        }
     }
 }
