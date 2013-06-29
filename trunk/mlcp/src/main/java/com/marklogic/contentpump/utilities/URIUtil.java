@@ -15,9 +15,14 @@
  ******************************************************************************/
 package com.marklogic.contentpump.utilities;
 
+import java.net.URI;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
 import com.marklogic.contentpump.ConfigConstants;
+import com.marklogic.mapreduce.DocumentURI;
 
 /**
  * Class containing utility functions for URI manipulations.
@@ -25,6 +30,7 @@ import com.marklogic.contentpump.ConfigConstants;
  * @author jchen
  */
 public class URIUtil {
+    public static final Log LOG = LogFactory.getLog(URIUtil.class);
 
     /**
      * Apply URI replacement configuration option to a URI source string.  The
@@ -76,5 +82,22 @@ public class URIUtil {
             uriBuf.append(suffix);
         }
         return uriBuf.toString();
+    }
+    
+    public static String getPathFromURI(DocumentURI uri)  {
+        String uriStr = uri.getUri();
+        try {
+            URI child = new URI(uriStr);
+            String childPath;
+            if (child.isOpaque()) {
+                childPath = child.getSchemeSpecificPart();
+            } else {
+                childPath = child.getPath();
+            }
+            return childPath;
+        } catch (Exception ex) {
+            LOG.warn("Error parsing URI " + uriStr + ".");
+            return uriStr;
+        }
     }
 }
