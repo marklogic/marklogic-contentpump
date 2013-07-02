@@ -111,6 +111,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             throws IOException, InterruptedException {
         conf = context.getConfiguration();
 
+        String fnAsColl = conf.get(ConfigConstants.CONF_OUTPUT_FILENAME_AS_COLLECTION);
+        if (fnAsColl != null) {
+            LOG.warn("The -filename_as_collection has no effect with input_type RDF, use -output_collections instead.");
+        }
+
         String[] collections = conf.getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
         ignoreCollectionQuad = (collections != null);
 
@@ -194,11 +199,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected String resource(Node rsrc) {
         if (rsrc.isBlank()) {
             String uri = null;
-            String addr = escapeXml(rsrc.toString());
+            String addr = escapeXml(rsrc.toString()).replace('/', '_').replace(':','_');
             if (blankMap.containsKey(addr)) {
                 uri = blankMap.get(addr);
             } else {
-                uri = "http://marklogic.com/semantics/blank/" + milliSecs + "/" + randomValue + "/" + addr;
+                uri = "http://marklogic.com/semantics/blank/" + milliSecs + "_" + randomValue + "_" + addr;
                 blankMap.put(addr, uri);
             }
 
