@@ -196,17 +196,33 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         buffer.append(str);
     }
 
+
+    private long rotl(long x, long y)
+    {
+        return (x<<y)^(x>>(64-y));
+    }
+
+    private long fuse(long a, long b)
+    {
+        return rotl(a,8)^b;
+    }
+
+    private long scramble(long x)
+    {
+        return x^rotl(x,20)^rotl(x,40);
+    }
+
     protected String resource(Node rsrc) {
         if (rsrc.isBlank()) {
             String uri = null;
-            String addr = escapeXml(rsrc.toString()).replace('/', '_').replace(':','_');
+            String addr = rsrc.toString();
             if (blankMap.containsKey(addr)) {
                 uri = blankMap.get(addr);
             } else {
-                uri = "http://marklogic.com/semantics/blank/" + milliSecs + "_" + randomValue + "_" + addr;
+                uri = "http://marklogic.com/semantics/blank/" + Long.toHexString(
+                        fuse(scramble((long)addr.hashCode()),fuse(scramble(milliSecs),randomValue)));
                 blankMap.put(addr, uri);
             }
-
             return uri;
         } else {
             return escapeXml(rsrc.toString());
