@@ -114,4 +114,12 @@ public class AssignmentManager {
     public int getPlacementForestIndex(DocumentURI uri) {
         return policy.getPlacementForestIndex(uri);
     }
+    
+    /**
+     * Used internally for testing
+     * @param val
+     */
+    public void setInitialized(boolean val) {
+        initialized = val;
+    }
 }

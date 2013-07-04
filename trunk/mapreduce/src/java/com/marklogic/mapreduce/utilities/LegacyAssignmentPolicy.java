@@ -22,7 +22,7 @@ import java.util.LinkedHashSet;
 import com.marklogic.mapreduce.DocumentURI;
 
 /**
- * Legacy Assignment Poilcy for fastload
+ * Legacy Assignment Policy for fastload
  */
 public class LegacyAssignmentPolicy extends AssignmentPolicy {
     private static final long HASH64_STEP = 15485863;
