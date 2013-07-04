@@ -144,13 +144,18 @@ public class DelimitedTextReader<VALUEIN> extends
             String[] values = parser.getLine();
 
             if (values == null) {
-                if (iterator != null && iterator.hasNext()) {
-                    close();
-                    initParser(iterator.next());
-                    return nextKeyValue();
-                } else {
+                if(compressed) {
                     bytesRead = fileLen;
                     return false;
+                } else { 
+                    if (iterator != null && iterator.hasNext()) {
+                        close();
+                        initParser(iterator.next());
+                        return nextKeyValue();
+                    } else {
+                        bytesRead = fileLen;
+                        return false;
+                    }
                 }
             }
             if (fields == null) {
