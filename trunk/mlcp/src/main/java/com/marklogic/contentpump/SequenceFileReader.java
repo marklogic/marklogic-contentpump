@@ -19,8 +19,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -30,6 +29,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
@@ -57,14 +57,28 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         return hasNext == true ? 0 : 1;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         initConfig(context);
-        Path file = ((FileSplit) inSplit).getPath();
+        batchSize = conf.getInt(MarkLogicConstants.BATCH_SIZE, 
+            MarkLogicConstants.DEFAULT_BATCH_SIZE);
+        
+        file = ((FileSplit) inSplit).getPath();
+        fs = file.getFileSystem(context.getConfiguration());
+        FileStatus status = fs.getFileStatus(file);
+        if(status.isDir()) {
+            iterator = new FileIterator((FileSplit)inSplit, context);
+            inSplit = iterator.next();
+        }
+        
+        initReader(inSplit);
 
-        FileSystem fs = file.getFileSystem(context.getConfiguration());
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void initReader(InputSplit inSplit) throws IOException{
+        file = ((FileSplit) inSplit).getPath();
         reader = new SequenceFile.Reader(fs, file, conf);
         String keyClass = conf
             .get(ConfigConstants.CONF_INPUT_SEQUENCEFILE_KEY_CLASS);
@@ -93,10 +107,7 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             conf);
         seqValue = (Writable) ReflectionUtils.newInstance(
             reader.getValueClass(), conf);
-        batchSize = conf.getInt(MarkLogicConstants.BATCH_SIZE, 
-            MarkLogicConstants.DEFAULT_BATCH_SIZE);
     }
-
     @SuppressWarnings("unchecked")
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
@@ -126,6 +137,12 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 key = null;
             }
             return true;
+        }
+        //end of seq file
+        if (iterator != null && iterator.hasNext()) {
+            close();
+            initReader(iterator.next());
+            return nextKeyValue();
         }
         return false;
     }

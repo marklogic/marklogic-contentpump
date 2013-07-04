@@ -24,12 +24,12 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
@@ -49,7 +49,7 @@ public class ArchiveRecordReader extends
     private byte[] buf = new byte[65536];
     private boolean allowEmptyMeta = false;
     private int count = 0;
-    String zipfile;
+    private String zipfile;
     /**
      * the type of files in this archive Valid choices: XML, TEXT, BINARY
      */
@@ -74,8 +74,21 @@ public class ArchiveRecordReader extends
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         initConfig(context);
+        allowEmptyMeta = conf.getBoolean(
+            CONF_INPUT_ARCHIVE_METADATA_OPTIONAL, false);
         
-        Path file = ((FileSplit) inSplit).getPath();
+        file = ((FileSplit) inSplit).getPath();
+        fs = file.getFileSystem(context.getConfiguration());
+        FileStatus status = fs.getFileStatus(file);
+        if(status.isDir()) {
+            iterator = new FileIterator((FileSplit)inSplit, context);
+            inSplit = iterator.next();
+        }
+        initStream(inSplit);
+    }
+    
+    protected void initStream(InputSplit inSplit) throws IOException {
+        file = ((FileSplit) inSplit).getPath();
         zipfile = file.toUri().getPath();
         int index = file.toUri().getPath().lastIndexOf(EXTENSION);
         String subStr = file.toUri().getPath().substring(0, index);
@@ -83,12 +96,8 @@ public class ArchiveRecordReader extends
         String typeStr = subStr.substring(index + 1, subStr.length());
         type = ContentType.valueOf(typeStr);
         value = new MarkLogicDocumentWithMeta();
-        FileSystem fs = file.getFileSystem(context.getConfiguration());
         FSDataInputStream fileIn = fs.open(file);
         zipIn = new ZipInputStream(fileIn);
-
-        allowEmptyMeta = conf.getBoolean(
-                        CONF_INPUT_ARCHIVE_METADATA_OPTIONAL, false);
     }
 
     @Override
@@ -135,8 +144,15 @@ public class ArchiveRecordReader extends
             }
 
         }
-        hasNext = false;
-        return false;
+        //end of a zip
+        if (iterator != null && iterator.hasNext()) {
+            close();
+            initStream(iterator.next());
+            return nextKeyValue();
+        } else {
+            hasNext = false;
+            return false;
+        }
     }
 
     private void readDocFromStream(long entryLength, MarkLogicDocument doc)

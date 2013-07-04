@@ -15,16 +15,19 @@
  */
 package com.marklogic.contentpump;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.marklogic.contentpump.utilities.IdGenerator;
-import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.MarkLogicConstants;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Calendar;
+import java.util.Hashtable;
+import java.util.Random;
+import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -37,15 +40,13 @@ import org.apache.jena.riot.lang.PipedRDFIterator;
 import org.apache.jena.riot.lang.PipedRDFStream;
 import org.apache.jena.riot.lang.PipedTriplesStream;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Calendar;
-import java.util.Hashtable;
-import java.util.Random;
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.regex.Pattern;
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.core.Quad;
+import com.marklogic.contentpump.utilities.FileIterator;
+import com.marklogic.contentpump.utilities.IdGenerator;
+import com.marklogic.mapreduce.ContentType;
+import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
  * Reader for RDF quads/triples. Uses Jena library to parse RDF and sends triples
@@ -79,23 +80,26 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long randomValue;
     protected long milliSecs;
 
-    protected FileSystem fs;
-    protected Path file;
     protected String inputFn; // Tracks input filename even in the CompressedRDFReader case
     protected long splitStart;
     protected long start;
     protected long pos;
     protected long end;
-
+    protected boolean compressed;
+    
     public RDFReader() {
         Random random = new Random();
         randomValue = random.nextLong();
         Calendar cal = Calendar.getInstance();
         milliSecs = cal.getTimeInMillis();
+        compressed = false;
     }
 
     @Override
     public void close() throws IOException {
+        if(rdfIter!=null) {
+            rdfIter.close();
+        }
     }
 
     @Override
@@ -131,12 +135,23 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         // ===================
 
         file = ((FileSplit) inSplit).getPath();
+        fs = file.getFileSystem(context.getConfiguration());
+        
+        FileStatus status = fs.getFileStatus(file);
+        if(status.isDir()) {
+            iterator = new FileIterator((FileSplit)inSplit, context);
+            inSplit = iterator.next();
+        }
+        initParser(inSplit);
+    }
+    
+    protected void initParser(InputSplit inSplit) throws IOException {
+        file = ((FileSplit) inSplit).getPath();
         start = 0;
         pos = 0;
         end = 1;
 
         configFileNameAsCollection(conf, file);
-        fs = file.getFileSystem(context.getConfiguration());
         loadModel(file.getName(), fs.open(file));
         idGen = new IdGenerator(inputFn + "-" + splitStart);
     }
@@ -278,9 +293,20 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if (!rdfIter.hasNext()) {
-            hasNext = false;
-            executor.shutdown();
-            return false;
+            if(compressed) {
+                hasNext = false;
+                executor.shutdown();
+                return false;
+            } else {
+                if (iterator!=null && iterator.hasNext()) {
+                    close();
+                    initParser(iterator.next());
+                } else {
+                    hasNext = false;
+                    executor.shutdown();
+                    return false;
+                }
+            }
         }
 
         if (readQuads) {

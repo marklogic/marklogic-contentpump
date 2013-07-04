@@ -29,13 +29,13 @@ import org.apache.commons.csv.CSVStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.mapreduce.CompressionCodec;
 
 /**
@@ -51,14 +51,30 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
     private ZipEntry currZipEntry;
     private CompressionCodec codec;
 
+    public CompressedDelimitedTextReader() {
+        super();
+        compressed = true;
+    }
+
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         initConfig(context);
-        initDelimConf(conf, inSplit);
+        initDelimConf();
         
-        Path file = ((FileSplit) inSplit).getPath();
-        FileSystem fs = file.getFileSystem(context.getConfiguration());
+        file = ((FileSplit) inSplit).getPath();
+        fs = file.getFileSystem(context.getConfiguration());
+        FileStatus status = fs.getFileStatus(file);
+        if(status.isDir()) {
+            iterator = new FileIterator((FileSplit)inSplit, context);
+            inSplit = iterator.next();
+        }
+        
+        initStream(inSplit);
+    }
+    
+    protected void initStream(InputSplit inSplit) throws IOException {
+        file = ((FileSplit) inSplit).getPath();
         FSDataInputStream fileIn = fs.open(file);
         
         String codecString = conf.get(
@@ -105,7 +121,26 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                 }
                 return nextKeyValueInZip();
             } else if (codec.equals(CompressionCodec.GZIP)) {
-                return super.nextKeyValue();
+                if (super.nextKeyValue()) {
+                    return true;
+                }
+                // move to next gzip file in this split
+                if (iterator != null && iterator.hasNext()) {
+                    // close previous zip and streams
+                    close();
+                    initStream(iterator.next());
+                    if (encoding == null) {
+                        instream = new InputStreamReader(zipIn);
+                    } else {
+                        instream = new InputStreamReader(zipIn, encoding);
+                    }
+                    parser = new CSVParser(instream, new CSVStrategy(
+                        delimiter, encapsulator,
+                        CSVStrategy.COMMENTS_DISABLED,
+                        CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
+                    return super.nextKeyValue();
+                } else
+                    return false;
             } else {
                 throw new UnsupportedOperationException("Unsupported codec: "
                     + codec.name());
@@ -154,8 +189,14 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             // continue read next zip entry if any
         }
         // end of zip
-        hasNext = false;
-        return false;
+        if (iterator != null && iterator.hasNext()) {
+            close();
+            initStream(iterator.next());
+            return nextKeyValueInZip();
+        } else {
+            hasNext = false;
+            return false;
+        }
     }
     
     @Override

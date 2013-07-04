@@ -18,15 +18,18 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.contentpump.utilities.URIUtil;
@@ -49,7 +52,9 @@ public abstract class ImportRecordReader<VALUEIN> extends
     protected boolean streaming = false;
     protected Configuration conf;
     protected String encoding;
-
+    protected Path file;
+    protected FileSystem fs;
+    protected Iterator<FileSplit> iterator;
     /**
      * Apply URI prefix and suffix configuration options and set the result as 
      * DocumentURI key.
