@@ -44,9 +44,14 @@ import com.marklogic.xcc.Session;
  */
 public class TransformOutputFormat<VALUEOUT> extends
     ContentOutputFormat<VALUEOUT> {
-    static final String MIMETYPES_QUERY = "import module namespace hadoop = "
+    static final String MIMETYPES_QUERY = 
+        "import module namespace hadoop = "
         + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
-        + "hadoop:get-mimetypes-map()";
+        + "let $f := "
+        + "  fn:function-lookup(xs:QName('hadoop:get-mimetypes-map'),0)\n"
+        + "let $hasFunc := exists($f)"
+        + "return  if($hasFunc eq fn:true()) then "
+        + "$f()\n" + "else ()";
     /**
      * internal mimetypes map, initialized in getRecordWriter
      */
@@ -79,7 +84,8 @@ public class TransformOutputFormat<VALUEOUT> extends
             options.setDefaultXQueryVersion("1.0-ml");
             query.setOptions(options);
             result = session.submitRequest(query);
-
+            if (!result.hasNext())
+                throw new IOException("Server-side transform requires MarkLogic 7 or later");
             mimetypeMap = new LinkedMapWritable();
             while (result.hasNext()) {
                 String suffs = result.next().asString();

@@ -38,9 +38,13 @@ import org.apache.hadoop.mapreduce.lib.input.InvalidInputException;
  */
 public abstract class FileAndDirectoryInputFormat<K, V> extends
 FileInputFormat<K, V> {
+	/**
+	 * threshold of expanded splits: 1 million
+	 */
+    private static int SPLIT_COUNT_LIMIT = 1000000;
     // add my own hiddenFileFilter since the one defined in FileInputFormat
     // is not accessible.
-    private static final PathFilter hiddenFileFilter = new PathFilter() {
+    public static final PathFilter hiddenFileFilter = new PathFilter() {
         public boolean accept(Path p) {
             String name = p.getName();
             return !name.startsWith("_") && !name.startsWith(".");
@@ -62,6 +66,8 @@ FileInputFormat<K, V> {
                 + " and input file pattern " + pattern, ex);
         }        
         
+        // flatten directories until reaching FILE_SPLIT_COUNT_LIMIT
+        
         PathFilter jobFilter = getInputPathFilter(job);
         List<PathFilter> filters = new ArrayList<PathFilter>();
         filters.add(hiddenFileFilter);
@@ -72,19 +78,23 @@ FileInputFormat<K, V> {
         // take a second pass of the splits generated to extract files from 
         // directories
         int count = 0;
-        while (count < splits.size()) {
+        while (count < splits.size() && splits.size() < SPLIT_COUNT_LIMIT) {
             FileSplit split = (FileSplit) splits.get(count);
             Path file = split.getPath();
             FileSystem fs = file.getFileSystem(conf);
             FileStatus status = fs.getFileStatus(file);
             if (status.isDir()) {
-                splits.remove(count);
                 FileStatus[] children = 
                                 fs.listStatus(status.getPath(), inputFilter);
-                for (FileStatus stat : children) {
-                    FileSplit child = new FileSplit(stat.getPath(), 0, 
-                                    stat.getLen(), null);
-                    splits.add(child);
+                if(children.length + count < SPLIT_COUNT_LIMIT) {
+                    splits.remove(count);
+                    for (FileStatus stat : children) {
+                        FileSplit child = new FileSplit(stat.getPath(), 0, 
+                                        stat.getLen(), null);
+                        splits.add(child);
+                    }
+                } else {
+                    count++;
                 }
             } else {
                 count++;
@@ -98,7 +108,7 @@ FileInputFormat<K, V> {
      * constructor do. Used by the listPaths() to apply the built-in
      * hiddenFileFilter together with a user provided one (if any).
      */
-    private static class MultiPathFilter implements PathFilter {
+    public static class MultiPathFilter implements PathFilter {
         private List<PathFilter> filters;
 
         public MultiPathFilter(List<PathFilter> filters) {

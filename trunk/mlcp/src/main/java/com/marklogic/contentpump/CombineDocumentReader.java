@@ -16,7 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +28,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
@@ -44,7 +44,6 @@ extends ImportRecordReader<VALUEIN> {
         .getLog(CombineDocumentReader.class);
     protected long bytesRead;
     protected long bytesTotal;
-    protected Iterator<FileSplit> iterator;
     protected TaskAttemptContext context;
     protected int batchSize;
     
@@ -55,6 +54,9 @@ extends ImportRecordReader<VALUEIN> {
     public void close() throws IOException {
     }
 
+    /**
+     * progress becomes inaccurate if #files exceeds the FILE_SPLIT_COUNT_LIMIT
+     */
     @Override
     public float getProgress() throws IOException, InterruptedException {
         return bytesRead / (float)bytesTotal;
@@ -65,13 +67,15 @@ extends ImportRecordReader<VALUEIN> {
     throws IOException, InterruptedException {
         initConfig(context);
 
-        iterator = ((CombineDocumentSplit)inSplit).getSplits().iterator();
+        iterator = new FileIterator(((CombineDocumentSplit) inSplit)
+            .getSplits().iterator(), context);
         bytesTotal = inSplit.getLength();
         this.context = context;
         batchSize = conf.getInt(MarkLogicConstants.BATCH_SIZE, 
                         MarkLogicConstants.DEFAULT_BATCH_SIZE);
     }
 
+    
     @SuppressWarnings({ "unchecked" })
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
@@ -80,7 +84,6 @@ extends ImportRecordReader<VALUEIN> {
             Path file = split.getPath();
             FileSystem fs = file.getFileSystem(context.getConfiguration());
             FSDataInputStream fileIn = fs.open(file);
-            
             byte[] buf = new byte[(int)split.getLength()];
             try {
                 String uri = makeURIFromPath(file);
@@ -118,7 +121,8 @@ extends ImportRecordReader<VALUEIN> {
             } finally {
                 fileIn.close();
             }
-        }       
+        }
+
         return false;
     }
 }

@@ -30,13 +30,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
 
 /**
@@ -72,13 +72,12 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected IdGenerator idGen;
 
     protected XMLInputFactory f;
-    protected FileSystem fs;
-    protected Path file;
     protected FSDataInputStream fInputStream;
     protected long start;
     protected long pos;
     protected boolean overflow;
     protected long end;
+    protected boolean compressed = false;
     
     public AggregateXMLReader() {
     }
@@ -109,26 +108,42 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         initConfig(context);
+        initAggConf(context);
         
+        f = XMLInputFactory.newInstance();
         file = ((FileSplit) inSplit).getPath();
+        fs = file.getFileSystem(context.getConfiguration());
+        FileStatus status = fs.getFileStatus(file);
+        if(status.isDir()) {
+            iterator = new FileIterator((FileSplit)inSplit, context);
+            inSplit = iterator.next();
+        }
+        initStreamReader(inSplit);
+    }
+    
+    protected void initStreamReader(InputSplit inSplit) throws IOException,
+        InterruptedException {
         start = 0;
         end = inSplit.getLength();
         overflow = false;
-        
+        file = ((FileSplit) inSplit).getPath();
         configFileNameAsCollection(conf, file);
-        fs = file.getFileSystem(context.getConfiguration());
+
         fInputStream = fs.open(file);
-        
-        f = XMLInputFactory.newInstance();
+
         try {
             xmlSR = f.createXMLStreamReader(fInputStream, encoding);
         } catch (XMLStreamException e) {
             LOG.error(e.getMessage(), e);
         }
-        initAggConf((FileSplit)inSplit, context);
+
+        if (useAutomaticId) {
+            idGen = new IdGenerator(file.toUri().getPath() + "-"
+                + ((FileSplit) inSplit).getStart());
+        }
     }
     
-    protected void initAggConf(FileSplit inSplit, TaskAttemptContext context) {
+    protected void initAggConf(TaskAttemptContext context) {
         Configuration conf = context.getConfiguration();
         idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
         if (idName == null) {
@@ -137,10 +152,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         recordName = conf.get(ConfigConstants.CONF_AGGREGATE_RECORD_ELEMENT);
         recordNamespace = conf
             .get(ConfigConstants.CONF_AGGREGATE_RECORD_NAMESPACE);
-        if (useAutomaticId) {
-            idGen = new IdGenerator(file.toUri().getPath() + "-"
-                + inSplit.getStart());
-        }
+
     }
 
     private void write(String str) {
@@ -496,8 +508,21 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                                 + ", recordNamespace = " + recordNamespace
                                 + " at " + xmlSR.getLocation());
                     } else {
-                        hasNext = false;
-                        return false;
+                        if(compressed) {
+                            //this doc is done, refer to the zip for next doc
+                            hasNext = false;
+                            return false;
+                        } else {
+                            //get next file from FileIterator
+                            if (iterator!=null && iterator.hasNext()) {
+                                close();
+                                initStreamReader(iterator.next());
+                                continue;
+                            } else {
+                                hasNext = false;
+                                return false;
+                            }
+                        }
                     }
                 default:
                     throw new XMLStreamException("UNIMPLEMENTED: " + eventType);

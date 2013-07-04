@@ -23,15 +23,14 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
 import com.sun.org.apache.xml.internal.utils.XMLChar;
 
@@ -59,10 +58,10 @@ public class DelimitedTextReader<VALUEIN> extends
     protected String uriName; // the column name used for URI
     protected long fileLen = Long.MAX_VALUE;
     protected long bytesRead;
-    protected Path file;
     protected boolean generateId;
     protected IdGenerator idGen;
     protected int uriId = -1; // the column index used for URI
+    protected boolean compressed;
     
     @Override
     public void close() throws IOException {
@@ -80,10 +79,21 @@ public class DelimitedTextReader<VALUEIN> extends
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         initConfig(context);
-        
+        initDelimConf();
+        file = ((FileSplit) inSplit).getPath();
+        fs = file.getFileSystem(context.getConfiguration());
+        FileStatus status = fs.getFileStatus(file);
+        if(status.isDir()) {
+            iterator = new FileIterator((FileSplit)inSplit, context);
+            inSplit = iterator.next();
+        }
+        initParser(inSplit);
+    }
+    
+    protected void initParser(InputSplit inSplit) throws IOException, InterruptedException {
         file = ((FileSplit) inSplit).getPath();
         configFileNameAsCollection(conf, file);
-        FileSystem fs = file.getFileSystem(context.getConfiguration());
+        
         FSDataInputStream fileIn = fs.open(file);
         if (encoding == null) {
             instream = new InputStreamReader(fileIn);
@@ -91,14 +101,23 @@ public class DelimitedTextReader<VALUEIN> extends
             instream = new InputStreamReader(fileIn, encoding);
             //String will be converted and read as UTF-8 String
         }
+        bytesRead = 0;
         fileLen = inSplit.getLength();
-        initDelimConf(conf, inSplit);
+        if (uriName == null) {
+            generateId = conf.getBoolean(CONF_DELIMITED_GENERATE_URI, false);
+            if (generateId) {
+                idGen = new IdGenerator(file.toUri().getPath() + "-"
+                        + ((FileSplit)inSplit).getStart());
+            } else {
+                uriId = 0;
+            }
+        }
         parser = new CSVParser(instream, new CSVStrategy(delimiter,
             encapsulator, CSVStrategy.COMMENTS_DISABLED,
             CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
     }
 
-    protected void initDelimConf(Configuration conf, InputSplit inSplit) {
+    protected void initDelimConf() {
         String delimStr = conf.get(ConfigConstants.CONF_DELIMITER,
                 ConfigConstants.DEFAULT_DELIMITER);
         if (delimStr.length() == 1) {
@@ -112,15 +131,7 @@ public class DelimitedTextReader<VALUEIN> extends
                 DEFAULT_ROOT_NAME);
         rootStart = '<' + rootName + '>';
         rootEnd = "</" + rootName + '>';
-        if (uriName == null) {
-            generateId = conf.getBoolean(CONF_DELIMITED_GENERATE_URI, false);
-            if (generateId) {
-                idGen = new IdGenerator(file.toUri().getPath() + "-"
-                        + ((FileSplit)inSplit).getStart());
-            } else {
-                uriId = 0;
-            }
-        }
+
     }
 
     @SuppressWarnings("unchecked")
@@ -133,8 +144,14 @@ public class DelimitedTextReader<VALUEIN> extends
             String[] values = parser.getLine();
 
             if (values == null) {
-                bytesRead = fileLen;
-                return false;
+                if (iterator != null && iterator.hasNext()) {
+                    close();
+                    initParser(iterator.next());
+                    return nextKeyValue();
+                } else {
+                    bytesRead = fileLen;
+                    return false;
+                }
             }
             if (fields == null) {
                 fields = values;
@@ -179,8 +196,19 @@ public class DelimitedTextReader<VALUEIN> extends
                 values = parser.getLine();
 
                 if (values == null) {
-                    bytesRead = fileLen;
-                    return false;
+                    if(compressed) {
+                        bytesRead = fileLen;
+                        return false;
+                    } else { 
+                        if (iterator != null && iterator.hasNext()) {
+                            close();
+                            initParser(iterator.next());
+                            return nextKeyValue();
+                        } else {
+                            bytesRead = fileLen;
+                            return false;
+                        }
+                    }
                 }
             }
 

@@ -1,15 +1,5 @@
 package com.marklogic.contentpump;
 
-import com.marklogic.contentpump.utilities.IdGenerator;
-import com.marklogic.mapreduce.CompressionCodec;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -17,6 +7,18 @@ import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.mapreduce.InputSplit;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
+import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+
+import com.marklogic.contentpump.utilities.FileIterator;
+import com.marklogic.contentpump.utilities.IdGenerator;
+import com.marklogic.mapreduce.CompressionCodec;
 
 /**
  * Reader for Compressed RDF statements.
@@ -47,8 +49,20 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
 
         initConfig(context);
 
-        Path file = ((FileSplit) inSplit).getPath();
+        file = ((FileSplit) inSplit).getPath();
         fs = file.getFileSystem(context.getConfiguration());
+        
+        FileStatus status = fs.getFileStatus(file);
+        if(status.isDir()) {
+            iterator = new FileIterator((FileSplit)inSplit, context);
+            inSplit = iterator.next();
+        }
+        
+        initStream(inSplit);
+    }
+
+    private void initStream(InputSplit inSplit) throws IOException {
+        file = ((FileSplit) inSplit).getPath();
         FSDataInputStream fileIn = fs.open(file);
 
         String codecString = conf.get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
@@ -93,7 +107,7 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
 
         idGen = new IdGenerator(inputFn + "-" + splitStart);
     }
-
+    
     private boolean nextRecordInAggregate() throws IOException, InterruptedException {
         return super.nextKeyValue();
     }
@@ -138,6 +152,11 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
                 return nextRecordInAggregate();
             }
             // end of zip
+            if (iterator != null && iterator.hasNext()) {
+                close();
+                initStream(iterator.next());
+                return nextRecordInAggregate();
+            }
             return false;
 
         } else if (codec.equals(CompressionCodec.GZIP)) {
@@ -147,6 +166,7 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
     }
     public CompressedRDFReader() {
         super();
+        compressed = true;
     }
     
     @Override
