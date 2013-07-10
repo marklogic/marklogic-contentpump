@@ -301,30 +301,30 @@ public class ContentOutputFormat<VALUEOUT> extends
      * @throws IOException
      */
     protected boolean isRangePolicy(ContentSource cs) throws IOException {
+        initPolicy(cs);
+        if (plcyKind != null && plcyKind == AssignmentPolicy.Kind.RANGE) {
+            return true;
+        }
+        return false;
+    }
+    
+    private void initPolicy(ContentSource cs) throws IOException {
         Session session = null;
-        ResultSequence result = null;
         try {
-            session = cs.newSession();   
+            session = cs.newSession();
             if (am.getPolicy() == null) {
                 plcyKind = getAssignmentPolicy(session);
             } else {
                 plcyKind = am.getPolicy().getPolicyKind();
             }
-            if (plcyKind != null && plcyKind == AssignmentPolicy.Kind.RANGE) {
-                return true;
-            }
-            return false;
         } catch (RequestException e) {
             LOG.error(e.getMessage(), e);
             throw new IOException(e);
         } finally {
-            if (result != null) {
-                result.close();
-            }
             if (session != null) {
                 session.close();
             }
-        }   
+        }
     }
     
     // forest host map is saved when checkOutputSpecs() is called.  In certain 
@@ -357,6 +357,8 @@ public class ContentOutputFormat<VALUEOUT> extends
                 ContentSource cs = 
                     InternalUtilities.getOutputContentSource(conf, 
                             conf.get(OUTPUT_HOST));
+                //get policy
+                initPolicy(cs);
                 // query forest status mapping
                 return queryForestInfo(cs);
             } catch (Exception ex) {
