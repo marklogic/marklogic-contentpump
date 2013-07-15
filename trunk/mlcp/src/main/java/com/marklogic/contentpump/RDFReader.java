@@ -76,7 +76,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected boolean hasNext = true;
     protected IdGenerator idGen;
 
-    protected Hashtable<String,String> blankMap = new Hashtable<String,String> ();
     protected long randomValue;
     protected long milliSecs;
 
@@ -229,16 +228,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected String resource(Node rsrc) {
         if (rsrc.isBlank()) {
-            String uri = null;
-            String addr = rsrc.toString();
-            if (blankMap.containsKey(addr)) {
-                uri = blankMap.get(addr);
-            } else {
-                uri = "http://marklogic.com/semantics/blank/" + Long.toHexString(
-                        fuse(scramble((long)addr.hashCode()),fuse(scramble(milliSecs),randomValue)));
-                blankMap.put(addr, uri);
-            }
-            return uri;
+            return "http://marklogic.com/semantics/blank/" + Long.toHexString(
+                        fuse(scramble((long)rsrc.hashCode()),fuse(scramble(milliSecs),randomValue)));
         } else {
             return escapeXml(rsrc.toString());
         }
