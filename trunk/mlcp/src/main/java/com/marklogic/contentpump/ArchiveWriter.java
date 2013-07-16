@@ -62,7 +62,8 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
         dir = path.toString();
         this.context = context;
         Configuration conf = context.getConfiguration();
-        String type = conf.get(ConfigConstants.CONF_OUTPUT_TYPE, ConfigConstants.DEFAULT_OUTPUT_TYPE);
+        String type = conf.get(ConfigConstants.CONF_OUTPUT_TYPE, 
+                ConfigConstants.DEFAULT_OUTPUT_TYPE);
         ExportOutputType outputType = ExportOutputType.valueOf(
                         type.toUpperCase());
         if (outputType.equals(ExportOutputType.DOCUMENT)) {
@@ -107,9 +108,15 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
         } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
             dst = dir + "/" + timestamp + "-" + type.toString();
         }
-        String zipEntryName = URIUtil.getPathFromURI(uri);
+        // Decode URI if exporting documents in compressed form.
+        String zipEntryName = isExportDoc ? URIUtil.getPathFromURI(uri) : 
+                                            uri.getUri();
         if (zipEntryName == null) {
-            LOG.warn("Error parsing URI, skipping: " + uri);
+            if (isExportDoc) {
+                LOG.warn("Error parsing URI, skipping: " + uri);
+            } else {
+                LOG.warn("Found document with empty URI.");
+            }
             return;
         }
         if (ContentType.BINARY.equals(type)) {
