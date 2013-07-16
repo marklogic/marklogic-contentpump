@@ -106,7 +106,7 @@
     <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
     <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
     <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
-    <pathelement path="${jarlib}/hadoop-core-1.1.2.jar"/>
+    <pathelement path="${jarlib}/hadoop-core-1.2.0.jar"/>
     <pathelement path="${jarlib}/log4j-1.2.17.jar"/>
     <pathelement path="${jarlib}/saxon9he.jar"/>
     <pathelement path="${jarlib}/cpox.jar"/>
