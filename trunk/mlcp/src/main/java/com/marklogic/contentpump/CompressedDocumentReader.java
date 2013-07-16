@@ -129,7 +129,7 @@ public class CompressedDocumentReader<VALUEIN> extends
                 if (zipEntry != null && zipEntry.getSize() != 0) {
                     String uri = getEncodedURI(zipEntry.getName());
                     if (uri != null) {
-                        setKey(zipEntry.getName());
+                        setKey(uri);
                         setValue(zipEntry.getSize());
                     } else {
                         key = null;
