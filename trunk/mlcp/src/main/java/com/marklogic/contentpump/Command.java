@@ -496,6 +496,10 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(FAST_LOAD);
                 if (arg == null || arg.equalsIgnoreCase("true")) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, true);
+                    LOG.info("Option fastload is specified.Please make sure "+
+                             "that all conditions required to run in fastload "+
+                             "mode are satisfied to avoid XDMP-DBDUPURI "+
+                             "errors.");
                 } else if (arg.equalsIgnoreCase("false")) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, false);
                 } else {
@@ -617,17 +621,11 @@ public enum Command implements ConfigConstants {
             String type = conf.get(CONF_OUTPUT_TYPE, DEFAULT_OUTPUT_TYPE);
             ExportOutputType outputType = ExportOutputType.valueOf(
                             type.toUpperCase());
-
-            if (outputType.equals(ExportOutputType.DOCUMENT)) {
-                conf.set(MarkLogicConstants.INPUT_MODE,
-                                MarkLogicConstants.BASIC_MODE);
+            conf.set(MarkLogicConstants.INPUT_MODE,
+                    MarkLogicConstants.BASIC_MODE);
+            if (outputType.equals(ExportOutputType.DOCUMENT)) {  
                 conf.set(MarkLogicConstants.INPUT_VALUE_CLASS,
                                 MarkLogicDocument.class.getCanonicalName());
-            } else if (outputType.equals(ExportOutputType.ARCHIVE)) {
-                // use basic mode for getSplits; use advanced mode(hardcoded)
-                // for record reader
-                conf.set(MarkLogicConstants.INPUT_MODE,
-                                MarkLogicConstants.BASIC_MODE);
             }
             
             if (cmdline.hasOption(SNAPSHOT)) {
