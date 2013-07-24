@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.lang.PipedQuadsStream;
 import org.apache.jena.riot.lang.PipedRDFIterator;
@@ -65,7 +66,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected PipedRDFIterator rdfIter;
     protected PipedRDFStream rdfInputStream;
     protected ExecutorService executor;
-    protected boolean readQuads;
+    protected Lang lang;
 
     protected Hashtable<String, Vector> collectionHash = new Hashtable<String, Vector> ();
     protected int collectionCount = 0;
@@ -170,14 +171,29 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         inputFn = fsname;
         idGen = new IdGenerator(inputFn + "-" + splitStart);
 
+        lang = null;
+        if (".rdf".equals(ext)) {
+            lang = Lang.RDFXML;
+        } else if (".ttl".equals(ext)) {
+            lang = Lang.TURTLE;
+        } else if (".json".equals(ext)) {
+            lang = Lang.RDFJSON;
+        } else if (".n3".equals(ext)) {
+            lang = Lang.N3;
+        } else if (".nt".equals(ext)) {
+            lang = Lang.NTRIPLES;
+        } else if (".nq".equals(ext)) {
+            lang =Lang.NQUADS;
+        } else if (".trig".equals(ext)) {
+            lang = Lang.TRIG;
+        }
+
         if (".nq".equals(ext)) {
             rdfIter = new PipedRDFIterator<Quad>();
             rdfInputStream = new PipedQuadsStream(rdfIter);
-            readQuads = true;
         } else {
             rdfIter = new PipedRDFIterator<Triple>();
             rdfInputStream = new PipedTriplesStream(rdfIter);
-            readQuads = false;
         }
 
         // PipedRDFStream and PipedRDFIterator need to be on different threads
@@ -190,7 +206,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             @Override
             public void run() {
                 // Call the parsing process.
-                RDFDataMgr.parse(rdfInputStream, in, baseURI, null, null);
+                RDFDataMgr.parse(rdfInputStream, in, baseURI, lang, null);
             }
         };
 
@@ -283,7 +299,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (!rdfIter.hasNext()) {
+        if (!rdfIter.hasNext() && collectionHash.size() == 0) {
             if(compressed) {
                 hasNext = false;
                 executor.shutdown();
@@ -300,7 +316,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
         }
 
-        if (readQuads) {
+        if (lang == Lang.NQUADS) {
             return nextQuadKeyValue();
         } else {
             return nextTripleKeyValue();
@@ -436,7 +452,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 overflow = true;
             } else if (collectionCount > MAX_COLLECTIONS) {
                 collection = largestCollection();
-                //System.err.println("Flushing " + collection + " (" + collectionHash.get(collection).size() + ")");
+                //System.err.println("Full hsh " + collection + " (" + collectionHash.get(collection).size() + ")");
                 overflow = true;
             }
         }
