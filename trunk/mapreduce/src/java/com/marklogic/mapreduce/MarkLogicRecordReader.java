@@ -192,6 +192,11 @@ implements MarkLogicConstants {
             ContentSource cs = InternalUtilities.getInputContentSource(conf, 
                     hostNames[0]);
             session = cs.newSession("#"+mlSplit.getForestId().toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connect to forest "
+                    + mlSplit.getForestId().toString() + " on "
+                    + session.getConnectionUri().getHost());
+            }
             AdhocQuery query = session.newAdhocQuery(queryText);
             if (advancedMode) {
                 if (bindSplitRange) {

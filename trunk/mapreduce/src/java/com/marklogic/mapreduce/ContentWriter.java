@@ -447,10 +447,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         ContentSource cs = forestSourceMap.get(forestId);
         if (fastLoad) {
             session = cs.newSession(forestId);
-            
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connect to forest " + forestId + " on "
+                    + session.getConnectionUri().getHost());
+            }
         } else {
             session = cs.newSession();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connect to " + session.getConnectionUri().getHost());
+            }
         }      
+
         if (txnSize > 1 || (batchSize > 1 && tolerateErrors)) {
             session.setTransactionMode(TransactionMode.UPDATE);
         }
