@@ -84,6 +84,9 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
                 ContentSource cs = InternalUtilities.getOutputContentSource(
                         conf, hostName);
                 session = cs.newSession();
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Connect to " + session.getConnectionUri().getHost());
+                }
                 if (txnSize > 1) {
                     session.setTransactionMode(TransactionMode.UPDATE);
                 }
