@@ -191,6 +191,39 @@ public class TestRDF {
         Utils.closeSession();
     }
 
+    @Test
+    public void testNT2013() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics-2013.nt"
+                        + " -input_file_type rdf";
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://one.example/subject1\"])");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+
+        Utils.closeSession();
+    }
+
     //@Test
     // Trig is not working today...
     public void testTrig() throws Exception {
