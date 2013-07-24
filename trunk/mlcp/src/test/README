@@ -2,10 +2,12 @@
 
 To run unit tests, the following configurations on MarkLogic Server are required:
 1) MarkLogic Server runs on localhost
-2) a XDBC server with port 5275 is required to associate with Documents database
+2) a XDBC server with port 5275 is required to associate with Documents database;
+   use "/" for the root and the Modules database for modules.
 3) create database "CopyDst"
 4) create a forest, and attach it to database "CopyDst" 
-5) create a XDBC server with port 6275 associated with database "CopyDst".
+5) create a XDBC server with port 6275 associated with database "CopyDst";
+   use "/" for the root and the Modules database for modules.
 
 hadoop runs on localhost
 
