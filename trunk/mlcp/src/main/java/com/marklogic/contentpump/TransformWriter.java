@@ -125,10 +125,16 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         ContentSource cs = forestSourceMap.get(forestId);
         if (fastLoad) {
             session = cs.newSession(forestId);
-
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connect to forest " + forestId + " on "
+                    + session.getConnectionUri().getHost());
+            }
         } else {
             session = cs.newSession();
-        }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connect to " + session.getConnectionUri().getHost());
+            }
+        }      
         if (txnSize > 1) {
             session.setTransactionMode(TransactionMode.UPDATE);
         }
