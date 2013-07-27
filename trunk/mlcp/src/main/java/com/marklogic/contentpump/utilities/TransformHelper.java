@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.marklogic.contentpump;
+package com.marklogic.contentpump.utilities;
 
 import java.io.InterruptedIOException;
 import java.io.UnsupportedEncodingException;
@@ -27,6 +27,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 
+import com.marklogic.contentpump.MarkLogicDocumentWithMeta;
+import com.marklogic.contentpump.TransformOutputFormat;
 import com.marklogic.io.Base64;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.xcc.AdhocQuery;
@@ -34,8 +36,6 @@ import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.DocumentRepairLevel;
-import com.marklogic.xcc.RequestOptions;
-import com.marklogic.xcc.Session;
 import com.marklogic.xcc.types.ValueType;
 
 /**
@@ -49,6 +49,7 @@ public class TransformHelper {
         "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
         + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
         + "//marklogic.com/xdmp/map\">";
+    public static StringBuilder QRY_SB = null;
     private static void getInvokeModuleQuery(StringBuilder q,
         String moduleUri, String functionNs, String functionName,
         String functionParam) {
@@ -81,29 +82,46 @@ public class TransformHelper {
         }
     }
 
+    public static void constructQryString(String moduleUri,
+        String functionNs, String functionName, String functionParam) {
+        synchronized (TransformHelper.class) {
+            if (QRY_SB == null) {
+                QRY_SB = new StringBuilder();
+                getInvokeModuleQuery(QRY_SB, moduleUri, functionNs, functionName,
+                    functionParam);
+            }
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(QRY_SB.toString());
+        }
+    }
+    /**
+     * for Import all file types except archive.
+     *  
+     * @param conf
+     * @param query
+     * @param moduleUri
+     * @param functionNs
+     * @param functionName
+     * @param functionParam
+     * @param uri
+     * @param value
+     * @param type
+     * @param cOptions
+     * @return
+     * @throws InterruptedIOException
+     * @throws UnsupportedEncodingException
+     */
     public static AdhocQuery getTransformInsertQry(Configuration conf,
-        Session session, String moduleUri, String functionNs,
+        AdhocQuery query, String moduleUri, String functionNs,
         String functionName, String functionParam, String uri,
         Object value, String type, ContentCreateOptions cOptions)
         throws InterruptedIOException, UnsupportedEncodingException {
         HashMap<String, String> optionsMap = new HashMap<String, String>();
-        StringBuilder qry = new StringBuilder();
-        getInvokeModuleQuery(qry, moduleUri, functionNs, functionName,
-            functionParam);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(qry.toString());
-        }
-
-        AdhocQuery query = session.newAdhocQuery(qry.toString());
-        RequestOptions rOptions = new RequestOptions();
-        rOptions.setDefaultXQueryVersion("1.0-ml");
-        query.setOptions(rOptions);
         query.setNewStringVariable("URI", uri);
-
         ContentType contentType = ContentType.valueOf(type);
-        if (contentType == ContentType.MIXED
-            || contentType == ContentType.UNKNOWN) {
+        if (contentType == ContentType.MIXED) {
             // get type from mimetype map
             contentType = ContentType.forName(getTypeFromMap(uri));
         }
@@ -203,7 +221,8 @@ public class TransformHelper {
     }
 
     /**
-     * Get transform and insert query for MarkLogicDocumentWithMeta
+     * Get transform and insert query for MarkLogicDocumentWithMeta, 
+     * used in importing archive, copy
      * @param conf
      * @param session
      * @param moduleUri
@@ -218,26 +237,14 @@ public class TransformHelper {
      * @throws UnsupportedEncodingException
      */
     public static AdhocQuery getTransformInsertQryMLDocWithMeta(
-        Configuration conf, Session session, String moduleUri,
+        Configuration conf, AdhocQuery query, String moduleUri,
         String functionNs, String functionName, String functionParam,
         String uri, MarkLogicDocumentWithMeta doc,
         ContentCreateOptions cOptions) throws InterruptedIOException,
         UnsupportedEncodingException {
         HashMap<String, String> optionsMap = new HashMap<String, String>();
-        StringBuilder qry = new StringBuilder();
-        getInvokeModuleQuery(qry, moduleUri, functionNs, functionName,
-            functionParam);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(qry.toString());
-        }
-
-        AdhocQuery query = session.newAdhocQuery(qry.toString());
-        RequestOptions rOptions = new RequestOptions();
-        rOptions.setDefaultXQueryVersion("1.0-ml");
-        query.setOptions(rOptions);
         query.setNewStringVariable("URI", uri);
-
         ContentType contentType = doc.getContentType();
         switch (contentType) {
         case BINARY:

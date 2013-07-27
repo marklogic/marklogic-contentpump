@@ -215,7 +215,11 @@ public enum InputType implements ConfigConstants {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                 CommandLine cmdline, Configuration conf) {
-            return ContentOutputFormat.class;
+            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+                return TransformOutputFormat.class;
+            } else {
+                return ContentOutputFormat.class;
+            }
         }
 
         @Override
