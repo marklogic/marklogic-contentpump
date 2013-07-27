@@ -34,6 +34,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.MarkLogicRecordWriter;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.StatisticalAssignmentPolicy;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.Content;
@@ -119,7 +120,7 @@ public class DatabaseContentWriter<VALUE> extends
     protected AssignmentManager am;
     protected int sfId;
     //default boolean is false
-    protected boolean needFrmtCount;
+    protected boolean countBased;
     
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
@@ -150,7 +151,7 @@ public class DatabaseContentWriter<VALUE> extends
         if (fastLoad
             && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
             || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
-            needFrmtCount = true;
+            countBased = true;
             if (batchSize > 1) {           
                 forestContents = new Content[1][batchSize];
                 counts = new int[1];
@@ -231,11 +232,11 @@ public class DatabaseContentWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {
         int fId = 0;
-        String uri = getUriWithOutputDir(key, outputDir);
+        String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
         String forestId = ContentOutputFormat.ID_PREFIX;
 
         if (fastLoad) {
-            if(!needFrmtCount) {
+            if(!countBased) {
                 // placement for legacy or bucket
                 fId = am.getPlacementForestIndex(key);
                 sfId = fId;
@@ -272,7 +273,7 @@ public class DatabaseContentWriter<VALUE> extends
 
             boolean isCopyProps = conf.getBoolean(
                 ConfigConstants.CONF_COPY_PROPERTIES, true);
-            if(needFrmtCount) {
+            if(countBased) {
                 fId = 0;
             }
             if (batchSize > 1) {
@@ -324,7 +325,7 @@ public class DatabaseContentWriter<VALUE> extends
                     }
                     
                     //reset forest index for statistical
-                    if (needFrmtCount) {
+                    if (countBased) {
                         sfId = -1;
                     }
                     counts[fId] = 0;
@@ -339,7 +340,7 @@ public class DatabaseContentWriter<VALUE> extends
                     stmtCounts[sid]++;
                 }
                 //reset forest index for statistical
-                if (needFrmtCount) {
+                if (countBased) {
                     sfId = -1;
                 }
                 
@@ -365,14 +366,14 @@ public class DatabaseContentWriter<VALUE> extends
             if (sessions[sid] != null) {
                 sessions[sid].close();
             }
-            if (needFrmtCount) {
+            if (countBased) {
                 rollbackDocCount(sid);
             }
             throw new IOException(e);
         }
     }
 
-    private Session getSession(String forestId) {
+    protected Session getSession(String forestId, TransactionMode mode) {
         Session session = null;
         ContentSource cs = forestSourceMap.get(forestId);
         if (fastLoad) {
@@ -386,12 +387,18 @@ public class DatabaseContentWriter<VALUE> extends
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to " + session.getConnectionUri().getHost());
             }
-        }      
+        }   
+        session.setTransactionMode(mode);
+        return session;
+    }
+    
+    private Session getSession(String forestId) {
+        TransactionMode mode = TransactionMode.AUTO;
 
         if (txnSize > 1 || (batchSize > 1 && tolerateErrors)) {
-            session.setTransactionMode(TransactionMode.UPDATE);
+            mode = TransactionMode.UPDATE;
         }
-        return session;
+        return getSession(forestId, mode);
     }
 
     @Override
@@ -399,7 +406,7 @@ public class DatabaseContentWriter<VALUE> extends
         InterruptedException {
         if (batchSize > 1) {
             int len, sid;
-            if (needFrmtCount) {
+            if (countBased) {
                 len = 1;
                 sid = sfId;
             } else {
@@ -432,7 +439,7 @@ public class DatabaseContentWriter<VALUE> extends
                         }
                         //RequestException if any is thrown before docCount is updated
                         //so docCount doesn't need to rollback in this try-catch
-                        if (needFrmtCount) {
+                        if (countBased) {
                             stmtCounts[sfId]++;
                             sfId = -1;
                         } else {
@@ -463,7 +470,7 @@ public class DatabaseContentWriter<VALUE> extends
                         if (sessions[sid] != null) {
                             sessions[sid].close();
                         }
-                        if (needFrmtCount) {
+                        if (countBased) {
                             rollbackDocCount(sid);
                         }
                         if (e instanceof ServerConnectionException
@@ -482,7 +489,7 @@ public class DatabaseContentWriter<VALUE> extends
                         sessions[i].commit();
                     } catch (RequestException e) {
                         LOG.error(e);
-                        if (needFrmtCount) {
+                        if (countBased) {
                             rollbackDocCount(i);
                         }
                         throw new IOException(e);

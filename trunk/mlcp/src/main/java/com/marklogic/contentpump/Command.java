@@ -1201,21 +1201,21 @@ public enum Command implements ConfigConstants {
     
     static void configModule(Options options) {
         Option moduleUri = OptionBuilder
-            .withArgName("number")
+            .withArgName("String")
             .hasArg()
             .withDescription(
                 "Path to the module containing the transform function")
             .create(TRANSFORM_MODULE);
         options.addOption(moduleUri);
-        Option ns = OptionBuilder.withArgName("number").hasArg()
+        Option ns = OptionBuilder.withArgName("String").hasArg()
             .withDescription("Namespace of the transform function")
             .create(TRANSFORM_NAMESPACE);
         options.addOption(ns);
-        Option func = OptionBuilder.withArgName("number").hasArg()
+        Option func = OptionBuilder.withArgName("String").hasArg()
             .withDescription("Name of the transform function")
             .create(TRANSFORM_FUNCTION);
         options.addOption(func);
-        Option param = OptionBuilder.withArgName("number").hasArg()
+        Option param = OptionBuilder.withArgName("String").hasArg()
             .withDescription("Name of the transform function")
             .create(TRANSFORM_PARAM);
         options.addOption(param);

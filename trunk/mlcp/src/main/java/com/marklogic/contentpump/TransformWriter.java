@@ -20,16 +20,17 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.contentpump.utilities.TransformHelper;
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentWriter;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
-import com.marklogic.mapreduce.ZipEntryInputStream;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
@@ -48,6 +49,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     private String functionName;
     private String functionParam;
     private String contentType;
+    private AdhocQuery[] queries;
 
     public TransformWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad,
@@ -61,17 +63,18 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         functionParam = conf.get(ConfigConstants.CONF_TRANSFORM_PARAM, "");
         contentType = conf.get(MarkLogicConstants.CONTENT_TYPE,
             MarkLogicConstants.DEFAULT_CONTENT_TYPE);
+        queries = new AdhocQuery[sessions.length];
     }
 
     @Override
     public void write(DocumentURI key, VALUEOUT value) throws IOException,
         InterruptedException {
         int fId = 0;
-        String uri = getUriWithOutputDir(key, outputDir);
+        String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
         String forestId = ContentOutputFormat.ID_PREFIX;
         
         if (fastLoad) {
-            if(!needFrmtCount) {
+            if(!countBased) {
                 // placement for legacy or bucket
                 fId = am.getPlacementForestIndex(key);
                 sfId = fId;
@@ -87,14 +90,17 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         if (sessions[sid] == null) {
             sessions[sid] = getSession(forestId);
         }
+        if(queries[sid] == null) {
+            queries[sid] = getAdhocQuery(sid);
+        }
 
-        AdhocQuery query = TransformHelper.getTransformInsertQry(conf,
-            sessions[sid], moduleUri, functionNs, functionName, functionParam,
+        TransformHelper.getTransformInsertQry(conf,
+            queries[sid], moduleUri, functionNs, functionName, functionParam,
             uri, value, contentType, options);
         try {
-            sessions[sid].submitRequest(query);
+            sessions[sid].submitRequest(queries[sid]);
             stmtCounts[sid]++;
-            if (needFrmtCount) {
+            if (countBased) {
                 sfId = -1;
             }
             if (stmtCounts[sid] == txnSize && 
@@ -113,7 +119,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             if (sessions[sid] != null) {
                 sessions[sid].close();
             }
-            if (needFrmtCount) {
+            if (countBased) {
                 rollbackFrmtCount(sid);
             }
             throw new IOException(e);
@@ -121,65 +127,24 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     }
 
     protected Session getSession(String forestId) {
-        Session session = null;
-        ContentSource cs = forestSourceMap.get(forestId);
-        if (fastLoad) {
-            session = cs.newSession(forestId);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Connect to forest " + forestId + " on "
-                    + session.getConnectionUri().getHost());
-            }
-        } else {
-            session = cs.newSession();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Connect to " + session.getConnectionUri().getHost());
-            }
-        }      
+        TransactionMode mode = TransactionMode.AUTO;
         if (txnSize > 1) {
-            session.setTransactionMode(TransactionMode.UPDATE);
+            mode = TransactionMode.UPDATE;
         }
-        return session;
+        return getSession(forestId, mode);
     }
-
-    @Override
-    public int getTransactionSize(Configuration conf) {
-        // return the specified txn size
-        if (conf.get(TXN_SIZE) != null) {
-            int txnSize = conf.getInt(TXN_SIZE, 0);
-            return txnSize <= 0 ? 1 : txnSize;
+    
+    protected AdhocQuery getAdhocQuery(int sid) {
+        if (TransformHelper.QRY_SB == null) {
+            TransformHelper.constructQryString(moduleUri, functionNs,
+                functionName, functionParam);
         }
-        return 10;
-    }
-
-    @Override
-    public void close(TaskAttemptContext context) throws IOException,
-        InterruptedException {
-        for (int i = 0; i < sessions.length; i++) {
-            if (sessions[i] == null)
-                continue;
-            if (stmtCounts[i] > 0 && 
-                sessions[i].getTransactionMode() == TransactionMode.UPDATE) {
-                try {
-                    sessions[i].commit();
-                } catch (RequestException e) {
-                    LOG.error(e);
-                    if (needFrmtCount) {
-                        rollbackFrmtCount(i);
-                    }
-                    throw new IOException(e);
-                } finally {
-                    sessions[i].close();
-                }
-            } else {
-                sessions[i].close();
-            }
-        }
-        if (is != null) {
-            is.close();
-            if (is instanceof ZipEntryInputStream) {
-                ((ZipEntryInputStream) is).closeZipInputStream();
-            }
-        }
+        AdhocQuery q = sessions[sid].newAdhocQuery(TransformHelper.QRY_SB
+            .toString());
+        RequestOptions rOptions = new RequestOptions();
+        rOptions.setDefaultXQueryVersion("1.0-ml");
+        q.setOptions(rOptions);
+        return q;
     }
 
 }
