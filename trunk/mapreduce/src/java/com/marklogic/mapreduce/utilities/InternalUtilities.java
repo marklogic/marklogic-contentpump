@@ -35,6 +35,7 @@ import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.LinkedMapWritable;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
@@ -366,5 +367,24 @@ public class InternalUtilities implements MarkLogicConstants {
             }
         }
         return buf.toString();
+    }
+    
+    /**
+     * if outputDir is available and valid, modify DocumentURI, and return uri
+     * in string
+     * 
+     * @param key
+     * @param outputDir
+     * @return URI
+     */
+    public static String getUriWithOutputDir(DocumentURI key, String outputDir){
+        String uri = key.getUri();
+        if (outputDir != null && !outputDir.isEmpty()) {
+            uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
+                  outputDir + uri : outputDir + '/' + uri;
+            key.setUri(uri);
+            key.validate();
+        }    
+        return uri;
     }
 }

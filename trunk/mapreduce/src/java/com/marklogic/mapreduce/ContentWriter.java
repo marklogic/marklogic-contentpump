@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.StatisticalAssignmentPolicy;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCapability;
@@ -127,7 +128,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     //fIdx cached for statistical policy
     protected int sfId;
     
-    protected boolean needFrmtCount;
+    protected boolean countBased;
     
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -158,7 +159,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (fastLoad
             && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
             || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
-            needFrmtCount = true;
+            countBased = true;
             if (batchSize > 1) {           
                 forestContents = new Content[1][batchSize];
                 counts = new int[1];
@@ -255,11 +256,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     @Override
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
-        String uri = getUriWithOutputDir(key, outputDir);
+        String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
         String forestId = ContentOutputFormat.ID_PREFIX;
         int fId = 0;
         if (fastLoad) {
-            if(!needFrmtCount) {
+            if(!countBased) {
                 // placement for legacy or bucket
                 fId = am.getPlacementForestIndex(key);
                 sfId = fId;
@@ -355,7 +356,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 throw new UnsupportedOperationException(value.getClass()
                     + " is not supported.");
             }
-            if(needFrmtCount) {
+            if(countBased) {
                 fId = 0;
             }
             if (batchSize > 1) {
@@ -380,7 +381,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     stmtCounts[sid]++;
 
                     //reset forest index for statistical
-                    if (needFrmtCount) {
+                    if (countBased) {
                         sfId = -1;
                     }
                     counts[fId] = 0;
@@ -392,7 +393,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 sessions[sid].insertContent(content);
                 stmtCounts[sid]++;
                 //reset forest index for statistical
-                if (needFrmtCount) {
+                if (countBased) {
                     sfId = -1;
                 }
             }
@@ -405,7 +406,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (sessions[sid] != null) {
                 sessions[sid].close();
             }
-            if (needFrmtCount) {
+            if (countBased) {
                 rollbackFrmtCount(sid);
             }
             throw new IOException(e);
@@ -413,7 +414,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (sessions[sid] != null) {
                 sessions[sid].close();
             }
-            if (needFrmtCount) {
+            if (countBased) {
                 rollbackFrmtCount(sid);
             }
             throw new IOException(e);
@@ -428,7 +429,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (sessions[sid] != null) {
                 sessions[sid].close();
             }
-            if (needFrmtCount) {
+            if (countBased) {
                 rollbackFrmtCount(sid);
             }
             throw new IOException(e);
@@ -442,7 +443,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         sap.updateStats(fId, -batchSize);
     }
     
-    protected Session getSession(String forestId) {
+    protected Session getSession(String forestId, TransactionMode mode) {
         Session session = null;
         ContentSource cs = forestSourceMap.get(forestId);
         if (fastLoad) {
@@ -457,11 +458,16 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 LOG.debug("Connect to " + session.getConnectionUri().getHost());
             }
         }      
-
-        if (txnSize > 1 || (batchSize > 1 && tolerateErrors)) {
-            session.setTransactionMode(TransactionMode.UPDATE);
-        }
+        session.setTransactionMode(mode);
         return session;
+    }
+    
+    protected Session getSession(String forestId) {
+        TransactionMode mode = TransactionMode.AUTO;
+        if (txnSize > 1 || (batchSize > 1 && tolerateErrors)) {
+            mode = TransactionMode.UPDATE;
+        }
+        return getSession(forestId, mode);
     }
 
     @Override
@@ -469,7 +475,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     InterruptedException {
         if (batchSize > 1) {
             int len, sid;
-            if (needFrmtCount) {
+            if (countBased) {
                 len = 1;
                 sid = sfId;
             } else {
@@ -503,7 +509,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         }
                         //RequestException if any is thrown before docCount is updated
                         //so docCount doesn't need to rollback in this try-catch
-                        if (needFrmtCount) {
+                        if (countBased) {
                             stmtCounts[sfId]++;
                             sfId = -1;
                         } else {
@@ -530,7 +536,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         sessions[i].commit();
                     } catch (RequestException e) {
                         LOG.error(e);
-                        if (needFrmtCount) {
+                        if (countBased) {
                             rollbackFrmtCount(i);
                         }
                         throw new IOException(e);
