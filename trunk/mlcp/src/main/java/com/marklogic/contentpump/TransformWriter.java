@@ -90,9 +90,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         if (sessions[sid] == null) {
             sessions[sid] = getSession(forestId);
         }
-        if(queries[sid] == null) {
+//        if(queries[sid] == null) {
             queries[sid] = getAdhocQuery(sid);
-        }
+//        }
 
         TransformHelper.getTransformInsertQry(conf,
             queries[sid], moduleUri, functionNs, functionName, functionParam,

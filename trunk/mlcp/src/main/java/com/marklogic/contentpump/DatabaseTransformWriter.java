@@ -91,9 +91,9 @@ public class DatabaseTransformWriter<VALUE> extends
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(forestId);
             }
-            if(queries[sid] == null) {
+//            if(queries[sid] == null) {
                 queries[sid] = getAdhocQuery(sid);
-            }
+//            }
             if (!meta.isNakedProps()) {
                 options.setFormat(doc.getContentType().getDocumentFormat());
                 AdhocQuery qry = TransformHelper
