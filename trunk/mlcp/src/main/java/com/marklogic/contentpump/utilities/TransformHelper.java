@@ -28,6 +28,7 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 
 import com.marklogic.contentpump.MarkLogicDocumentWithMeta;
+import com.marklogic.contentpump.RDFWritable;
 import com.marklogic.contentpump.TransformOutputFormat;
 import com.marklogic.io.Base64;
 import com.marklogic.mapreduce.ContentType;
@@ -49,10 +50,10 @@ public class TransformHelper {
         "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
         + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
         + "//marklogic.com/xdmp/map\">";
-    public static StringBuilder QRY_SB = null;
-    private static void getInvokeModuleQuery(StringBuilder q,
-        String moduleUri, String functionNs, String functionName,
+
+    private static String getInvokeModuleQuery(String moduleUri, String functionNs, String functionName,
         String functionParam) {
+        StringBuilder q = new StringBuilder();
         q.append("xquery version \"1.0-ml\";\n")
             .append("import module namespace hadoop = \"http://marklogic.com")
             .append("/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n")
@@ -64,6 +65,7 @@ public class TransformHelper {
             .append("\",\"").append(functionNs).append("\",\"")
             .append(functionName).append("\",\"").append(functionParam)
             .append("\", $URI, $CONTENT, $INSERT-OPTIONS)");
+        return q.toString();
     }
 
     private static String getTypeFromMap(String uri) {
@@ -82,18 +84,14 @@ public class TransformHelper {
         }
     }
 
-    public static void constructQryString(String moduleUri,
+    public static String constructQryString(String moduleUri,
         String functionNs, String functionName, String functionParam) {
-        synchronized (TransformHelper.class) {
-            if (QRY_SB == null) {
-                QRY_SB = new StringBuilder();
-                getInvokeModuleQuery(QRY_SB, moduleUri, functionNs, functionName,
+        String q = getInvokeModuleQuery(moduleUri, functionNs, functionName,
                     functionParam);
-            }
-        }
         if (LOG.isDebugEnabled()) {
-            LOG.debug(QRY_SB.toString());
+            LOG.debug(q);
         }
+        return q;
     }
     /**
      * for Import all file types except archive.
@@ -155,6 +153,10 @@ public class TransformHelper {
                 query.setNewStringVariable("CONTENT", new String(
                     ((BytesWritable) value).getBytes(), 0,
                     ((BytesWritable) value).getLength(), encoding));
+            } else if (value instanceof RDFWritable) {
+                //RDFWritable's value is Text
+                query.setNewStringVariable("CONTENT",
+                    ((RDFWritable) value).getValue().toString());
             } else {
                 // must be text or xml
                 query.setNewStringVariable("CONTENT",

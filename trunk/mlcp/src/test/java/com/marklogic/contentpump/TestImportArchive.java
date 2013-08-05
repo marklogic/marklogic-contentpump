@@ -73,7 +73,7 @@ public class TestImportArchive {
     
     @Test
     public void testArchiveTransformWithNaked() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/mixnakedzip -fastload"
@@ -109,7 +109,7 @@ public class TestImportArchive {
     
     @Test
     public void testArchiveTransformWithNakedTxn1() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/mixnakedzip -fastload -transaction_size 1"

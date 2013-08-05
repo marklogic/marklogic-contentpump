@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
@@ -181,7 +182,7 @@ public class TestCopy{
     
     @Test
     public void testCopyTransform() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
@@ -238,7 +239,7 @@ public class TestCopy{
     
     @Test
     public void testCopyTransformFast() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
@@ -302,7 +303,7 @@ public class TestCopy{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
             + " -delimited_uri_id first"
             + " -input_compressed -input_compression_codec zip"
-            + " -fastload true"
+            + " -fastload true -batch_size 1"
             + " -input_file_type delimited_text"
             + " -output_uri_suffix .xml"
             + " -output_uri_prefix test/";
@@ -322,17 +323,18 @@ public class TestCopy{
         assertEquals("5", result.next().asString());
         Utils.closeSession();
         
+        AssignmentManager.getInstance().setInitialized(false);
         //copy
         cmd = "COPY -input_host localhost -input_port 5275"
             + " -input_username admin -input_password admin"
             + " -output_host localhost -output_port 6275"
             + " -output_username admin -output_password admin"
+            + " -fastload -batch_size 1"
             + " -output_uri_suffix .suffix"
             + " -output_uri_prefix prefix/";
         args = cmd.split(" ");
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
-        
         
         result = Utils.runQuery(
             "xcc://admin:admin@localhost:6275", "fn:count(fn:collection())");

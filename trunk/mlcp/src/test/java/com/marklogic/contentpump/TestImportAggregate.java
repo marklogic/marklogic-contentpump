@@ -192,7 +192,7 @@ public class TestImportAggregate {
     
     @Test
     public void testImportTransformMedlineZip() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/medlinezip/medline04.zip"
@@ -219,7 +219,7 @@ public class TestImportAggregate {
     
     @Test
     public void testImportTransformMedlineZipFast() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/medlinezip/medline04.zip"

@@ -90,10 +90,10 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         if (sessions[sid] == null) {
             sessions[sid] = getSession(forestId);
         }
-//        if(queries[sid] == null) {
+        if(queries[sid] == null) {
             queries[sid] = getAdhocQuery(sid);
-//        }
-
+        }
+        
         TransformHelper.getTransformInsertQry(conf,
             queries[sid], moduleUri, functionNs, functionName, functionParam,
             uri, value, contentType, options);
@@ -135,12 +135,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     }
     
     protected AdhocQuery getAdhocQuery(int sid) {
-        if (TransformHelper.QRY_SB == null) {
-            TransformHelper.constructQryString(moduleUri, functionNs,
+        String qs = TransformHelper.constructQryString(moduleUri, functionNs,
                 functionName, functionParam);
-        }
-        AdhocQuery q = sessions[sid].newAdhocQuery(TransformHelper.QRY_SB
-            .toString());
+        AdhocQuery q = sessions[sid].newAdhocQuery(qs);
         RequestOptions rOptions = new RequestOptions();
         rOptions.setDefaultXQueryVersion("1.0-ml");
         q.setOptions(rOptions);

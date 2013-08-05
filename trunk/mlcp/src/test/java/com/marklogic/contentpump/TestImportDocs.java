@@ -145,7 +145,7 @@ public class TestImportDocs {
      
     @Test
     public void testImportTransformMixed() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"///AbacuS.xml"
@@ -155,7 +155,9 @@ public class TestImportDocs {
             + " -output_quality 1"
             + " -output_language fr"
             + " -namespace test"
+            + " -fastload"
             + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_function transform"
             + " -transform_module /lc.xqy"
             + " -transaction_size 10";
         String[] args = cmd.split(" ");
@@ -176,7 +178,7 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransformBinary() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/2012-06-13_16-26-58_431.jpg"
@@ -206,7 +208,7 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransformText() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
@@ -217,6 +219,7 @@ public class TestImportDocs {
             + " -output_language fr"
             + " -namespace test"
             + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_param myparam"
             + " -transform_module /lc.xqy";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
