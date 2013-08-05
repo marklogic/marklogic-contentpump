@@ -514,11 +514,29 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(THREADS_PER_SPLIT)) {
                 String arg = cmdline.getOptionValue(THREADS_PER_SPLIT);
-                if (Integer.parseInt(arg) > 1 && isStreaming(cmdline, conf)) {
+                int threadCnt = Integer.parseInt(arg);
+                if (threadCnt > 1 && isStreaming(cmdline, conf)) {
                     LOG.warn("The setting for " + THREADS_PER_SPLIT + 
                             " is ignored because streaming is enabled.");
+                } else if (threadCnt < inputType.getMinThreads()) {
+                    throw new IllegalArgumentException("Cannot set " + 
+                            THREADS_PER_SPLIT + 
+                            " to a value less than the minimum required " +
+                            " threads (" + inputType.getMinThreads() +
+                            ")for the job.");
                 } else {
                     conf.set(ConfigConstants.CONF_THREADS_PER_SPLIT, arg);
+                }
+            }
+            if (cmdline.hasOption(THREAD_COUNT)) {
+                String arg = cmdline.getOptionValue(THREAD_COUNT);
+                int threadCnt = Integer.parseInt(arg);
+                if (threadCnt < inputType.getMinThreads()) {
+                    throw new IllegalArgumentException("Cannot set " + 
+                            THREAD_COUNT + 
+                            " to a value less than the minimum required " +
+                            " threads (" + inputType.getMinThreads() +
+                            ")for the job.");
                 }
             }
 
@@ -538,8 +556,15 @@ public enum Command implements ConfigConstants {
 			String inputTypeOption = cmdline.getOptionValue(INPUT_FILE_TYPE,
                     INPUT_FILE_TYPE_DEFAULT);
             InputType type = InputType.forName(inputTypeOption);
-			int threadCnt = conf.getInt(ConfigConstants.CONF_THREADS_PER_SPLIT,
-					                    0);
+            
+            int minThreads = type.getMinThreads();
+            if (minThreads > 1) {
+                conf.setInt(CONF_MIN_THREADS, minThreads);
+            }
+            int threadCnt = conf.getInt(ConfigConstants.CONF_THREADS_PER_SPLIT, 
+                                        1);
+            threadCnt = Math.max(threadCnt, minThreads);
+ 
 			Class<? extends BaseMapper<?, ?, ?, ?>> internalMapperClass =
 					type.getMapperClass(cmdline, conf);
             if (threadCnt > 1 && !isStreaming(cmdline, conf)) {
@@ -569,7 +594,7 @@ public enum Command implements ConfigConstants {
             } else {
                 return mapper;
             }
-		} 
+		}
     },
     EXPORT {
         @Override
@@ -1018,7 +1043,10 @@ public enum Command implements ConfigConstants {
                     CommandLine cmdline);
     
     /**
-     * Set Mapper class for a job
+     * Set Mapper class for a job.  If the minimum threads required is more
+     * than 1 and threads_per_split is not set, also set the minimum threads in
+     * the configuration for the job scheduler.
+     * 
      * @param job the Hadoop job 
      * @param conf Hadoop configuration
      * @param CommandLine command line

@@ -183,7 +183,7 @@ public class ContentPump implements ConfigConstants {
             job = command.createJob(conf, cmdline);
         } catch (Exception e) {
             // Print exception message.
-            System.err.println(e.getMessage());
+            e.printStackTrace();
             return 1;
         }
         

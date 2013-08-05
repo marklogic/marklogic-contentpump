@@ -178,4 +178,5 @@ public interface ConfigConstants {
     static final String CONF_TRANSFORM_FUNCTION = "mapreduce.marklogic.transformfunction";
     static final String CONF_TRANSFORM_PARAM = "mapreduce.marklogic.transformparam";
     static final String CONF_MIMETYPES = "mapreduce.marklogic.mimetypes";
+    static final String CONF_MIN_THREADS = "mapreduce.marklogic.minthreads";
 }

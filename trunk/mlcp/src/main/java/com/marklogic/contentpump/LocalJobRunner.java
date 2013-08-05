@@ -74,6 +74,8 @@ public class LocalJobRunner implements ConfigConstants {
     private int threadCount;
     //TODO confusing, rename it
     private int availableThreads = 1;
+    // minimally required thread per task defined by the job
+    private int minThreads = 1;
     private Command cmd;
     
     public LocalJobRunner(Job job, CommandLine cmdline, Command cmd) {
@@ -106,6 +108,9 @@ public class LocalJobRunner implements ConfigConstants {
             threadsPerSplit = Integer.parseInt(
             		cmdline.getOptionValue(THREADS_PER_SPLIT));
         }
+        
+        Configuration conf = job.getConfiguration();
+        minThreads = conf.getInt(CONF_MIN_THREADS, minThreads);
         
         jobComplete = new AtomicBoolean();
         startTime = System.currentTimeMillis();
@@ -171,17 +176,18 @@ public class LocalJobRunner implements ConfigConstants {
                     new LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE>(
                         inputFormat, outputFormat, conf, i, split, reporter,
                         progress[i]);
-                availableThreads = getThreadCount(i, array.length);
+                availableThreads = assignThreads(i, array.length);
                 Class<? extends Mapper<?, ?, ?, ?>> runtimeMapperClass = 
                     job.getMapperClass();
                 if (availableThreads > 1 && 
                     availableThreads != threadsPerSplit) { 
                 	// possible runtime adjustment
-                	runtimeMapperClass = 
-                	    (Class<? extends Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>>)
-                	    cmd.getRuntimeMapperClass(
-                		job, mapperClass, threadsPerSplit, availableThreads);
-                	    
+                    if (runtimeMapperClass != (Class)MultithreadedMapper.class) {
+                	    runtimeMapperClass = (Class<? extends 
+                	        Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>>)
+                	        cmd.getRuntimeMapperClass(job, mapperClass, 
+                		        threadsPerSplit, availableThreads);
+                    }   
                     if (runtimeMapperClass != mapperClass) {
                 	    task.setMapperClass(runtimeMapperClass);
                     }
@@ -271,15 +277,15 @@ public class LocalJobRunner implements ConfigConstants {
      * @param splitCount
      * @return
      */
-    private int getThreadCount(int splitIndex, int splitCount) {
+    private int assignThreads(int splitIndex, int splitCount) {
     	if (threadsPerSplit > 0) {
     		return threadsPerSplit;
     	}
         if (splitCount == 1) {
             return threadCount;
         }
-        if (splitCount > threadCount) {
-            return 1;
+        if (splitCount * minThreads > threadCount) {
+            return minThreads;
         }
         if (splitIndex % threadCount < threadCount % splitCount) {
             return threadCount / splitCount + 1;

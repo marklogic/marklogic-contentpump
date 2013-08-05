@@ -16,7 +16,23 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
+import org.apache.hadoop.mapreduce.InputSplit;
+
+/**
+ * Content Pump base mapper with the capability to run in thread-safe mode.
+ * 
+ * @author jchen
+ *
+ * @param <KEYIN>
+ * @param <VALUEIN>
+ * @param <KEYOUT>
+ * @param <VALUEOUT>
+ */
 public class BaseMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     org.apache.hadoop.mapreduce.Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     public void runThreadSafe(Context outerCtx, Context subCtx)
@@ -35,5 +51,14 @@ public class BaseMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
             map(key, value, subCtx);
         }
         cleanup(subCtx);
+    }
+    
+    public int getRequiredThreads() {
+        return 1;
+    }
+    
+    public List<Future<Object>> submitTasks(ExecutorService threadPool,
+            InputSplit inputSplit) {
+        return Collections.emptyList();
     }
 }

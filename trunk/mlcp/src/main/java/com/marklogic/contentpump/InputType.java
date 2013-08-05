@@ -45,13 +45,6 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
-        getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-            DocumentMapper.class;
-        }
-
-        @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
             if(cmdline.hasOption(TRANSFORM_MODULE)) {
@@ -77,13 +70,6 @@ public enum InputType implements ConfigConstants {
             } else {
                 return AggregateXMLInputFormat.class;
             }
-        }
-
-        @Override
-        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
-        getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-            DocumentMapper.class;
         }
 
         @Override
@@ -113,13 +99,6 @@ public enum InputType implements ConfigConstants {
         }
 
         @Override
-        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
-        getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-            DocumentMapper.class;
-        }
-
-        @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
             if(cmdline.hasOption(TRANSFORM_MODULE)) {
@@ -139,13 +118,6 @@ public enum InputType implements ConfigConstants {
         public Class<? extends FileInputFormat> getInputFormatClass(
                         CommandLine cmdline, Configuration conf) {
             return ArchiveInputFormat.class;
-        }
-
-        @Override
-        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
-        getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-            DocumentMapper.class;
         }
         
         public Class<? extends OutputFormat> getOutputFormatClass(
@@ -168,13 +140,6 @@ public enum InputType implements ConfigConstants {
         public Class<? extends FileInputFormat> getInputFormatClass(
                         CommandLine cmdline, Configuration conf) {
             return SequenceFileInputFormat.class;
-        }
-
-        @Override
-        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
-        getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-            DocumentMapper.class;
         }
 
         @Override
@@ -203,13 +168,6 @@ public enum InputType implements ConfigConstants {
             } else {
                 return RDFInputFormat.class;
             }
-        }
-
-        @Override
-        public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>>
-        getMapperClass(CommandLine cmdline, Configuration conf) {
-            return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-                    DocumentMapper.class;
         }
 
         @Override
@@ -261,12 +219,18 @@ public enum InputType implements ConfigConstants {
      * @param contentType content type
      * @return Mapper class
      */
-    public abstract <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
-    getMapperClass(
-            CommandLine cmdline, Configuration conf);
+    public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
+    getMapperClass(CommandLine cmdline, Configuration conf) {
+        return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
+        DocumentMapper.class;
+    }
     
     public abstract Class<? extends OutputFormat> getOutputFormatClass(
                     CommandLine cmdline, Configuration conf);
     
-    public abstract ContentType getContentType(CommandLine cmdline);
+    public abstract ContentType getContentType(CommandLine cmdline);    
+    
+    public int getMinThreads() {
+        return 1;
+    }
 }
