@@ -1,23 +1,13 @@
 package com.marklogic.contentpump;
 
-import com.marklogic.contentpump.utilities.OptionsFileUtil;
-import com.marklogic.xcc.Content;
-import com.marklogic.xcc.ContentCreateOptions;
-import com.marklogic.xcc.ContentFactory;
-import com.marklogic.xcc.ContentSource;
-import com.marklogic.xcc.ContentSourceFactory;
-import com.marklogic.xcc.ResultItem;
-import com.marklogic.xcc.ResultSequence;
-import com.marklogic.xcc.Session;
-import com.marklogic.xcc.Session.TransactionMode;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.After;
 import org.junit.Test;
 
-import java.net.URI;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.xcc.ResultSequence;
 
 public class TestRDF {
 
@@ -50,6 +40,42 @@ public class TestRDF {
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("454", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testTransformRDFXML() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/RDFAddNode.xqy");
+        String cmd = 
+            "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.rdf"
+            + " -input_file_type rdf"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_param myparam"
+            + " -transform_module /RDFAddNode.xqy";
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("459", result.next().asString());
 
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");

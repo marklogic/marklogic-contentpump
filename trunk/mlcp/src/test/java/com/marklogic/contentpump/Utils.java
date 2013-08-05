@@ -51,18 +51,19 @@ public class Utils {
         return session.submitRequest(aquery);
     }
     
-    public static void prepareModule(String xccUri) throws XccConfigException,
-        RequestException, URISyntaxException {
+    public static void prepareModule(String xccUri, String moduleUri)
+        throws XccConfigException, RequestException, URISyntaxException {
         if (moduleReady)
             return;
         String query = "xquery version \"1.0-ml\";\n"
             + "xdmp:eval('xdmp:document-load(\""
             + Constants.TEST_PATH
-            + "/lc.xqy\", <options xmlns=\"xdmp:document-load\">"
+            + moduleUri + "\", <options xmlns=\"xdmp:document-load\">"
             + "<uri>/lc.xqy</uri></options>)',(),<options xmlns=\"xdmp:eval\">"
             + "<database>{xdmp:database-forests(xdmp:database(\"Modules\"))}</database></options>)";
         runQuery(xccUri, query);
     }
+    
 
     public static void setDirectoryCreation(String xccUri, String mode)
         throws XccConfigException, RequestException, URISyntaxException {
@@ -77,8 +78,13 @@ public class Utils {
     public static void clearDB(String xccUri, String dbName)
         throws XccConfigException, RequestException, URISyntaxException, 
         InterruptedException {
-        String q = "for $forest in xdmp:database-forests(xdmp:database(\""
-            + dbName + "\"))\n return xdmp:forest-clear($forest)";
+        String q = "xquery version \"1.0-ml\"\n;"
+            + "import module namespace admin = \"http://marklogic.com/xdmp/admin\" at \"/MarkLogic/admin.xqy\";\n"
+//            + "let $config := admin:get-configuration()\n"
+            + "let $db := xdmp:database(\"" + dbName + "\")\n"
+            + "for $f in xdmp:database-forests($db)\n "
+//            + "where admin:database-is-forest-retired($config, $db, $f) eq fn:false()\n"
+            + "return xdmp:forest-clear($f)";
         runQuery(xccUri, q);
         session.close();
         Thread.sleep(2000);

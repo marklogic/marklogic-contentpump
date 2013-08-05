@@ -45,7 +45,7 @@ public class TestDistributedImportDocs {
     
     @Test
     public void testImportTransformMixedDocs() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
             + " -port 5275 -output_uri_replace wiki,'wiki1'"

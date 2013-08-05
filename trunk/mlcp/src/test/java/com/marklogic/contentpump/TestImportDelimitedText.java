@@ -103,7 +103,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("7", result.next().asString());
         Utils.closeSession();
         
         result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
@@ -143,7 +143,7 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedText() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -transform_namespace http://marklogic.com/module_invoke"
@@ -178,12 +178,50 @@ public class TestImportDelimitedText{
         assertTrue(sb.toString().equals(key));
     }
 
+    @Test
+    public void testImportTransformOne2ManyDelimitedText() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/one-many.xqy");
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_module /one-many.xqy"
+            + " -delimited_uri_id first"
+            + " -transform_param -param-up"
+            + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("12", result.next().asString());
+        Utils.closeSession();
+//        
+//        result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
+//
+//        StringBuilder sb = new StringBuilder();
+//        while(result.hasNext()) {
+//            String s = result.next().asString();
+//            sb.append(s);
+//        }
+//        Utils.closeSession();
+//        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+//            + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
+//        assertTrue(sb.toString().equals(key));
+    }    
+    
 /*
  *  test output_language and namespace
  */
     @Test
     public void testImportTransformDelimitedTextLanNs() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -delimited_uri_id first"
@@ -267,7 +305,9 @@ public class TestImportDelimitedText{
     public void testImportDelimitedTextPipe2() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/1.pipe"
-            + " -delimited_uri_id NAME -delimiter |"
+            + " -delimited_uri_id CUSTKEY -delimiter |"
+            + " -output_uri_prefix /incoming/site-catalyst/total/"
+            + " -output_uri_replace /home/marklogic/mlcp/marklogic-contentpump-1.0.3/data,''"
             + " -input_file_type delimited_text -thread_count 1";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -578,7 +618,7 @@ public class TestImportDelimitedText{
     
     @Test
     public void testImportTransformDelimitedTextZip() throws Exception {
-        Utils.prepareModule("xcc://admin:admin@localhost:5275");
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
