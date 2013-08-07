@@ -19,13 +19,13 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Stack;
-import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -48,8 +48,6 @@ import com.marklogic.contentpump.utilities.IdGenerator;
  */
 public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(AggregateXMLReader.class);
-    protected static Pattern[] patterns = new Pattern[] {
-        Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
     public static String DEFAULT_NS = null;
     private int currDepth = 0;
     protected XMLStreamReader xmlSR;
@@ -291,8 +289,9 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         for (int i = 0; i < attrCount; i++) {
             String aPrefix = xmlSR.getAttributePrefix(i);
             String aName = xmlSR.getAttributeLocalName(i);
-            String aValue = escapeXml(xmlSR.getAttributeValue(i));
-            sb.append(" " + (null == aPrefix ? "" : aPrefix + ":") + aName
+            String aValue = StringEscapeUtils.escapeXml(xmlSR
+                .getAttributeValue(i));
+            sb.append(" " + (null == aPrefix ? "" : (aPrefix + ":")) + aName
                 + "=\"" + aValue + "\"");
             if (!useAutomaticId && newDoc && ("@" + aName).equals(idName)) {
                 currentId = aValue;
@@ -457,7 +456,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     processStartElement();
                     break;
                 case XMLStreamConstants.CHARACTERS:
-                    write(escapeXml(xmlSR.getText()));
+                    write(StringEscapeUtils.escapeXml(xmlSR.getText()));
                     break;
                 case XMLStreamConstants.CDATA:
                     write("<![CDATA[");
@@ -534,21 +533,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         return false;
-    }
-    
- 
- 
-
-
-    
-    public static String escapeXml(String _in) {
-        if (null == _in){
-            return "";
-        }
-        return patterns[2].matcher(
-                patterns[1].matcher(
-                        patterns[0].matcher(_in).replaceAll("&amp;"))
-                        .replaceAll("&lt;")).replaceAll("&gt;");
     }
     
     @Override
