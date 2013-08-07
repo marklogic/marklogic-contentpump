@@ -61,7 +61,7 @@ public class TestImportAggregate {
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("2", result.next().asString());
+        assertEquals("3", result.next().asString());
         Utils.closeSession();
     }
     
@@ -91,7 +91,31 @@ public class TestImportAggregate {
         assertEquals("1162", result.next().asString());
         Utils.closeSession();
     }
-    
+   
+    @Test
+    public void testEscapedQuoteInAtrr() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/agg/21045.xml"
+            + " -mode local"
+            + " -aggregate_record_element parent"
+            + " -input_file_type aggregates"
+            + " -output_uri_replace \"\\[,'',\\],'',:,''\"";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+        Utils.closeSession();
+    }
     
     /*
      * multithread mapper to load a file with 4 threads (thread_count is 4 by
