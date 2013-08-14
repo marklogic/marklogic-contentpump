@@ -108,7 +108,7 @@ public class TestRDF {
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
-        assertEquals("798", result.next().asString());
+        assertEquals("795", result.next().asString());
 
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.w3.org/TR/rdf-syntax-grammar\"])");
@@ -141,12 +141,12 @@ public class TestRDF {
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
-        assertEquals("5", result.next().asString());
+        assertEquals("12", result.next().asString());
 
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://jondoe.example.org/#me\"])");
         assertTrue(result.hasNext());
-        assertEquals("5", result.next().asString());
+        assertEquals("12", result.next().asString());
 
         Utils.closeSession();
     }
