@@ -17,6 +17,7 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 
+import com.marklogic.contentpump.utilities.CommandlineOption;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -255,9 +256,26 @@ public enum Command implements ConfigConstants {
                     + "successful inserts are committed")
                 .create(TOLERATE_ERRORS);
             options.addOption(tolerateErrors);
-            
+
+            Option rdfMemoryThreshold_opt = OptionBuilder
+                    .withArgName("threshold")
+                    .hasArg()
+                    .withDescription("Maximum size of an RDF document to be processed in memory")
+                    .create(RDF_STREAMING_MEMORY_THRESHOLD);
+            CommandlineOption rdfMemoryThreshold = new CommandlineOption(rdfMemoryThreshold_opt);
+            rdfMemoryThreshold.setHidden(true);
+            options.addOption(rdfMemoryThreshold);
+
+            Option rdfTriplesPerDoc_opt = OptionBuilder
+                    .withArgName("count")
+                    .hasArg()
+                    .withDescription("Maximum number of triples per sem:triples document")
+                    .create(RDF_TRIPLES_PER_DOCUMENT);
+            CommandlineOption rdfTriplesPerDoc = new CommandlineOption(rdfTriplesPerDoc_opt);
+            rdfTriplesPerDoc.setHidden(true);
+            options.addOption(rdfTriplesPerDoc);
+
             configPartition(options);
-            
         }
 
         @Override
@@ -1503,6 +1521,15 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(OUTPUT_QUALITY)) {
             String quantity = cmdline.getOptionValue(OUTPUT_QUALITY);
             conf.set(MarkLogicConstants.OUTPUT_QUALITY, quantity);
+        }
+
+        if (cmdline.hasOption(RDF_STREAMING_MEMORY_THRESHOLD)) {
+            String thresh = cmdline.getOptionValue(RDF_STREAMING_MEMORY_THRESHOLD);
+            conf.set(RDF_STREAMING_MEMORY_THRESHOLD, thresh);
+        }
+        if (cmdline.hasOption(RDF_TRIPLES_PER_DOCUMENT)) {
+            String count = cmdline.getOptionValue(RDF_TRIPLES_PER_DOCUMENT);
+            conf.set(RDF_TRIPLES_PER_DOCUMENT, count);
         }
     }
     

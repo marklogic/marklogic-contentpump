@@ -19,12 +19,22 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
+import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.query.DatasetFactory;
+import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
@@ -59,9 +69,17 @@ import com.marklogic.mapreduce.MarkLogicConstants;
  */
 public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(RDFReader.class);
-    public static final int MAXTRIPLESPERDOCUMENT = 100;
     protected static Pattern[] patterns = new Pattern[] {
             Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
+
+    private int MAXTRIPLESPERDOCUMENT = 100;
+    private long INMEMORYTHRESHOLD = 64 * 1024 * 1000; // 64Mb
+
+    protected Dataset dataset = null;
+    protected Model model = null;
+    protected StmtIterator statementIter = null;
+    protected Iterator<String> graphNameIter = null;
+    protected String collection = null;
 
     protected PipedRDFIterator rdfIter;
     protected PipedRDFStream rdfInputStream;
@@ -115,6 +133,16 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             throws IOException, InterruptedException {
         conf = context.getConfiguration();
 
+        String rdfopt = conf.get(ConfigConstants.RDF_STREAMING_MEMORY_THRESHOLD);
+        if (rdfopt != null) {
+            INMEMORYTHRESHOLD = Long.parseLong(rdfopt);
+        }
+
+        rdfopt = conf.get(ConfigConstants.RDF_TRIPLES_PER_DOCUMENT);
+        if (rdfopt != null) {
+            MAXTRIPLESPERDOCUMENT = Integer.parseInt(rdfopt);
+        }
+
         String fnAsColl = conf.get(ConfigConstants.CONF_OUTPUT_FILENAME_AS_COLLECTION);
         if (fnAsColl != null) {
             LOG.warn("The -filename_as_collection has no effect with input_type RDF, use -output_collections instead.");
@@ -151,13 +179,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         pos = 0;
         end = 1;
 
-        configFileNameAsCollection(conf, file);
-        loadModel(file.getName(), fs.open(file));
-        idGen = new IdGenerator(inputFn + "-" + splitStart);
-    }
-
-    protected void loadModel(String fsname, final InputStream in) throws IOException {
+        String fsname = file.getName();
         String ext = null;
+
         if (fsname.contains(".")) {
             int pos = fsname.lastIndexOf(".");
             ext = fsname.substring(pos);
@@ -183,35 +207,71 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         } else if (".nt".equals(ext)) {
             lang = Lang.NTRIPLES;
         } else if (".nq".equals(ext)) {
-            lang =Lang.NQUADS;
+            lang = Lang.NQUADS;
         } else if (".trig".equals(ext)) {
             lang = Lang.TRIG;
-        }
-
-        if (".nq".equals(ext)) {
-            rdfIter = new PipedRDFIterator<Quad>();
-            rdfInputStream = new PipedQuadsStream(rdfIter);
         } else {
-            rdfIter = new PipedRDFIterator<Triple>();
-            rdfInputStream = new PipedTriplesStream(rdfIter);
+            lang = Lang.RDFXML; // We have to default to something!
         }
 
-        // PipedRDFStream and PipedRDFIterator need to be on different threads
-        executor = Executors.newSingleThreadExecutor();
-
-        final String baseURI = fsname;
-
-        // Create a runnable for our parser thread
-        Runnable parser = new Runnable() {
-            @Override
-            public void run() {
-                // Call the parsing process.
-                RDFDataMgr.parse(rdfInputStream, in, baseURI, lang, null);
+        try {
+            long size = inSplit.getLength();
+            if (size < INMEMORYTHRESHOLD) {
+                if (lang == Lang.NQUADS) {
+                    dataset = DatasetFactory.createMem();
+                    model = dataset.getDefaultModel();
+                } else {
+                    model = ModelFactory.createDefaultModel();
+                }
+                LOG.info("In-memory RDF processing (" + size + " < " + INMEMORYTHRESHOLD + ")");
+            } else {
+                LOG.info("Streamed RDF processing (" + size + " >= " + INMEMORYTHRESHOLD + ")");
             }
-        };
+        } catch (InterruptedException e) {
+            throw new RuntimeException("failed to get size");
+        }
 
-        // Start the parser on another thread
-        executor.submit(parser);
+        configFileNameAsCollection(conf, file);
+        loadModel(file.getName(), fs.open(file));
+        idGen = new IdGenerator(inputFn + "-" + splitStart);
+    }
+
+    protected void loadModel(String fsname, final InputStream in) throws IOException {
+        if (model == null) {
+            if (lang == Lang.NQUADS) {
+                rdfIter = new PipedRDFIterator<Quad>();
+                rdfInputStream = new PipedQuadsStream(rdfIter);
+            } else {
+                rdfIter = new PipedRDFIterator<Triple>();
+                rdfInputStream = new PipedTriplesStream(rdfIter);
+            }
+
+            // PipedRDFStream and PipedRDFIterator need to be on different threads
+            executor = Executors.newSingleThreadExecutor();
+
+            final String baseURI = fsname;
+
+            // Create a runnable for our parser thread
+            Runnable parser = new Runnable() {
+                @Override
+                public void run() {
+                    // Call the parsing process.
+                    RDFDataMgr.parse(rdfInputStream, in, baseURI, lang, null);
+                }
+            };
+
+            // Start the parser on another thread
+            executor.submit(parser);
+        } else {
+            if (dataset == null) {
+                RDFDataMgr.read(model, in, lang);
+            } else {
+                RDFDataMgr.read(dataset, in, lang);
+                graphNameIter = dataset.listNames();
+            }
+            in.close();
+            statementIter = model.listStatements();
+        }
 
         // We don't know how many statements are in the model; we could count them, but that's
         // possibly expensive. So we just say 0 until we're done.
@@ -256,7 +316,25 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         return "<" + tag + ">" + uri + "</" + tag + ">";
     }
 
+    private String resource(Resource rsrc) {
+        if (rsrc.isAnon()) {
+            return "http://marklogic.com/semantics/blank/" + Long.toHexString(
+                    fuse(scramble((long)rsrc.hashCode()),fuse(scramble(milliSecs),randomValue)));
+        } else {
+            return escapeXml(rsrc.toString());
+        }
+    }
+
+    protected String resource(Resource rsrc, String tag) {
+        String uri = resource(rsrc);
+        return "<" + tag + ">" + uri + "</" + tag + ">";
+    }
+
     protected String subject(Node subj) {
+        return resource(subj, "subject");
+    }
+
+    protected String subject(Resource subj) {
         return resource(subj, "subject");
     }
 
@@ -264,14 +342,58 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         return resource(subj, "predicate");
     }
 
-    protected static String object(Node node) {
+    protected String predicate(Resource subj) {
+        return resource(subj, "predicate");
+    }
+
+    protected String object(Node node) {
         if (node.isLiteral()) {
-            String lit = node.getLiteralLexicalForm();
+            String text = node.getLiteralLexicalForm();
             String type = node.getLiteralDatatypeURI();
+            String lang = node.getLiteralLanguage();
+
             if (type == null) {
                 type = "http://www.w3.org/2001/XMLSchema#string";
             }
-            return "<object datatype='" + type + "'>" + escapeXml(lit) + "</object>";
+
+            if (lang == null || "".equals(lang)) {
+                lang = "";
+            } else {
+                lang = " xml:lang='" + lang + "'";
+            }
+
+            return "<object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</object>";
+        } else if (node.isBlank()) {
+            return "<object>http://marklogic.com/semantics/blank/" + Long.toHexString(
+                    fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
+                    +"</object>";
+        } else {
+            return "<object>" + escapeXml(node.toString()) + "</object>";
+        }
+    }
+
+    private String object(RDFNode node) {
+        if (node.isLiteral()) {
+            Literal lit = node.asLiteral();
+            String text = lit.getString();
+            String lang = lit.getLanguage();
+            String type = lit.getDatatypeURI();
+
+            if (type == null) {
+                type = "http://www.w3.org/2001/XMLSchema#string";
+            }
+
+            if (lang == null || "".equals(lang)) {
+                lang = "";
+            } else {
+                lang = " xml:lang='" + lang + "'";
+            }
+
+            return "<object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</object>";
+        } else if (node.isAnon()) {
+            return "<object>http://marklogic.com/semantics/blank/" + Long.toHexString(
+                    fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
+                    +"</object>";
         } else {
             return "<object>" + escapeXml(node.toString()) + "</object>";
         }
@@ -299,6 +421,198 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
+        if (statementIter == null) {
+            return nextStreamingKeyValue();
+        } else {
+            return nextInMemoryKeyValue();
+        }
+    }
+
+    public boolean nextInMemoryKeyValue() throws IOException, InterruptedException {
+        if (lang == Lang.NQUADS) {
+            return nextInMemoryQuadKeyValue();
+        } else {
+            return nextInMemoryTripleKeyValue();
+        }
+    }
+
+    public boolean nextInMemoryTripleKeyValue() throws IOException, InterruptedException {
+        if (!statementIter.hasNext()) {
+            hasNext = false;
+            return false;
+        }
+
+        setKey(idGen.incrementAndGet());
+        write("<triples xmlns='http://marklogic.com/semantics'>");
+        int max = MAXTRIPLESPERDOCUMENT;
+        while (max > 0 && statementIter.hasNext()) {
+            Statement stmt = statementIter.nextStatement();
+            write("<triple>");
+            write(subject(stmt.getSubject()));
+            write(predicate(stmt.getPredicate()));
+            write(object(stmt.getObject()));
+            write("</triple>");
+            max--;
+        }
+        write("</triples>\n");
+
+        if (!statementIter.hasNext()) {
+            pos = 1;
+        }
+
+        if (value instanceof Text) {
+            ((Text) value).set(buffer.toString());
+        } else if (value instanceof RDFWritable) {
+            ((RDFWritable) value).set(buffer.toString());
+        } else if (value instanceof ContentWithFileNameWritable) {
+            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
+                    .getValue();
+            if (realValue instanceof Text) {
+                ((Text) realValue).set(buffer.toString());
+            } else {
+                LOG.error("Expects Text in RDF, but gets "
+                        + realValue.getClass().getCanonicalName());
+                key = null;
+            }
+        } else {
+            LOG.error("Expects Text in RDF, but gets "
+                    + value.getClass().getCanonicalName());
+            key = null;
+        }
+
+        buffer.setLength(0);
+        return true;
+    }
+
+    public boolean nextInMemoryQuadKeyValue() throws IOException, InterruptedException {
+        if (ignoreCollectionQuad) {
+            return nextInMemoryQuadKeyValueIgnoreCollections();
+        } else {
+            return nextInMemoryQuadKeyValueWithCollections();
+        }
+    }
+
+    public boolean nextInMemoryQuadKeyValueWithCollections() throws IOException, InterruptedException {
+        while (!statementIter.hasNext()) {
+            if (graphNameIter.hasNext()) {
+                collection = graphNameIter.next();
+                model = dataset.getNamedModel(collection);
+                statementIter = model.listStatements();
+            } else {
+                hasNext = false;
+                return false;
+            }
+        }
+
+        setKey(idGen.incrementAndGet());
+        write("<triples xmlns='http://marklogic.com/semantics'>");
+        int max = MAXTRIPLESPERDOCUMENT;
+        while (max > 0 && statementIter.hasNext()) {
+            Statement stmt = statementIter.nextStatement();
+            write("<triple>");
+            write(subject(stmt.getSubject()));
+            write(predicate(stmt.getPredicate()));
+            write(object(stmt.getObject()));
+            write("</triple>");
+            max--;
+        }
+        write("</triples>\n");
+
+        if (!statementIter.hasNext()) {
+            pos = 1;
+        }
+
+        if (value instanceof Text) {
+            ((Text) value).set(buffer.toString());
+        } else if (value instanceof RDFWritable) {
+            ((RDFWritable) value).set(buffer.toString());
+            ((RDFWritable) value).setCollection(collection);
+        } else if (value instanceof ContentWithFileNameWritable) {
+            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
+                    .getValue();
+            if (realValue instanceof Text) {
+                ((Text) realValue).set(buffer.toString());
+            } else {
+                LOG.error("Expects Text in RDF, but gets "
+                        + realValue.getClass().getCanonicalName());
+                key = null;
+            }
+        } else {
+            LOG.error("Expects Text in RDF, but gets "
+                    + value.getClass().getCanonicalName());
+            key = null;
+        }
+
+        buffer.setLength(0);
+        return true;
+    }
+
+    public boolean nextInMemoryQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
+        while (!statementIter.hasNext()) {
+            if (graphNameIter.hasNext()) {
+                collection = graphNameIter.next();
+                model = dataset.getNamedModel(collection);
+                statementIter = model.listStatements();
+            } else {
+                hasNext = false;
+                return false;
+            }
+        }
+
+        setKey(idGen.incrementAndGet());
+        write("<triples xmlns='http://marklogic.com/semantics'>");
+        int max = MAXTRIPLESPERDOCUMENT;
+        while (max > 0 && statementIter.hasNext()) {
+            Statement stmt = statementIter.nextStatement();
+            write("<triple>");
+            write(subject(stmt.getSubject()));
+            write(predicate(stmt.getPredicate()));
+            write(object(stmt.getObject()));
+            write("</triple>");
+            max--;
+
+            boolean moreTriples = statementIter.hasNext();
+            while (!moreTriples) {
+                moreTriples = true; // counter-intuitive; get out of the loop if we really are finished
+                if (graphNameIter.hasNext()) {
+                    collection = graphNameIter.next();
+                    model = dataset.getNamedModel(collection);
+                    statementIter = model.listStatements();
+                    moreTriples = statementIter.hasNext();
+                }
+            }
+        }
+        write("</triples>\n");
+
+        if (!statementIter.hasNext()) {
+            pos = 1;
+        }
+
+        if (value instanceof Text) {
+            ((Text) value).set(buffer.toString());
+        } else if (value instanceof RDFWritable) {
+            ((RDFWritable) value).set(buffer.toString());
+        } else if (value instanceof ContentWithFileNameWritable) {
+            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
+                    .getValue();
+            if (realValue instanceof Text) {
+                ((Text) realValue).set(buffer.toString());
+            } else {
+                LOG.error("Expects Text in RDF, but gets "
+                        + realValue.getClass().getCanonicalName());
+                key = null;
+            }
+        } else {
+            LOG.error("Expects Text in RDF, but gets "
+                    + value.getClass().getCanonicalName());
+            key = null;
+        }
+
+        buffer.setLength(0);
+        return true;
+    }
+
+    public boolean nextStreamingKeyValue() throws IOException, InterruptedException {
         if (!rdfIter.hasNext() && collectionHash.size() == 0) {
             if(compressed) {
                 hasNext = false;
@@ -317,13 +631,13 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         if (lang == Lang.NQUADS) {
-            return nextQuadKeyValue();
+            return nextStramingQuadKeyValue();
         } else {
-            return nextTripleKeyValue();
+            return nextStreamingTripleKeyValue();
         }
     }
 
-    protected boolean nextTripleKeyValue() throws IOException, InterruptedException {
+    protected boolean nextStreamingTripleKeyValue() throws IOException, InterruptedException {
         setKey(idGen.incrementAndGet());
         write("<triples xmlns='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
@@ -366,15 +680,15 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         return true;
     }
 
-    public boolean nextQuadKeyValue() throws IOException, InterruptedException {
+    public boolean nextStramingQuadKeyValue() throws IOException, InterruptedException {
         if (ignoreCollectionQuad) {
-            return nextQuadKeyValueIgnoreCollections();
+            return nextStreamingQuadKeyValueIgnoreCollections();
         } else {
-            return nextQuadKeyValueWithCollections();
+            return nextStreamingQuadKeyValueWithCollections();
         }
     }
 
-    protected boolean nextQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
+    protected boolean nextStreamingQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
         setKey(idGen.incrementAndGet());
         write("<triples xmlns='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
@@ -417,7 +731,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         return true;
     }
 
-    public boolean nextQuadKeyValueWithCollections() throws IOException, InterruptedException {
+    public boolean nextStreamingQuadKeyValueWithCollections() throws IOException, InterruptedException {
         if (!rdfIter.hasNext() && collectionHash.isEmpty()) {
             hasNext = false;
             executor.shutdown();

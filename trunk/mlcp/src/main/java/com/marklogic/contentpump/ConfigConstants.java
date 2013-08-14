@@ -115,7 +115,10 @@ public interface ConfigConstants {
     static final String TRANSFORM_NAMESPACE = "transform_namespace";
     static final String TRANSFORM_FUNCTION = "transform_function";
     static final String TRANSFORM_PARAM = "transform_param";
-    
+
+    static final String RDF_STREAMING_MEMORY_THRESHOLD  = "rdf_streaming_memory_threshold";
+    static final String RDF_TRIPLES_PER_DOCUMENT  = "rdf_triples_per_document";
+
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
         "mapreduce.marklogic.input.compressioncodec";
