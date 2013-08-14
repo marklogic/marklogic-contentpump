@@ -59,7 +59,7 @@ public class Utils {
             + "xdmp:eval('xdmp:document-load(\""
             + Constants.TEST_PATH
             + moduleUri + "\", <options xmlns=\"xdmp:document-load\">"
-            + "<uri>/lc.xqy</uri></options>)',(),<options xmlns=\"xdmp:eval\">"
+            + "<uri>" + moduleUri + "</uri></options>)',(),<options xmlns=\"xdmp:eval\">"
             + "<database>{xdmp:database-forests(xdmp:database(\"Modules\"))}</database></options>)";
         runQuery(xccUri, query);
     }
