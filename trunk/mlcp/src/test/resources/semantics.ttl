@@ -248,9 +248,6 @@
    sem:timeZoneOffset "-8"^^xs:decimal
    .
 <http://dbpedia.org/resource/Doug_Cutting>
-   rdf:type foaf:Person;
-   foaf:name "Doug Cutting";
-   foaf:affiliation <http://dbpedia.org/resource/Cloudera>;
    foaf:based_near <http://dbpedia.org/resource/San_Jose>;
    sem:timeZoneOffset "-8"^^xs:decimal
    .
