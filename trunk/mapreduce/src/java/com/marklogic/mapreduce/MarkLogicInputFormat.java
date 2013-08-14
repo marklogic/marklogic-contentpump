@@ -20,8 +20,11 @@ import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -270,17 +273,26 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
         }
         
-        // construct and return splits
-        List<InputSplit>[] splits = new List[forestSplits.size()];
+        // create a split list per forest per host
         if (forestSplits == null || forestSplits.isEmpty()) {
             return new ArrayList<InputSplit>();
         }
         
-        // construct a list of splits per forest
+        // construct a list of splits per forest per host
+        Map<String, List<List<InputSplit>>> hostForestSplits = 
+            new HashMap<String, List<List<InputSplit>>>();
         for (int i = 0; i < forestSplits.size(); i++) {
             ForestSplit fsplit = forestSplits.get(i);
+            List<InputSplit> splits = null;
             if (fsplit.recordCount > 0) {
-                splits[i] = new ArrayList<InputSplit>();
+                String host = fsplit.hostName;
+                List<List<InputSplit>> splitLists = hostForestSplits.get(host);
+                if (splitLists == null) {
+                    splitLists = new ArrayList<List<InputSplit>>();
+                    hostForestSplits.put(host, splitLists);
+                }
+                splits = new ArrayList<InputSplit>();
+                splitLists.add(splits);
             } else {
                 continue;
             }
@@ -289,7 +301,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     new MarkLogicInputSplit(0, fsplit.recordCount, 
                             fsplit.forestId, fsplit.hostName);
                 split.setLastSplit(true);
-                splits[i].add(split);
+                splits.add(split);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Added split " + split);
                 }    
@@ -320,7 +332,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     if (remainingCount <= maxSplitSize) {
                         split.setLastSplit(true);
                     }
-                    splits[i].add(split);
+                    splits.add(split);
                     remainingCount -= length;
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Added split " + split);
@@ -329,26 +341,53 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
         }
         
-        // mix the lists of splits into one
+        // mix the lists of splits into one per host
+        Set<String> hosts = hostForestSplits.keySet();
+        int hostCount = hosts.size();
+        List<InputSplit>[] hostSplits = new ArrayList[hostCount];
+        int i = 0;
+        for (String host : hosts) {
+            List<List<InputSplit>> splitLists = hostForestSplits.get(host);
+            if (splitLists.size() == 1) {
+                hostSplits[i++] = splitLists.get(0);
+            } else {
+                hostSplits[i] = new ArrayList<InputSplit>();
+                boolean more = true;
+                for (int j = 0; more; j++) {
+                    more = false;
+                    for (List<InputSplit> splitsPerForest : splitLists) {
+                        if (j < splitsPerForest.size()) {
+                            hostSplits[i].add(splitsPerForest.get(j));
+                        }
+                        more = more || (j + 1 < splitsPerForest.size());
+                    }
+                }
+                i++;
+            }
+        }
+        
+        // mix hostSplits into one
         List<InputSplit> splitList = new ArrayList<InputSplit>();
         boolean more = true;
-        for (int i = 0; more; i++) {
+        for (int j = 0; more; j++) {
             more = false;
-            for (List<InputSplit> splitsPerForest : splits) {
-                if (splitsPerForest == null) {
-                    continue;
+            for (List<InputSplit> splitsPerHost : hostSplits) {
+                if (j < splitsPerHost.size()) {
+                    splitList.add(splitsPerHost.get(j));
                 }
-                if (i < splitsPerForest.size()) {
-                    splitList.add(splitsPerForest.get(i));
-                }
-                more = more || (i + 1 < splitsPerForest.size());
+                more = more || (j + 1 < splitsPerHost.size());
             }
         }
         
         LOG.info("Made " + splitList.size() + " splits.");
+        if (LOG.isDebugEnabled()) {
+            for (InputSplit split : splitList) {
+                LOG.debug(split);
+            }
+        }
         return splitList;
     }
-    
+
     /**
      * A per-forest split of the result records.
      * 
