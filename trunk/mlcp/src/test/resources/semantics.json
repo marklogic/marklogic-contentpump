@@ -31,7 +31,7 @@
         },
         {
           "value": "_:b0",
-          "type": "_bnode"
+          "type": "bnode"
         }
       ],
       "http://xmlns.com/foaf/0.1/birthday": [
@@ -43,7 +43,7 @@
       ],
       "http://xmlns.com/foaf/0.1/age": [
         {
-          "value": 1,
+          "value": "1",
           "type": "literal"
         }
       ],
@@ -68,8 +68,7 @@
       "http://www.w3.org/2006/vcard/ns#tel": [
         {
           "value": "+49-12-3546789",
-          "type": "literal",
-          "datatype": "http://www.w3.org/2001/XMLSchema#dateTime"
+          "type": "literal"
         }
       ]
     }
