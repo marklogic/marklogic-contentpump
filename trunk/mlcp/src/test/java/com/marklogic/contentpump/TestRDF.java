@@ -8,8 +8,24 @@ import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
+
+@RunWith(value = Parameterized.class)
 public class TestRDF {
+    private long threshold = 0;
+
+    public TestRDF(long threshold) {
+        this.threshold = threshold;
+    }
+
+    @Parameterized.Parameters
+    public static java.util.Collection<Object[]> data() {
+        Object[][] data = new Object[][] { { 0 }, { 64*1024*1000 } };
+        return Arrays.asList(data);
+    }
 
     @After
     public void tearDown() {
@@ -21,7 +37,7 @@ public class TestRDF {
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.rdf"
-            + " -input_file_type rdf";
+            + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
@@ -48,17 +64,17 @@ public class TestRDF {
 
         Utils.closeSession();
     }
-    
+
     @Test
     public void testTransformRDFXML() throws Exception {
         Utils.prepareModule("xcc://admin:admin@localhost:5275", "/RDFAddNode.xqy");
-        String cmd = 
-            "IMPORT -host localhost -port 5275 -username admin -password admin"
-            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.rdf"
-            + " -input_file_type rdf"
-            + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_param myparam"
-            + " -transform_module /RDFAddNode.xqy";
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.rdf"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
+                        + " -transform_namespace http://marklogic.com/module_invoke"
+                        + " -transform_param myparam"
+                        + " -transform_module /RDFAddNode.xqy";
         String[] args = cmd.split(" ");
 
         Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
@@ -68,7 +84,7 @@ public class TestRDF {
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
 
@@ -90,7 +106,7 @@ public class TestRDF {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.ttl"
-                        + " -input_file_type rdf";
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
@@ -123,7 +139,7 @@ public class TestRDF {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.json"
-                        + " -input_file_type rdf";
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
@@ -156,7 +172,7 @@ public class TestRDF {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.n3"
-                        + " -input_file_type rdf";
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
@@ -189,7 +205,7 @@ public class TestRDF {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.nt"
-                        + " -input_file_type rdf";
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
@@ -222,7 +238,7 @@ public class TestRDF {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics-2013.nt"
-                        + " -input_file_type rdf";
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
@@ -256,7 +272,7 @@ public class TestRDF {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.trig"
-                        + " -input_file_type rdf";
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
@@ -289,7 +305,7 @@ public class TestRDF {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.nq"
-                        + " -input_file_type rdf";
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
@@ -333,7 +349,7 @@ public class TestRDF {
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.nq"
                         + " -output_collections http://marklogic.com/collection/1"
-                        + " -input_file_type rdf";
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
