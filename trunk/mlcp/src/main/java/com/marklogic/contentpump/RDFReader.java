@@ -347,7 +347,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected String resource(Node rsrc, String tag) {
         String uri = resource(rsrc);
-        return "<" + tag + ">" + uri + "</" + tag + ">";
+        return "<sem:" + tag + ">" + uri + "</sem:" + tag + ">";
     }
 
     private String resource(Resource rsrc) {
@@ -361,7 +361,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected String resource(Resource rsrc, String tag) {
         String uri = resource(rsrc);
-        return "<" + tag + ">" + uri + "</" + tag + ">";
+        return "<sem:" + tag + ">" + uri + "</sem:" + tag + ">";
     }
 
     protected String subject(Node subj) {
@@ -396,13 +396,13 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 lang = " xml:lang='" + lang + "'";
             }
 
-            return "<object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</object>";
+            return "<sem:object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</sem:object>";
         } else if (node.isBlank()) {
-            return "<object>http://marklogic.com/semantics/blank/" + Long.toHexString(
+            return "<sem:object>http://marklogic.com/semantics/blank/" + Long.toHexString(
                     fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
-                    +"</object>";
+                    +"</sem:object>";
         } else {
-            return "<object>" + escapeXml(node.toString()) + "</object>";
+            return "<sem:object>" + escapeXml(node.toString()) + "</sem:object>";
         }
     }
 
@@ -423,13 +423,13 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 lang = " xml:lang='" + lang + "'";
             }
 
-            return "<object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</object>";
+            return "<sem:object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</sem:object>";
         } else if (node.isAnon()) {
-            return "<object>http://marklogic.com/semantics/blank/" + Long.toHexString(
+            return "<sem:object>http://marklogic.com/semantics/blank/" + Long.toHexString(
                     fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
-                    +"</object>";
+                    +"</sem:object>";
         } else {
-            return "<object>" + escapeXml(node.toString()) + "</object>";
+            return "<sem:object>" + escapeXml(node.toString()) + "</sem:object>";
         }
     }
 
@@ -477,18 +477,18 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         setKey(idGen.incrementAndGet());
-        write("<triples xmlns='http://marklogic.com/semantics'>");
+        write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && statementIter.hasNext()) {
             Statement stmt = statementIter.nextStatement();
-            write("<triple>");
+            write("<sem:triple>");
             write(subject(stmt.getSubject()));
             write(predicate(stmt.getPredicate()));
             write(object(stmt.getObject()));
-            write("</triple>");
+            write("</sem:triple>");
             max--;
         }
-        write("</triples>\n");
+        write("</sem:triples>\n");
 
         if (!statementIter.hasNext()) {
             pos = 1;
@@ -519,18 +519,18 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         setKey(idGen.incrementAndGet());
-        write("<triples xmlns='http://marklogic.com/semantics'>");
+        write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && statementIter.hasNext()) {
             Statement stmt = statementIter.nextStatement();
-            write("<triple>");
+            write("<sem:triple>");
             write(subject(stmt.getSubject()));
             write(predicate(stmt.getPredicate()));
             write(object(stmt.getObject()));
-            write("</triple>");
+            write("</sem:triple>");
             max--;
         }
-        write("</triples>\n");
+        write("</sem:triples>\n");
 
         if (!statementIter.hasNext()) {
             pos = 1;
@@ -553,15 +553,15 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         setKey(idGen.incrementAndGet());
-        write("<triples xmlns='http://marklogic.com/semantics'>");
+        write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && statementIter.hasNext()) {
             Statement stmt = statementIter.nextStatement();
-            write("<triple>");
+            write("<sem:triple>");
             write(subject(stmt.getSubject()));
             write(predicate(stmt.getPredicate()));
             write(object(stmt.getObject()));
-            write("</triple>");
+            write("</sem:triple>");
             max--;
 
             boolean moreTriples = statementIter.hasNext();
@@ -575,7 +575,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 }
             }
         }
-        write("</triples>\n");
+        write("</sem:triples>\n");
 
         if (!statementIter.hasNext()) {
             pos = 1;
@@ -612,18 +612,18 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected boolean nextStreamingTripleKeyValue() throws IOException, InterruptedException {
         setKey(idGen.incrementAndGet());
-        write("<triples xmlns='http://marklogic.com/semantics'>");
+        write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && rdfIter.hasNext()) {
             Triple triple = (Triple) rdfIter.next();
-            write("<triple>");
+            write("<sem:triple>");
             write(subject(triple.getSubject()));
             write(predicate(triple.getPredicate()));
             write(object(triple.getObject()));
-            write("</triple>");
+            write("</sem:triple>");
             max--;
         }
-        write("</triples>\n");
+        write("</sem:triples>\n");
 
         if (!rdfIter.hasNext()) {
             pos = 1;
@@ -643,18 +643,18 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected boolean nextStreamingQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
         setKey(idGen.incrementAndGet());
-        write("<triples xmlns='http://marklogic.com/semantics'>");
+        write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && rdfIter.hasNext()) {
             Quad quad = (Quad) rdfIter.next();
-            write("<triple>");
+            write("<sem:triple>");
             write(subject(quad.getSubject()));
             write(predicate(quad.getPredicate()));
             write(object(quad.getObject()));
-            write("</triple>");
+            write("</sem:triple>");
             max--;
         }
-        write("</triples>\n");
+        write("</sem:triples>\n");
 
         if (!rdfIter.hasNext()) {
             pos = 1;
@@ -690,7 +690,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
 
             Vector<String> triples = collectionHash.get(collection);
-            triples.add("<triple>" + triple + "</triple>");
+            triples.add("<sem:triple>" + triple + "</sem:triple>");
 
             //System.err.println(triple);
 
@@ -716,11 +716,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         Vector<String> triples = collectionHash.get(collection);
 
         setKey(idGen.incrementAndGet());
-        write("<triples xmlns='http://marklogic.com/semantics'>");
+        write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         for (String t : triples) {
             write(t);
         }
-        write("</triples>\n");
+        write("</sem:triples>\n");
 
         collectionHash.remove(collection);
         collectionCount--;
