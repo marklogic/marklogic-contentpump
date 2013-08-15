@@ -17,6 +17,9 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -59,6 +62,8 @@ import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.MarkLogicConstants;
 
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+
 /**
  * Reader for RDF quads/triples. Uses Jena library to parse RDF and sends triples
  * to the database in groups of MAXTRIPLESPERDOCUMENT.
@@ -69,11 +74,12 @@ import com.marklogic.mapreduce.MarkLogicConstants;
  */
 public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(RDFReader.class);
+    public static final String HASHALGORITHM = "SHA-256";
     protected static Pattern[] patterns = new Pattern[] {
             Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
 
-    private int MAXTRIPLESPERDOCUMENT = 100;
-    private long INMEMORYTHRESHOLD = 64 * 1024 * 1000; // 64Mb
+    protected int MAXTRIPLESPERDOCUMENT = 100;
+    protected long INMEMORYTHRESHOLD = 64 * 1024 * 1000; // 64Mb
 
     protected Dataset dataset = null;
     protected Model model = null;
@@ -170,29 +176,50 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
-        initParser(inSplit);
+
+        initStream(inSplit);
     }
-    
-    protected void initParser(InputSplit inSplit) throws IOException {
+
+    protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
         file = ((FileSplit) inSplit).getPath();
+        long size = inSplit.getLength();
+        initParser(file.toUri().toASCIIString(), size);
+        parse(file.getName());
+    }
+
+    protected void initParser(String fsname, long size) throws IOException {
         start = 0;
         pos = 0;
         end = 1;
 
-        String fsname = file.getName();
-        String ext = null;
+        dataset = null;
+        model = null;
+        statementIter = null;
+        graphNameIter = null;
 
+        String ext = null;
         if (fsname.contains(".")) {
             int pos = fsname.lastIndexOf(".");
             ext = fsname.substring(pos);
             if (".gz".equals(ext)) {
                 fsname = fsname.substring(0, pos);
                 pos = fsname.lastIndexOf(".");
-                ext = fsname.substring(pos);
+                if (pos >= 0) {
+                    ext = fsname.substring(pos);
+                } else {
+                    ext = null;
+                }
             }
         }
 
-        inputFn = fsname;
+        try {
+            MessageDigest digest = MessageDigest.getInstance(HASHALGORITHM);
+            LOG.info("Hashing: " + fsname);
+            inputFn = "/triplestore/" + (new HexBinaryAdapter()).marshal(digest.digest(fsname.getBytes()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Could not instantiate hash function for " + HASHALGORITHM);
+        }
+
         idGen = new IdGenerator(inputFn + "-" + splitStart);
 
         lang = null;
@@ -214,26 +241,23 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             lang = Lang.RDFXML; // We have to default to something!
         }
 
-        try {
-            long size = inSplit.getLength();
-            if (size < INMEMORYTHRESHOLD) {
-                if (lang == Lang.NQUADS) {
-                    dataset = DatasetFactory.createMem();
-                    model = dataset.getDefaultModel();
-                } else {
-                    model = ModelFactory.createDefaultModel();
-                }
-                LOG.info("In-memory RDF processing (" + size + " < " + INMEMORYTHRESHOLD + ")");
+        if (size < INMEMORYTHRESHOLD) {
+            if (lang == Lang.NQUADS) {
+                dataset = DatasetFactory.createMem();
+                model = dataset.getDefaultModel();
             } else {
-                LOG.info("Streamed RDF processing (" + size + " >= " + INMEMORYTHRESHOLD + ")");
+                model = ModelFactory.createDefaultModel();
             }
-        } catch (InterruptedException e) {
-            throw new RuntimeException("failed to get size");
+            LOG.info("In-memory RDF processing (" + size + " < " + INMEMORYTHRESHOLD + ")");
+        } else {
+            LOG.info("Streamed RDF processing (" + size + " >= " + INMEMORYTHRESHOLD + ")");
         }
 
-        configFileNameAsCollection(conf, file);
-        loadModel(file.getName(), fs.open(file));
         idGen = new IdGenerator(inputFn + "-" + splitStart);
+    }
+
+    protected void parse(String fsname) throws IOException {
+        loadModel(fsname, fs.open(file));
     }
 
     protected void loadModel(String fsname, final InputStream in) throws IOException {
@@ -414,7 +438,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if (val == null) {
             key = null;
         } else {
-            String uri = getEncodedURI(val);
+            String uri = getEncodedURI(val) + ".xml";
             super.setKey(uri);
         }
     }
@@ -460,27 +484,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             pos = 1;
         }
 
-        if (value instanceof Text) {
-            ((Text) value).set(buffer.toString());
-        } else if (value instanceof RDFWritable) {
-            ((RDFWritable) value).set(buffer.toString());
-        } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                    .getValue();
-            if (realValue instanceof Text) {
-                ((Text) realValue).set(buffer.toString());
-            } else {
-                LOG.error("Expects Text in RDF, but gets "
-                        + realValue.getClass().getCanonicalName());
-                key = null;
-            }
-        } else {
-            LOG.error("Expects Text in RDF, but gets "
-                    + value.getClass().getCanonicalName());
-            key = null;
-        }
-
-        buffer.setLength(0);
+        writeValue();
         return true;
     }
 
@@ -522,28 +526,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             pos = 1;
         }
 
-        if (value instanceof Text) {
-            ((Text) value).set(buffer.toString());
-        } else if (value instanceof RDFWritable) {
-            ((RDFWritable) value).set(buffer.toString());
-            ((RDFWritable) value).setCollection(collection);
-        } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                    .getValue();
-            if (realValue instanceof Text) {
-                ((Text) realValue).set(buffer.toString());
-            } else {
-                LOG.error("Expects Text in RDF, but gets "
-                        + realValue.getClass().getCanonicalName());
-                key = null;
-            }
-        } else {
-            LOG.error("Expects Text in RDF, but gets "
-                    + value.getClass().getCanonicalName());
-            key = null;
-        }
-
-        buffer.setLength(0);
+        writeValue(collection);
         return true;
     }
 
@@ -588,27 +571,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             pos = 1;
         }
 
-        if (value instanceof Text) {
-            ((Text) value).set(buffer.toString());
-        } else if (value instanceof RDFWritable) {
-            ((RDFWritable) value).set(buffer.toString());
-        } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                    .getValue();
-            if (realValue instanceof Text) {
-                ((Text) realValue).set(buffer.toString());
-            } else {
-                LOG.error("Expects Text in RDF, but gets "
-                        + realValue.getClass().getCanonicalName());
-                key = null;
-            }
-        } else {
-            LOG.error("Expects Text in RDF, but gets "
-                    + value.getClass().getCanonicalName());
-            key = null;
-        }
-
-        buffer.setLength(0);
+        writeValue();
         return true;
     }
 
@@ -621,7 +584,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             } else {
                 if (iterator!=null && iterator.hasNext()) {
                     close();
-                    initParser(iterator.next());
+                    initStream(iterator.next());
                 } else {
                     hasNext = false;
                     executor.shutdown();
@@ -656,27 +619,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             pos = 1;
         }
 
-        if (value instanceof Text) {
-            ((Text) value).set(buffer.toString());
-        } else if (value instanceof RDFWritable) {
-            ((RDFWritable) value).set(buffer.toString());
-        } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                    .getValue();
-            if (realValue instanceof Text) {
-                ((Text) realValue).set(buffer.toString());
-            } else {
-                LOG.error("Expects Text in triples, but gets "
-                        + realValue.getClass().getCanonicalName());
-                key = null;
-            }
-        } else {
-            LOG.error("Expects Text in triples, but gets "
-                    + value.getClass().getCanonicalName());
-            key = null;
-        }
-
-        buffer.setLength(0);
+        writeValue();
         return true;
     }
 
@@ -707,27 +650,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             pos = 1;
         }
 
-        if (value instanceof Text) {
-            ((Text) value).set(buffer.toString());
-        } else if (value instanceof RDFWritable) {
-            ((RDFWritable) value).set(buffer.toString());
-        } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                    .getValue();
-            if (realValue instanceof Text) {
-                ((Text) realValue).set(buffer.toString());
-            } else {
-                LOG.error("Expects Text in triples, but gets "
-                        + realValue.getClass().getCanonicalName());
-                key = null;
-            }
-        } else {
-            LOG.error("Expects Text in triples, but gets "
-                    + value.getClass().getCanonicalName());
-            key = null;
-        }
-
-        buffer.setLength(0);
+        writeValue();
         return true;
     }
 
@@ -796,29 +719,39 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             pos = 1;
         }
 
+        writeValue(collection);
+        return true;
+    }
+
+    public void writeValue() {
+        writeValue(null);
+    }
+
+    public void writeValue(String collection) {
         if (value instanceof Text) {
             ((Text) value).set(buffer.toString());
         } else if (value instanceof RDFWritable) {
             ((RDFWritable) value).set(buffer.toString());
-            ((RDFWritable) value).setCollection(collection);
+            if (collection != null) {
+                ((RDFWritable) value).setCollection(collection);
+            }
         } else if (value instanceof ContentWithFileNameWritable) {
             VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
                     .getValue();
             if (realValue instanceof Text) {
                 ((Text) realValue).set(buffer.toString());
             } else {
-                LOG.error("Expects Text in quads, but gets "
+                LOG.error("Expects RDF, but gets "
                         + realValue.getClass().getCanonicalName());
                 key = null;
             }
         } else {
-            LOG.error("Expects Text in quads, but gets "
+            LOG.error("Expects RDF, but gets "
                     + value.getClass().getCanonicalName());
             key = null;
         }
 
         buffer.setLength(0);
-        return true;
     }
 
     protected String largestCollection() {
