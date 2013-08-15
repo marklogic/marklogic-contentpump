@@ -24,6 +24,7 @@ public class TestRDF {
     @Parameterized.Parameters
     public static java.util.Collection<Object[]> data() {
         Object[][] data = new Object[][] { { 0 }, { 64*1024*1000 } };
+        // data = new Object[][] { { 0 } };
         return Arrays.asList(data);
     }
 
@@ -383,6 +384,77 @@ public class TestRDF {
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Ani_DiFranco?oldid=490340130#absolute-line=1\"))");
         assertTrue(result.hasNext());
         assertEquals("0", result.next().asString());
+
+        Utils.closeSession();
+    }
+
+    @Test
+    public void testRelativePaths() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/livesIn.ttl"
+                        + " -output_uri_prefix /triplestore/"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:predicate = \"file:///triplestore/livesIn\"])");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+
+        Utils.closeSession();
+    }
+
+    @Test
+    public void testOutputURIPrefix() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/livesIn.ttl"
+                        + " -output_uri_prefix /fred/"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; xdmp:node-uri((/sem:triples)[1])");
+        assertTrue(result.hasNext());
+        assertTrue(result.next().asString().startsWith("/fred/"));
+
+        Utils.closeSession();
+    }
+
+    @Test
+    public void testDefaultOutputURIPrefix() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/livesIn.ttl"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; xdmp:node-uri((/sem:triples)[1])");
+        assertTrue(result.hasNext());
+        assertTrue(result.next().asString().startsWith(RDFReader.DEFAULT_OUTPUT_URI_PREFIX));
 
         Utils.closeSession();
     }
