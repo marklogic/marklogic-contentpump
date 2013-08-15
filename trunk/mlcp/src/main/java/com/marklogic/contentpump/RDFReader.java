@@ -215,7 +215,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         try {
             MessageDigest digest = MessageDigest.getInstance(HASHALGORITHM);
             LOG.info("Hashing: " + fsname);
-            inputFn = "/triplestore/" + (new HexBinaryAdapter()).marshal(digest.digest(fsname.getBytes()));
+            inputFn = (new HexBinaryAdapter()).marshal(digest.digest(fsname.getBytes()));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Could not instantiate hash function for " + HASHALGORITHM);
         }
