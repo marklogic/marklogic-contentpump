@@ -75,6 +75,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(RDFReader.class);
     public static final String HASHALGORITHM = "SHA-256";
+    public static final String DEFAULT_OUTPUT_URI_PREFIX = "/triplestore/";
     protected static Pattern[] patterns = new Pattern[] {
             Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
 
@@ -86,6 +87,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected StmtIterator statementIter = null;
     protected Iterator<String> graphNameIter = null;
     protected String collection = null;
+    protected String uriPrefix = null;
 
     protected PipedRDFIterator rdfIter;
     protected PipedRDFStream rdfInputStream;
@@ -147,6 +149,13 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         rdfopt = conf.get(ConfigConstants.RDF_TRIPLES_PER_DOCUMENT);
         if (rdfopt != null) {
             MAXTRIPLESPERDOCUMENT = Integer.parseInt(rdfopt);
+        }
+
+        rdfopt = conf.get(ConfigConstants.CONF_OUTPUT_URI_PREFIX);
+        if (rdfopt != null) {
+            uriPrefix = rdfopt;
+        } else {
+            uriPrefix = null;
         }
 
         String fnAsColl = conf.get(ConfigConstants.CONF_OUTPUT_FILENAME_AS_COLLECTION);
@@ -215,7 +224,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         try {
             MessageDigest digest = MessageDigest.getInstance(HASHALGORITHM);
             LOG.info("Hashing: " + fsname);
-            inputFn = (new HexBinaryAdapter()).marshal(digest.digest(fsname.getBytes()));
+            String base = (uriPrefix == null) ? DEFAULT_OUTPUT_URI_PREFIX : ""; // the real one is automatically
+            inputFn = base + (new HexBinaryAdapter()).marshal(digest.digest(fsname.getBytes()));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Could not instantiate hash function for " + HASHALGORITHM);
         }
@@ -273,24 +283,24 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             // PipedRDFStream and PipedRDFIterator need to be on different threads
             executor = Executors.newSingleThreadExecutor();
 
-            final String baseURI = fsname;
-
             // Create a runnable for our parser thread
             Runnable parser = new Runnable() {
                 @Override
                 public void run() {
                     // Call the parsing process.
-                    RDFDataMgr.parse(rdfInputStream, in, baseURI, lang, null);
+                    String base = (uriPrefix == null) ? DEFAULT_OUTPUT_URI_PREFIX : uriPrefix;
+                    RDFDataMgr.parse(rdfInputStream, in, base, lang, null);
                 }
             };
 
             // Start the parser on another thread
             executor.submit(parser);
         } else {
+            String base = (uriPrefix == null) ? DEFAULT_OUTPUT_URI_PREFIX : uriPrefix;
             if (dataset == null) {
-                RDFDataMgr.read(model, in, lang);
+                RDFDataMgr.read(model, in, base, lang);
             } else {
-                RDFDataMgr.read(dataset, in, lang);
+                RDFDataMgr.read(dataset, in, base, lang);
                 graphNameIter = dataset.listNames();
             }
             in.close();
