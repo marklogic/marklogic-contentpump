@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -27,8 +28,12 @@ import com.marklogic.mapreduce.CompressionCodec;
  * @param <VALUEIN>
  */
 public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
-    public static final Log LOG = LogFactory
-        .getLog(CompressedRDFReader.class);
+    public static final Log LOG = LogFactory.getLog(CompressedRDFReader.class);
+
+    // When we're looking at compressed data, for the purposes of deciding if we should stream or not,
+    // we assume it'll be (compressedSize * COMPRESSIONFACTOR) when it's uncompressed.
+    public static final long COMPRESSIONFACTOR = 2;
+
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private ZipEntry currZipEntry;
@@ -43,6 +48,7 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         }
     }
 
+/*
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
@@ -60,13 +66,15 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         
         initStream(inSplit);
     }
+*/
 
-    private void initStream(InputSplit inSplit) throws IOException {
+    @Override
+    protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
         file = ((FileSplit) inSplit).getPath();
         FSDataInputStream fileIn = fs.open(file);
+        URI zipURI = file.toUri();
 
-        String codecString = conf.get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
-                CompressionCodec.ZIP.toString());
+        String codecString = conf.get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC, CompressionCodec.ZIP.toString());
         if (codecString.equalsIgnoreCase(CompressionCodec.ZIP.toString())) {
             zipIn = new ZipInputStream(fileIn);
             codec = CompressionCodec.ZIP;
@@ -86,51 +94,44 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
             long size = currZipEntry.getSize();
             if (size == -1) {
                 baos = new ByteArrayOutputStream();
+                initParser(zipURI.toASCIIString() + "/" + currZipEntry.getName(), INMEMORYTHRESHOLD); // if we don't know the size, assume it's big!
             } else {
                 baos = new ByteArrayOutputStream((int) size);
+                initParser(zipURI.toASCIIString() + "/" + currZipEntry.getName(), size);
             }
             int nb;
             while ((nb = zipIn.read(buf, 0, buf.length)) != -1) {
                 baos.write(buf, 0, nb);
             }
 
-            loadModel(currZipEntry.getName(), new ByteArrayInputStream(baos.toByteArray()));
+            parse(currZipEntry.getName(), new ByteArrayInputStream(baos.toByteArray()));
         } else if (codecString.equalsIgnoreCase(CompressionCodec.GZIP.toString())) {
+            long size = inSplit.getLength();
             zipIn = new GZIPInputStream(fileIn);
             codec = CompressionCodec.GZIP;
-
-            loadModel(file.getName(), zipIn);
+            initParser(zipURI.toASCIIString(), size * COMPRESSIONFACTOR);
+            parse(file.getName(), zipIn);
         } else {
-            throw new UnsupportedOperationException("Unsupported codec: "
-                + codec.name());
+            throw new UnsupportedOperationException("Unsupported codec: " + codec.name());
         }
-
-        idGen = new IdGenerator(inputFn + "-" + splitStart);
     }
-    
-    private boolean nextRecordInAggregate() throws IOException, InterruptedException {
-        return super.nextKeyValue();
+
+    protected void parse(String fsname, final InputStream in) throws IOException {
+        loadModel(fsname, in);
     }
 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (zipIn == null || rdfIter == null) {
-            hasNext = false;
-            return false;
+        boolean stillReading = super.nextKeyValue();
+        if (stillReading) {
+            return true;
         }
 
-        if (rdfIter.hasNext()) {
-            hasNext = nextRecordInAggregate();
-            if (hasNext) {
-                return true;
-            }
-        }
-
+        // Ok, we've run out of data in the current file, are there more?
+        URI zipURI = file.toUri();
         if (codec.equals(CompressionCodec.ZIP)) {
             ZipInputStream zis = (ZipInputStream) zipIn;
 
-            // rdfIter has run out of statements.
-            // If there is next zipEntry, build a new model and iterate over it
             ByteArrayOutputStream baos;
             while ((currZipEntry = zis.getNextEntry()) != null) {
                 if (currZipEntry.getSize() == 0) {
@@ -140,30 +141,33 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
                 long size = currZipEntry.getSize();
                 if (size == -1) {
                     baos = new ByteArrayOutputStream();
+                    // if we don't know the size, assume it's big!
+                    initParser(zipURI.toASCIIString() + "/" + currZipEntry.getName(), INMEMORYTHRESHOLD);
                 } else {
                     baos = new ByteArrayOutputStream((int) size);
+                    initParser(zipURI.toASCIIString() + "/" + currZipEntry.getName(), size);
                 }
                 int nb;
                 while ((nb = zis.read(buf, 0, buf.length)) != -1) {
                     baos.write(buf, 0, nb);
                 }
 
-                loadModel(currZipEntry.getName(), new ByteArrayInputStream(baos.toByteArray()));
-                return nextRecordInAggregate();
+                parse(currZipEntry.getName(), new ByteArrayInputStream(baos.toByteArray()));
+                return super.nextKeyValue();
             }
             // end of zip
             if (iterator != null && iterator.hasNext()) {
                 close();
                 initStream(iterator.next());
-                return nextRecordInAggregate();
+                return super.nextKeyValue();
             }
-            return false;
 
-        } else if (codec.equals(CompressionCodec.GZIP)) {
-            return nextRecordInAggregate();
+            return false;
+        } else {
+            return false;
         }
-        return true;
     }
+
     public CompressedRDFReader() {
         super();
         compressed = true;
