@@ -145,8 +145,7 @@ public interface ConfigConstants {
         "mapreduce.marklogic.output_uriprefix";
     static final String CONF_OUTPUT_URI_SUFFIX = 
         "mapreduce.marklogic.output_urisuffix";
-    static final String CONF_OUTPUT_FILEPATH = 
-        "mapreduce.marklogic.output.filepath";
+    static final String CONF_OUTPUT_FILEPATH = "mapred.output.dir";
     static final String CONF_INPUT_FILE_PATTERN = 
         "mapreduce.marklogic.input.filepattern";
     static final String CONF_OUTPUT_FILENAME_AS_COLLECTION = 
