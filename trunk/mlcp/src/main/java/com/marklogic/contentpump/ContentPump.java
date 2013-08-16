@@ -178,8 +178,10 @@ public class ContentPump implements ConfigConstants {
                 // clean up sessions properly
                 conf.setBoolean("mapred.map.tasks.speculative.execution",
                                 false);
+            } else {
+                // set working directory
+                conf.set("mapred.working.dir", System.getProperty("user.dir"));
             }
-            
             job = command.createJob(conf, cmdline);
         } catch (Exception e) {
             // Print exception message.

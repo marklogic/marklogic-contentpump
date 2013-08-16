@@ -27,6 +27,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -693,9 +694,6 @@ public enum Command implements ConfigConstants {
             job.setOutputFormatClass(
                             outputType.getOutputFormatClass(cmdline));
             job.setOutputKeyClass(DocumentURI.class);
-            String path = conf.get(ConfigConstants.CONF_OUTPUT_FILEPATH);
-            // directory should not exist and it will be created
-            FileOutputFormat.setOutputPath(job, new Path(path));
             return job;
         }
 
@@ -710,7 +708,8 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
-                conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH, path);
+                Path outputDir = new Path(conf.get("mapred.working.dir"), path);
+                conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH, outputDir.toString());
             }
             if (cmdline.hasOption(OUTPUT_INDENTED)) {
                 String isIndented = cmdline.getOptionValue(OUTPUT_INDENTED);
