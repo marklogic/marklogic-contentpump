@@ -24,8 +24,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 
 import com.hp.hpl.jena.query.Dataset;
@@ -88,7 +86,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected PipedRDFIterator rdfIter;
     protected PipedRDFStream rdfInputStream;
-    protected ExecutorService executor;
     protected Lang lang;
 
     protected Hashtable<String, Vector> collectionHash = new Hashtable<String, Vector> ();
@@ -264,9 +261,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 rdfInputStream = new PipedTriplesStream(rdfIter);
             }
 
-            // PipedRDFStream and PipedRDFIterator need to be on different threads
-            executor = Executors.newSingleThreadExecutor();
-
             // Create a runnable for our parser thread
             Runnable parser = new Runnable() {
                 @Override
@@ -276,8 +270,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 }
             };
 
-            // Start the parser on another thread
-            executor.submit(parser);
+            // Run it
+            new Thread(parser).start();
         } else {
             if (dataset == null) {
                 RDFDataMgr.read(model, in, fsname, lang);
@@ -571,7 +565,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if (!rdfIter.hasNext() && collectionHash.size() == 0) {
             if(compressed) {
                 hasNext = false;
-                executor.shutdown();
                 return false;
             } else {
                 if (iterator!=null && iterator.hasNext()) {
@@ -579,7 +572,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     initStream(iterator.next());
                 } else {
                     hasNext = false;
-                    executor.shutdown();
                     return false;
                 }
             }
@@ -649,7 +641,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public boolean nextStreamingQuadKeyValueWithCollections() throws IOException, InterruptedException {
         if (!rdfIter.hasNext() && collectionHash.isEmpty()) {
             hasNext = false;
-            executor.shutdown();
             return false;
         }
 
