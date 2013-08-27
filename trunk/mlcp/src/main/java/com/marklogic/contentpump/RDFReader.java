@@ -17,7 +17,6 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
@@ -159,11 +158,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
                 MarkLogicConstants.DEFAULT_CONTENT_TYPE);
-        if (!conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false)) {
-            ContentType contentType = ContentType.valueOf(type);
-            Class<? extends Writable> valueClass = RDFWritable.class;
-            value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
-        }
+        ContentType contentType = ContentType.valueOf(type);
+        Class<? extends Writable> valueClass = RDFWritable.class;
+        value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
         encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
 
         // ===================
@@ -214,7 +211,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         try {
             MessageDigest digest = MessageDigest.getInstance(HASHALGORITHM);
-            LOG.info("Hashing: " + fsname);
             inputFn = (new HexBinaryAdapter()).marshal(digest.digest(fsname.getBytes()));
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Could not instantiate hash function for " + HASHALGORITHM);
@@ -252,8 +248,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         } else {
             LOG.info("Streamed RDF processing (" + size + " >= " + INMEMORYTHRESHOLD + ")");
         }
-
-        idGen = new IdGenerator(inputFn + "-" + splitStart);
     }
 
     protected void parse(String fsname) throws IOException {
