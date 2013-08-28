@@ -46,6 +46,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RiotReader;
+import org.apache.jena.riot.lang.LangRIOT;
 import org.apache.jena.riot.lang.PipedQuadsStream;
 import org.apache.jena.riot.lang.PipedRDFIterator;
 import org.apache.jena.riot.lang.PipedRDFStream;
@@ -58,6 +60,11 @@ import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.MarkLogicConstants;
+import org.apache.jena.riot.system.ErrorHandler;
+import org.apache.jena.riot.system.ParserProfile;
+import org.apache.jena.riot.system.RiotLib;
+import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFLib;
 
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
@@ -106,6 +113,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long pos;
     protected long end;
     protected boolean compressed;
+
+    private static final Object jenaLock = new Object();
     
     public RDFReader() {
         Random random = new Random();
@@ -234,16 +243,18 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             lang = Lang.RDFXML; // We have to default to something!
         }
 
-        if (size < INMEMORYTHRESHOLD) {
-            if (lang == Lang.NQUADS) {
-                dataset = DatasetFactory.createMem();
-                model = dataset.getDefaultModel();
+        synchronized (jenaLock) {
+            if (size < INMEMORYTHRESHOLD) {
+                if (lang == Lang.NQUADS) {
+                    dataset = DatasetFactory.createMem();
+                    model = dataset.getDefaultModel();
+                } else {
+                    model = ModelFactory.createDefaultModel();
+                }
+                //LOG.info("In-memory RDF processing (" + size + " < " + INMEMORYTHRESHOLD + ")");
             } else {
-                model = ModelFactory.createDefaultModel();
+                //LOG.info("Streamed RDF processing (" + size + " >= " + INMEMORYTHRESHOLD + ")");
             }
-            LOG.info("In-memory RDF processing (" + size + " < " + INMEMORYTHRESHOLD + ")");
-        } else {
-            LOG.info("Streamed RDF processing (" + size + " >= " + INMEMORYTHRESHOLD + ")");
         }
     }
 
@@ -265,8 +276,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             Runnable parser = new Runnable() {
                 @Override
                 public void run() {
-                    // Call the parsing process.
-                    RDFDataMgr.parse(rdfInputStream, in, fsname, lang, null);
+                    LangRIOT parser = RiotReader.createParser(in, lang, fsname, rdfInputStream);
+                    ErrorHandler handler = new ParserErrorHandler(fsname);
+                    ParserProfile prof = RiotLib.profile(lang, fsname, handler);
+                    parser.setProfile(prof);
+                    parser.parse();
                 }
             };
 
@@ -274,9 +288,19 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             new Thread(parser).start();
         } else {
             if (dataset == null) {
-                RDFDataMgr.read(model, in, fsname, lang);
+                StreamRDF dest = StreamRDFLib.graph(model.getGraph());
+                LangRIOT parser = RiotReader.createParser(in, lang, fsname, dest);
+                ErrorHandler handler = new ParserErrorHandler(fsname);
+                ParserProfile prof = RiotLib.profile(lang, fsname, handler);
+                parser.setProfile(prof);
+                parser.parse();
             } else {
-                RDFDataMgr.read(dataset, in, fsname, lang);
+                StreamRDF dest = StreamRDFLib.dataset(dataset.asDatasetGraph());
+                LangRIOT parser = RiotReader.createParser(in, lang, fsname, dest);
+                ErrorHandler handler = new ParserErrorHandler(fsname);
+                ParserProfile prof = RiotLib.profile(lang, fsname, handler);
+                parser.setProfile(prof);
+                parser.parse();
                 graphNameIter = dataset.listNames();
             }
             in.close();
@@ -749,5 +773,39 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         return collection;
+    }
+
+    private class ParserErrorHandler implements ErrorHandler {
+        String inputfn = "";
+
+        public ParserErrorHandler(String inputfn) {
+            this.inputfn = inputfn;
+        }
+
+        private String formatMessage(String message, long line, long col) {
+            String msg = inputfn + ":";
+            if (line >= 0) {
+                msg += line;
+            }
+            if (line >= 0 && col >= 0) {
+                msg += ":" + col;
+            }
+            return msg += " " + message;
+        }
+
+        @Override
+        public void warning(String message, long line, long col) {
+            LOG.warn(formatMessage(message, line, col));
+        }
+
+        @Override
+        public void error(String message, long line, long col) {
+            LOG.error(formatMessage(message, line, col));
+        }
+
+        @Override
+        public void fatal(String message, long line, long col) {
+            LOG.fatal(formatMessage(message, line, col));
+        }
     }
 }
