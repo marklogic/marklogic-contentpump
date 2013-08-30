@@ -227,9 +227,6 @@ public class DelimitedTextReader<VALUEIN> extends
             StringBuilder sb = new StringBuilder();
             sb.append(rootStart);
             for (int i = 0; i < fields.length; i++) {
-                if (!XMLChar.isValidName(fields[i])) {
-                    fields[i] = getValidName(fields[i]);
-                }
                 if (!generateId && uriId == i) {
                     if (values[i] == null || values[i].equals("")) {
                         //TODO log file name and line number
