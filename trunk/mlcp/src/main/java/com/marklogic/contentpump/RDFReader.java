@@ -103,6 +103,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long randomValue;
     protected long milliSecs;
 
+    protected String origFn;
     protected String inputFn; // Tracks input filename even in the CompressedRDFReader case
     protected long splitStart;
     protected long start;
@@ -211,6 +212,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
         }
 
+        origFn = fsname;
         inputFn = Long.toHexString(fuse(scramble(random.nextLong()),fuse(scramble(milliSecs),random.nextLong())));
         idGen = new IdGenerator(inputFn + "-" + splitStart);
 
@@ -467,7 +469,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         setKey(idGen.incrementAndGet());
-        write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
+        write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>\n");
+        write("<sem:origin>" + origFn + "</sem:origin>\n");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && statementIter.hasNext()) {
             Statement stmt = statementIter.nextStatement();
@@ -475,7 +478,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             write(subject(stmt.getSubject()));
             write(predicate(stmt.getPredicate()));
             write(object(stmt.getObject()));
-            write("</sem:triple>");
+            write("</sem:triple>\n");
             max--;
         }
         write("</sem:triples>\n");
