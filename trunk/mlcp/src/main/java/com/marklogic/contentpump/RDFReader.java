@@ -17,8 +17,6 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Calendar;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -45,7 +43,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RiotReader;
 import org.apache.jena.riot.lang.LangRIOT;
 import org.apache.jena.riot.lang.PipedQuadsStream;
@@ -65,8 +62,6 @@ import org.apache.jena.riot.system.ParserProfile;
 import org.apache.jena.riot.system.RiotLib;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
-
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
 /**
  * Reader for RDF quads/triples. Uses Jena library to parse RDF and sends triples
@@ -104,6 +99,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected boolean hasNext = true;
     protected IdGenerator idGen;
 
+    protected Random random;
     protected long randomValue;
     protected long milliSecs;
 
@@ -117,7 +113,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private static final Object jenaLock = new Object();
     
     public RDFReader() {
-        Random random = new Random();
+        random = new Random();
         randomValue = random.nextLong();
         Calendar cal = Calendar.getInstance();
         milliSecs = cal.getTimeInMillis();
@@ -215,13 +211,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
         }
 
-        try {
-            MessageDigest digest = MessageDigest.getInstance(HASHALGORITHM);
-            inputFn = (new HexBinaryAdapter()).marshal(digest.digest(fsname.getBytes()));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Could not instantiate hash function for " + HASHALGORITHM);
-        }
-
+        inputFn = Long.toHexString(fuse(scramble(random.nextLong()),fuse(scramble(milliSecs),random.nextLong())));
         idGen = new IdGenerator(inputFn + "-" + splitStart);
 
         lang = null;
