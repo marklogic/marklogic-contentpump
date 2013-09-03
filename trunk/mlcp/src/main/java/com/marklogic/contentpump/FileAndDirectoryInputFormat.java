@@ -84,8 +84,7 @@ FileInputFormat<K, V> {
             FileSystem fs = file.getFileSystem(conf);
             FileStatus status = fs.getFileStatus(file);
             if (status.isDir()) {
-                FileStatus[] children = 
-                                fs.listStatus(status.getPath(), inputFilter);
+                FileStatus[] children = fs.listStatus(file, inputFilter);
                 if(children.length + count < SPLIT_COUNT_LIMIT) {
                     splits.remove(count);
                     for (FileStatus stat : children) {
