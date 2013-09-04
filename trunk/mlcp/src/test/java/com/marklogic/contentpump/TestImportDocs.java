@@ -262,6 +262,15 @@ public class TestImportDocs {
     }
     
     @Test
+    public void testImportXMLExpectFailure() throws Exception {
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("-1", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
     public void testImportXMLOutputDirNonfast() throws Exception {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
