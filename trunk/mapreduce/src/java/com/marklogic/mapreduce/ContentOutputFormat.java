@@ -100,6 +100,8 @@ public class ContentOutputFormat<VALUEOUT> extends
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;
+    /** whether stats-based policy allows fastload **/
+    protected boolean allowFastLoad = true;
     protected AssignmentPolicy.Kind plcyKind;
     @Override
     public void checkOutputSpecs(Configuration conf, ContentSource cs) 
@@ -273,8 +275,10 @@ public class ContentOutputFormat<VALUEOUT> extends
                 if(conf.get(OUTPUT_PARTITION)== null && isRange) {
                     LOG.warn("output_partition is not set for range policy, fastload mode is off");
                     fastLoad = false;
+                } else if (isRange) {
+                    fastLoad = allowFastLoad;
                 } else {
-                    fastLoad = true;
+                	fastLoad = true;
                 }
             } else {
                 //neither fastload nor output_dir is set
@@ -392,10 +396,10 @@ public class ContentOutputFormat<VALUEOUT> extends
         AssignmentPolicy.Kind kind = AssignmentPolicy.Kind.valueOf(s
             .toUpperCase());
         item = result.next();
+        allowFastLoad = Boolean.parseBoolean(item.asString());
         if ((kind == AssignmentPolicy.Kind.STATISTICAL 
             || kind == AssignmentPolicy.Kind.RANGE)
-            && !Boolean.parseBoolean(item.asString()) 
-            && conf.getBoolean(OUTPUT_FAST_LOAD, false)) {
+            && !allowFastLoad && conf.getBoolean(OUTPUT_FAST_LOAD, false)) {
             throw new IOException(
                 "Fastload can't be used: rebalancer is on and "
                     + "forests are imbalanced in a database with "
