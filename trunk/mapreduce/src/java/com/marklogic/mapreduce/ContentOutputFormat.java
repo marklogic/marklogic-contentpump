@@ -394,10 +394,12 @@ public class ContentOutputFormat<VALUEOUT> extends
         item = result.next();
         if ((kind == AssignmentPolicy.Kind.STATISTICAL 
             || kind == AssignmentPolicy.Kind.RANGE)
-            && Boolean.parseBoolean(item.asString()) && fastLoad) {
+            && !Boolean.parseBoolean(item.asString()) 
+            && conf.getBoolean(OUTPUT_FAST_LOAD, false)) {
             throw new IOException(
-                "Fastload can't be used:"
-                    + "rebalancer is on and assignment policy is statistical or range");
+                "Fastload can't be used: rebalancer is on and "
+                    + "forests are imbalanced in a database with "
+                    + "statistics-based assignment policy");
         }
         return kind;
     }
