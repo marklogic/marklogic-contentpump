@@ -172,11 +172,7 @@ public class CompressedDocumentReader<VALUEIN> extends
             baos.write(buf, 0, size);
         }
         if (value instanceof Text) {
-            if (encoding == null) {
-                ((Text) value).set(baos.toString());
-            } else {
-                ((Text) value).set(baos.toString(encoding));
-            }
+            ((Text) value).set(baos.toString(encoding));
         } else if (value instanceof BytesWritable) {
             if (batchSize > 1) {
                 // Copy data since XCC won't do it when Content is created.
