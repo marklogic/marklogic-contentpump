@@ -53,6 +53,15 @@ public class MarkLogicDocument implements Writable {
         "Cannot convert binary data to Text.");
     }
     
+    public String getContentAsString() throws UnsupportedEncodingException {
+        if (contentType == ContentType.XML || 
+            contentType == ContentType.TEXT) {
+            return new String(content, "UTF-8");         
+        }
+        throw new UnsupportedOperationException(
+        "Cannot convert binary data to Text.");
+    }
+    
     public byte[] getContentAsByteArray() {
         return content;
     }
