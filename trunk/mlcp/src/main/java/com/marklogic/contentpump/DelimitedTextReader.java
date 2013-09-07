@@ -43,7 +43,7 @@ import com.sun.org.apache.xml.internal.utils.XMLChar;
 public class DelimitedTextReader<VALUEIN> extends
     ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(DelimitedTextReader.class);
-    protected static final char encapsulator = '"';
+    public static final char encapsulator = '"';
     static final String DEFAULT_ROOT_NAME = "root";
     /**
      * header of delimited text
@@ -95,12 +95,8 @@ public class DelimitedTextReader<VALUEIN> extends
         configFileNameAsCollection(conf, file);
         
         FSDataInputStream fileIn = fs.open(file);
-        if (encoding == null) {
-            instream = new InputStreamReader(fileIn);
-        } else {
-            instream = new InputStreamReader(fileIn, encoding);
-            //String will be converted and read as UTF-8 String
-        }
+        instream = new InputStreamReader(fileIn, encoding);
+
         bytesRead = 0;
         fileLen = inSplit.getLength();
         if (uriName == null) {
@@ -161,6 +157,7 @@ public class DelimitedTextReader<VALUEIN> extends
             if (fields == null) {
                 fields = values;
                 boolean found = generateId || uriId == 0;
+                //TODO make this block into util and reuse it in inputformat
                 for (int i = 0; i < fields.length && !found; i++) {
                     // Oracle jdk bug 4508058: UTF-8 encoding does not recognize
                     // initial BOM

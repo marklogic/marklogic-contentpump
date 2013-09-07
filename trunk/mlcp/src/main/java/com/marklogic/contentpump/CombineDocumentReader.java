@@ -95,11 +95,7 @@ extends ImportRecordReader<VALUEIN> {
                 }
                 fileIn.readFully(buf);
                 if (value instanceof Text) {
-                    if (encoding == null) {
-                        ((Text) value).set(new String(buf));
-                    } else {
-                        ((Text) value).set(new String(buf, encoding));
-                    }
+                    ((Text) value).set(new String(buf, encoding));
                 } else if (value instanceof BytesWritable) {
                     if (batchSize > 1) {
                         // Copy data since XCC won't do it when Content is 

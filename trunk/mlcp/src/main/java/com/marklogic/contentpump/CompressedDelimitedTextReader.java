@@ -100,11 +100,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             if (codec.equals(CompressionCodec.ZIP)) {
                 return nextKeyValueInZip();
             } else if (codec.equals(CompressionCodec.GZIP)) {
-                if (encoding == null) {
-                    instream = new InputStreamReader(zipIn);
-                } else {
-                    instream = new InputStreamReader(zipIn, encoding);
-                }
+                instream = new InputStreamReader(zipIn, encoding);
                 parser = new CSVParser(instream, new CSVStrategy(delimiter,
                     encapsulator, CSVStrategy.COMMENTS_DISABLED,
                     CSVStrategy.ESCAPE_DISABLED, true, true, false, true));

@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import com.marklogic.contentpump.utilities.CommandlineOption;
 import org.apache.commons.cli.CommandLine;
@@ -526,8 +527,14 @@ public enum Command implements ConfigConstants {
                 }
             }
             if (cmdline.hasOption(CONTENT_ENCODING)) {
-                String arg = cmdline.getOptionValue(CONTENT_ENCODING);
+                String arg = cmdline.getOptionValue(CONTENT_ENCODING).toUpperCase();
+                if("SYSTEM".equals(arg)) {
+                    arg = Charset.defaultCharset().name();
+                } 
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
+            } else {
+                //default is UTF-8
+                conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, "UTF-8");
             }
             if (cmdline.hasOption(THREADS_PER_SPLIT)) {
                 String arg = cmdline.getOptionValue(THREADS_PER_SPLIT);
@@ -653,6 +660,13 @@ public enum Command implements ConfigConstants {
                         "fetch data from the source database")
                 .create(SNAPSHOT);
             options.addOption(snapshot);
+            Option encoding = OptionBuilder
+                .withArgName("encoding")
+                .hasOptionalArg()
+                .withDescription(
+                    "The charset encoding to be used by the MarkLogic when "
+                        + "exporting documents").create(CONTENT_ENCODING);
+            options.addOption(encoding);
         }
 
         @Override
@@ -734,6 +748,16 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
                 conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
+            }
+            if (cmdline.hasOption(CONTENT_ENCODING)) {
+                String arg = cmdline.getOptionValue(CONTENT_ENCODING).toUpperCase();
+                if("SYSTEM".equals(arg)) {
+                    arg = Charset.defaultCharset().name();
+                } 
+                conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
+            } else {
+                //default is UTF-8
+                conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, "UTF-8");
             }
         }
 
