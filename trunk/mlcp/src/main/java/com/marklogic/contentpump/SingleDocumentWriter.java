@@ -20,7 +20,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.logging.Log;
@@ -36,6 +35,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.marklogic.contentpump.utilities.URIUtil;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
 /**
@@ -51,10 +51,11 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
     
     Path dir;
     Configuration conf;
-    
+    String encoding;
     public SingleDocumentWriter(Path path, Configuration conf) {
         dir = path;
         this.conf = conf;
+        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Default charset: " + Charset.defaultCharset());
         }
@@ -95,8 +96,15 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 os.write(content.getContentAsByteArray());
             } else if (ContentType.TEXT.equals(type)
                 || ContentType.XML.equals(type)) {
-                Text t = content.getContentAsText();
+                if(encoding.equals("UTF-8")) {
+                    Text t = content.getContentAsText();
+                    os.write(t.getBytes(), 0, t.getLength());
+                } else {
+                    String t = content.getContentAsString();
+                    os.write(t.getBytes(encoding));
+                }
                 if (LOG.isTraceEnabled()) {
+                	Text t = content.getContentAsText();
                     LOG.trace(t);
                     byte[] bytes = content.getContentAsByteArray();
                     StringBuilder sb = new StringBuilder();
@@ -106,7 +114,6 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                     }
                     LOG.trace(sb);
                 }
-                os.write(t.getBytes(), 0, t.getLength());
             } else {
                 LOG.warn("Skipping " + uri + ".  Unsupported content type: "
                     + type.name());

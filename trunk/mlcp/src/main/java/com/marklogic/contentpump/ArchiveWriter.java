@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.marklogic.contentpump.utilities.URIUtil;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 
 /**
@@ -57,11 +58,13 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
      * is exporting docs
      */
     private boolean isExportDoc;
-
+    private String encoding;
+    
     public ArchiveWriter(Path path, TaskAttemptContext context) {
         dir = path.toString();
         this.context = context;
         Configuration conf = context.getConfiguration();
+        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
         String type = conf.get(ConfigConstants.CONF_OUTPUT_TYPE, 
                 ConfigConstants.DEFAULT_OUTPUT_TYPE);
         ExportOutputType outputType = ExportOutputType.valueOf(
@@ -126,7 +129,7 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             if (!isExportDoc) {
                 binaryArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
                     ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
-                        .getBytes());
+                        .getBytes(encoding));
             }
             binaryArchive.write(zipEntryName, 
                     content.getContentAsByteArray());
@@ -137,10 +140,10 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             if (!isExportDoc) {
                 txtArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
                     ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
-                        .getBytes());
+                        .getBytes(encoding));
             }
             txtArchive.write(zipEntryName, 
-                    content.getContentAsText().getBytes());
+                    content.getContentAsString().getBytes(encoding));
         } else if(ContentType.XML.equals(type)) {
             if(xmlArchive == null) {
                 xmlArchive = new OutputArchive(dst, conf);
@@ -149,18 +152,18 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 if (((MarkLogicDocumentWithMeta) content).getMeta().isNakedProps) {
                     xmlArchive.write(zipEntryName + DocumentMetadata.NAKED,
                         ((MarkLogicDocumentWithMeta) content).getMeta()
-                            .toXML().getBytes());
+                            .toXML().getBytes(encoding));
                 } else {
                     xmlArchive.write(
                         zipEntryName + DocumentMetadata.EXTENSION,
                         ((MarkLogicDocumentWithMeta) content).getMeta()
-                            .toXML().getBytes());
-                    xmlArchive.write(zipEntryName, content.getContentAsText()
-                        .getBytes());
+                            .toXML().getBytes(encoding));
+                    xmlArchive.write(zipEntryName, content.getContentAsString()
+                        .getBytes(encoding));
                 }
             } else {
-                xmlArchive.write(zipEntryName, content.getContentAsText()
-                    .getBytes());
+                xmlArchive.write(zipEntryName, content.getContentAsString()
+                    .getBytes(encoding));
             }
         } else {
             throw new IOException ("incorrect type: " + type);
