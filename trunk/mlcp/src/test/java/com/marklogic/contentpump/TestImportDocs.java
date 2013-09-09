@@ -640,6 +640,78 @@ public class TestImportDocs {
         assertTrue(str.trim().equals(key));
     }
     
+    @Test
+    public void testImportTxtUTF8() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.enc"
+            + " -thread_count 1 -mode local -document_type TEXT"
+            + " -output_collections test,ML";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getOnlyDocs("xcc://admin:admin@localhost:5275");
+
+        assertTrue(result.hasNext());
+        InputStream is = result.next().asInputStream();
+        //data in server is UTF-8 encoded
+        String str = getResult(is, "UTF-8");
+
+        Utils.closeSession();
+
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportText#testImportTxtUTF8.txt");
+        assertTrue(str.trim().equals(key));
+    }
+    
+    @Test
+    public void testImportMixedTxtUTF8() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.txt"
+            + " -thread_count 1 -mode local"
+            + " -output_collections test,ML";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getOnlyDocs("xcc://admin:admin@localhost:5275");
+
+        assertTrue(result.hasNext());
+        InputStream is = result.next().asInputStream();
+        //data in server is UTF-8 encoded
+        String str = getResult(is, "UTF-8");
+
+        Utils.closeSession();
+
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportText#testImportTxtUTF8.txt");
+        assertTrue(str.trim().equals(key));
+    }
+    
     private String getResult(InputStream is, String encoding) throws IOException {
         return getResultSB(is,encoding).toString();
     }
