@@ -191,6 +191,14 @@ public class Utils {
         bw.close();
     }
     
+    public static void writeFile(String filename, String str)
+        throws IOException {
+        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(
+            filename)));
+        bw.write(str);
+        bw.close();
+    }
+    
     public static void deleteDirectory(File f) throws IOException {
         if (!f.exists()) {
             return;
