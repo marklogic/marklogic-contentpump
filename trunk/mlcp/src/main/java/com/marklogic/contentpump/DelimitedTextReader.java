@@ -154,6 +154,7 @@ public class DelimitedTextReader<VALUEIN> extends
                     }
                 }
             }
+            boolean checked = false;
             if (fields == null) {
                 fields = values;
                 boolean found = generateId || uriId == 0;
@@ -184,6 +185,7 @@ public class DelimitedTextReader<VALUEIN> extends
                     if (fields[i].equals(uriName)) {
                         uriId = i;
                         found = true;
+                        checked = true;
                         break;
                     }
                 }
@@ -224,6 +226,9 @@ public class DelimitedTextReader<VALUEIN> extends
             StringBuilder sb = new StringBuilder();
             sb.append(rootStart);
             for (int i = 0; i < fields.length; i++) {
+                if (!checked && !XMLChar.isValidName(fields[i])) {
+                    fields[i] = getValidName(fields[i]);
+                }
                 if (!generateId && uriId == i) {
                     if (values[i] == null || values[i].equals("")) {
                         //TODO log file name and line number
