@@ -157,6 +157,18 @@ public abstract class ImportRecordReader<VALUEIN> extends
             return null;
         }
     }
+    
+    protected String makeURIForZipEntry(Path zipFile, String val) {  
+        Path path = new Path(zipFile, val);
+        val = URIUtil.applyUriReplace(path.toUri().getPath(), conf);
+        try {
+            URI uri = new URI(null, null, null, 0, val, null, null);
+            return uri.toString();
+        } catch (URISyntaxException e) {
+            LOG.warn("Error parsing value as URI, skipping " + val, e);
+            return null;
+        }
+    }
 
     @Override
     public abstract boolean nextKeyValue() throws IOException,

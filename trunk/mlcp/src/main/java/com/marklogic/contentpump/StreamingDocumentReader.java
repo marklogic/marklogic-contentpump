@@ -43,7 +43,7 @@ CombineDocumentReader<StreamLocator> {
             Path path = split.getPath();
             String uri = makeURIFromPath(path);
             if (uri != null) {
-                setKey(makeURIFromPath(path));
+                setKey(uri);
             } else {
                 key = null;
                 return true;
