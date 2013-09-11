@@ -1,1 +1,1 @@
-ML-utf-16be.encMarkLogic is going IPO!!!
+/space/workspace/xcc/mlcp/src/test/resources/encoding/ML-utf-16be.zip/ML-utf-16be.encMarkLogic is going IPO!!!

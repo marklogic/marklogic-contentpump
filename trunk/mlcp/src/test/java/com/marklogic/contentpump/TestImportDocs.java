@@ -399,7 +399,7 @@ public class TestImportDocs {
             "xcc://admin:admin@localhost:5275",
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
-        assertEquals("93", result.next().asString());
+        assertEquals("186", result.next().asString());
         Utils.closeSession();
     }
     
@@ -430,7 +430,7 @@ public class TestImportDocs {
             "xcc://admin:admin@localhost:5275",
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
-        assertEquals("93", result.next().asString());
+        assertEquals("186", result.next().asString());
         Utils.closeSession();
     }
     
@@ -462,7 +462,7 @@ public class TestImportDocs {
             "xcc://admin:admin@localhost:5275",
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
-        assertEquals("93", result.next().asString());
+        assertEquals("186", result.next().asString());
         Utils.closeSession();
     }
     
@@ -493,7 +493,7 @@ public class TestImportDocs {
             "xcc://admin:admin@localhost:5275",
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
-        assertEquals("93", result.next().asString());
+        assertEquals("186", result.next().asString());
         Utils.closeSession();
     }
     
@@ -528,7 +528,7 @@ public class TestImportDocs {
             sb.append(result.next().asString());
         }
         Utils.closeSession();
-        
+
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportText#testImportDocsZipUTF16BE.txt");
         assertTrue(sb.toString().trim().equals(key));
