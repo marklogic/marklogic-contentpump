@@ -133,8 +133,6 @@ public class OutputArchive {
             newOutputStream();
         }
 
-        // by checking outputBytes first, we should avoid infinite loops -
-        // at the cost of fatal exceptions.
         if (currentFileBytes > 0
             && currentFileBytes + total > Integer.MAX_VALUE) {
             LOG.warn("too many bytes in current package");
@@ -145,10 +143,6 @@ public class OutputArchive {
             outputStream.putNextEntry(entry);
             outputStream.write(bytes);
             outputStream.closeEntry();
-            /*
-             * // Flush once in a while to see if this frees up memory if
-             * (currentEntries % 10 == 0) { outputStream.flush(); }
-             */
         } catch (ZipException e) {
             LOG.warn("skipping duplicate entry: " + entry.getName());
             return 0;

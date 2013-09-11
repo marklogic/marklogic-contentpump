@@ -127,7 +127,7 @@ public class CompressedDocumentReader<VALUEIN> extends
             ZipInputStream zis = (ZipInputStream) zipIn;
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry != null && zipEntry.getSize() != 0) {
-                    String uri = getEncodedURI(zipEntry.getName());
+                    String uri = makeURIForZipEntry(file, zipEntry.getName());
                     if (uri != null) {
                         setKey(uri);
                         setValue(zipEntry.getSize());
