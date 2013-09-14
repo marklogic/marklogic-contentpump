@@ -22,9 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
@@ -33,9 +31,6 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
-import com.marklogic.mapreduce.utilities.AssignmentManager;
-import com.marklogic.mapreduce.utilities.AssignmentPolicy;
-import com.marklogic.mapreduce.utilities.ForestInfo;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.AdhocQuery;
@@ -140,11 +135,17 @@ implements MarkLogicConstants, Configurable {
         }
     }
     
-    protected TextArrayWritable queryHosts(ContentSource cs)
+    protected TextArrayWritable queryHosts(ContentSource cs) 
+    		throws IOException {
+    	return queryHosts(cs, null, null);
+    }
+    
+   
+    // Query for a list a hosts, replacing any host name matching hostName 
+    // with outputHost
+    protected TextArrayWritable queryHosts(ContentSource cs, String matchHost,
+    		String replaceHost)
         throws IOException {
-        if( conf.get(OUTPUT_PARTITION)!= null) {
-            LOG.warn("output_partition is ommited in non-fastload mode");
-        }
         Session session = null;
         ResultSequence result = null;
         try {
@@ -162,8 +163,12 @@ implements MarkLogicConstants, Configurable {
                 // skip the forestid in case MLCP 7 runs against ML6
                 if(item.asString().matches("-?\\d+"))
                     continue;
-                Text host = new Text(item.asString());
-                hosts.add(host);
+                String host = item.asString();
+                if (matchHost != null && host.equals(matchHost)) {
+                	hosts.add(new Text(replaceHost));
+                } else {
+                    hosts.add(new Text(host));
+                }
             }
             return new TextArrayWritable(hosts.toArray(new Text[hosts.size()]));
         } catch (RequestException e) {
