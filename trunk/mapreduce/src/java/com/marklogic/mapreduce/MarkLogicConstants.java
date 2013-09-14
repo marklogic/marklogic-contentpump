@@ -611,7 +611,14 @@ public interface MarkLogicConstants {
      */
     static final String OUTPUT_NAMESPACE = 
         "mapreduce.marklogic.output.node.namespace";
-    
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, indicates whether the job is running in local or 
+     * distributed mode.
+     */
+    static final String EXECUTION_MODE = "mapreduce.marklogic.mode";
+    static final String MODE_DISTRIBUTED = "distributed";
+    static final String MODE_LOCAL = "local";
     /** 
      * The default maximum split size for input splits, used if
      * {@link #MAX_SPLIT_SIZE input.maxsplitsize} is not specified.
