@@ -126,6 +126,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if(rdfIter!=null) {
             rdfIter.close();
         }
+        model = null;
+        dataset = null;
     }
 
     @Override
@@ -285,14 +287,22 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 ErrorHandler handler = new ParserErrorHandler(fsname);
                 ParserProfile prof = RiotLib.profile(lang, fsname, handler);
                 parser.setProfile(prof);
-                parser.parse();
+                try {
+                    parser.parse();
+                } catch (Throwable e) {
+                    LOG.error("Parse error in RDF document; processing partial document");
+                }
             } else {
                 StreamRDF dest = StreamRDFLib.dataset(dataset.asDatasetGraph());
                 LangRIOT parser = RiotReader.createParser(in, lang, fsname, dest);
                 ErrorHandler handler = new ParserErrorHandler(fsname);
                 ParserProfile prof = RiotLib.profile(lang, fsname, handler);
                 parser.setProfile(prof);
-                parser.parse();
+                try {
+                    parser.parse();
+                } catch (Throwable e) {
+                    LOG.error("Parse error in RDF document; processing partial document");
+                }
                 graphNameIter = dataset.listNames();
             }
             in.close();
