@@ -81,7 +81,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long INMEMORYTHRESHOLD = 64 * 1024 * 1000; // 64Mb
 
     protected Dataset dataset = null;
-    protected Model model = null;
     protected StmtIterator statementIter = null;
     protected Iterator<String> graphNameIter = null;
     protected String collection = null;
@@ -126,7 +125,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if(rdfIter!=null) {
             rdfIter.close();
         }
-        model = null;
         dataset = null;
     }
 
@@ -195,7 +193,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         end = 1;
 
         dataset = null;
-        model = null;
         statementIter = null;
         graphNameIter = null;
 
@@ -239,12 +236,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         synchronized (jenaLock) {
             if (size < INMEMORYTHRESHOLD) {
-                if (lang == Lang.NQUADS) {
-                    dataset = DatasetFactory.createMem();
-                    model = dataset.getDefaultModel();
-                } else {
-                    model = ModelFactory.createDefaultModel();
-                }
+                dataset = DatasetFactory.createMem();
                 //LOG.info("In-memory RDF processing (" + size + " < " + INMEMORYTHRESHOLD + ")");
             } else {
                 //LOG.info("Streamed RDF processing (" + size + " >= " + INMEMORYTHRESHOLD + ")");
@@ -257,8 +249,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected void loadModel(final String fsname, final InputStream in) throws IOException {
-        if (model == null) {
-            if (lang == Lang.NQUADS) {
+        if (dataset == null) {
+            if (lang == Lang.NQUADS || lang == Lang.TRIG) {
                 rdfIter = new PipedRDFIterator<Quad>();
                 rdfInputStream = new PipedQuadsStream(rdfIter);
             } else {
@@ -281,32 +273,19 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             // Run it
             new Thread(parser).start();
         } else {
-            if (dataset == null) {
-                StreamRDF dest = StreamRDFLib.graph(model.getGraph());
-                LangRIOT parser = RiotReader.createParser(in, lang, fsname, dest);
-                ErrorHandler handler = new ParserErrorHandler(fsname);
-                ParserProfile prof = RiotLib.profile(lang, fsname, handler);
-                parser.setProfile(prof);
-                try {
-                    parser.parse();
-                } catch (Throwable e) {
-                    LOG.error("Parse error in RDF document; processing partial document");
-                }
-            } else {
-                StreamRDF dest = StreamRDFLib.dataset(dataset.asDatasetGraph());
-                LangRIOT parser = RiotReader.createParser(in, lang, fsname, dest);
-                ErrorHandler handler = new ParserErrorHandler(fsname);
-                ParserProfile prof = RiotLib.profile(lang, fsname, handler);
-                parser.setProfile(prof);
-                try {
-                    parser.parse();
-                } catch (Throwable e) {
-                    LOG.error("Parse error in RDF document; processing partial document");
-                }
-                graphNameIter = dataset.listNames();
+            StreamRDF dest = StreamRDFLib.dataset(dataset.asDatasetGraph());
+            LangRIOT parser = RiotReader.createParser(in, lang, fsname, dest);
+            ErrorHandler handler = new ParserErrorHandler(fsname);
+            ParserProfile prof = RiotLib.profile(lang, fsname, handler);
+            parser.setProfile(prof);
+            try {
+                parser.parse();
+            } catch (Throwable e) {
+                LOG.error("Parse error in RDF document; processing partial document");
             }
             in.close();
-            statementIter = model.listStatements();
+            graphNameIter = dataset.listNames();
+            statementIter = dataset.getDefaultModel().listStatements();
         }
 
         // We don't know how many statements are in the model; we could count them, but that's
@@ -465,7 +444,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextInMemoryKeyValue() throws IOException, InterruptedException {
-        if (lang == Lang.NQUADS) {
+        if (lang == Lang.NQUADS || lang == Lang.TRIG) {
             return nextInMemoryQuadKeyValue();
         } else {
             return nextInMemoryTripleKeyValue();
@@ -513,8 +492,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         while (!statementIter.hasNext()) {
             if (graphNameIter.hasNext()) {
                 collection = graphNameIter.next();
-                model = dataset.getNamedModel(collection);
-                statementIter = model.listStatements();
+                statementIter = dataset.getNamedModel(collection).listStatements();
             } else {
                 hasNext = false;
                 return false;
@@ -547,8 +525,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         while (!statementIter.hasNext()) {
             if (graphNameIter.hasNext()) {
                 collection = graphNameIter.next();
-                model = dataset.getNamedModel(collection);
-                statementIter = model.listStatements();
+                statementIter = dataset.getNamedModel(collection).listStatements();
             } else {
                 hasNext = false;
                 return false;
@@ -572,8 +549,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 moreTriples = true; // counter-intuitive; get out of the loop if we really are finished
                 if (graphNameIter.hasNext()) {
                     collection = graphNameIter.next();
-                    model = dataset.getNamedModel(collection);
-                    statementIter = model.listStatements();
+                    statementIter = dataset.getNamedModel(collection).listStatements();
                     moreTriples = statementIter.hasNext();
                 }
             }
@@ -604,7 +580,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
         }
 
-        if (lang == Lang.NQUADS) {
+        if (lang == Lang.NQUADS || lang == Lang.TRIG) {
             return nextStramingQuadKeyValue();
         } else {
             return nextStreamingTripleKeyValue();
@@ -676,7 +652,13 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         while (!overflow && rdfIter.hasNext()) {
             Quad quad = (Quad) rdfIter.next();
 
-            collection = resource(quad.getGraph());
+            Node graph = quad.getGraph();
+            if (graph == null) {
+                collection = "http://marklogic.com/semantics#default-graph";
+            } else {
+                collection = resource(quad.getGraph());
+            }
+
             String triple = subject(quad.getSubject())
                     + predicate(quad.getPredicate())
                     + object(quad.getObject());
