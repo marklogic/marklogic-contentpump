@@ -81,6 +81,9 @@ public class MarkLogicDocument implements Writable {
             if (item.getValueType() == ValueType.DOCUMENT) {
                 content = item.asString().getBytes("UTF-8");
                 contentType = ContentType.XML;
+            } else if (item.getValueType() == ValueType.ELEMENT) {
+                    content = item.asString().getBytes("UTF-8");
+                    contentType = ContentType.XML;
             } else if (item.getValueType() == ValueType.TEXT) {
                 content = item.asString().getBytes("UTF-8");
                 contentType = ContentType.TEXT;
