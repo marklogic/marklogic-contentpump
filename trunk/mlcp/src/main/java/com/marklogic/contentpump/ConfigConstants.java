@@ -35,6 +35,7 @@ public interface ConfigConstants {
     static final String HADOOP_CONF_DIR = "hadoop_conf_dir";
     static final String THREAD_COUNT = "thread_count";
     static final String MAX_SPLIT_SIZE = "max_split_size";
+    static final int DEFAULT_MAX_SPLIT_SIZE = 50000;
     static final String MIN_SPLIT_SIZE = "min_split_size";
     static final String OPTIONS_FILE = "-options_file";
 
@@ -106,6 +107,7 @@ public interface ConfigConstants {
     static final String DELIMITED_URI_ID = "delimited_uri_id";
     static final String DELIMITED_ROOT_NAME = "delimited_root_name";
     static final String DELIMITED_GENERATE_URI = "generate_uri";
+    static final String SPLIT_INPUT = "split_input";
     static final String FAST_LOAD = "fastload";
     static final String CONTENT_ENCODING = "content_encoding";
     static final String THREADS_PER_SPLIT = "thread_count_per_split";
@@ -139,6 +141,8 @@ public interface ConfigConstants {
         "mapreduce.marklogic.delimited.rootname";
     static final String CONF_DELIMITED_GENERATE_URI = 
         "mapreduce.marklogic.delimited.generateuri";
+    static final String CONF_SPLIT_INPUT = 
+        "mapreduce.marklogic.splitinput";
     static final String CONF_OUTPUT_URI_REPLACE = 
         "mapreduce.marklogic.output.urireplace";
     static final String CONF_OUTPUT_URI_PREFIX = 

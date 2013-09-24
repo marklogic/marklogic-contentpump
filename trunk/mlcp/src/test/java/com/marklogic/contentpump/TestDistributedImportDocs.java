@@ -120,7 +120,7 @@ public class TestDistributedImportDocs {
             "xcc://admin:admin@localhost:5275",
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
-        assertEquals("93", result.next().asString());
+        assertEquals("186", result.next().asString());
         Utils.closeSession();
     }
  

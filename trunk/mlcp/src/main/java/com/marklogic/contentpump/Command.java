@@ -276,6 +276,14 @@ public enum Command implements ConfigConstants {
             options.addOption(rdfTriplesPerDoc);
 
             configPartition(options);
+            
+            Option splitInput = OptionBuilder
+                .withArgName("true,false")
+                .hasOptionalArg()
+                .withDescription(
+                    "Whether to split input files to load into MarkLogic")
+                .create(SPLIT_INPUT);
+            options.addOption(splitInput);
         }
 
         @Override
@@ -286,6 +294,13 @@ public enum Command implements ConfigConstants {
             String inputTypeOption = cmdline.getOptionValue(INPUT_FILE_TYPE,
                             INPUT_FILE_TYPE_DEFAULT);
             InputType type = InputType.forName(inputTypeOption);
+            if (!type.equals(InputType.DELIMITED_TEXT)) {
+                if (conf.getBoolean(ConfigConstants.CONF_SPLIT_INPUT, false)) {
+                    throw new IllegalArgumentException("The setting for " +
+                        SPLIT_INPUT + " option is not supported for " 
+                        + type);
+                }
+            }
             
             // construct a job
             Job job = new Job(conf);
@@ -351,6 +366,9 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
                 conf.set(ConfigConstants.CONF_MAX_SPLIT_SIZE, maxSize);
+            } else {
+                conf.setInt(ConfigConstants.CONF_MAX_SPLIT_SIZE,
+                    ConfigConstants.DEFAULT_MAX_SPLIT_SIZE);
             }
             if (cmdline.hasOption(MIN_SPLIT_SIZE)) {
                 String minSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
@@ -572,6 +590,24 @@ public enum Command implements ConfigConstants {
             applyPartitionConfigOptions(conf, cmdline);
             
             applyModuleConfigOptions(conf, cmdline, batchSize);
+            
+            if (cmdline.hasOption(SPLIT_INPUT)) {
+                String arg = cmdline.getOptionValue(SPLIT_INPUT);
+                if (arg == null || arg.equalsIgnoreCase("true")) {
+                    if (isInputCompressed(cmdline)) {
+                        LOG.warn(INPUT_COMPRESSED + " disables " + SPLIT_INPUT);
+                        conf.setBoolean(ConfigConstants.CONF_SPLIT_INPUT,
+                            false);
+                    }
+                    conf.setBoolean(ConfigConstants.CONF_SPLIT_INPUT, true);
+                } else if (arg.equalsIgnoreCase("false")) {
+                    conf.setBoolean(ConfigConstants.CONF_SPLIT_INPUT, false);
+                } else {
+                    throw new IllegalArgumentException(
+                        "Unrecognized option argument for " + SPLIT_INPUT
+                            + ": " + arg);
+                }
+            }
         }
 
 		@Override

@@ -41,7 +41,7 @@ FileInputFormat<K, V> {
 	/**
 	 * threshold of expanded splits: 1 million
 	 */
-    private static int SPLIT_COUNT_LIMIT = 1000000;
+    protected static int SPLIT_COUNT_LIMIT = 1000000;
     // add my own hiddenFileFilter since the one defined in FileInputFormat
     // is not accessible.
     public static final PathFilter hiddenFileFilter = new PathFilter() {
@@ -50,6 +50,13 @@ FileInputFormat<K, V> {
             return !name.startsWith("_") && !name.startsWith(".");
         }
     };
+    
+    @Override
+    protected boolean isSplitable(JobContext context, Path filename) {
+        Configuration conf = context.getConfiguration();
+        return conf.getBoolean(ConfigConstants.CONF_SPLIT_INPUT, false)
+            && !conf.getBoolean(ConfigConstants.INPUT_COMPRESSED, false);
+    }
 
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
@@ -66,8 +73,7 @@ FileInputFormat<K, V> {
                 + " and input file pattern " + pattern, ex);
         }        
         
-        // flatten directories until reaching FILE_SPLIT_COUNT_LIMIT
-        
+        // flatten directories until reaching SPLIT_COUNT_LIMIT
         PathFilter jobFilter = getInputPathFilter(job);
         List<PathFilter> filters = new ArrayList<PathFilter>();
         filters.add(hiddenFileFilter);
