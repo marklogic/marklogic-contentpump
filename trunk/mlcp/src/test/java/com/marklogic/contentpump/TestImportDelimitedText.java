@@ -261,7 +261,32 @@ public class TestImportDelimitedText{
     public void testImportDelimitedTextPipe() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
+            + " -generate_uri -delimiter |"
+            + " -input_file_type delimited_text -input_file_pattern .*\\.tpch -thread_count 1";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    //split each file into 3 splits, the last of which is skipped bc' reaching the end
+    @Test
+    public void testImport3DelimitedSplits() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -delimited_uri_id NAME -delimiter |"
+            + " -split_input true"
+            + " -max_split_size 200"
             + " -input_file_type delimited_text -input_file_pattern .*\\.tpch -thread_count 1";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -276,6 +301,31 @@ public class TestImportDelimitedText{
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImport2DelimitedSplits() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
+            + " -delimiter |"
+            + " -split_input"
+            + " -generate_uri"
+            + " -max_split_size 300"
+            + " -input_file_type delimited_text -input_file_pattern .*\\.tpch -thread_count 1";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
         Utils.closeSession();
     }
     
@@ -377,6 +427,40 @@ public class TestImportDelimitedText{
 
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedTextElemNames.txt");
+        assertTrue(sb.toString().equals(key));
+    }
+    
+    @Test
+    public void testImportDelimitedTextElemNamesSplit() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.ename"
+            + " -split_input -max_split_size 50"
+            + " -input_file_type delimited_text";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+
+        StringBuilder sb = new StringBuilder();
+        while(result.hasNext()) {
+            String s = result.next().asString();
+            sb.append(s);
+        }
+        Utils.closeSession();
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportDelimitedText#testImportDelimitedTextElemNamesSplit.txt");
         assertTrue(sb.toString().equals(key));
     }
     
