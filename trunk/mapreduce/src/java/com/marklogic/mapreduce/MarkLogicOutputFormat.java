@@ -69,9 +69,10 @@ implements MarkLogicConstants, Configurable {
         + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
         + "let $f := "
         + "  fn:function-lookup(xs:QName('hadoop:get-host-names'),0)\n"
-        + "let $hasNewFn := exists($f)\n"
-        + "return  if($hasNewFn eq fn:true()) then $f()"
-        + " else hadoop:get-forest-host-map()";
+        + "return  if(exists($f)) then $f() else\n"
+        + "   for $i at $p in hadoop:get-forest-host-map()"
+        + "   where $p mod 2 eq 0 "
+        + "   return $i";
     static final String MANUAL_DIRECTORY_MODE = "manual";
     
     protected Configuration conf;
@@ -160,9 +161,6 @@ implements MarkLogicConstants, Configurable {
             ArrayList<Text> hosts = new ArrayList<Text>();
             while (result.hasNext()) {
                 ResultItem item = result.next();
-                // skip the forestid in case MLCP 7 runs against ML6
-                if(item.asString().matches("-?\\d+"))
-                    continue;
                 String host = item.asString();
                 if (matchHost != null && host.equals(matchHost)) {
                 	hosts.add(new Text(replaceHost));
