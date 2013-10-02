@@ -367,14 +367,14 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             String type = node.getLiteralDatatypeURI();
             String lang = node.getLiteralLanguage();
 
-            if (type == null) {
-                type = "http://www.w3.org/2001/XMLSchema#string";
-            }
-
             if (lang == null || "".equals(lang)) {
                 lang = "";
             } else {
                 lang = " xml:lang='" + lang + "'";
+            }
+
+            if ("".equals(lang) && type == null) {
+                type = "http://www.w3.org/2001/XMLSchema#string";
             }
 
             return "<sem:object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</sem:object>";
@@ -394,14 +394,14 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             String lang = lit.getLanguage();
             String type = lit.getDatatypeURI();
 
-            if (type == null) {
-                type = "http://www.w3.org/2001/XMLSchema#string";
-            }
-
             if (lang == null || "".equals(lang)) {
                 lang = "";
             } else {
                 lang = " xml:lang='" + lang + "'";
+            }
+
+            if ("".equals(lang) && type == null) {
+                type = "http://www.w3.org/2001/XMLSchema#string";
             }
 
             return "<sem:object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</sem:object>";
