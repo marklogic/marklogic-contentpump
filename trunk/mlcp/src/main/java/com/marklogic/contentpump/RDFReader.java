@@ -15,6 +15,7 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Calendar;
@@ -84,6 +85,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected StmtIterator statementIter = null;
     protected Iterator<String> graphNameIter = null;
     protected String collection = null;
+    protected boolean parseFailed = false;
 
     protected PipedRDFIterator rdfIter;
     protected PipedRDFStream rdfInputStream;
@@ -245,7 +247,13 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected void parse(String fsname) throws IOException {
-        loadModel(fsname, fs.open(file));
+        try {
+            parseFailed = false;
+            loadModel(fsname, fs.open(file));
+        } catch (Exception e) {
+            parseFailed = true;
+            LOG.fatal("Failed to parse: " + origFn);
+        }
     }
 
     protected void loadModel(final String fsname, final InputStream in) throws IOException {
@@ -262,11 +270,30 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             Runnable parser = new Runnable() {
                 @Override
                 public void run() {
-                    LangRIOT parser = RiotReader.createParser(in, lang, fsname, rdfInputStream);
-                    ErrorHandler handler = new ParserErrorHandler(fsname);
-                    ParserProfile prof = RiotLib.profile(lang, fsname, handler);
-                    parser.setProfile(prof);
-                    parser.parse();
+                    LangRIOT parser;
+
+                    try {
+                        parser = RiotReader.createParser(in, lang, fsname, rdfInputStream);
+                    } catch (Exception ex) {
+                        // Yikes something went horribly wrong, bad encoding maybe?
+                        LOG.fatal("Failed to parse: " + origFn);
+                        ex.printStackTrace();
+
+                        byte[] b = new byte[0] ;
+                        InputStream emptyBAIS = new ByteArrayInputStream(b) ;
+                        parser = RiotReader.createParser(emptyBAIS, lang, fsname, rdfInputStream);
+                    }
+
+                    try {
+                        ErrorHandler handler = new ParserErrorHandler(fsname);
+                        ParserProfile prof = RiotLib.profile(lang, fsname, handler);
+                        parser.setProfile(prof);
+                        parser.parse();
+                    } catch (Exception e) {
+                        LOG.fatal("Failed to parse: " + origFn);
+                        e.printStackTrace();
+                        parseFailed = true;
+                    }
                 }
             };
 
@@ -436,11 +463,16 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (statementIter == null) {
-            return nextStreamingKeyValue();
-        } else {
-            return nextInMemoryKeyValue();
+        boolean result = false;
+        if (!parseFailed) {
+            if (statementIter == null) {
+                result = nextStreamingKeyValue();
+            } else {
+                result = nextInMemoryKeyValue();
+            }
         }
+
+        return result;
     }
 
     public boolean nextInMemoryKeyValue() throws IOException, InterruptedException {
