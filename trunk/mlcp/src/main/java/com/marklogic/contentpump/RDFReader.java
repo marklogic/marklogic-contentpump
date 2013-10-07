@@ -165,7 +165,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 MarkLogicConstants.DEFAULT_CONTENT_TYPE);
         ContentType contentType = ContentType.valueOf(type);
         Class<? extends Writable> valueClass = RDFWritable.class;
-        value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
+
+        @SuppressWarnings("unchecked")
+        VALUEIN localValue = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
+
+        value = localValue;
         encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
 
         // ===================
@@ -260,10 +264,14 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if (dataset == null) {
             if (lang == Lang.NQUADS || lang == Lang.TRIG) {
                 rdfIter = new PipedRDFIterator<Quad>();
-                rdfInputStream = new PipedQuadsStream(rdfIter);
+                @SuppressWarnings("unchecked")
+                PipedQuadsStream stream = new PipedQuadsStream(rdfIter);
+                rdfInputStream = stream;
             } else {
                 rdfIter = new PipedRDFIterator<Triple>();
-                rdfInputStream = new PipedTriplesStream(rdfIter);
+                @SuppressWarnings("unchecked")
+                PipedTriplesStream stream = new PipedTriplesStream(rdfIter);
+                rdfInputStream = stream;
             }
 
             // Create a runnable for our parser thread
@@ -309,6 +317,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 parser.parse();
             } catch (Throwable e) {
                 LOG.error("Parse error in RDF document; processing partial document");
+                e.printStackTrace();
             }
             in.close();
             graphNameIter = dataset.listNames();
@@ -397,14 +406,19 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             if (lang == null || "".equals(lang)) {
                 lang = "";
             } else {
-                lang = " xml:lang='" + lang + "'";
+                lang = " xml:lang='" + escapeXml(lang) + "'";
             }
 
-            if ("".equals(lang) && type == null) {
-                type = "http://www.w3.org/2001/XMLSchema#string";
+            if ("".equals(lang)) {
+                if (type == null) {
+                    type = "http://www.w3.org/2001/XMLSchema#string";
+                }
+                type = " datatype='" + escapeXml(type) + "'";
+            } else {
+                type = "";
             }
 
-            return "<sem:object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</sem:object>";
+            return "<sem:object" + type + lang + ">" + escapeXml(text) + "</sem:object>";
         } else if (node.isBlank()) {
             return "<sem:object>http://marklogic.com/semantics/blank/" + Long.toHexString(
                     fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
@@ -424,14 +438,19 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             if (lang == null || "".equals(lang)) {
                 lang = "";
             } else {
-                lang = " xml:lang='" + lang + "'";
+                lang = " xml:lang='" + escapeXml(lang) + "'";
             }
 
-            if ("".equals(lang) && type == null) {
-                type = "http://www.w3.org/2001/XMLSchema#string";
+            if ("".equals(lang)) {
+                if (type == null) {
+                    type = "http://www.w3.org/2001/XMLSchema#string";
+                }
+                type = " datatype='" + escapeXml(type) + "'";
+            } else {
+                type = "";
             }
 
-            return "<sem:object datatype='" + escapeXml(type) + "'" + lang + ">" + escapeXml(text) + "</sem:object>";
+            return "<sem:object" + type + lang + ">" + escapeXml(text) + "</sem:object>";
         } else if (node.isAnon()) {
             return "<sem:object>http://marklogic.com/semantics/blank/" + Long.toHexString(
                     fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
@@ -703,7 +722,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 //System.err.println("      " + collection + " (" + collectionHash.get(collection).size() + ")");
             }
 
+            @SuppressWarnings("unchecked")
             Vector<String> triples = collectionHash.get(collection);
+
             triples.add("<sem:triple>" + triple + "</sem:triple>");
 
             //System.err.println(triple);
@@ -727,6 +748,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
         }
 
+        @SuppressWarnings("unchecked")
         Vector<String> triples = collectionHash.get(collection);
 
         setKey(idGen.incrementAndGet());
@@ -760,6 +782,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 ((RDFWritable) value).setCollection(collection);
             }
         } else if (value instanceof ContentWithFileNameWritable) {
+            @SuppressWarnings("unchecked")
             VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
                     .getValue();
             if (realValue instanceof Text) {

@@ -1,0 +1,7 @@
+@prefix foo: <http://example.org/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+foo:TestResource foo:description "This is an English description"@en .
+foo:TestResource foo:description "This is erroneously marked as a French description"@fr .
+foo:TestResource foo:created "2013-10-07T12:06:00+01:00"^^xsd:dateTime .
+foo:TestResource foo:size "324"^^xsd:unsignedLong .
