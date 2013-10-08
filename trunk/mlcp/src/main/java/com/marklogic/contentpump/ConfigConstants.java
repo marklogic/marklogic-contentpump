@@ -35,7 +35,6 @@ public interface ConfigConstants {
     static final String HADOOP_CONF_DIR = "hadoop_conf_dir";
     static final String THREAD_COUNT = "thread_count";
     static final String MAX_SPLIT_SIZE = "max_split_size";
-    static final int DEFAULT_MAX_SPLIT_SIZE = 50000;
     static final String MIN_SPLIT_SIZE = "min_split_size";
     static final String OPTIONS_FILE = "-options_file";
 
