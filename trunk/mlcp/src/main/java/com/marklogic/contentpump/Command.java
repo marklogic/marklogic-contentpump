@@ -366,9 +366,6 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
                 conf.set(ConfigConstants.CONF_MAX_SPLIT_SIZE, maxSize);
-            } else {
-                conf.setInt(ConfigConstants.CONF_MAX_SPLIT_SIZE,
-                    ConfigConstants.DEFAULT_MAX_SPLIT_SIZE);
             }
             if (cmdline.hasOption(MIN_SPLIT_SIZE)) {
                 String minSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
