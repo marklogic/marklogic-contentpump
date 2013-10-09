@@ -144,7 +144,9 @@ public class ContentPump implements ConfigConstants {
         conf.set(CONF_MODE, distributed ? MODE_DISTRIBUTED : MODE_LOCAL);
         
         if (distributed) {
-            if (!cmdline.hasOption(SPLIT_INPUT)) {
+            if (!cmdline.hasOption(SPLIT_INPUT)
+                && Command.getInputType(cmdline).equals(
+                    InputType.DELIMITED_TEXT)) {
                 conf.setBoolean(ConfigConstants.CONF_SPLIT_INPUT, true);
             }
             File hdConfDir= new File(hadoopConfDir);
