@@ -835,7 +835,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         @Override
         public void warning(String message, long line, long col) {
-            LOG.warn(formatMessage(message, line, col));
+            if (message.contains("Bad IRI:")) {
+                LOG.debug(formatMessage(message, line, col));
+            } else {
+                LOG.warn(formatMessage(message, line, col));
+            }
         }
 
         @Override
