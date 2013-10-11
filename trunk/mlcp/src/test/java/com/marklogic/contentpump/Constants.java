@@ -25,7 +25,7 @@ public class Constants {
             e.printStackTrace();
         }
     }
-    private static String TEST_DATA = MLCP_HOME + "/src/test/resources";
+    private static String TEST_DATA = "////" + MLCP_HOME + "/src/test/resources";
     /**
      * Path of test data
      */
