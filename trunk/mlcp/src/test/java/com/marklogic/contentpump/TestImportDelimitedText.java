@@ -90,6 +90,7 @@ public class TestImportDelimitedText{
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -generate_uri"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -563,6 +564,7 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() 
             + "/encoding/samplecsv.utf16le.csv -content_encoding utf-16le"
             + " -delimited_uri_id first"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -600,6 +602,7 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() 
             + "/encoding/samplecsv.utf16be.csv -content_encoding utf-16be"
             + " -delimited_uri_id first"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -636,6 +639,7 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() 
             + "/encoding/samplecsv.utf16le.zip -content_encoding utf-16le"
             + " -delimited_uri_id first -input_compressed"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
