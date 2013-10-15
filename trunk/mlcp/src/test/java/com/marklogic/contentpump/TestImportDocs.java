@@ -505,6 +505,7 @@ public class TestImportDocs {
             + "/encoding/ML-utf-16be.zip -content_encoding UTF-16BE"
             + " -thread_count 1 -mode local -document_type text"
             + " -input_compressed -input_compression_codec zip"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -540,6 +541,7 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-16le.enc"
             + " -thread_count 1 -mode local -content_encoding UTF-16LE"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML -document_type text";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -575,6 +577,7 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-16le.enc"
             + " -thread_count 1 -mode local -content_encoding UTF-16LE"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -610,6 +613,7 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.enc"
             + " -thread_count 1 -mode local"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -646,6 +650,7 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.enc"
             + " -thread_count 1 -mode local -document_type TEXT"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -675,6 +680,43 @@ public class TestImportDocs {
             + "/keys/TestImportText#testImportTxtUTF8.txt");
         assertTrue(str.trim().equals(key));
     }
+//    @Test
+//    public void testImportMixedTxtUTF8LE_bad() throws Exception {
+//        String cmd = 
+//            "IMPORT -password admin -username admin -host localhost -port 5275"
+//            + " -input_file_path " + "/space2/qa/mlcp/data/xml/bigdata/doc108.xml"// + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.txt"
+//            + " -thread_count 1 -mode local"
+//            + " -content_encoding utf-8le"
+//            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
+//            + " -output_collections test,ML";
+//        String[] args = cmd.split(" ");
+//        assertFalse(args.length == 0);
+//
+//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//
+//        String[] expandedArgs = null;
+//        expandedArgs = OptionsFileUtil.expandArguments(args);
+//        ContentPump.runCommand(expandedArgs);
+//
+//        ResultSequence result = Utils.runQuery(
+//            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+//        assertTrue(result.hasNext());
+//        assertEquals("1", result.next().asString());
+//        Utils.closeSession();
+//        
+//        result = Utils.getOnlyDocs("xcc://admin:admin@localhost:5275");
+//
+//        assertTrue(result.hasNext());
+//        InputStream is = result.next().asInputStream();
+//        //data in server is UTF-8 encoded
+//        String str = getResult(is, "UTF-8");
+//
+//        Utils.closeSession();
+//
+//        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+//            + "/keys/TestImportText#testImportTxtUTF8.txt");
+//        assertTrue(str.trim().equals(key));
+//    }
     
     @Test
     public void testImportMixedTxtUTF8() throws Exception {
@@ -682,6 +724,7 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.txt"
             + " -thread_count 1 -mode local"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -769,6 +812,7 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-16le.txt"
             + " -thread_count 1 -mode local -content_encoding UTF-16LE"
+            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
