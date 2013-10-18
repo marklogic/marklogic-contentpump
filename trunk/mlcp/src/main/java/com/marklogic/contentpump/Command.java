@@ -545,7 +545,10 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(CONTENT_ENCODING).toUpperCase();
                 if("SYSTEM".equals(arg)) {
                     arg = Charset.defaultCharset().name();
-                } 
+                } else if (!Charset.isSupported(arg)) {
+                    throw new IllegalArgumentException( arg
+                        + " encoding is not supported");
+                }
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
             } else {
                 //default is UTF-8
@@ -786,7 +789,10 @@ public enum Command implements ConfigConstants {
                 String arg = cmdline.getOptionValue(CONTENT_ENCODING).toUpperCase();
                 if("SYSTEM".equals(arg)) {
                     arg = Charset.defaultCharset().name();
-                } 
+                } else if (!Charset.isSupported(arg)) {
+                    throw new IllegalArgumentException(arg
+                        + " encoding is not supported");
+                }
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
             } else {
                 //default is UTF-8
