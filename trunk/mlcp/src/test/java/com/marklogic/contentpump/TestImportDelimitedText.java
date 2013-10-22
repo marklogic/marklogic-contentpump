@@ -117,6 +117,7 @@ public class TestImportDelimitedText{
         Utils.closeSession();
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedGenerateId.txt");
+        System.out.println("DUMP:" + cmd);
         System.out.println("DUMP:" + sb.length() +"@" + sb.toString());
         assertTrue(sb.toString().equals(key));
     }
