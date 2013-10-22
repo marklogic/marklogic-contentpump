@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -12,13 +14,15 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.lang.PipedQuadsStream;
+import org.apache.jena.riot.lang.PipedRDFIterator;
+import org.apache.jena.riot.lang.PipedTriplesStream;
 
-import com.marklogic.contentpump.utilities.FileIterator;
-import com.marklogic.contentpump.utilities.IdGenerator;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.sparql.core.Quad;
 import com.marklogic.mapreduce.CompressionCodec;
 
 /**
@@ -38,13 +42,17 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
     private InputStream zipIn;
     private ZipEntry currZipEntry;
     private CompressionCodec codec;
-
+    private ExecutorService pool;
+    
     @Override
     public void close() throws IOException {
         super.close();
         //close the zip
         if (zipIn != null) {
             zipIn.close();
+        }
+        if (pool != null) {
+            pool.shutdown();
         }
     }
 
@@ -116,10 +124,36 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         }
     }
 
-    protected void parse(String fsname, final InputStream in) throws IOException {
-        loadModel(fsname, in);
-    }
+    protected void parse(String fsname, final InputStream in)
+        throws IOException {
+        if (dataset == null) {
+            if (lang == Lang.NQUADS || lang == Lang.TRIG) {
+                rdfIter = new PipedRDFIterator<Quad>();
+                @SuppressWarnings("unchecked")
+                PipedQuadsStream stream = new PipedQuadsStream(rdfIter);
+                rdfInputStream = stream;
+            } else {
+                rdfIter = new PipedRDFIterator<Triple>();
+                @SuppressWarnings("unchecked")
+                PipedTriplesStream stream = new PipedTriplesStream(rdfIter);
+                rdfInputStream = stream;
+            }
 
+            // Create a runnable for our parser thread
+            Runnable parser = new RunnableParser(fsname, in);
+
+            // add it into pool
+            pool.submit(parser);
+            // We don't know how many statements are in the model; we could
+            // count them, but that's
+            // possibly expensive. So we just say 0 until we're done.
+            pos = 0;
+            end = 1;
+        } else {
+            loadModel(fsname, in);
+        }
+    }
+    
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
         boolean stillReading = super.nextKeyValue();
@@ -171,11 +205,13 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
     public CompressedRDFReader() {
         super();
         compressed = true;
+        //allocate a pool of size 1
+        pool = Executors.newFixedThreadPool(1);
     }
     
     @Override
     public float getProgress() throws IOException, InterruptedException {
         return hasNext ? 0 : 1;
     }
-
+    
 }

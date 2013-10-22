@@ -79,7 +79,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
 
     protected int MAXTRIPLESPERDOCUMENT = 100;
-    protected long INMEMORYTHRESHOLD = 64 * 1024 * 1000; // 64Mb
+    protected long INMEMORYTHRESHOLD = 1 * 1024 * 1000; // 1Mb
 
     protected Dataset dataset = null;
     protected StmtIterator statementIter = null;
@@ -275,35 +275,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
 
             // Create a runnable for our parser thread
-            Runnable parser = new Runnable() {
-                @Override
-                public void run() {
-                    LangRIOT parser;
-
-                    try {
-                        parser = RiotReader.createParser(in, lang, fsname, rdfInputStream);
-                    } catch (Exception ex) {
-                        // Yikes something went horribly wrong, bad encoding maybe?
-                        LOG.fatal("Failed to parse: " + origFn);
-                        ex.printStackTrace();
-
-                        byte[] b = new byte[0] ;
-                        InputStream emptyBAIS = new ByteArrayInputStream(b) ;
-                        parser = RiotReader.createParser(emptyBAIS, lang, fsname, rdfInputStream);
-                    }
-
-                    try {
-                        ErrorHandler handler = new ParserErrorHandler(fsname);
-                        ParserProfile prof = RiotLib.profile(lang, fsname, handler);
-                        parser.setProfile(prof);
-                        parser.parse();
-                    } catch (Exception e) {
-                        LOG.fatal("Failed to parse: " + origFn);
-                        e.printStackTrace();
-                        parseFailed = true;
-                    }
-                }
-            };
+            Runnable parser = new RunnableParser(fsname, in);
 
             // Run it
             new Thread(parser).start();
@@ -815,7 +787,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         return collection;
     }
 
-    private class ParserErrorHandler implements ErrorHandler {
+    protected class ParserErrorHandler implements ErrorHandler {
         String inputfn = "";
 
         public ParserErrorHandler(String inputfn) {
@@ -851,5 +823,45 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         public void fatal(String message, long line, long col) {
             LOG.fatal(formatMessage(message, line, col));
         }
+    }
+    
+    protected class RunnableParser implements Runnable{
+        final String fsname;
+        final InputStream in;
+        
+        public RunnableParser(String fsname, InputStream in) {
+            super();
+            this.fsname = fsname;
+            this.in = in;
+        }
+
+        @Override
+        public void run() {
+            LangRIOT parser;
+
+            try {
+                parser = RiotReader.createParser(in, lang, fsname, rdfInputStream);
+            } catch (Exception ex) {
+                // Yikes something went horribly wrong, bad encoding maybe?
+                LOG.fatal("Failed to parse: " + origFn);
+                ex.printStackTrace();
+
+                byte[] b = new byte[0] ;
+                InputStream emptyBAIS = new ByteArrayInputStream(b) ;
+                parser = RiotReader.createParser(emptyBAIS, lang, fsname, rdfInputStream);
+            }
+
+            try {
+                ErrorHandler handler = new ParserErrorHandler(fsname);
+                ParserProfile prof = RiotLib.profile(lang, fsname, handler);
+                parser.setProfile(prof);
+                parser.parse();
+            } catch (Exception e) {
+                LOG.fatal("Failed to parse: " + origFn);
+                e.printStackTrace();
+                parseFailed = true;
+            }
+        }
+        
     }
 }
