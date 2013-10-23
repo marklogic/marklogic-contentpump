@@ -289,6 +289,32 @@ public class TestImportAggregate {
     }
     
     @Test
+    public void testImportTransformMedlineZipGenId() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/medlinezip/medline04.2.zip"
+            + " -transform_module /lc.xqy"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -mode local -thread_count 2"
+            + " -input_file_type aggregates -input_compressed -input_compressed true";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("4", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
     public void testImportTransformMedlineZipFast() throws Exception {
         Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
