@@ -56,25 +56,6 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         }
     }
 
-/*
-    @Override
-    public void initialize(InputSplit inSplit, TaskAttemptContext context)
-        throws IOException, InterruptedException {
-
-        initConfig(context);
-
-        file = ((FileSplit) inSplit).getPath();
-        fs = file.getFileSystem(context.getConfiguration());
-        
-        FileStatus status = fs.getFileStatus(file);
-        if(status.isDir()) {
-            iterator = new FileIterator((FileSplit)inSplit, context);
-            inSplit = iterator.next();
-        }
-        
-        initStream(inSplit);
-    }
-*/
 
     @Override
     protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
