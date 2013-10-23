@@ -36,6 +36,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.FileIterator;
+import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.mapreduce.CompressionCodec;
 
 /**
@@ -87,6 +88,16 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             .toString())) {
             zipIn = new GZIPInputStream(fileIn);
             codec = CompressionCodec.GZIP;
+        }
+        
+        if (uriName == null) {
+            generateId = conf.getBoolean(CONF_DELIMITED_GENERATE_URI, false);
+            if (generateId) {
+                idGen = new IdGenerator(file.toUri().getPath() + "-"
+                    + ((FileSplit) inSplit).getStart());
+            } else {
+                uriId = 0;
+            }
         }
     }
 
