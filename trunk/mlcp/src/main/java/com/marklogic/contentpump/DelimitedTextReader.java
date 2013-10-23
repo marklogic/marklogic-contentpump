@@ -225,7 +225,7 @@ public class DelimitedTextReader<VALUEIN> extends
                         key = null;
                         return true;
                     }
-                    String uri = getEncodedURI(values[i]);
+                    String uri = values[i];
                     if (uri != null) {
                         setKey(uri);
                     } else {
@@ -275,6 +275,16 @@ public class DelimitedTextReader<VALUEIN> extends
             sb.append(delimiter);
         }
         return sb.substring(0, sb.length() - 1);
+    }
+    
+    @Override
+    protected void setKey(String val) {
+        if (val == null) {
+            key = null;
+        } else {
+            String uri = getEncodedURI(val);
+            super.setKey(uri);
+        }
     }
     
 }
