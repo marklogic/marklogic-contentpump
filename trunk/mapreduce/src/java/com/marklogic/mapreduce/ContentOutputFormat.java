@@ -293,7 +293,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             String s = conf.get(ASSIGNMENT_POLICY);
             if (MODE_DISTRIBUTED.equals(conf.get(EXECUTION_MODE))) {
             	AssignmentPolicy.Kind policy =
-            			AssignmentPolicy.Kind.valueOf(s);
+            			AssignmentPolicy.Kind.forName(s);
                 am.initialize(policy, fhmap, conf.getInt(BATCH_SIZE, 10));
             }
             return fhmap;
@@ -336,7 +336,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             item = result.next();
             String policyStr = item.asString();
             conf.set(ASSIGNMENT_POLICY, policyStr);
-            policy = AssignmentPolicy.Kind.valueOf(policyStr.toUpperCase());
+            policy = AssignmentPolicy.Kind.forName(policyStr);
             item = result.next();
             allowFastLoad = Boolean.parseBoolean(item.asString());
             if ((policy == AssignmentPolicy.Kind.STATISTICAL 
