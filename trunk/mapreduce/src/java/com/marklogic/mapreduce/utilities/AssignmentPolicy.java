@@ -29,8 +29,16 @@ public abstract class AssignmentPolicy {
     public static final Log LOG = LogFactory.getLog(AssignmentPolicy.class);
 
     public enum Kind {
-        LEGACY, BUCKET, RANGE, STATISTICAL
-    };
+        LEGACY, BUCKET, RANGE, STATISTICAL;
+        public static Kind forName(String type) {
+            for (Kind e : values()) {
+                if (e.toString().equalsIgnoreCase(type)) {
+                    return e;
+                }
+            }
+            throw new IllegalArgumentException("No enum: " + type);
+        }
+    }
 
     protected Kind policy;
     /**

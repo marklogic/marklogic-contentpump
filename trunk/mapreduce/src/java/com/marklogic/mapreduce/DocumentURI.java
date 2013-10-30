@@ -87,21 +87,12 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
      */
     @Deprecated
     public int getPlacementId(int size) {
-        LegacyAssignmentPolicy lap = new LegacyAssignmentPolicy();
         switch (size) {
             case 0: 
                 throw new IllegalArgumentException("getPlacementId(size = 0)");
             case 1: return 0;
             default:
-//                normalize();
-//                BigInteger uriKey = getUriKey();
-//                long u = uriKey.longValue();
-//                for (int i = 8; i <= 56; i += 8) {
-//                    u += rotl(uriKey, i);
-//                }
-//                long v = (0xffff + size) / size;
-//                return (int) ((u & 0xffff) / v);
-                return lap.getPlacementId(this, size);
+                return LegacyAssignmentPolicy.getPlacementId(this, size);
         }
     }
     
