@@ -121,10 +121,10 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
             }
 
             // Create a runnable for our parser thread
-            Runnable parser = new RunnableParser(fsname, in);
+            jenaStreamingParser = new RunnableParser(origFn, fsname, in);
 
             // add it into pool
-            pool.submit(parser);
+            pool.submit(jenaStreamingParser);
             // We don't know how many statements are in the model; we could
             // count them, but that's
             // possibly expensive. So we just say 0 until we're done.
@@ -168,7 +168,10 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
                 }
 
                 parse(currZipEntry.getName(), new ByteArrayInputStream(baos.toByteArray()));
-                return super.nextKeyValue();
+                boolean gotTriples = super.nextKeyValue();
+                if (gotTriples) {
+                    return true;
+                }
             }
             // end of zip
             if (iterator != null && iterator.hasNext()) {
