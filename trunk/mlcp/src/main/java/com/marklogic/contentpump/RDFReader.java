@@ -85,7 +85,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected StmtIterator statementIter = null;
     protected Iterator<String> graphNameIter = null;
     protected String collection = null;
-    protected boolean parseFailed = false;
+    protected RunnableParser jenaStreamingParser = null;
 
     protected PipedRDFIterator rdfIter;
     protected PipedRDFStream rdfInputStream;
@@ -198,6 +198,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         pos = 0;
         end = 1;
 
+        jenaStreamingParser = null;
         dataset = null;
         statementIter = null;
         graphNameIter = null;
@@ -252,10 +253,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected void parse(String fsname) throws IOException {
         try {
-            parseFailed = false;
             loadModel(fsname, fs.open(file));
         } catch (Exception e) {
-            parseFailed = true;
             LOG.fatal("Failed to parse: " + origFn);
         }
     }
@@ -275,10 +274,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
 
             // Create a runnable for our parser thread
-            Runnable parser = new RunnableParser(fsname, in);
+            jenaStreamingParser = new RunnableParser(origFn, fsname, in);
 
             // Run it
-            new Thread(parser).start();
+            new Thread(jenaStreamingParser).start();
         } else {
             StreamRDF dest = StreamRDFLib.dataset(dataset.asDatasetGraph());
             LangRIOT parser = RiotReader.createParser(in, lang, fsname, dest);
@@ -455,7 +454,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
         boolean result = false;
-        if (!parseFailed) {
+        if (jenaStreamingParser == null || !jenaStreamingParser.failed()) {
             if (statementIter == null) {
                 result = nextStreamingKeyValue();
             } else {
@@ -825,14 +824,22 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
     }
     
-    protected class RunnableParser implements Runnable{
+    protected class RunnableParser implements Runnable {
         final String fsname;
         final InputStream in;
+        final String origFn;
+        private boolean failed = false;
         
-        public RunnableParser(String fsname, InputStream in) {
+        public RunnableParser(String origFn, String fsname, InputStream in) {
             super();
             this.fsname = fsname;
             this.in = in;
+            this.origFn = origFn;
+            System.err.println("O:" + origFn + " : " + fsname);
+        }
+
+        public boolean failed() {
+            return failed;
         }
 
         @Override
@@ -857,9 +864,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 parser.setProfile(prof);
                 parser.parse();
             } catch (Exception e) {
+                failed = true;
                 LOG.fatal("Failed to parse: " + origFn);
                 e.printStackTrace();
-                parseFailed = true;
             }
         }
         
