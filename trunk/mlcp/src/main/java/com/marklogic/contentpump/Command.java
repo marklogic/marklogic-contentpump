@@ -756,8 +756,11 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
-                Path outputDir = new Path(conf.get("mapred.working.dir"), path);
-                conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH, outputDir.toString());
+                String wkdir = conf.get("mapred.working.dir");
+                Path outputDir = wkdir == null ? new Path(path) : new Path(
+                    wkdir, path);
+                conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH,
+                    outputDir.toString());
             }
             if (cmdline.hasOption(OUTPUT_INDENTED)) {
                 String isIndented = cmdline.getOptionValue(OUTPUT_INDENTED);
