@@ -291,7 +291,10 @@ public class ContentOutputFormat<VALUEOUT> extends
                 LinkedMapWritable.class);
             // must be in fast load mode, otherwise won't reach here
             String s = conf.get(ASSIGNMENT_POLICY);
-            if (MODE_DISTRIBUTED.equals(conf.get(EXECUTION_MODE))) {
+            //EXECUTION_MODE must have a value in mlcp;
+            //default is "distributed" in hadoop connector
+            String mode = conf.get(EXECUTION_MODE, MODE_DISTRIBUTED);
+            if (MODE_DISTRIBUTED.equals(mode)) {
             	AssignmentPolicy.Kind policy =
             			AssignmentPolicy.Kind.forName(s);
                 am.initialize(policy, fhmap, conf.getInt(BATCH_SIZE, 10));
