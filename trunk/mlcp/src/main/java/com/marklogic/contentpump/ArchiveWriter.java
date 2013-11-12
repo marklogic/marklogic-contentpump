@@ -128,7 +128,7 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             }
             if (!isExportDoc) {
                 binaryArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
-                    ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
+                    ((QueriedDocumentWithMeta) content).getMeta().toXML()
                         .getBytes(encoding));
             }
             binaryArchive.write(zipEntryName, 
@@ -139,7 +139,7 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
             }
             if (!isExportDoc) {
                 txtArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
-                    ((MarkLogicDocumentWithMeta) content).getMeta().toXML()
+                    ((QueriedDocumentWithMeta) content).getMeta().toXML()
                         .getBytes(encoding));
             }
             txtArchive.write(zipEntryName, 
@@ -149,14 +149,14 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 xmlArchive = new OutputArchive(dst, conf);
             }
             if (!isExportDoc) {
-                if (((MarkLogicDocumentWithMeta) content).getMeta().isNakedProps) {
+                if (((QueriedDocumentWithMeta) content).getMeta().isNakedProps) {
                     xmlArchive.write(zipEntryName + DocumentMetadata.NAKED,
-                        ((MarkLogicDocumentWithMeta) content).getMeta()
+                        ((QueriedDocumentWithMeta) content).getMeta()
                             .toXML().getBytes(encoding));
                 } else {
                     xmlArchive.write(
                         zipEntryName + DocumentMetadata.EXTENSION,
-                        ((MarkLogicDocumentWithMeta) content).getMeta()
+                        ((QueriedDocumentWithMeta) content).getMeta()
                             .toXML().getBytes(encoding));
                     xmlArchive.write(zipEntryName, content.getContentAsString()
                         .getBytes(encoding));

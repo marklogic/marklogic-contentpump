@@ -30,13 +30,16 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.ForestInputFormat;
 import com.marklogic.mapreduce.Indentation;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
+import com.marklogic.mapreduce.UnpackedDocument;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
@@ -713,8 +716,6 @@ public enum Command implements ConfigConstants {
             String type = conf.get(CONF_OUTPUT_TYPE, DEFAULT_OUTPUT_TYPE);
             ExportOutputType outputType = ExportOutputType.valueOf(
                             type.toUpperCase());
-            conf.set(MarkLogicConstants.INPUT_MODE,
-                    MarkLogicConstants.BASIC_MODE);
             if (outputType.equals(ExportOutputType.DOCUMENT)) {  
                 conf.set(MarkLogicConstants.INPUT_VALUE_CLASS,
                                 MarkLogicDocument.class.getCanonicalName());
@@ -1034,6 +1035,94 @@ public enum Command implements ConfigConstants {
 		        int threadCnt, int availableThreads) {
 			return mapper;
 		}
+    },
+    UNPACK {
+        @Override
+        public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
+            applyFilteringConfigOptions(conf, cmdline);  
+            if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
+                String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
+                Path outputDir = new Path(conf.get("mapred.working.dir"), path);
+                conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH, outputDir.toString());
+            }
+        }
+
+        @Override
+        public void configOptions(Options options) {
+            configCommonOptions(options); 
+            configFilteringOptions(options);
+            Option inputFilePath = OptionBuilder
+                .withArgName("path")
+                .hasArg()
+                .withDescription("The file system location for input, as a "
+                    + "regular expression")
+                .create(INPUT_FILE_PATH);
+            inputFilePath.setRequired(true);
+            options.addOption(inputFilePath);
+            Option inputFilePattern = OptionBuilder
+                .withArgName("regex pattern")
+                .hasArg()
+                .withDescription("Matching regex pattern for files found in "
+                    + "the input file path")
+                .create(INPUT_FILE_PATTERN);
+            options.addOption(inputFilePattern);
+            Option outputFilePath = OptionBuilder
+                .withArgName("path")
+                .hasArg()
+                .withDescription("export output file path")
+                .create(OUTPUT_FILE_PATH);
+            outputFilePath.setRequired(true);                
+            options.addOption(outputFilePath);
+            Option exportCompress = OptionBuilder
+                .withArgName("true,false")
+                .hasOptionalArg()
+                .withDescription("Whether to compress the output document")
+                .create(OUTPUT_COMPRESS);
+            options.addOption(exportCompress);        
+        }
+
+        @Override
+        public Job createJob(Configuration conf, CommandLine cmdline)
+                throws IOException {
+            applyConfigOptions(conf, cmdline);
+            
+            // construct a job
+            Job job = new Job(conf);
+            job.setJarByClass(this.getClass());
+            job.setInputFormatClass(ForestInputFormat.class);
+
+            setMapperClass(job, conf, cmdline);
+            job.setMapOutputKeyClass(DocumentURI.class);
+            job.setMapOutputValueClass(UnpackedDocument.class);
+            Class<? extends OutputFormat> outputFormatClass = 
+                Command.isOutputCompressed(cmdline) ?
+                 ArchiveOutputFormat.class : SingleDocumentOutputFormat.class;
+            job.setOutputFormatClass(outputFormatClass);
+            job.setOutputKeyClass(DocumentURI.class);
+            
+            if (cmdline.hasOption(INPUT_FILE_PATH)) {
+                String path = cmdline.getOptionValue(INPUT_FILE_PATH);
+                FileInputFormat.setInputPaths(job, path);
+            }
+            if (cmdline.hasOption(INPUT_FILE_PATTERN)) {
+                FileInputFormat.setInputPathFilter(job,
+                                DocumentPathFilter.class);
+            }
+            return job;
+        }
+
+        @Override
+        public Class<? extends Mapper<?, ?, ?, ?>> getRuntimeMapperClass(
+                Job job, Class<? extends Mapper<?, ?, ?, ?>> mapper,
+                int threadCnt, int availableThreads) {
+            return mapper;
+        }
+
+        @Override
+        public void setMapperClass(Job job, Configuration conf,
+                CommandLine cmdline) {
+            job.setMapperClass(DocumentMapper.class);           
+        }
     };
 
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
@@ -1045,6 +1134,8 @@ public enum Command implements ConfigConstants {
             return EXPORT;
         } else if (cmd.equalsIgnoreCase(COPY.name())) {
             return COPY;
+        } else if (cmd.equalsIgnoreCase(UNPACK.name())) {
+            return UNPACK;
         } else {
             throw new IllegalArgumentException("Unknown command: " + cmd);
         }

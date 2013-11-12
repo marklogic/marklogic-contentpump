@@ -75,7 +75,7 @@ public class DatabaseContentReader extends
     /**
      * Current value.
      */
-    protected MarkLogicDocumentWithMeta currentValue;
+    protected QueriedDocumentWithMeta currentValue;
 
     public DatabaseContentReader(Configuration conf) {
         super(conf);
@@ -362,7 +362,7 @@ public class DatabaseContentReader extends
                 throw new IOException("Missing document URI for result "
                     + count);
             }
-            currentValue = new MarkLogicDocumentWithMeta();
+            currentValue = new QueriedDocumentWithMeta();
             DocumentMetadata metadata = metadataMap.get(uri);
             uri = URIUtil.applyUriReplace(uri, conf);
             uri = URIUtil.applyPrefixSuffix(uri, conf);
@@ -376,7 +376,7 @@ public class DatabaseContentReader extends
             return true;
         } else {
             // naked properties
-            currentValue = new MarkLogicDocumentWithMeta();
+            currentValue = new QueriedDocumentWithMeta();
             ResultItem item = currItem;
             String type = null;
             if (item != null && item.getItemType() == ValueType.XS_STRING) {

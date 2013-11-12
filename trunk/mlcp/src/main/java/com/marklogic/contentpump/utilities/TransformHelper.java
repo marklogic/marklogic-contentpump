@@ -27,7 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 
-import com.marklogic.contentpump.MarkLogicDocumentWithMeta;
+import com.marklogic.contentpump.QueriedDocumentWithMeta;
 import com.marklogic.contentpump.RDFWritable;
 import com.marklogic.contentpump.TransformOutputFormat;
 import com.marklogic.io.Base64;
@@ -241,7 +241,7 @@ public class TransformHelper {
     public static AdhocQuery getTransformInsertQryMLDocWithMeta(
         Configuration conf, AdhocQuery query, String moduleUri,
         String functionNs, String functionName, String functionParam,
-        String uri, MarkLogicDocumentWithMeta doc,
+        String uri, QueriedDocumentWithMeta doc,
         ContentCreateOptions cOptions) throws InterruptedIOException,
         UnsupportedEncodingException {
         HashMap<String, String> optionsMap = new HashMap<String, String>();

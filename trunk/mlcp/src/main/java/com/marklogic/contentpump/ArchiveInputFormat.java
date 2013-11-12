@@ -36,12 +36,12 @@ import com.marklogic.mapreduce.DocumentURI;
  *
  */
 public class ArchiveInputFormat extends
-    FileAndDirectoryInputFormat<DocumentURI, MarkLogicDocumentWithMeta> {
+    FileAndDirectoryInputFormat<DocumentURI, QueriedDocumentWithMeta> {
     public static final Log LOG = LogFactory.getLog(ArchiveInputFormat.class);
     private static String EXTENSION = ".zip";
     
     @Override
-    public RecordReader<DocumentURI, MarkLogicDocumentWithMeta> createRecordReader(InputSplit split,
+    public RecordReader<DocumentURI, QueriedDocumentWithMeta> createRecordReader(InputSplit split,
         TaskAttemptContext context) throws IOException, InterruptedException {
         return new ArchiveRecordReader();
     }
