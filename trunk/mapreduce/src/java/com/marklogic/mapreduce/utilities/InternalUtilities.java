@@ -38,7 +38,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.LinkedMapWritable;
 import com.marklogic.mapreduce.MarkLogicConstants;
-import com.marklogic.mapreduce.MarkLogicDocument;
+import com.marklogic.mapreduce.QueriedDocument;
 import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.SslConfigOptions;
 import com.marklogic.xcc.ContentSource;
@@ -226,8 +226,8 @@ public class InternalUtilities implements MarkLogicConstants {
                  result.getValueType() == ValueType.ATTRIBUTE ||
                  result.getValueType() == ValueType.TEXT)) {
             ((MarkLogicNode)value).set(result);
-        } else if (valueClass.equals(MarkLogicDocument.class)) {
-            ((MarkLogicDocument) value).set(result);
+        } else if (valueClass.equals(QueriedDocument.class)) {
+            ((QueriedDocument) value).set(result);
         } else {
             throw new UnsupportedOperationException("Value " +  
                     valueClass + " is unsupported for result type: " + 
@@ -386,5 +386,9 @@ public class InternalUtilities implements MarkLogicConstants {
             key.validate();
         }    
         return uri;
+    }
+    
+    public static int compareUnsignedLong(long x, long y) {
+        return (x == y) ? 0 : ((x < y) ^ ((x < 0) != (y < 0)) ? -1 : 1);
     }
 }
