@@ -20,7 +20,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.StringReader;
 
-import com.marklogic.mapreduce.MarkLogicDocument;
+import com.marklogic.mapreduce.QueriedDocument;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
 
@@ -29,7 +29,7 @@ import com.marklogic.xcc.ContentPermission;
  * @author ali
  *
  */
-public class MarkLogicDocumentWithMeta extends MarkLogicDocument {
+public class QueriedDocumentWithMeta extends QueriedDocument {
     protected DocumentMetadata meta;
 
     public DocumentMetadata getMeta() {

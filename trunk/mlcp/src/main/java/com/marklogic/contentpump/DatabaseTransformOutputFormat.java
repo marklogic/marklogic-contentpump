@@ -24,7 +24,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.contentpump.DatabaseContentOutputFormat;
 import com.marklogic.contentpump.DatabaseTransformWriter;
-import com.marklogic.contentpump.MarkLogicDocumentWithMeta;
+import com.marklogic.contentpump.QueriedDocumentWithMeta;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.xcc.ContentSource;
 
@@ -35,13 +35,13 @@ import com.marklogic.xcc.ContentSource;
  */
 public class DatabaseTransformOutputFormat extends DatabaseContentOutputFormat {
     @Override
-    public RecordWriter<DocumentURI, MarkLogicDocumentWithMeta> getRecordWriter(
+    public RecordWriter<DocumentURI, QueriedDocumentWithMeta> getRecordWriter(
         TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the DatabaseTransformContentWriter
-        return new DatabaseTransformWriter<MarkLogicDocumentWithMeta>(conf,
+        return new DatabaseTransformWriter<QueriedDocumentWithMeta>(conf,
             sourceMap, fastLoad, am);
     }
 }

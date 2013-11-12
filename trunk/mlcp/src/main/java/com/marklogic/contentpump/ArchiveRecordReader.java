@@ -31,7 +31,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.MarkLogicDocument;
+import com.marklogic.mapreduce.QueriedDocument;
 
 /**
  * Read archive, construct MarkLogicDocumentWithMeta as value.
@@ -40,7 +40,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
  *
  */
 public class ArchiveRecordReader extends
-    ImportRecordReader<MarkLogicDocumentWithMeta> implements 
+    ImportRecordReader<QueriedDocumentWithMeta> implements 
     ConfigConstants {
     public static final Log LOG = LogFactory.getLog(ArchiveRecordReader.class);
     private ZipInputStream zipIn;
@@ -95,7 +95,7 @@ public class ArchiveRecordReader extends
         index = subStr.lastIndexOf('-');
         String typeStr = subStr.substring(index + 1, subStr.length());
         type = ContentType.valueOf(typeStr);
-        value = new MarkLogicDocumentWithMeta();
+        value = new QueriedDocumentWithMeta();
         FSDataInputStream fileIn = fs.open(file);
         zipIn = new ZipInputStream(fileIn);
     }
@@ -110,13 +110,13 @@ public class ArchiveRecordReader extends
         ZipEntry zipEntry;
         ZipInputStream zis = (ZipInputStream) zipIn;
         if (value == null) {
-            value = new MarkLogicDocumentWithMeta();
+            value = new QueriedDocumentWithMeta();
         }
         while ((zipEntry = zis.getNextEntry()) != null) {
             String name = zipEntry.getName();
             long length = zipEntry.getSize();
             if (name.endsWith(DocumentMetadata.NAKED)) {
-                ((MarkLogicDocumentWithMeta) value)
+                ((QueriedDocumentWithMeta) value)
                     .setMeta(getMetadataFromStream(length));
                 setKey(name.substring(0, name.length()
                     - DocumentMetadata.NAKED.length()));
@@ -125,7 +125,7 @@ public class ArchiveRecordReader extends
                 return true;
             }
             if (count % 2 == 0 && name.endsWith(DocumentMetadata.EXTENSION)) {
-                ((MarkLogicDocumentWithMeta) value)
+                ((QueriedDocumentWithMeta) value)
                     .setMeta(getMetadataFromStream(length));
                 count++;
                 continue;
@@ -138,7 +138,7 @@ public class ArchiveRecordReader extends
                 return true;
             } else {
                 setKey(name);
-                readDocFromStream(length, (MarkLogicDocument) value);
+                readDocFromStream(length, (QueriedDocument) value);
                 count++;
                 return true;
             }
@@ -155,7 +155,7 @@ public class ArchiveRecordReader extends
         }
     }
 
-    private void readDocFromStream(long entryLength, MarkLogicDocument doc)
+    private void readDocFromStream(long entryLength, QueriedDocument doc)
         throws IOException {
         ByteArrayOutputStream baos;
         if (entryLength == -1) {
