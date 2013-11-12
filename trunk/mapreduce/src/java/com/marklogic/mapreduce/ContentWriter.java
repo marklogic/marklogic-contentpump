@@ -306,7 +306,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 content = ((CustomContent) value).getContent(conf, newOptions, 
                         uri);
-            } else if (value instanceof MarkLogicDocument) {
+            } else if (value instanceof QueriedDocument) {
                 MarkLogicDocument doc = (MarkLogicDocument)value;
                 if (formatNeeded) {
                     options.setFormat(doc.getContentType().getDocumentFormat());

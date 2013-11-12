@@ -252,7 +252,7 @@ public interface MarkLogicConstants {
      * and {@link DocumentInputFormat}. 
      * Optional. Default: {@link org.apache.hadoop.io.Text} for 
      * {@link KeyValueInputFormat} and {@link ValueInputFormat}, 
-     * {@link MarkLogicDocument} for {@link DocumentInputFormat}.
+     * {@link QueriedDocument} for {@link DocumentInputFormat}.
      */
     static final String INPUT_VALUE_CLASS = 
         "mapreduce.marklogic.input.valueclass";

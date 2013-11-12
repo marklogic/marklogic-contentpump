@@ -253,12 +253,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 }
                 count++;
             }
-            if (forestSplits != null) {
-                LOG.info("Fetched " + forestSplits.size() + 
+            LOG.info("Fetched " + 
+                    forestSplits == null ? 0 : forestSplits.size() + 
                     " forest splits.");            
-            } else {
-                LOG.info("No splits fetched.");
-            }
         } catch (XccConfigException e) {
             LOG.error(e);
             throw new IOException(e);
