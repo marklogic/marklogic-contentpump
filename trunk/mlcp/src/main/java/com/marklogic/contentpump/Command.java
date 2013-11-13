@@ -39,6 +39,7 @@ import com.marklogic.mapreduce.ForestInputFormat;
 import com.marklogic.mapreduce.Indentation;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
+import com.marklogic.mapreduce.QueriedDocument;
 import com.marklogic.mapreduce.UnpackedDocument;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.ContentSource;
@@ -718,7 +719,7 @@ public enum Command implements ConfigConstants {
                             type.toUpperCase());
             if (outputType.equals(ExportOutputType.DOCUMENT)) {  
                 conf.set(MarkLogicConstants.INPUT_VALUE_CLASS,
-                                MarkLogicDocument.class.getCanonicalName());
+                                QueriedDocument.class.getCanonicalName());
             }
             
             if (cmdline.hasOption(SNAPSHOT)) {
