@@ -3,6 +3,7 @@ package com.marklogic.mapreduce;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -55,5 +56,11 @@ public class RegularBinaryDocument extends BinaryDocument {
     @Override
     public ContentType getContentType() {
         return ContentType.BINARY;
+    }
+
+    @Override
+    public String getContentAsString() throws UnsupportedEncodingException {
+        throw new UnsupportedOperationException(
+                "Cannot convert binary data to String.");
     }
 }

@@ -177,7 +177,7 @@
       </manifest>
     </jar>
     <jar jarfile="${mapreduce.cdh.output.jar}" basedir="${compiled.classes.dir.cdh}"
-      includes="com/marklogic/mapreduce/*,com/marklogic/mapreduce/functions/*,com/marklogic/mapreduce/utilities/*">
+      includes="com/marklogic/dom/*,com/marklogic/tree/*,com/marklogic/io/*,com/marklogic/mapreduce/*,com/marklogic/mapreduce/functions/*,com/marklogic/mapreduce/utilities/*">
       <manifest>
         <section name="mapreduce">
           <attribute name="Vendor" value="MarkLogic Corporation"/>
