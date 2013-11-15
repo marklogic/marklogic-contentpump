@@ -53,10 +53,13 @@ public class CompressedTreeDecoder {
         if (atomLimit == 0) return;
         int numAtoms = decoder.decodeUnsigned();
         int index = rep.numTextReps;
+        int minSize = rep.numTextReps + numAtoms + 1;
         if (rep.textReps == null) {
-            rep.textReps = new int[rep.atomLimit*16];
-        } else if (rep.textReps.length < rep.numTextReps + numAtoms + 1) {
-            int textReps[] = new int[rep.textReps.length*2];
+            int size = Math.max(rep.atomLimit*16, minSize);
+            rep.textReps = new int[size];
+        } else if (rep.textReps.length < minSize) {
+            int size = Math.max(rep.textReps.length*2, minSize);
+            int textReps[] = new int[size];
             //System.out.println("Realloc " + rep.textReps.length + " -> " + textReps.length);
             System.arraycopy(rep.textReps, 0, textReps, 0, index);
             rep.textReps = textReps;
