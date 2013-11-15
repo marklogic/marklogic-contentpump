@@ -138,7 +138,6 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
         for (int bytesRead = 0; bytesRead < j; ) {
             bytesRead += in.read(buf, bytesRead, j - bytesRead);
         }
-        bytesRead += j;
         position++;
         ByteArrayInputStream bis = new ByteArrayInputStream(buf);
         BiendianDataInputStream is = new BiendianDataInputStream(bis);

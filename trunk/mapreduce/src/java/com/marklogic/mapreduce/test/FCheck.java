@@ -48,8 +48,8 @@ public class FCheck {
 	private static final int CHECKSUM_SEED = 2038074743;
 	private static final int CHECKSUM_STEP = 17;
 
-	private boolean verbose;
-	private boolean debug = false;
+	private boolean verbose = true;
+	private boolean debug = true;
 
 	private int wordSize = 4;
 
@@ -518,7 +518,7 @@ public class FCheck {
                 }
                 if (docid == 0xffffffff && csword == 0xffffffff && fdatw == 0xffffffff) {
                     System.out.println("Reached the end.");
-                    continue;
+                    break;
                 }
                 if (prevDocid != -1 && docid <= prevDocid) {
                     panic(file, "docid out of order, position=" + position +
