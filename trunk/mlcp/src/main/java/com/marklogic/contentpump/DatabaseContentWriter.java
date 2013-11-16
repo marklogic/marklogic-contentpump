@@ -253,8 +253,8 @@ public class DatabaseContentWriter<VALUE> extends
         try {
             Content content = null;
             DocumentMetadata meta = null;
-            if (value instanceof QueriedDocumentWithMeta) {
-                meta = ((QueriedDocumentWithMeta) value).getMeta();
+            if (value instanceof DatabaseDocumentWithMeta) {
+                meta = ((DatabaseDocumentWithMeta) value).getMeta();
                 newContentCreateOptions(meta);
                 MarkLogicDocument doc = (MarkLogicDocument) value;
                 options.setFormat(doc.getContentType().getDocumentFormat());

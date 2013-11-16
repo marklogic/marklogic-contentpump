@@ -75,7 +75,7 @@ public class DatabaseContentReader extends
     /**
      * Current value.
      */
-    protected QueriedDocumentWithMeta currentValue;
+    protected DatabaseDocumentWithMeta currentValue;
 
     public DatabaseContentReader(Configuration conf) {
         super(conf);
@@ -362,7 +362,7 @@ public class DatabaseContentReader extends
                 throw new IOException("Missing document URI for result "
                     + count);
             }
-            currentValue = new QueriedDocumentWithMeta();
+            currentValue = new DatabaseDocumentWithMeta();
             DocumentMetadata metadata = metadataMap.get(uri);
             uri = URIUtil.applyUriReplace(uri, conf);
             uri = URIUtil.applyPrefixSuffix(uri, conf);
@@ -376,7 +376,7 @@ public class DatabaseContentReader extends
             return true;
         } else {
             // naked properties
-            currentValue = new QueriedDocumentWithMeta();
+            currentValue = new DatabaseDocumentWithMeta();
             ResultItem item = currItem;
             String type = null;
             if (item != null && item.getItemType() == ValueType.XS_STRING) {

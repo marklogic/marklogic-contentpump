@@ -83,7 +83,7 @@ public class DatabaseTransformWriter<VALUE> extends
 
         try {
             DocumentMetadata meta = null;
-            QueriedDocumentWithMeta doc = (QueriedDocumentWithMeta) value;
+            DatabaseDocumentWithMeta doc = (DatabaseDocumentWithMeta) value;
             meta = doc.getMeta();
             newContentCreateOptions(meta);
             boolean isCopyProps = conf.getBoolean(

@@ -26,5 +26,7 @@
 	<classpathentry kind="lib" path="/home/jchen/.m2/repository/com/marklogic/marklogic-mapreduce1/1.2/marklogic-mapreduce1-1.2.jar" sourcepath="/Mapreduce"/>
 	<classpathentry kind="lib" path="/home/jchen/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="/home/jchen/.m2/repository/commons-codec/commons-codec/1.4/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="/space/projects/xcc/mlcp/src/conf"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/Mapreduce"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
