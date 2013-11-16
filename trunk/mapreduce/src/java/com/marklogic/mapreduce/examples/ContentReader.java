@@ -46,7 +46,7 @@ import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentInputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
-import com.marklogic.mapreduce.QueriedDocument;
+import com.marklogic.mapreduce.DatabaseDocument;
 import com.marklogic.mapreduce.SslConfigOptions;
 
 /**
@@ -56,10 +56,10 @@ import com.marklogic.mapreduce.SslConfigOptions;
  */
 public class ContentReader {
     public static class DocMapper 
-    extends Mapper<DocumentURI, QueriedDocument, DocumentURI, QueriedDocument> {
+    extends Mapper<DocumentURI, DatabaseDocument, DocumentURI, DatabaseDocument> {
         public static final Log LOG =
             LogFactory.getLog(DocMapper.class);
-        public void map(DocumentURI key, QueriedDocument value, Context context) 
+        public void map(DocumentURI key, DatabaseDocument value, Context context) 
         throws IOException, InterruptedException {
             if (key != null && value != null) {
                 context.write(key, value);
@@ -81,7 +81,7 @@ public class ContentReader {
         job.setInputFormatClass(DocumentInputFormat.class);
         job.setMapperClass(DocMapper.class);
         job.setMapOutputKeyClass(DocumentURI.class);
-        job.setMapOutputValueClass(QueriedDocument.class);
+        job.setMapOutputValueClass(DatabaseDocument.class);
         job.setOutputFormatClass(CustomOutputFormat.class);
        
         CustomOutputFormat.setOutputPath(job, new Path(args[1]));
@@ -144,10 +144,10 @@ public class ContentReader {
     }
     
     static class CustomOutputFormat 
-    extends FileOutputFormat<DocumentURI, QueriedDocument> {
+    extends FileOutputFormat<DocumentURI, DatabaseDocument> {
         
         @Override
-        public RecordWriter<DocumentURI, QueriedDocument> getRecordWriter(
+        public RecordWriter<DocumentURI, DatabaseDocument> getRecordWriter(
                 TaskAttemptContext context)
                 throws IOException, InterruptedException {
             return new CustomWriter(getOutputPath(context), 
@@ -155,7 +155,7 @@ public class ContentReader {
         }
     }
 
-    static class CustomWriter extends RecordWriter<DocumentURI, QueriedDocument> {
+    static class CustomWriter extends RecordWriter<DocumentURI, DatabaseDocument> {
 
         Path dir;
         Configuration conf;
@@ -177,7 +177,7 @@ public class ContentReader {
         }
 
         @Override
-        public void write(DocumentURI key, QueriedDocument content)
+        public void write(DocumentURI key, DatabaseDocument content)
                 throws IOException, InterruptedException {
             Path path = null;
             try {

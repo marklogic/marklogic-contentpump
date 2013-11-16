@@ -35,9 +35,9 @@ import com.marklogic.xcc.types.XdmBinary;
  * @author jchen
  *
  */
-public class QueriedDocument implements MarkLogicDocument {
+public class DatabaseDocument implements MarkLogicDocument {
     public static final Log LOG = LogFactory.getLog(
-            QueriedDocument.class);
+            DatabaseDocument.class);
     private byte[] content;
     private ContentType contentType;
     /* (non-Javadoc)
