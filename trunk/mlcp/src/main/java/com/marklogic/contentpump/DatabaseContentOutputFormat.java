@@ -34,15 +34,15 @@ import com.marklogic.xcc.ContentSource;
  * 
  */
 public class DatabaseContentOutputFormat extends
-    ContentOutputFormat<QueriedDocumentWithMeta> {
+    ContentOutputFormat<DatabaseDocumentWithMeta> {
     @Override
-    public RecordWriter<DocumentURI, QueriedDocumentWithMeta> getRecordWriter(
+    public RecordWriter<DocumentURI, DatabaseDocumentWithMeta> getRecordWriter(
         TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the DatabaseContentWriter
-        return new DatabaseContentWriter<QueriedDocumentWithMeta>(conf,
+        return new DatabaseContentWriter<DatabaseDocumentWithMeta>(conf,
             sourceMap, fastLoad, am);
 
     }

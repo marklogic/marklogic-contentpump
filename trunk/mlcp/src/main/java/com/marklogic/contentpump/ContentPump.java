@@ -308,9 +308,10 @@ public class ContentPump implements ConfigConstants {
     private static void printUsage() {
         System.out.println("usage: mlcp COMMAND [ARGS]\n");
         System.out.println("Available commands:");
-        System.out.println("  IMPORT import data to a MarkLogic database");
-        System.out.println("  EXPORT export data from a MarkLogic database");
-        System.out.println("  COPY   copy data from one MarkLogic database to another");
+        System.out.println("  IMPORT  import data to a MarkLogic database");
+        System.out.println("  EXPORT  export data from a MarkLogic database");
+        System.out.println("  COPY    copy data from one MarkLogic database to another");
+        System.out.println("  EXTRACT extract data from MarkLogic forests");
         System.out.println("  HELP   list available commands");
     }
 }

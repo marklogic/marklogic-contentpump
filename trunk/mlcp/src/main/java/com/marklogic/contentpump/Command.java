@@ -39,8 +39,8 @@ import com.marklogic.mapreduce.ForestInputFormat;
 import com.marklogic.mapreduce.Indentation;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
-import com.marklogic.mapreduce.QueriedDocument;
-import com.marklogic.mapreduce.UnpackedDocument;
+import com.marklogic.mapreduce.DatabaseDocument;
+import com.marklogic.mapreduce.FileDocument;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
@@ -719,7 +719,7 @@ public enum Command implements ConfigConstants {
                             type.toUpperCase());
             if (outputType.equals(ExportOutputType.DOCUMENT)) {  
                 conf.set(MarkLogicConstants.INPUT_VALUE_CLASS,
-                                QueriedDocument.class.getCanonicalName());
+                                DatabaseDocument.class.getCanonicalName());
             }
             
             if (cmdline.hasOption(SNAPSHOT)) {
@@ -1037,7 +1037,7 @@ public enum Command implements ConfigConstants {
 			return mapper;
 		}
     },
-    UNPACK {
+    EXTRACT {
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyFilteringConfigOptions(conf, cmdline);  
@@ -1094,7 +1094,7 @@ public enum Command implements ConfigConstants {
 
             setMapperClass(job, conf, cmdline);
             job.setMapOutputKeyClass(DocumentURI.class);
-            job.setMapOutputValueClass(UnpackedDocument.class);
+            job.setMapOutputValueClass(FileDocument.class);
             Class<? extends OutputFormat> outputFormatClass = 
                 Command.isOutputCompressed(cmdline) ?
                  ArchiveOutputFormat.class : SingleDocumentOutputFormat.class;
@@ -1135,8 +1135,8 @@ public enum Command implements ConfigConstants {
             return EXPORT;
         } else if (cmd.equalsIgnoreCase(COPY.name())) {
             return COPY;
-        } else if (cmd.equalsIgnoreCase(UNPACK.name())) {
-            return UNPACK;
+        } else if (cmd.equalsIgnoreCase(EXTRACT.name())) {
+            return EXTRACT;
         } else {
             throw new IllegalArgumentException("Unknown command: " + cmd);
         }
