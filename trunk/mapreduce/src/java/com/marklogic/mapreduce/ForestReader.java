@@ -66,9 +66,9 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
         FileSystem fs = path.getFileSystem(conf);
         in = fs.open(path);
         is = new BiendianDataInputStream(in);
-        valueClass = conf.getClass(INPUT_VALUE_CLASS, UnpackedDocument.class, 
+        valueClass = conf.getClass(INPUT_VALUE_CLASS, FileDocument.class, 
                 Writable.class);
-        if (!UnpackedDocument.class.isAssignableFrom(valueClass)) {
+        if (!FileDocument.class.isAssignableFrom(valueClass)) {
             throw new IllegalArgumentException("Unsupported " + 
                     INPUT_VALUE_CLASS);
         }
@@ -86,7 +86,7 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
             }
             String uri = tree.getDocumentURI();
             key = new DocumentURI(uri);
-            value = (VALUEIN) UnpackedDocument.createDocument(conf, 
+            value = (VALUEIN) FileDocument.createDocument(conf, 
                     largeForestDir, tree, uri);
             if (value != null) return true;
         }
