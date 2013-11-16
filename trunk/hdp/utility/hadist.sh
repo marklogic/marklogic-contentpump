@@ -1,1 +1,0 @@
-export HADOOP_DIST=HDP
