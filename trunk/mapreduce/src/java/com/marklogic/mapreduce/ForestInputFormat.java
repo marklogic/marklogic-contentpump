@@ -60,15 +60,21 @@ public class ForestInputFormat<VALUE> extends
             Path path = file.getPath();
             FileSystem fs = path.getFileSystem(job.getConfiguration());
             FileStatus children[] = fs.listStatus(path);
-            FileStatus treeIndexStatus = null, treeDataStatus = null;
+            FileStatus treeIndexStatus = null, treeDataStatus = null, 
+                    ordinalsStatus = null, timestampsStatus = null;
             for (FileStatus child : children) {
                 String fileName = child.getPath().getName();
                 if (fileName.equals("TreeData")) { // inside a stand
                     treeDataStatus = child;
                 } else if (fileName.equals("TreeIndex")) {
                     treeIndexStatus = child;
+                } else if (fileName.equals("Ordinals")) {
+                    ordinalsStatus = child;
+                } else if (fileName.equals("Timestamps")) {
+                    timestampsStatus = child;
                 }
-                if (treeDataStatus != null && treeIndexStatus != null) {
+                if (treeDataStatus != null && treeIndexStatus != null &&
+                    ordinalsStatus != null && timestampsStatus != null) {
                     break;
                 }
             }
@@ -76,6 +82,10 @@ public class ForestInputFormat<VALUE> extends
                 throw new RuntimeException("TreeData file not found.");
             } else if (treeIndexStatus == null) {
                 throw new RuntimeException("TreeIndex file not found.");
+            } else if (ordinalsStatus == null) {
+                throw new RuntimeException("Ordinals file not found.");
+            } else if (timestampsStatus == null) {
+                throw new RuntimeException("Timestamps file not found.");
             }
             long treeDataSize = treeDataStatus.getLen();
             if (treeDataSize == 0) {
@@ -89,68 +99,92 @@ public class ForestInputFormat<VALUE> extends
             // make splits based on TreeIndex
             FSDataInputStream is = fs.open(treeIndexStatus.getPath());
             BiendianDataInputStream in = new BiendianDataInputStream(is);
-            int prevDocid = -1, docid, position = 0;
+            int prevDocid = -1, docid = -1, position = 0;
             long prevOffset = -1L, offset = 0, splitStart = 0;
             BlockLocation[] blkLocations = fs.getFileBlockLocations(
                     treeDataStatus, 0, treeDataSize);
-            for (;; ++position) {
-                try {
-                    docid = in.readInt();
-                    in.readInt();
-                    offset = in.readLong();
-                } catch (EOFException e) {
-                    break;
+            try {
+                for (;; ++position) {
+                    try {
+                        docid = in.readInt();
+                        in.readInt();
+                        offset = in.readLong();
+                    } catch (EOFException e) {
+                        break;
+                    }
+                    int comp = InternalUtilities.compareUnsignedLong(offset,
+                            treeDataSize);
+                    if (comp >= 0) {
+                        throw new RuntimeException(
+                                "TreeIndex offset is out of bound: position = "
+                                        + position + ", offset = " + offset
+                                        + ", treeDataSize = " + treeDataSize);
+                    }
+                    if (prevDocid != -1 && 
+                        (docid & 0xffffffffL) <= (prevDocid & 0xffffffffL)) {
+                        throw new RuntimeException(
+                                "docid out of order, position = " + position
+                                        + ", docid = " + docid
+                                        + ", prevDocid = " + prevDocid);
+                    }
+                    prevDocid = docid;
+                    if (prevOffset != -1L
+                            && InternalUtilities.compareUnsignedLong(offset,
+                                    prevOffset) <= 0) {
+                        throw new RuntimeException(
+                                "offset out of order, position = " + position
+                                        + ", offset = " + offset
+                                        + ", prevOffset = " + prevOffset);
+                    }
+                    long splitLen = offset - splitStart;
+                    if (splitLen == splitSize || 
+                        (splitLen > splitSize && 
+                         splitLen - splitSize <= 
+                             splitSize - (prevOffset - splitStart))) {
+                        int blkIndex = getBlockIndex(blkLocations, offset);
+                        InputSplit split = new FileSplit(treeDataPath,
+                                splitStart, splitLen,
+                                blkLocations[blkIndex].getHosts());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Created split: start=" + splitStart + 
+                                " len=" + splitLen + " last docid=" + docid);
+                        }
+                        splits.add(split);
+                        splitStart = offset;
+                    } else if (splitLen > splitSize) {
+                        int blkIndex = getBlockIndex(blkLocations, prevOffset);
+                        InputSplit split = new FileSplit(treeDataPath,
+                                splitStart, prevOffset - splitStart,
+                                blkLocations[blkIndex].getHosts());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Created split: start=" + splitStart + 
+                                " len=" + (prevOffset - splitStart) + 
+                                " last docid=" + docid);
+                        }
+                        splits.add(split);
+                        splitStart = prevOffset;
+                    }
                 }
-                int comp = InternalUtilities.compareUnsignedLong(offset, 
-                        treeDataSize);
-                if (comp >= 0) {
-                    throw new RuntimeException(
-                        "TreeIndex offset is out of bound: position = " +
-                        position + ", offset = " + offset + ", treeDataSize = "
-                        + treeDataSize);
-                }
-                if (prevDocid != -1 && 
-                    (docid & 0xffffffffL) <= (prevDocid & 0xffffffffL)) {
-                    throw new RuntimeException(
-                        "docid out of order, position = " +
-                        position + ", docid = " + docid + ", prevDocid = " +
-                        prevDocid);
-                }
-                prevDocid = docid;
-                if (prevOffset != -1L &&
-                    InternalUtilities.compareUnsignedLong(offset, prevOffset) 
-                        <= 0) {
-                    throw new RuntimeException(
-                        "offset out of order, position = " +
-                        position + ", offset = " + offset + ", prevOffset = "
-                        + prevOffset);
-                }
-                long splitLen = offset - splitStart;
-                if (splitLen == splitSize ||
-                    (splitLen > splitSize && 
-                     splitLen - splitSize <= 
-                         splitSize - (prevOffset - splitStart))) { 
-                    int blkIndex = getBlockIndex(blkLocations, offset);
-                    FileSplit split = new FileSplit(treeDataPath, splitStart, 
-                            splitSize, blkLocations[blkIndex].getHosts());
-                    splits.add(split);
-                    splitStart = offset;
-                } else if (splitLen > splitSize) {
-                    int blkIndex = getBlockIndex(blkLocations, prevOffset);
-                    FileSplit split = new FileSplit(treeDataPath, splitStart,
-                            prevOffset - splitStart, 
-                            blkLocations[blkIndex].getHosts());
-                    splits.add(split);
-                    splitStart = prevOffset;
-                }              
+            } finally {
+                in.close();
             }
             if (offset > splitStart) {
                 int blkIndex = getBlockIndex(blkLocations, offset);
-                FileSplit split = new FileSplit(treeDataPath, splitStart, 
-                        splitSize, blkLocations[blkIndex].getHosts());
+                InputSplit split = new FileSplit(treeDataPath, splitStart, 
+                      offset - splitStart, blkLocations[blkIndex].getHosts());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Created split: start=" + splitStart + 
+                        " len=" + (offset - splitStart) + " last docid=" + 
+                        docid);
+                }
+                
                 splits.add(split);
             }
-        }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Made " + splits.size() + " splits.");
+            }
+        } 
+    
         return splits;
     }
 }

@@ -17,7 +17,7 @@ import org.w3c.dom.Document;
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 
-public class DOMDocument extends FileDocument {
+public class DOMDocument extends ForestDocument {
     public static final Log LOG = LogFactory.getLog(DOMDocument.class);
     private Document doc;
     private byte rootNodeKind;
