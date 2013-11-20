@@ -8,11 +8,11 @@ import org.apache.hadoop.fs.Path;
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 
-public abstract class FileDocument implements MarkLogicDocument {
+public abstract class ForestDocument implements MarkLogicDocument {
     public static final Log LOG = LogFactory.getLog(
-            FileDocument.class);
+            ForestDocument.class);
     
-    public static FileDocument createDocument(Configuration conf,
+    public static ForestDocument createDocument(Configuration conf,
             Path forestDir, ExpandedTree tree, String uri) {
         byte rootNodeKind = tree.rootNodeKind();
         switch (rootNodeKind) {

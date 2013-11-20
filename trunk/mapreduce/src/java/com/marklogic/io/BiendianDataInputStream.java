@@ -51,6 +51,16 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
     public final int skipBytes(int n) throws IOException {
         return di.skipBytes(n);
     }
+    
+    public final long skipBytes(long n) throws IOException {
+        long total = 0;
+        while (n > Integer.MAX_VALUE) {
+            int skipped = di.skipBytes(Integer.MAX_VALUE);
+            n -= skipped;
+            total += skipped;
+        }  
+        return total + di.skipBytes((int)n);
+    }
 
     public final boolean readBoolean() throws IOException {
         return di.readBoolean();
@@ -149,5 +159,10 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
     @Override
     public int read() throws IOException {
         return di.read();
+    }
+    
+    @Override
+    public void close() throws IOException {
+        in.close();
     }
 }

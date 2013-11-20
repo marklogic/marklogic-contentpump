@@ -26,19 +26,36 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
     protected FileSplit split;
     protected long bytesRead;
     protected Configuration conf;
-    protected BiendianDataInputStream is;
-    protected InputStream in;
+    protected BiendianDataInputStream dataIs;
+    protected BiendianDataInputStream ordIs;
+    protected BiendianDataInputStream tsIs;
     protected DocumentURI key;
     protected VALUEIN value;
     protected Class<? extends Writable> valueClass;
-    protected int position = 0, prevDocid = -1;
+    protected int position;
+    protected int prevDocid = -1;
     protected boolean done = false;
     protected Path largeForestDir;
+    protected int nascentCnt = 0;
+    protected int deletedCnt = 0;
+    protected int fragCnt = 0;
 
     @Override
     public void close() throws IOException {
-        if (is != null) {
-            is.close();
+        if (dataIs != null) {
+            dataIs.close();
+        }
+        if (ordIs != null) {
+            ordIs.close();
+        }
+        if (tsIs != null) {
+            tsIs.close();
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Nascent count: " + nascentCnt + 
+                    " Deleted count: " + deletedCnt + " Bytes read = " +
+                    bytesRead + " Fragment count: " + fragCnt +
+                    " Last docid: " + prevDocid);
         }
     }
 
@@ -62,31 +79,34 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
             throws IOException, InterruptedException {
         this.split = (FileSplit) split;
         conf = context.getConfiguration();
-        Path path = this.split.getPath();
-        FileSystem fs = path.getFileSystem(conf);
-        in = fs.open(path);
-        is = new BiendianDataInputStream(in);
-        valueClass = conf.getClass(INPUT_VALUE_CLASS, FileDocument.class, 
-                Writable.class);
-        if (!FileDocument.class.isAssignableFrom(valueClass)) {
+        Path dataPath = this.split.getPath();
+        FileSystem fs = dataPath.getFileSystem(conf);
+        dataIs = new BiendianDataInputStream(fs.open(dataPath));
+        dataIs.skipBytes(this.split.getStart());
+        Path ordPath = new Path(dataPath.getParent(), "Ordinals");
+        ordIs = new BiendianDataInputStream(fs.open(ordPath));
+        Path tsPath = new Path(dataPath.getParent(), "Timestamps");
+        tsIs = new BiendianDataInputStream(fs.open(tsPath));
+        valueClass = conf.getClass(INPUT_VALUE_CLASS, ForestDocument.class, 
+                               Writable.class);
+        if (!ForestDocument.class.isAssignableFrom(valueClass)) {
             throw new IllegalArgumentException("Unsupported " + 
                     INPUT_VALUE_CLASS);
         }
-        largeForestDir = new Path(path.getParent().getParent(), "Large");
+        largeForestDir = new Path(dataPath.getParent().getParent(), "Large");
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        while (!done) {
+        while (bytesRead < split.getLength() && !done) {
             ExpandedTree tree = getNextTree();
             if (tree == null) {
-                done = true;
-                return false;
+                continue;
             }
             String uri = tree.getDocumentURI();
             key = new DocumentURI(uri);
-            value = (VALUEIN) FileDocument.createDocument(conf, 
+            value = (VALUEIN) ForestDocument.createDocument(conf, 
                     largeForestDir, tree, uri);
             if (value != null) return true;
         }
@@ -96,11 +116,10 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
     private ExpandedTree getNextTree() throws IOException {
         int j;
         try {
-            int docid = is.readInt();
-            int csword = is.readInt();
-            int fdatw = is.readInt();
-            bytesRead += 96;
-            int checksum = csword & 0xfffffff0;
+            int docid = dataIs.readInt();
+            int csword = dataIs.readInt();
+            int fdatw = dataIs.readInt();
+            bytesRead += 12;
             int datWords = csword & 0x0000000f;
             int hdrWords = 2;
             if (datWords == 0) {
@@ -110,6 +129,7 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
             }
             if (docid == 0xffffffff && csword == 0xffffffff
                     && fdatw == 0xffffffff) {
+                LOG.trace("Reached the end");
                 done = true;
                 return null;
             }
@@ -118,6 +138,19 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
                         + position + ", docid = " + docid + ", prevDocid = "
                         + prevDocid);
             }
+            if (prevDocid == -1 && docid != 0) { // need to skip tsIs and ordIs
+                ordIs.skipBytes(docid * 8);
+                tsIs.skipBytes(docid * 8 * 2);
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("First docid: " + docid);
+                }
+            } else {
+                int docidGap = docid - prevDocid;
+                if (docidGap > 1) {
+                    ordIs.skipBytes(docidGap - 1);
+                    tsIs.skipBytes(docidGap - 1);
+                }
+            }
             prevDocid = docid;
             if (hdrWords == 2) {
                 j = datWords - 1;
@@ -125,19 +158,35 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
                 j = datWords;
             }
             j *= 4;
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(String.format("TreeData p %d d %d w %d",
-                        position, docid, datWords));
+            fragCnt++;
+            long nascent = tsIs.readLong();
+            long deleted = tsIs.readLong();
+            
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(String.format("TreeData p %d d %d w %d nt %d dt %d",
+                        position, docid, datWords, nascent, deleted));
+            }
+            
+            if (nascent == 0L || deleted != -1L) { // skip
+                position++;
+                bytesRead += dataIs.skipBytes(j);
+                if (nascent == 0L) nascentCnt++;
+                if (deleted != -1L) deletedCnt++;
+                return null;
             }
         } catch (EOFException e) {
             done = true;
             return null;
         }
-        byte[] buf = new byte[j];       
-        for (int bytesRead = 0; bytesRead < j; ) {
-            bytesRead += in.read(buf, bytesRead, j - bytesRead);
-        }
+       
+        // TODO: Is it better to read into a buffer or directly from the 
+        // stream then reset and skip?
+        byte[] buf = new byte[j];  
+        InputStream in = dataIs.getInputStream();
+        for (int read = 0; read < j; ) {
+            read += in.read(buf, read, j - read);
+        } 
+        bytesRead += j;
         position++;
         ByteArrayInputStream bis = new ByteArrayInputStream(buf);
         BiendianDataInputStream is = new BiendianDataInputStream(bis);
