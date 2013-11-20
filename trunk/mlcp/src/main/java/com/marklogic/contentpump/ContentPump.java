@@ -205,7 +205,7 @@ public class ContentPump implements ConfigConstants {
             return 0;
         } catch (Exception e) {
             LOG.error("Error running a ContentPump job", e); 
-            System.err.println(e.getMessage());
+            e.printStackTrace(System.err);
             return 1;
         }
     }
