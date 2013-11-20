@@ -40,7 +40,7 @@ import com.marklogic.mapreduce.Indentation;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.DatabaseDocument;
-import com.marklogic.mapreduce.FileDocument;
+import com.marklogic.mapreduce.ForestDocument;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
@@ -299,7 +299,7 @@ public enum Command implements ConfigConstants {
                             INPUT_FILE_TYPE_DEFAULT);
             InputType type = InputType.forName(inputTypeOption);
             if (!type.equals(InputType.DELIMITED_TEXT)) {
-                if (conf.getBoolean(ConfigConstants.CONF_SPLIT_INPUT, false)) {
+                if (conf.getBoolean(CONF_SPLIT_INPUT, false)) {
                     throw new IllegalArgumentException("The setting for " +
                         SPLIT_INPUT + " option is not supported for " 
                         + type);
@@ -369,11 +369,13 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
-                conf.set(ConfigConstants.CONF_MAX_SPLIT_SIZE, maxSize);
+                conf.set(CONF_MAX_SPLIT_SIZE1, maxSize);
+                conf.set(CONF_MAX_SPLIT_SIZE2, maxSize);
             }
             if (cmdline.hasOption(MIN_SPLIT_SIZE)) {
                 String minSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
-                conf.set(CONF_MIN_SPLIT_SIZE, minSize);
+                conf.set(CONF_MIN_SPLIT_SIZE1, minSize);
+                conf.set(CONF_MIN_SPLIT_SIZE2, minSize);
             }
             if (cmdline.hasOption(AGGREGATE_URI_ID)) {
                 String uriId = cmdline.getOptionValue(AGGREGATE_URI_ID);
@@ -571,7 +573,7 @@ public enum Command implements ConfigConstants {
                             " threads (" + inputType.getMinThreads() +
                             ")for the job.");
                 } else {
-                    conf.set(ConfigConstants.CONF_THREADS_PER_SPLIT, arg);
+                    conf.set(CONF_THREADS_PER_SPLIT, arg);
                 }
             }
             if (cmdline.hasOption(THREAD_COUNT)) {
@@ -600,12 +602,11 @@ public enum Command implements ConfigConstants {
                 if (arg == null || arg.equalsIgnoreCase("true")) {
                     if (isInputCompressed(cmdline)) {
                         LOG.warn(INPUT_COMPRESSED + " disables " + SPLIT_INPUT);
-                        conf.setBoolean(ConfigConstants.CONF_SPLIT_INPUT,
-                            false);
+                        conf.setBoolean(CONF_SPLIT_INPUT, false);
                     }
-                    conf.setBoolean(ConfigConstants.CONF_SPLIT_INPUT, true);
+                    conf.setBoolean(CONF_SPLIT_INPUT, true);
                 } else if (arg.equalsIgnoreCase("false")) {
-                    conf.setBoolean(ConfigConstants.CONF_SPLIT_INPUT, false);
+                    conf.setBoolean(CONF_SPLIT_INPUT, false);
                 } else {
                     throw new IllegalArgumentException(
                         "Unrecognized option argument for " + SPLIT_INPUT
@@ -625,8 +626,7 @@ public enum Command implements ConfigConstants {
             if (minThreads > 1) {
                 conf.setInt(CONF_MIN_THREADS, minThreads);
             }
-            int threadCnt = conf.getInt(ConfigConstants.CONF_THREADS_PER_SPLIT, 
-                                        1);
+            int threadCnt = conf.getInt(CONF_THREADS_PER_SPLIT, 1);
             threadCnt = Math.max(threadCnt, minThreads);
  
 			Class<? extends BaseMapper<?, ?, ?, ?>> internalMapperClass =
@@ -761,8 +761,7 @@ public enum Command implements ConfigConstants {
                 String wkdir = conf.get("mapred.working.dir");
                 Path outputDir = wkdir == null ? new Path(path) : new Path(
                     wkdir, path);
-                conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH,
-                    outputDir.toString());
+                conf.set(CONF_OUTPUT_FILEPATH, outputDir.toString());
             }
             if (cmdline.hasOption(OUTPUT_INDENTED)) {
                 String isIndented = cmdline.getOptionValue(OUTPUT_INDENTED);
@@ -1044,7 +1043,17 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
                 Path outputDir = new Path(conf.get("mapred.working.dir"), path);
-                conf.set(ConfigConstants.CONF_OUTPUT_FILEPATH, outputDir.toString());
+                conf.set(CONF_OUTPUT_FILEPATH, outputDir.toString());
+            }
+            if (cmdline.hasOption(MIN_SPLIT_SIZE)) {
+                String minSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
+                conf.set(CONF_MIN_SPLIT_SIZE1, minSize);
+                conf.set(CONF_MIN_SPLIT_SIZE2, minSize);
+            }
+            if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
+                String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
+                conf.set(CONF_MAX_SPLIT_SIZE1, maxSize);
+                conf.set(CONF_MAX_SPLIT_SIZE2, maxSize);
             }
         }
 
@@ -1094,7 +1103,7 @@ public enum Command implements ConfigConstants {
 
             setMapperClass(job, conf, cmdline);
             job.setMapOutputKeyClass(DocumentURI.class);
-            job.setMapOutputValueClass(FileDocument.class);
+            job.setMapOutputValueClass(ForestDocument.class);
             Class<? extends OutputFormat> outputFormatClass = 
                 Command.isOutputCompressed(cmdline) ?
                  ArchiveOutputFormat.class : SingleDocumentOutputFormat.class;

@@ -74,8 +74,9 @@ public class OutputArchive {
         if (fs.exists(zpath)) {
             throw new IOException(zpath + " already exists.");
         }
-        LOG.info("Creating output archive: " + zpath);
+        
         if (LOG.isDebugEnabled()) {
+            LOG.debug("Creating output archive: " + zpath);
             LOG.debug("Default charset: " + Charset.defaultCharset());
         }
         // if fs instanceof DistributedFileSystem, use hadoop api; otherwise,
@@ -144,7 +145,7 @@ public class OutputArchive {
             outputStream.write(bytes);
             outputStream.closeEntry();
         } catch (ZipException e) {
-            LOG.warn("skipping duplicate entry: " + entry.getName());
+            LOG.warn("Exception caught: " + e.getMessage() + entry.getName());
             return 0;
         }
 

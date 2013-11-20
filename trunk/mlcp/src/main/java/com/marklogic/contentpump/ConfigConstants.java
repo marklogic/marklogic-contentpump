@@ -123,8 +123,14 @@ public interface ConfigConstants {
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
         "mapreduce.marklogic.input.compressioncodec";
-    static final String CONF_MAX_SPLIT_SIZE = "mapred.max.split.size";
-    static final String CONF_MIN_SPLIT_SIZE = "mapred.min.split.size";
+    // for Hadoop1
+    static final String CONF_MAX_SPLIT_SIZE1 = "mapred.max.split.size";
+    static final String CONF_MIN_SPLIT_SIZE1 = "mapred.min.split.size";
+    // for Hadoop2
+    static final String CONF_MAX_SPLIT_SIZE2 = 
+        "mapreduce.input.fileinputformat.split.maxsize";
+    static final String CONF_MIN_SPLIT_SIZE2 = 
+        "mapreduce.input.fileinputformat.split.minsize";
     static final String CONF_AGGREGATE_URI_ID = 
         "mapreduce.marklogic.aggregate.uriid";
     static final String CONF_AGGREGATE_RECORD_ELEMENT = 
