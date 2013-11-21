@@ -759,9 +759,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
                 String wkdir = conf.get("mapred.working.dir");
-                Path outputDir = wkdir == null ? new Path(path) : new Path(
-                    wkdir, path);
-                conf.set(CONF_OUTPUT_FILEPATH, outputDir.toString());
+                if (wkdir != null) {
+                    path = new Path(wkdir, path).toString();
+                }
+                conf.set(CONF_OUTPUT_FILEPATH, path);
             }
             if (cmdline.hasOption(OUTPUT_INDENTED)) {
                 String isIndented = cmdline.getOptionValue(OUTPUT_INDENTED);
@@ -1042,8 +1043,11 @@ public enum Command implements ConfigConstants {
             applyFilteringConfigOptions(conf, cmdline);  
             if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
-                Path outputDir = new Path(conf.get("mapred.working.dir"), path);
-                conf.set(CONF_OUTPUT_FILEPATH, outputDir.toString());
+                String wkdir = conf.get("mapred.working.dir");
+                if (wkdir != null) {
+                    path = new Path(wkdir, path).toString();
+                }
+                conf.set(CONF_OUTPUT_FILEPATH, path);
             }
             if (cmdline.hasOption(MIN_SPLIT_SIZE)) {
                 String minSize = cmdline.getOptionValue(MIN_SPLIT_SIZE);
