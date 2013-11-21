@@ -180,10 +180,10 @@ public class ForestInputFormat<VALUE> extends
                 
                 splits.add(split);
             }
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Made " + splits.size() + " splits.");
-            }
         } 
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Made " + splits.size() + " splits.");
+        }
     
         return splits;
     }
