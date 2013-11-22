@@ -80,6 +80,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected int MAXTRIPLESPERDOCUMENT = 100;
     protected long INMEMORYTHRESHOLD = 1 * 1024 * 1000; // 1Mb
+    protected long INJESTIONNOTIFYSTEP = 10000;
 
     protected Dataset dataset = null;
     protected StmtIterator statementIter = null;
@@ -111,6 +112,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long pos;
     protected long end;
     protected boolean compressed;
+    protected long injestedTriples = 0;
 
     private static final Object jenaLock = new Object();
     
@@ -490,6 +492,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             write(predicate(stmt.getPredicate()));
             write(object(stmt.getObject()));
             write("</sem:triple>\n");
+            notifyUser();
             max--;
         }
         write("</sem:triples>\n");
@@ -532,6 +535,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             write(object(stmt.getObject()));
             write("</sem:triple>");
             max--;
+            notifyUser();
         }
         write("</sem:triples>\n");
 
@@ -564,6 +568,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             write(predicate(stmt.getPredicate()));
             write(object(stmt.getObject()));
             write("</sem:triple>");
+            notifyUser();
             max--;
 
             boolean moreTriples = statementIter.hasNext();
@@ -620,6 +625,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             write(predicate(triple.getPredicate()));
             write(object(triple.getObject()));
             write("</sem:triple>");
+            notifyUser();
             max--;
         }
         write("</sem:triples>\n");
@@ -651,6 +657,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             write(predicate(quad.getPredicate()));
             write(object(quad.getObject()));
             write("</sem:triple>");
+            notifyUser();
             max--;
         }
         write("</sem:triples>\n");
@@ -726,6 +733,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         for (String t : triples) {
             write(t);
+            notifyUser();
         }
         write("</sem:triples>\n");
 
@@ -784,6 +792,13 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         return collection;
+    }
+
+    protected void notifyUser() {
+        injestedTriples++;
+        if (injestedTriples % INJESTIONNOTIFYSTEP == 0) {
+            LOG.info("Injested " + injestedTriples + " triples from " + origFn);
+        }
     }
 
     protected class ParserErrorHandler implements ErrorHandler {
