@@ -12,19 +12,25 @@ public abstract class ForestDocument implements MarkLogicDocument {
     public static final Log LOG = LogFactory.getLog(
             ForestDocument.class);
     
+    private long fragmentOrdinal;
+    private String[] collections;
+    
     public static ForestDocument createDocument(Configuration conf,
             Path forestDir, ExpandedTree tree, String uri) {
         byte rootNodeKind = tree.rootNodeKind();
+        ForestDocument doc = null;
         switch (rootNodeKind) {
             case NodeKind.BINARY:
                 if (tree.binaryData == null) {
-                    return new LargeBinaryDocument(conf, forestDir, tree);
+                    doc = new LargeBinaryDocument(conf, forestDir, tree);
                 } else {
-                    return new RegularBinaryDocument(tree);
+                    doc = new RegularBinaryDocument(tree);
                 }
+                break;
             case NodeKind.ELEM:
             case NodeKind.TEXT:
-                return new DOMDocument(tree);     
+                doc = new DOMDocument(tree);  
+                break;
             default:
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Skipping unsupported node kind "
@@ -32,5 +38,24 @@ public abstract class ForestDocument implements MarkLogicDocument {
                 }
                 return null;
         }
+        doc.setFragmentOrdinal(tree.getFragmentOrdinal());
+        doc.setCollections(tree.getCollections());
+        return doc;
+    }
+
+    public long getFragmentOrdinal() {
+        return fragmentOrdinal;
+    }
+    
+    private void setFragmentOrdinal(long fragOrdinal) {
+        fragmentOrdinal = fragOrdinal; 
+    }
+    
+    public String[] getCollections() {
+        return collections;
+    }
+    
+    private void setCollections(String[] cols) {
+        collections = cols;
     }
 }
