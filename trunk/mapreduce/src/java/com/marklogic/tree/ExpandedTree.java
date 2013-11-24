@@ -1,6 +1,7 @@
 package com.marklogic.tree;
 
 import java.nio.charset.Charset;
+import java.util.Iterator;
 
 import org.apache.hadoop.fs.Path;
 import org.w3c.dom.Node;
@@ -96,6 +97,7 @@ public class ExpandedTree {
 	public int schemaRepUID; // unsigned
 	public long schemaTimestamp; // uint64_t
 //	uint64_t languageHash; // probably not used
+	protected long fragmentOrdinal;
 
 	public boolean atomEquals(int atom, byte value[]) {
 		int p = 0;
@@ -139,6 +141,16 @@ public class ExpandedTree {
 //    	System.out.println("getText(" + index + ") returning [" + buf.toString() + "] length " + buf.length());
         return buf.toString();
 	}
+	
+    public String[] getCollections() {
+        int index = colsTextRepID;
+        int cnt = textReps[index++];
+        String[] cols = new String[cnt];
+        for (int i = 0; i < cnt; ++i) {
+            cols[i] = atomString(textReps[index++]);
+        }
+        return cols;
+    }
 
 //	public Node rootNode() {
 //		return node(0);
@@ -210,5 +222,13 @@ public class ExpandedTree {
         String dir = String.format("%03x", dirKey);
         String fileName = String.format("%16x", binaryKey);
         return new Path(dir, fileName);
+    }
+
+    public long getFragmentOrdinal() {
+        return fragmentOrdinal;
+    }
+    
+    public void setFragmentOrdinal(long fragOrdinal) {
+        fragmentOrdinal = fragOrdinal;       
     }
 }

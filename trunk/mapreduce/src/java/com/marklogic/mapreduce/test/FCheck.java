@@ -549,6 +549,7 @@ public class FCheck {
             	// TODO: count and verify bytes read
 //            	int computed = computeChecksum(docid, in, datWords);
                 System.out.println(tree.getDocumentURI());
+       
                 byte kind = tree.rootNodeKind();
                 if (kind == NodeKind.BINARY) {
                     System.out.println("binary root");

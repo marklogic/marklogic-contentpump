@@ -91,7 +91,7 @@ public class ForestInputFormat<VALUE> extends
             if (treeDataSize == 0) {
                 // unexpected, give up this stand
                 LOG.warn("Found empty TreeData file.  Skipping...");
-                break;
+                continue; // skipping this stand
             }
             Path treeDataPath = treeDataStatus.getPath();
             long blockSize = treeDataStatus.getBlockSize();

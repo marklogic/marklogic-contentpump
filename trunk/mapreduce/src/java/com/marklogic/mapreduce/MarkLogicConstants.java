@@ -390,6 +390,27 @@ public interface MarkLogicConstants {
       */       
       static final String INDENTED =      
           "mapreduce.marklogic.input.indented"; 
+      /**
+       * The config property name (<code>{@value}</code>)
+       * which, if set, indicates to only include documents with one or many of
+       * specified collection URIs.
+       */
+      static final String COLLECTION_FILTER =
+          "mapreduce.marklogic.input.filter.collection";
+      /**
+       * The config property name (<code>{@value}</code>)
+       * which, if set, indicates to only include documents with one of 
+       * specified directory URIs.
+       */
+      static final String DIRECTORY_FILTER =
+          "mapreduce.marklogic.input.filter.directory";
+      /**
+       * The config property name (<code>{@value}</code>)
+       * which, if set, indicates to only include documents with one of 
+       * specified types.
+       */
+      static final String TYPE_FILTER =
+          "mapreduce.marklogic.input.filter.type";
     
     // output-related config property names
     /**

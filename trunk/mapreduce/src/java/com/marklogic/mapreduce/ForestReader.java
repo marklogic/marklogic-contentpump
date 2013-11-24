@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -19,6 +20,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.io.BiendianDataInputStream;
 import com.marklogic.tree.CompressedTreeDecoder;
 import com.marklogic.tree.ExpandedTree;
+import com.marklogic.tree.NodeKind;
 
 public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
         implements MarkLogicConstants {
@@ -39,6 +41,9 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
     protected int nascentCnt = 0;
     protected int deletedCnt = 0;
     protected int fragCnt = 0;
+    protected Collection<String> colFilters;
+    protected Collection<String> dirFilters;
+    protected Collection<String> typeFilters;
 
     @Override
     public void close() throws IOException {
@@ -94,6 +99,16 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
                     INPUT_VALUE_CLASS);
         }
         largeForestDir = new Path(dataPath.getParent().getParent(), "Large");
+        colFilters = conf.getStringCollection(COLLECTION_FILTER);
+        dirFilters = conf.getStringCollection(DIRECTORY_FILTER);
+        for (String dir : dirFilters) {
+            if (!dir.endsWith("/")) {
+                String newDir = dir + "/";
+                dirFilters.remove(dir);
+                dirFilters.add(newDir);
+            }
+        }
+        typeFilters = conf.getStringCollection(TYPE_FILTER);
     }
 
     @SuppressWarnings("unchecked")
@@ -105,12 +120,63 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
                 continue;
             }
             String uri = tree.getDocumentURI();
+            if (!applyFilter(uri, tree)) {
+                continue;
+            }
             key = new DocumentURI(uri);
             value = (VALUEIN) ForestDocument.createDocument(conf, 
                     largeForestDir, tree, uri);
             if (value != null) return true;
         }
         return false;
+    }
+
+    protected boolean applyFilter(String uri, ExpandedTree tree) {
+        // apply directory filter
+        if (!dirFilters.isEmpty()) {
+            boolean match = false;
+            for (String dir : dirFilters) {
+                if (uri.startsWith(dir)) {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) return false;
+        }
+        // apply type filter
+        if (!typeFilters.isEmpty()) {
+            byte kind = tree.rootNodeKind();
+            boolean match = false;
+            for (String type : typeFilters) {
+                if (type.equalsIgnoreCase("BINARY") && 
+                    kind == NodeKind.BINARY) {
+                    match = true;
+                    break;
+                } else if (type.equalsIgnoreCase("TEXT") && 
+                    kind == NodeKind.TEXT) {
+                    match = true;
+                    break;
+                } else if (type.equalsIgnoreCase("XML") && 
+                    kind == NodeKind.ELEM) {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) return false;
+        }
+        // apply collection filter
+        if (!colFilters.isEmpty()) {
+            String[] cols = tree.getCollections();
+            boolean match = false;
+            for (String col : cols) {
+                if (colFilters.contains(col)) {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) return false;
+        }
+        return true;
     }
 
     private ExpandedTree getNextTree() throws IOException {
@@ -145,10 +211,11 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
                     LOG.trace("First docid: " + docid);
                 }
             } else {
-                int docidGap = docid - prevDocid;
-                if (docidGap > 1) {
-                    ordIs.skipBytes(docidGap - 1);
-                    tsIs.skipBytes(docidGap - 1);
+                int docidDiff = docid - prevDocid;
+                if (docidDiff > 1) {
+                    int toSkip = docidDiff * 8;
+                    ordIs.skipBytes(toSkip);
+                    tsIs.skipBytes(toSkip * 2);
                 }
             }
             prevDocid = docid;
@@ -178,19 +245,25 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
             done = true;
             return null;
         }
-       
-        // TODO: Is it better to read into a buffer or directly from the 
-        // stream then reset and skip?
-        byte[] buf = new byte[j];  
-        InputStream in = dataIs.getInputStream();
-        for (int read = 0; read < j; ) {
-            read += in.read(buf, read, j - read);
-        } 
-        bytesRead += j;
-        position++;
-        ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-        BiendianDataInputStream is = new BiendianDataInputStream(bis);
-        ExpandedTree tree = new CompressedTreeDecoder().decode(is);
-        return tree;
+        try {
+            // TODO: Is it better to read into a buffer or directly from the 
+            // stream then reset and skip?
+            byte[] buf = new byte[j];  
+            InputStream in = dataIs.getInputStream();
+            for (int read = 0; read < j; ) {
+                read += in.read(buf, read, j - read);
+            } 
+            bytesRead += j;
+            position++;
+            ByteArrayInputStream bis = new ByteArrayInputStream(buf);
+            BiendianDataInputStream is = new BiendianDataInputStream(bis);
+            ExpandedTree tree = new CompressedTreeDecoder().decode(is);
+            tree.setFragmentOrdinal(ordIs.readLong());
+            return tree;
+        } catch (Exception e) {
+            LOG.error("Unexpected error occurred reading forest data", e);
+            done = true;
+            return null;
+        }
     }
 }
