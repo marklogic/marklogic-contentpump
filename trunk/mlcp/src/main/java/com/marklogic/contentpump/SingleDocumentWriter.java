@@ -55,7 +55,8 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
     public SingleDocumentWriter(Path path, Configuration conf) {
         dir = path;
         this.conf = conf;
-        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
+        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, 
+                "UTF-8");
         if (LOG.isDebugEnabled()) {
             LOG.debug("Default charset: " + Charset.defaultCharset());
         }

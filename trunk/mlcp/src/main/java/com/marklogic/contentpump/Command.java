@@ -1039,8 +1039,7 @@ public enum Command implements ConfigConstants {
     },
     EXTRACT {
         @Override
-        public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
-            applyFilteringConfigOptions(conf, cmdline);  
+        public void applyConfigOptions(Configuration conf, CommandLine cmdline) {  
             if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
                 String wkdir = conf.get("mapred.working.dir");
@@ -1059,12 +1058,23 @@ public enum Command implements ConfigConstants {
                 conf.set(CONF_MAX_SPLIT_SIZE1, maxSize);
                 conf.set(CONF_MAX_SPLIT_SIZE2, maxSize);
             }
+            if (cmdline.hasOption(COLLECTION_FILTER)) {
+                String colFilter = cmdline.getOptionValue(COLLECTION_FILTER);
+                conf.set(CONF_COLLECTION_FILTER, colFilter);
+            }
+            if (cmdline.hasOption(DIRECTORY_FILTER)) {
+                String dirFilter = cmdline.getOptionValue(DIRECTORY_FILTER);
+                conf.set(CONF_DIRECTORY_FILTER, dirFilter);
+            }
+            if (cmdline.hasOption(TYPE_FILTER)) {
+                String typeFilter = cmdline.getOptionValue(TYPE_FILTER);
+                conf.set(MarkLogicConstants.TYPE_FILTER, typeFilter);
+            }
         }
 
         @Override
         public void configOptions(Options options) {
             configCommonOptions(options); 
-            configFilteringOptions(options);
             Option inputFilePath = OptionBuilder
                 .withArgName("path")
                 .hasArg()
@@ -1092,7 +1102,25 @@ public enum Command implements ConfigConstants {
                 .hasOptionalArg()
                 .withDescription("Whether to compress the output document")
                 .create(OUTPUT_COMPRESS);
-            options.addOption(exportCompress);        
+            options.addOption(exportCompress);   
+            Option df = OptionBuilder
+                .withArgName("String")
+                .hasArg()
+                .withDescription("Comma-separated list of directories")
+                .create(DIRECTORY_FILTER);
+            options.addOption(df);
+            Option cf = OptionBuilder
+                .withArgName("String")
+                .hasArg()
+                .withDescription("Comma-separated list of collections")
+                .create(COLLECTION_FILTER);
+            options.addOption(cf);
+            Option tf = OptionBuilder
+                .withArgName("String")
+                .hasArg()
+                .withDescription("Comma-separated list of document types")
+               .create(TYPE_FILTER);
+            options.addOption(tf);
         }
 
         @Override
