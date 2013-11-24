@@ -15,6 +15,8 @@
  */
 package com.marklogic.contentpump;
 
+import com.marklogic.mapreduce.MarkLogicConstants;
+
 /**
  * Constants for configuration option names and values.
  * 
@@ -85,6 +87,7 @@ public interface ConfigConstants {
     static final String DEFAULT_COPY_QUALITY = "true";
     static final String COLLECTION_FILTER = "collection_filter";
     static final String DIRECTORY_FILTER = "directory_filter";
+    static final String TYPE_FILTER = "type_filter";
     static final String DOCUMENT_SELECTOR = "document_selector";
     static final String SNAPSHOT = "snapshot";
     static final String OUTPUT_TYPE = "output_type";
@@ -166,10 +169,6 @@ public interface ConfigConstants {
         "mapreduce.marklogic.input.sequencefile.valueclass";
     static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE = 
         "mapreduce.marklogic.input.sequencefile.valuetype";
-    static final String CONF_DIRECTORY_FILTER = 
-        "mapreduce.marklogic.directory.filter";
-    static final String CONF_COLLECTION_FILTER = 
-        "mapreduce.marklogic.collection.filter";
     static final String CONF_OUTPUT_TYPE = "mapreduce.marklogic.output.type";
     static final String CONF_COPY_COLLECTIONS = 
         "mapreduce.marklogic.copycollections";
@@ -184,10 +183,20 @@ public interface ConfigConstants {
         "mapreduce.marklogic.multithreadedmapper.threads";
     static final String CONF_MULTITHREADEDMAPPER_CLASS = 
         "mapreduce.marklogic.multithreadedmapper.class";
-    static final String CONF_TRANSFORM_MODULE = "mapreduce.marklogic.transformmodule";
-    static final String CONF_TRANSFORM_NAMESPACE = "mapreduce.marklogic.transformnamespace";
-    static final String CONF_TRANSFORM_FUNCTION = "mapreduce.marklogic.transformfunction";
-    static final String CONF_TRANSFORM_PARAM = "mapreduce.marklogic.transformparam";
-    static final String CONF_MIMETYPES = "mapreduce.marklogic.mimetypes";
-    static final String CONF_MIN_THREADS = "mapreduce.marklogic.minthreads";
+    static final String CONF_TRANSFORM_MODULE = 
+            "mapreduce.marklogic.transformmodule";
+    static final String CONF_TRANSFORM_NAMESPACE = 
+            "mapreduce.marklogic.transformnamespace";
+    static final String CONF_TRANSFORM_FUNCTION = 
+            "mapreduce.marklogic.transformfunction";
+    static final String CONF_TRANSFORM_PARAM = 
+            "mapreduce.marklogic.transformparam";
+    static final String CONF_MIMETYPES = 
+            "mapreduce.marklogic.mimetypes";
+    static final String CONF_MIN_THREADS = 
+            "mapreduce.marklogic.minthreads";
+    static final String CONF_COLLECTION_FILTER = 
+            MarkLogicConstants.COLLECTION_FILTER;
+    static final String CONF_DIRECTORY_FILTER = 
+            MarkLogicConstants.DIRECTORY_FILTER;
 }
