@@ -217,7 +217,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         String name = xmlSR.getLocalName();
         String namespace = xmlSR.getNamespaceURI();
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Start-tag: " + name);
+            LOG.trace("Start-tag: " + xmlSR.getName() + " at depth " + currDepth);
         }
         if (namespace == null) {
             String prefix = xmlSR.getPrefix();
@@ -347,7 +347,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         String name = xmlSR.getLocalName();
         String namespace = xmlSR.getNamespaceURI();
         if (LOG.isTraceEnabled()) {
-            LOG.trace("End-tag: " + name);
+            LOG.trace("End-tag: " + xmlSR.getName() + " at depth " + currDepth);
         }
         if (namespace == null) {
             String prefix = xmlSR.getPrefix();
@@ -378,8 +378,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             if( currDepth == 1) {
                 cleanupEndElement();
             } else {
-                currDepth--;
                 removeNameSpaceDecl();
+                currDepth--;
             }
             return true;
         }
@@ -419,8 +419,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         newDoc = false;
         // reset buffer
         buffer.setLength(0);
-        currDepth--;
         removeNameSpaceDecl();
+        currDepth--;        
     }
  
     @Override
