@@ -88,7 +88,7 @@ public class CompressedTreeDecoder {
         else {
             rep.keys = new long[rep.numKeys];
             for (int i = 0; i < rep.numKeys; ++i) {
-                rep.keys[i] = in.readLong();
+                rep.keys[i] = decoder.decode64bits();
             }
         }
 
