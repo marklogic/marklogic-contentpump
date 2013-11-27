@@ -144,6 +144,7 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
             } else {
                 key.setUri(uri);
             }
+            return true;
         }
         return false;
     }
