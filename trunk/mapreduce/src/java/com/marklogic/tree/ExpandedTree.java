@@ -157,7 +157,9 @@ public class ExpandedTree {
 //	}
 	
 	public byte rootNodeKind() {
-	    return nodeKind[((DocumentImpl)node(0)).getFirstChildIndex()];
+	    if (node(0) != null) {
+	        return nodeKind[((DocumentImpl)node(0)).getFirstChildIndex()];
+	    } else return nodeKind[0];
 	}
 	
 	public Node node(int i) {
@@ -224,11 +226,15 @@ public class ExpandedTree {
         return new Path(dir, fileName);
     }
 
+    public boolean containLinks() {
+        return numLinkNodeReps > 0;
+    }
+
     public long getFragmentOrdinal() {
         return fragmentOrdinal;
     }
-    
-    public void setFragmentOrdinal(long fragOrdinal) {
-        fragmentOrdinal = fragOrdinal;       
-    }
+
+    public void setFragmentOrdinal(long fragmentOrdinal) {
+        this.fragmentOrdinal = fragmentOrdinal;
+    }    
 }

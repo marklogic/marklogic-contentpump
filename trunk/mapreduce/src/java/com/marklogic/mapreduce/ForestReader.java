@@ -120,13 +120,30 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
                 continue;
             }
             String uri = tree.getDocumentURI();
+            // no support for fragments
+            if (tree.containLinks() || tree.getFragmentOrdinal() != 0) {
+                // send to DocumentMapper for book keeping
+                if (LOG.isDebugEnabled() && tree.containLinks()) {
+                    LOG.debug("Skipping fragmented document: " + uri);
+                }
+                key = null;
+                value = null;
+                return true;
+            }
             if (!applyFilter(uri, tree)) {
                 continue;
             }
-            key = new DocumentURI(uri);
             value = (VALUEIN) ForestDocument.createDocument(conf, 
                     largeForestDir, tree, uri);
-            if (value != null) return true;
+            if (value == null) { // send to DocumentMapper for book keeping
+                key = null;
+                return true;
+            }
+            if (key == null) {
+                key = new DocumentURI(uri);
+            } else {
+                key.setUri(uri);
+            }
         }
         return false;
     }
