@@ -1,10 +1,34 @@
+/*
+ * Copyright 2003-2013 MarkLogic Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.marklogic.io;
 
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+/**
+ * Decoder used to decode compressed tree data.
+ * 
+ * @author jchen
+ */
 public class Decoder {
+    public static final Log LOG = LogFactory.getLog(Decoder.class);
     
     DataInput in;
 
@@ -165,9 +189,13 @@ public class Decoder {
                 break;
             }
         }
-        // System.out.print("unary1 "); for (int i=0; i<256; i++) {
-        // System.out.print(String.format("%02x ", table[i])); }
-        // System.out.println();
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("unary1 "); 
+            for (int i=0; i<256; i++) {
+                LOG.trace(String.format("%02x \n", table[i])); 
+            }
+        }
+        
         return table;
     }
 
@@ -204,9 +232,12 @@ public class Decoder {
                 table[i] = (byte)(((bbits + ubits) << 5) | val);
             }
         }
-        // System.out.print("unsigned1 "); for (int i=0; i<64; i++) {
-        // System.out.print(String.format("%02x ", table[i])); }
-        // System.out.println();
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("unsigned1 "); 
+            for (int i=0; i<64; i++) {
+                LOG.trace(String.format("%02x \n", table[i])); 
+            }
+        }
         return table;
     }
 
@@ -227,9 +258,12 @@ public class Decoder {
                 table[i] = (short)(((bbits + ubits) << 12) | val);
             }
         }
-        // System.out.print("unsigned2 "); for (int i=0; i<64; i++) {
-        // System.out.print(String.format("%04x ", table[i])); } 
-        // System.out.println();
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("unsigned2 "); 
+            for (int i=0; i<64; i++) {
+                LOG.trace(String.format("%04x \n", table[i])); 
+            }
+        }
         return table;
     }
 
@@ -250,77 +284,14 @@ public class Decoder {
                 table[i] = (((bbits + ubits) << 16) | val);
             }
         }
-        /*
-        int table[] = new int[65536];
-        for (int i = 0; i < 65536; i++) {
-            long entry = unary2[i]&0xffL;
-            long bbits = entry * 4L;
-            long ubits = entry + 1L;
-            if (((bbits + ubits)&0xffffL) > 16L)
-                table[i] = 0xffff0000;
-            else {
-            	long val = (i >>> ubits) & ((1 << bbits) - 1);
-                for (int j = 0; j < bbits; j += 4)
-                    val += (1 << j);
-                table[i] = (int)(((bbits + ubits) << 16) | val);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("unsigned3 "); 
+            for (int i=0; i<64; i++) {
+                LOG.trace(String.format("%08x \n", table[i])); 
             }
         }
-        */
-        // System.out.print("unsigned3 "); for (int i=0; i<64; i++) {
-        // System.out.print(String.format("%08x ", table[i])); } 
-        // System.out.println();
         return table;
     }
 
     static final int unsigned3[] = unsigned3Make();
-
-/*
-    static const unsigned short*
-    signed1Make()
-    {
-      unsigned short* table = new unsigned short[64];
-      for (unsigned i=0; i<64; i++) {
-        unsigned entry = Decoder::unsigned1[i];
-        unsigned nbits = entry>>>5;
-        unsigned d = entry&0x1f;
-        unsigned value = ((d&1)?(int)((d+1)/2):-(int)(d/2));
-        table[i] = (unsigned short)((nbits<<8)|value);
-      }
-      return table;
-    }
-
-    const unsigned short* const Decoder::signed1 = signed1Make();
-
-    static const unsigned*
-    signed2Make()
-    {
-      unsigned* table = new unsigned[2048];
-      for (unsigned i=0; i<2048; i++) {
-        unsigned entry = Decoder::unsigned2[i];
-        unsigned nbits = entry>>>12;
-        unsigned d = entry&0xfff;
-        unsigned value = ((d&1)?(int)((d+1)/2):-(int)(d/2));
-        table[i] = (nbits<<16)|value;
-      }
-      return table;
-    }
-
-    const unsigned* const Decoder::signed2 = signed2Make();
-
-    static const unsigned*
-    signed3Make()
-    {
-      unsigned* table = new unsigned[65536];
-      for (unsigned i=0; i<65536; i++) {
-        unsigned entry = Decoder::unsigned3[i];
-        unsigned nbits = entry>>>16;
-        unsigned d = entry&0xffff;
-        unsigned value = ((d&1)?(int)((d+1)/2):-(int)(d/2));
-        table[i] = (nbits<<16)|value;
-      }
-      return table;
-    }
-
-    const unsigned* const Decoder::signed3 = signed3Make();
-*/
 }

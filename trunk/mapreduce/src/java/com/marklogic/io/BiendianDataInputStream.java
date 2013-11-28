@@ -1,3 +1,18 @@
+/*
+ * Copyright 2003-2013 MarkLogic Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.marklogic.io;
 
 import java.io.DataInput;
@@ -6,7 +21,11 @@ import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 
-// TODO: implement directly over nio for better performance
+/**
+ * InputStream able to handle both big-endian and little-endian data format.
+ * 
+ * @author jchen
+ */
 public class BiendianDataInputStream extends InputStream implements DataInput {
 
     private final InputStream in;
@@ -94,8 +113,7 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
             if ((a | b) < 0)
                 throw new EOFException();
             return (b << 8) + (a << 0);
-        }
-        else {
+        } else {
             return di.readUnsignedShort();
         }
     }
@@ -107,8 +125,7 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
             if ((a | b) < 0)
                 throw new EOFException();
             return (char)((b << 8) + (a << 0));
-        }
-        else {
+        } else {
             return di.readChar();
         }
     }
@@ -116,21 +133,23 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
     public final int readInt() throws IOException {
         di.readFully(buf, 0, 4);
         if (littleEndian) {
-            return (((buf[3] & 255) << 24) + ((buf[2] & 255) << 16) + ((buf[1] & 255) << 8) + ((buf[0] & 255) << 0));
-        }
-        else {
-            return (((buf[0] & 255) << 24) + ((buf[1] & 255) << 16) + ((buf[2] & 255) << 8) + ((buf[3] & 255) << 0));
+            return (((buf[3] & 255) << 24) + ((buf[2] & 255) << 16) + 
+                    ((buf[1] & 255) << 8) + ((buf[0] & 255) << 0));
+        } else {
+            return (((buf[0] & 255) << 24) + ((buf[1] & 255) << 16) + 
+                    ((buf[2] & 255) << 8) + ((buf[3] & 255) << 0));
         }
     }
 
     public final long readLong() throws IOException {
         if (littleEndian) {
             di.readFully(buf, 0, 8);
-            return (((long)buf[7] << 56) + ((long)(buf[6] & 255) << 48) + ((long)(buf[5] & 255) << 40)
-                    + ((long)(buf[4] & 255) << 32) + ((long)(buf[3] & 255) << 24) + ((buf[2] & 255) << 16)
+            return (((long)buf[7] << 56) + ((long)(buf[6] & 255) << 48) 
+                    + ((long)(buf[5] & 255) << 40)
+                    + ((long)(buf[4] & 255) << 32) 
+                    + ((long)(buf[3] & 255) << 24) + ((buf[2] & 255) << 16)
                     + ((buf[1] & 255) << 8) + ((buf[0] & 255) << 0));
-        }
-        else {
+        } else {
             return di.readLong();
         }
     }

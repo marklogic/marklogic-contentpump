@@ -30,7 +30,7 @@ import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XdmBinary;
 
 /**
- * MarkLogic documents retrieved from queries.
+ * MarkLogic documents retrieved from a MarkLogic database.
  *  
  * @author jchen
  *
