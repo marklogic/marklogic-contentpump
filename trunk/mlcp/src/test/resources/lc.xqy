@@ -26,6 +26,7 @@ as map:map*
   let $dummy := xdmp:log(fn:concat("nodekind:",$nodekind))
   let $newVal := switch ($nodekind)
     case "binary" return $node
+    case "text" return <text>{$node}</text>
     case "document" return m:lc($node)
     case "element" return m:lc($node)
     default return $node

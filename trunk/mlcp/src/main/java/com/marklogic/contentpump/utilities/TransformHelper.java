@@ -75,7 +75,7 @@ public class TransformHelper {
             String suff = uri.substring(idx + 1, uri.length());
             if (suff.equalsIgnoreCase("xml"))
                 return "xml";
-            format = (Text) TransformOutputFormat.mimetypeMap.get(suff);
+            format = (Text) TransformOutputFormat.mimetypeMap.get(new Text(suff));
         }
         if (format == null) {
             return "binary";
