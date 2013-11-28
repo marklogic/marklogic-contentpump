@@ -1,8 +1,24 @@
+/*
+ * Copyright 2003-2013 MarkLogic Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.marklogic.tree;
 
 import java.nio.charset.Charset;
-import java.util.Iterator;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.w3c.dom.Node;
 
@@ -14,10 +30,15 @@ import com.marklogic.dom.NodeImpl;
 import com.marklogic.dom.ProcessingInstructionImpl;
 import com.marklogic.dom.TextImpl;
 
+/**
+ * Java equivalent of ExpandedTreeRep in Tree.h
+ * 
+ * @author jchen
+ */
 public class ExpandedTree {
-
+    public static final Log LOG = LogFactory.getLog(ExpandedTree.class);
 	private static final Charset UTF8 = Charset.forName("UTF8");
-// TODO: check data type correctness: byte for char, int for unsigned
+
 	NodeImpl nodes[]; // NodeRep*
 	
 	public long ordinal;  // uint64_t
@@ -28,10 +49,6 @@ public class ExpandedTree {
 	public byte atomData[]; // char*
 	public String atomString[];
 	public int atomIndex[]; // unsigned*
-//	uint64_t* atomHashes;
-//	uint64_t* atomLCHashes;
-//	uint64_t* atomDLHashes;
-//	uint64_t* atomLCDLHashes;
 	
 	public long nodeOrdinal[];
 	public byte nodeKind[];
@@ -96,15 +113,17 @@ public class ExpandedTree {
 	public int colsTextRepID; // unsigned
 	public int schemaRepUID; // unsigned
 	public long schemaTimestamp; // uint64_t
-//	uint64_t languageHash; // probably not used
-	protected long fragmentOrdinal;
+
+	private long fragmentOrdinal;
 
 	public boolean atomEquals(int atom, byte value[]) {
 		int p = 0;
 		int i = atomIndex[atom] + 1;
 		while (p < value.length) {
 			byte b = atomData[i];
-			// System.out.println(String.format("%02x %02x", b, value[p]));
+			if (LOG.isTraceEnabled()) {
+			    LOG.trace(String.format("%02x %02x", b, value[p]));
+			}
 			if ((b == 0) || (b != value[p]))
 				return false;
 			p++;
@@ -114,15 +133,13 @@ public class ExpandedTree {
 	}
 
 	public String atomString(int i) {
-		// TODO: memorize only node names
 		String value = null;
 		if (atomString == null) {
 			atomString = new String[atomIndex.length];
-		} else {
+		} else if (atomString.length > i){
 			value = atomString[i];
 		}
 		if (value == null) {
-			// TODO: why all the +1 / -2 here?  not quite the same in C++
 			value = atomString[i] = new String(atomData, atomIndex[i] + 1,
 					atomIndex[i + 1] - atomIndex[i] - 2, UTF8);
 		}
@@ -130,15 +147,20 @@ public class ExpandedTree {
 	}
 	
 	public String getText(int index) {
-    	// TODO: keep for reuse (?)
-		// TODO: count bytes, build once rather than calling atomString
 	    if (textReps==null) return null;
     	StringBuilder buf = new StringBuilder();
     	for (int i=textReps[index++]; i > 0; --i) {
-//    		System.out.println("atom " + textReps[index] + " [" + atomString(textReps[index]) + "] length " + atomString(textReps[index]).length());
+    	    if (LOG.isTraceEnabled()) {
+    	        LOG.trace("atom " + textReps[index] + " [" + 
+    	            atomString(textReps[index]) + "] length " + 
+    	            atomString(textReps[index]).length());
+    	    }
     		buf.append(atomString(textReps[index++]));
     	}
-//    	System.out.println("getText(" + index + ") returning [" + buf.toString() + "] length " + buf.length());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("getText(" + index + ") returning [" + buf.toString() + 
+                    "] length " + buf.length());
+        }
         return buf.toString();
 	}
 	
@@ -151,15 +173,13 @@ public class ExpandedTree {
         }
         return cols;
     }
-
-//	public Node rootNode() {
-//		return node(0);
-//	}
 	
 	public byte rootNodeKind() {
 	    if (node(0) != null) {
 	        return nodeKind[((DocumentImpl)node(0)).getFirstChildIndex()];
-	    } else return nodeKind[0];
+	    } else {
+	        return nodeKind[0];
+	    }
 	}
 	
 	public Node node(int i) {
@@ -181,10 +201,8 @@ public class ExpandedTree {
 				nodes[i] = new TextImpl(this, i);
 				break;
 			case NodeKind.LINK:
-				System.out.println("No support for link node.");
 				break;
 			case NodeKind.NS:
-				System.out.println("No support for namespace node.");
 				break;
             case NodeKind.DOC:
                 nodes[i] = new DocumentImpl(this, i);
@@ -196,19 +214,11 @@ public class ExpandedTree {
 				nodes[i] = new CommentImpl(this, i);
 				break;
 			case NodeKind.PERM:
-				System.out.println("Skipping permission node.");
 				break;
-			case NodeKind.BINARY:
-			    if (binaryData == null) { // large binary	        
-			        System.out.println("large binary. binary size = " + 
-			                binarySize + ", binary path = " +
-			                getPathToBinary());
-			    } else {
-			        System.out.println("binary length = " + binaryData.length);
-			    }				
+			case NodeKind.BINARY:		
 				break;
 			default:
-				System.out.println("Unable to create node kind " + nodeKind[i] + " @ " + i);
+				LOG.warn("Unexpected node kind: " + nodeKind[i] + " @ " + i);
 				break;
 			}
 			return nodes[i];

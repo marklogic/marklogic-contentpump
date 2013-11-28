@@ -1,7 +1,21 @@
+/*
+ * Copyright 2003-2013 MarkLogic Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.marklogic.mapreduce.test;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.File;
@@ -9,22 +23,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.modeler.util.DomUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.w3c.dom.Node;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSOutput;
-import org.w3c.dom.ls.LSSerializer;
 
 import com.marklogic.io.BiendianDataInputStream;
-import com.marklogic.mapreduce.ForestInputFormat;
 import com.marklogic.tree.CompressedTreeDecoder;
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
@@ -43,15 +48,12 @@ import com.marklogic.tree.NodeKind;
 // TODO: fdatw test is wrong i think
 
 public class FCheck {
-    public static final Log LOG = LogFactory.getLog(FCheck.class);
 	private static final long maxWrd64 = ((128 << 20) + (16 << 10));
 	private static final int CHECKSUM_SEED = 2038074743;
 	private static final int CHECKSUM_STEP = 17;
 
 	private boolean verbose = true;
 	private boolean debug = true;
-
-	private int wordSize = 4;
 
 	private long numFragments;
 	private long numLists;
@@ -613,7 +615,7 @@ public class FCheck {
         long treeDataSize = treeDataStatus.getLen();
         if (treeDataSize == 0) {
             // unexpected, give up this stand
-            LOG.warn("Found empty TreeData file.  Skipping...");
+            System.err.println("Found empty TreeData file.  Skipping...");
             return;
         }
         FSDataInputStream is = fs.open(treeIndexStatus.getPath());
