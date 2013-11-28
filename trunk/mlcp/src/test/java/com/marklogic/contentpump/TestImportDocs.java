@@ -173,6 +173,10 @@ public class TestImportDocs {
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:doc()/node()[xdmp:node-kind(.) eq \"element\"])");
+        assertTrue(result.hasNext());
+        assertEquals("4", result.next().asString());
         Utils.closeSession();
     }
     
