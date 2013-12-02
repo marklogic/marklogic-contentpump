@@ -39,6 +39,7 @@ import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -209,7 +210,7 @@ public class LocalJobRunner implements ConfigConstants {
                 	pool.submit(task);
                 }
             } else { // single-threaded
-                TaskID taskId = new TaskID();
+                TaskID taskId = new TaskID(new JobID(), true, i);
                 TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
                 TaskAttemptContext context = 
                     ReflectionUtil.createTaskAttemptContext(conf, taskAttemptId);
@@ -310,6 +311,7 @@ public class LocalJobRunner implements ConfigConstants {
         private OutputFormat<OUTKEY, OUTVALUE> outputFormat;
         private Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE> mapper;
         private Configuration conf;
+        private int id;
         private InputSplit split;
         private AtomicInteger pctProgress;
         private ContentPumpReporter reporter;
@@ -323,6 +325,7 @@ public class LocalJobRunner implements ConfigConstants {
             this.inputFormat = inputFormat;
             this.outputFormat = outputFormat;
             this.conf = conf;
+            this.id = id;
             this.split = split;
             this.pctProgress = pctProgress;
             this.reporter = reporter;
@@ -358,7 +361,7 @@ public class LocalJobRunner implements ConfigConstants {
             TrackingRecordReader trackingReader = null;
             RecordWriter<OUTKEY, OUTVALUE> writer = null;
             OutputCommitter committer = null;
-            TaskID taskId = new TaskID();
+            TaskID taskId = new TaskID(new JobID(), true, id);
             TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
             try {
                 context = ReflectionUtil.createTaskAttemptContext(conf, 
