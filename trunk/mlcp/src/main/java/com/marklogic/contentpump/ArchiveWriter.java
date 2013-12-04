@@ -166,7 +166,7 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 if (doc == null) {
                     LOG.warn("empty document for " + zipEntryName);
                 }
-                xmlArchive.write(zipEntryName, doc.getBytes());
+                xmlArchive.write(zipEntryName, doc.getBytes(encoding));
             }
         } else {
             throw new IOException ("incorrect type: " + type);
