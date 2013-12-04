@@ -42,34 +42,37 @@ public class OutputArchive {
     public static String EXTENSION = ".zip";
     private long currentFileBytes = 0;
     private ZipOutputStream outputStream;
-    private String path;
+    private String basePath;
+    private String currPath;
     private static AtomicInteger fileCount = new AtomicInteger();
     private int currentEntries;
     private Configuration conf;
     
     public OutputArchive(String path, Configuration conf) {
         if (path.toLowerCase().endsWith(EXTENSION)) {
-            this.path = path;
+            this.basePath = path;
         } else {
-            this.path = path + EXTENSION;
+            this.basePath = path + EXTENSION;
         }
         this.conf = conf;
     }
 
     private void newOutputStream() throws IOException {
-        String file = path;
         // use the constructor filename for the first zip,
         // then add filecount to subsequent archives, if any.
         int count = fileCount.getAndIncrement();
-        file = newPackagePath(path, count, 6);
+        currPath = newPackagePath(basePath, count, 6);
         if (outputStream != null) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("closing output archive: " + currPath);
+            }   
             outputStream.flush();
             outputStream.close();
         }
         currentFileBytes = 0;
         currentEntries = 0;
 
-        Path zpath = new Path(file);
+        Path zpath = new Path(currPath);
         FileSystem fs = zpath.getFileSystem(conf);
         if (fs.exists(zpath)) {
             throw new IOException(zpath + " already exists.");
@@ -136,8 +139,13 @@ public class OutputArchive {
 
         if (currentFileBytes > 0
             && currentFileBytes + total > Integer.MAX_VALUE) {
-            LOG.warn("too many bytes in current package");
-            newOutputStream();
+            if (currentEntries % 2 ==0) {
+            	//the file overflowed is metadata, create new zip
+                newOutputStream();
+            } else {
+            	//the file overflowed is doc, keep it in current zip
+                LOG.warn("too many bytes in current package:" + currPath);
+            }
         }
 
         try {
@@ -159,7 +167,7 @@ public class OutputArchive {
     public void close() throws IOException {
         if (outputStream != null) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("closing output archive: " + path);
+                LOG.debug("closing output archive: " + currPath);
             }           
             outputStream.flush();
             outputStream.close();
