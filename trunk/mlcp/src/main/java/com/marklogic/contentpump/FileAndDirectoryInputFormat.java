@@ -19,7 +19,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -38,10 +41,14 @@ import org.apache.hadoop.mapreduce.lib.input.InvalidInputException;
  */
 public abstract class FileAndDirectoryInputFormat<K, V> extends
 FileInputFormat<K, V> {
+    public static final Log LOG = LogFactory.getLog(FileAndDirectoryInputFormat.class);
 	/**
 	 * threshold of expanded splits: 1 million
 	 */
     protected static int SPLIT_COUNT_LIMIT = 1000000;
+    
+    private static final double SPLIT_SLOP = 1.1;   // 10% slop
+    
     // add my own hiddenFileFilter since the one defined in FileInputFormat
     // is not accessible.
     public static final PathFilter hiddenFileFilter = new PathFilter() {
@@ -58,22 +65,67 @@ FileInputFormat<K, V> {
             && !conf.getBoolean(ConfigConstants.INPUT_COMPRESSED, false);
     }
 
+    
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
-        List<InputSplit> splits;
+        List<InputSplit> splits = new ArrayList<InputSplit>();
         Configuration conf = job.getConfiguration();
         try {
-            splits = super.getSplits(job);
+            List<FileStatus> files = listStatus(job);
+
+            long minSize = Math.max(getFormatMinSplitSize(),
+                getMinSplitSize(job));
+            long maxSize = getMaxSplitSize(job);
+            for (FileStatus child : files) {
+                Path path = child.getPath();
+                FileSystem fs = path.getFileSystem(conf);
+                // length is zero for directories according to FSDirectory.java
+                long length = child.getLen();
+                BlockLocation[] blkLocations = null;
+                if (!child.isDir()) {
+                    blkLocations = fs.getFileBlockLocations(child, 0, length);
+                } else if (length != 0) {
+                    throw new IOException("non-zero length directory:"
+                        + path.toUri().toString());
+                }
+
+                if ((length != 0) && isSplitable(job, path)) {
+                    long blockSize = child.getBlockSize();
+                    long splitSize = computeSplitSize(blockSize, minSize,
+                        maxSize);
+
+                    long bytesRemaining = length;
+                    while (((double) bytesRemaining) / splitSize > SPLIT_SLOP) {
+                        int blkIndex = getBlockIndex(blkLocations, length
+                            - bytesRemaining);
+                        splits.add(new FileSplit(path,
+                            length - bytesRemaining, splitSize,
+                            blkLocations[blkIndex].getHosts()));
+                        bytesRemaining -= splitSize;
+                    }
+
+                    if (bytesRemaining != 0) {
+                        splits.add(new FileSplit(path,
+                            length - bytesRemaining, bytesRemaining,
+                            blkLocations[blkLocations.length - 1].getHosts()));
+                    }
+                } else if (length != 0) {
+                    splits.add(new FileSplit(path, 0, length, blkLocations[0]
+                        .getHosts()));
+                } else {
+                    // Create empty hosts array for zero length files
+                    splits.add(new FileSplit(path, 0, length, new String[0]));
+                }
+            }
         } catch (InvalidInputException ex) {
             String inPath = conf.get("mapred.input.dir");
             String pattern = conf.get(ConfigConstants.CONF_INPUT_FILE_PATTERN,
-                    ".*");
+                ".*");
             throw new IOException(
                 "No input files found with the specified input path " + inPath
-                + " and input file pattern " + pattern, ex);
-        }        
+                    + " and input file pattern " + pattern, ex);
+        }
         
-        // flatten directories until reaching SPLIT_COUNT_LIMIT
         PathFilter jobFilter = getInputPathFilter(job);
         List<PathFilter> filters = new ArrayList<PathFilter>();
         filters.add(hiddenFileFilter);
@@ -81,9 +133,10 @@ FileInputFormat<K, V> {
             filters.add(jobFilter);
         }
         PathFilter inputFilter = new MultiPathFilter(filters);
-        // take a second pass of the splits generated to extract files from 
+        // take a second pass of the splits generated to extract files from
         // directories
         int count = 0;
+        // flatten directories until reaching SPLIT_COUNT_LIMIT
         while (count < splits.size() && splits.size() < SPLIT_COUNT_LIMIT) {
             FileSplit split = (FileSplit) splits.get(count);
             Path file = split.getPath();
