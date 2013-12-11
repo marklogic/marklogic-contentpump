@@ -68,8 +68,8 @@ public class TransformOutputFormat<VALUEOUT> extends
             return mimetypeMap;
         String mtmap = conf.get(ConfigConstants.CONF_MIMETYPES);
         if (mtmap != null) {
-            mimetypeMap = DefaultStringifier.load(conf, OUTPUT_FOREST_HOST,
-                LinkedMapWritable.class);
+            mimetypeMap = DefaultStringifier.load(conf,
+                ConfigConstants.CONF_MIMETYPES, LinkedMapWritable.class);
             return mimetypeMap;
         }
         String host = conf.get(OUTPUT_HOST);
