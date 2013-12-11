@@ -164,7 +164,6 @@ public class DocumentMetadata {
      * @return
      */
     public String toXML() {
-        // note that this will escape the properties... do we care? no.
         return xstream.toXML(this);
     }
 
@@ -182,11 +181,7 @@ public class DocumentMetadata {
         properties = null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.marklogic.ps.xqsync.MetadataInterface#getFormatName()
-     */
+
     public String getFormatName() {
         return format.toString();
     }
