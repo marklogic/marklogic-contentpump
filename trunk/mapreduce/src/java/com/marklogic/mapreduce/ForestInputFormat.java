@@ -18,6 +18,7 @@ package com.marklogic.mapreduce;
 import java.io.EOFException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -63,6 +64,11 @@ public class ForestInputFormat<VALUE> extends
         for (Iterator<FileStatus> it = result.iterator(); it.hasNext();) {
             FileStatus file = it.next();
             String fileName = file.getPath().getName();
+            if (!file.isDir() || fileName.equals("Obsolete")) {
+                LOG.warn("Obsolete file found.  Ignoring forest " + 
+                        file.getPath().getParent());
+                return Collections.emptyList();
+            }
             if (!file.isDir() || fileName.equals("Journals")
                     || fileName.equals("Large")) {
                 it.remove();
@@ -85,6 +91,7 @@ public class ForestInputFormat<VALUE> extends
             FileStatus children[] = fs.listStatus(path);
             FileStatus treeIndexStatus = null, treeDataStatus = null, 
                     ordinalsStatus = null, timestampsStatus = null;
+            boolean obsolete = false;
             for (FileStatus child : children) {
                 String fileName = child.getPath().getName();
                 if (fileName.equals("TreeData")) { // inside a stand
@@ -95,11 +102,14 @@ public class ForestInputFormat<VALUE> extends
                     ordinalsStatus = child;
                 } else if (fileName.equals("Timestamps")) {
                     timestampsStatus = child;
-                }
-                if (treeDataStatus != null && treeIndexStatus != null &&
-                    ordinalsStatus != null && timestampsStatus != null) {
+                } else if (fileName.equals("Obsolete")) {
+                    obsolete = true;
                     break;
                 }
+            }
+            if (obsolete) {
+                LOG.warn("Obsolete file found.  Ignoring stand " + path);
+                break;
             }
             if (treeDataStatus == null) {
                 throw new RuntimeException("TreeData file not found.");
