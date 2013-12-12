@@ -165,6 +165,7 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                 String doc = content.getContentAsString();
                 if (doc == null) {
                     LOG.warn("empty document for " + zipEntryName);
+                    return;
                 }
                 xmlArchive.write(zipEntryName, doc.getBytes(encoding));
             }
