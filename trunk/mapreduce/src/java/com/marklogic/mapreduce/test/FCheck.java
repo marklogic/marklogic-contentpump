@@ -772,7 +772,7 @@ public class FCheck {
 			if (file.isDirectory()) {
 				if (filename.equals("Journals")) {
 					checkJournals(file);
-				} else if (!filename.equals("Large")){
+				} else if (!filename.equals("Large") && !filename.equals(".svn")){
 					checkStand(file);
 				}
 			} else {
