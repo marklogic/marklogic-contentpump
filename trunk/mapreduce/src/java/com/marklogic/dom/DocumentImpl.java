@@ -90,10 +90,12 @@ public class DocumentImpl extends NodeImpl implements Document {
 		}
 	}
 
-	// TODO
 	protected Node getPreviousChild(int node) {
-		assert (false);
-		return null;
+		if (node != getFirstChildIndex()) {
+			return tree.node(child - 1);
+		} else {
+			return null;
+		}
 	}
 
 	@Override
