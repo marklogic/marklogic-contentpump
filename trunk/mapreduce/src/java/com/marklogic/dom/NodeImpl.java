@@ -91,7 +91,7 @@ public class NodeImpl implements Node {
     // TODO
     @Override
     public String getBaseURI() {
-        return null;
+        return tree.getDocumentURI();
     }
 
     @Override

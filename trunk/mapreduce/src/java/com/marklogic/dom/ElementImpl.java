@@ -170,11 +170,10 @@ public class ElementImpl extends NodeImpl implements Element {
 	    return (ns >= 0) ? tree.atomString(tree.nsNodePrefixAtom[ns]) : null;
 	}
 
-	// TODO
 	@Override
 	protected Node getPreviousChild(int child) {
-		assert (false);
-		return null;
+		return (child != tree.elemNodeChildNodeRepID[tree.nodeRepID[node]]) ? 
+				tree.node(child - 1) : null;
 	}
 
 	@Override
