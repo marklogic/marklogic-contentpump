@@ -45,11 +45,6 @@ public class AttrImpl extends NodeImpl implements Attr {
     }
 
     @Override
-    public Node getNextSibling() {
-    	return null;
-    }
-    
-    @Override
     public String getNodeName() {
     	return getName(); 
     }
@@ -64,22 +59,12 @@ public class AttrImpl extends NodeImpl implements Attr {
         return (Element)tree.node(tree.nodeParentNodeRepID[node]);
     }
 
-    @Override
-    public Node getParentNode() {
-    	return null;
-    }
-    
     // TODO
     @Override
     public String getPrefix() {
     	return "TODO";
     }
     
-    @Override
-    public Node getPreviousSibling() {
-    	return null;
-    }
-
     @Override
     public TypeInfo getSchemaTypeInfo() {
         return null;
