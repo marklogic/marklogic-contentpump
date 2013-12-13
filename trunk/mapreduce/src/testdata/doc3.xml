@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root xmlns:h="http://www.w3.org/TR/html4/">hello world 
+<country id="1">china</country><capital>beijing</capital><h:country id="2">japan</h:country><h:capital>beijing</h:capital></root>
