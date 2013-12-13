@@ -51,4 +51,8 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
         
     }
+    
+    public void testJavaDomSample() throws IOException {
+        Utils.readXMLasDOMDocument(new File(testData, "doc1.xml"));
+    }
 }
