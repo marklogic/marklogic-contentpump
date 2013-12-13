@@ -54,7 +54,7 @@ public abstract class NodeImpl implements Node {
     }
 
     /** Constructor for serialization. */
-    public NodeImpl() {}
+//    public NodeImpl() {}
 
     @Override
     public Node appendChild(Node newChild) throws DOMException {
