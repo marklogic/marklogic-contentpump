@@ -149,6 +149,14 @@
     <path refid="mapreduce.cdh.classpath"/>
   </path>
 
+  <path id="mapreduce.testcases.classpath">
+    <pathelement path="${compiled.classes.dir}"/>
+      <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
+      <pathelement path="${jarlib}/commons-configuration-1.6.jar"/>
+      <pathelement path="${jarlib}/commons-lang-2.5.jar"/>
+      <pathelement path="${jarlib}/hadoop-core-1.2.0.jar"/>
+  </path>
+  
   <target name="compile.mapreduce" depends="init">
     <javac classpathref="mapreduce.compile.classpath" srcdir="${java.source}"
       destdir="${compiled.classes.dir}" deprecation="on"
@@ -203,6 +211,29 @@
     </jar>
   </target>
 
+  <target name="compile.mapreduce.tests" depends="compile.mapreduce">
+    <javac classpathref="mapreduce.testcases.classpath" srcdir="${junit.source}"
+      destdir="${compiled.classes.dir}" deprecation="on"
+      debug="${compile.debug.symbols.flag}" failonerror="on"
+      source="1.6" target="1.6">
+      <compilerarg value="-Xlint"/>
+    </javac>
+  </target>
+  
+  <target name="test.mapreduce" depends="mapreduce.test.jar,compile.mapreduce.tests" unless="junit.disabled" >
+    <mkdir dir="${junit.output.dir}"/>
+    <junit printsummary="on" showoutput="true" 
+           haltonerror="${junit.halt.on.error}" haltonfailure="${junit.halt.on.failure}">
+      <classpath refid="mapreduce.testcases.classpath"/>
+      <!-- two formatters, one to screen, one to file -->
+      <formatter type="${junit.output.format}" usefile="false"/>
+      <formatter type="${junit.output.format}" usefile="true"/>
+      <batchtest fork="yes" todir="${junit.output.dir}">
+        <fileset dir="${junit.source}" includes="**/Test*.java"/>
+      </batchtest>
+    </junit>
+  </target>
+  
   <!-- ************************************************************** -->
   <!-- Gen the JavaDocs -->
 
@@ -350,6 +381,6 @@
 
   <target name="mapreduce" depends="mapreduce.package"/>
   <target name="all" depends="mapreduce,mapreduce.test.jar"/>
-
+  <target name="test" depends="test.mapreduce"/>
 </project>
 
