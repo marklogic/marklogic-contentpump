@@ -60,6 +60,9 @@ mapreduce: $(ANT_HOME)
 package: $(ANT_HOME)
 	$(ANT) package
 
+test: $(ANT_HOME)
+	$(ANT) test
+
 clean:
 	rm -rf $(BUILD_TMP)
 
