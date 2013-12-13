@@ -25,7 +25,7 @@ import org.w3c.dom.UserDataHandler;
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 
-public class NodeImpl implements Node {
+public abstract class NodeImpl implements Node {
 
     public static final boolean trace = false;
 
@@ -45,10 +45,16 @@ public class NodeImpl implements Node {
 
     final int node;
 
+    /**
+     * No public constructor; only subclasses of Node should be instantiated
+     */
     NodeImpl(ExpandedTree tree, int node) {
         this.tree = tree;
         this.node = node;
     }
+
+    /** Constructor for serialization. */
+    public NodeImpl() {}
 
     @Override
     public Node appendChild(Node newChild) throws DOMException {
@@ -137,9 +143,7 @@ public class NodeImpl implements Node {
     }
 
     @Override
-    public String getNodeName() {
-        return null;
-    }
+    public abstract String getNodeName();
 
     @Override
     public short getNodeType() {
@@ -148,7 +152,7 @@ public class NodeImpl implements Node {
 
     @Override
     public String getNodeValue() throws DOMException {
-        return null;
+        return null; // overridden in some subclasses
     }
 
     // TODO
@@ -160,6 +164,7 @@ public class NodeImpl implements Node {
 
     @Override
     public Node getParentNode() {
+        //assume no linkNodeKind
         return tree.node(tree.nodeParentNodeRepID[node]);
     }
 
