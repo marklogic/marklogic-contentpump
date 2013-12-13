@@ -92,7 +92,7 @@ public class DocumentImpl extends NodeImpl implements Document {
 
 	protected Node getPreviousChild(int node) {
 		if (node != getFirstChildIndex()) {
-			return tree.node(child - 1);
+			return tree.node(node - 1);
 		} else {
 			return null;
 		}
