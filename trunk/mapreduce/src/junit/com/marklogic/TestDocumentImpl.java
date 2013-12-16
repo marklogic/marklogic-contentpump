@@ -120,15 +120,20 @@ public class TestDocumentImpl extends TestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-
+            expected.append(uri);
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
             NodeList children = doc.getChildNodes();
             walkDOM(children, expected);
             DocumentImpl d = new DocumentImpl(t, 0);
             NodeList eChildren = d.getChildNodes();
+            actual.append(uri);
             walkDOM (eChildren, actual);
+            
+            expected.append("\n");
+            actual.append("\n");
         }
-
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
         assertEquals(expected.toString(), actual.toString());
  
     }
