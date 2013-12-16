@@ -126,41 +126,7 @@ public class Utils {
             // http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
             doc.getDocumentElement().normalize();
 
-            System.out.println("JAVA DOM Root element :"
-                + doc.getDocumentElement().getNodeName());
-
-            NodeList nList = doc.getElementsByTagName("root");
-
-            System.out.println("----------------------------");
-
-            for (int temp = 0; temp < nList.getLength(); temp++) {
-
-                Node nNode = nList.item(temp);
-
-                System.out
-                    .println("\nCurrent Element :" + nNode.getNodeName());
-
-                if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-
-                    Element eElement = (Element) nNode;
-
-//                    System.out.println("contry id : "
-//                        + eElement.getAttribute("id"));
-                    System.out.println("Country : "
-                        + eElement.getElementsByTagName("country").item(0)
-                            .getTextContent());
-//                    System.out.println("Last Name : "
-//                        + eElement.getElementsByTagName("lastname").item(0)
-//                            .getTextContent());
-//                    System.out.println("Nick Name : "
-//                        + eElement.getElementsByTagName("nickname").item(0)
-//                            .getTextContent());
-//                    System.out.println("Salary : "
-//                        + eElement.getElementsByTagName("salary").item(0)
-//                            .getTextContent());
-
-                }
-            }
+ 
         } catch (Exception e) {
             e.printStackTrace();
         }
