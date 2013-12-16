@@ -137,7 +137,8 @@ public class ElementImpl extends NodeImpl implements Element {
 
 	@Override
 	public String getNodeName() {
-		return getTagName();
+	    String ns = getPrefix();
+		return ns == null ? getTagName() : ns + ":" + getTagName();
 	}
 
     protected int getNSNodeID() {
