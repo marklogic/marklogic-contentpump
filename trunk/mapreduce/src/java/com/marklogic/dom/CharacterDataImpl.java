@@ -20,7 +20,7 @@ import org.w3c.dom.DOMException;
 
 import com.marklogic.tree.ExpandedTree;
 
-public class CharacterDataImpl extends NodeImpl implements CharacterData {
+public abstract class CharacterDataImpl extends NodeImpl implements CharacterData {
 
     public CharacterDataImpl(ExpandedTree tree, int node) {
         super(tree, node);
