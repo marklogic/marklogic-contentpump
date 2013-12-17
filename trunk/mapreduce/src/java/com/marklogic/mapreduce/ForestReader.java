@@ -19,7 +19,9 @@ import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -124,13 +126,21 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
         largeForestDir = new Path(dataPath.getParent().getParent(), "Large");
         colFilters = conf.getStringCollection(COLLECTION_FILTER);
         dirFilters = conf.getStringCollection(DIRECTORY_FILTER);
-        for (String dir : dirFilters) {
+        Collection<String> addedDirs = null;
+        for (Iterator<String> it = dirFilters.iterator(); it.hasNext();) {
+            String dir = it.next();
             if (!dir.endsWith("/")) {
                 String newDir = dir + "/";
-                dirFilters.remove(dir);
-                dirFilters.add(newDir);
+                it.remove();
+                if (addedDirs == null) {
+                    addedDirs = new ArrayList<String>();
+                }
+                addedDirs.add(newDir);
             }
         }
+        if (addedDirs != null) {
+            dirFilters.addAll(addedDirs);
+        }   
         typeFilters = conf.getStringCollection(TYPE_FILTER);
     }
 
