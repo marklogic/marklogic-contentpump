@@ -36,24 +36,20 @@ public class TextImpl extends CharacterDataImpl implements Text {
         return getNodeValue();
     }
 
-	@Override
 	public String getWholeText() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-    @Override
 	public boolean isElementContentWhitespace() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
-	@Override
 	public Text replaceWholeText(String content) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
-	@Override
 	public Text splitText(int offset) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}

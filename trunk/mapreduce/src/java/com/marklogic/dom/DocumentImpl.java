@@ -54,12 +54,11 @@ public class DocumentImpl extends NodeImpl implements Document {
 
 	public NodeList getChildNodes() {
 		return new NodeList() {
-			@Override
+			
 			public int getLength() {
 				return getNumChildren();
 			}
-
-			@Override
+			
 			public Node item(int index) {
 				return (index < getNumChildren()) ? tree
 						.node(getFirstChildIndex() + index) : null;
@@ -96,11 +95,6 @@ public class DocumentImpl extends NodeImpl implements Document {
 		} else {
 			return null;
 		}
-	}
-
-	@Override
-	public String getTextContent() throws DOMException {
-		return null;
 	}
 
 	public Node adoptNode(Node arg0) throws DOMException {
