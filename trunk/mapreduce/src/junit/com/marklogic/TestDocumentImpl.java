@@ -140,7 +140,7 @@ public class TestDocumentImpl extends TestCase {
  
     }
     
-    private void walkDOMSibling(NodeList nodes, StringBuilder sb) {
+    private void walkDOMNextSibling(NodeList nodes, StringBuilder sb) {
         if(nodes.getLength() <=0 ) return;
         
         Node child = nodes.item(0);
@@ -149,13 +149,28 @@ public class TestDocumentImpl extends TestCase {
             sb.append(child.getNodeName()).append("#");
             sb.append(child.getNodeValue()).append("#");
             
-            walkDOMSibling(child.getChildNodes(), sb);
+            walkDOMNextSibling(child.getChildNodes(), sb);
             //next sibling
             child = child.getNextSibling();
         }
     }
     
-    public void testSibling() throws IOException {
+    private void walkDOMPreviousSibling(NodeList nodes, StringBuilder sb) {
+        if(nodes.getLength() <=0 ) return;
+        
+        Node child = nodes.item(nodes.getLength() - 1);
+        while (child != null) {
+            sb.append(child.getNodeType()).append("#");
+            sb.append(child.getNodeName()).append("#");
+            sb.append(child.getNodeValue()).append("#");
+            
+            walkDOMPreviousSibling(child.getChildNodes(), sb);
+            //next sibling
+            child = child.getPreviousSibling();
+        }
+    }
+    
+    public void testNextSibling() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
                 + "3docForest", "00000002"), false);
@@ -169,11 +184,40 @@ public class TestDocumentImpl extends TestCase {
             expected.append(uri);
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
             NodeList children = doc.getChildNodes();
-            walkDOMSibling(children, expected);
+            walkDOMNextSibling(children, expected);
             DocumentImpl d = new DocumentImpl(t, 0);
             NodeList eChildren = d.getChildNodes();
             actual.append(uri);
-            walkDOMSibling (eChildren, actual);
+            walkDOMNextSibling (eChildren, actual);
+            
+            expected.append("\n");
+            actual.append("\n");
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+ 
+    }
+    
+    public void testPreviousSibling() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+                + "3docForest", "00000002"), false);
+        assertEquals(3, trees.size());
+
+        StringBuilder expected = new StringBuilder();
+        StringBuilder actual = new StringBuilder();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+            String uri = t.getDocumentURI();
+            expected.append(uri);
+            Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            NodeList children = doc.getChildNodes();
+            walkDOMPreviousSibling(children, expected);
+            DocumentImpl d = new DocumentImpl(t, 0);
+            NodeList eChildren = d.getChildNodes();
+            actual.append(uri);
+            walkDOMPreviousSibling (eChildren, actual);
             
             expected.append("\n");
             actual.append("\n");
