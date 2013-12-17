@@ -27,7 +27,6 @@ public class ProcessingInstructionImpl extends NodeImpl implements
 		super(tree, node);
 	}
 
-	@Override
 	public String getData() {
 	    return tree.getText(tree.piNodeTextRepID[tree.nodeRepID[node]]);
 	}
@@ -42,7 +41,6 @@ public class ProcessingInstructionImpl extends NodeImpl implements
 		return getData();
 	}
 
-	@Override
 	public String getTarget() {
 		return tree.atomString(tree.piNodeTargetAtom[tree.nodeRepID[node]]);
 	}
@@ -52,7 +50,6 @@ public class ProcessingInstructionImpl extends NodeImpl implements
         return getNodeValue();
     }
 
-	@Override
 	public void setData(String data) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}

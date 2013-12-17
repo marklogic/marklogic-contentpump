@@ -34,7 +34,6 @@ public class AttrImpl extends NodeImpl implements Attr {
         return tree.atomString(tree.nodeNameNameAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]]); 
     }
 
-    @Override
     public String getName() {
     	return tree.atomString(tree.nodeNameNameAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]]); 
     }
@@ -54,7 +53,6 @@ public class AttrImpl extends NodeImpl implements Attr {
     	return getValue(); 
     }
     
-    @Override
     public Element getOwnerElement() {
         return (Element)tree.node(tree.nodeParentNodeRepID[node]);
     }
@@ -65,27 +63,22 @@ public class AttrImpl extends NodeImpl implements Attr {
     	return "TODO";
     }
     
-    @Override
     public TypeInfo getSchemaTypeInfo() {
         return null;
     }
 
-    @Override
     public boolean getSpecified() {
         return true;
     }
 
-    @Override
     public String getValue() {
     	return tree.getText(tree.attrNodeTextRepID[tree.nodeRepID[node]]);
     }
 
-    @Override
     public boolean isId() {
         return false;
     }
 
-    @Override
     public void setValue(String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

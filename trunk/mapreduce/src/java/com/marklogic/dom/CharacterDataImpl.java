@@ -26,22 +26,18 @@ public abstract class CharacterDataImpl extends NodeImpl implements CharacterDat
         super(tree, node);
     }
 
-    @Override
     public void appendData(String arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
-    @Override
     public void deleteData(int offset, int count) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
-    @Override
     public String getData() throws DOMException {
         return tree.getText(tree.nodeRepID[node]);
     }
 
-    @Override
     public int getLength() {
         return getData().length();
     }
@@ -51,22 +47,18 @@ public abstract class CharacterDataImpl extends NodeImpl implements CharacterDat
         return getData();
     }
 
-    @Override
     public void insertData(int offset, String arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
-    @Override
     public void replaceData(int offset, int count, String arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
-    @Override
     public void setData(String data) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
-    @Override
     public String substringData(int offset, int count) throws DOMException {
     	if ((offset < 0) || (count < 0)) {
     		throw new DOMException(DOMException.INDEX_SIZE_ERR, null);
