@@ -227,6 +227,46 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+    private void walkDOMParent (NodeList nodes, StringBuilder sb) {
+        for(int i=0; i<nodes.getLength(); i++) {
+            Node child = nodes.item(i);
+            sb.append(child.getNodeType()).append("#");
+            sb.append(child.getNodeName()).append("'s parent is ");
+            sb.append(child.getParentNode().getNodeName()).append("#");
+            if(child.hasChildNodes()) {
+                walkDOMParent(child.getChildNodes(), sb);
+            }
+        }
+    }
+    
+    public void testParent() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+                + "3docForest", "00000002"), false);
+        assertEquals(3, trees.size());
+
+        StringBuilder expected = new StringBuilder();
+        StringBuilder actual = new StringBuilder();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+            String uri = t.getDocumentURI();
+            expected.append(uri);
+            Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            NodeList children = doc.getChildNodes();
+            walkDOMParent(children, expected);
+            DocumentImpl d = new DocumentImpl(t, 0);
+            NodeList eChildren = d.getChildNodes();
+            actual.append(uri);
+            walkDOMParent (eChildren, actual);
+            
+            expected.append("\n");
+            actual.append("\n");
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+    }
+    
     private void walkDOMTextContent (NodeList nodes, StringBuilder sb) {
         for(int i=0; i<nodes.getLength(); i++) {
             Node n = nodes.item(i);

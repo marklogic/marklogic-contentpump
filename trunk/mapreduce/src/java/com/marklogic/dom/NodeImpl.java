@@ -175,6 +175,13 @@ public abstract class NodeImpl implements Node {
         return (p == null ? null : p.getPreviousChild(node));
     }
 
+    // visit every child node, excluding COMMENT_NODE and
+    // PROCESSING_INSTRUCTION_NODE nodes.
+    private boolean hasTextContent(Node child) {
+        return child.getNodeType() != Node.COMMENT_NODE
+            && child.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE;
+    }
+    
     // overwritten by some Text, Comment and PI
     public String getTextContent() throws DOMException {
         StringBuilder sb = new StringBuilder();
@@ -187,7 +194,9 @@ public abstract class NodeImpl implements Node {
         NodeList children = getChildNodes();
         for(int i=0; i<children.getLength(); i++) {
             Node child = children.item(i);
-            sb.append(child.getTextContent());
+            if(hasTextContent(child)) {
+                sb.append(child.getTextContent());
+            }
         }
     }
 

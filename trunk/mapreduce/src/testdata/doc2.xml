@@ -1,3 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>hello world 
-<country id="1">china</country><capital>beijing</capital><country id="2">japan</country></root>
+<!-- this is comment --><country>fn:doc("/abc")china</country><example><?target This is a PI.?></example></root>
