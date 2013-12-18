@@ -42,11 +42,11 @@ public class Utils {
                 if (datWords == 0) {
                     datWords = fdatw;
                     hdrWords = 3;
-                    System.out.println("3 header words");
+//                    System.out.println("3 header words");
                 }
                 if (docid == 0xffffffff && csword == 0xffffffff
                     && fdatw == 0xffffffff) {
-                    System.out.println("Reached the end.");
+//                    System.out.println("Reached the end.");
                     break;
                 }
                 if (prevDocid != -1 && docid <= prevDocid) {
