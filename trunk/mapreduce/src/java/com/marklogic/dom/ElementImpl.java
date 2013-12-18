@@ -22,6 +22,7 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.TypeInfo;
+import java.util.ArrayList;
 
 import com.marklogic.tree.ExpandedTree;
 
@@ -155,11 +156,40 @@ public class ElementImpl extends NodeImpl implements Element {
         }
         return L;
     }
+    
+    protected int nextNSNodeID(int ns, int minOrdinal) {
+    	if (ns < 0) return ns;
+    	for (;;) {
+    		ns = tree.nsNodePrevNSNodeRepID[ns];
+    		if ( ns < 0 ) return -1;
+    		if ( tree.nsNodePrefixAtom[ns] != Integer.MAX_VALUE) break;
+    	}
+    	if ( ns < minOrdinal ) ns = -1; 
+    	return ns;
+    }
 	
+	protected int getPrefixID(int uriAtom) {
+		int a = Integer.MAX_VALUE;
+		boolean useDefaultNS = true;
+		ArrayList<Integer> ubp = new ArrayList<Integer>();
+    	for ( int ns = getNSNodeID(); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
+    		int uri = tree.nsNodeUriAtom[ns];
+    		int prefix = tree.nsNodePrefixAtom[ns];
+    		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
+    		if (uri != uriAtom) { useDefaultNS &= (tree.atomString(prefix) != null); continue; }
+    		if (ubp.contains(prefix)) continue;
+    		if (tree.atomString(prefix) != null) {if (a == Integer.MAX_VALUE) a = prefix; continue;}
+    		if (useDefaultNS) return prefix; 
+    	} 
+    	return a;
+	}
+    
 	@Override
 	public String getPrefix() {
-	    int ns = getNSNodeID();
-	    return (ns >= 0) ? tree.atomString(tree.nsNodePrefixAtom[ns]) : null;
+		int ns = tree.nodeNameNamespaceAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]];
+		if (ns < 0) return null;
+		if (tree.atomString(ns) != null)  ns = getPrefixID(ns);
+	    return (ns != Integer.MAX_VALUE) ? tree.atomString(ns) : null;
 	}
 
 	@Override
