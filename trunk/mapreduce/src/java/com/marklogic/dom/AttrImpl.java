@@ -15,6 +15,8 @@
  */
 package com.marklogic.dom;
 
+import java.util.ArrayList;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Element;
@@ -28,19 +30,23 @@ public class AttrImpl extends NodeImpl implements Attr {
     public AttrImpl(ExpandedTree tree, int node) {
         super(tree, node);
     }
-
+    
+    protected int getNodeID() {
+    	return tree.attrNodeNodeNameRepID[tree.nodeRepID[node]];
+    }
+    
     @Override
     public String getLocalName() {
-        return tree.atomString(tree.nodeNameNameAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]]); 
+        return tree.atomString(tree.nodeNameNameAtom[getNodeID()]); 
     }
 
     public String getName() {
-    	return tree.atomString(tree.nodeNameNameAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]]); 
+    	return tree.atomString(tree.nodeNameNameAtom[getNodeID()]); 
     }
 
     @Override
     public String getNamespaceURI() {
-        return tree.atomString(tree.nodeNameNamespaceAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]]);
+        return tree.atomString(tree.nodeNameNamespaceAtom[getNodeID()]);
     }
 
     @Override
@@ -57,12 +63,32 @@ public class AttrImpl extends NodeImpl implements Attr {
         return (Element)tree.node(tree.nodeParentNodeRepID[node]);
     }
 
-    // TODO
     @Override
-    public String getPrefix() {
-    	return "TODO";
-    }
+    protected int getPrefixID(int uriAtom) {
+		int parentNodeRepID = tree.nodeParentNodeRepID[node];
+		if (parentNodeRepID == Integer.MAX_VALUE) parentNodeRepID = node;
+		ArrayList<Integer> ubp = new ArrayList<Integer>();
+		long sum_ordinal = tree.ordinal+tree.nodeOrdinal[parentNodeRepID];
+    	for ( int ns = getNSNodeID(sum_ordinal); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
+    		int uri = tree.nsNodeUriAtom[ns];
+    		int prefix = tree.nsNodePrefixAtom[ns];
+    		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
+    		if (uri != uriAtom)  continue; 
+    		if (ubp.contains(prefix)) continue;
+    		if (tree.atomString(prefix) != null)  continue;
+    		return prefix; 
+    	} 
+    	return Integer.MAX_VALUE;
+	}
     
+	@Override
+	public String getPrefix() {
+		int ns = tree.nodeNameNamespaceAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]];
+		if (ns < 0) return null;
+		if (tree.atomString(ns) != null)  ns = getPrefixID(ns);
+	    return (ns != Integer.MAX_VALUE) ? tree.atomString(ns) : null;
+	}
+	
     public TypeInfo getSchemaTypeInfo() {
         return null;
     }

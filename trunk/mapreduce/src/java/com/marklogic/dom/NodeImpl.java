@@ -54,7 +54,6 @@ public abstract class NodeImpl implements Node {
     /** Constructor for serialization. */
 //    public NodeImpl() {}
 
-
     public Node appendChild(Node newChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
@@ -161,6 +160,9 @@ public abstract class NodeImpl implements Node {
         return tree.node(tree.nodeParentNodeRepID[node]);
     }
 
+    protected int getPrefixID(int uriAtom) {
+    	return -1;
+    }
 
     public String getPrefix() {
         return null;
@@ -242,6 +244,40 @@ public abstract class NodeImpl implements Node {
         return false;
     }
 
+    protected int getNSNodeID(long ordinal) {
+        int R = tree.numNSNodeReps;
+        if (R == 0) return -1;
+        int L = 0;
+        while (L + 1 < R) {
+            int M = (L + R) >>> 1;
+            if (ordinal < tree.nsNodeOrdinal[M])
+                R = M;
+            else
+                L = M;
+        }
+        if (ordinal < tree.nsNodeOrdinal[L])
+            --L;
+        for (;;) {
+            if (L < 0)
+                break;
+            if (tree.nsNodePrefixAtom[L] != Integer.MAX_VALUE)
+                break;
+            L = tree.nsNodePrevNSNodeRepID[L];
+        }
+        return L;
+    }
+    
+    protected int nextNSNodeID(int ns, long minOrdinal) {
+    	if (ns < 0) return ns;
+    	for (;;) {
+    		ns = tree.nsNodePrevNSNodeRepID[ns];
+    		if ( ns < 0 ) return -1;
+    		if ( tree.nsNodePrefixAtom[ns] != Integer.MAX_VALUE) break;
+    	}
+    	if ( ns < minOrdinal ) ns = -1; 
+    	return ns;
+    }
+    
     // TODO - override in subclasses?
 
     public String lookupNamespaceURI(String prefix) {
