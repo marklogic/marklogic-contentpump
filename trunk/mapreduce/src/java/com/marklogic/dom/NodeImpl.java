@@ -24,18 +24,15 @@ import org.w3c.dom.UserDataHandler;
 
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
-import com.sun.org.apache.xerces.internal.dom.TextImpl;
 
 public abstract class NodeImpl implements Node {
 
     public static final boolean trace = false;
-
     private static final NodeList emptyNodeList = new NodeList() {
     
         public int getLength() {
             return 0;
         }
-
     
         public Node item(int index) {
             return null;
@@ -179,16 +176,20 @@ public abstract class NodeImpl implements Node {
         return (p == null ? null : p.getPreviousChild(node));
     }
 
-    final boolean hasTextContent(Node child) {
-        return child.getNodeType() != Node.COMMENT_NODE &&
-            child.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE &&
-            (child.getNodeType() != Node.TEXT_NODE ||
-             ((TextImpl) child).isIgnorableWhitespace() == false);
+    // overwritten by some Text, Comment and PI
+    public String getTextContent() throws DOMException {
+        StringBuilder sb = new StringBuilder();
+        getTextContent(sb);
+        return sb.toString();
     }
     
-    // TODO
-    public String getTextContent() throws DOMException {
-        return getNodeValue();
+    // internal method taking a StringBuffer in parameter
+    private void getTextContent(StringBuilder sb) throws DOMException {
+        NodeList children = getChildNodes();
+        for(int i=0; i<children.getLength(); i++) {
+            Node child = children.item(i);
+            sb.append(child.getTextContent());
+        }
     }
 
     // TODO - is this allowed to throw NO_MODIFICATION_ALLOWED_ERR?
