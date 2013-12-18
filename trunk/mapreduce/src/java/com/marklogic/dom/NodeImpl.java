@@ -147,11 +147,8 @@ public abstract class NodeImpl implements Node {
         return null; // overridden in some subclasses
     }
 
-    // TODO
-
     public Document getOwnerDocument() {
-        assert (false);
-        return null;
+        return (DocumentImpl)(this.tree.node(0));
     }
 
 
