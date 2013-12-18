@@ -17,13 +17,16 @@ import com.marklogic.tree.ExpandedTree;
 public class TestDocumentImpl extends TestCase {
     boolean verbose = false;
     String testData = "src/testdata";
+    String forest = "3docForest";
+    String stand = "00000002";
+    int num = 3;
 
 
     public void testGetDocumentURI() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
-                + "3docForest", "00000002"), false);
-        assertEquals(3, trees.size());
+                + forest, stand), false);
+        assertEquals(num, trees.size());
 
         StringBuffer expected = new StringBuffer();
         StringBuffer actual = new StringBuffer();
@@ -36,25 +39,35 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
-    public void testGetNodeNameAndFirstChild() throws IOException {
+    public void testGetNodeNameAndFirstAndLastChild() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
-                + "3docForest", "00000002"), false);
-        assertEquals(3, trees.size());
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
 
         StringBuffer expected = new StringBuffer();
         StringBuffer actual = new StringBuffer();
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
-            expected.append("#document").append("root");
+        	String uri = t.getDocumentURI();
+        	
+        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            expected.append(doc.getNodeName());
+            expected.append("#FIRSTCHILD##").
+            		 append(doc.getFirstChild().getLocalName()).append("#");
+            expected.append("#LASTCHILD##").
+            		 append(doc.getLastChild().getLocalName()).append("#");
+            
             DocumentImpl d = new DocumentImpl(t, 0);
             actual.append(d.getNodeName());
             String lname = d.getFirstChild().getLocalName();
-            System.out.println(lname);
-            actual.append(lname);
+            actual.append("#FIRSTCHILD##").append(lname).append("#");
+            lname = d.getLastChild().getLocalName();
+            actual.append("#LASTCHILD##").append(lname).append("#");
         }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
         assertEquals(expected.toString(), actual.toString());
-        
     }
     
 //    public void testJavaDomSample() throws IOException {
@@ -114,8 +127,8 @@ public class TestDocumentImpl extends TestCase {
     public void testNodeNameChildNodes() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
-                + "3docForest", "00000002"), false);
-        assertEquals(3, trees.size());
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
 
         StringBuilder expected = new StringBuilder();
         StringBuilder actual = new StringBuilder();
@@ -173,8 +186,8 @@ public class TestDocumentImpl extends TestCase {
     public void testNextSibling() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
-                + "3docForest", "00000002"), false);
-        assertEquals(3, trees.size());
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
 
         StringBuilder expected = new StringBuilder();
         StringBuilder actual = new StringBuilder();
@@ -202,8 +215,8 @@ public class TestDocumentImpl extends TestCase {
     public void testPreviousSibling() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
-                + "3docForest", "00000002"), false);
-        assertEquals(3, trees.size());
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
 
         StringBuilder expected = new StringBuilder();
         StringBuilder actual = new StringBuilder();
@@ -281,8 +294,8 @@ public class TestDocumentImpl extends TestCase {
     public void testTextContent() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
-                + "3docForest", "00000002"), false);
-        assertEquals(3, trees.size());
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
 
         StringBuilder expected = new StringBuilder();
         StringBuilder actual = new StringBuilder();
