@@ -132,47 +132,13 @@ public class ElementImpl extends NodeImpl implements Element {
 	    String ns = getPrefix();
 		return ns == null ? getTagName() : ns + ":" + getTagName();
 	}
-
-    protected int getNSNodeID() {
-        int R = tree.numNSNodeReps;
-        if (R == 0) return -1;
-        int L = 0;
-        long ordinal = tree.nodeOrdinal[node];
-        while (L + 1 < R) {
-            int M = (L + R) >>> 1;
-            if (ordinal < tree.nsNodeOrdinal[M])
-                R = M;
-            else
-                L = M;
-        }
-        if (ordinal < tree.nsNodeOrdinal[L])
-            --L;
-        for (;;) {
-            if (L < 0)
-                break;
-            if (tree.nsNodePrefixAtom[L] != Integer.MAX_VALUE)
-                break;
-            L = tree.nsNodePrevNSNodeRepID[L];
-        }
-        return L;
-    }
-    
-    protected int nextNSNodeID(int ns, int minOrdinal) {
-    	if (ns < 0) return ns;
-    	for (;;) {
-    		ns = tree.nsNodePrevNSNodeRepID[ns];
-    		if ( ns < 0 ) return -1;
-    		if ( tree.nsNodePrefixAtom[ns] != Integer.MAX_VALUE) break;
-    	}
-    	if ( ns < minOrdinal ) ns = -1; 
-    	return ns;
-    }
 	
+	@Override
 	protected int getPrefixID(int uriAtom) {
 		int a = Integer.MAX_VALUE;
 		boolean useDefaultNS = true;
 		ArrayList<Integer> ubp = new ArrayList<Integer>();
-    	for ( int ns = getNSNodeID(); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
+    	for ( int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
     		int uri = tree.nsNodeUriAtom[ns];
     		int prefix = tree.nsNodePrefixAtom[ns];
     		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
