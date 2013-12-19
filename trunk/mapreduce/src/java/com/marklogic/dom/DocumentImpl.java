@@ -43,6 +43,11 @@ public class DocumentImpl extends NodeImpl implements Document {
 	public String getNodeName() {
 		return "#document";
 	}
+	
+	@Override
+    public Document getOwnerDocument() {
+        return null;
+    }
 
 	protected int getNumChildren() {
 		return tree.docNodeNumChildren[tree.nodeRepID[node]];
