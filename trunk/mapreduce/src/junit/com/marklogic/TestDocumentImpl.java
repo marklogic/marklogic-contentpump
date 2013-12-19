@@ -54,16 +54,57 @@ public class TestDocumentImpl extends TestCase {
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
             expected.append(doc.getNodeName());
             expected.append("#FIRSTCHILD##").
-            		 append(doc.getFirstChild().getLocalName()).append("#");
+            		 append(doc.getFirstChild().getNodeName()).append("#");
             expected.append("#LASTCHILD##").
-            		 append(doc.getLastChild().getLocalName()).append("#");
+            		 append(doc.getLastChild().getNodeName()).append("#");
             
             DocumentImpl d = new DocumentImpl(t, 0);
             actual.append(d.getNodeName());
-            String lname = d.getFirstChild().getLocalName();
+            String lname = d.getFirstChild().getNodeName();
             actual.append("#FIRSTCHILD##").append(lname).append("#");
-            lname = d.getLastChild().getLocalName();
+            lname = d.getLastChild().getNodeName();
             actual.append("#LASTCHILD##").append(lname).append("#");
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+    }
+    
+    public void testGetOwnerDocumentBaseURI() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
+
+        StringBuffer expected = new StringBuffer();
+        StringBuffer actual = new StringBuffer();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+        	String uri = t.getDocumentURI();
+        	
+        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            expected.append(doc.getNodeName());
+            expected.append("#OWNDERDOCROOT##").
+            		 append(doc.getOwnerDocument() == null).append("#");
+            expected.append("#OWNDERDOCCHILD##").
+            		 append(doc.getFirstChild().getOwnerDocument().getNodeName()).append("#");
+            
+            DocumentImpl d = new DocumentImpl(t, 0);
+            actual.append(d.getNodeName());
+            actual.append("#OWNDERDOCROOT##").
+   		 		   append(d.getOwnerDocument() == null).append("#");
+            actual.append("#OWNDERDOCCHILD##").
+   		 		   append(d.getFirstChild().getOwnerDocument().getNodeName()).append("#");
+            
+            String expectedUri = doc.getBaseURI();
+            String actualUri = d.getBaseURI();
+            
+            if (!expectedUri.contains(actualUri)) {
+                expected.append("#BASEURIROOT##").
+       		 			 append(expectedUri).append("#");
+                actual.append("#BASEURIROOT##").
+		 			 append(actualUri).append("#");
+            }
         }
         System.out.println(expected.toString());
         System.out.println(actual.toString());
