@@ -159,7 +159,7 @@ public class TestDocumentImpl extends TestCase {
         StringBuffer expected = new StringBuffer();
         StringBuffer actual = new StringBuffer();
         
-        String tags[] = {"*","country","capital"};
+        String tags[] = {"*","country","capital","h:capital"};
         
         for (int s = 0; s < tags.length; s++){
         	expected.append("#TAG#").append(tags[s]).append("\n");
