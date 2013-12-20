@@ -77,18 +77,13 @@ public class ElementImpl extends NodeImpl implements Element {
 			}
 		};
 	}
-
-	// TODO
-	public NodeList getElementsByTagName(String name) {
-		assert (false);
-		return null;
+	
+	public NodeList getElementsByTagNameNS(String namespaceURI, String name) {
+		return getElementsByTagNameNSOrNodeName(namespaceURI,name,false);
 	}
 
-	// TODO
-	public NodeList getElementsByTagNameNS(String namespaceURI, String localName)
-			throws DOMException {
-		assert (false);
-		return null;
+	public NodeList getElementsByTagName(String localName) {
+		return getElementsByTagNameNSOrNodeName(null,localName,true);
 	}
 
 	protected int getNumChildren() {
@@ -138,7 +133,7 @@ public class ElementImpl extends NodeImpl implements Element {
 		int a = Integer.MAX_VALUE;
 		boolean useDefaultNS = true;
 		ArrayList<Integer> ubp = new ArrayList<Integer>();
-    	for ( int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
+    	for ( int ns = getNSNodeID(tree.nodeOrdinal[tree.nodeRepID[node]]); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
     		int uri = tree.nsNodeUriAtom[ns];
     		int prefix = tree.nsNodePrefixAtom[ns];
     		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }

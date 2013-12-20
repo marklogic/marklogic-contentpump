@@ -15,6 +15,8 @@
  */
 package com.marklogic.dom;
 
+import java.util.ArrayList;
+
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -332,4 +334,63 @@ public abstract class NodeImpl implements Node {
     public Object setUserData(String key, Object data, UserDataHandler handler) {
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR, null);
     }
+    
+
+
+	protected NodeList getElementsByTagNameNSOrNodeName(String namespaceURI, String name,final boolean nodeName) {
+		
+		final String tagname = name;
+		final String ns = namespaceURI;
+		final Node thisNode = this;
+		
+		return new NodeList() {
+			protected ArrayList<Node> elementList = new ArrayList<Node>();
+			protected boolean done = false;
+			
+			protected void init() {
+				if (done) return;
+				ArrayList<Node> childrenList = new ArrayList<Node>();
+				childrenList.add(thisNode);
+				int i = 0;
+				while ( i != childrenList.size()) {
+					Node curr = childrenList.get(i);
+					NodeList children = curr.getChildNodes();
+					for (int childi =0 ; childi < children.getLength(); childi ++)
+						if (children.item(childi).getNodeType() == Node.ELEMENT_NODE)
+							childrenList.add(children.item(childi));
+					i ++;
+					if (i == 1) continue; 
+					if (nodeName) {
+						if (curr.getNodeName().equals(tagname) || tagname.equals("*"))
+							elementList.add(curr);
+					}
+					else {
+						// do nothing if only one of the two is null
+						if (ns != null && ns.equals("*") && tagname.equals("*")){
+							elementList.add(curr); continue;
+						}
+						if (curr.getNamespaceURI() == null ^ ns == null) continue;
+						if (ns != null) {
+							if ((ns.equals("*") || ns.equals(curr.getNamespaceURI())) &&
+								(tagname.equals("*") || tagname.equals(curr.getLocalName())))
+								elementList.add(curr);
+						}
+						else if (curr.getNamespaceURI() == null) elementList.add(curr);
+					}
+				}
+				done = true;
+			}
+			
+			public int getLength() {
+				init();
+				return elementList.size();
+			}
+
+			public Node item(int index) {
+				init();
+				return (index < getLength()) ? elementList.get(index) : null;
+			}
+			
+		};
+	}
 }

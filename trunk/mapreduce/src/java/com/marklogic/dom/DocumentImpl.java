@@ -184,14 +184,12 @@ public class DocumentImpl extends NodeImpl implements Document {
 		return null;
 	}
 
-	public NodeList getElementsByTagName(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public NodeList getElementsByTagNameNS(String namespaceURI, String name) {
+		return getElementsByTagNameNSOrNodeName(namespaceURI,name,false);
 	}
 
-	public NodeList getElementsByTagNameNS(String arg0, String arg1) {
-		// TODO Auto-generated method stub
-		return null;
+	public NodeList getElementsByTagName(String localName) {
+		return getElementsByTagNameNSOrNodeName(null,localName,true);
 	}
 
 	public DOMImplementation getImplementation() {

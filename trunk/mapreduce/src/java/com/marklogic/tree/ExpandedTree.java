@@ -131,7 +131,7 @@ public class ExpandedTree {
 		}
 		return true;
 	}
-
+	
 	public String atomString(int i) {
 		String value = null;
 		if (atomString == null) {
