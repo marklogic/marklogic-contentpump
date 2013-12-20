@@ -33,7 +33,9 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 
 	public Node getNamedItem(String name) {
     	if (NodeImpl.trace) System.out.println(this.getClass().getSimpleName() + ".getNamedItem(" + element.node + ", " + name + ")");
-		// TODO Auto-generated method stub
+		if (name == null) return null;
+    	for (int i = 0; i < getLength(); i++)
+			if (name.equals(item(i).getNodeName())) return item(i);
 		return null;
 	}
 
@@ -41,6 +43,12 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 			throws DOMException {
     	if (NodeImpl.trace) System.out.println(this.getClass().getSimpleName() + ".getNamedItemNS(" + element.node + ", " + namespaceURI + ", " + localName + ")");
 		// TODO Auto-generated method stub
+    	if (localName == null) return null;
+    	for (int i = 0; i < getLength(); i++) {
+    		if ((namespaceURI == null) != (item(i).getNamespaceURI() == null)) continue;
+    		if (namespaceURI != null && !namespaceURI.equals(item(i).getNamespaceURI())) continue;    			
+			if (localName.equals(item(i).getLocalName())) return item(i);
+    	}
 		return null;
 	}
 
