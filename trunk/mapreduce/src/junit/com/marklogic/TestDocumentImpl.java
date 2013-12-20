@@ -12,6 +12,7 @@ import org.w3c.dom.NodeList;
 import junit.framework.TestCase;
 
 import com.marklogic.dom.DocumentImpl;
+import com.marklogic.dom.ElementImpl;
 import com.marklogic.tree.ExpandedTree;
 
 public class TestDocumentImpl extends TestCase {
@@ -111,6 +112,199 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+    public void testGetLocalNameGetNamespaceURI() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
+
+        StringBuffer expected = new StringBuffer();
+        StringBuffer actual = new StringBuffer();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+        	String uri = t.getDocumentURI();
+        	
+        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            DocumentImpl d = new DocumentImpl(t, 0);
+        	
+            expected.append(d.getBaseURI()).append("\n");
+            actual.append(d.getBaseURI()).append("\n");
+            
+            NodeList children = doc.getFirstChild().getChildNodes();
+            for (int k = 0; k < children.getLength(); k++) {
+              Node curr = children.item(k);
+              expected.append("#LOCALNAME##").append(curr.getLocalName()).append("#").append("\n");
+              expected.append("#URI##").append(curr.getNamespaceURI()).append("#").append("\n");
+              expected.append("\n");
+            }
+            children = d.getFirstChild().getChildNodes();
+            for (int k = 0; k < children.getLength(); k++) {
+              Node curr = children.item(k);
+              actual.append("#LOCALNAME##").append(curr.getLocalName()).append("#").append("\n");
+              actual.append("#URI##").append(curr.getNamespaceURI()).append("#").append("\n");
+              actual.append("\n");
+            }
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+    }
+    
+    public void testGetElementByTagName() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
+
+        StringBuffer expected = new StringBuffer();
+        StringBuffer actual = new StringBuffer();
+        
+        String tags[] = {"*","country","capital"};
+        
+        for (int s = 0; s < tags.length; s++){
+        	expected.append("#TAG#").append(tags[s]).append("\n");
+        	actual.append("#TAG#").append(tags[s]).append("\n");
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+        	String uri = t.getDocumentURI();
+        	
+        	expected.append("#URI##").append(uri).append("#\n");
+        	actual.append("#URI##").append(uri).append("#\n");
+        	
+        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+        	Element rootExpected = (Element) doc.getFirstChild();
+        	NodeList elementsExpected = rootExpected.getElementsByTagName(tags[s]);
+        	for (int j = 0; j < elementsExpected.getLength(); j++) {
+        		Node curr = elementsExpected.item(j);
+        		expected.append("#I##").append(j).append("#").
+        				append("#NODENAME##").append(curr.getNodeName()).append("#").
+        				append("#NODETEXT##").append(curr.getTextContent()).append("#").
+        				append("\n");
+        	}
+        		            
+            DocumentImpl d = new DocumentImpl(t, 0);
+            ElementImpl rootActual = (ElementImpl) d.getFirstChild();
+        	NodeList elementsActual = rootActual.getElementsByTagName(tags[s]);
+        	for (int j = 0; j < elementsActual.getLength(); j++) {
+        		Node curr = elementsActual.item(j);
+        		actual.append("#I##").append(j).append("#").
+        			  append("#NODENAME##").append(curr.getNodeName()).append("#").
+        			  append("#NODETEXT##").append(curr.getTextContent()).append("#").
+        			  append("\n");
+        	}
+         }
+    	expected.append("\n");
+    	actual.append("\n");
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+    }
+    
+    public void testDocGetElementByTagName() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
+
+        StringBuffer expected = new StringBuffer();
+        StringBuffer actual = new StringBuffer();
+        
+        String tags[] = {"*","country","capital"};
+        
+        for (int s = 0; s < tags.length; s++){
+        	expected.append("#TAG#").append(tags[s]).append("\n");
+        	actual.append("#TAG#").append(tags[s]).append("\n");
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+        	String uri = t.getDocumentURI();
+        	
+        	expected.append("#URI##").append(uri).append("#\n");
+        	actual.append("#URI##").append(uri).append("#\n");
+        	
+        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+        	NodeList elementsExpected = doc.getElementsByTagName(tags[s]);
+        	for (int j = 0; j < elementsExpected.getLength(); j++) {
+        		Node curr = elementsExpected.item(j);
+        		expected.append("#I##").append(j).append("#").
+        				append("#NODENAME##").append(curr.getNodeName()).append("#").
+        				append("#NODETEXT##").append(curr.getTextContent()).append("#").
+        				append("\n");
+        	}
+        		            
+            DocumentImpl d = new DocumentImpl(t, 0);
+        	NodeList elementsActual = d.getElementsByTagName(tags[s]);
+        	for (int j = 0; j < elementsActual.getLength(); j++) {
+        		Node curr = elementsActual.item(j);
+        		actual.append("#I##").append(j).append("#").
+        			  append("#NODENAME##").append(curr.getNodeName()).append("#").
+        			  append("#NODETEXT##").append(curr.getTextContent()).append("#").
+        			  append("\n");
+        	}
+         }
+    	expected.append("\n");
+    	actual.append("\n");
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+    }
+    
+    public void testGetElementByTagNameNS() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
+
+        StringBuffer expected = new StringBuffer();
+        StringBuffer actual = new StringBuffer();
+        
+        String tags[] = {"*","country","capital"};
+        String nss[] = {"*","http://www.w3.org/TR/html4/"};
+        
+        for (int n = 0; n < nss.length; n++)
+        for (int s = 0; s < tags.length; s++){
+        	expected.append("#TAG#").append(tags[s]).append("\n");
+        	expected.append("#NS#").append(nss[n]).append("\n");
+        	actual.append("#TAG#").append(tags[s]).append("\n");
+        	actual.append("#NS#").append(nss[n]).append("\n");
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+        	String uri = t.getDocumentURI();
+        	
+        	expected.append("#URI##").append(uri).append("#\n");
+        	actual.append("#URI##").append(uri).append("#\n");
+        	
+        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+        	Element rootExpected = (Element) doc.getFirstChild();
+        	NodeList elementsExpected = rootExpected.getElementsByTagNameNS(nss[n],tags[s]);
+        	for (int j = 0; j < elementsExpected.getLength(); j++) {
+        		Node curr = elementsExpected.item(j);
+        		expected.append("#I##").append(j).append("#").
+        				append("#NODENAME##").append(curr.getNodeName()).append("#").
+        				append("#NODETEXT##").append(curr.getTextContent()).append("#").
+        				append("\n");
+        	}
+        		            
+            DocumentImpl d = new DocumentImpl(t, 0);
+            ElementImpl rootActual = (ElementImpl) d.getFirstChild();
+        	NodeList elementsActual = rootActual.getElementsByTagNameNS(nss[n],tags[s]);
+        	for (int j = 0; j < elementsActual.getLength(); j++) {
+        		Node curr = elementsActual.item(j);
+        		actual.append("#I##").append(j).append("#").
+        			  append("#NODENAME##").append(curr.getNodeName()).append("#").
+        			  append("#NODETEXT##").append(curr.getTextContent()).append("#").
+        			  append("\n");
+        	}
+         }
+    	expected.append("\n");
+    	actual.append("\n");
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+    }
+    
 //    public void testJavaDomSample() throws IOException {
 //        Document doc = Utils.readXMLasDOMDocument(new File(testData, "doc1.xml"));
 //        System.out.println("JAVA DOM Root element :"
@@ -163,7 +357,6 @@ public class TestDocumentImpl extends TestCase {
         }
     }
     
-
     
     public void testNodeNameChildNodes() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
