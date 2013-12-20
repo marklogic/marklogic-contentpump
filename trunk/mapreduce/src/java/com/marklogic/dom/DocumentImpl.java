@@ -101,6 +101,16 @@ public class DocumentImpl extends NodeImpl implements Document {
 			return null;
 		}
 	}
+	
+    // TODO 
+    public boolean isEqualNode(Node other) {
+//    	For two DocumentType nodes to be equal, the following conditions must also be satisfied:
+//    		The following string attributes are equal: publicId, systemId, internalSubset.
+//    		The entities NamedNodeMaps are equal.
+//    		The notations NamedNodeMaps are equal.
+        assert (false);
+        return false;
+    }
 
 	public Node adoptNode(Node arg0) throws DOMException {
 		// TODO Auto-generated method stub

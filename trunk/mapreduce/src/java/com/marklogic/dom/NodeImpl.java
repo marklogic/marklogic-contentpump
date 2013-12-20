@@ -230,10 +230,36 @@ public abstract class NodeImpl implements Node {
         return false;
     }
 
-    // TODO - override in subclasses?
     public boolean isEqualNode(Node other) {
-        assert (false);
-        return false;
+    	
+    	//Note that normalization can affect equality; to avoid this, 
+    	// nodes should be normalized before being compared.
+    	// For the moment, normalization cannot be done. 
+    	
+    	if (getNodeType() !=  other.getNodeType()) 		return false;
+    	if (getLocalName() !=  other.getLocalName()) 	return false;
+    	if (getNamespaceURI() !=  other.getNamespaceURI()) return false;
+    	if (getPrefix() !=  other.getPrefix()) 			return false;
+    	if (getNodeValue() !=  other.getNodeValue()) 	return false;
+    	if (hasChildNodes() !=  other.hasChildNodes()) 	return false;
+    	if (hasAttributes() !=  other.hasAttributes()) 	return false;
+    	if (hasChildNodes()) {
+    		NamedNodeMap thisAttr = getAttributes();
+    		NamedNodeMap otherAttr = other.getAttributes();
+    		if (thisAttr.getLength() != otherAttr.getLength()) return false;
+    		for (int i = 0; i < thisAttr.getLength(); i++)
+    			if (thisAttr.item(i).isEqualNode(otherAttr.item(i)))
+    				return false;
+    	}
+    	if (hasAttributes()) {
+    		NodeList thisChild = getChildNodes();
+    		NodeList otherChild = other.getChildNodes();
+    		if (thisChild.getLength() != otherChild.getLength()) return false;
+    		for (int i = 0; i < thisChild.getLength(); i++)
+    			if (thisChild.item(i).isEqualNode(otherChild.item(i)))
+    				return false;
+    	}
+    	return true;
     }
 
 
