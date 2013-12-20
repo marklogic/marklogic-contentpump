@@ -34,7 +34,8 @@ import org.w3c.dom.Text;
 import com.marklogic.tree.ExpandedTree;
 
 public class DocumentImpl extends NodeImpl implements Document {
-
+    private Element documentElement;
+    
 	public DocumentImpl(ExpandedTree tree, int node) {
 		super(tree, node);
 	}
@@ -172,12 +173,21 @@ public class DocumentImpl extends NodeImpl implements Document {
 
 	public DocumentType getDoctype() {
 		// TODO Auto-generated method stub
-		return null;
+		return new DocumentTypeImpl(tree, node);
 	}
 
 	public Element getDocumentElement() {
-		// TODO Auto-generated method stub
-		return null;
+	    if (documentElement != null) return documentElement;
+	    
+	    NodeList children = getChildNodes();
+	    for (int i=0; i<children.getLength(); i++) {
+	        Node n = children.item(i);
+	        if (n.getNodeType() == Node.ELEMENT_NODE) {
+	            documentElement = (Element)n;
+	            break;
+	        }
+	    }
+		return documentElement;
 	}
 
 	public String getDocumentURI() {
