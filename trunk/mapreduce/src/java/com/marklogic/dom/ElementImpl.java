@@ -34,14 +34,13 @@ public class ElementImpl extends NodeImpl implements Element {
 
 	// TODO
 	public String getAttribute(String name) {
-		assert (false);
-		return null;
+	    return getAttributeNode(name).getValue();
 	}
 
 	// TODO
 	public Attr getAttributeNode(String name) {
-		assert (false);
-		return null;
+	    NamedNodeMap nnMap = getAttributes();
+		return (AttrImpl)nnMap.getNamedItem(name);
 	}
 
 	// TODO
