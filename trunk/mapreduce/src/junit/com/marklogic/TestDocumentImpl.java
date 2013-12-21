@@ -4,12 +4,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import junit.framework.TestCase;
+
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import junit.framework.TestCase;
 
 import com.marklogic.dom.DocumentImpl;
 import com.marklogic.dom.ElementImpl;
@@ -544,6 +546,100 @@ public class TestDocumentImpl extends TestCase {
             NodeList eChildren = d.getChildNodes();
             actual.append(uri);
             walkDOMTextContent (eChildren, actual);
+            
+            expected.append("\n");
+            actual.append("\n");
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+    }
+    
+    private void walkDOMAttr (NodeList nodes, StringBuilder sb) {
+        for(int i=0; i<nodes.getLength(); i++) {
+            Node n = nodes.item(i);
+            if (n.hasAttributes() ) {
+                sb.append(n.getNodeName()).append("#"); 
+                NamedNodeMap nnMap = n.getAttributes();
+                for(int j=0; j<nnMap.getLength(); j++) {
+                    Attr attr = (Attr)nnMap.item(j);
+                    sb.append("@");
+                    sb.append(attr.getName());
+                    sb.append("=");
+                    sb.append(attr.getValue());
+                }
+            }
+            if(n.hasChildNodes()) {
+                walkDOMAttr(n.getChildNodes(), sb);
+            }
+        }
+    }
+    
+    public void testAttributes() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+                + "3docForest", "00000002"), false);
+        assertEquals(3, trees.size());
+
+        StringBuilder expected = new StringBuilder();
+        StringBuilder actual = new StringBuilder();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+            String uri = t.getDocumentURI();
+            expected.append(uri);
+            Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            NodeList children = doc.getChildNodes();
+            walkDOMAttr(children, expected);
+            DocumentImpl d = new DocumentImpl(t, 0);
+            NodeList eChildren = d.getChildNodes();
+            actual.append(uri);
+            walkDOMAttr (eChildren, actual);
+            
+            expected.append("\n");
+            actual.append("\n");
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+    }
+    
+    private void walkDOMElem (NodeList nodes, StringBuilder sb) {
+        for(int i=0; i<nodes.getLength(); i++) {
+            Node n = nodes.item(i);
+            if (n.getNodeType() == Node.ELEMENT_NODE ) {
+                sb.append(n.getNodeName()).append("#"); 
+                Attr attr = ((Element)n).getAttributeNode("id");
+                if(attr!=null) {
+                    sb.append("@").append(attr.getName()).append("=").append(attr.getValue());
+                    sb.append("@id=").append(((Element)n).getAttribute("id"));
+                }
+
+            }
+            if(n.hasChildNodes()) {
+                walkDOMElem(n.getChildNodes(), sb);
+            }
+        }
+    }
+    
+    public void testAttributeNode() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+                + "3docForest", "00000002"), false);
+        assertEquals(3, trees.size());
+
+        StringBuilder expected = new StringBuilder();
+        StringBuilder actual = new StringBuilder();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+            String uri = t.getDocumentURI();
+            expected.append(uri);
+            Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            NodeList children = doc.getChildNodes();
+            walkDOMElem(children, expected);
+            DocumentImpl d = new DocumentImpl(t, 0);
+            NodeList eChildren = d.getChildNodes();
+            actual.append(uri);
+            walkDOMElem(eChildren, actual);
             
             expected.append("\n");
             actual.append("\n");
