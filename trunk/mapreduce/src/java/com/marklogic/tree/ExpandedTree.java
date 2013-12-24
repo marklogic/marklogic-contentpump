@@ -389,8 +389,6 @@ public class ExpandedTree implements Writable {
                 textReps[i] = in.readInt();
             }
         }
-        LOG.info("numTextReps: " + numTextReps);
-        LOG.info("URI: " + getDocumentURI());
     }
 
     @Override
@@ -504,8 +502,6 @@ public class ExpandedTree implements Writable {
         out.writeInt(uriTextRepID);
         out.writeInt(colsTextRepID);
         out.writeInt(numTextReps);
-        LOG.info("numTextReps: " + numTextReps);
-        LOG.info("URI: " + getDocumentURI());
         if (numTextReps > 0) {
             for (int i = 0; i < numTextReps; i++) {
                 out.writeInt(textReps[i]);
