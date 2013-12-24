@@ -15,10 +15,15 @@
  */
 package com.marklogic.mapreduce;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.WritableUtils;
 
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
@@ -77,5 +82,17 @@ public abstract class ForestDocument implements MarkLogicDocument {
     
     private void setCollections(String[] cols) {
         collections = cols;
+    }
+    
+    @Override
+    public void readFields(DataInput in) throws IOException {
+        fragmentOrdinal = in.readLong();
+        collections = WritableUtils.readStringArray(in);
+    }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+        out.writeLong(fragmentOrdinal);
+        WritableUtils.writeStringArray(out, collections);
     }
 }

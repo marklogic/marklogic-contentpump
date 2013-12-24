@@ -62,6 +62,7 @@
   <property name="mapreduce.output.jar" value="${java.intermediate.dir}/${mapreduce.jar.name}"/>
   <property name="mapreduce.cdh.output.jar" value="${java.intermediate.dir}/${mapreduce.cdh.jar.name}"/>
   <property name="mapreduce.test.jar" value="${java.intermediate.dir}/mapreduce.test.jar"/>
+  <property name="mapreduce.cdh.test.jar" value="${java.intermediate.dir}/mapreduce.cdh.test.jar"/>
   <property name="mapreduce.javadoczip" value="${java.intermediate.dir}/${mapreduce.javadoczip.name}"/>
   <property name="mapreduce.bundle.zip" value="${products}/${mapreduce.bundle.name}.zip"/>
   <property name="mapreduce.cdh.bundle.zip" value="${products}/${mapreduce.cdh.bundle.name}.zip"/>
@@ -199,6 +200,17 @@
 
   <target name="mapreduce.test.jar" depends="compile.mapreduce" unless="classes.current">
     <jar jarfile="${mapreduce.test.jar}" basedir="${compiled.classes.dir}"
+      includes="com/marklogic/mapreduce/test/*">
+      <manifest>
+        <section name="mapreduce-test">
+          <attribute name="Vendor" value="MarkLogic Corporation"/>
+          <attribute name="Description" value="Hadoop Connector for Java"/>
+          <attribute name="Build-Version" value="${version.number.string}"/>
+          <attribute name="Build-Date" value="${date-string}"/>
+        </section>
+      </manifest>
+    </jar>
+    <jar jarfile="${mapreduce.cdh.test.jar}" basedir="${compiled.classes.dir.cdh}"
       includes="com/marklogic/mapreduce/test/*">
       <manifest>
         <section name="mapreduce-test">

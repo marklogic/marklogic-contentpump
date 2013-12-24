@@ -15,11 +15,15 @@
  */
 package com.marklogic.tree;
 
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Writable;
 import org.w3c.dom.Node;
 
 import com.marklogic.dom.AttrImpl;
@@ -35,7 +39,7 @@ import com.marklogic.dom.TextImpl;
  * 
  * @author jchen
  */
-public class ExpandedTree {
+public class ExpandedTree implements Writable {
     public static final Log LOG = LogFactory.getLog(ExpandedTree.class);
 	private static final Charset UTF8 = Charset.forName("UTF8");
 
@@ -246,5 +250,266 @@ public class ExpandedTree {
 
     public void setFragmentOrdinal(long fragmentOrdinal) {
         this.fragmentOrdinal = fragmentOrdinal;
+    }
+
+    @Override
+    public void readFields(DataInput in) throws IOException {
+        uriKey = in.readLong();
+        uniqKey = in.readLong();
+        linkKey = in.readLong();
+        numKeys = in.readInt();
+        if (numKeys > 0) {
+            keys = new long[numKeys];
+            for (int i = 0; i < numKeys; i++) {
+                keys[i] = in.readLong();
+            }
+        }
+        int atomDataLen = in.readInt();
+        if (atomDataLen > 0) {
+            atomData = new byte[atomDataLen];
+            for (int i = 0; i < atomDataLen; i++) {
+                atomData[i] = in.readByte();
+            }
+        }
+        atomLimit = in.readInt();
+        if (atomLimit > 0) {
+            atomIndex = new int[atomLimit+1];
+            for (int i = 0; i < atomLimit + 1; i++) {
+                atomIndex[i] = in.readInt();               
+            }
+        }
+        int nodeNameNameAtomLen = in.readInt();
+        if (nodeNameNameAtomLen > 0) {
+            nodeNameNameAtom = new int[nodeNameNameAtomLen];
+            nodeNameNamespaceAtom = new int[nodeNameNameAtomLen];
+            for (int i = 0; i < nodeNameNameAtomLen; i++) {
+                nodeNameNameAtom[i] = in.readInt();
+                nodeNameNamespaceAtom[i] = in.readInt();
+            }
+        }
+        numNodeReps = in.readInt();
+        if (numNodeReps > 0) {
+            nodes = new NodeImpl[numNodeReps]; 
+            nodeOrdinal = new long[numNodeReps];
+            nodeKind = new byte[numNodeReps];
+            nodeRepID = new int[numNodeReps];
+            nodeParentNodeRepID = new int[numNodeReps];
+            for (int i = 0; i < numNodeReps; i++) {
+                nodeOrdinal[i] = in.readLong();
+                nodeKind[i] = in.readByte();
+                nodeRepID[i] = in.readInt();
+                nodeParentNodeRepID[i] = in.readInt();
+            }
+        }
+        int numElemNodeReps = in.readInt();
+        if (numElemNodeReps > 0) {
+            elemNodeNodeNameRepID = new int [numElemNodeReps];
+            elemNodeAttrNodeRepID = new int[numElemNodeReps];
+            elemNodeChildNodeRepID = new int[numElemNodeReps];
+            elemNodeElemDeclRepID = new int[numElemNodeReps];
+            elemNodeNumAttributes = new int[numElemNodeReps];
+            elemNodeNumDefaultAttrs = new int[numElemNodeReps];
+            elemNodeNumChildren = new int[numElemNodeReps];
+            elemNodeFlags = new int[numElemNodeReps];
+            for (int i = 0; i < numElemNodeReps; i++) {
+                elemNodeNodeNameRepID[i] = in.readInt();
+                elemNodeAttrNodeRepID[i] = in.readInt();
+                elemNodeChildNodeRepID[i] = in.readInt();
+                elemNodeElemDeclRepID[i] = in.readInt();
+                elemNodeNumAttributes[i] = in.readInt();
+                elemNodeNumDefaultAttrs[i] = in.readInt();
+                elemNodeNumChildren[i] = in.readInt();
+                elemNodeFlags[i] = in.readInt();
+            }
+        }
+        int numAttrNodeReps = in.readInt();
+        if (numAttrNodeReps > 0) {
+            attrNodeNodeNameRepID = new int[numAttrNodeReps];
+            attrNodeTextRepID = new int[numAttrNodeReps];
+            attrNodeAttrDeclRepID = new int[numAttrNodeReps];
+            for (int i = 0; i < numAttrNodeReps; i++) {
+                attrNodeNodeNameRepID[i] = in.readInt();
+                attrNodeTextRepID[i] = in.readInt();
+                attrNodeAttrDeclRepID[i] = in.readInt();
+            }
+        }
+        numLinkNodeReps = in.readInt();
+        if (numLinkNodeReps > 0) {
+            linkNodeKey = new long[numLinkNodeReps];
+            linkNodeNodeCount = new long[numLinkNodeReps];
+            linkNodeNodeNameRepID = new int[numLinkNodeReps];
+            linkNodeNodeRepID = new int[numLinkNodeReps];
+            for (int i = 0; i < numLinkNodeReps; i++) {
+                linkNodeKey[i] = in.readLong();
+                linkNodeNodeCount[i] = in.readLong();
+                linkNodeNodeNameRepID[i] = in.readInt();
+                linkNodeNodeRepID[i] = in.readInt();
+            }
+        }
+        int numDocNodeReps = in.readInt();
+        if (numDocNodeReps > 0) {
+            docNodeTextRepID = new int[numDocNodeReps];
+            docNodeChildNodeRepID = new int[numDocNodeReps];
+            docNodeNumChildren = new int[numDocNodeReps];
+            for (int i = 0; i < numDocNodeReps; i++) {
+                docNodeTextRepID[i] = in.readInt();
+                docNodeChildNodeRepID[i] = in.readInt();
+                docNodeNumChildren[i] = in.readInt();
+            }
+        }
+        int numPINodeReps = in.readInt();
+        if (numPINodeReps > 0) {
+            piNodeTargetAtom = new int[numPINodeReps];
+            piNodeTextRepID = new int[numPINodeReps];
+            for (int i = 0; i < numPINodeReps; i++) {
+                piNodeTargetAtom[i] = in.readInt();
+                piNodeTextRepID[i] = in.readInt();
+            }
+        }
+        numNSNodeReps = in.readInt();
+        if (numNSNodeReps > 0) {
+            nsNodeOrdinal = new long[numNSNodeReps];
+            nsNodePrevNSNodeRepID = new int[numNSNodeReps];
+            nsNodePrefixAtom = new int[numNSNodeReps];
+            nsNodeUriAtom = new int[numNSNodeReps];
+            for (int i = 0; i < numNSNodeReps; i++) {
+                nsNodeOrdinal[i] = in.readLong();
+                nsNodePrevNSNodeRepID[i] = in.readInt();
+                nsNodePrefixAtom[i] = in.readInt();
+                nsNodeUriAtom[i] = in.readInt();
+            }
+        }
+        // skip permission node since it's not exposed to the API
+        uriTextRepID = in.readInt();
+        colsTextRepID = in.readInt();
+        numTextReps = in.readInt();
+        if (numTextReps > 0) {
+            textReps = new int[numTextReps];
+            for (int i = 0; i < numTextReps; i++) {
+                textReps[i] = in.readInt();
+            }
+        }
+        LOG.info("numTextReps: " + numTextReps);
+        LOG.info("URI: " + getDocumentURI());
+    }
+
+    @Override
+    public void write(DataOutput out) throws IOException {
+        out.writeLong(uriKey);
+        out.writeLong(uniqKey);
+        out.writeLong(linkKey);
+        out.writeInt(numKeys);
+        if (numKeys > 0) {
+           for (long key : keys) {
+               out.writeLong(key);
+           }
+        }
+        if (atomData != null && atomData.length > 0) {
+            out.writeInt(atomData.length);
+            for (int i = 0; i < atomData.length; i++) {
+                out.writeByte(atomData[i]);
+            }
+        } else {
+            out.writeInt(0);
+        }
+        out.writeInt(atomLimit);
+        if (atomIndex != null && atomIndex.length > 0) {
+            for (int i = 0; i < atomIndex.length; i++) {
+                out.writeInt(atomIndex[i]);
+            }
+        }
+        if (nodeNameNameAtom != null && nodeNameNameAtom.length > 0) {
+            out.writeInt(nodeNameNameAtom.length);
+            for (int i = 0; i < nodeNameNameAtom.length; i++) {
+                out.writeInt(nodeNameNameAtom[i]);
+                out.writeInt(nodeNameNamespaceAtom[i]);
+            }
+        } else {
+            out.writeInt(0);
+        }
+        out.writeInt(numNodeReps);
+        if (numNodeReps > 0) {
+            for (int i = 0; i < numNodeReps; i++) {
+                out.writeLong(nodeOrdinal[i]);
+                out.writeByte(nodeKind[i]);
+                out.writeInt(nodeRepID[i]);
+                out.writeInt(nodeParentNodeRepID[i]);
+            }
+        }
+        if (elemNodeNodeNameRepID != null && 
+            elemNodeNodeNameRepID.length > 0) {
+            out.writeInt(elemNodeNodeNameRepID.length);
+            for (int i = 0; i < elemNodeNodeNameRepID.length; i++) {
+                out.writeInt(elemNodeNodeNameRepID[i]);
+                out.writeInt(elemNodeAttrNodeRepID[i]);
+                out.writeInt(elemNodeChildNodeRepID[i]);
+                out.writeInt(elemNodeElemDeclRepID[i]);
+                out.writeInt(elemNodeNumAttributes[i]);
+                out.writeInt(elemNodeNumDefaultAttrs[i]);
+                out.writeInt(elemNodeNumChildren[i]);
+                out.writeInt(elemNodeFlags[i]);
+            }
+        } else {
+            out.writeInt(0);
+        }
+        if (attrNodeNodeNameRepID != null && 
+            attrNodeNodeNameRepID.length > 0) {
+            out.writeInt(attrNodeNodeNameRepID.length);
+            for (int i = 0; i < attrNodeNodeNameRepID.length; i++) {
+                out.writeInt(attrNodeNodeNameRepID[i]);
+                out.writeInt(attrNodeTextRepID[i]);
+                out.writeInt(attrNodeAttrDeclRepID[i]);
+            }
+        } else {
+            out.writeInt(0);
+        }
+        out.writeInt(numLinkNodeReps);
+        if (numLinkNodeReps > 0) {
+            for (int i = 0; i < numLinkNodeReps; i++) {
+                out.writeLong(linkNodeKey[i]);
+                out.writeLong(linkNodeNodeCount[i]);
+                out.writeInt(linkNodeNodeNameRepID[i]);
+                out.writeInt(linkNodeNodeRepID[i]);
+            }
+        }
+        if (docNodeTextRepID != null && docNodeTextRepID.length > 0) {
+            out.writeInt(docNodeTextRepID.length);
+            for (int i = 0; i < docNodeTextRepID.length; i++) {
+                out.writeInt(docNodeTextRepID[i]);
+                out.writeInt(docNodeChildNodeRepID[i]);
+                out.writeInt(docNodeNumChildren[i]);
+            }
+        } else {
+            out.writeInt(0);
+        }
+        if (piNodeTargetAtom != null && piNodeTargetAtom.length > 0) {
+            out.writeInt(piNodeTargetAtom.length);
+            for (int i = 0; i < piNodeTargetAtom.length; i++) {
+                out.writeInt(piNodeTargetAtom[i]);
+                out.writeInt(piNodeTextRepID[i]);
+            }
+        } else {
+            out.writeInt(0);
+        }
+        out.writeInt(numNSNodeReps);
+        if (numNSNodeReps > 0) {
+            for (int i = 0; i < numNSNodeReps; i++) {
+                out.writeLong(nsNodeOrdinal[i]);
+                out.writeInt(nsNodePrevNSNodeRepID[i]);
+                out.writeInt(nsNodePrefixAtom[i]);
+                out.writeInt(nsNodeUriAtom[i]);
+            }
+        }
+        // skip permission node since it's not exposed to the API
+        out.writeInt(uriTextRepID);
+        out.writeInt(colsTextRepID);
+        out.writeInt(numTextReps);
+        LOG.info("numTextReps: " + numTextReps);
+        LOG.info("URI: " + getDocumentURI());
+        if (numTextReps > 0) {
+            for (int i = 0; i < numTextReps; i++) {
+                out.writeInt(textReps[i]);
+            }
+        }
     }    
 }

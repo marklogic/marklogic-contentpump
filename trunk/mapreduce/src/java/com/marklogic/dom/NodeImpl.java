@@ -27,6 +27,11 @@ import org.w3c.dom.UserDataHandler;
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 
+/**
+ * Expanded-tree-backed DOM Node implementation.
+ * 
+ * @author jchen
+ */
 public abstract class NodeImpl implements Node {
 
     public static final boolean trace = false;
@@ -41,9 +46,9 @@ public abstract class NodeImpl implements Node {
         }
     };
 
-    final ExpandedTree tree;
+    protected final ExpandedTree tree;
 
-    final int node;
+    protected final int node;
 
     /**
      * No public constructor; only subclasses of Node should be instantiated
@@ -53,8 +58,9 @@ public abstract class NodeImpl implements Node {
         this.node = node;
     }
 
-    /** Constructor for serialization. */
-//    public NodeImpl() {}
+    public ExpandedTree getExpandedTree() {
+        return tree;
+    }
 
     public Node appendChild(Node newChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
