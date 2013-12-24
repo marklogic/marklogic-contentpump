@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -39,11 +40,11 @@ import com.marklogic.tree.ExpandedTree;
 public class LargeBinaryDocument extends BinaryDocument {
     public static final Log LOG = LogFactory.getLog(
             LargeBinaryDocument.class);
-    Path path;
-    long offset;
-    long size;
-    long binaryOrigLen;
-    Configuration conf;
+    protected Path path;
+    protected long offset;
+    protected long size;
+    protected long binaryOrigLen;
+    protected Configuration conf;
     
     public LargeBinaryDocument() {
     }
@@ -57,8 +58,25 @@ public class LargeBinaryDocument extends BinaryDocument {
         this.conf = conf;
     }
     
+    public Path getPath() {
+        return path;
+    }
+
+    public long getOffset() {
+        return offset;
+    }
+    
+    public long getSize() {
+        return size;
+    }
+
+    public long getBinaryOrigLen() {
+        return binaryOrigLen;
+    }
+
     @Override
     public void readFields(DataInput in) throws IOException {
+        super.readFields(in);
         path = new Path(Text.readString(in));
         offset = in.readLong();
         size = in.readLong();
@@ -67,6 +85,7 @@ public class LargeBinaryDocument extends BinaryDocument {
 
     @Override
     public void write(DataOutput out) throws IOException {
+        super.write(out);
         Text.writeString(out, path.toString());
         out.writeLong(offset);
         out.writeLong(size);
@@ -78,21 +97,34 @@ public class LargeBinaryDocument extends BinaryDocument {
         if (size > Integer.MAX_VALUE) {
             throw new ArrayIndexOutOfBoundsException("Array size = " + size);
         }
+        return getContentAsByteArray(0, (int)size);  
+    }
+    
+    public byte[] getContentAsByteArray(int offset, int len) {
         FileSystem fs;
         try {
             fs = path.getFileSystem(conf);
             if (!fs.exists(path)) {
                 throw new RuntimeException("File not found: " + path);
             }
-            byte[] buf = new byte[(int) size];
+            FileStatus status = fs.getFileStatus(path);
+            if (status.getLen() < offset) {
+                throw new RuntimeException("Reached end of file: " + path);
+            }
+            byte[] buf = new byte[(int) len];
             FSDataInputStream is = fs.open(path);
-            for (int bytesRead = 0; bytesRead < size;) {
-                bytesRead += is.read(buf, bytesRead, (int) size - bytesRead);
+            for (int toSkip = offset, skipped = 0; 
+                 toSkip < offset; 
+                 toSkip -= skipped) {
+                skipped = is.skipBytes(offset);
+            }
+            for (int bytesRead = 0; bytesRead < len;) {
+                bytesRead += is.read(buf, bytesRead, len - bytesRead);
             }
             return buf;
         } catch (IOException e) {
             throw new RuntimeException("Error accessing file: " + path, e);
-        }     
+        }  
     }
 
     @Override

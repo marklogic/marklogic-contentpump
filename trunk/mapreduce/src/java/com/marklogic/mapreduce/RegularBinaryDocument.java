@@ -41,14 +41,27 @@ public class RegularBinaryDocument extends BinaryDocument {
         binaryData = tree.binaryData;
     }
     
+    public int getSize() {
+        return size;
+    }
+    
     @Override
     public void readFields(DataInput in) throws IOException {
-        // TODO
+        super.readFields(in);
+        size = in.readInt();
+        binaryData = new int[size];
+        for (int i = 0; i < size; i++) {
+            binaryData[i] = in.readInt();
+        }
     }
 
     @Override
     public void write(DataOutput out) throws IOException {
-        // TODO
+        super.write(out);
+        out.write(size);
+        for (int i = 0; i < size; i++) {
+            out.write(binaryData[i]);
+        }
     }
 
     @Override

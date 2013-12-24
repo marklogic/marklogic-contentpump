@@ -29,6 +29,8 @@ import org.apache.commons.modeler.util.DomUtil;
 import org.apache.hadoop.io.Text;
 import org.w3c.dom.Document;
 
+import com.marklogic.dom.NodeImpl;
+import com.marklogic.dom.TextImpl;
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 
@@ -56,24 +58,30 @@ public class DOMDocument extends ForestDocument {
     }
     
     @Override
-    public void readFields(DataInput arg0) throws IOException {
-        // TODO Auto-generated method stub
-
+    public void readFields(DataInput in) throws IOException {
+        super.readFields(in);
+        ExpandedTree tree = new ExpandedTree();
+        tree.readFields(in);
+        doc = (Document)tree.node(0);
+        rootNodeKind = tree.rootNodeKind();
     }
 
     @Override
-    public void write(DataOutput arg0) throws IOException {
-        // TODO Auto-generated method stub
-
+    public void write(DataOutput out) throws IOException {
+        super.write(out);
+        ((NodeImpl)doc).getExpandedTree().write(out);
     }
 
     public String toString() {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        if (rootNodeKind == NodeKind.TEXT) {
+            return ((TextImpl)doc).getTextContent();
+        }
         try {
             DomUtil.writeXml(doc, bos);
             return bos.toString();
         } catch (TransformerException ex) {
-            LOG.error(ex);
+            LOG.error("Error serializing document", ex);
         }    
         return null;
     }
@@ -81,11 +89,14 @@ public class DOMDocument extends ForestDocument {
     @Override
     public byte[] getContentAsByteArray() {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        if (rootNodeKind == NodeKind.TEXT) {
+            return ((TextImpl)doc).getTextContent().getBytes();
+        }
         try {
             DomUtil.writeXml(doc, bos);
             return bos.toByteArray();
         } catch (TransformerException ex) {
-            LOG.error(ex);
+            LOG.error("Error serializing document", ex);
         }    
         return null;
     }
