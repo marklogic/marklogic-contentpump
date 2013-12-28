@@ -54,6 +54,8 @@ public abstract class ForestDocument implements MarkLogicDocument {
                 break;
             case NodeKind.ELEM:
             case NodeKind.TEXT:
+            case NodeKind.PI:
+            case NodeKind.COMMENT:
                 doc = new DOMDocument(tree);  
                 break;
             default:

@@ -208,7 +208,9 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
                     match = true;
                     break;
                 } else if (type.equalsIgnoreCase("XML") && 
-                    kind == NodeKind.ELEM) {
+                    (kind == NodeKind.ELEM ||
+                     kind == NodeKind.COMMENT ||
+                     kind == NodeKind.PI)) {
                     match = true;
                     break;
                 }

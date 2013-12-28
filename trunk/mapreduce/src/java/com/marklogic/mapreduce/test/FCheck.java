@@ -16,6 +16,7 @@
 package com.marklogic.mapreduce.test;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.EOFException;
 import java.io.File;
@@ -23,11 +24,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
+import org.apache.commons.modeler.util.DomUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.w3c.dom.Node;
 
 import com.marklogic.io.BiendianDataInputStream;
 import com.marklogic.tree.CompressedTreeDecoder;
@@ -562,9 +565,12 @@ public class FCheck {
                 } else {
                     System.out.println("unexpected node kind: " + kind);
                 }
-//                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//                DomUtil.writeXml(tree.rootNode(), bos);
-//                System.out.println(bos.toString());
+                if (kind != NodeKind.BINARY) {
+                    Node root = tree.node(0);
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    DomUtil.writeXml(root, bos);
+                    System.out.println(bos.toString());
+                }           
             }
             catch (Exception e) {
             	System.err.println("Fail at position " + position);
