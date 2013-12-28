@@ -75,7 +75,10 @@ public class DOMDocument extends ForestDocument {
     public String toString() {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (rootNodeKind == NodeKind.TEXT) {
-            return ((TextImpl)doc).getTextContent();
+            TextImpl textNode = (TextImpl) doc.getFirstChild();
+            if (textNode != null) {
+                return textNode.getTextContent();
+            }    
         }
         try {
             DomUtil.writeXml(doc, bos);
@@ -90,7 +93,10 @@ public class DOMDocument extends ForestDocument {
     public byte[] getContentAsByteArray() {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (rootNodeKind == NodeKind.TEXT) {
-            return ((TextImpl)doc).getTextContent().getBytes();
+            TextImpl textNode = (TextImpl) doc.getFirstChild();
+            if (textNode != null) {
+                return textNode.getTextContent().getBytes();
+            }          
         }
         try {
             DomUtil.writeXml(doc, bos);
@@ -113,7 +119,9 @@ public class DOMDocument extends ForestDocument {
 
     @Override
     public ContentType getContentType() {
-        if (rootNodeKind == NodeKind.ELEM) {
+        if (rootNodeKind == NodeKind.ELEM ||
+            rootNodeKind == NodeKind.COMMENT ||
+            rootNodeKind == NodeKind.PI) {
             return ContentType.XML;
         } else if (rootNodeKind == NodeKind.TEXT) {
             return ContentType.TEXT;
