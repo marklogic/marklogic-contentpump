@@ -35,6 +35,7 @@ import org.apache.hadoop.util.VersionInfo;
 
 import com.marklogic.contentpump.utilities.CommandlineOptions;
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
  * ContentPump entry point.  MarkLogic ContentPump is a tool that moves content 
@@ -44,7 +45,7 @@ import com.marklogic.contentpump.utilities.OptionsFileUtil;
  * @author jchen
  *
  */
-public class ContentPump implements ConfigConstants {
+public class ContentPump implements MarkLogicConstants, ConfigConstants {
     
     public static final Log LOG = LogFactory.getLog(ContentPump.class);
     

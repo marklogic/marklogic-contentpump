@@ -31,8 +31,6 @@ public interface ConfigConstants {
 
     // common
     static final String MODE = "mode";
-    static final String MODE_DISTRIBUTED = "distributed";
-    static final String MODE_LOCAL = "local";
 
     static final String HADOOP_CONF_DIR = "hadoop_conf_dir";
     static final String THREAD_COUNT = "thread_count";
@@ -120,8 +118,10 @@ public interface ConfigConstants {
     static final String TRANSFORM_FUNCTION = "transform_function";
     static final String TRANSFORM_PARAM = "transform_param";
 
-    static final String RDF_STREAMING_MEMORY_THRESHOLD  = "rdf_streaming_memory_threshold";
+    static final String RDF_STREAMING_MEMORY_THRESHOLD  = 
+            "rdf_streaming_memory_threshold";
     static final String RDF_TRIPLES_PER_DOCUMENT  = "rdf_triples_per_document";
+    static final String DEFAULT_ENCODING = "UTF-8";
 
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 

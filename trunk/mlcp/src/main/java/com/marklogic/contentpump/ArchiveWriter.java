@@ -37,8 +37,8 @@ import com.marklogic.mapreduce.MarkLogicDocument;
  * 
  * @author jchen
  */
-public class ArchiveWriter extends 
-RecordWriter<DocumentURI, MarkLogicDocument> {
+public class ArchiveWriter extends RecordWriter<DocumentURI, MarkLogicDocument>
+implements MarkLogicConstants, ConfigConstants {
     public static final Log LOG = LogFactory.getLog(ArchiveWriter.class);
     private String dir;
     private TaskAttemptContext context;
@@ -64,9 +64,8 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
         dir = path.toString();
         this.context = context;
         Configuration conf = context.getConfiguration();
-        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
-        String type = conf.get(ConfigConstants.CONF_OUTPUT_TYPE, 
-                ConfigConstants.DEFAULT_OUTPUT_TYPE);
+        encoding = conf.get(OUTPUT_CONTENT_ENCODING, DEFAULT_ENCODING);
+        String type = conf.get(CONF_OUTPUT_TYPE, DEFAULT_OUTPUT_TYPE);
         ExportOutputType outputType = ExportOutputType.valueOf(
                         type.toUpperCase());
         if (outputType.equals(ExportOutputType.DOCUMENT)) {
@@ -101,14 +100,14 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
         Configuration conf = context.getConfiguration();
         String dst = null;
         
-        String mode = conf.get(ConfigConstants.CONF_MODE);
+        String mode = conf.get(CONF_MODE);
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssZ");
         String timestamp = sdf.format(date);
-        if (mode.equals(ConfigConstants.MODE_DISTRIBUTED)) {
+        if (mode.equals(MODE_DISTRIBUTED)) {
             dst = dir + "/" + context.getTaskAttemptID().getTaskID().getId() 
                 + "-" + timestamp + "-" + type.toString();
-        } else if (mode.equals(ConfigConstants.MODE_LOCAL)) {
+        } else if (mode.equals(MODE_LOCAL)) {
             dst = dir + "/" + timestamp + "-" + type.toString();
         }
         // Decode URI if exporting documents in compressed form.
@@ -142,8 +141,8 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                     ((DatabaseDocumentWithMeta) content).getMeta().toXML()
                         .getBytes(encoding));
             }
-            txtArchive.write(zipEntryName, 
-                    content.getContentAsString().getBytes(encoding));
+            String text = content.getContentAsString();
+            txtArchive.write(zipEntryName, text.getBytes(encoding));
         } else if(ContentType.XML.equals(type)) {
             if(xmlArchive == null) {
                 xmlArchive = new OutputArchive(dst, conf);
@@ -158,8 +157,8 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
                         zipEntryName + DocumentMetadata.EXTENSION,
                         ((DatabaseDocumentWithMeta) content).getMeta()
                             .toXML().getBytes(encoding));
-                    xmlArchive.write(zipEntryName, content.getContentAsString()
-                        .getBytes(encoding));
+                    xmlArchive.write(zipEntryName, 
+                            content.getContentAsString().getBytes(encoding));
                 }
             } else {
                 String doc = content.getContentAsString();
