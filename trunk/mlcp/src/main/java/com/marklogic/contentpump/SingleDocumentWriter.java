@@ -44,8 +44,9 @@ import com.marklogic.mapreduce.MarkLogicDocument;
  * 
  * @author jchen
  */
-public class SingleDocumentWriter extends 
-RecordWriter<DocumentURI, MarkLogicDocument> {
+public class SingleDocumentWriter 
+extends RecordWriter<DocumentURI, MarkLogicDocument> 
+implements MarkLogicConstants, ConfigConstants {
     public static final Log LOG = 
         LogFactory.getLog(SingleDocumentWriter.class);
     
@@ -55,8 +56,7 @@ RecordWriter<DocumentURI, MarkLogicDocument> {
     public SingleDocumentWriter(Path path, Configuration conf) {
         dir = path;
         this.conf = conf;
-        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, 
-                "UTF-8");
+        encoding = conf.get(OUTPUT_CONTENT_ENCODING, DEFAULT_ENCODING);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Default charset: " + Charset.defaultCharset());
         }
