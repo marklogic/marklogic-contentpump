@@ -286,7 +286,7 @@ public abstract class NodeImpl implements Node {
 
     protected int getNSNodeID(long ordinal) {
         int R = tree.numNSNodeReps;
-        if (R == 0) return -1;
+        if (R == 0) return Integer.MAX_VALUE;
         int L = 0;
         while (L + 1 < R) {
             int M = (L + R) >>> 1;
@@ -298,8 +298,8 @@ public abstract class NodeImpl implements Node {
         if (ordinal < tree.nsNodeOrdinal[L])
             --L;
         for (;;) {
-            if (L < 0)
-                break;
+            if (L == Integer.MAX_VALUE) 
+            	break; 
             if (tree.nsNodePrefixAtom[L] != Integer.MAX_VALUE)
                 break;
             L = tree.nsNodePrevNSNodeRepID[L];
@@ -308,13 +308,12 @@ public abstract class NodeImpl implements Node {
     }
     
     protected int nextNSNodeID(int ns, long minOrdinal) {
-    	if (ns < 0) return ns;
     	for (;;) {
     		ns = tree.nsNodePrevNSNodeRepID[ns];
-    		if ( ns < 0 ) return -1;
+    		if ( ns == -1 ) return Integer.MAX_VALUE;
     		if ( tree.nsNodePrefixAtom[ns] != Integer.MAX_VALUE) break;
     	}
-    	if ( ns < minOrdinal ) ns = -1; 
+    	if ( ns < minOrdinal ) ns = Integer.MAX_VALUE; 
     	return ns;
     }
      
