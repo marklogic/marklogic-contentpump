@@ -22,6 +22,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
+import com.marklogic.mapreduce.ForestInputFormat;
 
 /**
  * Enum of supported input type.
@@ -184,6 +185,28 @@ public enum InputType implements ConfigConstants {
         public ContentType getContentType(CommandLine cmdline) {
             return ContentType.XML;
         }
+    },
+    FOREST {
+        @Override
+        public Class<? extends FileInputFormat> getInputFormatClass(
+            CommandLine cmdline, Configuration conf) {
+            return ForestInputFormat.class;
+        }
+
+        @Override
+        public Class<? extends OutputFormat> getOutputFormatClass(
+                        CommandLine cmdline, Configuration conf) {
+            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+                return TransformOutputFormat.class;
+            } else {
+                return ContentOutputFormat.class;
+            }
+        }
+
+        @Override
+        public ContentType getContentType(CommandLine cmdline) {
+            return ContentType.MIXED;
+        }
     };
 
     public static InputType forName(String type) {
@@ -199,6 +222,8 @@ public enum InputType implements ConfigConstants {
             return SEQUENCEFILE;
         } else if (type.equalsIgnoreCase(RDF.name())) {
             return RDF;
+        } else if (type.equalsIgnoreCase(FOREST.name())) {
+            return FOREST;
         } else {
             throw new IllegalArgumentException("Unknown input type: " + type);
         }
