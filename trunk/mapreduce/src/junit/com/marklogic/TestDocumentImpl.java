@@ -2,7 +2,10 @@ package com.marklogic;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.LinkedList;
 
 import junit.framework.TestCase;
 
@@ -22,15 +25,15 @@ public class TestDocumentImpl extends TestCase {
 	
 	boolean verbose = false;
 
-    /* String testData = "src/testdata/dom-core-test";
+     String testData = "src/testdata/dom-core-test";
     String forest = "DOM-test-forest";
     String stand = "00000004";
-    int num = 16; */ 
+    int num = 16;
 	
-    String testData = "src/testdata/3doc-test";
+    /* String testData = "src/testdata/3doc-test";
 	String forest = "3docForest";
 	String stand = "00000002";
-	int num = 3; 
+	int num = 3; */ 
 	
     public void testGetDocumentURI() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
@@ -75,6 +78,59 @@ public class TestDocumentImpl extends TestCase {
             actual.append("#FIRSTCHILD##").append(lname).append("#").append("\n");
             lname = d.getLastChild().getNodeName();
             actual.append("#LASTCHILD##").append(lname).append("#").append("\n");
+        }
+        System.out.println(expected.toString());
+        System.out.println(actual.toString());
+        assertEquals(expected.toString(), actual.toString());
+    }
+    
+    public void testGetPrefix() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+            		+ forest, stand), false);
+        assertEquals(num, trees.size());
+
+        StringBuffer expected = new StringBuffer();
+        StringBuffer actual = new StringBuffer();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+        	String uri = t.getDocumentURI();
+        	
+        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+        	if (doc == null) continue;
+            expected.append(uri).append("\n");
+        	Queue<NodeList> q = new LinkedList<NodeList>();
+        	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
+        	while (!q.isEmpty()) {
+        		NodeList nl = q.poll();
+        		for (int k=0; k<nl.getLength(); k++) {
+        			if (nl.item(k).hasChildNodes()) 
+        				q.add(nl.item(k).getChildNodes());
+                    if (nl.item(k).getNodeType() == Node.ELEMENT_NODE)
+                    expected.append("#CHILD##").
+           		     append(nl.item(k).getNodeName()).append("#").append("\n");
+        		}
+        		
+        	}
+        	
+            q.clear();
+            DocumentImpl d = new DocumentImpl(t, 0);
+            actual.append(uri).append("\n");
+        	if (d.hasChildNodes()) q.add(d.getChildNodes());
+        	while (!q.isEmpty()) {
+        		NodeList nl = q.poll();
+        		for (int k=0; k<nl.getLength(); k++) {
+        			if (nl.item(k).hasChildNodes()) 
+        				q.add(nl.item(k).getChildNodes());
+                    if (nl.item(k).getNodeType() == Node.ELEMENT_NODE)
+        			actual.append("#CHILD##").
+           		     append(nl.item(k).getNodeName()).append("#").append("\n");
+        		}
+        		
+        	}
+            
+        	expected.append("#");
+        	actual.append("#");
         }
         System.out.println(expected.toString());
         System.out.println(actual.toString());
@@ -245,7 +301,6 @@ public class TestDocumentImpl extends TestCase {
         		Node curr = elementsExpected.item(j);
         		expected.append("#I##").append(j).append("#").
         				append("#NODENAME##").append(curr.getNodeName()).append("#").
-        				append("#NODETEXT##").append(curr.getTextContent()).append("#").
         				append("\n");
         	}
         		            
@@ -255,7 +310,6 @@ public class TestDocumentImpl extends TestCase {
         		Node curr = elementsActual.item(j);
         		actual.append("#I##").append(j).append("#").
         			  append("#NODENAME##").append(curr.getNodeName()).append("#").
-        			  append("#NODETEXT##").append(curr.getTextContent()).append("#").
         			  append("\n");
         	}
          }
