@@ -104,8 +104,8 @@ public enum Command implements ConfigConstants {
                 .withArgName("type")
                 .hasArg()
                 .withDescription("Type of input file.  Valid choices are: "
-                    + "documents, XML aggregates, delimited text, and export "
-                    + "archive.")
+                    + "documents, XML aggregates, delimited text, export "
+                    + "archive, rdf and forest.")
                 .create(INPUT_FILE_TYPE);
             options.addOption(inputFileType);
             Option inputCompressed = OptionBuilder
