@@ -127,15 +127,15 @@ public class ElementImpl extends NodeImpl implements Element {
 		return ns == null ? getTagName() : ns + ":" + getTagName();
 	}
 	
-	@Override
 	protected int getPrefixID(int uriAtom) {
 		int a = Integer.MAX_VALUE;
 		boolean useDefaultNS = true;
 		ArrayList<Integer> ubp = new ArrayList<Integer>();
-    	for ( int ns = getNSNodeID(tree.nodeOrdinal[tree.nodeRepID[node]]); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
+		long minOrdinal = 0;
+		for ( int ns = getNSNodeID(tree.nodeOrdinal[tree.nodeRepID[node]]); ns >= 0 ; ns = nextNSNodeID(ns,minOrdinal) ) {
     		int uri = tree.nsNodeUriAtom[ns];
     		int prefix = tree.nsNodePrefixAtom[ns];
-    		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
+    		if (uri<0 || tree.atomString(uri) == null) { ubp.add(prefix); continue; }
     		if (uri != uriAtom) { useDefaultNS &= (tree.atomString(prefix) != null); continue; }
     		if (ubp.contains(prefix)) continue;
     		if (tree.atomString(prefix) != null) {if (a == Integer.MAX_VALUE) a = prefix; continue;}
@@ -143,7 +143,7 @@ public class ElementImpl extends NodeImpl implements Element {
     	} 
     	return a;
 	}
-    
+	
 	@Override
 	public String getPrefix() {
 		int ns = tree.nodeNameNamespaceAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]];
@@ -189,6 +189,52 @@ public class ElementImpl extends NodeImpl implements Element {
 		return (tree.elemNodeChildNodeRepID[tree.nodeRepID[node]] != Integer.MAX_VALUE);
 	}
 
+	// The following page gives algorithm for the following functions
+	// http://www.w3.org/TR/DOM-Level-3-Core/namespaces-algorithms.html#lookupNamespacePrefixAlgo
+	
+	@Override
+    public String lookupNamespaceURI(String prefix) {
+        if (prefix == null) return null;
+        if (prefix.equals(getPrefix())) return getNamespaceURI();
+        return null;
+    }
+
+	@Override
+	public String lookupPrefix(String namespaceURI) {
+        if (namespaceURI == null) return null;
+        if (namespaceURI.equals(getNamespaceURI())) return getPrefix();
+        for (Node parent = this.getParentNode(); parent != null; parent = parent.getParentNode()) {
+          if (parent.getNodeType() != Node.ELEMENT_NODE) 
+        	  continue;
+          String found = ((ElementImpl)parent).lookupPrefix(namespaceURI,this);
+          if (found != null) return found;
+        } 
+        return null;
+	}
+	
+	protected String lookupPrefix(String namespaceURI,Node root) {
+		int a = Integer.MAX_VALUE;
+		boolean useDefaultNS = true;
+		ArrayList<Integer> ubp = new ArrayList<Integer>();
+		
+		/* Logic from NSNodeIterator(const Node& node, const Node& root) */
+		long minOrdinal = (this == root?0:tree.nodeOrdinal[tree.nodeRepID[node]]);
+		if (tree.nodeOrdinal[tree.nodeRepID[node]] < minOrdinal) return null;
+		// TODO check what parentNSNodeRepID logic is all about
+		/* END */
+		
+		for ( int ns = getNSNodeID(tree.nodeOrdinal[tree.nodeRepID[node]]); ns != Integer.MAX_VALUE ; ns = nextNSNodeID(ns,minOrdinal) ) {
+			int uri = tree.nsNodeUriAtom[ns];
+			int prefix = tree.nsNodePrefixAtom[ns];
+			if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
+			if (!namespaceURI.equals(tree.atomString(uri))) { useDefaultNS &= (tree.atomString(prefix) != null); continue; }
+			if (ubp.contains(prefix)) continue;
+			if (tree.atomString(prefix) != null) {if (a == Integer.MAX_VALUE) a = prefix; continue;}
+			if (useDefaultNS) return (prefix != Integer.MAX_VALUE) ? tree.atomString(prefix) : null;
+		} 
+		return (a != Integer.MAX_VALUE) ? tree.atomString(a) : null;
+	}
+	
 	public void removeAttribute(String name) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}

@@ -69,7 +69,7 @@ public class AttrImpl extends NodeImpl implements Attr {
 		if (parentNodeRepID == Integer.MAX_VALUE) parentNodeRepID = node;
 		ArrayList<Integer> ubp = new ArrayList<Integer>();
 		long sum_ordinal = tree.ordinal+tree.nodeOrdinal[parentNodeRepID];
-    	for ( int ns = getNSNodeID(sum_ordinal); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
+    	for ( int ns = getNSNodeID(sum_ordinal); ns != Integer.MAX_VALUE ; ns = nextNSNodeID(ns,0) ) {
     		int uri = tree.nsNodeUriAtom[ns];
     		int prefix = tree.nsNodePrefixAtom[ns];
     		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
@@ -104,6 +104,16 @@ public class AttrImpl extends NodeImpl implements Attr {
     public boolean isId() {
         return false;
     }
+    
+	@Override
+    public String lookupNamespaceURI(String prefix) {
+		return getOwnerElement().lookupNamespaceURI(prefix);
+    }
+
+	@Override
+	public String lookupPrefix(String namespaceURI) {
+		return getOwnerElement().lookupPrefix(namespaceURI);
+	}
 
     public void setValue(String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);

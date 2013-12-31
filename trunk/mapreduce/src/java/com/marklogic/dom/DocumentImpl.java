@@ -243,6 +243,16 @@ public class DocumentImpl extends NodeImpl implements Document {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+    public String lookupNamespaceURI(String prefix) {
+		return getDocumentElement().lookupNamespaceURI(prefix);
+    }
+
+	@Override
+	public String lookupPrefix(String namespaceURI) {
+		return getDocumentElement().lookupPrefix(namespaceURI);
+	}
 
 	public void normalizeDocument() {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
