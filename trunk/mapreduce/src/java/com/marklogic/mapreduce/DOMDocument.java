@@ -21,13 +21,20 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Result;
+import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.modeler.util.DomUtil;
 import org.apache.hadoop.io.Text;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import com.marklogic.dom.NodeImpl;
 import com.marklogic.dom.TextImpl;
@@ -44,6 +51,15 @@ public class DOMDocument extends ForestDocument {
     public static final Log LOG = LogFactory.getLog(DOMDocument.class);
     private Document doc;
     private byte rootNodeKind;
+    private static TransformerFactory transformerFactory = null;
+
+    private static synchronized TransformerFactory getTransformerFactory() {
+        if (transformerFactory == null) {
+            transformerFactory = TransformerFactory.newInstance();
+        }
+
+        return transformerFactory;
+    }
     
     public DOMDocument() {
     }
@@ -71,9 +87,22 @@ public class DOMDocument extends ForestDocument {
         super.write(out);
         ((NodeImpl)doc).getExpandedTree().write(out);
     }
+    
+    static ByteArrayOutputStream serialize(Node node) 
+    throws TransformerException {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        Result rslt = new StreamResult(bos);
+        Source src = new DOMSource(node);
+        Transformer transformer = getTransformerFactory().newTransformer();
+        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, 
+                "yes");
+        transformer.transform(src, rslt);
+
+        return bos;
+    }
 
     public String toString() {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (rootNodeKind == NodeKind.TEXT) {
             TextImpl textNode = (TextImpl) doc.getFirstChild();
             if (textNode != null) {
@@ -81,7 +110,7 @@ public class DOMDocument extends ForestDocument {
             }    
         }
         try {
-            DomUtil.writeXml(doc, bos);
+            ByteArrayOutputStream bos = serialize(doc);
             return bos.toString();
         } catch (TransformerException ex) {
             LOG.error("Error serializing document", ex);
@@ -91,7 +120,6 @@ public class DOMDocument extends ForestDocument {
 
     @Override
     public byte[] getContentAsByteArray() {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         if (rootNodeKind == NodeKind.TEXT) {
             TextImpl textNode = (TextImpl) doc.getFirstChild();
             if (textNode != null) {
@@ -99,7 +127,7 @@ public class DOMDocument extends ForestDocument {
             }          
         }
         try {
-            DomUtil.writeXml(doc, bos);
+            ByteArrayOutputStream bos = serialize(doc);
             return bos.toByteArray();
         } catch (TransformerException ex) {
             LOG.error("Error serializing document", ex);

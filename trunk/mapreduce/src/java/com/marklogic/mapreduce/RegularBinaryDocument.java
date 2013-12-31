@@ -34,7 +34,10 @@ import com.marklogic.tree.ExpandedTree;
 public class RegularBinaryDocument extends BinaryDocument {
 
     private int[] binaryData;
-    private int size;
+    private int size = 0;
+    
+    public RegularBinaryDocument() {
+    }
     
     public RegularBinaryDocument(ExpandedTree tree) {
         size = tree.binaryData.length;
@@ -58,9 +61,9 @@ public class RegularBinaryDocument extends BinaryDocument {
     @Override
     public void write(DataOutput out) throws IOException {
         super.write(out);
-        out.write(size);
+        out.writeInt(size);
         for (int i = 0; i < size; i++) {
-            out.write(binaryData[i]);
+            out.writeInt(binaryData[i]);
         }
     }
 
