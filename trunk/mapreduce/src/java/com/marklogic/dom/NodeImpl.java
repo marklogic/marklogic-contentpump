@@ -238,7 +238,7 @@ public abstract class NodeImpl implements Node {
 
     public boolean isEqualNode(Node other) {
     	
-    	//Note that normalization can affect equality; to avoid this, 
+    	// Note that normalization can affect equality; to avoid this, 
     	// nodes should be normalized before being compared.
     	// For the moment, normalization cannot be done. 
     	
@@ -317,18 +317,14 @@ public abstract class NodeImpl implements Node {
     	if ( ns < minOrdinal ) ns = -1; 
     	return ns;
     }
-    
-    // TODO - override in subclasses?
+     
+    // http://www.w3.org/TR/DOM-Level-3-Core/namespaces-algorithms.html#lookupNamespacePrefixAlgo
 
     public String lookupNamespaceURI(String prefix) {
-        assert (false);
         return null;
     }
 
-    // TODO - override in subclasses?
-
     public String lookupPrefix(String namespaceURI) {
-        assert (false);
         return null;
     }
 

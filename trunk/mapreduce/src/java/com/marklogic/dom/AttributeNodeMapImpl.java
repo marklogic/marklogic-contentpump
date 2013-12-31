@@ -42,7 +42,6 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 	public Node getNamedItemNS(String namespaceURI, String localName)
 			throws DOMException {
     	if (NodeImpl.trace) System.out.println(this.getClass().getSimpleName() + ".getNamedItemNS(" + element.node + ", " + namespaceURI + ", " + localName + ")");
-		// TODO Auto-generated method stub
     	if (localName == null) return null;
     	for (int i = 0; i < getLength(); i++) {
     		if ((namespaceURI == null) != (item(i).getNamespaceURI() == null)) continue;
