@@ -1,27 +1,4 @@
-<?xml version="1.0"?><?TEST-STYLE PIDATA?>
-<!DOCTYPE html
-   PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-   "xhtml1-strict.dtd" [
-   <!ENTITY alpha "&#945;">
-   <!ENTITY beta "&#946;">
-   <!ENTITY gamma "&#947;">
-   <!ENTITY delta "&#948;">
-   <!ENTITY epsilon "&#949;">
-   <!ENTITY alpha "&#950;">
-   <!NOTATION notation1 PUBLIC "notation1File">
-   <!NOTATION notation2 SYSTEM "notation2File">
-   <!ATTLIST p
-        dir CDATA 'rtl'
-        xmlns:dmstc CDATA #IMPLIED
-        xmlns:nm CDATA #IMPLIED
-        xmlns:emp2 CDATA #IMPLIED>
-   <!ATTLIST html
-                   xmlns:xsi CDATA #IMPLIED
-                   xsi:schemaLocation CDATA #IMPLIED>
-   <!ATTLIST acronym xsi:noNamespaceSchemaLocation CDATA #IMPLIED>
-   <!ENTITY ent4 "<span xmlns='http://www.w3.org/1999/xhtml'>Element data</span><?PItarget PIdata?>">
-   <!ATTLIST span xmlns CDATA #IMPLIED>
-]>
+<?xml version="1.0"?>
 <!-- This is comment number 1.-->
 <html xmlns='http://www.w3.org/1999/xhtml'
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -42,7 +19,7 @@
   <code>Secretary</code>
   <sup>35,000</sup>
   <var>Female</var>
-  <acronym title="Yes" class="Yes" xsi:noNamespaceSchemaLocation="Yes">&beta; Dallas, &gamma;
+  <acronym title="Yes" class="Yes" xsi:noNamespaceSchemaLocation="Yes"> Dallas, 
  98554</acronym>
  </p>
  <p xmlns:dmstc="http://www.netzero.com">
@@ -51,7 +28,7 @@
  Jones</strong>
   <code>Department Manager</code>
   <sup>100,000</sup>
-  <var>&ent4;</var>
+  <var></var>
   <acronym title="Yes" class="No" id="_98553" xsi:noNamespaceSchemaLocation="Yes">PO Box 27 Irving, texas 98553</acronym>
  </p>
  <p xmlns:nm="http://www.altavista.com">
@@ -60,7 +37,7 @@
   <code>Personnel Director</code>
   <sup>95,000</sup>
   <var>Female</var>
-  <acronym title="Yes" class="Y&alpha;" id="_98556" xsi:noNamespaceSchemaLocation="Yes">27 South Road. Dallas, Texas 98556</acronym>
+  <acronym title="Yes" class="Y" id="_98556" xsi:noNamespaceSchemaLocation="Yes">27 South Road. Dallas, Texas 98556</acronym>
  </p>
  <p xmlns:emp2="http://www.nist.gov">
   <em>EMP0005</em>
