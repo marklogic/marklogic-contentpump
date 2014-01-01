@@ -302,9 +302,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 if (formatNeeded) {
                     options.setFormat(DocumentFormat.BINARY);
                     formatNeeded = false;
-                }          
-                String str = new String(((BytesWritable) value).getBytes());
-                LOG.info("content: \n" + str);
+                }
                 content = ContentFactory.newContent(uri, 
                         ((BytesWritable) value).getBytes(), 0, 
                         ((BytesWritable) value).getLength(), options);               
@@ -326,7 +324,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsByteArray(), options);
                 } else {
-                    LOG.info("content: " + doc.getContentAsString());
                     content = ContentFactory.newContent(uri, 
                               doc.getContentAsText().getBytes(), options);
                 }
