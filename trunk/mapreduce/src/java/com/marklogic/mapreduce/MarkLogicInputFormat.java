@@ -284,10 +284,11 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         // construct a list of splits per forest per host
         Map<String, List<List<InputSplit>>> hostForestSplits = 
             new HashMap<String, List<List<InputSplit>>>();
+        boolean tsQuery = (jobConf.get(INPUT_QUERY_TIMESTAMP) != null);
         for (int i = 0; i < forestSplits.size(); i++) {
             ForestSplit fsplit = forestSplits.get(i);
             List<InputSplit> splits = null;
-            if (fsplit.recordCount > 0) {
+            if (fsplit.recordCount > 0 || !tsQuery) {
                 String host = fsplit.hostName;
                 List<List<InputSplit>> splitLists = hostForestSplits.get(host);
                 if (splitLists == null) {
