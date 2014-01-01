@@ -15,7 +15,7 @@
     <dependency>
       <groupId>com.marklogic</groupId>
       <artifactId>marklogic-mapreduce1</artifactId>
-      <version>1.2</version>
+      <version>2.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>

@@ -19,7 +19,7 @@
     <dependency>
       <groupId>com.marklogic</groupId>
       <artifactId>marklogic-mapreduce2</artifactId>
-      <version>1.2</version>
+      <version>2.1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.avro</groupId>
