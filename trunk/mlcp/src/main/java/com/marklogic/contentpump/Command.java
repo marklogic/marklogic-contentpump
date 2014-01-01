@@ -288,27 +288,35 @@ public enum Command implements ConfigConstants {
                     "Whether to split input files to load into MarkLogic")
                 .create(SPLIT_INPUT);
             options.addOption(splitInput);
+            
+            Option df = OptionBuilder
+                .withArgName("String")
+                .hasArg()
+                .withDescription("Comma-separated list of directories")
+                .create(DIRECTORY_FILTER);
+            options.addOption(df);
+            Option cf = OptionBuilder
+                .withArgName("String")
+                .hasArg()
+                .withDescription("Comma-separated list of collections")
+                .create(COLLECTION_FILTER);
+            options.addOption(cf);
+            Option tf = OptionBuilder
+                .withArgName("String")
+                .hasArg()
+                .withDescription("Comma-separated list of document types")
+                .create(TYPE_FILTER);
+            options.addOption(tf);
         }
 
         @Override
         public Job createJob(Configuration conf, CommandLine cmdline)
                         throws IOException {
             applyConfigOptions(conf, cmdline);
-
-            String inputTypeOption = cmdline.getOptionValue(INPUT_FILE_TYPE,
-                            INPUT_FILE_TYPE_DEFAULT);
-            InputType type = InputType.forName(inputTypeOption);
-            if (!type.equals(InputType.DELIMITED_TEXT)) {
-                if (conf.getBoolean(CONF_SPLIT_INPUT, false)) {
-                    throw new IllegalArgumentException("The setting for " +
-                        SPLIT_INPUT + " option is not supported for " 
-                        + type);
-                }
-            }
+            InputType type = getInputType(cmdline);
             
             // construct a job
             Job job = new Job(conf);
-            job.setJarByClass(this.getClass());
             job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
             job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
 
@@ -323,6 +331,7 @@ public enum Command implements ConfigConstants {
                 FileInputFormat.setInputPathFilter(job,
                                 DocumentPathFilter.class);
             }
+            
             return job;
         }
 
@@ -556,9 +565,6 @@ public enum Command implements ConfigConstants {
                         + " encoding is not supported");
                 }
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
-            } else {
-                //default is UTF-8
-                conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, "UTF-8");
             }
             if (cmdline.hasOption(THREADS_PER_SPLIT)) {
                 String arg = cmdline.getOptionValue(THREADS_PER_SPLIT);
@@ -604,6 +610,11 @@ public enum Command implements ConfigConstants {
                         LOG.warn(INPUT_COMPRESSED + " disables " + SPLIT_INPUT);
                         conf.setBoolean(CONF_SPLIT_INPUT, false);
                     }
+                    if (inputType != InputType.DELIMITED_TEXT) {
+                        throw new IllegalArgumentException("The setting for " +
+                            SPLIT_INPUT + " option is not supported for " + 
+                            inputType);
+                    }
                     conf.setBoolean(CONF_SPLIT_INPUT, true);
                 } else if (arg.equalsIgnoreCase("false")) {
                     conf.setBoolean(CONF_SPLIT_INPUT, false);
@@ -611,6 +622,36 @@ public enum Command implements ConfigConstants {
                     throw new IllegalArgumentException(
                         "Unrecognized option argument for " + SPLIT_INPUT
                             + ": " + arg);
+                }
+            }
+            if (cmdline.hasOption(COLLECTION_FILTER)) {
+                if (inputType == InputType.FOREST) {
+                    String colFilter = 
+                            cmdline.getOptionValue(COLLECTION_FILTER);
+                    conf.set(CONF_COLLECTION_FILTER, colFilter);
+                } else {
+                    LOG.warn("The setting for " + COLLECTION_FILTER + 
+                            " is not applicable for " + inputType); 
+                }
+            }
+            if (cmdline.hasOption(DIRECTORY_FILTER)) {
+                if (inputType == InputType.FOREST) {
+                    String dirFilter = 
+                            cmdline.getOptionValue(DIRECTORY_FILTER);
+                    conf.set(CONF_DIRECTORY_FILTER, dirFilter);
+                } else {
+                    LOG.warn("The setting for " + DIRECTORY_FILTER + 
+                            " is not applicable for " + inputType); 
+                }
+            }
+            if (cmdline.hasOption(TYPE_FILTER)) {
+                if (inputType == InputType.FOREST) {
+                    String typeFilter = 
+                            cmdline.getOptionValue(TYPE_FILTER);
+                    conf.set(MarkLogicConstants.TYPE_FILTER, typeFilter);
+                } else {
+                    LOG.warn("The setting for " + TYPE_FILTER + 
+                            " is not applicable for " + inputType); 
                 }
             }
         }
@@ -1130,17 +1171,16 @@ public enum Command implements ConfigConstants {
             
             // construct a job
             Job job = new Job(conf);
-            job.setJarByClass(this.getClass());
             job.setInputFormatClass(ForestInputFormat.class);
+            Class<? extends OutputFormat> outputFormatClass = 
+                    Command.isOutputCompressed(cmdline) ?
+                        ArchiveOutputFormat.class : 
+                        SingleDocumentOutputFormat.class;
+            job.setOutputFormatClass(outputFormatClass);
 
             setMapperClass(job, conf, cmdline);
             job.setMapOutputKeyClass(DocumentURI.class);
             job.setMapOutputValueClass(ForestDocument.class);
-            Class<? extends OutputFormat> outputFormatClass = 
-                Command.isOutputCompressed(cmdline) ?
-                 ArchiveOutputFormat.class : SingleDocumentOutputFormat.class;
-            job.setOutputFormatClass(outputFormatClass);
-            job.setOutputKeyClass(DocumentURI.class);
             
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(INPUT_FILE_PATH);
