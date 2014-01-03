@@ -15,6 +15,8 @@
  */
 package com.marklogic.dom;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Comment;
@@ -35,10 +37,27 @@ import com.marklogic.tree.ExpandedTree;
 
 public class DocumentImpl extends NodeImpl implements Document {
     private Element documentElement;
-    
+
 	public DocumentImpl(ExpandedTree tree, int node) {
 		super(tree, node);
 	}
+
+	public Node cloneNode(boolean deep) {
+	    Document clonedDoc = null;
+        try {
+            clonedDoc = tree.getClonedDocOwner();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException("Internal Error:" + e);
+        }
+        if(deep) {
+            for(Node n = getFirstChild();n!=null; n=n.getNextSibling()) {
+                clonedDoc.appendChild(n.cloneNode(true));
+            }
+        }
+	    
+	    return clonedDoc;
+	}
+	
 
 	@Override
 	public String getNodeName() {

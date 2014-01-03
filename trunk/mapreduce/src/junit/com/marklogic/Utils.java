@@ -118,7 +118,8 @@ public class Utils {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory
                 .newInstance();
-            dbFactory.setNamespaceAware(true);
+//            dbFactory.setIgnoringElementContentWhitespace(true);
+//            dbFactory.setNamespaceAware(true);
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             doc = dBuilder.parse(file);
 
@@ -132,6 +133,15 @@ public class Utils {
             e.printStackTrace();
         }
         return doc;
+    }
+    
+    public static boolean isWhitespaceNode(Node n) {
+        if (n.getNodeType() == Node.TEXT_NODE) {
+            String val = n.getNodeValue();
+            return val.trim().length() == 0;
+        } else {
+            return false;
+        }
     }
 
 }

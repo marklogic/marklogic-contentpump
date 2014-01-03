@@ -31,11 +31,11 @@ public class TestDocumentImpl extends TestCase {
     String forest = "DOM-test-forest";
     String stand = "00000002";
     int num = 16; 
-	
-    /* String testData = "src/testdata/3doc-test";
-	String forest = "3docForest";
-	String stand = "00000002";
-	int num = 3; */ 
+    
+/*     String testData = "src/testdata/3doc-test";
+    String forest = "3docForest";
+    String stand = "00000002";
+    int num = 3;  */
 	
     public void testGetDocumentURI() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
@@ -203,6 +203,7 @@ public class TestDocumentImpl extends TestCase {
             NodeList children = doc.getFirstChild().getChildNodes();
             for (int k = 0; k < children.getLength(); k++) {
               Node curr = children.item(k);
+//              if(Utils.isWhitespaceNode(curr)) continue;
               expected.append("#NODENAME##").append(curr.getNodeName()).append("#").append("\n");
               String nodename = curr.getNodeName();
               int tok = nodename.indexOf(':'); 
@@ -516,10 +517,12 @@ public class TestDocumentImpl extends TestCase {
     private void walkDOM (NodeList nodes, StringBuilder sb) {
         for(int i=0; i<nodes.getLength(); i++) {
             Node child = nodes.item(i);
+//            if(Utils.isWhitespaceNode(child)) continue;
             sb.append(child.getNodeType()).append("#");
             sb.append(child.getNodeName()).append("#");
             sb.append(child.getNodeValue()).append("#");
             if(child.hasChildNodes()) {
+                sb.append("\n");
                 walkDOM(child.getChildNodes(), sb);
             }
         }
@@ -534,7 +537,8 @@ public class TestDocumentImpl extends TestCase {
 
         StringBuilder expected = new StringBuilder();
         StringBuilder actual = new StringBuilder();
-        for (int i = 0; i < trees.size(); i++) {
+        //TODO
+        for (int i = 0; i < 1/*trees.size()*/; i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
             expected.append(uri);
@@ -542,6 +546,7 @@ public class TestDocumentImpl extends TestCase {
         	if (doc == null) continue;
             NodeList children = doc.getChildNodes();
             walkDOM(children, expected);
+            System.out.println("--------------");
             DocumentImpl d = new DocumentImpl(t, 0);
             NodeList eChildren = d.getChildNodes();
             actual.append(uri);
@@ -729,6 +734,9 @@ public class TestDocumentImpl extends TestCase {
     private void walkDOMAttr (NodeList nodes, StringBuilder sb) {
         for(int i=0; i<nodes.getLength(); i++) {
             Node n = nodes.item(i);
+            if (n.getNodeType() == Node.ELEMENT_NODE ) {
+                System.out.println(n.getNodeName());
+            }
             if (n.hasAttributes() ) {
                 sb.append(n.getNodeName()).append("#"); 
                 NamedNodeMap nnMap = n.getAttributes();
@@ -786,6 +794,10 @@ public class TestDocumentImpl extends TestCase {
                     sb.append("@id=").append(((Element)n).getAttribute("id"));
                 }
 
+            } else if(Utils.isWhitespaceNode(n)){
+                continue;
+            } else {
+                sb.append(n.getNodeValue());
             }
             if(n.hasChildNodes()) {
                 walkDOMElem(n.getChildNodes(), sb);
@@ -820,5 +832,81 @@ public class TestDocumentImpl extends TestCase {
         System.out.println(expected.toString());
         System.out.println(actual.toString());
         assertEquals(expected.toString(), actual.toString());
+    }
+    
+    public void testDeepClone() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+                    + forest, stand), false);
+        assertEquals(num, trees.size());
+
+    StringBuilder expected = new StringBuilder();
+    StringBuilder actual = new StringBuilder();
+    StringBuilder clone = new StringBuilder();
+    for (int i = 0; i < trees.size(); i++) {
+        ExpandedTree t = trees.get(i);
+        String uri = t.getDocumentURI();
+        expected.append(uri);
+        Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+        if (doc == null) continue;
+        NodeList children = doc.getChildNodes();
+        walkDOMElem(children, expected);
+        DocumentImpl d = new DocumentImpl(t, 0);
+        children = d.getChildNodes();
+        actual.append(uri);
+        walkDOMElem(children, actual);
+        
+        Document clonedDoc = (Document) d.cloneNode(true);
+        clone.append(uri);
+        children = clonedDoc.getChildNodes();
+        walkDOMElem(children, clone);
+        
+        expected.append("\n");
+        actual.append("\n");
+        clone.append("\n");
+    }
+    System.out.println(expected.toString());
+    System.out.println(actual.toString());
+    System.out.println(clone.toString());
+    assertEquals(actual.toString(), clone.toString());
+    assertEquals(expected.toString(), clone.toString());
+    
+    }
+    
+    public void testShallowClone() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+                    + forest, stand), false);
+        assertEquals(num, trees.size());
+
+    StringBuilder expected = new StringBuilder();
+    StringBuilder actual = new StringBuilder();
+    StringBuilder clone = new StringBuilder();
+    for (int i = 0; i < trees.size(); i++) {
+        ExpandedTree t = trees.get(i);
+        String uri = t.getDocumentURI();
+        expected.append(uri);
+        Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+        if (doc == null) continue;
+        Node root = doc.getDocumentElement();
+        expected.append(root.getNodeName() + root.getNodeValue());
+        DocumentImpl d = new DocumentImpl(t, 0);
+        root = d.getDocumentElement();
+        actual.append(uri);
+        actual.append(root.getNodeName() + root.getNodeValue());
+        
+        Element clonedElem = (Element) root.cloneNode(false);
+        clone.append(uri);
+        clone.append(clonedElem.getNodeName() + clonedElem.getNodeValue());
+        
+        expected.append("\n");
+        actual.append("\n");
+        clone.append("\n");
+    }
+    System.out.println(expected.toString());
+    System.out.println(actual.toString());
+    System.out.println(clone.toString());
+    assertEquals(actual.toString(), clone.toString());
+    assertEquals(expected.toString(), clone.toString());
     }
 }

@@ -15,7 +15,11 @@
  */
 package com.marklogic.dom;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.ProcessingInstruction;
 
 import com.marklogic.tree.ExpandedTree;
@@ -27,6 +31,16 @@ public class ProcessingInstructionImpl extends NodeImpl implements
 		super(tree, node);
 	}
 
+    public Node cloneNode(boolean deep) {
+        Document doc;
+        try {
+            doc = tree.getClonedDocOwner();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException("Internal Error:" + e);
+        }
+        return doc.createProcessingInstruction(getTarget(), getData());
+    }
+    
 	public String getData() {
 	    return tree.getText(tree.piNodeTextRepID[tree.nodeRepID[node]]);
 	}
