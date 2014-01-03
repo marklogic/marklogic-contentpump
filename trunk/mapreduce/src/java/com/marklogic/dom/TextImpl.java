@@ -15,7 +15,11 @@
  */
 package com.marklogic.dom;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 import com.marklogic.tree.ExpandedTree;
@@ -26,6 +30,16 @@ public class TextImpl extends CharacterDataImpl implements Text {
 		super(tree, node);
 	}
 
+    public Node cloneNode(boolean deep) {
+        Document doc;
+        try {
+            doc = tree.getClonedDocOwner();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException("Internal Error:" + e);
+        }
+        return doc.createTextNode(getNodeValue());
+    }
+    
 	@Override
 	public String getNodeName() {
 		return "#text";

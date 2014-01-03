@@ -17,6 +17,7 @@ package com.marklogic.dom;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -24,23 +25,53 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.TypeInfo;
 import java.util.ArrayList;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import com.marklogic.tree.ExpandedTree;
 
 public class ElementImpl extends NodeImpl implements Element {
 
-	public ElementImpl(ExpandedTree tree, int node) {
-		super(tree, node);
-	}
+    AttributeNodeMapImpl attributes;
 
-	// TODO
+    public ElementImpl(ExpandedTree tree, int node) {
+        super(tree, node);
+        attributes = new AttributeNodeMapImpl(this);
+    }
+	
+	public Node cloneNode(boolean deep) {
+        Document doc;
+        try {
+            doc = tree.getClonedDocOwner();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException("Internal Error:" + e);
+        }
+        Element elem = doc.createElementNS(getNamespaceURI(), getTagName());
+        elem.setPrefix(getPrefix());
+
+        for (int i = 0; i < attributes.getLength(); i++) {
+            Attr attr = (Attr) attributes.item(i);
+            elem.setAttributeNS(attr.getNamespaceURI(), attr.getLocalName(),
+                attr.getValue());
+        }
+        
+        if(deep) {
+            //clone children 
+            NodeList list = getChildNodes();
+            for(int i=0; i<list.getLength(); i++) {
+                Node n = list.item(i);
+                Node c = n.cloneNode(true);
+                elem.appendChild(c);
+            }
+        }
+        return elem;
+	}
+	
 	public String getAttribute(String name) {
 	    return getAttributeNode(name).getValue();
 	}
 
-	// TODO
 	public Attr getAttributeNode(String name) {
-	    NamedNodeMap nnMap = getAttributes();
-		return (AttrImpl)nnMap.getNamedItem(name);
+	    		return (AttrImpl)attributes.getNamedItem(name);
 	}
 
 	// TODO
@@ -59,7 +90,7 @@ public class ElementImpl extends NodeImpl implements Element {
 
 	@Override
 	public NamedNodeMap getAttributes() {
-		return new AttributeNodeMapImpl(this);
+		return attributes;
 	}
 
 	@Override
@@ -124,7 +155,7 @@ public class ElementImpl extends NodeImpl implements Element {
 	@Override
 	public String getNodeName() {
 	    String ns = getPrefix();
-		return ns == null ? getTagName() : ns + ":" + getTagName();
+		return ns == null || ns.equals("") ? getTagName() : ns + ":" + getTagName();
 	}
 	
 	protected int getPrefixID(int uriAtom) {
@@ -144,6 +175,22 @@ public class ElementImpl extends NodeImpl implements Element {
     	return a;
 	}
 	
+	public int getNumNSDecl() {
+//	    int parentNodeRepID = tree.nodeParentNodeRepID[node];
+//        if (parentNodeRepID == Integer.MAX_VALUE)
+//            parentNodeRepID = node;
+//        //parent's ordinal
+//        long sum_ordinal = tree.ordinal + tree.nodeOrdinal[parentNodeRepID];
+//        for (int ns = getNSNodeID(sum_ordinal); ns >= 0; ns = nextNSNodeID(ns,0)) {
+//
+//        }
+        int count = 0;
+	    for (int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0 ; ns = nextNSNodeID(ns,tree.nodeOrdinal[node]) ) {
+	        count++;
+	    }
+	    return count;
+	}
+    
 	@Override
 	public String getPrefix() {
 		int ns = tree.nodeNameNamespaceAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]];
@@ -182,6 +229,7 @@ public class ElementImpl extends NodeImpl implements Element {
 
 	public boolean hasAttributes() {
 		return (tree.elemNodeAttrNodeRepID[tree.nodeRepID[node]] != Integer.MAX_VALUE);
+//	    return getAttributes().getLength() > 0;
 	}
 
 	@Override

@@ -20,10 +20,14 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.marklogic.dom.AttrImpl;
@@ -120,6 +124,21 @@ public class ExpandedTree implements Writable {
 
 	private long fragmentOrdinal;
 
+	private Document domDoc;
+	public Document getClonedDocOwner() throws ParserConfigurationException {
+	    if(domDoc == null) {
+	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+	        domDoc = dbf.newDocumentBuilder().newDocument();
+	    }
+	    return domDoc;
+	}
+	public void setClonedDocOwner (Document doc) {
+	    domDoc = doc;
+	}
+//	public Document getDOMDocument() {
+//	    DocumentImpl d = new DocumentImpl(this, 0);
+//	    return (Document) d.cloneNode(true);
+//	}
 	public boolean atomEquals(int atom, byte value[]) {
 		int p = 0;
 		int i = atomIndex[atom] + 1;

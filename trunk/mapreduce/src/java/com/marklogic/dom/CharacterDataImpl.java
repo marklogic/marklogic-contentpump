@@ -25,7 +25,7 @@ public abstract class CharacterDataImpl extends NodeImpl implements CharacterDat
     public CharacterDataImpl(ExpandedTree tree, int node) {
         super(tree, node);
     }
-
+    
     public void appendData(String arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

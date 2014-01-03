@@ -35,6 +35,7 @@ import com.marklogic.tree.NodeKind;
 public abstract class NodeImpl implements Node {
 
     public static final boolean trace = false;
+    
     private static final NodeList emptyNodeList = new NodeList() {
     
         public int getLength() {
@@ -70,7 +71,7 @@ public abstract class NodeImpl implements Node {
     public Node cloneNode(boolean deep) {
         return null;
     }
-
+    
     public short compareDocumentPosition(Node other) throws DOMException {
         if (other instanceof NodeImpl) {
             NodeImpl otherNode = (NodeImpl)other;

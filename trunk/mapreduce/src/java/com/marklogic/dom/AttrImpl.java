@@ -17,8 +17,11 @@ package com.marklogic.dom;
 
 import java.util.ArrayList;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.TypeInfo;
@@ -29,6 +32,16 @@ public class AttrImpl extends NodeImpl implements Attr {
 
     public AttrImpl(ExpandedTree tree, int node) {
         super(tree, node);
+    }
+    
+    public Node cloneNode(boolean deep) {
+        Document doc;
+        try {
+            doc = tree.getClonedDocOwner();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException("Internal Error:" + e);
+        }
+        return doc.createAttributeNS(getNamespaceURI(), getLocalName());
     }
     
     protected int getNodeID() {

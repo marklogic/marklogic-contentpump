@@ -15,8 +15,12 @@
  */
 package com.marklogic.dom;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.w3c.dom.Comment;
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 import com.marklogic.tree.ExpandedTree;
 
@@ -26,6 +30,16 @@ public class CommentImpl extends CharacterDataImpl implements Comment {
 		super(tree, node);
 	}
 	
+    public Node cloneNode(boolean deep) {
+        Document doc;
+        try {
+            doc = tree.getClonedDocOwner();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException("Internal Error:" + e);
+        }
+        return doc.createComment(getData());
+    }
+    
 	@Override
 	public String getNodeName() {
 		return "#comment";
