@@ -204,8 +204,13 @@ public class TestDocumentImpl extends TestCase {
             for (int k = 0; k < children.getLength(); k++) {
               Node curr = children.item(k);
               expected.append("#NODENAME##").append(curr.getNodeName()).append("#").append("\n");
-              expected.append("#LOCALNAME##").append(curr.getLocalName()).append("#").append("\n");
-              expected.append("#URI##").append(curr.getNamespaceURI()).append("#").append("\n");
+              String nodename = curr.getNodeName();
+              int tok = nodename.indexOf(':'); 
+              String prefix = (tok == -1)?null:nodename.substring(0, tok);
+              String namespace = (tok == -1)?null:curr.lookupNamespaceURI(prefix);
+              String localname = (tok == -1)?nodename:nodename.substring(tok);
+              expected.append("#LOCALNAME##").append(localname).append("#").append("\n");
+              expected.append("#URI##").append(namespace).append("#").append("\n");
               expected.append("\n");
             }
             children = d.getFirstChild().getChildNodes();
@@ -231,7 +236,7 @@ public class TestDocumentImpl extends TestCase {
         StringBuffer expected = new StringBuffer();
         StringBuffer actual = new StringBuffer();
         
-        String tags[] = {"*","country","capital","h:capital"};
+        String tags[] = {"*","country","capital","h:capital","text","body","head","html:head"};
         
         for (int s = 0; s < tags.length; s++){
         	expected.append("#TAG#").append(tags[s]).append("\n");
@@ -311,7 +316,7 @@ public class TestDocumentImpl extends TestCase {
         StringBuffer expected = new StringBuffer();
         StringBuffer actual = new StringBuffer();
         
-        String tags[] = {"*","country","capital"};
+        String tags[] = {"*","country","capital","text","body","head","html:head"};
                 
         for (int s = 0; s < tags.length; s++){
         	expected.append("#TAG#").append(tags[s]).append("\n");
@@ -392,7 +397,7 @@ public class TestDocumentImpl extends TestCase {
         StringBuffer expected = new StringBuffer();
         StringBuffer actual = new StringBuffer();
         
-        String tags[] = {"*","country","capital"};
+        String tags[] = {"*","country","capital","text","body","head","html:head"};
         String nss[] = {"*","http://www.w3.org/TR/html4/"};
         
         for (int n = 0; n < nss.length; n++)
@@ -401,40 +406,65 @@ public class TestDocumentImpl extends TestCase {
         	expected.append("#NS#").append(nss[n]).append("\n");
         	actual.append("#TAG#").append(tags[s]).append("\n");
         	actual.append("#NS#").append(nss[n]).append("\n");
-        for (int i = 0; i < trees.size(); i++) {
-            ExpandedTree t = trees.get(i);
-        	String uri = t.getDocumentURI();
-        	
-        	expected.append("#URI##").append(uri).append("#\n");
-        	actual.append("#URI##").append(uri).append("#\n");
-        	
-        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
-        	int firstelement = 0;
-        	while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
-        	Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
-        	NodeList elementsExpected = rootExpected.getElementsByTagNameNS(nss[n],tags[s]);
-        	for (int j = 0; j < elementsExpected.getLength(); j++) {
-        		Node curr = elementsExpected.item(j);
-        		expected.append("#I##").append(j).append("#").
-        				append("#NODENAME##").append(curr.getNodeName()).append("#").
-        				append("#NODETEXT##").append(curr.getTextContent()).append("#").
-        				append("\n");
-        	}
-        		            
-            DocumentImpl d = new DocumentImpl(t, 0);
-            firstelement = 0;
-        	while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
-            ElementImpl rootActual = (ElementImpl) d.getChildNodes().item(firstelement);
-        	NodeList elementsActual = rootActual.getElementsByTagNameNS(nss[n],tags[s]);
-        	for (int j = 0; j < elementsActual.getLength(); j++) {
-        		Node curr = elementsActual.item(j);
-        		actual.append("#I##").append(j).append("#").
-        			  append("#NODENAME##").append(curr.getNodeName()).append("#").
-        			  append("#NODETEXT##").append(curr.getTextContent()).append("#").
-        			  append("\n");
-        	}
-         }
+
+            for (int i = 0; i < trees.size(); i++) {
+                ExpandedTree t = trees.get(i);
+            	String uri = t.getDocumentURI();
+            	
+            	expected.append("#URI##").append(uri).append("#\n");
+            	actual.append("#URI##").append(uri).append("#\n");
+            	
+            	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            	if (doc == null) continue;
+            	int firstelement = 0;
+            	while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+            	Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
+            	NodeList elementsExpected = rootExpected.getElementsByTagNameNS(nss[n],tags[s]);
+            	expected.append("#NUM##").append(elementsExpected.getLength()).
+            			append("#").append("\n");
+            	ArrayList<Node> esort = new ArrayList<Node>();
+            	for (int j = 0; j < elementsExpected.getLength(); j++) {
+            		esort.add(elementsExpected.item(j));
+            	}
+            	Collections.sort(esort, new Comparator<Node>() {
+                    @Override
+                    public int compare(Node  n1, Node  n2)
+                    {
+                    	return  n1.getNodeName().compareTo(n2.getNodeName());
+                    }
+                });
+            	for (int j = 0; j < esort.size(); j++) {
+            		Node curr = esort.get(j);
+            		expected.append("#I##").append(j).append("#").
+            				append("#NODENAME##").append(curr.getNodeName()).append("#").
+            				append("\n");
+            	}
+            		            
+                DocumentImpl d = new DocumentImpl(t, 0);
+                firstelement = 0;
+            	while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+                ElementImpl rootActual = (ElementImpl) d.getChildNodes().item(firstelement);
+            	NodeList elementsActual = rootActual.getElementsByTagNameNS(nss[n],tags[s]);
+            	actual.append("#NUM##").append(elementsActual.getLength()).
+    			 	append("#").append("\n");
+            	ArrayList<Node> asort = new ArrayList<Node>();
+            	for (int j = 0; j < elementsActual.getLength(); j++) {
+            		asort.add(elementsActual.item(j));
+            	}
+            	Collections.sort(asort, new Comparator<Node>() {
+                    @Override
+                    public int compare(Node  n1, Node  n2)
+                    {
+                    	return  n1.getNodeName().compareTo(n2.getNodeName());
+                    }
+                });
+            	for (int j = 0; j < asort.size(); j++) {
+            		Node curr = asort.get(j);
+            		actual.append("#I##").append(j).append("#").
+            				append("#NODENAME##").append(curr.getNodeName()).append("#").
+            				append("\n");
+            	}
+             }
     	expected.append("\n");
     	actual.append("\n");
         }

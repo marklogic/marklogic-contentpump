@@ -76,13 +76,23 @@ public abstract class NodeImpl implements Node {
             NodeImpl otherNode = (NodeImpl)other;
             if (this.tree == otherNode.tree) {
                 if (tree.nodeOrdinal[node] > tree.nodeOrdinal[otherNode.node]) {
+                	int ancestor = tree.nodeParentNodeRepID[node];
+                    while (ancestor!=Integer.MAX_VALUE && 
+                    	   tree.nodeOrdinal[ancestor] >= tree.nodeOrdinal[otherNode.node]) {
+                    	if (ancestor == otherNode.node) 
+                    		return DOCUMENT_POSITION_CONTAINS;
+                    	ancestor = tree.nodeParentNodeRepID[ancestor];
+                    }
                     return DOCUMENT_POSITION_PRECEDING;
-                    // TODO
-                    // return DOCUMENT_POSITION_CONTAINS;
                 } else {
+                	int ancestor = tree.nodeParentNodeRepID[otherNode.node];
+                    while (ancestor!=Integer.MAX_VALUE && 
+                    	   tree.nodeOrdinal[ancestor] >= tree.nodeOrdinal[otherNode.node]) {
+                    	if (ancestor == node) 
+                    		return DOCUMENT_POSITION_CONTAINED_BY;
+                    	ancestor = tree.nodeParentNodeRepID[ancestor];
+                    }
                     return DOCUMENT_POSITION_FOLLOWING;
-                    // TODO
-                    // return DOCUMENT_POSITION_CONTAINED_BY;
                 }
             } else {
                 return DOCUMENT_POSITION_DISCONNECTED;

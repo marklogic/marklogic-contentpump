@@ -118,6 +118,7 @@ public class Utils {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory
                 .newInstance();
+            dbFactory.setNamespaceAware(true);
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             doc = dBuilder.parse(file);
 
