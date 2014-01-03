@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<inf:ProductInformation xmlns:inf="urn:product:Info"
+      xmlns:stk="urn:product:Stock">
+  <inf:ProductName Code="C00001">Computer</inf:ProductName>
+  <inf:Price Units="$">2500</inf:Price>
+  <stk:Volume Units="Units">200</stk:Volume>
+</inf:ProductInformation>

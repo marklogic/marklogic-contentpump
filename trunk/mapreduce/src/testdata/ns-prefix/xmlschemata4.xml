@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<library
+  xmlns="http://eric.van-der-vlist.com/ns/library"
+  xmlns:hr="http://eric.van-der-vlist.com/ns/person"
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+ <book id="b0836217462" available="true">
+  <isbn>0836217462</isbn>
+  <title xml:lang="en">Being a Dog Is a Full-Time Job</title>
+  <dc:publisher>Andrews Mc Meel Publishing</dc:publisher>
+ </book>
+</library>

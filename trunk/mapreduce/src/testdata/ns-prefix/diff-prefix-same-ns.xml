@@ -1,0 +1,11 @@
+<tag>
+  <foo:head xmlns:foo="http://me.com/namespaces/foofoo">
+    <foo:title>An example document</foo:title>
+  </foo:head>
+  <bar:body xmlns:bar="http://me.com/namespaces/foofoo">
+    <bar:e1>a simple document</bar:e1>
+    <bar:e2>
+      Another element
+    </bar:e2>
+  </bar:body>
+</tag>
