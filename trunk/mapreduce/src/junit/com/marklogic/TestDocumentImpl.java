@@ -26,16 +26,21 @@ public class TestDocumentImpl extends TestCase {
 
 	
 	boolean verbose = false;
+	
+	 String testData = "src/testdata/ns-prefix";
+    String forest = "ns-prefix-forest";
+    String stand = "00000001";
+    int num = 23;
 
-    String testData = "src/testdata/dom-core-test";
+	/* String testData = "src/testdata/dom-core-test";
     String forest = "DOM-test-forest";
     String stand = "00000002";
-    int num = 16; 
+    int num = 16;  */ 
     
-/*     String testData = "src/testdata/3doc-test";
+    /* String testData = "src/testdata/3doc-test";
     String forest = "3docForest";
     String stand = "00000002";
-    int num = 3;  */
+    int num = 3; */  
 	
     public void testGetDocumentURI() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(

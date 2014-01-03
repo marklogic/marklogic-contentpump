@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<foo xmlns:a="http://example.org/~wilbur"
+     xmlns:b="http://example.org/%7ewilbur"
+     xmlns:c="http://example.org/%7Ewilbur">
+
+<bar a:attr="1" b:attr="2" c:attr="3"/>
+
+</foo>
+
