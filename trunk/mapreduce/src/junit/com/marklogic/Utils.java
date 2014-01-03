@@ -119,7 +119,7 @@ public class Utils {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory
                 .newInstance();
 //            dbFactory.setIgnoringElementContentWhitespace(true);
-//            dbFactory.setNamespaceAware(true);
+            dbFactory.setNamespaceAware(true);
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             doc = dBuilder.parse(file);
 
