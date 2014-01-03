@@ -128,17 +128,17 @@ public class ElementImpl extends NodeImpl implements Element {
 	}
 	
 	protected int getPrefixID(int uriAtom) {
-		int a = Integer.MAX_VALUE;
+		int a = -1;
 		boolean useDefaultNS = true;
 		ArrayList<Integer> ubp = new ArrayList<Integer>();
 		long minOrdinal = 0;
-		for ( int ns = getNSNodeID(tree.nodeOrdinal[node]); ns != Integer.MAX_VALUE ; ns = nextNSNodeID(ns,minOrdinal) ) {
+		for ( int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0 ; ns = nextNSNodeID(ns,minOrdinal) ) {
     		int uri = tree.nsNodeUriAtom[ns];
     		int prefix = tree.nsNodePrefixAtom[ns];
-    		if (uri<0 || tree.atomString(uri) == null) { ubp.add(prefix); continue; }
-    		if (prefix<0 || uri != uriAtom) { useDefaultNS &= (tree.atomString(prefix) != null); continue; }
+    		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
+    		if (uri != uriAtom) { useDefaultNS &= (tree.atomString(prefix) != null); continue; }
     		if (ubp.contains(prefix)) continue;
-    		if (prefix<0 || tree.atomString(prefix) != null) {if (a == Integer.MAX_VALUE) a = prefix; continue;}
+    		if (tree.atomString(prefix) != null) {if (a == -1) a = prefix; continue;}
     		if (useDefaultNS) return prefix; 
     	} 
     	return a;
@@ -147,10 +147,9 @@ public class ElementImpl extends NodeImpl implements Element {
 	@Override
 	public String getPrefix() {
 		int ns = tree.nodeNameNamespaceAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]];
-		if (ns < 0) return null;
 		if (tree.atomString(ns) != null)  ns = getPrefixID(ns);
-	    String r = (ns != Integer.MAX_VALUE) ? tree.atomString(ns) : null;
-	    return (r==null || r.length() == 0)?null:r;
+	    String r = (ns != -1) ? tree.atomString(ns) : null;
+	    return r;
 	}
 
 	@Override

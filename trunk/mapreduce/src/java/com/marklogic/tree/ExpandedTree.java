@@ -137,6 +137,7 @@ public class ExpandedTree implements Writable {
 	}
 	
 	public String atomString(int i) {
+		if (i<0 || i==Integer.MAX_VALUE) return null;
 		String value = null;
 		if (atomString == null) {
 			atomString = new String[atomIndex.length];
@@ -147,6 +148,7 @@ public class ExpandedTree implements Writable {
 			value = atomString[i] = new String(atomData, atomIndex[i] + 1,
 					atomIndex[i + 1] - atomIndex[i] - 2, UTF8);
 		}
+		if (value.isEmpty()) return null;
 		return value;
 	}
 	

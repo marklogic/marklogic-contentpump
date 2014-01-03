@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.LinkedList;
+import java.util.Collections;
+import java.util.Comparator;
 
 import junit.framework.TestCase;
 
@@ -25,7 +27,7 @@ public class TestDocumentImpl extends TestCase {
 	
 	boolean verbose = false;
 
-     String testData = "src/testdata/dom-core-test";
+    String testData = "src/testdata/dom-core-test";
     String forest = "DOM-test-forest";
     String stand = "00000002";
     int num = 16; 
@@ -33,7 +35,7 @@ public class TestDocumentImpl extends TestCase {
     /* String testData = "src/testdata/3doc-test";
 	String forest = "3docForest";
 	String stand = "00000002";
-	int num = 3; */  
+	int num = 3; */ 
 	
     public void testGetDocumentURI() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
@@ -65,7 +67,6 @@ public class TestDocumentImpl extends TestCase {
         	String uri = t.getDocumentURI();
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
             expected.append(uri);
             expected.append("#FIRSTCHILD##").
             		 append(doc.getFirstChild().getNodeName()).append("#").append("\n");
@@ -92,13 +93,14 @@ public class TestDocumentImpl extends TestCase {
 
         StringBuffer expected = new StringBuffer();
         StringBuffer actual = new StringBuffer();
+        
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
         	String uri = t.getDocumentURI();
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
-            expected.append(uri).append("\n");
+        	        	
+            expected.append("\n").append(uri).append("\n");
         	Queue<NodeList> q = new LinkedList<NodeList>();
         	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
         	while (!q.isEmpty()) {
@@ -114,7 +116,7 @@ public class TestDocumentImpl extends TestCase {
         	
             q.clear();
             DocumentImpl d = new DocumentImpl(t, 0);
-            actual.append(uri).append("\n");
+            actual.append("\n").append(uri).append("\n");
         	if (d.hasChildNodes()) q.add(d.getChildNodes());
         	while (!q.isEmpty()) {
         		NodeList nl = q.poll();
@@ -243,25 +245,53 @@ public class TestDocumentImpl extends TestCase {
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         	if (doc == null) continue;
-        	Element rootExpected = (Element) doc.getFirstChild();
+        	int firstelement = 0;
+        	while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+        	Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
         	NodeList elementsExpected = rootExpected.getElementsByTagName(tags[s]);
+        	expected.append("#NUM##").append(elementsExpected.getLength()).
+        			append("#").append("\n");
+        	ArrayList<Node> esort = new ArrayList<Node>();
         	for (int j = 0; j < elementsExpected.getLength(); j++) {
-        		Node curr = elementsExpected.item(j);
+        		esort.add(elementsExpected.item(j));
+        	}
+        	Collections.sort(esort, new Comparator<Node>() {
+                @Override
+                public int compare(Node  n1, Node  n2)
+                {
+                	return  n1.getNodeName().compareTo(n2.getNodeName());
+                }
+            });
+        	for (int j = 0; j < esort.size(); j++) {
+        		Node curr = esort.get(j);
         		expected.append("#I##").append(j).append("#").
         				append("#NODENAME##").append(curr.getNodeName()).append("#").
-        				append("#NODETEXT##").append(curr.getTextContent()).append("#").
         				append("\n");
         	}
         		            
             DocumentImpl d = new DocumentImpl(t, 0);
-            ElementImpl rootActual = (ElementImpl) d.getFirstChild();
+            firstelement = 0;
+        	while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+            ElementImpl rootActual = (ElementImpl) d.getChildNodes().item(firstelement);
         	NodeList elementsActual = rootActual.getElementsByTagName(tags[s]);
+        	actual.append("#NUM##").append(elementsActual.getLength()).
+			 	append("#").append("\n");
+        	ArrayList<Node> asort = new ArrayList<Node>();
         	for (int j = 0; j < elementsActual.getLength(); j++) {
-        		Node curr = elementsActual.item(j);
+        		asort.add(elementsActual.item(j));
+        	}
+        	Collections.sort(asort, new Comparator<Node>() {
+                @Override
+                public int compare(Node  n1, Node  n2)
+                {
+                	return  n1.getNodeName().compareTo(n2.getNodeName());
+                }
+            });
+        	for (int j = 0; j < asort.size(); j++) {
+        		Node curr = asort.get(j);
         		actual.append("#I##").append(j).append("#").
-        			  append("#NODENAME##").append(curr.getNodeName()).append("#").
-        			  append("#NODETEXT##").append(curr.getTextContent()).append("#").
-        			  append("\n");
+        				append("#NODENAME##").append(curr.getNodeName()).append("#").
+        				append("\n");
         	}
          }
     	expected.append("\n");
@@ -282,36 +312,69 @@ public class TestDocumentImpl extends TestCase {
         StringBuffer actual = new StringBuffer();
         
         String tags[] = {"*","country","capital"};
-        
+                
         for (int s = 0; s < tags.length; s++){
         	expected.append("#TAG#").append(tags[s]).append("\n");
         	actual.append("#TAG#").append(tags[s]).append("\n");
-        for (int i = 0; i < trees.size(); i++) {
-            ExpandedTree t = trees.get(i);
-        	String uri = t.getDocumentURI();
-        	
-        	expected.append("#URI##").append(uri).append("#\n");
-        	actual.append("#URI##").append(uri).append("#\n");
-        	
-        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
-        	NodeList elementsExpected = doc.getElementsByTagName(tags[s]);
-        	for (int j = 0; j < elementsExpected.getLength(); j++) {
-        		Node curr = elementsExpected.item(j);
-        		expected.append("#I##").append(j).append("#").
-        				append("#NODENAME##").append(curr.getNodeName()).append("#").
-        				append("\n");
-        	}
-        		            
-            DocumentImpl d = new DocumentImpl(t, 0);
-        	NodeList elementsActual = d.getElementsByTagName(tags[s]);
-        	for (int j = 0; j < elementsActual.getLength(); j++) {
-        		Node curr = elementsActual.item(j);
-        		actual.append("#I##").append(j).append("#").
-        			  append("#NODENAME##").append(curr.getNodeName()).append("#").
-        			  append("\n");
-        	}
-         }
+
+            for (int i = 0; i < trees.size(); i++) {
+                ExpandedTree t = trees.get(i);
+            	String uri = t.getDocumentURI();
+            	
+            	expected.append("#URI##").append(uri).append("#\n");
+            	actual.append("#URI##").append(uri).append("#\n");
+            	
+            	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            	if (doc == null) continue;
+            	int firstelement = 0;
+            	while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+            	Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
+            	NodeList elementsExpected = doc.getElementsByTagName(tags[s]);
+            	expected.append("#NUM##").append(elementsExpected.getLength()).
+            			append("#").append("\n");
+            	ArrayList<Node> esort = new ArrayList<Node>();
+            	for (int j = 0; j < elementsExpected.getLength(); j++) {
+            		esort.add(elementsExpected.item(j));
+            	}
+            	Collections.sort(esort, new Comparator<Node>() {
+                    @Override
+                    public int compare(Node  n1, Node  n2)
+                    {
+                    	return  n1.getNodeName().compareTo(n2.getNodeName());
+                    }
+                });
+            	for (int j = 0; j < esort.size(); j++) {
+            		Node curr = esort.get(j);
+            		expected.append("#I##").append(j).append("#").
+            				append("#NODENAME##").append(curr.getNodeName()).append("#").
+            				append("\n");
+            	}
+            		            
+                DocumentImpl d = new DocumentImpl(t, 0);
+                firstelement = 0;
+            	while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+                ElementImpl rootActual = (ElementImpl) d.getChildNodes().item(firstelement);
+            	NodeList elementsActual = d.getElementsByTagName(tags[s]);
+            	actual.append("#NUM##").append(elementsActual.getLength()).
+    			 	append("#").append("\n");
+            	ArrayList<Node> asort = new ArrayList<Node>();
+            	for (int j = 0; j < elementsActual.getLength(); j++) {
+            		asort.add(elementsActual.item(j));
+            	}
+            	Collections.sort(asort, new Comparator<Node>() {
+                    @Override
+                    public int compare(Node  n1, Node  n2)
+                    {
+                    	return  n1.getNodeName().compareTo(n2.getNodeName());
+                    }
+                });
+            	for (int j = 0; j < asort.size(); j++) {
+            		Node curr = asort.get(j);
+            		actual.append("#I##").append(j).append("#").
+            				append("#NODENAME##").append(curr.getNodeName()).append("#").
+            				append("\n");
+            	}
+             }
     	expected.append("\n");
     	actual.append("\n");
         }
@@ -347,7 +410,9 @@ public class TestDocumentImpl extends TestCase {
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         	if (doc == null) continue;
-        	Element rootExpected = (Element) doc.getFirstChild();
+        	int firstelement = 0;
+        	while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+        	Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
         	NodeList elementsExpected = rootExpected.getElementsByTagNameNS(nss[n],tags[s]);
         	for (int j = 0; j < elementsExpected.getLength(); j++) {
         		Node curr = elementsExpected.item(j);
@@ -358,7 +423,9 @@ public class TestDocumentImpl extends TestCase {
         	}
         		            
             DocumentImpl d = new DocumentImpl(t, 0);
-            ElementImpl rootActual = (ElementImpl) d.getFirstChild();
+            firstelement = 0;
+        	while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+            ElementImpl rootActual = (ElementImpl) d.getChildNodes().item(firstelement);
         	NodeList elementsActual = rootActual.getElementsByTagNameNS(nss[n],tags[s]);
         	for (int j = 0; j < elementsActual.getLength(); j++) {
         		Node curr = elementsActual.item(j);

@@ -1,7 +1,7 @@
 <html:html xmlns:html='http://www.w3.org/1999/xhtml'>
-<html:head xmlns='http://www.w3.org/1999/xhtml'>
-<html:title>test file</html:title>
-</html:head>
+<head xmlns='http://www.w3.org/1999/xhtml'>
+<title>test file</title>
+</head>
 <html:body> 
 <html:p class="visible:false">bar</html:p>
 </html:body>
