@@ -15,12 +15,16 @@
  */
 package com.marklogic.dom;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
-public class AttributeNodeMapImpl implements NamedNodeMap {
+import com.marklogic.tree.ExpandedTree;
 
+public class AttributeNodeMapImpl implements NamedNodeMap {
 	ElementImpl element;
 	
 	public AttributeNodeMapImpl(ElementImpl element) {
@@ -28,7 +32,15 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 	}
 	
 	public int getLength() {
-		return element.tree.elemNodeNumAttributes[element.tree.nodeRepID[element.node]];
+		return getNumAttr() + element.getNumNSDecl();
+	}
+	
+	/*
+	 * Exclude namespace declaration
+	 */
+	protected int getNumAttr() {
+	    int num = element.tree.elemNodeNumAttributes[element.tree.nodeRepID[element.node]];
+	    return num != Integer.MAX_VALUE? num : 0;   
 	}
 
 	public Node getNamedItem(String name) {
@@ -52,8 +64,39 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 	}
 
 	public Node item(int index) {
-    	if (NodeImpl.trace) System.out.println(this.getClass().getSimpleName() + ".item(" + element.node + ", " + index + ")");
-		return element.tree.node(element.tree.elemNodeAttrNodeRepID[element.tree.nodeRepID[element.node]]+index);
+	    int numAttr = getNumAttr();
+	    if(index < numAttr) {
+        	if (NodeImpl.trace) System.out.println(this.getClass().getSimpleName() + ".item(" + element.node + ", " + index + ")");
+    		return element.tree.node(element.tree.elemNodeAttrNodeRepID[element.tree.nodeRepID[element.node]]+index);
+	    } else {
+	        int nsIdx = index - numAttr;
+	        ExpandedTree tree = element.tree;
+	        int count =0;
+	        long minimal = tree.nodeOrdinal[element.node];
+	        for (int ns = element.getNSNodeID(minimal, minimal); ns >= 0 ; ns = element.nextNSNodeID(ns,minimal) ) {
+	            if(count == nsIdx) {
+	                String uri = tree.atomString(tree.nsNodeUriAtom[ns]);
+	                String prefix = tree.atomString(tree.nsNodePrefixAtom[ns]);
+	                System.out.println(prefix + "=" + uri);
+	                Attr attr = null;
+	                try {
+	                    if(prefix!=null && "".equals(prefix)==false) {
+	                        attr = tree.getClonedDocOwner().createAttribute("xmlns:" + prefix);
+	                    } else {
+	                        attr = tree.getClonedDocOwner().createAttribute("xmlns");
+	                    }
+                        attr.setNodeValue(uri);
+                    } catch (DOMException e) {
+                        throw new RuntimeException(e);
+                    } catch (ParserConfigurationException e) {
+                    	throw new RuntimeException(e);
+                    }
+	                return attr;
+	            }
+	            count++;
+	        }
+	        return null;
+	    }
 	}
 
 	public Node removeNamedItem(String name) throws DOMException {

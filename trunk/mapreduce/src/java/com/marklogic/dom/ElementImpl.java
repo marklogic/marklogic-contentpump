@@ -50,8 +50,7 @@ public class ElementImpl extends NodeImpl implements Element {
 
         for (int i = 0; i < attributes.getLength(); i++) {
             Attr attr = (Attr) attributes.item(i);
-            elem.setAttributeNS(attr.getNamespaceURI(), attr.getLocalName(),
-                attr.getValue());
+            elem.setAttributeNode((Attr)attr.cloneNode(deep));
         }
         
         if(deep) {
@@ -176,16 +175,9 @@ public class ElementImpl extends NodeImpl implements Element {
 	}
 	
 	public int getNumNSDecl() {
-//	    int parentNodeRepID = tree.nodeParentNodeRepID[node];
-//        if (parentNodeRepID == Integer.MAX_VALUE)
-//            parentNodeRepID = node;
-//        //parent's ordinal
-//        long sum_ordinal = tree.ordinal + tree.nodeOrdinal[parentNodeRepID];
-//        for (int ns = getNSNodeID(sum_ordinal); ns >= 0; ns = nextNSNodeID(ns,0)) {
-//
-//        }
+	    long minOrdinal = tree.nodeOrdinal[node];
         int count = 0;
-	    for (int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0 ; ns = nextNSNodeID(ns,tree.nodeOrdinal[node]) ) {
+	    for (int ns = getNSNodeID(minOrdinal, minOrdinal); ns >= 0 ; ns = nextNSNodeID(ns, minOrdinal) ) {
 	        count++;
 	    }
 	    return count;
@@ -228,8 +220,7 @@ public class ElementImpl extends NodeImpl implements Element {
 	}
 
 	public boolean hasAttributes() {
-		return (tree.elemNodeAttrNodeRepID[tree.nodeRepID[node]] != Integer.MAX_VALUE);
-//	    return getAttributes().getLength() > 0;
+	    return getAttributes().getLength() > 0;
 	}
 
 	@Override

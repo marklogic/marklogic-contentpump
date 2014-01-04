@@ -41,7 +41,9 @@ public class AttrImpl extends NodeImpl implements Attr {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException("Internal Error:" + e);
         }
-        return doc.createAttributeNS(getNamespaceURI(), getLocalName());
+        Attr attr = doc.createAttributeNS(getNamespaceURI(), getLocalName());
+        attr.setValue(getValue());
+        return attr;
     }
     
     protected int getNodeID() {

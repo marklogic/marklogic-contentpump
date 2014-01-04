@@ -27,20 +27,22 @@ public class TestDocumentImpl extends TestCase {
 	
 	boolean verbose = false;
 	
-	 String testData = "src/testdata/ns-prefix";
+	String testData = "src/testdata/ns-prefix";
     String forest = "ns-prefix-forest";
     String stand = "00000001";
     int num = 23;
 
-	/* String testData = "src/testdata/dom-core-test";
+/*	String testData = "src/testdata/dom-core-test";
     String forest = "DOM-test-forest";
     String stand = "00000002";
-    int num = 16;  */ 
+    int num = 16; */  
     
-    /* String testData = "src/testdata/3doc-test";
+
+/*    String testData = "src/testdata/3doc-test";
     String forest = "3docForest";
     String stand = "00000002";
-    int num = 3; */  
+    int num = 3;   */
+
 	
     public void testGetDocumentURI() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
@@ -479,45 +481,6 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
-//    public void testJavaDomSample() throws IOException {
-//        Document doc = Utils.readXMLasDOMDocument(new File(testData, "doc1.xml"));
-//        System.out.println("JAVA DOM Root element :"
-//            + doc.getDocumentElement().getNodeName());
-//
-//        NodeList children = doc.getChildNodes();
-//        
-//        StringBuilder sb = new StringBuilder();
-//        walk(children, sb);
-//        System.out.println(sb.toString());
-//        for (int temp = 0; temp < children.getLength(); temp++) {
-//
-//            Node nNode = children.item(temp);
-//
-//            System.out
-//                .println("\nCurrent Element :" + nNode.getNodeName());
-//
-//            if (nNode.getNodeType() == Node.ELEMENT_NODE) {
-//
-//                Element eElement = (Element) nNode;
-//                System.out.println(eElement.getNodeName());
-//                System.out.println("contry id : "
-//                    + eElement.getAttribute("id"));
-//                System.out.println("Country : "
-//                    + eElement.getElementsByTagName("country").item(0)
-//                        .getTextContent());
-//                System.out.println("Last Name : "
-//                    + eElement.getElementsByTagName("lastname").item(0)
-//                        .getTextContent());
-//                System.out.println("Nick Name : "
-//                    + eElement.getElementsByTagName("nickname").item(0)
-//                        .getTextContent());
-//                System.out.println("Salary : "
-//                    + eElement.getElementsByTagName("salary").item(0)
-//                        .getTextContent());
-
-//            }
-//        }
-//    }
     
     private void walkDOM (NodeList nodes, StringBuilder sb) {
         for(int i=0; i<nodes.getLength(); i++) {
@@ -542,8 +505,7 @@ public class TestDocumentImpl extends TestCase {
 
         StringBuilder expected = new StringBuilder();
         StringBuilder actual = new StringBuilder();
-        //TODO
-        for (int i = 0; i < 1/*trees.size()*/; i++) {
+        for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
             expected.append(uri);
@@ -574,7 +536,7 @@ public class TestDocumentImpl extends TestCase {
             sb.append(child.getNodeType()).append("#");
             sb.append(child.getNodeName()).append("#");
             sb.append(child.getNodeValue()).append("#");
-            
+            sb.append("\n");
             walkDOMNextSibling(child.getChildNodes(), sb);
             //next sibling
             child = child.getNextSibling();
@@ -589,7 +551,7 @@ public class TestDocumentImpl extends TestCase {
             sb.append(child.getNodeType()).append("#");
             sb.append(child.getNodeName()).append("#");
             sb.append(child.getNodeValue()).append("#");
-            
+            sb.append("\n");
             walkDOMPreviousSibling(child.getChildNodes(), sb);
             //next sibling
             child = child.getPreviousSibling();
@@ -661,6 +623,7 @@ public class TestDocumentImpl extends TestCase {
             sb.append(child.getNodeType()).append("#");
             sb.append(child.getNodeName()).append("'s parent is ");
             sb.append(child.getParentNode().getNodeName()).append("#");
+            sb.append("\n");
             if(child.hasChildNodes()) {
                 walkDOMParent(child.getChildNodes(), sb);
             }
@@ -701,6 +664,7 @@ public class TestDocumentImpl extends TestCase {
             Node n = nodes.item(i);
             sb.append(n.getNodeType()).append("#");
             sb.append(n.getTextContent()).append("#");
+            sb.append("\n");
             if(n.hasChildNodes()) {
                 walkDOMTextContent(n.getChildNodes(), sb);
             }
@@ -743,16 +707,19 @@ public class TestDocumentImpl extends TestCase {
                 System.out.println(n.getNodeName());
             }
             if (n.hasAttributes() ) {
+                ArrayList<String> list = new ArrayList<String>();
                 sb.append(n.getNodeName()).append("#"); 
                 NamedNodeMap nnMap = n.getAttributes();
                 for(int j=0; j<nnMap.getLength(); j++) {
                     Attr attr = (Attr)nnMap.item(j);
-                    sb.append("@");
-                    sb.append(attr.getName());
-                    sb.append("=");
-                    sb.append(attr.getValue());
-                }
+                    String tmp = "@" + attr.getName() + "=" + attr.getValue();
+                    list.add(tmp);
+                    list.add("#isSpecified:" + attr.getSpecified());
+                } 
+                Collections.sort(list);
+                sb.append(list.toString());
             }
+            sb.append("\n");
             if(n.hasChildNodes()) {
                 walkDOMAttr(n.getChildNodes(), sb);
             }
@@ -797,6 +764,7 @@ public class TestDocumentImpl extends TestCase {
                 if(attr!=null) {
                     sb.append("@").append(attr.getName()).append("=").append(attr.getValue());
                     sb.append("@id=").append(((Element)n).getAttribute("id"));
+                    sb.append("#isSpecified:").append(attr.getSpecified());
                 }
 
             } else if(Utils.isWhitespaceNode(n)){
@@ -804,6 +772,7 @@ public class TestDocumentImpl extends TestCase {
             } else {
                 sb.append(n.getNodeValue());
             }
+            sb.append("\n");
             if(n.hasChildNodes()) {
                 walkDOMElem(n.getChildNodes(), sb);
             }
