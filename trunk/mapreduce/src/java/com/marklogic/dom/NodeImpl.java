@@ -295,6 +295,15 @@ public abstract class NodeImpl implements Node {
         return false;
     }
 
+    protected int getNSNodeID(long ordinal, long minOrdinal) {
+        if (ordinal < minOrdinal)
+            return -1;
+        int idx = getNSNodeID(ordinal);
+        if (idx >= 0 && tree.nsNodeOrdinal[idx] >= minOrdinal)
+            return idx;
+        return -1;
+    }
+    
     protected int getNSNodeID(long ordinal) {
         int R = tree.numNSNodeReps;
         if (R == 0) return -1;
@@ -324,7 +333,7 @@ public abstract class NodeImpl implements Node {
     		if ( ns == -1 ) return -1;
     		if ( tree.nsNodePrefixAtom[ns] != -1) break;
     	}
-    	if ( ns < minOrdinal ) ns = -1;
+    	if ( tree.nsNodeOrdinal[ns] < minOrdinal ) ns = -1;
     	return ns;
     }
      
