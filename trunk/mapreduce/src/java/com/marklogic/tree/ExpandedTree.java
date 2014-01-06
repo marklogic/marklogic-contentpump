@@ -127,14 +127,20 @@ public class ExpandedTree implements Writable {
 	private Document domDoc;
 	public Document getClonedDocOwner() throws ParserConfigurationException {
 	    if(domDoc == null) {
-	        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-	        dbf.setNamespaceAware(true);
-	        domDoc = dbf.newDocumentBuilder().newDocument();
+	        //initialize the doc owner node, needed by elem, attr, etc
+	        initClonedDocOwner();
 	    }
 	    return domDoc;
 	}
-	public void setClonedDocOwner (Document doc) {
-	    domDoc = doc;
+
+    public void setClonedDocOwner(Document doc) {
+        domDoc = doc;
+    }
+	
+	public void initClonedDocOwner () throws ParserConfigurationException {
+	    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        domDoc = dbf.newDocumentBuilder().newDocument();
 	}
 
 	public boolean atomEquals(int atom, byte value[]) {

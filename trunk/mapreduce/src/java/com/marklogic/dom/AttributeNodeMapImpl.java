@@ -44,7 +44,9 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 	}
 
 	public Node getNamedItem(String name) {
-    	if (NodeImpl.trace) System.out.println(this.getClass().getSimpleName() + ".getNamedItem(" + element.node + ", " + name + ")");
+        if (NodeImpl.trace)
+            System.out.println(this.getClass().getSimpleName()
+                + ".getNamedItem(" + element.node + ", " + name + ")");
 		if (name == null) return null;
     	for (int i = 0; i < getLength(); i++)
 			if (name.equals(item(i).getNodeName())) return item(i);
@@ -53,7 +55,10 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 
 	public Node getNamedItemNS(String namespaceURI, String localName)
 			throws DOMException {
-    	if (NodeImpl.trace) System.out.println(this.getClass().getSimpleName() + ".getNamedItemNS(" + element.node + ", " + namespaceURI + ", " + localName + ")");
+        if (NodeImpl.trace)
+            System.out.println(this.getClass().getSimpleName()
+                + ".getNamedItemNS(" + element.node + ", " + namespaceURI
+                + ", " + localName + ")");
     	if (localName == null) return null;
     	for (int i = 0; i < getLength(); i++) {
     		if ((namespaceURI == null) != (item(i).getNamespaceURI() == null)) continue;
@@ -64,39 +69,45 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 	}
 
 	public Node item(int index) {
-	    int numAttr = getNumAttr();
-	    if(index < numAttr) {
-        	if (NodeImpl.trace) System.out.println(this.getClass().getSimpleName() + ".item(" + element.node + ", " + index + ")");
-    		return element.tree.node(element.tree.elemNodeAttrNodeRepID[element.tree.nodeRepID[element.node]]+index);
-	    } else {
-	        int nsIdx = index - numAttr;
-	        ExpandedTree tree = element.tree;
-	        int count =0;
-	        long minimal = tree.nodeOrdinal[element.node];
-	        for (int ns = element.getNSNodeID(minimal, minimal); ns >= 0 ; ns = element.nextNSNodeID(ns,minimal) ) {
-	            if(count == nsIdx) {
-	                String uri = tree.atomString(tree.nsNodeUriAtom[ns]);
-	                String prefix = tree.atomString(tree.nsNodePrefixAtom[ns]);
-	                System.out.println(prefix + "=" + uri);
-	                Attr attr = null;
-	                try {
-	                    if(prefix!=null && "".equals(prefix)==false) {
-	                        attr = tree.getClonedDocOwner().createAttribute("xmlns:" + prefix);
-	                    } else {
-	                        attr = tree.getClonedDocOwner().createAttribute("xmlns");
-	                    }
+        int numAttr = getNumAttr();
+        ExpandedTree tree = element.tree;
+        if (index < numAttr) {
+            if (NodeImpl.trace)
+                System.out.println(this.getClass().getSimpleName() + ".item("
+                    + element.node + ", " + index + ")");
+            return tree
+                .node(tree.elemNodeAttrNodeRepID[tree.nodeRepID[element.node]]
+                    + index);
+        } else {
+            int nsIdx = index - numAttr;
+            int count = 0;
+            long minimal = tree.nodeOrdinal[element.node];
+            for (int ns = element.getNSNodeID(minimal, minimal); ns >= 0; ns = element
+                .nextNSNodeID(ns, minimal)) {
+                if (count == nsIdx) {
+                    String uri = tree.atomString(tree.nsNodeUriAtom[ns]);
+                    String prefix = tree.atomString(tree.nsNodePrefixAtom[ns]);
+                    Attr attr = null;
+                    try {
+                        if (prefix != null && "".equals(prefix) == false) {
+                            attr = tree.getClonedDocOwner().createAttribute(
+                                "xmlns:" + prefix);
+                        } else {
+                            attr = tree.getClonedDocOwner().createAttribute(
+                                "xmlns");
+                        }
                         attr.setNodeValue(uri);
                     } catch (DOMException e) {
                         throw new RuntimeException(e);
                     } catch (ParserConfigurationException e) {
-                    	throw new RuntimeException(e);
+                        throw new RuntimeException(e);
                     }
-	                return attr;
-	            }
-	            count++;
-	        }
-	        return null;
-	    }
+                    return attr;
+                }
+                count++;
+            }
+            return null;
+        }
 	}
 
 	public Node removeNamedItem(String name) throws DOMException {
