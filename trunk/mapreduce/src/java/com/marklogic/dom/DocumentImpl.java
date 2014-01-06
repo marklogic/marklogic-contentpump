@@ -42,21 +42,23 @@ public class DocumentImpl extends NodeImpl implements Document {
 		super(tree, node);
 	}
 
-	public Node cloneNode(boolean deep) {
-	    Document clonedDoc = null;
+    public Node cloneNode(boolean deep) {
+        Document clonedDoc = null;
         try {
+            //initialize a new doc owner node 
+            tree.initClonedDocOwner();
             clonedDoc = tree.getClonedDocOwner();
         } catch (ParserConfigurationException e) {
             throw new RuntimeException("Internal Error:" + e);
         }
-        if(deep) {
-            for(Node n = getFirstChild();n!=null; n=n.getNextSibling()) {
+        if (deep) {
+            for (Node n = getFirstChild(); n != null; n = n.getNextSibling()) {
                 clonedDoc.appendChild(n.cloneNode(true));
             }
         }
-	    
-	    return clonedDoc;
-	}
+
+        return clonedDoc;
+    }
 	
 
 	@Override
