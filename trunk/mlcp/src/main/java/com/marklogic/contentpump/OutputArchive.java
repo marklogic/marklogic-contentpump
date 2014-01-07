@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
@@ -119,6 +120,30 @@ public class OutputArchive {
             path = path + "-" + count;
         }
         return path;
+    }
+    
+    public void write(String uri, InputStream is, long size) 
+    throws IOException {
+        ZipEntry entry = new ZipEntry(uri);
+        if (outputStream == null || 
+            (currentFileBytes + size > Integer.MAX_VALUE) &&
+             currentFileBytes > 0) {
+            newOutputStream();
+        }        
+        try {
+            outputStream.putNextEntry(entry);
+            long bufSize = Math.min(size, 512<<10);
+            byte[] buf = new byte[(int)bufSize];
+            for (long toRead = size, read = 0; toRead > 0; toRead -= read) {
+                read = is.read(buf, 0, (int)bufSize);
+                outputStream.write(buf, 0, (int)read);
+            }
+            outputStream.closeEntry();
+        } catch (ZipException e) {
+            LOG.warn("Exception caught: " + e.getMessage() + entry.getName());
+        }
+        currentFileBytes += size;
+        currentEntries++;
     }
 
     public long write(String outputPath, byte[] bytes) throws IOException {

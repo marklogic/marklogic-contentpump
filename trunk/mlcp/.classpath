@@ -23,7 +23,7 @@
 	<classpathentry kind="lib" path="src/conf"/>
 	<classpathentry kind="lib" path="/home/jchen/.m2/repository/xml-apis/xml-apis/1.4.01/xml-apis-1.4.01.jar"/>
 	<classpathentry kind="lib" path="/home/jchen/.m2/repository/com/marklogic/marklogic-xcc/7.0/marklogic-xcc-7.0.jar"/>
-	<classpathentry kind="lib" path="/home/jchen/.m2/repository/com/marklogic/marklogic-mapreduce1/1.2/marklogic-mapreduce1-1.2.jar" sourcepath="/Mapreduce"/>
+	<classpathentry kind="lib" path="/home/jchen/.m2/repository/com/marklogic/marklogic-mapreduce1/2.1/marklogic-mapreduce1-2.1.jar" sourcepath="/Mapreduce"/>
 	<classpathentry kind="lib" path="/home/jchen/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar"/>
 	<classpathentry kind="lib" path="/home/jchen/.m2/repository/commons-codec/commons-codec/1.4/commons-codec-1.4.jar"/>
 	<classpathentry kind="lib" path="/space/projects/xcc/mlcp/src/conf"/>

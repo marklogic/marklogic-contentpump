@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -130,8 +131,22 @@ implements MarkLogicConstants, ConfigConstants {
                     ((DatabaseDocumentWithMeta) content).getMeta().toXML()
                         .getBytes(encoding));
             }
-            binaryArchive.write(zipEntryName, 
-                    content.getContentAsByteArray());
+            if (content.isStreamable()) {
+                InputStream is = null;
+                try {
+                    is = content.getContentAsByteStream();
+                    long size = content.getContentSize();
+                    binaryArchive.write(zipEntryName, 
+                            content.getContentAsByteStream(), size);
+                } finally {
+                    if (is != null) {
+                        is.close();
+                    }                   
+                }
+            } else {
+                binaryArchive.write(zipEntryName, 
+                        content.getContentAsByteArray());
+            }
         } else if(ContentType.TEXT.equals(type)) {
             if(txtArchive == null) {
                 txtArchive = new OutputArchive(dst, conf);
