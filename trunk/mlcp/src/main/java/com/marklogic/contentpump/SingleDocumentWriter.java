@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -94,7 +95,27 @@ implements MarkLogicConstants, ConfigConstants {
 
             ContentType type = content.getContentType();
             if (ContentType.BINARY.equals(type)) {
-                os.write(content.getContentAsByteArray());
+                if (content.isStreamable()) {
+                    InputStream is = null;
+                    try {
+                        is = content.getContentAsByteStream();
+                        long size = content.getContentSize();
+                        long bufSize = Math.min(size, 512<<10);
+                        byte[] buf = new byte[(int)bufSize];
+                        for (long toRead = size, read = 0; 
+                             toRead > 0; 
+                             toRead -= read) {
+                            read = is.read(buf, 0, (int)bufSize);
+                            os.write(buf, 0, (int)read);
+                        }
+                    } finally {
+                       if (is != null) {
+                           is.close();
+                       }
+                    }
+                } else {
+                    os.write(content.getContentAsByteArray());
+                }              
             } else if (ContentType.TEXT.equals(type)
                 || ContentType.XML.equals(type)) {
                 if(encoding.equals("UTF-8")) {
