@@ -18,6 +18,7 @@ package com.marklogic.mapreduce;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.hadoop.io.Text;
@@ -31,18 +32,24 @@ import org.apache.hadoop.io.Writable;
  */
 public interface MarkLogicDocument extends Writable {
 
-    public abstract ContentType getContentType();
+    public ContentType getContentType();
 
-    public abstract Text getContentAsText();
+    public Text getContentAsText();
 
-    public abstract byte[] getContentAsByteArray();
+    public byte[] getContentAsByteArray();
 
-    public abstract MarkLogicNode getContentAsMarkLogicNode();
+    public InputStream getContentAsByteStream();
     
-    public abstract String getContentAsString() 
+    public MarkLogicNode getContentAsMarkLogicNode();
+    
+    public String getContentAsString() 
     throws UnsupportedEncodingException;
+    
+    public long getContentSize();
+    
+    public boolean isStreamable();
 
-    public abstract void readFields(DataInput in) throws IOException;
+    public void readFields(DataInput in) throws IOException;
 
-    public abstract void write(DataOutput out) throws IOException;
+    public void write(DataOutput out) throws IOException;
 }

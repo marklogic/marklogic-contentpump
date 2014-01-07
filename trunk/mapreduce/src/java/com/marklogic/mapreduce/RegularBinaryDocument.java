@@ -99,4 +99,9 @@ public class RegularBinaryDocument extends BinaryDocument {
         throw new UnsupportedOperationException(
                 "Cannot convert binary data to String.");
     }
+    
+    @Override
+    public long getContentSize() {
+        return size;
+    }
 }

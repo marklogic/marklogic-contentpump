@@ -296,8 +296,24 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     ((DOMDocument) value).getContentAsMarkLogicNode().get(), 
                     options);
             } else if (value instanceof BinaryDocument) {
-                content = ContentFactory.newContent(uri, 
-                    ((BinaryDocument) value).getContentAsByteArray(), options);
+                BinaryDocument doc = (BinaryDocument)value;
+                if (doc.isStreamable()) {
+                    InputStream is = null;
+                    try {
+                        is = doc.getContentAsByteStream();
+                        content = ContentFactory.newUnBufferedContent(uri, is, 
+                                options);
+                    } catch (Exception ex) {
+                        if (is != null) {
+                            is.close();
+                        } 
+                        LOG.error("Error accessing large binary document " + 
+                            key + ", skipping...", ex);
+                    } 
+                } else {
+                    content = ContentFactory.newContent(uri, 
+                        doc.getContentAsByteArray(), options);
+                }
             } else if (value instanceof BytesWritable) {
                 if (formatNeeded) {
                     options.setFormat(DocumentFormat.BINARY);
