@@ -147,7 +147,7 @@ public class ForestInputFormat<VALUE> extends
                     }
                     int comp = InternalUtilities.compareUnsignedLong(offset,
                             treeDataSize);
-                    if (comp >= 0) {
+                    if (comp > 0) {
                         throw new RuntimeException(
                                 "TreeIndex offset is out of bound: position = "
                                         + position + ", offset = " + offset
