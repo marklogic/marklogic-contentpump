@@ -15,9 +15,11 @@
  */
 package com.marklogic.mapreduce;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -96,5 +98,21 @@ public abstract class ForestDocument implements MarkLogicDocument {
     public void write(DataOutput out) throws IOException {
         out.writeLong(fragmentOrdinal);
         WritableUtils.writeStringArray(out, collections);
+    }
+    
+    @Override
+    public InputStream getContentAsByteStream() {
+        return new ByteArrayInputStream(getContentAsByteArray());
+    }
+    
+    @Override
+    public long getContentSize() {
+        byte[] buf = getContentAsByteArray();
+        return buf.length;
+    }
+    
+    @Override
+    public boolean isStreamable() {
+        return false;
     }
 }

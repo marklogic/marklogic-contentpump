@@ -18,6 +18,7 @@ package com.marklogic.mapreduce;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
@@ -81,6 +82,8 @@ public class LargeBinaryDocument extends BinaryDocument {
         offset = in.readLong();
         size = in.readLong();
         binaryOrigLen = in.readLong();
+        conf = new Configuration();
+        conf.readFields(in);
     }
 
     @Override
@@ -90,6 +93,7 @@ public class LargeBinaryDocument extends BinaryDocument {
         out.writeLong(offset);
         out.writeLong(size);
         out.writeLong(binaryOrigLen);
+        conf.write(out);
     }
     
     @Override
@@ -102,6 +106,7 @@ public class LargeBinaryDocument extends BinaryDocument {
     
     public byte[] getContentAsByteArray(int offset, int len) {
         FileSystem fs;
+        FSDataInputStream is = null;
         try {
             fs = path.getFileSystem(conf);
             if (!fs.exists(path)) {
@@ -112,7 +117,7 @@ public class LargeBinaryDocument extends BinaryDocument {
                 throw new RuntimeException("Reached end of file: " + path);
             }
             byte[] buf = new byte[(int) len];
-            FSDataInputStream is = fs.open(path);
+            is = fs.open(path);
             for (int toSkip = offset, skipped = 0; 
                  toSkip < offset; 
                  toSkip -= skipped) {
@@ -124,7 +129,14 @@ public class LargeBinaryDocument extends BinaryDocument {
             return buf;
         } catch (IOException e) {
             throw new RuntimeException("Error accessing file: " + path, e);
-        }  
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                }
+            }
+        }
     }
 
     @Override
@@ -150,4 +162,29 @@ public class LargeBinaryDocument extends BinaryDocument {
                 "Cannot convert binary data to String.");
     }
 
+    @Override
+    public InputStream getContentAsByteStream() {
+        FileSystem fs;
+        FSDataInputStream is = null;
+        try {
+            fs = path.getFileSystem(conf);
+            if (!fs.exists(path)) {
+                throw new RuntimeException("File not found: " + path);
+            }
+            is = fs.open(path);
+            return is;
+        } catch (IOException e) {
+            throw new RuntimeException("Error accessing file: " + path, e);
+        }
+    }
+
+    @Override
+    public long getContentSize() {
+        return size;
+    }
+    
+    @Override
+    public boolean isStreamable() {
+        return true;
+    }
 }

@@ -15,9 +15,11 @@
  */
 package com.marklogic.mapreduce;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
@@ -64,6 +66,11 @@ public class DatabaseDocument implements MarkLogicDocument {
      */
     public byte[] getContentAsByteArray() {
         return content;
+    }
+    
+    @Override
+    public InputStream getContentAsByteStream() {
+        return new ByteArrayInputStream(getContentAsByteArray());
     }
     
     /* (non-Javadoc)
@@ -147,5 +154,15 @@ public class DatabaseDocument implements MarkLogicDocument {
         out.writeInt(contentType.ordinal());
         WritableUtils.writeVInt(out, content.length);
         out.write(content, 0, content.length);
+    }
+
+    @Override
+    public long getContentSize() {
+        return content.length;
+    }
+    
+    @Override
+    public boolean isStreamable() {
+        return false;
     }
 }

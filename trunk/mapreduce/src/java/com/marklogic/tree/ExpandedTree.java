@@ -261,7 +261,7 @@ public class ExpandedTree implements Writable {
     public Path getPathToBinary() {
         long dirKey = binaryKey >>> 54;
         String dir = String.format("%03x", dirKey);
-        String fileName = String.format("%16x", binaryKey);
+        String fileName = String.format("%016x", binaryKey);
         return new Path(dir, fileName);
     }
 
