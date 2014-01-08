@@ -156,6 +156,7 @@
       <pathelement path="${jarlib}/commons-configuration-1.6.jar"/>
       <pathelement path="${jarlib}/commons-lang-2.5.jar"/>
       <pathelement path="${jarlib}/hadoop-core-1.2.0.jar"/>
+  	<pathelement path="${jarlib}/hamcrest-core-1.3.jar"/>
   </path>
   
   <target name="compile.mapreduce" depends="init">
@@ -241,7 +242,7 @@
       <formatter type="${junit.output.format}" usefile="false"/>-->
       <formatter type="${junit.output.format}" usefile="true"/>
       <batchtest fork="yes" todir="${junit.output.dir}">
-        <fileset dir="${junit.source}" includes="**/Test*.java" excludes="**/TestFCheck.java"/>
+        <fileset dir="${junit.source}" includes="**/TestAll.java" excludes="**/TestFCheck.java"/>
       </batchtest>
     </junit>
   </target>
