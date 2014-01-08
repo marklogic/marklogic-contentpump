@@ -109,7 +109,8 @@ public abstract class ImportRecordReader<VALUEIN> extends
                 contentType.getWritableClass();
             value = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
         }
-        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
+        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING,
+                DEFAULT_ENCODING);
     }
 
     @SuppressWarnings("unchecked")
