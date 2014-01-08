@@ -136,7 +136,9 @@ public class OutputArchive {
             byte[] buf = new byte[(int)bufSize];
             for (long toRead = size, read = 0; toRead > 0; toRead -= read) {
                 read = is.read(buf, 0, (int)bufSize);
-                outputStream.write(buf, 0, (int)read);
+                if (read > 0) {
+                    outputStream.write(buf, 0, (int)read);
+                }
             }
             outputStream.closeEntry();
         } catch (ZipException e) {
