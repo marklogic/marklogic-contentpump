@@ -202,7 +202,7 @@ public class ForestInputFormat<VALUE> extends
                 in.close();
             }
             if (offset > splitStart) {
-                int blkIndex = getBlockIndex(blkLocations, offset);
+                int blkIndex = getBlockIndex(blkLocations, offset - 1);
                 InputSplit split = new FileSplit(treeDataPath, splitStart, 
                       offset - splitStart, blkLocations[blkIndex].getHosts());
                 if (LOG.isDebugEnabled()) {
