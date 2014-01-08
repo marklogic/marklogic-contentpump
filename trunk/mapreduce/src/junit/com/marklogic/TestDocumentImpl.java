@@ -3,18 +3,17 @@ package com.marklogic;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.LinkedList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 
-import junit.framework.TestCase;
-
-import org.w3c.dom.Attr;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -22,15 +21,18 @@ import com.marklogic.dom.DocumentImpl;
 import com.marklogic.dom.ElementImpl;
 import com.marklogic.tree.ExpandedTree;
 
-public class TestDocumentImpl extends TestCase {
+@RunWith(value = Parameterized.class)
+public class TestDocumentImpl extends AbstractTestCase {
+	public TestDocumentImpl(ForestData fd) {
+        super(fd);
+    }
 
+    boolean verbose = false;
 	
-	boolean verbose = false;
-	
-	String testData = "src/testdata/ns-prefix";
-    String forest = "ns-prefix-forest";
-    String stand = "00000001";
-    int num = 23;
+//	String testData = "src/testdata/ns-prefix";
+//    String forest = "ns-prefix-forest";
+//    String stand = "00000001";
+//    int num = 23;
 
 /*	String testData = "src/testdata/dom-core-test";
     String forest = "DOM-test-forest";
@@ -43,7 +45,7 @@ public class TestDocumentImpl extends TestCase {
     String stand = "00000002";
     int num = 3;   */
 
-	
+	@Test
     public void testGetDocumentURI() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -61,6 +63,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+	@Test
     public void testGetNodeNameAndFirstAndLastChild() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -92,6 +95,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+    @Test
     public void testGetPrefix() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -145,6 +149,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+    @Test
     public void testGetOwnerDocumentBaseURI() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -188,6 +193,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+    @Test
     public void testGetLocalNameGetNamespaceURI() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -235,6 +241,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+    @Test
     public void testGetElementByTagName() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -315,6 +322,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+    @Test
     public void testDocGetElementByTagName() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -396,6 +404,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+    @Test
     public void testGetElementByTagNameNS() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -480,23 +489,8 @@ public class TestDocumentImpl extends TestCase {
         System.out.println(actual.toString());
         assertEquals(expected.toString(), actual.toString());
     }
-    
-    
-    private void walkDOM (NodeList nodes, StringBuilder sb) {
-        for(int i=0; i<nodes.getLength(); i++) {
-            Node child = nodes.item(i);
-//            if(Utils.isWhitespaceNode(child)) continue;
-            sb.append(child.getNodeType()).append("#");
-            sb.append(child.getNodeName()).append("#");
-            sb.append(child.getNodeValue()).append("#");
-            if(child.hasChildNodes()) {
-                sb.append("\n");
-                walkDOM(child.getChildNodes(), sb);
-            }
-        }
-    }
-    
-    
+   
+    @Test
     public void testNodeNameChildNodes() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -528,36 +522,7 @@ public class TestDocumentImpl extends TestCase {
  
     }
     
-    private void walkDOMNextSibling(NodeList nodes, StringBuilder sb) {
-        if(nodes.getLength() <=0 ) return;
-        
-        Node child = nodes.item(0);
-        while (child != null) {
-            sb.append(child.getNodeType()).append("#");
-            sb.append(child.getNodeName()).append("#");
-            sb.append(child.getNodeValue()).append("#");
-            sb.append("\n");
-            walkDOMNextSibling(child.getChildNodes(), sb);
-            //next sibling
-            child = child.getNextSibling();
-        }
-    }
-    
-    private void walkDOMPreviousSibling(NodeList nodes, StringBuilder sb) {
-        if(nodes.getLength() <=0 ) return;
-        
-        Node child = nodes.item(nodes.getLength() - 1);
-        while (child != null) {
-            sb.append(child.getNodeType()).append("#");
-            sb.append(child.getNodeName()).append("#");
-            sb.append(child.getNodeValue()).append("#");
-            sb.append("\n");
-            walkDOMPreviousSibling(child.getChildNodes(), sb);
-            //next sibling
-            child = child.getPreviousSibling();
-        }
-    }
-    
+    @Test
     public void testNextSibling() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -588,6 +553,7 @@ public class TestDocumentImpl extends TestCase {
  
     }
     
+    @Test
     public void testPreviousSibling() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -616,20 +582,8 @@ public class TestDocumentImpl extends TestCase {
         System.out.println(actual.toString());
         assertEquals(expected.toString(), actual.toString());
     }
-    
-    private void walkDOMParent (NodeList nodes, StringBuilder sb) {
-        for(int i=0; i<nodes.getLength(); i++) {
-            Node child = nodes.item(i);
-            sb.append(child.getNodeType()).append("#");
-            sb.append(child.getNodeName()).append("'s parent is ");
-            sb.append(child.getParentNode().getNodeName()).append("#");
-            sb.append("\n");
-            if(child.hasChildNodes()) {
-                walkDOMParent(child.getChildNodes(), sb);
-            }
-        }
-    }
-    
+
+    @Test
     public void testParent() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
                 new File(testData + System.getProperty("file.separator")
@@ -659,18 +613,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
-    private void walkDOMTextContent (NodeList nodes, StringBuilder sb) {
-        for(int i=0; i<nodes.getLength(); i++) {
-            Node n = nodes.item(i);
-            sb.append(n.getNodeType()).append("#");
-            sb.append(n.getTextContent()).append("#");
-            sb.append("\n");
-            if(n.hasChildNodes()) {
-                walkDOMTextContent(n.getChildNodes(), sb);
-            }
-        }
-    }
-    
+    @Test
     public void testTextContent() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -700,32 +643,8 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
-    private void walkDOMAttr (NodeList nodes, StringBuilder sb) {
-        for(int i=0; i<nodes.getLength(); i++) {
-            Node n = nodes.item(i);
-            if (n.getNodeType() == Node.ELEMENT_NODE ) {
-                System.out.println(n.getNodeName());
-            }
-            if (n.hasAttributes() ) {
-                ArrayList<String> list = new ArrayList<String>();
-                sb.append(n.getNodeName()).append("#"); 
-                NamedNodeMap nnMap = n.getAttributes();
-                for(int j=0; j<nnMap.getLength(); j++) {
-                    Attr attr = (Attr)nnMap.item(j);
-                    String tmp = "@" + attr.getName() + "=" + attr.getValue();
-                    list.add(tmp);
-                    list.add("#isSpecified:" + attr.getSpecified());
-                } 
-                Collections.sort(list);
-                sb.append(list.toString());
-            }
-            sb.append("\n");
-            if(n.hasChildNodes()) {
-                walkDOMAttr(n.getChildNodes(), sb);
-            }
-        }
-    }
-    
+
+    @Test
     public void testAttributes() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
                 new File(testData + System.getProperty("file.separator")
@@ -755,30 +674,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
-    private void walkDOMElem (NodeList nodes, StringBuilder sb) {
-        for(int i=0; i<nodes.getLength(); i++) {
-            Node n = nodes.item(i);
-            if (n.getNodeType() == Node.ELEMENT_NODE ) {
-                sb.append(n.getNodeName()).append("#"); 
-                Attr attr = ((Element)n).getAttributeNode("id");
-                if(attr!=null) {
-                    sb.append("@").append(attr.getName()).append("=").append(attr.getValue());
-                    sb.append("@id=").append(((Element)n).getAttribute("id"));
-                    sb.append("#isSpecified:").append(attr.getSpecified());
-                }
-
-            } else if(Utils.isWhitespaceNode(n)){
-                continue;
-            } else {
-                sb.append(n.getNodeValue());
-            }
-            sb.append("\n");
-            if(n.hasChildNodes()) {
-                walkDOMElem(n.getChildNodes(), sb);
-            }
-        }
-    }
-    
+    @Test
     public void testAttributeNode() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
                 new File(testData + System.getProperty("file.separator")
@@ -808,6 +704,7 @@ public class TestDocumentImpl extends TestCase {
         assertEquals(expected.toString(), actual.toString());
     }
     
+    @Test
     public void testDeepClone() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
@@ -847,6 +744,48 @@ public class TestDocumentImpl extends TestCase {
     
     }
     
+    @Test
+    public void testDeepCloneBug25449() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+                    + forest, stand), false);
+        assertEquals(num, trees.size());
+
+    StringBuilder expected = new StringBuilder();
+    StringBuilder actual = new StringBuilder();
+    StringBuilder clone = new StringBuilder();
+    for (int i = 0; i < trees.size(); i++) {
+        ExpandedTree t = trees.get(i);
+        String uri = t.getDocumentURI();
+        expected.append(uri);
+        Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+        if (doc == null) continue;
+        NodeList children = doc.getChildNodes();
+        walkDOMElem(children, expected);
+        DocumentImpl d = new DocumentImpl(t, 0);
+        children = d.getChildNodes();
+        actual.append(uri);
+        walkDOMElem(children, actual);
+        
+        Document clonedDoc = (Document) d.cloneNode(true);
+        clonedDoc = (Document) d.cloneNode(true);
+        clone.append(uri);
+        children = clonedDoc.getChildNodes();
+        walkDOMElem(children, clone);
+        
+        expected.append("\n");
+        actual.append("\n");
+        clone.append("\n");
+    }
+    System.out.println(expected.toString());
+    System.out.println(actual.toString());
+    System.out.println(clone.toString());
+    assertEquals(actual.toString(), clone.toString());
+    assertEquals(expected.toString(), clone.toString());
+    
+    }
+    
+    @Test
     public void testShallowClone() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
             new File(testData + System.getProperty("file.separator")
