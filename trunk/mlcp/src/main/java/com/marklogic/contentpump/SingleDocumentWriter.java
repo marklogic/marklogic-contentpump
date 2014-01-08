@@ -106,7 +106,9 @@ implements MarkLogicConstants, ConfigConstants {
                              toRead > 0; 
                              toRead -= read) {
                             read = is.read(buf, 0, (int)bufSize);
-                            os.write(buf, 0, (int)read);
+                            if (read > 0) {
+                                os.write(buf, 0, (int)read);
+                            }                     
                         }
                     } finally {
                        if (is != null) {
