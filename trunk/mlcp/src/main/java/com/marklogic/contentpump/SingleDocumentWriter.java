@@ -108,7 +108,11 @@ implements MarkLogicConstants, ConfigConstants {
                             read = is.read(buf, 0, (int)bufSize);
                             if (read > 0) {
                                 os.write(buf, 0, (int)read);
-                            }                     
+                            } else {
+                                LOG.warn("Premature EOF: uri=" + uri +
+                                        ",toRead=" + toRead);
+                                break;
+                            }
                         }
                     } finally {
                        if (is != null) {

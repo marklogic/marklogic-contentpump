@@ -138,7 +138,11 @@ public class OutputArchive {
                 read = is.read(buf, 0, (int)bufSize);
                 if (read > 0) {
                     outputStream.write(buf, 0, (int)read);
-                }
+                } else {
+                    LOG.warn("Premature EOF: uri=" + uri +
+                            ",toRead=" + toRead);
+                    break;
+                }   
             }
             outputStream.closeEntry();
         } catch (ZipException e) {
