@@ -172,7 +172,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         VALUEIN localValue = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
 
         value = localValue;
-        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
+        encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING,
+                DEFAULT_ENCODING);
 
         // ===================
 
