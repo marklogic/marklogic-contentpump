@@ -15,6 +15,7 @@
  */
 package com.marklogic.dom;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Attr;
@@ -37,27 +38,35 @@ import com.marklogic.tree.ExpandedTree;
 
 public class DocumentImpl extends NodeImpl implements Document {
     private Element documentElement;
-
+    /**
+     * owner document for cloneNode
+     */
+    private Document ownerDocCloned;
+    
 	public DocumentImpl(ExpandedTree tree, int node) {
 		super(tree, node);
 	}
 
     public Node cloneNode(boolean deep) {
-        Document clonedDoc = null;
         try {
             //initialize a new doc owner node 
-            tree.initClonedDocOwner();
-            clonedDoc = tree.getClonedDocOwner();
+            initClonedOwnerDoc();
         } catch (ParserConfigurationException e) {
             throw new RuntimeException("Internal Error:" + e);
         }
         if (deep) {
-            for (Node n = getFirstChild(); n != null; n = n.getNextSibling()) {
-                clonedDoc.appendChild(n.cloneNode(true));
+            for (NodeImpl n = (NodeImpl)getFirstChild(); n != null; n = (NodeImpl)n.getNextSibling()) {
+                ownerDocCloned.appendChild(n.cloneNode(ownerDocCloned, true));
             }
         }
 
-        return clonedDoc;
+        return ownerDocCloned;
+    }
+    
+    protected void initClonedOwnerDoc () throws ParserConfigurationException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        ownerDocCloned = dbf.newDocumentBuilder().newDocument();
     }
 	
 

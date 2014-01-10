@@ -15,18 +15,20 @@
  */
 package com.marklogic.dom;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import com.marklogic.tree.ExpandedTree;
 
 public class AttributeNodeMapImpl implements NamedNodeMap {
-	ElementImpl element;
-	
+	protected ElementImpl element;
+	protected Attr[] nsDecl;
 	public AttributeNodeMapImpl(ElementImpl element) {
 		this.element = element;
 	}
@@ -38,10 +40,10 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 	/*
 	 * Exclude namespace declaration
 	 */
-	protected int getNumAttr() {
-	    int num = element.tree.elemNodeNumAttributes[element.tree.nodeRepID[element.node]];
-	    return num != Integer.MAX_VALUE? num : 0;   
-	}
+    protected int getNumAttr() {
+        int num = element.tree.elemNodeNumAttributes[element.tree.nodeRepID[element.node]];
+        return num >= 0 ? num : 0;
+    }
 
 	public Node getNamedItem(String name) {
         if (NodeImpl.trace)
@@ -68,7 +70,21 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 		return null;
 	}
 
+    protected Document getClonedOwnerDoc () throws ParserConfigurationException {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setNamespaceAware(true);
+        return dbf.newDocumentBuilder().newDocument();
+    }
+    
 	public Node item(int index) {
+	    try {
+            return item(index, null);
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
+	}
+	
+	public Node item(int index, Document ownerDoc) throws ParserConfigurationException {
         int numAttr = getNumAttr();
         ExpandedTree tree = element.tree;
         if (index < numAttr) {
@@ -80,31 +96,38 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
                     + index);
         } else {
             int nsIdx = index - numAttr;
-            int count = 0;
+            if (nsDecl != null) return nsDecl[nsIdx];
+            
+            // TODO create owner doc?
+            if (ownerDoc == null) {
+                ownerDoc = getClonedOwnerDoc();
+            }
+
+            nsDecl = new Attr[element.getNumNSDecl()];
             long minimal = tree.nodeOrdinal[element.node];
-            for (int ns = element.getNSNodeID(minimal, minimal); ns >= 0; ns = element
-                .nextNSNodeID(ns, minimal)) {
-                if (count == nsIdx) {
-                    String uri = tree.atomString(tree.nsNodeUriAtom[ns]);
-                    String prefix = tree.atomString(tree.nsNodePrefixAtom[ns]);
-                    Attr attr = null;
-                    try {
-                        if (prefix != null && "".equals(prefix) == false) {
-                            attr = tree.getClonedDocOwner().createAttribute(
-                                "xmlns:" + prefix);
-                        } else {
-                            attr = tree.getClonedDocOwner().createAttribute(
-                                "xmlns");
-                        }
-                        attr.setNodeValue(uri);
-                    } catch (DOMException e) {
-                        throw new RuntimeException(e);
-                    } catch (ParserConfigurationException e) {
-                        throw new RuntimeException(e);
+            int count = 0;
+            for (int ns = element.getNSNodeID(minimal, minimal); ns >= 0
+                && count < element.getNumNSDecl(); ns = element.nextNSNodeID(
+                ns, minimal)) {
+                String uri = tree.atomString(tree.nsNodeUriAtom[ns]);
+                String prefix = tree.atomString(tree.nsNodePrefixAtom[ns]);
+                Attr attr = null;
+                try {
+                    if (prefix != null && "".equals(prefix) == false) {
+                        attr = ownerDoc.createAttribute("xmlns:" + prefix);
+                    } else {
+                        attr = ownerDoc.createAttribute("xmlns");
                     }
-                    return attr;
+                    attr.setNodeValue(uri);
+                } catch (DOMException e) {
+                    throw new RuntimeException(e);
                 }
+                nsDecl[count] = attr;
                 count++;
+            }
+            
+            if(nsDecl != null && nsIdx < count) {
+                return nsDecl[nsIdx];
             }
             return null;
         }

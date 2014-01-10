@@ -68,14 +68,14 @@ public class AbstractTestCase extends TestCase {
             }
             if (n.hasAttributes() ) {
                 ArrayList<String> list = new ArrayList<String>();
-                sb.append(n.getNodeName()).append("#"); 
+                sb.append(n.getNodeName()).append("#\n");
                 NamedNodeMap nnMap = n.getAttributes();
-                for(int j=0; j<nnMap.getLength(); j++) {
-                    Attr attr = (Attr)nnMap.item(j);
+                for (int j = 0; j < nnMap.getLength(); j++) {
+                    Attr attr = (Attr) nnMap.item(j);
                     String tmp = "@" + attr.getName() + "=" + attr.getValue();
                     list.add(tmp);
-                    list.add("#isSpecified:" + attr.getSpecified());
-                } 
+                    list.add("#isSpecified:" + attr.getSpecified() + "\n");
+                }
                 Collections.sort(list);
                 sb.append(list.toString());
             }

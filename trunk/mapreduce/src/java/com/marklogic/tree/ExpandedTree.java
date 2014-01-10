@@ -20,14 +20,10 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import com.marklogic.dom.AttrImpl;
@@ -123,25 +119,6 @@ public class ExpandedTree implements Writable {
 	public long schemaTimestamp; // uint64_t
 
 	private long fragmentOrdinal;
-
-	private Document domDoc;
-	public Document getClonedDocOwner() throws ParserConfigurationException {
-	    if(domDoc == null) {
-	        //initialize the doc owner node, needed by elem, attr, etc
-	        initClonedDocOwner();
-	    }
-	    return domDoc;
-	}
-
-    public void setClonedDocOwner(Document doc) {
-        domDoc = doc;
-    }
-	
-	public void initClonedDocOwner () throws ParserConfigurationException {
-	    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        domDoc = dbf.newDocumentBuilder().newDocument();
-	}
 
 	public boolean atomEquals(int atom, byte value[]) {
 		int p = 0;

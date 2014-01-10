@@ -760,6 +760,7 @@ public class TestDocumentImpl extends AbstractTestCase {
         expected.append(uri);
         Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         if (doc == null) continue;
+        doc = (Document) doc.cloneNode(true);
         NodeList children = doc.getChildNodes();
         walkDOMElem(children, expected);
         DocumentImpl d = new DocumentImpl(t, 0);
@@ -801,16 +802,15 @@ public class TestDocumentImpl extends AbstractTestCase {
         expected.append(uri);
         Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         if (doc == null) continue;
-        Node root = doc.getDocumentElement();
-        expected.append(root.getNodeName() + root.getNodeValue());
+
+        expected.append(doc.getNodeValue());
         DocumentImpl d = new DocumentImpl(t, 0);
-        root = d.getDocumentElement();
         actual.append(uri);
-        actual.append(root.getNodeName() + root.getNodeValue());
+        actual.append(d.getNodeValue());
         
-        Element clonedElem = (Element) root.cloneNode(false);
+        Document clonedDoc = (Document) d.cloneNode(false);
         clone.append(uri);
-        clone.append(clonedElem.getNodeName() + clonedElem.getNodeValue());
+        clone.append(clonedDoc.getNodeValue());
         
         expected.append("\n");
         actual.append("\n");
