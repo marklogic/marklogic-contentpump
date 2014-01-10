@@ -22,6 +22,20 @@ import org.w3c.dom.ProcessingInstruction;
 
 import com.marklogic.tree.ExpandedTree;
 
+/**
+ * A read-only W3C DOM Node implementation on top of MarkLogic's
+ * internal representation of a processing instruction in a document as 
+ * stored on disk in the expanded tree cache of a forest. 
+ * 
+ * <p>
+ * This interface is effectively read-only: Setters and update methods 
+ * inherited from <code>org.w3c.Node</code> are not supported and will raise
+ * an exception if called. To create a modifiable copy of a node, use
+ * {@link #cloneNode}.
+ * </p>
+ * 
+ * @author jchen
+ */
 public class ProcessingInstructionImpl extends NodeImpl implements
 		ProcessingInstruction {
 
@@ -56,7 +70,8 @@ public class ProcessingInstructionImpl extends NodeImpl implements
         return getNodeValue();
     }
 
-	public void setData(String data) throws DOMException {
+	/** Unsupported. */
+    public void setData(String data) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 }

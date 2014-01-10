@@ -36,6 +36,20 @@ import org.w3c.dom.Text;
 
 import com.marklogic.tree.ExpandedTree;
 
+/**
+ * A read-only W3C DOM Node implementation of MarkLogic's
+ * internal representation of a document as stored in the expanded 
+ * tree cache of a forest on disk. 
+ * 
+ * <p>
+ * This interface is effectively read-only: Setters and update methods 
+ * inherited from <code>org.w3c.Node</code> are not supported and will raise
+ * an exception if called. To create a modifiable copy of a node, use
+ * {@link #cloneNode}.
+ * </p>
+ * 
+ * @author jchen
+ */
 public class DocumentImpl extends NodeImpl implements Document {
     private Element documentElement;
     /**
@@ -284,27 +298,33 @@ public class DocumentImpl extends NodeImpl implements Document {
 		return getDocumentElement().lookupPrefix(namespaceURI);
 	}
 
+	/** Unsupported. */
 	public void normalizeDocument() {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+	/** Unsupported. */
 	public Node renameNode(Node arg0, String arg1, String arg2)
 			throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+	/** Unsupported. */
 	public void setDocumentURI(String arg0) {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+	/** Unsupported. */
 	public void setStrictErrorChecking(boolean arg0) {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+	/** Unsupported. */
 	public void setXmlStandalone(boolean arg0) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+	/** Unsupported. */
 	public void setXmlVersion(String arg0) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}

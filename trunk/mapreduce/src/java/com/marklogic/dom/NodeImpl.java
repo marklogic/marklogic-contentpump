@@ -28,7 +28,16 @@ import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 
 /**
- * Expanded-tree-backed DOM Node implementation.
+ * A read-only W3C DOM Node implementation of MarkLogic's
+ * internal representation of a node as stored in the expanded 
+ * tree cache of a forest on disk. 
+ * 
+ * <p>
+ * This interface is effectively read-only: Setters and update methods 
+ * inherited from <code>org.w3c.Node</code> are not supported and will raise
+ * an exception if called. To create a modifiable copy of a node, use
+ * {@link #cloneNode}.
+ * </p>
  * 
  * @author jchen
  */
@@ -63,6 +72,7 @@ public abstract class NodeImpl implements Node {
         return tree;
     }
 
+    /** Unsupported. */
     public Node appendChild(Node newChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
@@ -224,6 +234,7 @@ public abstract class NodeImpl implements Node {
     }
 
     // TODO - is this allowed to throw NO_MODIFICATION_ALLOWED_ERR?
+    /** Unsupported. */
     public Object getUserData(String key) {
         assert (false);
         return null;
@@ -240,6 +251,7 @@ public abstract class NodeImpl implements Node {
     }
 
 
+    /** Unsupported. */
     public Node insertBefore(Node newChild, Node refChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
@@ -352,36 +364,43 @@ public abstract class NodeImpl implements Node {
     }
 
 
+    /** Unsupported. */
     public void normalize() {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
 
+    /** Unsupported. */
     public Node removeChild(Node oldChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
 
+    /** Unsupported. */
     public Node replaceChild(Node newChild, Node oldChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
 
+    /** Unsupported. */
     public void setNodeValue(String nodeValue) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
 
+    /** Unsupported. */
     public void setPrefix(String prefix) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
 
+    /** Unsupported. */
     public void setTextContent(String textContent) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
 
+    /** Unsupported. */
     public Object setUserData(String key, Object data, UserDataHandler handler) {
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR, null);
     }

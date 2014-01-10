@@ -33,9 +33,18 @@ import org.apache.hadoop.io.Text;
 import com.marklogic.tree.ExpandedTree;
 
 /**
- * BinaryDocument that represents a binary document stored outside of a 
- * MarkLogic fragment.
+ * A {@link BinaryDocument} representing a large binary document 
+ * extracted from a forest using Direct Access. 
  * 
+ * <p>
+ * A large binary is stored outside of a MarkLogic fragment. 
+ * A binary document categorized as "large" when it exceeds the large
+ * size threshold configured for a database. For more details, see
+ * "Working With Binary Documents" in the MarkLogic Server
+ * <em>Application Developer's Guide</em>.
+ * </p>
+ * 
+ * @see ForestInputFormat
  * @author jchen
  */
 public class LargeBinaryDocument extends BinaryDocument {

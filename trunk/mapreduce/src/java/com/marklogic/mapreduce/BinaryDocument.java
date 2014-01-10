@@ -16,8 +16,10 @@
 package com.marklogic.mapreduce;
 
 /**
- * ForestDocument that represents a binary document in MarkLogic.
+ * A {@link ForestDocument} representing a binary document in MarkLogic
+ * accessed via Direct Access.
  * 
+ * @see ForestInputFormat
  * @author jchen
  */
 public abstract class BinaryDocument extends ForestDocument {
