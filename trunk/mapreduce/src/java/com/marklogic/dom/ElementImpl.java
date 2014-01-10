@@ -208,8 +208,11 @@ public class ElementImpl extends NodeImpl implements Element {
 	@Override
 	public String getPrefix() {
 		int ns = tree.nodeNameNamespaceAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]];
+		if (ns < 0) return null;
+		String preserved = builtinNSPrefix(getNamespaceURI());
+		if (preserved != null) return preserved;
 		if (tree.atomString(ns) != null)  ns = getPrefixID(ns);
-	    String r = (ns != -1) ? tree.atomString(ns) : null;
+	    String r = (ns >= 0) ? tree.atomString(ns) : null;
 	    return r;
 	}
 

@@ -463,4 +463,23 @@ public abstract class NodeImpl implements Node {
 			
 		};
 	}
+	
+	protected String builtinNSPrefix(String URI) {
+		if (URI == null) return null;
+		if (URI.equals("http://www.w3.org/XML/1998/namespace")) return "xml";
+		if (URI.equals("http://www.w3.org/2000/xmlns/")) return "xmlns";
+		if (URI.equals("http://www.w3.org/2001/XMLSchema")) return "xs";
+		if (URI.equals("http://www.w3.org/2001/XMLSchema-instance")) return "xsi";
+		if (URI.equals("http://www.w3.org/2003/05/xpath-datatypes")) return "xdt";
+		if (URI.equals("http://marklogic.com/xdmp")) return "xdmp";
+		if (URI.equals("http://marklogic.com/xqe")) return "xqe";
+		if (URI.equals("http://marklogic.com/xdmp/security")) return "sec";
+		if (URI.equals("http://www.w3.org/2005/xqt-errors")) return "err";
+		if (URI.equals("http://marklogic.com/xdmp/error")) return "error";
+		if (URI.equals("http://marklogic.com/xdmp/directory")) return "dir";
+		if (URI.equals("DAV:")) return "dav";
+		if (URI.equals("http://marklogic.com/xdmp/lock")) return "lock";
+		if (URI.equals("http://marklogic.com/xdmp/property")) return "prop";
+		return null;
+	}
 }
