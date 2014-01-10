@@ -78,7 +78,7 @@ public abstract class NodeImpl implements Node {
             if (this.tree == otherNode.tree) {
                 if (tree.nodeOrdinal[node] > tree.nodeOrdinal[otherNode.node]) {
                 	int ancestor = tree.nodeParentNodeRepID[node];
-                    while (ancestor!=Integer.MAX_VALUE && 
+                    while (ancestor >= 0 && 
                     	   tree.nodeOrdinal[ancestor] >= tree.nodeOrdinal[otherNode.node]) {
                     	if (ancestor == otherNode.node) 
                     		return DOCUMENT_POSITION_CONTAINS;
@@ -87,7 +87,7 @@ public abstract class NodeImpl implements Node {
                     return DOCUMENT_POSITION_PRECEDING;
                 } else {
                 	int ancestor = tree.nodeParentNodeRepID[otherNode.node];
-                    while (ancestor!=Integer.MAX_VALUE && 
+                    while (ancestor >= 0 && 
                     	   tree.nodeOrdinal[ancestor] >= tree.nodeOrdinal[otherNode.node]) {
                     	if (ancestor == node) 
                     		return DOCUMENT_POSITION_CONTAINED_BY;
