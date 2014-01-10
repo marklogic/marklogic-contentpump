@@ -22,24 +22,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>httpcore-4.0.1.jar</name>
+			<name>apache-mime4j-0.6.jar</name>
 			<type>2</type>
-			<location>/space/projects/xcc/mapreduce/src/lib/httpcore-4.0.1.jar</location>
-		</link>
-		<link>
-			<name>httpclient-4.0.3.jar</name>
-			<type>2</type>
-			<location>/space/projects/xcc/mapreduce/src/lib/httpclient-4.0.3.jar</location>
-		</link>
-		<link>
-			<name>commons-codec-1.3.jar</name>
-			<type>2</type>
-			<location>/space/projects/xcc/mapreduce/src/lib/commons-codec-1.3.jar</location>
-		</link>
-		<link>
-			<name>java</name>
-			<type>2</type>
-			<location>/space/projects/xcc/mapreduce/src/java</location>
+			<location>/space/projects/xcc/mapreduce/src/lib/apache-mime4j-0.6.jar</location>
 		</link>
 		<link>
 			<name>classes</name>
@@ -47,14 +32,29 @@
 			<location>/space/projects/xcc/mapreduce/buildtmp/classes</location>
 		</link>
 		<link>
-			<name>apache-mime4j-0.6.jar</name>
+			<name>commons-codec-1.3.jar</name>
 			<type>2</type>
-			<location>/space/projects/xcc/mapreduce/src/lib/apache-mime4j-0.6.jar</location>
+			<location>/space/projects/xcc/mapreduce/src/lib/commons-codec-1.3.jar</location>
+		</link>
+		<link>
+			<name>httpclient-4.0.3.jar</name>
+			<type>2</type>
+			<location>/space/projects/xcc/mapreduce/src/lib/httpclient-4.0.3.jar</location>
+		</link>
+		<link>
+			<name>httpcore-4.0.1.jar</name>
+			<type>2</type>
+			<location>/space/projects/xcc/mapreduce/src/lib/httpcore-4.0.1.jar</location>
 		</link>
 		<link>
 			<name>httpmime-4.0.3.jar</name>
 			<type>2</type>
 			<location>/space/projects/xcc/mapreduce/src/lib/httpmime-4.0.3.jar</location>
+		</link>
+		<link>
+			<name>java</name>
+			<type>2</type>
+			<location>/space/projects/xcc/mapreduce/src/java</location>
 		</link>
 	</linkedResources>
 </projectDescription>
