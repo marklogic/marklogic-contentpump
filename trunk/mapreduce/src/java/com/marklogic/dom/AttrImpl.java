@@ -108,6 +108,8 @@ public class AttrImpl extends NodeImpl implements Attr {
 	public String getPrefix() {
 		int ns = tree.nodeNameNamespaceAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]];
 		if (ns < 0) return null;
+		String preserved = builtinNSPrefix(getNamespaceURI());
+		if (preserved != null) return preserved;
 		if (tree.atomString(ns) != null)  ns = getPrefixID(ns);
 	    return (ns >= 0) ? tree.atomString(ns) : null;
 	}
