@@ -17,8 +17,6 @@ package com.marklogic.dom;
 
 import java.util.ArrayList;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -34,13 +32,7 @@ public class AttrImpl extends NodeImpl implements Attr {
         super(tree, node);
     }
     
-    public Node cloneNode(boolean deep) {
-        Document doc;
-        try {
-            doc = tree.getClonedDocOwner();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException("Internal Error:" + e);
-        }
+    public Node cloneNode(Document doc, boolean deep) {
         Attr attr = doc.createAttributeNS(getNamespaceURI(), getLocalName());
         attr.setValue(getValue());
         return attr;
@@ -56,7 +48,9 @@ public class AttrImpl extends NodeImpl implements Attr {
     }
 
     public String getName() {
-    	return tree.atomString(tree.nodeNameNameAtom[getNodeID()]); 
+        String prefix = getPrefix();
+        return prefix == null || prefix.equals("") ? getLocalName() : prefix
+            + ":" + getLocalName();
     }
 
     @Override
@@ -90,7 +84,7 @@ public class AttrImpl extends NodeImpl implements Attr {
     		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
     		if (uri != uriAtom)  continue; 
     		if (ubp.contains(prefix)) continue;
-    		if (tree.atomString(prefix) != null)  continue;
+    		if (tree.atomString(prefix) == null) continue;
     		return prefix; 
     	} 
     	return -1;
@@ -98,7 +92,7 @@ public class AttrImpl extends NodeImpl implements Attr {
     
 	@Override
 	public String getPrefix() {
-		int ns = tree.nodeNameNamespaceAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]];
+		int ns = tree.nodeNameNamespaceAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]];
 		if (ns < 0) return null;
 		if (tree.atomString(ns) != null)  ns = getPrefixID(ns);
 	    return (ns >= 0) ? tree.atomString(ns) : null;

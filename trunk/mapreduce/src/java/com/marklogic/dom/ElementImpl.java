@@ -15,6 +15,8 @@
  */
 package com.marklogic.dom;
 
+import java.util.ArrayList;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -23,42 +25,45 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.TypeInfo;
-import java.util.ArrayList;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import com.marklogic.tree.ExpandedTree;
 
 public class ElementImpl extends NodeImpl implements Element {
 
-    AttributeNodeMapImpl attributes;
-
+    protected AttributeNodeMapImpl attributes;
+    protected int numNSDecl;
     public ElementImpl(ExpandedTree tree, int node) {
         super(tree, node);
         attributes = new AttributeNodeMapImpl(this);
+        numNSDecl = -1;
     }
 	
-	public Node cloneNode(boolean deep) {
-        Document doc;
-        try {
-            doc = tree.getClonedDocOwner();
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException("Internal Error:" + e);
-        }
+    public Node cloneNode(boolean deep) {
+        throw new UnsupportedOperationException();
+    }
+    
+	public Node cloneNode(Document doc, boolean deep) {
         Element elem = doc.createElementNS(getNamespaceURI(), getTagName());
         elem.setPrefix(getPrefix());
 
         for (int i = 0; i < attributes.getLength(); i++) {
             Attr attr = (Attr) attributes.item(i);
-            elem.setAttributeNode((Attr)attr.cloneNode(deep));
+            if(attr instanceof AttrImpl) {
+                elem.setAttributeNode((Attr)((AttrImpl)attr).cloneNode(doc, deep));
+            } else {
+                //ns decl, stored as Java DOM Attr
+                Attr clonedAttr = doc.createAttribute(attr.getName());
+                clonedAttr.setValue(attr.getValue());
+                elem.setAttributeNode(clonedAttr);
+            }
         }
         
         if(deep) {
             //clone children 
             NodeList list = getChildNodes();
             for(int i=0; i<list.getLength(); i++) {
-                Node n = list.item(i);
-                Node c = n.cloneNode(true);
+                NodeImpl n = (NodeImpl)list.item(i);
+                Node c = n.cloneNode(doc, true);
                 elem.appendChild(c);
             }
         }
@@ -174,14 +179,17 @@ public class ElementImpl extends NodeImpl implements Element {
     	return a;
 	}
 	
-	public int getNumNSDecl() {
-	    long minOrdinal = tree.nodeOrdinal[node];
-        int count = 0;
-	    for (int ns = getNSNodeID(minOrdinal, minOrdinal); ns >= 0 ; ns = nextNSNodeID(ns, minOrdinal) ) {
-	        count++;
-	    }
-	    return count;
-	}
+    public int getNumNSDecl() {
+        if (numNSDecl != -1)
+            return numNSDecl;
+        numNSDecl = 0;
+        long minOrdinal = tree.nodeOrdinal[node];
+        for (int ns = getNSNodeID(minOrdinal, minOrdinal); ns >= 0; ns = nextNSNodeID(
+            ns, minOrdinal)) {
+            numNSDecl++;
+        }
+        return numNSDecl;
+    }
     
 	@Override
 	public String getPrefix() {

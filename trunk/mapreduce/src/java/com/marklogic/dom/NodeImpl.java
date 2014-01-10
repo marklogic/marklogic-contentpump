@@ -67,8 +67,12 @@ public abstract class NodeImpl implements Node {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
-    // TODO - override in subclasses?
     public Node cloneNode(boolean deep) {
+        throw new UnsupportedOperationException();
+    }
+    
+    // override in subclasses
+    public Node cloneNode(Document doc, boolean deep) {
         return null;
     }
     
