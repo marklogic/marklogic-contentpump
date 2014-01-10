@@ -484,8 +484,14 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_LANGUAGE, language);
             }
             if (cmdline.hasOption(INPUT_FILE_PATTERN)) {
-                String pattern = cmdline.getOptionValue(INPUT_FILE_PATTERN);
-                conf.set(CONF_INPUT_FILE_PATTERN, pattern);
+                if (inputType == InputType.FOREST) {
+                    LOG.warn("The setting for " + INPUT_FILE_PATTERN + 
+                            " is ignored for input type " + inputType.name());
+                } else {
+                    String pattern = 
+                            cmdline.getOptionValue(INPUT_FILE_PATTERN);
+                    conf.set(CONF_INPUT_FILE_PATTERN, pattern);
+                }
             }
             if (cmdline.hasOption(USERNAME)) {
                 String username = cmdline.getOptionValue(USERNAME);
@@ -840,9 +846,6 @@ public enum Command implements ConfigConstants {
                         + " encoding is not supported");
                 }
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
-            } else {
-                //default is UTF-8
-                conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, "UTF-8");
             }
         }
 
@@ -1124,13 +1127,6 @@ public enum Command implements ConfigConstants {
                 .create(INPUT_FILE_PATH);
             inputFilePath.setRequired(true);
             options.addOption(inputFilePath);
-            Option inputFilePattern = OptionBuilder
-                .withArgName("regex pattern")
-                .hasArg()
-                .withDescription("Matching regex pattern for files found in "
-                    + "the input file path")
-                .create(INPUT_FILE_PATTERN);
-            options.addOption(inputFilePattern);
             Option outputFilePath = OptionBuilder
                 .withArgName("path")
                 .hasArg()
@@ -1185,10 +1181,6 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(INPUT_FILE_PATH);
                 FileInputFormat.setInputPaths(job, path);
-            }
-            if (cmdline.hasOption(INPUT_FILE_PATTERN)) {
-                FileInputFormat.setInputPathFilter(job,
-                                DocumentPathFilter.class);
             }
             return job;
         }
