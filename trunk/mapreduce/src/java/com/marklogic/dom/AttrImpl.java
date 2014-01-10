@@ -81,10 +81,10 @@ public class AttrImpl extends NodeImpl implements Attr {
     @Override
     protected int getPrefixID(int uriAtom) {
 		int parentNodeRepID = tree.nodeParentNodeRepID[node];
-		if (parentNodeRepID == Integer.MAX_VALUE) parentNodeRepID = node;
+		if (parentNodeRepID == -1) parentNodeRepID = node;
 		ArrayList<Integer> ubp = new ArrayList<Integer>();
 		long sum_ordinal = tree.ordinal+tree.nodeOrdinal[parentNodeRepID];
-    	for ( int ns = getNSNodeID(sum_ordinal); ns != Integer.MAX_VALUE ; ns = nextNSNodeID(ns,0) ) {
+    	for ( int ns = getNSNodeID(sum_ordinal); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
     		int uri = tree.nsNodeUriAtom[ns];
     		int prefix = tree.nsNodePrefixAtom[ns];
     		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
@@ -93,7 +93,7 @@ public class AttrImpl extends NodeImpl implements Attr {
     		if (tree.atomString(prefix) != null)  continue;
     		return prefix; 
     	} 
-    	return Integer.MAX_VALUE;
+    	return -1;
 	}
     
 	@Override
@@ -101,7 +101,7 @@ public class AttrImpl extends NodeImpl implements Attr {
 		int ns = tree.nodeNameNamespaceAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]];
 		if (ns < 0) return null;
 		if (tree.atomString(ns) != null)  ns = getPrefixID(ns);
-	    return (ns != Integer.MAX_VALUE) ? tree.atomString(ns) : null;
+	    return (ns >= 0) ? tree.atomString(ns) : null;
 	}
 	
     public TypeInfo getSchemaTypeInfo() {
