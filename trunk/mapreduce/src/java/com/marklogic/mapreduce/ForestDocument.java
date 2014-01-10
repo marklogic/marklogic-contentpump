@@ -31,8 +31,10 @@ import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 
 /**
- * MarkLogicDocument retrieved from a MarkLogic forest through Direct Access
+ * A {@link MarkLogicDocument} retrieved from a MarkLogic forest through 
+ * Direct Access.
  * 
+ * @see ForestInputFormat
  * @author jchen
  */
 public abstract class ForestDocument implements MarkLogicDocument {

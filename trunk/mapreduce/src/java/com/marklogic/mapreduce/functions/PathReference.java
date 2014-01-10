@@ -39,12 +39,12 @@ public abstract class PathReference extends Reference {
     }
     
     /**
-     * The path range expression represented by this lexicon.
+     * Get the path range expression represented by this lexicon.
      * <p>
      *   This path expression must correspond to the path expression
      *   used to create an existing path range index.
      * </p>
-     * @return
+     * @return A path range expression.
      */
     public abstract String getPathExpression();
     

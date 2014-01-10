@@ -320,7 +320,6 @@ public class ContentOutputFormat<VALUEOUT> extends
      * Initialize initial server host name, assignment policy and fastload.
      * 
      * @param session
-     * @return assignment policy
      * @throws IOException
      * @throws RequestException
      */

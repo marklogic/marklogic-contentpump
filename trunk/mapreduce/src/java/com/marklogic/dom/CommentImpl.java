@@ -22,6 +22,20 @@ import org.w3c.dom.Node;
 
 import com.marklogic.tree.ExpandedTree;
 
+/**
+ * A read-only W3C DOM Node implementation of MarkLogic's
+ * internal representation of an XML comment as stored in the expanded 
+ * tree cache of a forest on disk. 
+ * 
+ * <p>
+ * This interface is effectively read-only: Setters and update methods 
+ * inherited from <code>org.w3c.Node</code> are not supported and will raise
+ * an exception if called. To create a modifiable copy of a node, use
+ * {@link #cloneNode}.
+ * </p>
+ * 
+ * @author jchen
+ */
 public class CommentImpl extends CharacterDataImpl implements Comment {
 
 	public CommentImpl(ExpandedTree tree, int node) {

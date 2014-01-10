@@ -40,12 +40,27 @@ import com.marklogic.io.BiendianDataInputStream;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 
 /**
- * FileInputFormat that reads from forest data dirs.
+ * {@link org.apache.hadoop.mapreduce.lib.input.FileInputFormat FileInputFormat} 
+ * subclass for reading documents from a forest using DirectAccess.
+ * 
+ * <p>
+ * Direct Access is intended primarily for extracting documents in offline or
+ * read-only forests, such as forests containing archived data that are
+ * part of a Tiered Storage data management strategy.
+ * </p><p>
+ * This format produces key-value pairs where the key is a {@link DocumentURI}
+ * and the value is a {@link ForestDocument}. The type of <code>ForestDocument</code>
+ * depends on the underlying document content type: {@link DOMDocument} 
+ * for XML or text, or {@link BinaryDocument} for binaries. Binary
+ * documents can be further specialized to {@link RegularBinaryDocument} or
+ * {@link LargeBinaryDocument}, depending on size and the database
+ * configuration. 
+ * </p>
  * 
  * @author jchen
  *
- * @param <VALUE> Currently only support ForestDocument, but other types like
- * Text or BytesWritable are possible candidates to be added.
+ * @param <VALUE> Only ForestDocument is currently supported, but types
+ * such as Text or BytesWritable are possible candidates to be added.
  */
 public class ForestInputFormat<VALUE> extends
         FileInputFormat<DocumentURI, VALUE> implements MarkLogicConstants {

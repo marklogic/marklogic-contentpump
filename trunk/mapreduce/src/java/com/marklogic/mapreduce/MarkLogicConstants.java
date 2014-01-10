@@ -169,7 +169,8 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class implementing 
-     * LexiconFunction which will be used to generate input. 
+     * {@link com.marklogic.mapreduce.functions.LexiconFunction LexiconFunction} 
+     * which will be used to generate input. 
      */
     static final String INPUT_LEXICON_FUNCTION_CLASS =
         "mapreduce.marklogic.input.lexiconfunctionclass";
@@ -394,21 +395,21 @@ public interface MarkLogicConstants {
       /**
        * The config property name (<code>{@value}</code>)
        * which, if set, indicates to only include documents with one or many of
-       * specified collection URIs.
+       * specified collection URIs when using {@link ForestInputFormat}.
        */
       static final String COLLECTION_FILTER =
           "mapreduce.marklogic.input.filter.collection";
       /**
        * The config property name (<code>{@value}</code>)
        * which, if set, indicates to only include documents with one of 
-       * specified directory URIs.
+       * specified directory URIs when using {@link ForestInputFormat}.
        */
       static final String DIRECTORY_FILTER =
           "mapreduce.marklogic.input.filter.directory";
       /**
        * The config property name (<code>{@value}</code>)
        * which, if set, indicates to only include documents with one of 
-       * specified types.
+       * specified types when using {@link ForestInputFormat}.
        */
       static final String TYPE_FILTER =
           "mapreduce.marklogic.input.filter.type";

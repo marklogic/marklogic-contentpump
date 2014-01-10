@@ -28,6 +28,20 @@ import org.w3c.dom.TypeInfo;
 
 import com.marklogic.tree.ExpandedTree;
 
+/**
+ * A read-only W3C DOM Node implementation of MarkLogic's
+ * internal representation of a document element as stored in the expanded 
+ * tree cache of a forest on disk. 
+ * 
+ * <p>
+ * This interface is effectively read-only: Setters and update methods 
+ * inherited from <code>org.w3c.Node</code> are not supported and will raise
+ * an exception if called. To create a modifiable copy of a node, use
+ * {@link #cloneNode}.
+ * </p>
+ * 
+ * @author jchen
+ */
 public class ElementImpl extends NodeImpl implements Element {
 
     protected AttributeNodeMapImpl attributes;
@@ -303,45 +317,55 @@ public class ElementImpl extends NodeImpl implements Element {
 		return (a >= 0) ? tree.atomString(a) : null;
 	}
 	
+    /** Unsupported. */
 	public void removeAttribute(String name) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+    /** Unsupported. */
 	public Attr removeAttributeNode(Attr oldAttr) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+    /** Unsupported. */
 	public void removeAttributeNS(String namespaceURI, String localName)
 			throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+    /** Unsupported. */
 	public void setAttribute(String name, String value) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+    /** Unsupported. */
 	public Attr setAttributeNode(Attr newAttr) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+    /** Unsupported. */
 	public Attr setAttributeNodeNS(Attr newAttr) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+    /** Unsupported. */
 	public void setAttributeNS(String namespaceURI, String qualifiedName,
 			String value) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+    /** Unsupported. */
 	public void setIdAttribute(String name, boolean isId) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+    /** Unsupported. */
 	public void setIdAttributeNode(Attr idAttr, boolean isId)
 			throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+    /** Unsupported. */
 	public void setIdAttributeNS(String namespaceURI, String localName,
 			boolean isId) throws DOMException {
 		throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);

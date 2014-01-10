@@ -20,16 +20,32 @@ import org.w3c.dom.DOMException;
 
 import com.marklogic.tree.ExpandedTree;
 
+/**
+ * A read-only W3C DOM Node implementation of MarkLogic's
+ * internal representation of character data as stored in the expanded 
+ * tree cache of a forest on disk. 
+ * 
+ * <p>
+ * This interface is effectively read-only. Setters and update methods 
+ * inherited from <code>org.w3c.Node</code> are not supported and will raise
+ * an exception if called. To create a modifiable copy of a node, use
+ * {@link #cloneNode}.
+ * </p>
+ * 
+ * @author jchen
+ */
 public abstract class CharacterDataImpl extends NodeImpl implements CharacterData {
 
     public CharacterDataImpl(ExpandedTree tree, int node) {
         super(tree, node);
     }
     
+    /** Unsupported. */
     public void appendData(String arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
+    /** Unsupported. */
     public void deleteData(int offset, int count) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
@@ -47,14 +63,17 @@ public abstract class CharacterDataImpl extends NodeImpl implements CharacterDat
         return getData();
     }
 
+    /** Unsupported. */
     public void insertData(int offset, String arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
+    /** Unsupported. */
     public void replaceData(int offset, int count, String arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
+    /** Unsupported. */
     public void setData(String data) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

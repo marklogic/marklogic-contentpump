@@ -25,7 +25,13 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
 /**
- * Captures any type of MarkLogic documents.
+ * An abstraction of a document stored in a MarkLogic database.
+ * 
+ * <p>
+ * This interface represents any type of MarkLogic document,
+ * regardless of content type or whether it is actively managed
+ * by MarkLogic server.
+ * </p>
  *  
  * @author jchen
  *

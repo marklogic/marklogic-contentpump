@@ -27,8 +27,10 @@ import org.apache.hadoop.io.Text;
 import com.marklogic.tree.ExpandedTree;
 
 /**
- * BinaryDocument that represents a binary fragment in MarkLogic.
+ * A {@link BinaryDocument} representing a binary fragment in MarkLogic
+ * accessed via Direct Access.
  * 
+ * @see ForestInputFormat
  * @author jchen
  */
 public class RegularBinaryDocument extends BinaryDocument {

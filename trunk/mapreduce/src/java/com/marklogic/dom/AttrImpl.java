@@ -26,6 +26,20 @@ import org.w3c.dom.TypeInfo;
 
 import com.marklogic.tree.ExpandedTree;
 
+/**
+ * A read-only W3C DOM Node implementation of MarkLogic's
+ * internal representation of an element attribute as stored in the expanded 
+ * tree cache of a forest on disk. 
+ * 
+ * <p>
+ * This class is effectively read-only: Setters and update methods 
+ * inherited from <code>org.w3c.Node</code> are not supported and will raise
+ * an exception if called. To create a modifiable copy of a node, use
+ * {@link #cloneNode}.
+ * </p>
+ * 
+ * @author jchen
+ */
 public class AttrImpl extends NodeImpl implements Attr {
 
     public AttrImpl(ExpandedTree tree, int node) {
@@ -124,6 +138,7 @@ public class AttrImpl extends NodeImpl implements Attr {
 		return getOwnerElement().lookupPrefix(namespaceURI);
 	}
 
+    /** Unsupported. */
     public void setValue(String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
