@@ -80,8 +80,10 @@ public class ForestInputFormat<VALUE> extends
             FileStatus file = it.next();
             String fileName = file.getPath().getName();
             if (!file.isDir() && fileName.equals("Obsolete")) {
-                LOG.warn("Obsolete file found.  Ignoring forest " + 
-                        file.getPath().getParent());
+                LOG.warn(
+                    "Obsolete file found.  The forest is either live or isn't "
+                    + "dismounted cleanly.  Ignoring forest " +            
+                    file.getPath().getParent());
                 return Collections.emptyList();
             }
             if (!file.isDir() || fileName.equals("Journals")
@@ -123,7 +125,9 @@ public class ForestInputFormat<VALUE> extends
                 }
             }
             if (obsolete) {
-                LOG.warn("Obsolete file found.  Ignoring stand " + path);
+                LOG.warn(
+                    "Obsolete file found.  The forest is either live or isn't "
+                    + "dismounted cleanly.  Ignoring stand " + path);
                 break;
             }
             if (treeDataStatus == null) {
