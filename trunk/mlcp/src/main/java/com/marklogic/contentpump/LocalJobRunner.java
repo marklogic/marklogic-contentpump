@@ -476,6 +476,9 @@ public class LocalJobRunner implements ConfigConstants {
     }
 
     public double computeProgress() {
+        if (progress.length == 0) {
+            return (double)1;
+        }
         long result = 0;
         for (AtomicInteger pct : progress) {
             result += pct.longValue();
