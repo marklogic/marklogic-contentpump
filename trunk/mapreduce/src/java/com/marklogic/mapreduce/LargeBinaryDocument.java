@@ -66,6 +66,12 @@ public class LargeBinaryDocument extends BinaryDocument {
         size = tree.binarySize;
         binaryOrigLen = tree.binaryOrigLen;
         this.conf = conf;
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Large binary path: " + path);
+            LOG.trace("offset: " + offset);
+            LOG.trace("size: " + size);
+            LOG.trace("origLen: " + binaryOrigLen);
+        }
     }
     
     public Path getPath() {
