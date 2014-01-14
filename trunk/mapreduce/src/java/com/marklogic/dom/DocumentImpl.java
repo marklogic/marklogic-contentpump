@@ -61,19 +61,25 @@ public class DocumentImpl extends NodeImpl implements Document {
 		super(tree, node);
 	}
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Namespace declaration is cloned as attribute, whose owner document
+     * contain this attribute only.
+     */
     public Node cloneNode(boolean deep) {
         try {
-            //initialize a new doc owner node 
+            // initialize a new doc owner node
             initClonedOwnerDoc();
         } catch (ParserConfigurationException e) {
             throw new RuntimeException("Internal Error:" + e);
         }
         if (deep) {
-            for (NodeImpl n = (NodeImpl)getFirstChild(); n != null; n = (NodeImpl)n.getNextSibling()) {
+            for (NodeImpl n = (NodeImpl) getFirstChild(); n != null; n = (NodeImpl) n
+                .getNextSibling()) {
                 ownerDocCloned.appendChild(n.cloneNode(ownerDocCloned, true));
             }
         }
-
         return ownerDocCloned;
     }
     

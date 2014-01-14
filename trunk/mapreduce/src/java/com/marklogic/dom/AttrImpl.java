@@ -49,6 +49,7 @@ public class AttrImpl extends NodeImpl implements Attr {
     public Node cloneNode(Document doc, boolean deep) {
         Attr attr = doc.createAttributeNS(getNamespaceURI(), getLocalName());
         attr.setValue(getValue());
+        attr.setPrefix(getPrefix());
         return attr;
     }
     

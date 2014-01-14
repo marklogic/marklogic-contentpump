@@ -62,11 +62,14 @@ public class ElementImpl extends NodeImpl implements Element {
 
         for (int i = 0; i < attributes.getLength(); i++) {
             Attr attr = (Attr) attributes.item(i);
-            if(attr instanceof AttrImpl) {
-                elem.setAttributeNode((Attr)((AttrImpl)attr).cloneNode(doc, deep));
+            if (attr instanceof AttrImpl) {
+                elem.setAttributeNode((Attr) ((AttrImpl) attr).cloneNode(doc,
+                    deep));
             } else {
-                //ns decl, stored as Java DOM Attr
-                Attr clonedAttr = doc.createAttribute(attr.getName());
+                // ns decl, stored as Java DOM Attr
+            	// uri of xmlns is "http://www.w3.org/2000/xmlns/"
+                Attr clonedAttr = doc.createAttributeNS(
+                    "http://www.w3.org/2000/xmlns/", attr.getName());
                 clonedAttr.setValue(attr.getValue());
                 elem.setAttributeNode(clonedAttr);
             }

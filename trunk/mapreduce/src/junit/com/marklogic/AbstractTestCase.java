@@ -4,7 +4,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import junit.framework.TestCase;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -15,15 +19,16 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import junit.framework.TestCase;
-
 @RunWith(value = Parameterized.class)
 public class AbstractTestCase extends TestCase {
     String testData ;
     String forest;
     String stand;
     int num;
-    
+    static Set<String> expectedMissingNSDecl = new HashSet<String>();
+    static {
+        expectedMissingNSDecl.add("acronym@xmlns=");
+    }
     AbstractTestCase(ForestData fd) {
         testData = fd.getPath();
         forest = fd.getName();
@@ -86,6 +91,27 @@ public class AbstractTestCase extends TestCase {
         }
     }
     
+    protected void walkDOMAttr (NodeList nodes, Set<String> sb) {
+        for(int i=0; i<nodes.getLength(); i++) {
+            Node n = nodes.item(i);
+            if (n.getNodeType() == Node.ELEMENT_NODE ) {
+                System.out.println(n.getNodeName());
+            }
+            if (n.hasAttributes() ) {
+                NamedNodeMap nnMap = n.getAttributes();
+                for (int j = 0; j < nnMap.getLength(); j++) {
+                    Attr attr = (Attr) nnMap.item(j);
+                    String tmp = n.getNodeName() +  "@" + attr.getName() + "=" + attr.getValue().replaceAll("\\s+", "");
+                    System.out.println(tmp);
+                    sb.add(tmp);
+                 }
+            }
+            if(n.hasChildNodes()) {
+                walkDOMAttr(n.getChildNodes(), sb);
+            }
+        }
+    }
+    
     protected void walkDOMElem (NodeList nodes, StringBuilder sb) {
         for(int i=0; i<nodes.getLength(); i++) {
             Node n = nodes.item(i);
@@ -93,15 +119,15 @@ public class AbstractTestCase extends TestCase {
                 sb.append(n.getNodeName()).append("#"); 
                 Attr attr = ((Element)n).getAttributeNode("id");
                 if(attr!=null) {
-                    sb.append("@").append(attr.getName()).append("=").append(attr.getValue());
-                    sb.append("@id=").append(((Element)n).getAttribute("id"));
+                    sb.append("@").append(attr.getName()).append("=").append(attr.getValue().replaceAll("\\s+", ""));
+                    sb.append("@id=").append(((Element)n).getAttribute("id").replaceAll("\\s+", ""));
                     sb.append("#isSpecified:").append(attr.getSpecified());
                 }
 
             } else if(Utils.isWhitespaceNode(n)){
                 continue;
             } else {
-                sb.append(n.getNodeValue());
+                sb.append(n.getNodeValue().trim());
             }
             sb.append("\n");
             if(n.hasChildNodes()) {
@@ -115,6 +141,10 @@ public class AbstractTestCase extends TestCase {
         
         Node child = nodes.item(0);
         while (child != null) {
+            if(Utils.isWhitespaceNode(child)) {
+                child = child.getNextSibling();
+                continue;
+            }
             sb.append(child.getNodeType()).append("#");
             sb.append(child.getNodeName()).append("#");
             sb.append(child.getNodeValue()).append("#");
@@ -144,6 +174,10 @@ public class AbstractTestCase extends TestCase {
         
         Node child = nodes.item(nodes.getLength() - 1);
         while (child != null) {
+            if(Utils.isWhitespaceNode(child)) {
+                child = child.getPreviousSibling();
+                continue;
+            }
             sb.append(child.getNodeType()).append("#");
             sb.append(child.getNodeName()).append("#");
             sb.append(child.getNodeValue()).append("#");
@@ -157,8 +191,9 @@ public class AbstractTestCase extends TestCase {
     protected void walkDOMTextContent (NodeList nodes, StringBuilder sb) {
         for(int i=0; i<nodes.getLength(); i++) {
             Node n = nodes.item(i);
+            if(Utils.isWhitespaceNode(n)) continue;
             sb.append(n.getNodeType()).append("#");
-            sb.append(n.getTextContent()).append("#");
+            sb.append(n.getTextContent().replaceAll("\\s+", "")).append("#");
             sb.append("\n");
             if(n.hasChildNodes()) {
                 walkDOMTextContent(n.getChildNodes(), sb);
