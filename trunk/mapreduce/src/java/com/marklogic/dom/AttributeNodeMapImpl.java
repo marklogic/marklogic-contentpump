@@ -29,6 +29,8 @@ import com.marklogic.tree.ExpandedTree;
 public class AttributeNodeMapImpl implements NamedNodeMap {
 	protected ElementImpl element;
 	protected Attr[] nsDecl;
+	private static DocumentBuilderFactory dbf = null;
+	
 	public AttributeNodeMapImpl(ElementImpl element) {
 		this.element = element;
 	}
@@ -70,12 +72,24 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 		return null;
 	}
 
+	private static synchronized DocumentBuilderFactory getDocumentBuilderFactory() {
+	    if(dbf == null) {
+	        dbf = DocumentBuilderFactory.newInstance();
+	        dbf.setNamespaceAware(true);
+	    }
+	    return dbf;
+	}
+	
     protected Document getClonedOwnerDoc () throws ParserConfigurationException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        return dbf.newDocumentBuilder().newDocument();
+        return getDocumentBuilderFactory().newDocumentBuilder().newDocument();
     }
     
+    /**
+     * Returns the indexth item in the map. If index is greater than or equal to
+     * the number of nodes in this map, this returns null; if the item returned
+     * is a namespace declaration, it is represented as an attribute whose owner
+     * document is a document containing the attribute only.
+     */
 	public Node item(int index) {
 	    try {
             return item(index, null);
@@ -84,7 +98,8 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         }
 	}
 	
-	public Node item(int index, Document ownerDoc) throws ParserConfigurationException {
+    public Node item(int index, Document ownerDoc)
+        throws ParserConfigurationException {
         int numAttr = getNumAttr();
         ExpandedTree tree = element.tree;
         if (index < numAttr) {
@@ -98,12 +113,13 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
             int nsIdx = index - numAttr;
             if (nsDecl != null) return nsDecl[nsIdx];
             
-            // TODO create owner doc?
+            // create owner doc
             if (ownerDoc == null) {
                 ownerDoc = getClonedOwnerDoc();
             }
 
             nsDecl = new Attr[element.getNumNSDecl()];
+            //ordinal of the element node
             long minimal = tree.nodeOrdinal[element.node];
             int count = 0;
             for (int ns = element.getNSNodeID(minimal, minimal); ns >= 0

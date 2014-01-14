@@ -81,7 +81,12 @@ public abstract class NodeImpl implements Node {
         throw new UnsupportedOperationException();
     }
     
-    // override in subclasses
+    /**
+     * Given a owner document, clone the node
+     * @param doc owner document
+     * @param deep the flag to indicate deep clone or not
+     * @return
+     */
     public Node cloneNode(Document doc, boolean deep) {
         return null;
     }
@@ -233,11 +238,9 @@ public abstract class NodeImpl implements Node {
         }
     }
 
-    // TODO - is this allowed to throw NO_MODIFICATION_ALLOWED_ERR?
     /** Unsupported. */
     public Object getUserData(String key) {
-        assert (false);
-        return null;
+        throw new DOMException(DOMException.NOT_SUPPORTED_ERR, null);
     }
 
 
