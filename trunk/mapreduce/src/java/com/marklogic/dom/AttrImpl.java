@@ -17,6 +17,8 @@ package com.marklogic.dom;
 
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -41,7 +43,7 @@ import com.marklogic.tree.ExpandedTree;
  * @author jchen
  */
 public class AttrImpl extends NodeImpl implements Attr {
-
+    public static final Log LOG = LogFactory.getLog(AttrImpl.class);
     public AttrImpl(ExpandedTree tree, int node) {
         super(tree, node);
     }

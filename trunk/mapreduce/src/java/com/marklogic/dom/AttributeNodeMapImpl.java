@@ -18,6 +18,8 @@ package com.marklogic.dom;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
@@ -27,6 +29,7 @@ import org.w3c.dom.Node;
 import com.marklogic.tree.ExpandedTree;
 
 public class AttributeNodeMapImpl implements NamedNodeMap {
+    public static final Log LOG = LogFactory.getLog(AttributeNodeMapImpl.class);
 	protected ElementImpl element;
 	protected Attr[] nsDecl;
 	private static DocumentBuilderFactory dbf = null;
@@ -36,6 +39,10 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 	}
 	
 	public int getLength() {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(element.getNodeName() + "@NumAttr:" + getNumAttr()
+                + " NumNSDecl:" + element.getNumNSDecl());
+        }
 		return getNumAttr() + element.getNumNSDecl();
 	}
 	
@@ -48,9 +55,10 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
     }
 
 	public Node getNamedItem(String name) {
-        if (NodeImpl.trace)
-            System.out.println(this.getClass().getSimpleName()
-                + ".getNamedItem(" + element.node + ", " + name + ")");
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(this.getClass().getSimpleName() + ".getNamedItem("
+                + element.node + ", " + name + ")");
+        }
 		if (name == null) return null;
     	for (int i = 0; i < getLength(); i++)
 			if (name.equals(item(i).getNodeName())) return item(i);
@@ -59,10 +67,11 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
 
 	public Node getNamedItemNS(String namespaceURI, String localName)
 			throws DOMException {
-        if (NodeImpl.trace)
-            System.out.println(this.getClass().getSimpleName()
+	    if (LOG.isTraceEnabled()) {
+            LOG.trace(this.getClass().getSimpleName()
                 + ".getNamedItemNS(" + element.node + ", " + namespaceURI
                 + ", " + localName + ")");
+	    }
     	if (localName == null) return null;
     	for (int i = 0; i < getLength(); i++) {
     		if ((namespaceURI == null) != (item(i).getNamespaceURI() == null)) continue;
@@ -103,14 +112,16 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         int numAttr = getNumAttr();
         ExpandedTree tree = element.tree;
         if (index < numAttr) {
-            if (NodeImpl.trace)
-                System.out.println(this.getClass().getSimpleName() + ".item("
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(this.getClass().getSimpleName() + ".item("
                     + element.node + ", " + index + ")");
+            }
             return tree
                 .node(tree.elemNodeAttrNodeRepID[tree.nodeRepID[element.node]]
                     + index);
         } else {
             int nsIdx = index - numAttr;
+            //if nsDecl is initialized, return it
             if (nsDecl != null) return nsDecl[nsIdx];
             
             // create owner doc
@@ -128,13 +139,16 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
                 String uri = tree.atomString(tree.nsNodeUriAtom[ns]);
                 String prefix = tree.atomString(tree.nsNodePrefixAtom[ns]);
                 Attr attr = null;
+                String name = null;
                 try {
                     if (prefix != null && "".equals(prefix) == false) {
-                        attr = ownerDoc.createAttribute("xmlns:" + prefix);
+                        name = "xmlns:" + prefix;
                     } else {
-                        attr = ownerDoc.createAttribute("xmlns");
+                        name = "xmlns";
                     }
-                    attr.setNodeValue(uri);
+                    attr = ownerDoc.createAttributeNS(
+                        "http://www.w3.org/2000/xmlns/", name);
+                    attr.setValue(uri);
                 } catch (DOMException e) {
                     throw new RuntimeException(e);
                 }
