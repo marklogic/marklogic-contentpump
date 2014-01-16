@@ -71,6 +71,7 @@
   <!-- Configurable flags that will affect how targets run -->
   <property name="junit.output.format" value="plain"/>  <!-- plain | brief | xml -->
   <property name="junit.output.dir" value="${buildtmp}/junit.test.output"/>
+  <property name="log4j" value="file:src/conf/log4j.properties"/>
   <property name="compile.debug.symbols.flag" value="true"/>  <!-- on | off -->
   <property name="junit.halt.on.error" value="on"/>    <!-- on | off -->
   <property name="junit.halt.on.failure" value="off"/>    <!-- on | off -->
@@ -152,11 +153,12 @@
 
   <path id="mapreduce.testcases.classpath">
     <pathelement path="${compiled.classes.dir}"/>
-      <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
-      <pathelement path="${jarlib}/commons-configuration-1.6.jar"/>
-      <pathelement path="${jarlib}/commons-lang-2.5.jar"/>
-      <pathelement path="${jarlib}/hadoop-core-1.2.0.jar"/>
+    <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
+    <pathelement path="${jarlib}/commons-configuration-1.6.jar"/>
+    <pathelement path="${jarlib}/commons-lang-2.5.jar"/>
+    <pathelement path="${jarlib}/hadoop-core-1.2.0.jar"/>
   	<pathelement path="${jarlib}/hamcrest-core-1.3.jar"/>
+  	<pathelement path="${jarlib}/log4j-1.2.17.jar"/>
   </path>
   
   <target name="compile.mapreduce" depends="init">
@@ -237,8 +239,9 @@
     <mkdir dir="${junit.output.dir}"/>
     <junit printsummary="on" showoutput="true" 
            haltonerror="${junit.halt.on.error}" haltonfailure="${junit.halt.on.failure}">
+      <sysproperty key="log4j.configuration" value="${log4j}"/>
       <classpath refid="mapreduce.testcases.classpath"/>
-      <!-- two formatters, one to screen, one to file 
+      <!-- two formatters, one to screen, one to file  
       <formatter type="${junit.output.format}" usefile="false"/>-->
       <formatter type="${junit.output.format}" usefile="true"/>
       <batchtest fork="yes" todir="${junit.output.dir}">
@@ -355,6 +358,7 @@
     <copy todir="${mapreduce.stage.conf}">
       <fileset dir="${conf.dir}">
         <include name="*.xml"/>
+      	<include name="log4j.properties"/>
         <exclude name="marklogic-wiki.xml"/>
       </fileset>
     </copy>

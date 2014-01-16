@@ -241,7 +241,7 @@ public class CompressedTreeDecoder {
         }
         rep.numLinkNodeReps = decoder.decodeUnsigned() * 4 / 3;
         if (LOG.isTraceEnabled())
-            System.out.println(String.format("numLinkNodeReps %d", 
+            LOG.trace(String.format("numLinkNodeReps %d", 
                     rep.numLinkNodeReps));
         if (rep.numLinkNodeReps > 0) {
             rep.linkNodeKey = new long[rep.numLinkNodeReps];

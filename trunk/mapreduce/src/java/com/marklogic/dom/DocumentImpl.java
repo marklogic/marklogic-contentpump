@@ -18,6 +18,8 @@ package com.marklogic.dom;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Attr;
 import org.w3c.dom.CDATASection;
 import org.w3c.dom.Comment;
@@ -51,21 +53,32 @@ import com.marklogic.tree.ExpandedTree;
  * @author jchen
  */
 public class DocumentImpl extends NodeImpl implements Document {
+    public static final Log LOG = LogFactory.getLog(DocumentImpl.class);
     private Element documentElement;
     /**
      * owner document for cloneNode
      */
     private Document ownerDocCloned;
     
+    private static DocumentBuilderFactory dbf = null;
+    
 	public DocumentImpl(ExpandedTree tree, int node) {
 		super(tree, node);
 	}
 
+    private static synchronized DocumentBuilderFactory getDocumentBuilderFactory() {
+        if (dbf == null) {
+            dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+        }
+        return dbf;
+    }
+    
     /**
      * {@inheritDoc}
      * <p>
      * Namespace declaration is cloned as attribute, whose owner document
-     * contain this attribute only.
+     * contains this attribute only.
      */
     public Node cloneNode(boolean deep) {
         try {
@@ -83,10 +96,9 @@ public class DocumentImpl extends NodeImpl implements Document {
         return ownerDocCloned;
     }
     
-    protected void initClonedOwnerDoc () throws ParserConfigurationException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        ownerDocCloned = dbf.newDocumentBuilder().newDocument();
+    protected void initClonedOwnerDoc() throws ParserConfigurationException {
+        ownerDocCloned = getDocumentBuilderFactory().newDocumentBuilder()
+            .newDocument();
     }
 	
 

@@ -17,6 +17,8 @@ package com.marklogic.dom;
 
 import java.util.ArrayList;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -42,8 +44,8 @@ import com.marklogic.tree.NodeKind;
  * @author jchen
  */
 public abstract class NodeImpl implements Node {
-
-    public static final boolean trace = false;
+    public static final Log LOG = LogFactory.getLog(NodeImpl.class);
+//    public static final boolean trace = false;
     
     private static final NodeList emptyNodeList = new NodeList() {
     
@@ -77,6 +79,11 @@ public abstract class NodeImpl implements Node {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
+    /**
+     * CloneNode is only supported for document node. 
+     * <p>
+     * {@inheritDoc}
+     */
     public Node cloneNode(boolean deep) {
         throw new UnsupportedOperationException();
     }
