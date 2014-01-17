@@ -476,6 +476,73 @@ public class TestDocumentImpl extends AbstractTestCase {
         System.out.println(actual.toString());
         assertEquals(expected.toString(), actual.toString());
     }
+    
+    protected String getPostition(short comp) {
+    	if (comp == 0x01) return "DOCUMENT_POSITION_DISCONNECTED";
+    	if (comp == 0x02) return "DOCUMENT_POSITION_PRECEDING";
+    	if (comp == 0x04) return "DOCUMENT_POSITION_FOLLOWING";
+    	if (comp == 10) return "OCUMENT_POSITION_CONTAINS";
+    	if (comp == 20) return "OCUMENT_POSITION_CONTAINED_BY";
+    	if (comp == 0x20) return "DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC";
+    	return "INVALID";
+    }
+    
+    @Test
+    public void testCompareDocumentPosition() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+                new File(testData + System.getProperty("file.separator")
+                		+ forest, stand), false);
+            assertEquals(num, trees.size());
+
+            StringBuilder expected = new StringBuilder();
+            StringBuilder actual = new StringBuilder();
+            for (int i = 0; i < trees.size(); i++) {
+                ExpandedTree t = trees.get(i);
+                String uri = t.getDocumentURI();
+           	
+            	expected.append("#URI##").append(uri).append("#\n");
+            	actual.append("#URI##").append(uri).append("#\n");
+            	
+                Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            	if (doc == null) continue;
+                NodeList children = doc.getChildNodes();
+                if (children.getLength() >= 2) {
+                	expected.append(getPostition(children.item(0).compareDocumentPosition(children.item(1)))).append("#\n");
+                	expected.append(getPostition(children.item(1).compareDocumentPosition(children.item(0)))).append("#\n");
+                }
+                for (int j=0; j < children.getLength(); j++) {
+                	if (children.item(j).hasChildNodes()) {
+                		Node child = children.item(j).getChildNodes().item(0);
+                		expected.append("#NODE1#").append(child.getNodeName());
+                		expected.append("#NODE2#").append(children.item(0).getNodeName()).append("#\n");
+                    	expected.append(getPostition(children.item(0).compareDocumentPosition(child))).append("#\n");
+                    	expected.append(getPostition(child.compareDocumentPosition(children.item(0)))).append("#\n");
+                	}
+                }                 	
+                
+                DocumentImpl d = new DocumentImpl(t, 0);
+                children = d.getChildNodes();
+                if (children.getLength() >= 2) {
+                	actual.append(getPostition(children.item(0).compareDocumentPosition(children.item(1)))).append("#\n");
+                	actual.append(getPostition(children.item(1).compareDocumentPosition(children.item(0)))).append("#\n");
+                }
+                for (int j=0; j < children.getLength(); j++) {
+                	if (children.item(j).hasChildNodes()) {
+                		Node child = children.item(j).getChildNodes().item(0);
+                		actual.append("#NODE1#").append(child.getNodeName());
+                		actual.append("#NODE2#").append(children.item(0).getNodeName()).append("#\n");;
+                		actual.append(getPostition(children.item(0).compareDocumentPosition(child))).append("#\n");
+                		actual.append(getPostition(child.compareDocumentPosition(children.item(0)))).append("#\n");
+                	}
+                }     
+            	expected.append("\n");
+            	actual.append("\n");
+                
+            }
+            System.out.println(expected.toString());
+            System.out.println(actual.toString());
+            assertEquals(expected.toString(), actual.toString());
+    }
    
     @Test
     public void testNodeNameChildNodes() throws IOException {
