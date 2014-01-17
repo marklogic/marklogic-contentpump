@@ -158,6 +158,7 @@ public class AbstractTestCase extends TestCase {
     protected void walkDOMParent (NodeList nodes, StringBuilder sb) {
         for(int i=0; i<nodes.getLength(); i++) {
             Node child = nodes.item(i);
+            if(Utils.isWhitespaceNode(child)) continue;
             sb.append(child.getNodeType()).append("#");
             sb.append(child.getNodeName()).append("'s parent is ");
             sb.append(child.getParentNode().getNodeName()).append("#");
