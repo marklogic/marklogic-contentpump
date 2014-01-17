@@ -898,4 +898,39 @@ public class TestDocumentImpl extends AbstractTestCase {
     assertEquals(actual.toString(), clone.toString());
     assertEquals(expected.toString(), clone.toString());
     }
+    
+    @Test
+    public void testIsDefaultNS() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+            new File(testData + System.getProperty("file.separator")
+                    + forest, stand), false);
+        assertEquals(num, trees.size());
+
+    StringBuilder expected = new StringBuilder();
+    StringBuilder actual = new StringBuilder();
+    String ns[] = {"http://www.w3.org/TR/html4/", "urn:loc.gov:books"};
+        for (int ni = 0; ni < ns.length; ni++) {
+            for (int i = 0; i < trees.size(); i++) {
+                ExpandedTree t = trees.get(i);
+                String uri = t.getDocumentURI();
+                expected.append(uri).append("#");
+                expected.append(ns[ni]).append("@isDefaultNS:");
+                Document doc = Utils.readXMLasDOMDocument(new File(testData,
+                    uri));
+                if (doc == null)
+                    continue;
+                expected.append(doc.isDefaultNamespace(ns[ni])).append("\n");
+
+                DocumentImpl d = new DocumentImpl(t, 0);
+                actual.append(uri).append("#");
+                actual.append(ns[ni]).append("@isDefaultNS:");
+                actual.append(d.isDefaultNamespace(ns[ni])).append("\n");
+            }
+            System.out.println(expected);
+            System.out.println("\n");
+            System.out.println(actual);
+            System.out.println("\n");
+        }
+    
+    }
 }
