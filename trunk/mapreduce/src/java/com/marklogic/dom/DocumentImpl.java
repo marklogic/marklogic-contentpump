@@ -251,8 +251,14 @@ public class DocumentImpl extends NodeImpl implements Document {
 	    }
 		return documentElement;
 	}
+	
+	@Override
+    public boolean isDefaultNamespace(String namespaceURI) {
+        Element e = getDocumentElement();
+        return e != null ? e.isDefaultNamespace(namespaceURI) : false;
+    }
 
-	public String getDocumentURI() {
+    public String getDocumentURI() {
 		return tree.getDocumentURI();
 	}
 

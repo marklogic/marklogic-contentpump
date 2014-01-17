@@ -266,11 +266,23 @@ public abstract class NodeImpl implements Node {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
-    // TODO - override in subclasses?
-
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Not supported for namespace declaration.
+     * <p>
+     * Overrided by DocumentImpl and ElementImpl
+     */
     public boolean isDefaultNamespace(String namespaceURI) {
-        assert (false);
-        return false;
+        int type = getNodeType();
+        if (type == NodeKind.ATTR) {
+            if (this instanceof AttrImpl == false) {
+                // ns decl
+                throw new UnsupportedOperationException();
+            }
+        }
+        Node p = getParentNode();
+        return p.isDefaultNamespace(namespaceURI);
     }
 
     public boolean isEqualNode(Node other) {

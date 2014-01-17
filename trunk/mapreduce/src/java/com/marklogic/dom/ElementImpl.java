@@ -29,6 +29,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.TypeInfo;
 
 import com.marklogic.tree.ExpandedTree;
+import com.marklogic.tree.NodeKind;
 
 /**
  * A read-only W3C DOM Node implementation of MarkLogic's
@@ -131,7 +132,41 @@ public class ElementImpl extends NodeImpl implements Element {
 		};
 	}
 	
-	public NodeList getElementsByTagNameNS(String namespaceURI, String name) {
+    @Override
+    public boolean isDefaultNamespace(String namespaceURI) {
+        String namespace = this.getNamespaceURI();
+        String prefix = this.getPrefix();
+
+        if (prefix == null || prefix.length() == 0) {
+            if (namespaceURI == null) {
+                return (namespace == namespaceURI);
+            }
+            return namespaceURI.equals(namespace);
+        }
+        if (this.hasAttributes()) {
+            Attr attr = this.getAttributeNodeNS(
+                "http://www.w3.org/2000/xmlns/", "xmlns");
+            if (attr != null) {
+                String value = attr.getNodeValue();
+                if (namespaceURI == null) {
+                    return (namespace == value);
+                }
+                return namespaceURI.equals(value);
+            }
+        }
+
+        Node ancestor = getParentNode();
+        if (ancestor != null) {
+            short type = ancestor.getNodeType();
+            if (type == NodeKind.ELEM) {
+                return ancestor.isDefaultNamespace(namespaceURI);
+            }
+            // otherwise, current node is root already
+        }
+        return false;
+    }
+
+    public NodeList getElementsByTagNameNS(String namespaceURI, String name) {
 		return getElementsByTagNameNSOrNodeName(namespaceURI,name,false);
 	}
 
