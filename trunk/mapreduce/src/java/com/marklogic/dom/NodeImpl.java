@@ -37,8 +37,7 @@ import com.marklogic.tree.NodeKind;
  * <p>
  * This interface is effectively read-only: Setters and update methods 
  * inherited from <code>org.w3c.Node</code> are not supported and will raise
- * an exception if called. To create a modifiable copy of a node, use
- * {@link #cloneNode}.
+ * an exception if called.
  * </p>
  * 
  * @author jchen
