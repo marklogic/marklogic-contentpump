@@ -255,7 +255,7 @@ public class ElementImpl extends NodeImpl implements Element {
 
 	@Override
 	public boolean hasChildNodes() {
-		return (tree.elemNodeChildNodeRepID[tree.nodeRepID[node]] != Integer.MAX_VALUE);
+		return getChildNodes().getLength() > 0 ;
 	}
 
 	// The following page gives algorithm for the following functions

@@ -104,19 +104,19 @@ public abstract class NodeImpl implements Node {
             if (this.tree == otherNode.tree) {
                 if (tree.nodeOrdinal[node] > tree.nodeOrdinal[otherNode.node]) {
                 	int ancestor = tree.nodeParentNodeRepID[node];
-                    while (ancestor >= 0 && 
+                    while (ancestor!= Integer.MAX_VALUE && 
                     	   tree.nodeOrdinal[ancestor] >= tree.nodeOrdinal[otherNode.node]) {
                     	if (ancestor == otherNode.node) 
-                    		return DOCUMENT_POSITION_CONTAINS;
+                    		return DOCUMENT_POSITION_CONTAINS | DOCUMENT_POSITION_PRECEDING;
                     	ancestor = tree.nodeParentNodeRepID[ancestor];
                     }
                     return DOCUMENT_POSITION_PRECEDING;
                 } else {
                 	int ancestor = tree.nodeParentNodeRepID[otherNode.node];
-                    while (ancestor >= 0 && 
-                    	   tree.nodeOrdinal[ancestor] >= tree.nodeOrdinal[otherNode.node]) {
+                    while (ancestor != Integer.MAX_VALUE && 
+                    	   tree.nodeOrdinal[ancestor] <= tree.nodeOrdinal[otherNode.node]) {
                     	if (ancestor == node) 
-                    		return DOCUMENT_POSITION_CONTAINED_BY;
+                    		return DOCUMENT_POSITION_CONTAINED_BY | DOCUMENT_POSITION_FOLLOWING;
                     	ancestor = tree.nodeParentNodeRepID[ancestor];
                     }
                     return DOCUMENT_POSITION_FOLLOWING;
@@ -446,16 +446,16 @@ public abstract class NodeImpl implements Node {
 					}
 					else {
 						// do nothing if only one of the two is null
-						if (ns != null && ns.equals("*") && tagname.equals("*")){
+						if ("*".equals(ns) && "*".equals(tagname)){
 							elementList.add(curr); continue;
 						}
-						if (curr.getNamespaceURI() == null ^ ns == null) continue;
 						if (ns != null) {
 							if ((ns.equals("*") || ns.equals(curr.getNamespaceURI())) &&
 								(tagname.equals("*") || tagname.equals(curr.getLocalName())))
 								elementList.add(curr);
 						}
-						else if (curr.getNamespaceURI() == null) elementList.add(curr);
+						else if (tagname.equals("*") || tagname.equals(curr.getLocalName()))
+								elementList.add(curr);
 					}
 				}
 				done = true;
