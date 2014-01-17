@@ -209,7 +209,7 @@ public class TestDocumentImpl extends AbstractTestCase {
               int tok = nodename.indexOf(':'); 
               String prefix = (tok == -1)?null:nodename.substring(0, tok);
               String namespace = (tok == -1)?null:curr.lookupNamespaceURI(prefix);
-              String localname = (tok == -1)?nodename:nodename.substring(tok);
+              String localname = (tok == -1)?nodename:nodename.substring(tok+1);
               expected.append("#LOCALNAME##").append(localname).append("#").append("\n");
               expected.append("#URI##").append(namespace).append("#").append("\n");
               expected.append("\n");
