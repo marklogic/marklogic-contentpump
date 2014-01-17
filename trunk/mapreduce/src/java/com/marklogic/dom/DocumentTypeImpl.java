@@ -20,6 +20,13 @@ import org.w3c.dom.NamedNodeMap;
 
 import com.marklogic.tree.ExpandedTree;
 
+/**
+ * Document Type node is not part of XDM. DocumentTypeImpl is simply a dummy
+ * class which does nothing but provide a constructor.
+ * 
+ * @author ali
+ * 
+ */
 public class DocumentTypeImpl extends NodeImpl implements DocumentType {
     
     DocumentTypeImpl(ExpandedTree tree, int node) {
