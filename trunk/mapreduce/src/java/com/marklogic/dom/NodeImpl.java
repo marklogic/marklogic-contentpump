@@ -81,6 +81,7 @@ public abstract class NodeImpl implements Node {
      * CloneNode is only supported for document node. 
      * <p>
      * {@inheritDoc}
+     * </p>
      */
     public Node cloneNode(boolean deep) {
         throw new UnsupportedOperationException();
@@ -266,8 +267,8 @@ public abstract class NodeImpl implements Node {
      * {@inheritDoc}
      * <p>
      * Not supported for namespace declaration.
-     * <p>
      * Overrided by DocumentImpl and ElementImpl
+     * </p>
      */
     public boolean isDefaultNamespace(String namespaceURI) {
         int type = getNodeType();
