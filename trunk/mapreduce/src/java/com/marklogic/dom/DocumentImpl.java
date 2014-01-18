@@ -79,6 +79,7 @@ public class DocumentImpl extends NodeImpl implements Document {
      * <p>
      * Namespace declaration is cloned as attribute, whose owner document
      * contains this attribute only.
+     * </p>
      */
     public Node cloneNode(boolean deep) {
         try {
