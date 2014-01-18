@@ -116,6 +116,7 @@ public class AttrImpl extends NodeImpl implements Attr {
 	    return (ns >= 0) ? tree.atomString(ns) : null;
 	}
 	
+	/** Unsupported. */
     public TypeInfo getSchemaTypeInfo() {
         return null;
     }
@@ -128,6 +129,7 @@ public class AttrImpl extends NodeImpl implements Attr {
     	return tree.getText(tree.attrNodeTextRepID[tree.nodeRepID[node]]);
     }
 
+    /** Unsupported. */
     public boolean isId() {
         return false;
     }

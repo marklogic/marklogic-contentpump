@@ -55,13 +55,13 @@ public class TextImpl extends CharacterDataImpl implements Text {
         return getNodeValue();
     }
 
+	/** Unsupported. */
 	public String getWholeText() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public boolean isElementContentWhitespace() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
