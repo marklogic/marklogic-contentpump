@@ -165,76 +165,76 @@ public class DocumentImpl extends NodeImpl implements Document {
 		}
 	}
 	
-    // TODO 
-    public boolean isEqualNode(Node other) {
-//    	For two DocumentType nodes to be equal, the following conditions must also be satisfied:
-//    		The following string attributes are equal: publicId, systemId, internalSubset.
-//    		The entities NamedNodeMaps are equal.
-//    		The notations NamedNodeMaps are equal.
-        assert (false);
-        return false;
-    }
-
+	/** Unsupported. */
 	public Node adoptNode(Node arg0) throws DOMException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public Attr createAttribute(String arg0) throws DOMException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public Attr createAttributeNS(String arg0, String arg1) throws DOMException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public CDATASection createCDATASection(String arg0) throws DOMException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public Comment createComment(String arg0) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public DocumentFragment createDocumentFragment() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public Element createElement(String arg0) throws DOMException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public Element createElementNS(String arg0, String arg1)
 			throws DOMException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public EntityReference createEntityReference(String arg0)
 			throws DOMException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public ProcessingInstruction createProcessingInstruction(String arg0,
 			String arg1) throws DOMException {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public Text createTextNode(String arg0) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public DocumentType getDoctype() {
-		// TODO Auto-generated method stub
 		return new DocumentTypeImpl(tree, node);
 	}
 
@@ -262,13 +262,13 @@ public class DocumentImpl extends NodeImpl implements Document {
 		return tree.getDocumentURI();
 	}
 
+    /** Unsupported. */
 	public DOMConfiguration getDomConfig() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public Element getElementById(String arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -280,25 +280,27 @@ public class DocumentImpl extends NodeImpl implements Document {
 		return getElementsByTagNameNSOrNodeName(null,localName,true);
 	}
 
+	/** Unsupported. */
 	public DOMImplementation getImplementation() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public String getInputEncoding() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/** Unsupported. */
 	public boolean getStrictErrorChecking() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
+	/** Unsupported. */
 	public String getXmlEncoding() {
 		return null;
 	}
 
+	/** Unsupported. */
 	public boolean getXmlStandalone() {
 		return true;
 	}
@@ -307,8 +309,8 @@ public class DocumentImpl extends NodeImpl implements Document {
 		return "1.0";
 	}
 
+	/** Unsupported. */
 	public Node importNode(Node arg0, boolean arg1) throws DOMException {
-		// TODO Auto-generated method stub
 		return null;
 	}
 	

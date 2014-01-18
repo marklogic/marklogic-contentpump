@@ -163,19 +163,23 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         }
 	}
 
+    /** Unsupported. */
 	public Node removeNamedItem(String name) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+	/** Unsupported. */
 	public Node removeNamedItemNS(String namespaceURI, String localName)
 			throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+	/** Unsupported. */
 	public Node setNamedItem(Node arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}
 
+	/** Unsupported. */
 	public Node setNamedItemNS(Node arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
 	}

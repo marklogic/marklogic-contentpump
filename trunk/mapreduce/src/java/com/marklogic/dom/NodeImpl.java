@@ -44,7 +44,6 @@ import com.marklogic.tree.NodeKind;
  */
 public abstract class NodeImpl implements Node {
     public static final Log LOG = LogFactory.getLog(NodeImpl.class);
-//    public static final boolean trace = false;
     
     private static final NodeList emptyNodeList = new NodeList() {
     
@@ -133,7 +132,6 @@ public abstract class NodeImpl implements Node {
         return null;
     }
 
-    // TODO
     public String getBaseURI() {
         return tree.getDocumentURI();
     }
@@ -142,12 +140,11 @@ public abstract class NodeImpl implements Node {
         return emptyNodeList;
     }
 
-    // TODO
+    /** Unsupported. */
     public Object getFeature(String feature, String version) {
         assert (false);
         return this;
     }
-
 
     public Node getFirstChild() {
         return null;
