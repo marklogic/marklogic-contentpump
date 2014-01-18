@@ -97,18 +97,14 @@ public class ElementImpl extends NodeImpl implements Element {
 	    		return (AttrImpl)attributes.getNamedItem(name);
 	}
 
-	// TODO
 	public Attr getAttributeNodeNS(String namespaceURI, String localName)
 			throws DOMException {
-		assert (false);
-		return null;
+		return (AttrImpl)getAttributes().getNamedItemNS(namespaceURI,localName);
 	}
 
-	// TODO
 	public String getAttributeNS(String namespaceURI, String localName)
 			throws DOMException {
-		assert (false);
-		return null;
+		return ((AttrImpl)getAttributes().getNamedItemNS(namespaceURI,localName)).getValue();
 	}
 
 	@Override
@@ -270,17 +266,13 @@ public class ElementImpl extends NodeImpl implements Element {
 				.atomString(tree.nodeNameNameAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]]);
 	}
 
-	// TODO
 	public boolean hasAttribute(String name) {
-		assert (false);
-		return false;
+		return (getAttributes().getNamedItem(name) != null);
 	}
 
-	// TODO
 	public boolean hasAttributeNS(String namespaceURI, String localName)
 			throws DOMException {
-		assert (false);
-		return false;
+		return (getAttributes().getNamedItemNS(namespaceURI,localName) != null);
 	}
 
 	public boolean hasAttributes() {

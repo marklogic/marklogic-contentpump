@@ -581,6 +581,12 @@ public class TestDocumentImpl extends AbstractTestCase {
                         	expected.append("#PREFIX#").append(pres[p]).append("#NS#").
            						append(nslookup).append("\n");
                         }
+                        for (int p=0; p<nss.length; p++) {
+                        	String nslookup = nl.item(k).lookupPrefix(nss[p]);
+                        	if (null == nslookup) continue;
+                        	expected.append("#NS#").append(pres[p]).append("#PREFIX#").
+           						append(nslookup).append("\n");
+                        }
             		}
             	}
             	
@@ -600,6 +606,12 @@ public class TestDocumentImpl extends AbstractTestCase {
                         	String nslookup = nl.item(k).lookupNamespaceURI(pres[p]);
                         	if (null == nslookup) continue;
                         	actual.append("#PREFIX#").append(pres[p]).append("#NS#").
+           						append(nslookup).append("\n");
+                        }
+                        for (int p=0; p<nss.length; p++) {
+                        	String nslookup = nl.item(k).lookupPrefix(nss[p]);
+                        	if (null == nslookup) continue;
+                        	actual.append("#NS#").append(pres[p]).append("#PREFIX#").
            						append(nslookup).append("\n");
                         }
             		}
