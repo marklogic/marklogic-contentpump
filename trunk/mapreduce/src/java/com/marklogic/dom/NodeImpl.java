@@ -424,9 +424,6 @@ public abstract class NodeImpl implements Node {
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR, null);
     }
 
-    protected NodeList getElementsByTagNameNSOrNodeName(String namespaceURI,
-        String name, final boolean nodeName) {
-
 	protected NodeList getElementsByTagNameNSOrNodeName(String namespaceURI, String name,final boolean nodeName) {
 		
 		final String tagname = name;
@@ -477,54 +474,6 @@ public abstract class NodeImpl implements Node {
 				init();
 				return elementList.size();
 			}
-
-        return new NodeList() {
-            protected ArrayList<Node> elementList = new ArrayList<Node>();
-            protected boolean done = false;
-
-            protected void init() {
-                if (done)
-                    return;
-                ArrayList<Node> childrenList = new ArrayList<Node>();
-                childrenList.add(thisNode);
-                int i = 0;
-                while (i != childrenList.size()) {
-                    Node curr = childrenList.get(i);
-                    NodeList children = curr.getChildNodes();
-                    for (int childi = 0; childi < children.getLength(); childi++)
-                        if (children.item(childi).getNodeType() == Node.ELEMENT_NODE)
-                            childrenList.add(children.item(childi));
-                    i++;
-                    if (i == 1)
-                        continue;
-                    if (nodeName) {
-                        if (curr.getNodeName().equals(tagname)
-                            || tagname.equals("*"))
-                            elementList.add(curr);
-                    } else {
-                        // do nothing if only one of the two is null
-                        if ("*".equals(ns) && "*".equals(tagname)) {
-                            elementList.add(curr);
-                            continue;
-                        }
-                        if (ns != null) {
-                            if ((ns.equals("*") || ns.equals(curr
-                                .getNamespaceURI()))
-                                && (tagname.equals("*") || tagname.equals(curr
-                                    .getLocalName())))
-                                elementList.add(curr);
-                        } else if (tagname.equals("*")
-                            || tagname.equals(curr.getLocalName()))
-                            elementList.add(curr);
-                    }
-                }
-                done = true;
-            }
-
-            public int getLength() {
-                init();
-                return elementList.size();
-            }
 
             public Node item(int index) {
                 init();
