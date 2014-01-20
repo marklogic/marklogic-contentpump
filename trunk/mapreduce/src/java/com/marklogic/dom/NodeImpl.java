@@ -16,6 +16,7 @@
 package com.marklogic.dom;
 
 import java.util.ArrayList;
+import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -426,9 +427,56 @@ public abstract class NodeImpl implements Node {
     protected NodeList getElementsByTagNameNSOrNodeName(String namespaceURI,
         String name, final boolean nodeName) {
 
-        final String tagname = name;
-        final String ns = namespaceURI;
-        final Node thisNode = this;
+	protected NodeList getElementsByTagNameNSOrNodeName(String namespaceURI, String name,final boolean nodeName) {
+		
+		final String tagname = name;
+		final String ns = namespaceURI;
+		final Node thisNode = this;
+		
+		return new NodeList() {
+			protected ArrayList<Node> elementList = new ArrayList<Node>();
+			protected boolean done = false;
+			
+			protected void init() {
+				if (done) return;
+				Stack<Node> childrenStack = new Stack<Node>();
+				childrenStack.push(thisNode);
+				boolean root = true;
+				while ( !childrenStack.isEmpty()) {
+					Node curr = childrenStack.pop();
+					NodeList children = curr.getChildNodes();
+					for (int childi = children.getLength() -1 ; childi >=0; childi--)
+						if (children.item(childi).getNodeType() == Node.ELEMENT_NODE)
+							childrenStack.push(children.item(childi));
+					if (root) {
+						root = false;
+						continue;
+					}
+					if (nodeName) {
+						if (curr.getNodeName().equals(tagname) || tagname.equals("*"))
+							elementList.add(curr);
+					}
+					else {
+						// do nothing if only one of the two is null
+						if ("*".equals(ns) && "*".equals(tagname)){
+							elementList.add(curr); continue;
+						}
+						if (ns != null) {
+							if ((ns.equals("*") || ns.equals(curr.getNamespaceURI())) &&
+								(tagname.equals("*") || tagname.equals(curr.getLocalName())))
+								elementList.add(curr);
+						}
+						else if (tagname.equals("*") || tagname.equals(curr.getLocalName()))
+								elementList.add(curr);
+					}
+				}
+				done = true;
+			}
+			
+			public int getLength() {
+				init();
+				return elementList.size();
+			}
 
         return new NodeList() {
             protected ArrayList<Node> elementList = new ArrayList<Node>();
