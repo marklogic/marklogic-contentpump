@@ -262,13 +262,6 @@ public class TestDocumentImpl extends AbstractTestCase {
         	for (int j = 0; j < elementsExpected.getLength(); j++) {
         		esort.add(elementsExpected.item(j));
         	}
-        	Collections.sort(esort, new Comparator<Node>() {
-                @Override
-                public int compare(Node  n1, Node  n2)
-                {
-                	return  n1.getNodeName().compareTo(n2.getNodeName());
-                }
-            });
         	for (int j = 0; j < esort.size(); j++) {
         		Node curr = esort.get(j);
         		expected.append("#I##").append(j).append("#").
@@ -287,13 +280,6 @@ public class TestDocumentImpl extends AbstractTestCase {
         	for (int j = 0; j < elementsActual.getLength(); j++) {
         		asort.add(elementsActual.item(j));
         	}
-        	Collections.sort(asort, new Comparator<Node>() {
-                @Override
-                public int compare(Node  n1, Node  n2)
-                {
-                	return  n1.getNodeName().compareTo(n2.getNodeName());
-                }
-            });
         	for (int j = 0; j < asort.size(); j++) {
         		Node curr = asort.get(j);
         		actual.append("#I##").append(j).append("#").
@@ -344,13 +330,6 @@ public class TestDocumentImpl extends AbstractTestCase {
             	for (int j = 0; j < elementsExpected.getLength(); j++) {
             		esort.add(elementsExpected.item(j));
             	}
-            	Collections.sort(esort, new Comparator<Node>() {
-                    @Override
-                    public int compare(Node  n1, Node  n2)
-                    {
-                    	return  n1.getNodeName().compareTo(n2.getNodeName());
-                    }
-                });
             	for (int j = 0; j < esort.size(); j++) {
             		Node curr = esort.get(j);
             		expected.append("#I##").append(j).append("#").
@@ -369,13 +348,6 @@ public class TestDocumentImpl extends AbstractTestCase {
             	for (int j = 0; j < elementsActual.getLength(); j++) {
             		asort.add(elementsActual.item(j));
             	}
-            	Collections.sort(asort, new Comparator<Node>() {
-                    @Override
-                    public int compare(Node  n1, Node  n2)
-                    {
-                    	return  n1.getNodeName().compareTo(n2.getNodeName());
-                    }
-                });
             	for (int j = 0; j < asort.size(); j++) {
             		Node curr = asort.get(j);
             		actual.append("#I##").append(j).append("#").
@@ -430,13 +402,6 @@ public class TestDocumentImpl extends AbstractTestCase {
             	for (int j = 0; j < elementsExpected.getLength(); j++) {
             		esort.add(elementsExpected.item(j));
             	}
-            	Collections.sort(esort, new Comparator<Node>() {
-                    @Override
-                    public int compare(Node  n1, Node  n2)
-                    {
-                    	return  n1.getNodeName().compareTo(n2.getNodeName());
-                    }
-                });
             	for (int j = 0; j < esort.size(); j++) {
             		Node curr = esort.get(j);
             		expected.append("#I##").append(j).append("#").
@@ -455,13 +420,6 @@ public class TestDocumentImpl extends AbstractTestCase {
             	for (int j = 0; j < elementsActual.getLength(); j++) {
             		asort.add(elementsActual.item(j));
             	}
-            	Collections.sort(asort, new Comparator<Node>() {
-                    @Override
-                    public int compare(Node  n1, Node  n2)
-                    {
-                    	return  n1.getNodeName().compareTo(n2.getNodeName());
-                    }
-                });
             	for (int j = 0; j < asort.size(); j++) {
             		Node curr = asort.get(j);
             		actual.append("#I##").append(j).append("#").
