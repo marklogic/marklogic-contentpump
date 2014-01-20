@@ -23,34 +23,34 @@ import org.w3c.dom.Node;
 import com.marklogic.tree.ExpandedTree;
 
 /**
- * A read-only W3C DOM Node implementation of MarkLogic's
- * internal representation of an XML comment as stored in the expanded 
- * tree cache of a forest on disk. 
+ * A read-only W3C DOM Node implementation of MarkLogic's internal
+ * representation of an XML comment as stored in the expanded tree cache of a
+ * forest on disk.
  * 
  * <p>
- * This interface is effectively read-only: Setters and update methods 
- * inherited from <code>org.w3c.Node</code> are not supported and will raise
- * an exception if called.
+ * This interface is effectively read-only: Setters and update methods inherited
+ * from <code>org.w3c.Node</code> are not supported and will raise an exception
+ * if called.
  * </p>
  * 
  * @author jchen
  */
 public class CommentImpl extends CharacterDataImpl implements Comment {
 
-	public CommentImpl(ExpandedTree tree, int node) {
-		super(tree, node);
-	}
-	
+    public CommentImpl(ExpandedTree tree, int node) {
+        super(tree, node);
+    }
+
     public Node cloneNode(Document doc, boolean deep) {
         return doc.createComment(getData());
     }
-    
-	@Override
-	public String getNodeName() {
-		return "#comment";
-	}
 
-	@Override
+    @Override
+    public String getNodeName() {
+        return "#comment";
+    }
+
+    @Override
     public String getTextContent() throws DOMException {
         return getNodeValue();
     }

@@ -23,55 +23,55 @@ import org.w3c.dom.Text;
 import com.marklogic.tree.ExpandedTree;
 
 /**
- * A read-only W3C DOM Node implementation of MarkLogic's
- * internal representation of text data as stored in the expanded 
- * tree cache of a forest on disk. 
+ * A read-only W3C DOM Node implementation of MarkLogic's internal
+ * representation of text data as stored in the expanded tree cache of a forest
+ * on disk.
  * 
  * <p>
- * This interface is effectively read-only: Setters and update methods 
- * inherited from <code>org.w3c.Node</code> are not supported and will raise
- * an exception if called. 
+ * This interface is effectively read-only: Setters and update methods inherited
+ * from <code>org.w3c.Node</code> are not supported and will raise an exception
+ * if called.
  * </p>
  * 
  * @author jchen
  */
 public class TextImpl extends CharacterDataImpl implements Text {
 
-	public TextImpl(ExpandedTree tree, int node) {
-		super(tree, node);
-	}
+    public TextImpl(ExpandedTree tree, int node) {
+        super(tree, node);
+    }
 
     public Node cloneNode(Document doc, boolean deep) {
         return doc.createTextNode(getNodeValue());
     }
-    
-	@Override
-	public String getNodeName() {
-		return "#text";
-	}
 
-	@Override
+    @Override
+    public String getNodeName() {
+        return "#text";
+    }
+
+    @Override
     public String getTextContent() throws DOMException {
         return getNodeValue();
     }
 
-	/** Unsupported. */
-	public String getWholeText() {
-		return null;
-	}
+    /** Unsupported. */
+    public String getWholeText() {
+        return null;
+    }
 
-	/** Unsupported. */
-	public boolean isElementContentWhitespace() {
-		return false;
-	}
+    /** Unsupported. */
+    public boolean isElementContentWhitespace() {
+        return false;
+    }
 
-	/** Unsupported. */
-	public Text replaceWholeText(String content) throws DOMException {
+    /** Unsupported. */
+    public Text replaceWholeText(String content) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
-	}
+    }
 
-	/** Unsupported. */
-	public Text splitText(int offset) throws DOMException {
+    /** Unsupported. */
+    public Text splitText(int offset) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
-	}
+    }
 }

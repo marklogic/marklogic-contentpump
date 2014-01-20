@@ -23,54 +23,54 @@ import org.w3c.dom.ProcessingInstruction;
 import com.marklogic.tree.ExpandedTree;
 
 /**
- * A read-only W3C DOM Node implementation on top of MarkLogic's
- * internal representation of a processing instruction in a document as 
- * stored on disk in the expanded tree cache of a forest. 
+ * A read-only W3C DOM Node implementation on top of MarkLogic's internal
+ * representation of a processing instruction in a document as stored on disk in
+ * the expanded tree cache of a forest.
  * 
  * <p>
- * This interface is effectively read-only: Setters and update methods 
- * inherited from <code>org.w3c.Node</code> are not supported and will raise
- * an exception if called.
+ * This interface is effectively read-only: Setters and update methods inherited
+ * from <code>org.w3c.Node</code> are not supported and will raise an exception
+ * if called.
  * </p>
  * 
  * @author jchen
  */
 public class ProcessingInstructionImpl extends NodeImpl implements
-		ProcessingInstruction {
+    ProcessingInstruction {
 
-	public ProcessingInstructionImpl(ExpandedTree tree, int node) {
-		super(tree, node);
-	}
+    public ProcessingInstructionImpl(ExpandedTree tree, int node) {
+        super(tree, node);
+    }
 
     public Node cloneNode(Document doc, boolean deep) {
         return doc.createProcessingInstruction(getTarget(), getData());
     }
-    
-	public String getData() {
-	    return tree.getText(tree.piNodeTextRepID[tree.nodeRepID[node]]);
-	}
 
-	@Override
-	public String getNodeName() {
-		return getTarget();
-	}
+    public String getData() {
+        return tree.getText(tree.piNodeTextRepID[tree.nodeRepID[node]]);
+    }
 
-	@Override
-	public String getNodeValue() {
-		return getData();
-	}
+    @Override
+    public String getNodeName() {
+        return getTarget();
+    }
 
-	public String getTarget() {
-		return tree.atomString(tree.piNodeTargetAtom[tree.nodeRepID[node]]);
-	}
+    @Override
+    public String getNodeValue() {
+        return getData();
+    }
+
+    public String getTarget() {
+        return tree.atomString(tree.piNodeTargetAtom[tree.nodeRepID[node]]);
+    }
 
     @Override
     public String getTextContent() throws DOMException {
         return getNodeValue();
     }
 
-	/** Unsupported. */
+    /** Unsupported. */
     public void setData(String data) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
-	}
+    }
 }
