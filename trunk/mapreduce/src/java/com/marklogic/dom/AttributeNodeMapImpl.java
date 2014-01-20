@@ -29,84 +29,91 @@ import org.w3c.dom.Node;
 import com.marklogic.tree.ExpandedTree;
 
 public class AttributeNodeMapImpl implements NamedNodeMap {
-    public static final Log LOG = LogFactory.getLog(AttributeNodeMapImpl.class);
-	protected ElementImpl element;
-	protected Attr[] nsDecl;
-	private static DocumentBuilderFactory dbf = null;
-	
-	public AttributeNodeMapImpl(ElementImpl element) {
-		this.element = element;
-	}
-	
-	public int getLength() {
+    public static final Log LOG = LogFactory
+        .getLog(AttributeNodeMapImpl.class);
+    protected ElementImpl element;
+    protected Attr[] nsDecl;
+    private static DocumentBuilderFactory dbf = null;
+
+    public AttributeNodeMapImpl(ElementImpl element) {
+        this.element = element;
+    }
+
+    public int getLength() {
         if (LOG.isTraceEnabled()) {
             LOG.trace(element.getNodeName() + "@NumAttr:" + getNumAttr()
                 + " NumNSDecl:" + element.getNumNSDecl());
         }
-		return getNumAttr() + element.getNumNSDecl();
-	}
-	
-	/*
-	 * Exclude namespace declaration
-	 */
+        return getNumAttr() + element.getNumNSDecl();
+    }
+
+    /*
+     * Exclude namespace declaration
+     */
     protected int getNumAttr() {
         int num = element.tree.elemNodeNumAttributes[element.tree.nodeRepID[element.node]];
         return num >= 0 ? num : 0;
     }
 
-	public Node getNamedItem(String name) {
+    public Node getNamedItem(String name) {
         if (LOG.isTraceEnabled()) {
             LOG.trace(this.getClass().getSimpleName() + ".getNamedItem("
                 + element.node + ", " + name + ")");
         }
-		if (name == null) return null;
-    	for (int i = 0; i < getLength(); i++)
-			if (name.equals(item(i).getNodeName())) return item(i);
-		return null;
-	}
+        if (name == null)
+            return null;
+        for (int i = 0; i < getLength(); i++)
+            if (name.equals(item(i).getNodeName()))
+                return item(i);
+        return null;
+    }
 
-	public Node getNamedItemNS(String namespaceURI, String localName)
-			throws DOMException {
-	    if (LOG.isTraceEnabled()) {
-            LOG.trace(this.getClass().getSimpleName()
-                + ".getNamedItemNS(" + element.node + ", " + namespaceURI
-                + ", " + localName + ")");
-	    }
-    	if (localName == null) return null;
-    	for (int i = 0; i < getLength(); i++) {
-    		if ((namespaceURI == null) != (item(i).getNamespaceURI() == null)) continue;
-    		if (namespaceURI != null && !namespaceURI.equals(item(i).getNamespaceURI())) continue;    			
-			if (localName.equals(item(i).getLocalName())) return item(i);
-    	}
-		return null;
-	}
+    public Node getNamedItemNS(String namespaceURI, String localName)
+        throws DOMException {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(this.getClass().getSimpleName() + ".getNamedItemNS("
+                + element.node + ", " + namespaceURI + ", " + localName + ")");
+        }
+        if (localName == null)
+            return null;
+        for (int i = 0; i < getLength(); i++) {
+            if ((namespaceURI == null) != (item(i).getNamespaceURI() == null))
+                continue;
+            if (namespaceURI != null
+                && !namespaceURI.equals(item(i).getNamespaceURI()))
+                continue;
+            if (localName.equals(item(i).getLocalName()))
+                return item(i);
+        }
+        return null;
+    }
 
-	private static synchronized DocumentBuilderFactory getDocumentBuilderFactory() {
-	    if(dbf == null) {
-	        dbf = DocumentBuilderFactory.newInstance();
-	        dbf.setNamespaceAware(true);
-	    }
-	    return dbf;
-	}
-	
-    protected Document getClonedOwnerDoc () throws ParserConfigurationException {
+    private static synchronized DocumentBuilderFactory getDocumentBuilderFactory() {
+        if (dbf == null) {
+            dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+        }
+        return dbf;
+    }
+
+    protected Document getClonedOwnerDoc() throws ParserConfigurationException {
         return getDocumentBuilderFactory().newDocumentBuilder().newDocument();
     }
-    
+
     /**
      * Returns the indexth item in the map. If index is greater than or equal to
      * the number of nodes in this map, this returns null; if the item returned
      * is a namespace declaration, it is represented as an attribute whose owner
      * document is a document containing the attribute only.
      */
-	public Node item(int index) {
-	    try {
+    public Node item(int index) {
+        try {
             return item(index, null);
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-	}
-	
+    }
+
     public Node item(int index, Document ownerDoc)
         throws ParserConfigurationException {
         int numAttr = getNumAttr();
@@ -121,16 +128,17 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
                     + index);
         } else {
             int nsIdx = index - numAttr;
-            //if nsDecl is initialized, return it
-            if (nsDecl != null) return nsDecl[nsIdx];
-            
+            // if nsDecl is initialized, return it
+            if (nsDecl != null)
+                return nsDecl[nsIdx];
+
             // create owner doc
             if (ownerDoc == null) {
                 ownerDoc = getClonedOwnerDoc();
             }
 
             nsDecl = new Attr[element.getNumNSDecl()];
-            //ordinal of the element node
+            // ordinal of the element node
             long minimal = tree.nodeOrdinal[element.node];
             int count = 0;
             for (int ns = element.getNSNodeID(minimal, minimal); ns >= 0
@@ -155,32 +163,32 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
                 nsDecl[count] = attr;
                 count++;
             }
-            
-            if(nsDecl != null && nsIdx < count) {
+
+            if (nsDecl != null && nsIdx < count) {
                 return nsDecl[nsIdx];
             }
             return null;
         }
-	}
+    }
 
     /** Unsupported. */
-	public Node removeNamedItem(String name) throws DOMException {
+    public Node removeNamedItem(String name) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
-	}
+    }
 
-	/** Unsupported. */
-	public Node removeNamedItemNS(String namespaceURI, String localName)
-			throws DOMException {
+    /** Unsupported. */
+    public Node removeNamedItemNS(String namespaceURI, String localName)
+        throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
-	}
+    }
 
-	/** Unsupported. */
-	public Node setNamedItem(Node arg) throws DOMException {
+    /** Unsupported. */
+    public Node setNamedItem(Node arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
-	}
+    }
 
-	/** Unsupported. */
-	public Node setNamedItemNS(Node arg) throws DOMException {
+    /** Unsupported. */
+    public Node setNamedItemNS(Node arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
-	}
+    }
 }

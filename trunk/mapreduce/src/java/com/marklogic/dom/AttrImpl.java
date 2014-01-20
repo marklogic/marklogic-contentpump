@@ -29,38 +29,39 @@ import org.w3c.dom.TypeInfo;
 import com.marklogic.tree.ExpandedTree;
 
 /**
- * A read-only W3C DOM Node implementation of MarkLogic's
- * internal representation of an element attribute as stored in the expanded 
- * tree cache of a forest on disk. 
+ * A read-only W3C DOM Node implementation of MarkLogic's internal
+ * representation of an element attribute as stored in the expanded tree cache
+ * of a forest on disk.
  * 
  * <p>
- * This class is effectively read-only: Setters and update methods 
- * inherited from <code>org.w3c.Node</code> are not supported and will raise
- * an exception if called.
+ * This class is effectively read-only: Setters and update methods inherited
+ * from <code>org.w3c.Node</code> are not supported and will raise an exception
+ * if called.
  * </p>
  * 
  * @author jchen
  */
 public class AttrImpl extends NodeImpl implements Attr {
     public static final Log LOG = LogFactory.getLog(AttrImpl.class);
+
     public AttrImpl(ExpandedTree tree, int node) {
         super(tree, node);
     }
-    
+
     public Node cloneNode(Document doc, boolean deep) {
         Attr attr = doc.createAttributeNS(getNamespaceURI(), getLocalName());
         attr.setValue(getValue());
         attr.setPrefix(getPrefix());
         return attr;
     }
-    
+
     protected int getNodeID() {
-    	return tree.attrNodeNodeNameRepID[tree.nodeRepID[node]];
+        return tree.attrNodeNodeNameRepID[tree.nodeRepID[node]];
     }
-    
+
     @Override
     public String getLocalName() {
-        return tree.atomString(tree.nodeNameNameAtom[getNodeID()]); 
+        return tree.atomString(tree.nodeNameNameAtom[getNodeID()]);
     }
 
     public String getName() {
@@ -76,47 +77,58 @@ public class AttrImpl extends NodeImpl implements Attr {
 
     @Override
     public String getNodeName() {
-    	return getName(); 
+        return getName();
     }
-    
+
     @Override
     public String getNodeValue() {
-    	return getValue(); 
+        return getValue();
     }
-    
+
     public Element getOwnerElement() {
-        return (Element)tree.node(tree.nodeParentNodeRepID[node]);
+        return (Element) tree.node(tree.nodeParentNodeRepID[node]);
     }
 
     @Override
     protected int getPrefixID(int uriAtom) {
-		int parentNodeRepID = tree.nodeParentNodeRepID[node];
-		if (parentNodeRepID == -1) parentNodeRepID = node;
-		ArrayList<Integer> ubp = new ArrayList<Integer>();
-		long sum_ordinal = tree.ordinal+tree.nodeOrdinal[parentNodeRepID];
-    	for ( int ns = getNSNodeID(sum_ordinal); ns >= 0 ; ns = nextNSNodeID(ns,0) ) {
-    		int uri = tree.nsNodeUriAtom[ns];
-    		int prefix = tree.nsNodePrefixAtom[ns];
-    		if (tree.atomString(uri) == null) { ubp.add(prefix); continue; }
-    		if (uri != uriAtom)  continue; 
-    		if (ubp.contains(prefix)) continue;
-    		if (tree.atomString(prefix) == null) continue;
-    		return prefix; 
-    	} 
-    	return -1;
-	}
-    
-	@Override
-	public String getPrefix() {
-		int ns = tree.nodeNameNamespaceAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]];
-		if (ns < 0) return null;
-		String preserved = builtinNSPrefix(getNamespaceURI());
-		if (preserved != null) return preserved;
-		if (tree.atomString(ns) != null)  ns = getPrefixID(ns);
-	    return (ns >= 0) ? tree.atomString(ns) : null;
-	}
-	
-	/** Unsupported. */
+        int parentNodeRepID = tree.nodeParentNodeRepID[node];
+        if (parentNodeRepID == -1)
+            parentNodeRepID = node;
+        ArrayList<Integer> ubp = new ArrayList<Integer>();
+        long sum_ordinal = tree.ordinal + tree.nodeOrdinal[parentNodeRepID];
+        for (int ns = getNSNodeID(sum_ordinal); ns >= 0; ns = nextNSNodeID(ns,
+            0)) {
+            int uri = tree.nsNodeUriAtom[ns];
+            int prefix = tree.nsNodePrefixAtom[ns];
+            if (tree.atomString(uri) == null) {
+                ubp.add(prefix);
+                continue;
+            }
+            if (uri != uriAtom)
+                continue;
+            if (ubp.contains(prefix))
+                continue;
+            if (tree.atomString(prefix) == null)
+                continue;
+            return prefix;
+        }
+        return -1;
+    }
+
+    @Override
+    public String getPrefix() {
+        int ns = tree.nodeNameNamespaceAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]];
+        if (ns < 0)
+            return null;
+        String preserved = builtinNSPrefix(getNamespaceURI());
+        if (preserved != null)
+            return preserved;
+        if (tree.atomString(ns) != null)
+            ns = getPrefixID(ns);
+        return (ns >= 0) ? tree.atomString(ns) : null;
+    }
+
+    /** Unsupported. */
     public TypeInfo getSchemaTypeInfo() {
         return null;
     }
@@ -126,23 +138,23 @@ public class AttrImpl extends NodeImpl implements Attr {
     }
 
     public String getValue() {
-    	return tree.getText(tree.attrNodeTextRepID[tree.nodeRepID[node]]);
+        return tree.getText(tree.attrNodeTextRepID[tree.nodeRepID[node]]);
     }
 
     /** Unsupported. */
     public boolean isId() {
         return false;
     }
-    
-	@Override
+
+    @Override
     public String lookupNamespaceURI(String prefix) {
-		return getOwnerElement().lookupNamespaceURI(prefix);
+        return getOwnerElement().lookupNamespaceURI(prefix);
     }
 
-	@Override
-	public String lookupPrefix(String namespaceURI) {
-		return getOwnerElement().lookupPrefix(namespaceURI);
-	}
+    @Override
+    public String lookupPrefix(String namespaceURI) {
+        return getOwnerElement().lookupPrefix(namespaceURI);
+    }
 
     /** Unsupported. */
     public void setValue(String value) throws DOMException {

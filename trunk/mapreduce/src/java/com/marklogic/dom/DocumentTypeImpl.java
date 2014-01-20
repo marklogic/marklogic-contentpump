@@ -28,7 +28,7 @@ import com.marklogic.tree.ExpandedTree;
  * 
  */
 public class DocumentTypeImpl extends NodeImpl implements DocumentType {
-    
+
     DocumentTypeImpl(ExpandedTree tree, int node) {
         super(tree, node);
     }
@@ -73,7 +73,5 @@ public class DocumentTypeImpl extends NodeImpl implements DocumentType {
         // TODO Auto-generated method stub
         return null;
     }
-
-
 
 }

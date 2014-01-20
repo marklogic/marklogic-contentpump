@@ -21,24 +21,25 @@ import org.w3c.dom.DOMException;
 import com.marklogic.tree.ExpandedTree;
 
 /**
- * A read-only W3C DOM Node implementation of MarkLogic's
- * internal representation of character data as stored in the expanded 
- * tree cache of a forest on disk. 
+ * A read-only W3C DOM Node implementation of MarkLogic's internal
+ * representation of character data as stored in the expanded tree cache of a
+ * forest on disk.
  * 
  * <p>
- * This interface is effectively read-only. Setters and update methods 
- * inherited from <code>org.w3c.Node</code> are not supported and will raise
- * an exception if called. 
+ * This interface is effectively read-only. Setters and update methods inherited
+ * from <code>org.w3c.Node</code> are not supported and will raise an exception
+ * if called.
  * </p>
  * 
  * @author jchen
  */
-public abstract class CharacterDataImpl extends NodeImpl implements CharacterData {
+public abstract class CharacterDataImpl extends NodeImpl implements
+    CharacterData {
 
     public CharacterDataImpl(ExpandedTree tree, int node) {
         super(tree, node);
     }
-    
+
     /** Unsupported. */
     public void appendData(String arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
@@ -68,7 +69,8 @@ public abstract class CharacterDataImpl extends NodeImpl implements CharacterDat
     }
 
     /** Unsupported. */
-    public void replaceData(int offset, int count, String arg) throws DOMException {
+    public void replaceData(int offset, int count, String arg)
+        throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
@@ -78,18 +80,17 @@ public abstract class CharacterDataImpl extends NodeImpl implements CharacterDat
     }
 
     public String substringData(int offset, int count) throws DOMException {
-    	if ((offset < 0) || (count < 0)) {
-    		throw new DOMException(DOMException.INDEX_SIZE_ERR, null);
-    	}
+        if ((offset < 0) || (count < 0)) {
+            throw new DOMException(DOMException.INDEX_SIZE_ERR, null);
+        }
         String data = getData();
-    	if (offset > data.length()) {
-    		throw new DOMException(DOMException.INDEX_SIZE_ERR, null);
-    	}
-    	if (offset+count > data.length()) {
-    		return data.substring(offset);
-    	}
-    	else {
-            return data.substring(offset, offset+count);
-    	}
+        if (offset > data.length()) {
+            throw new DOMException(DOMException.INDEX_SIZE_ERR, null);
+        }
+        if (offset + count > data.length()) {
+            return data.substring(offset);
+        } else {
+            return data.substring(offset, offset + count);
+        }
     }
 }
