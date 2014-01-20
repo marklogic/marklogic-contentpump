@@ -3,8 +3,6 @@ package com.marklogic;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,6 +10,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,6 +26,7 @@ import com.marklogic.tree.ExpandedTree;
 
 @RunWith(value = Parameterized.class)
 public class TestDocumentImpl extends AbstractTestCase {
+    public static final Log LOG = LogFactory.getLog(TestDocumentImpl.class);
 	public TestDocumentImpl(ForestData fd) {
         super(fd);
     }
@@ -77,8 +78,10 @@ public class TestDocumentImpl extends AbstractTestCase {
             lname = d.getLastChild().getNodeName();
             actual.append("#LASTCHILD##").append(lname).append("#").append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
@@ -131,8 +134,10 @@ public class TestDocumentImpl extends AbstractTestCase {
         	expected.append("#");
         	actual.append("#");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
@@ -175,8 +180,10 @@ public class TestDocumentImpl extends AbstractTestCase {
 		 			 append(actualUri).append("#");
             }
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
@@ -223,8 +230,10 @@ public class TestDocumentImpl extends AbstractTestCase {
               actual.append("\n");
             }
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
@@ -290,8 +299,10 @@ public class TestDocumentImpl extends AbstractTestCase {
     	expected.append("\n");
     	actual.append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
@@ -358,8 +369,10 @@ public class TestDocumentImpl extends AbstractTestCase {
     	expected.append("\n");
     	actual.append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
@@ -430,8 +443,10 @@ public class TestDocumentImpl extends AbstractTestCase {
     	expected.append("\n");
     	actual.append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
@@ -497,8 +512,10 @@ public class TestDocumentImpl extends AbstractTestCase {
             	actual.append("\n");
                 
             }
-            System.out.println(expected.toString());
-            System.out.println(actual.toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(expected.toString());
+                LOG.debug(actual.toString());
+            }
             assertEquals(expected.toString(), actual.toString());
     }
     
@@ -579,8 +596,10 @@ public class TestDocumentImpl extends AbstractTestCase {
             	expected.append("#");
             	actual.append("#");
             }
-            System.out.println(expected.toString());
-            System.out.println(actual.toString());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(expected.toString());
+                LOG.debug(actual.toString());
+            }
             assertEquals(expected.toString(), actual.toString());
     }
    
@@ -601,7 +620,8 @@ public class TestDocumentImpl extends AbstractTestCase {
         	if (doc == null) continue;
             NodeList children = doc.getChildNodes();
             walkDOM(children, expected);
-            System.out.println("--------------");
+            if (LOG.isDebugEnabled()) 
+                LOG.debug("--------------");
             DocumentImpl d = new DocumentImpl(t, 0);
             NodeList eChildren = d.getChildNodes();
             actual.append(uri);
@@ -610,8 +630,10 @@ public class TestDocumentImpl extends AbstractTestCase {
             expected.append("\n");
             actual.append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
  
     }
@@ -641,8 +663,10 @@ public class TestDocumentImpl extends AbstractTestCase {
             expected.append("\n");
             actual.append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
  
     }
@@ -672,8 +696,10 @@ public class TestDocumentImpl extends AbstractTestCase {
             expected.append("\n");
             actual.append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
 
@@ -702,8 +728,10 @@ public class TestDocumentImpl extends AbstractTestCase {
             expected.append("\n");
             actual.append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
@@ -732,8 +760,10 @@ public class TestDocumentImpl extends AbstractTestCase {
             expected.append("\n");
             actual.append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
@@ -762,7 +792,8 @@ public class TestDocumentImpl extends AbstractTestCase {
         }
         for(String s : expectedAttrSet) {
             if(actualAttrSet.contains(s) == false && expectedMissingNSDecl.contains(s) == false) {
-                System.out.println("NOT_FOUND:" + s);
+                if (LOG.isDebugEnabled()) 
+                    LOG.debug("NOT_FOUND:" + s);
                 assertTrue(actualAttrSet.contains(s));
             }
         }
@@ -794,46 +825,50 @@ public class TestDocumentImpl extends AbstractTestCase {
             expected.append("\n");
             actual.append("\n");
         }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+        }
         assertEquals(expected.toString(), actual.toString());
     }
     
     @Test
     public void testDeepClone() throws IOException {
-        List<ExpandedTree> trees = Utils.decodeTreeData(
-            new File(testData + System.getProperty("file.separator")
-                    + forest, stand), false);
+        List<ExpandedTree> trees = Utils.decodeTreeData(new File(testData
+            + System.getProperty("file.separator") + forest, stand), false);
         assertEquals(num, trees.size());
 
-    StringBuilder expected = new StringBuilder();
-    StringBuilder actual = new StringBuilder();
-    StringBuilder clone = new StringBuilder();
-    for (int i = 0; i < trees.size(); i++) {
-        ExpandedTree t = trees.get(i);
-        String uri = t.getDocumentURI();
-        expected.append(uri);
-        Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        if (doc == null) continue;
-        NodeList children = doc.getChildNodes();
-        walkDOMElem(children, expected);
-        DocumentImpl d = new DocumentImpl(t, 0);
-        children = d.getChildNodes();
-        actual.append(uri);
-        walkDOMElem(children, actual);
-        
-        Document clonedDoc = (Document) d.cloneNode(true);
-        clone.append(uri);
-        children = clonedDoc.getChildNodes();
-        walkDOMElem(children, clone);
-        
-        expected.append("\n");
-        actual.append("\n");
-        clone.append("\n");
-    }
-        System.out.println(expected.toString());
-        System.out.println(actual.toString());
-        System.out.println(clone.toString());
+        StringBuilder expected = new StringBuilder();
+        StringBuilder actual = new StringBuilder();
+        StringBuilder clone = new StringBuilder();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+            String uri = t.getDocumentURI();
+            expected.append(uri);
+            Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            if (doc == null)
+                continue;
+            NodeList children = doc.getChildNodes();
+            walkDOMElem(children, expected);
+            DocumentImpl d = new DocumentImpl(t, 0);
+            children = d.getChildNodes();
+            actual.append(uri);
+            walkDOMElem(children, actual);
+
+            Document clonedDoc = (Document) d.cloneNode(true);
+            clone.append(uri);
+            children = clonedDoc.getChildNodes();
+            walkDOMElem(children, clone);
+
+            expected.append("\n");
+            actual.append("\n");
+            clone.append("\n");
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+            LOG.debug(clone.toString());
+        }
         assertEquals(actual.toString(), clone.toString());
         assertEquals(expected.toString(), clone.toString());
 
@@ -854,7 +889,8 @@ public class TestDocumentImpl extends AbstractTestCase {
         }
         for (String s : expectedAttrSet) {
             if(actualAttrSet.contains(s) == false && expectedMissingNSDecl.contains(s) == false) {
-                System.out.println("NOT_FOUND:" + s);
+                if (LOG.isDebugEnabled()) 
+                    LOG.debug("NOT_FOUND:" + s);
                 assertTrue(actualAttrSet.contains(s));
             }
         }
@@ -862,93 +898,96 @@ public class TestDocumentImpl extends AbstractTestCase {
     
     @Test
     public void testDeepCloneBug25449() throws IOException {
-        List<ExpandedTree> trees = Utils.decodeTreeData(
-            new File(testData + System.getProperty("file.separator")
-                    + forest, stand), false);
+        List<ExpandedTree> trees = Utils.decodeTreeData(new File(testData
+            + System.getProperty("file.separator") + forest, stand), false);
         assertEquals(num, trees.size());
 
-    StringBuilder expected = new StringBuilder();
-    StringBuilder actual = new StringBuilder();
-    StringBuilder clone = new StringBuilder();
-    for (int i = 0; i < trees.size(); i++) {
-        ExpandedTree t = trees.get(i);
-        String uri = t.getDocumentURI();
-        expected.append(uri);
-        Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        if (doc == null) continue;
-        doc = (Document) doc.cloneNode(true);
-        NodeList children = doc.getChildNodes();
-        walkDOMElem(children, expected);
-        DocumentImpl d = new DocumentImpl(t, 0);
-        children = d.getChildNodes();
-        actual.append(uri);
-        walkDOMElem(children, actual);
-        
-        Document clonedDoc = (Document) d.cloneNode(true);
-        clonedDoc = (Document) d.cloneNode(true);
-        clone.append(uri);
-        children = clonedDoc.getChildNodes();
-        walkDOMElem(children, clone);
-        
-        expected.append("\n");
-        actual.append("\n");
-        clone.append("\n");
-    }
-    System.out.println(expected.toString());
-    System.out.println(actual.toString());
-    System.out.println(clone.toString());
-    assertEquals(actual.toString(), clone.toString());
-    assertEquals(expected.toString(), clone.toString());
+        StringBuilder expected = new StringBuilder();
+        StringBuilder actual = new StringBuilder();
+        StringBuilder clone = new StringBuilder();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+            String uri = t.getDocumentURI();
+            expected.append(uri);
+            Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            if (doc == null)
+                continue;
+            doc = (Document) doc.cloneNode(true);
+            NodeList children = doc.getChildNodes();
+            walkDOMElem(children, expected);
+            DocumentImpl d = new DocumentImpl(t, 0);
+            children = d.getChildNodes();
+            actual.append(uri);
+            walkDOMElem(children, actual);
+
+            Document clonedDoc = (Document) d.cloneNode(true);
+            clonedDoc = (Document) d.cloneNode(true);
+            clone.append(uri);
+            children = clonedDoc.getChildNodes();
+            walkDOMElem(children, clone);
+
+            expected.append("\n");
+            actual.append("\n");
+            clone.append("\n");
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+            LOG.debug(clone.toString());
+        }
+        assertEquals(actual.toString(), clone.toString());
+        assertEquals(expected.toString(), clone.toString());
     
     }
     
     @Test
     public void testShallowClone() throws IOException {
-        List<ExpandedTree> trees = Utils.decodeTreeData(
-            new File(testData + System.getProperty("file.separator")
-                    + forest, stand), false);
+        List<ExpandedTree> trees = Utils.decodeTreeData(new File(testData
+            + System.getProperty("file.separator") + forest, stand), false);
         assertEquals(num, trees.size());
 
-    StringBuilder expected = new StringBuilder();
-    StringBuilder actual = new StringBuilder();
-    StringBuilder clone = new StringBuilder();
-    for (int i = 0; i < trees.size(); i++) {
-        ExpandedTree t = trees.get(i);
-        String uri = t.getDocumentURI();
-        expected.append(uri);
-        Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        if (doc == null) continue;
+        StringBuilder expected = new StringBuilder();
+        StringBuilder actual = new StringBuilder();
+        StringBuilder clone = new StringBuilder();
+        for (int i = 0; i < trees.size(); i++) {
+            ExpandedTree t = trees.get(i);
+            String uri = t.getDocumentURI();
+            expected.append(uri);
+            Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            if (doc == null)
+                continue;
 
-        expected.append(doc.getNodeValue());
-        DocumentImpl d = new DocumentImpl(t, 0);
-        actual.append(uri);
-        actual.append(d.getNodeValue());
-        
-        Document clonedDoc = (Document) d.cloneNode(false);
-        clone.append(uri);
-        clone.append(clonedDoc.getNodeValue());
-        
-        expected.append("\n");
-        actual.append("\n");
-        clone.append("\n");
-    }
-    System.out.println(expected.toString());
-    System.out.println(actual.toString());
-    System.out.println(clone.toString());
-    assertEquals(actual.toString(), clone.toString());
-    assertEquals(expected.toString(), clone.toString());
+            expected.append(doc.getNodeValue());
+            DocumentImpl d = new DocumentImpl(t, 0);
+            actual.append(uri);
+            actual.append(d.getNodeValue());
+
+            Document clonedDoc = (Document) d.cloneNode(false);
+            clone.append(uri);
+            clone.append(clonedDoc.getNodeValue());
+
+            expected.append("\n");
+            actual.append("\n");
+            clone.append("\n");
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(expected.toString());
+            LOG.debug(actual.toString());
+            LOG.debug(clone.toString());
+        }
+        assertEquals(actual.toString(), clone.toString());
+        assertEquals(expected.toString(), clone.toString());
     }
     
     @Test
     public void testIsDefaultNS() throws IOException {
-        List<ExpandedTree> trees = Utils.decodeTreeData(
-            new File(testData + System.getProperty("file.separator")
-                    + forest, stand), false);
+        List<ExpandedTree> trees = Utils.decodeTreeData(new File(testData
+            + System.getProperty("file.separator") + forest, stand), false);
         assertEquals(num, trees.size());
 
-    StringBuilder expected = new StringBuilder();
-    StringBuilder actual = new StringBuilder();
-    String ns[] = {"http://www.w3.org/TR/html4/", "urn:loc.gov:books"};
+        StringBuilder expected = new StringBuilder();
+        StringBuilder actual = new StringBuilder();
+        String ns[] = { "http://www.w3.org/TR/html4/", "urn:loc.gov:books" };
         for (int ni = 0; ni < ns.length; ni++) {
             for (int i = 0; i < trees.size(); i++) {
                 ExpandedTree t = trees.get(i);
@@ -966,11 +1005,13 @@ public class TestDocumentImpl extends AbstractTestCase {
                 actual.append(ns[ni]).append("@isDefaultNS:");
                 actual.append(d.isDefaultNamespace(ns[ni])).append("\n");
             }
-            System.out.println(expected);
-            System.out.println("\n");
-            System.out.println(actual);
-            System.out.println("\n");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(expected);
+                LOG.debug("\n");
+                LOG.debug(actual);
+                LOG.debug("\n");
+            }
         }
-    
+
     }
 }
