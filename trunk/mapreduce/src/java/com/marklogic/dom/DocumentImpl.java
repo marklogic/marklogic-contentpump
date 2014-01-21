@@ -166,72 +166,61 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     /** Unsupported. */
     public Node adoptNode(Node arg0) throws DOMException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public Attr createAttribute(String arg0) throws DOMException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public Attr createAttributeNS(String arg0, String arg1)
         throws DOMException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public CDATASection createCDATASection(String arg0) throws DOMException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public Comment createComment(String arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public DocumentFragment createDocumentFragment() {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public Element createElement(String arg0) throws DOMException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public Element createElementNS(String arg0, String arg1)
         throws DOMException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public EntityReference createEntityReference(String arg0)
         throws DOMException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public ProcessingInstruction createProcessingInstruction(String arg0,
         String arg1) throws DOMException {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
     public Text createTextNode(String arg0) {
-        // TODO Auto-generated method stub
-        return null;
+    	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /**

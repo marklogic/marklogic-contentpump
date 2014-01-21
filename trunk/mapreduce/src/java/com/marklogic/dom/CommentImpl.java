@@ -54,4 +54,14 @@ public class CommentImpl extends CharacterDataImpl implements Comment {
     public String getTextContent() throws DOMException {
         return getNodeValue();
     }
+    
+    @Override
+    public String lookupPrefix(String namespaceURI) {
+    	return getParentNode().lookupPrefix(namespaceURI);
+    }
+    
+    @Override
+    public String lookupNamespaceURI(String prefix) {
+    	return getParentNode().lookupNamespaceURI(prefix);
+    }
 }
