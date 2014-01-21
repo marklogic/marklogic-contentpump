@@ -235,7 +235,7 @@ public class DocumentImpl extends NodeImpl implements Document {
     }
 
     /**
-     * Returns a dummy DocumentTypeImpl object that contains nothing
+     * Returns a dummy DocumentTypeImpl object that contains nothing.
      */
     public DocumentType getDoctype() {
         return new DocumentTypeImpl(tree, node);
