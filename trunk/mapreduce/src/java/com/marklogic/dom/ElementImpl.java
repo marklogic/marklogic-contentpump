@@ -91,23 +91,24 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     public String getAttribute(String name) {
-        return getAttributeNode(name).getValue();
+    	Attr attr = getAttributeNode(name);
+        return attr==null?"":attr.getValue();
     }
 
     public Attr getAttributeNode(String name) {
-        return (AttrImpl) attributes.getNamedItem(name);
+        return (attributes==null)?null:(Attr)(attributes.getNamedItem(name));
     }
 
-    public Attr getAttributeNodeNS(String namespaceURI, String localName)
-        throws DOMException {
-        return (AttrImpl) getAttributes().getNamedItemNS(namespaceURI,
+    public Attr getAttributeNodeNS(String namespaceURI, String localName){
+        return (attributes==null)?null:(AttrImpl)getAttributes().getNamedItemNS(namespaceURI,
             localName);
     }
 
-    public String getAttributeNS(String namespaceURI, String localName)
-        throws DOMException {
-        return ((AttrImpl) getAttributes().getNamedItemNS(namespaceURI,
-            localName)).getValue();
+    public String getAttributeNS(String namespaceURI, String localName) {
+    	if (attributes==null) return "";
+    	AttrImpl attr = 
+    		(AttrImpl) getAttributes().getNamedItemNS(namespaceURI,localName);
+        return attr==null?"":attr.getValue();
     }
 
     @Override

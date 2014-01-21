@@ -602,7 +602,76 @@ public class TestDocumentImpl extends AbstractTestCase {
             }
             assertEquals(expected.toString(), actual.toString());
     }
-   
+    
+    @Test
+    public void testGetHasAttribute() throws IOException {
+        List<ExpandedTree> trees = Utils.decodeTreeData(
+                new File(testData + System.getProperty("file.separator")
+                		+ forest, stand), false);
+            assertEquals(num, trees.size());
+
+            StringBuffer expected = new StringBuffer();
+            StringBuffer actual = new StringBuffer();
+            
+            String attrs[] = {"xmlns","onload","base","x","value","union","id"};
+
+            for (int i = 0; i < trees.size(); i++) {
+                ExpandedTree t = trees.get(i);
+            	String uri = t.getDocumentURI();
+            	
+            	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            	        	
+                expected.append("\n").append(uri).append("\n");
+            	Queue<NodeList> q = new LinkedList<NodeList>();
+            	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
+            	while (!q.isEmpty()) {
+            		NodeList nl = q.poll();
+            		for (int k=0; k<nl.getLength(); k++) {
+            			if (nl.item(k).hasChildNodes()) 
+            				q.add(nl.item(k).getChildNodes());
+            			if (nl.item(k).getNodeType() != Node.ELEMENT_NODE) continue;
+            			if ("cdata-section".equals(nl.item(k).getNodeName())) continue;
+                        expected.append("#NODE##").
+             		     append(nl.item(k).getNodeName()).append("#").append("\n");
+                        for (int p=0; p<attrs.length; p++) {
+                        	Element elem = (Element)nl.item(k);
+                        	String value = elem.getAttribute(attrs[p]);
+                        	expected.append("#ATTR#").append(attrs[p]).
+                        		append("#VALUE#").append(value).append("\n");
+                        }
+            		}
+            	}
+            	
+                q.clear();
+                DocumentImpl d = new DocumentImpl(t, 0);
+                actual.append("\n").append(uri).append("\n");
+            	if (d.hasChildNodes()) q.add(d.getChildNodes());
+            	while (!q.isEmpty()) {
+            		NodeList nl = q.poll();
+            		for (int k=0; k<nl.getLength(); k++) {
+            			if (nl.item(k).hasChildNodes()) 
+            				q.add(nl.item(k).getChildNodes());
+            			if (nl.item(k).getNodeType() != Node.ELEMENT_NODE) continue;
+            			if ("cdata-section".equals(nl.item(k).getNodeName())) continue;
+            			actual.append("#NODE##").
+             		     append(nl.item(k).getNodeName()).append("#").append("\n");
+                        for (int p=0; p<attrs.length; p++) {
+                        	Element elem = (Element)nl.item(k);
+                        	String value = elem.getAttribute(attrs[p]);
+                        	actual.append("#ATTR#").append(attrs[p]).
+                        		append("#VALUE#").append(value).append("\n");
+                        }
+            		}
+            	}
+                
+            	expected.append("#");
+            	actual.append("#");
+            }
+            System.out.println(expected.toString());
+            System.out.println(actual.toString());
+            assertEquals(expected.toString(), actual.toString());
+    }
+    
     @Test
     public void testNodeNameChildNodes() throws IOException {
         List<ExpandedTree> trees = Utils.decodeTreeData(
