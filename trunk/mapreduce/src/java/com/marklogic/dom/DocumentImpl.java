@@ -46,7 +46,8 @@ import com.marklogic.tree.ExpandedTree;
  * <p>
  * This interface is effectively read-only: Setters and update methods inherited
  * from <code>org.w3c.Node</code> are not supported and will raise an exception
- * if called. To create a modifiable copy of a node, use {@link #cloneNode}.
+ * if called. To create a modifiable copy of a node for XML document, use
+ * {@link #cloneNode}. Text document cannot be cloned.
  * </p>
  * 
  * @author jchen
