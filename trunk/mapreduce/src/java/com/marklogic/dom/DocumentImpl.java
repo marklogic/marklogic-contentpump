@@ -15,6 +15,7 @@
  */
 package com.marklogic.dom;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -97,8 +98,8 @@ public class DocumentImpl extends NodeImpl implements Document {
     }
 
     protected void initClonedOwnerDoc() throws ParserConfigurationException {
-        ownerDocCloned = getDocumentBuilderFactory().newDocumentBuilder()
-            .newDocument();
+        ownerDocCloned = getDocumentBuilderFactory().newDocumentBuilder().newDocument();
+        ownerDocCloned.setDocumentURI(getDocumentURI());
     }
 
     @Override
