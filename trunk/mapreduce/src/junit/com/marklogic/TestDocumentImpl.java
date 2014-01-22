@@ -1025,14 +1025,12 @@ public class TestDocumentImpl extends AbstractTestCase {
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
             if (doc == null)
                 continue;
-
             expected.append(doc.getNodeValue());
             DocumentImpl d = new DocumentImpl(t, 0);
-            actual.append(uri);
+            actual.append(d.getDocumentURI());
             actual.append(d.getNodeValue());
-
             Document clonedDoc = (Document) d.cloneNode(false);
-            clone.append(uri);
+            clone.append(clonedDoc.getDocumentURI());
             clone.append(clonedDoc.getNodeValue());
 
             expected.append("\n");

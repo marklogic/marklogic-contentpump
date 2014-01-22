@@ -100,6 +100,7 @@ public class DocumentImpl extends NodeImpl implements Document {
     protected void initClonedOwnerDoc() throws ParserConfigurationException {
         ownerDocCloned = getDocumentBuilderFactory().newDocumentBuilder().newDocument();
         ownerDocCloned.setDocumentURI(getDocumentURI());
+        ownerDocCloned.setXmlVersion(getXmlVersion());
     }
 
     @Override
