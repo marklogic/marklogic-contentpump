@@ -49,7 +49,7 @@ public class AbstractTestCase extends TestCase {
         dataList.add(ds1);
 
         ForestData[] ds2 = { new ForestData("src/testdata/3doc-test",
-            "3docForest", "00000002", 3) };
+            "3docForest", "00000002", 4) };
         dataList.add(ds2);
 
         ForestData[] ds3 = { new ForestData("src/testdata/dom-core-test",

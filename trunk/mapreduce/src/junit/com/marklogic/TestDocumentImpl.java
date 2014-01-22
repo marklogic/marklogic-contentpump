@@ -65,6 +65,8 @@ public class TestDocumentImpl extends AbstractTestCase {
         	String uri = t.getDocumentURI();
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+        	//text document failed in parsing as DOM
+        	if (doc == null) continue;
             expected.append(uri);
             expected.append("#FIRSTCHILD##").
             		 append(doc.getFirstChild().getNodeName()).append("#").append("\n");
@@ -100,7 +102,8 @@ public class TestDocumentImpl extends AbstractTestCase {
         	String uri = t.getDocumentURI();
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	        	
+            //text document failed in parsing as DOM
+            if (doc == null) continue;
             expected.append("\n").append(uri).append("\n");
         	Queue<NodeList> q = new LinkedList<NodeList>();
         	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
@@ -537,7 +540,8 @@ public class TestDocumentImpl extends AbstractTestCase {
             	String uri = t.getDocumentURI();
             	
             	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-            	        	
+                //text document failed in parsing as DOM
+                if (doc == null) continue;        	
                 expected.append("\n").append(uri).append("\n");
             	Queue<NodeList> q = new LinkedList<NodeList>();
             	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
@@ -620,7 +624,8 @@ public class TestDocumentImpl extends AbstractTestCase {
             	String uri = t.getDocumentURI();
             	
             	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-            	        	
+                //text document failed in parsing as DOM
+                if (doc == null) continue;	
                 expected.append("\n").append(uri).append("\n");
             	Queue<NodeList> q = new LinkedList<NodeList>();
             	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
@@ -684,9 +689,9 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            expected.append(uri);
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
+            if (doc == null) continue;
+            expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOM(children, expected);
             if (LOG.isDebugEnabled()) 
@@ -719,10 +724,10 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            expected.append(uri);
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         	if (doc == null) continue;
-            NodeList children = doc.getChildNodes();
+        	expected.append(uri);
+        	NodeList children = doc.getChildNodes();
             walkDOMNextSibling(children, expected);
             DocumentImpl d = new DocumentImpl(t, 0);
             NodeList eChildren = d.getChildNodes();
@@ -752,9 +757,10 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            expected.append(uri);
+            
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         	if (doc == null) continue;
+        	expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOMPreviousSibling(children, expected);
             DocumentImpl d = new DocumentImpl(t, 0);
@@ -784,9 +790,10 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            expected.append(uri);
+            
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         	if (doc == null) continue;
+        	expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOMParent(children, expected);
             DocumentImpl d = new DocumentImpl(t, 0);
@@ -816,9 +823,10 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            expected.append(uri);
+            
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         	if (doc == null) continue;
+        	expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOMTextContent(children, expected);
             DocumentImpl d = new DocumentImpl(t, 0);
@@ -881,9 +889,9 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            expected.append(uri);
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
+            if (doc == null) continue;
+            expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOMElem(children, expected);
             DocumentImpl d = new DocumentImpl(t, 0);
@@ -913,10 +921,11 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            expected.append(uri);
+            
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
             if (doc == null)
                 continue;
+            expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOMElem(children, expected);
             DocumentImpl d = new DocumentImpl(t, 0);
@@ -977,10 +986,11 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            expected.append(uri);
+            
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
             if (doc == null)
                 continue;
+            expected.append(uri);
             doc = (Document) doc.cloneNode(true);
             NodeList children = doc.getChildNodes();
             walkDOMElem(children, expected);
@@ -1021,18 +1031,36 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            expected.append(uri);
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-            if (doc == null)
-                continue;
-            expected.append(doc.getNodeValue());
             DocumentImpl d = new DocumentImpl(t, 0);
-            actual.append(d.getDocumentURI());
-            actual.append(d.getNodeValue());
-            Document clonedDoc = (Document) d.cloneNode(false);
-            clone.append(clonedDoc.getDocumentURI());
-            clone.append(clonedDoc.getNodeValue());
+            
+            if (doc == null) {
+                //text document
+                expected.append(uri).append("\n");
+                expected.append("null@");
+                
+                actual.append(d.getDocumentURI()).append("\n");
+                actual.append(d.getDocumentElement()).append("@");
+                
+                try {
+                    //expect UnsupportedOperationException
+                    d.cloneNode(false);
+                } catch (UnsupportedOperationException e) {
+                    clone.append(uri).append("\n");
+                    clone.append("null@");
+                }
+            } else {
+                expected.append(uri).append("\n");
+                expected.append(doc.getNodeValue());
 
+                actual.append(d.getDocumentURI()).append("\n");
+                actual.append(d.getNodeValue());
+
+                Document clonedDoc = (Document) d.cloneNode(false);
+                clone.append(clonedDoc.getDocumentURI()).append("\n");
+                clone.append(clonedDoc.getNodeValue());
+            }
+            
             expected.append("\n");
             actual.append("\n");
             clone.append("\n");

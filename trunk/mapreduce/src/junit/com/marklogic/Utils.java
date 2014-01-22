@@ -11,16 +11,17 @@ import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import com.marklogic.io.BiendianDataInputStream;
 import com.marklogic.tree.CompressedTreeDecoder;
 import com.marklogic.tree.ExpandedTree;
 
 public class Utils {
+    public static final Log LOG = LogFactory.getLog(Utils.class);
     public static List<ExpandedTree> decodeTreeData(File dir, boolean verbose)
         throws IOException {
         LinkedList<ExpandedTree> treeList = new LinkedList<ExpandedTree>();
@@ -130,7 +131,7 @@ public class Utils {
 
  
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.warn(e.getMessage());
         }
         return doc;
     }

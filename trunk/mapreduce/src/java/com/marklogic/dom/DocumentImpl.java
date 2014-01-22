@@ -15,7 +15,6 @@
  */
 package com.marklogic.dom;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -80,9 +79,17 @@ public class DocumentImpl extends NodeImpl implements Document {
      * Namespace declaration is cloned as attribute, whose owner document
      * contains this attribute only.
      * </p>
+     * <p>
+     * Text documents in MarkLogic cannot be cloned.
+     * UnsupportedOperationException will be thrown if cloneNode is call on text
+     * document. </>
      */
     public Node cloneNode(boolean deep) {
         try {
+            if (checkRootNode() == false) {
+                throw new UnsupportedOperationException(
+                    "Text document cannot be cloned");
+            }
             // initialize a new doc owner node
             initClonedOwnerDoc();
         } catch (ParserConfigurationException e) {
@@ -101,6 +108,32 @@ public class DocumentImpl extends NodeImpl implements Document {
         ownerDocCloned = getDocumentBuilderFactory().newDocumentBuilder().newDocument();
         ownerDocCloned.setDocumentURI(getDocumentURI());
         ownerDocCloned.setXmlVersion(getXmlVersion());
+    }
+    
+    /**
+     * Check root node of a document to see if it conform to DOM Structure
+     * Model. The root node can only be ELEMENT_NODE,
+     * PROCESSING_INSTRUCTION_NODE or COMMENT_NODE
+     * 
+     * @return false if root node is text node; otherwise true.
+     */
+    private boolean checkRootNode() {
+        NodeList children = getChildNodes();
+        int elemCount = 0;
+        for (int i = 0; i < children.getLength(); i++) {
+            Node n = children.item(i);
+            switch (n.getNodeType()) {
+            case Node.ELEMENT_NODE:
+                elemCount++;
+                break;
+            case Node.PROCESSING_INSTRUCTION_NODE:
+            case Node.COMMENT_NODE:
+                continue;
+            default:
+                return false;
+            }
+        }
+        return elemCount <= 1 ? true : false;
     }
 
     @Override
