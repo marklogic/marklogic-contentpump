@@ -62,7 +62,7 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     private static DocumentBuilderFactory dbf = null;
 
-    private int isXMLDoc = -1;
+    private int isXMLDoc;
     public DocumentImpl(ExpandedTree tree, int node) {
         super(tree, node);
         isXMLDoc = -1;
