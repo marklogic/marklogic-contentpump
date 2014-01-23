@@ -112,6 +112,12 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     @Override
+    /**
+     * @{inherit}
+     * <p>
+     * Attributes returned contains default attributes enforced by XML Schema in MarkLogic.
+     * </p>
+     */
     public NamedNodeMap getAttributes() {
         return attributes;
     }
