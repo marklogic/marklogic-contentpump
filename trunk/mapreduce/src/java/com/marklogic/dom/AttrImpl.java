@@ -81,6 +81,21 @@ public class AttrImpl extends NodeImpl implements Attr {
     }
 
     @Override
+    public Node getNextSibling() {
+        return null;
+    }
+
+    @Override
+    public Node getParentNode() {
+        return null;
+    }
+
+    @Override
+    public Node getPreviousSibling() {
+        return null;
+    }
+
+    @Override
     public String getNodeValue() {
         return getValue();
     }
