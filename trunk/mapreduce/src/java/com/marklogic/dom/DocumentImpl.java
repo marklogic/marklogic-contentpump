@@ -62,10 +62,10 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     private static DocumentBuilderFactory dbf = null;
 
-    private boolean isXMLDoc;
+    private int isXMLDoc = -1;
     public DocumentImpl(ExpandedTree tree, int node) {
         super(tree, node);
-        isXMLDoc = checkRootNode();
+        isXMLDoc = -1;
     }
 
     private static synchronized DocumentBuilderFactory getDocumentBuilderFactory() {
@@ -92,7 +92,8 @@ public class DocumentImpl extends NodeImpl implements Document {
      */
     public Node cloneNode(boolean deep) {
         try {
-            if (isXMLDoc == false) {
+            if (isXMLDoc == -1) isXMLDoc = checkRootNode();
+            if (isXMLDoc == 1) {
                 throw new UnsupportedOperationException(
                     "Text document cannot be cloned");
             }
@@ -121,7 +122,8 @@ public class DocumentImpl extends NodeImpl implements Document {
      * @return true if XML document; otherwise false.
      */
     public boolean isXMLDoc() {
-        return isXMLDoc;
+        if (isXMLDoc == -1) isXMLDoc = checkRootNode();
+        return isXMLDoc == 0;
     }
     
     /**
@@ -129,9 +131,9 @@ public class DocumentImpl extends NodeImpl implements Document {
      * Model. The root node can only be ELEMENT_NODE,
      * PROCESSING_INSTRUCTION_NODE or COMMENT_NODE.
      * 
-     * @return false if root node violates DOM Structure Model; otherwise true.
+     * @return 1 if root node violates DOM Structure Model; otherwise 0.
      */
-    private boolean checkRootNode() {
+    private int checkRootNode() {
         NodeList children = getChildNodes();
         int elemCount = 0;
         for (int i = 0; i < children.getLength(); i++) {
@@ -144,10 +146,10 @@ public class DocumentImpl extends NodeImpl implements Document {
             case Node.COMMENT_NODE:
                 continue;
             default:
-                return false;
+                return 1;
             }
         }
-        return elemCount <= 1 ? true : false;
+        return elemCount <= 1 ? 0 : 1;
     }
 
     @Override
