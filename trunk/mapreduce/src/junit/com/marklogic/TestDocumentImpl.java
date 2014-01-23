@@ -45,7 +45,7 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             expected.append(t.getDocumentURI());
-            DocumentImpl d = new DocumentImpl(t, i);
+            DocumentImpl d = new DocumentImpl(t, 0);
             actual.append(d.getDocumentURI());
         }
         assertEquals(expected.toString(), actual.toString());
