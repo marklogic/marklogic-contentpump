@@ -40,8 +40,8 @@ import com.marklogic.tree.ExpandedTree;
 
 /**
  * A read-only W3C DOM Node implementation of MarkLogic's internal
- * representation of a document as stored in the expanded tree cache of a forest
- * on disk.
+ * representation of an XML or text document as stored in the expanded tree
+ * cache of a forest on disk.
  * 
  * <p>
  * This interface is effectively read-only: Setters and update methods inherited
@@ -62,8 +62,10 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     private static DocumentBuilderFactory dbf = null;
 
+    private boolean isXMLDoc;
     public DocumentImpl(ExpandedTree tree, int node) {
         super(tree, node);
+        isXMLDoc = checkRootNode();
     }
 
     private static synchronized DocumentBuilderFactory getDocumentBuilderFactory() {
@@ -84,10 +86,13 @@ public class DocumentImpl extends NodeImpl implements Document {
      * Text documents in MarkLogic cannot be cloned.
      * UnsupportedOperationException will be thrown if cloneNode is call on text
      * document. </>
+     * <p>
+     * DocumentType node will not be cloned as it is not part of the Expanded
+     * Tree.</>
      */
     public Node cloneNode(boolean deep) {
         try {
-            if (checkRootNode() == false) {
+            if (isXMLDoc == false) {
                 throw new UnsupportedOperationException(
                     "Text document cannot be cloned");
             }
@@ -112,11 +117,19 @@ public class DocumentImpl extends NodeImpl implements Document {
     }
     
     /**
+     * Document can be an XML document or a text document.
+     * @return true if XML document; otherwise false.
+     */
+    public boolean isXMLDoc() {
+        return isXMLDoc;
+    }
+    
+    /**
      * Check root node of a document to see if it conform to DOM Structure
      * Model. The root node can only be ELEMENT_NODE,
-     * PROCESSING_INSTRUCTION_NODE or COMMENT_NODE
+     * PROCESSING_INSTRUCTION_NODE or COMMENT_NODE.
      * 
-     * @return false if root node is text node; otherwise true.
+     * @return false if root node violates DOM Structure Model; otherwise true.
      */
     private boolean checkRootNode() {
         NodeList children = getChildNodes();
@@ -260,7 +273,8 @@ public class DocumentImpl extends NodeImpl implements Document {
     }
 
     /**
-     * Returns a dummy DocumentTypeImpl object that contains nothing.
+     * Returns a dummy DocumentTypeImpl object that contains nothing. It is not
+     * expected to do anything with the returned object.
      */
     public DocumentType getDoctype() {
         return new DocumentTypeImpl(tree, node);
