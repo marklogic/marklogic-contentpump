@@ -46,10 +46,6 @@ public class RegularBinaryDocument extends BinaryDocument {
         binaryData = tree.binaryData;
     }
     
-    public int getSize() {
-        return size;
-    }
-    
     @Override
     public void readFields(DataInput in) throws IOException {
         super.readFields(in);
@@ -104,6 +100,6 @@ public class RegularBinaryDocument extends BinaryDocument {
     
     @Override
     public long getContentSize() {
-        return size;
+        return size * 4;
     }
 }
