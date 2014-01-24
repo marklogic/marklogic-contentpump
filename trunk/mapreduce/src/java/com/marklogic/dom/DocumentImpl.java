@@ -63,9 +63,13 @@ public class DocumentImpl extends NodeImpl implements Document {
     private static DocumentBuilderFactory dbf = null;
 
     private int isXMLDoc;
+    static final int UNKNOWN_TYPE = -1;
+    static final int VALID_XML = 0;
+    static final int NON_XML = 1;
+
     public DocumentImpl(ExpandedTree tree, int node) {
         super(tree, node);
-        isXMLDoc = -1;
+        isXMLDoc = UNKNOWN_TYPE;
     }
 
     private static synchronized DocumentBuilderFactory getDocumentBuilderFactory() {
@@ -92,8 +96,8 @@ public class DocumentImpl extends NodeImpl implements Document {
      */
     public Node cloneNode(boolean deep) {
         try {
-            if (isXMLDoc == -1) isXMLDoc = checkRootNode();
-            if (isXMLDoc == 1) {
+            if (isXMLDoc == UNKNOWN_TYPE) isXMLDoc = getDocumentType();
+            if (isXMLDoc == NON_XML) {
                 throw new UnsupportedOperationException(
                     "Text document cannot be cloned");
             }
@@ -122,18 +126,19 @@ public class DocumentImpl extends NodeImpl implements Document {
      * @return true if XML document; otherwise false.
      */
     public boolean isXMLDoc() {
-        if (isXMLDoc == -1) isXMLDoc = checkRootNode();
-        return isXMLDoc == 0;
+        if (isXMLDoc == UNKNOWN_TYPE) isXMLDoc = getDocumentType();
+        return isXMLDoc == VALID_XML;
     }
-    
+
     /**
      * Check root node of a document to see if it conform to DOM Structure
      * Model. The root node can only be ELEMENT_NODE,
      * PROCESSING_INSTRUCTION_NODE or COMMENT_NODE.
      * 
-     * @return 1 if root node violates DOM Structure Model; otherwise 0.
+     * @return 1(NON_XML) if root node violates DOM Structure Model; otherwise
+     *         0(VALID_XML).
      */
-    private int checkRootNode() {
+    private int getDocumentType() {
         NodeList children = getChildNodes();
         int elemCount = 0;
         for (int i = 0; i < children.getLength(); i++) {
@@ -146,10 +151,10 @@ public class DocumentImpl extends NodeImpl implements Document {
             case Node.COMMENT_NODE:
                 continue;
             default:
-                return 1;
+                return NON_XML;
             }
         }
-        return elemCount <= 1 ? 0 : 1;
+        return elemCount <= 1 ? VALID_XML : NON_XML;
     }
 
     @Override
