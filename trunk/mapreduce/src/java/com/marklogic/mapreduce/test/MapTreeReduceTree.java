@@ -41,12 +41,12 @@ public class MapTreeReduceTree extends Configured implements Tool {
                     LargeBinaryDocument lbd = (LargeBinaryDocument)value;
                     System.out.println("path: " + lbd.getPath());
                     System.out.println("offset: " + lbd.getOffset());
-                    System.out.println("size: " + lbd.getSize());
+                    System.out.println("size: " + lbd.getContentSize());
                     System.out.println("binary orig len: " + 
                             lbd.getBinaryOrigLen());
                 } else if (value instanceof RegularBinaryDocument) {
                     RegularBinaryDocument rbd = (RegularBinaryDocument)value;
-                    System.out.println("size: " + rbd.getSize());
+                    System.out.println("size: " + rbd.getContentSize());
                 }
             }          
         }

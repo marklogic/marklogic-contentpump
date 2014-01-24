@@ -38,21 +38,65 @@ import org.apache.hadoop.io.Writable;
  */
 public interface MarkLogicDocument extends Writable {
 
+    /**
+     * Return content type of the document.
+     * 
+     * @return content type of the document.
+     */
     public ContentType getContentType();
 
+    /**
+     * Return content as Text.  
+     * 
+     * @return content.
+     * @throws UnsupportedOperationException for binary documents.
+     */
     public Text getContentAsText();
 
+    /**
+     * Return content as byte array.
+     * 
+     * @return content.
+     */
     public byte[] getContentAsByteArray();
-
+    
+    /**
+     * Return content as byte stream.
+     * 
+     * @return content.
+     */
     public InputStream getContentAsByteStream();
     
+    /**
+     * Return content as MarkLogicNode.
+     * 
+     * @return content.
+     * @throws UnsupportedOperationException for binary documents.
+     */
     public MarkLogicNode getContentAsMarkLogicNode();
     
+    /**
+     * Return content as String.
+     * 
+     * @return content.
+     * @throws UnsupportedEncodingException
+     * @throws UnsupportedOperationException for binary documents.
+     */
     public String getContentAsString() 
     throws UnsupportedEncodingException;
     
+    /**
+     * Return byte length of the content.
+     * 
+     * @return byte length of the content.
+     */
     public long getContentSize();
     
+    /**
+     * Whether the content can be streamed.
+     * 
+     * @return true for LargeBinaryDocument, false for the rest.
+     */
     public boolean isStreamable();
 
     public void readFields(DataInput in) throws IOException;

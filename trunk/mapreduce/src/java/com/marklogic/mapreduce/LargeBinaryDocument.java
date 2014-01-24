@@ -81,10 +81,6 @@ public class LargeBinaryDocument extends BinaryDocument {
     public long getOffset() {
         return offset;
     }
-    
-    public long getSize() {
-        return size;
-    }
 
     public long getBinaryOrigLen() {
         return binaryOrigLen;
