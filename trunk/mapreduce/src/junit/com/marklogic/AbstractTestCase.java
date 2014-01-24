@@ -30,7 +30,7 @@ public class AbstractTestCase extends TestCase {
     int num;
     static Set<String> expectedMissingNSDecl = new HashSet<String>();
     static {
-        expectedMissingNSDecl.add("acronym@xmlns=");
+        expectedMissingNSDecl.add("acronym@xmlns=#parent is null#nextSibling is null");
     }
 
     AbstractTestCase(ForestData fd) {
@@ -113,6 +113,8 @@ public class AbstractTestCase extends TestCase {
                     Attr attr = (Attr) nnMap.item(j);
                     String tmp = n.getNodeName() + "@" + attr.getName() + "="
                         + attr.getValue().replaceAll("\\s+", "");
+                    tmp += "#parent is " + attr.getParentNode();
+                    tmp += "#nextSibling is " + attr.getNextSibling();
                     if (LOG.isDebugEnabled())
                         LOG.debug(tmp);
                     sb.add(tmp);
