@@ -48,7 +48,7 @@ public class AttrImpl extends NodeImpl implements Attr {
         super(tree, node);
     }
 
-    public Node cloneNode(Document doc, boolean deep) {
+    protected Node cloneNode(Document doc, boolean deep) {
         Attr attr = doc.createAttributeNS(getNamespaceURI(), getLocalName());
         attr.setValue(getValue());
         attr.setPrefix(getPrefix());
@@ -59,47 +59,58 @@ public class AttrImpl extends NodeImpl implements Attr {
         return tree.attrNodeNodeNameRepID[tree.nodeRepID[node]];
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getLocalName() {
         return tree.atomString(tree.nodeNameNameAtom[getNodeID()]);
     }
 
+    /** {@inheritDoc} */
     public String getName() {
         String prefix = getPrefix();
         return prefix == null || prefix.equals("") ? getLocalName() : prefix
             + ":" + getLocalName();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNamespaceURI() {
         return tree.atomString(tree.nodeNameNamespaceAtom[getNodeID()]);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNodeName() {
         return getName();
     }
 
+    /** {@inheritDoc} */
     @Override
     public Node getNextSibling() {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Node getParentNode() {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Node getPreviousSibling() {
         return null;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNodeValue() {
         return getValue();
     }
-
+    /** 
+     * {@inheritDoc}
+     * OwnerElement for a namespace attribute is null.
+     */
     public Element getOwnerElement() {
         return (Element) tree.node(tree.nodeParentNodeRepID[node]);
     }
@@ -130,6 +141,7 @@ public class AttrImpl extends NodeImpl implements Attr {
         return -1;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getPrefix() {
         int ns = tree.nodeNameNamespaceAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]];
@@ -148,10 +160,12 @@ public class AttrImpl extends NodeImpl implements Attr {
         return null;
     }
 
+    /** {@inheritDoc} */
     public boolean getSpecified() {
         return true;
     }
 
+    /** {@inheritDoc} */
     public String getValue() {
         return tree.getText(tree.attrNodeTextRepID[tree.nodeRepID[node]]);
     }
@@ -161,11 +175,13 @@ public class AttrImpl extends NodeImpl implements Attr {
         return false;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String lookupNamespaceURI(String prefix) {
         return getOwnerElement().lookupNamespaceURI(prefix);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String lookupPrefix(String namespaceURI) {
         return getOwnerElement().lookupPrefix(namespaceURI);

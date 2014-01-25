@@ -32,7 +32,7 @@ import com.marklogic.tree.ExpandedTree;
  * from <code>org.w3c.Node</code> are not supported and will raise an exception
  * if called.
  * </p>
- * 
+ * \
  * @author jchen
  */
 public class CommentImpl extends CharacterDataImpl implements Comment {
@@ -41,25 +41,29 @@ public class CommentImpl extends CharacterDataImpl implements Comment {
         super(tree, node);
     }
 
-    public Node cloneNode(Document doc, boolean deep) {
+    protected Node cloneNode(Document doc, boolean deep) {
         return doc.createComment(getData());
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNodeName() {
         return "#comment";
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getTextContent() throws DOMException {
         return getNodeValue();
     }
     
+    /** {@inheritDoc} */
     @Override
     public String lookupPrefix(String namespaceURI) {
     	return getParentNode().lookupPrefix(namespaceURI);
     }
     
+    /** {@inheritDoc} */
     @Override
     public String lookupNamespaceURI(String prefix) {
     	return getParentNode().lookupNamespaceURI(prefix);

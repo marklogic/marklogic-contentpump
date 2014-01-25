@@ -83,16 +83,14 @@ public class DocumentImpl extends NodeImpl implements Document {
     /**
      * {@inheritDoc}
      * <p>
-     * Namespace declaration is cloned as attribute, whose owner document
-     * contains this attribute only.
-     * </p>
-     * <p>
      * Text documents in MarkLogic cannot be cloned.
      * UnsupportedOperationException will be thrown if cloneNode is call on text
      * document. </>
      * <p>
      * DocumentType node will not be cloned as it is not part of the Expanded
      * Tree.</>
+     * 
+     * 
      */
     public Node cloneNode(boolean deep) {
         try {

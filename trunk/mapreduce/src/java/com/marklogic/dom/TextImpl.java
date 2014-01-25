@@ -41,7 +41,7 @@ public class TextImpl extends CharacterDataImpl implements Text {
         super(tree, node);
     }
 
-    public Node cloneNode(Document doc, boolean deep) {
+    protected Node cloneNode(Document doc, boolean deep) {
         return doc.createTextNode(getNodeValue());
     }
 
