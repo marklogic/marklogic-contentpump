@@ -54,10 +54,12 @@ public abstract class CharacterDataImpl extends NodeImpl implements
         return tree.getText(tree.nodeRepID[node]);
     }
 
+    /** {@inheritDoc} */
     public int getLength() {
         return getData().length();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNodeValue() throws DOMException {
         return getData();
@@ -79,6 +81,7 @@ public abstract class CharacterDataImpl extends NodeImpl implements
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
+    /** {@inheritDoc} */
     public String substringData(int offset, int count) throws DOMException {
         if ((offset < 0) || (count < 0)) {
             throw new DOMException(DOMException.INDEX_SIZE_ERR, null);

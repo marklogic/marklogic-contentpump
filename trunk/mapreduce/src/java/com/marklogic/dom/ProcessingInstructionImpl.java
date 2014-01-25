@@ -42,28 +42,33 @@ public class ProcessingInstructionImpl extends NodeImpl implements
         super(tree, node);
     }
 
-    public Node cloneNode(Document doc, boolean deep) {
+    protected Node cloneNode(Document doc, boolean deep) {
         return doc.createProcessingInstruction(getTarget(), getData());
     }
 
+    /** {@inheritDoc} */
     public String getData() {
         return tree.getText(tree.piNodeTextRepID[tree.nodeRepID[node]]);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNodeName() {
         return getTarget();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getNodeValue() {
         return getData();
     }
 
+    /** {@inheritDoc} */
     public String getTarget() {
         return tree.atomString(tree.piNodeTargetAtom[tree.nodeRepID[node]]);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getTextContent() throws DOMException {
         return getNodeValue();

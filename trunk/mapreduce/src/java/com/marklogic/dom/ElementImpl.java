@@ -55,11 +55,7 @@ public class ElementImpl extends NodeImpl implements Element {
         numNSDecl = -1;
     }
 
-    public Node cloneNode(boolean deep) {
-        throw new UnsupportedOperationException();
-    }
-
-    public Node cloneNode(Document doc, boolean deep) {
+    protected Node cloneNode(Document doc, boolean deep) {
         Element elem = doc.createElementNS(getNamespaceURI(), getTagName());
         elem.setPrefix(getPrefix());
 
@@ -90,20 +86,24 @@ public class ElementImpl extends NodeImpl implements Element {
         return elem;
     }
 
+    /** {@inheritDoc} */
     public String getAttribute(String name) {
     	Attr attr = getAttributeNode(name);
         return attr==null?"":attr.getValue();
     }
 
+    /** {@inheritDoc} */
     public Attr getAttributeNode(String name) {
         return (attributes==null)?null:(Attr)(attributes.getNamedItem(name));
     }
 
+    /** {@inheritDoc} */
     public Attr getAttributeNodeNS(String namespaceURI, String localName){
         return (attributes==null)?null:(AttrImpl)getAttributes().getNamedItemNS(namespaceURI,
             localName);
     }
 
+    /** {@inheritDoc} */
     public String getAttributeNS(String namespaceURI, String localName) {
     	if (attributes==null) return "";
     	AttrImpl attr = 
@@ -111,17 +111,19 @@ public class ElementImpl extends NodeImpl implements Element {
         return attr==null?"":attr.getValue();
     }
 
-    @Override
+    
     /**
-     * @{inherit}
-     * <p>
+     * {@inheritDoc}
+     * <P>
      * Attributes returned contains default attributes enforced by XML Schema in MarkLogic.
-     * </p>
+     * 
      */
+    @Override
     public NamedNodeMap getAttributes() {
         return attributes;
     }
 
+    /** {@inheritDoc} */
     @Override
     public NodeList getChildNodes() {
         return new NodeList() {
@@ -137,6 +139,7 @@ public class ElementImpl extends NodeImpl implements Element {
         };
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean isDefaultNamespace(String namespaceURI) {
         String namespace = this.getNamespaceURI();
@@ -171,10 +174,12 @@ public class ElementImpl extends NodeImpl implements Element {
         return false;
     }
 
+    /** {@inheritDoc} */
     public NodeList getElementsByTagNameNS(String namespaceURI, String name) {
         return getElementsByTagNameNSOrNodeName(namespaceURI, name, false);
     }
 
+    /** {@inheritDoc} */
     public NodeList getElementsByTagName(String localName) {
         return getElementsByTagNameNSOrNodeName(null, localName, true);
     }

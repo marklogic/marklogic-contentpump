@@ -114,7 +114,7 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         }
     }
 
-    public Node item(int index, Document ownerDoc)
+    protected Node item(int index, Document ownerDoc)
         throws ParserConfigurationException {
         int numAttr = getNumAttr();
         ExpandedTree tree = element.tree;

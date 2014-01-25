@@ -80,9 +80,9 @@ public abstract class NodeImpl implements Node {
 
     /**
      * CloneNode is only supported for document node.
-     * <p>
+     * 
      * {@inheritDoc}
-     * </p>
+     * 
      */
     public Node cloneNode(boolean deep) {
         throw new UnsupportedOperationException();
@@ -95,12 +95,15 @@ public abstract class NodeImpl implements Node {
      *            owner document
      * @param deep
      *            the flag to indicate deep clone or not
-     * @return
+     * @return null
      */
-    public Node cloneNode(Document doc, boolean deep) {
+    protected Node cloneNode(Document doc, boolean deep) {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public short compareDocumentPosition(Node other) throws DOMException {
         if (other instanceof NodeImpl) {
             NodeImpl otherNode = (NodeImpl) other;
@@ -134,14 +137,16 @@ public abstract class NodeImpl implements Node {
         }
     }
 
+    /** {@inheritDoc} */
     public NamedNodeMap getAttributes() {
         return null;
     }
 
+    /** {@inheritDoc} */
     public String getBaseURI() {
         return tree.getDocumentURI();
     }
-
+    /** {@inheritDoc} */
     public NodeList getChildNodes() {
         return emptyNodeList;
     }
@@ -152,18 +157,21 @@ public abstract class NodeImpl implements Node {
         return this;
     }
 
+    /** {@inheritDoc} */
     public Node getFirstChild() {
         return null;
     }
-
+    /** {@inheritDoc} */
     public Node getLastChild() {
         return null;
     }
 
+    /** {@inheritDoc} */
     public String getLocalName() {
         return null;
     }
 
+    /** {@inheritDoc} */
     public String getNamespaceURI() {
         return null;
     }
@@ -172,25 +180,36 @@ public abstract class NodeImpl implements Node {
         return null;
     }
 
+    /** {@inheritDoc} */
     public Node getNextSibling() {
         NodeImpl p = (NodeImpl) getParentNode();
         return (p == null ? null : p.getNextChild(node));
     }
 
+    /** {@inheritDoc} */
     public abstract String getNodeName();
 
+    /** {@inheritDoc} */
     public short getNodeType() {
         return NodeKind.domType(tree.nodeKind[node]);
     }
 
+    /** {@inheritDoc} */
     public String getNodeValue() throws DOMException {
         return null; // overridden in some subclasses
     }
 
+    /** 
+     * {@inheritDoc} 
+     * 
+     * OwnerDocument of namespace attribute is created artificially, 
+     * which only contains the attribute only.
+     */
     public Document getOwnerDocument() {
         return (DocumentImpl) (this.tree.node(0));
     }
 
+    /** {@inheritDoc} */
     public Node getParentNode() {
         // assume no linkNodeKind
         return tree.node(tree.nodeParentNodeRepID[node]);
@@ -200,6 +219,7 @@ public abstract class NodeImpl implements Node {
         return -1;
     }
 
+    /** {@inheritDoc} */
     public String getPrefix() {
         return null;
     }
@@ -220,7 +240,10 @@ public abstract class NodeImpl implements Node {
             && child.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE;
     }
 
-    // overwritten by some Text, Comment and PI
+    /** {@inheritDoc} 
+     * 
+     *  Overwritten by TextImpl, CommentImpl and ProcessingInstructionImpl
+     */
     public String getTextContent() throws DOMException {
         StringBuilder sb = new StringBuilder();
         getTextContent(sb);
@@ -243,10 +266,12 @@ public abstract class NodeImpl implements Node {
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR, null);
     }
 
+    /** {@inheritDoc} */
     public boolean hasAttributes() {
         return false;
     }
 
+    /** {@inheritDoc} */
     public boolean hasChildNodes() {
         return false;
     }
@@ -275,6 +300,7 @@ public abstract class NodeImpl implements Node {
         return p.isDefaultNamespace(namespaceURI);
     }
 
+    /** {@inheritDoc} */
     public boolean isEqualNode(Node other) {
 
         // Note that normalization can affect equality; to avoid this,
@@ -316,6 +342,7 @@ public abstract class NodeImpl implements Node {
         return true;
     }
 
+    /** {@inheritDoc} */
     public boolean isSameNode(Node other) {
         return (other instanceof NodeImpl)
             && (((NodeImpl) other).tree == tree)
@@ -379,12 +406,13 @@ public abstract class NodeImpl implements Node {
         return ns;
     }
 
+    /** {@inheritDoc} */
     // http://www.w3.org/TR/DOM-Level-3-Core/namespaces-algorithms.html#lookupNamespacePrefixAlgo
-
     public String lookupNamespaceURI(String prefix) {
         return null;
     }
 
+    /** {@inheritDoc} */
     public String lookupPrefix(String namespaceURI) {
         return null;
     }
