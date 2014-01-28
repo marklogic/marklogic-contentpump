@@ -247,9 +247,14 @@ public class AbstractTestCase extends TestCase {
                 child = child.getPreviousSibling();
                 continue;
             }
+            if ("#cdata-section".equals(child.getNodeName())) {
+                sb.append(child.getNodeType() -1).append("#");
+                sb.append("#text").append("#");
+            } else {
+                sb.append(child.getNodeType()).append("#");
+                sb.append(child.getNodeName()).append("#");
+            }
 
-            sb.append(child.getNodeType()).append("#");
-            sb.append(child.getNodeName()).append("#");
             sb.append(child.getNodeValue()).append("#");
             sb.append("\n");
             walkDOMPreviousSibling(child.getChildNodes(), sb);
