@@ -202,7 +202,7 @@ public class TestDocumentImpl extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
         	String uri = t.getDocumentURI();
-        	
+
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         	if (doc == null) continue;
             DocumentImpl d = new DocumentImpl(t, 0);
@@ -215,18 +215,15 @@ public class TestDocumentImpl extends AbstractTestCase {
               Node curr = children.item(k);
               if(Utils.isWhitespaceNode(curr)) continue;
               expected.append("#NODENAME##").append(curr.getNodeName()).append("#").append("\n");
-              String nodename = curr.getNodeName();
-              int tok = nodename.indexOf(':'); 
-              String prefix = (tok == -1)?null:nodename.substring(0, tok);
-              String namespace = (tok == -1)?null:curr.lookupNamespaceURI(prefix);
-              String localname = (tok == -1)?nodename:nodename.substring(tok+1);
-              expected.append("#LOCALNAME##").append(localname).append("#").append("\n");
+              String namespace = curr.getNamespaceURI();
+              expected.append("#LOCALNAME##").append(curr.getLocalName()).append("#").append("\n");
               expected.append("#URI##").append(namespace).append("#").append("\n");
               expected.append("\n");
             }
             children = d.getFirstChild().getChildNodes();
             for (int k = 0; k < children.getLength(); k++) {
               Node curr = children.item(k);
+              if(Utils.isWhitespaceNode(curr)) continue;
               actual.append("#NODENAME##").append(curr.getNodeName()).append("#").append("\n");
               actual.append("#LOCALNAME##").append(curr.getLocalName()).append("#").append("\n");
               actual.append("#URI##").append(curr.getNamespaceURI()).append("#").append("\n");
