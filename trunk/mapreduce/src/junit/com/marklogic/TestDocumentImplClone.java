@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,7 +20,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.marklogic.dom.DocumentImpl;
-import com.marklogic.dom.ElementImpl;
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 
@@ -217,18 +215,15 @@ public class TestDocumentImplClone extends AbstractTestCase {
               Node curr = children.item(k);
               if(Utils.isWhitespaceNode(curr)) continue;
               expected.append("#NODENAME##").append(curr.getNodeName()).append("#").append("\n");
-              String nodename = curr.getNodeName();
-              int tok = nodename.indexOf(':'); 
-              String prefix = (tok == -1)?null:nodename.substring(0, tok);
-              String namespace = (tok == -1)?null:curr.lookupNamespaceURI(prefix);
-              String localname = (tok == -1)?nodename:nodename.substring(tok+1);
-              expected.append("#LOCALNAME##").append(localname).append("#").append("\n");
+              String namespace = curr.getNamespaceURI();
+              expected.append("#LOCALNAME##").append(curr.getLocalName()).append("#").append("\n");
               expected.append("#URI##").append(namespace).append("#").append("\n");
               expected.append("\n");
             }
             children = d.getFirstChild().getChildNodes();
             for (int k = 0; k < children.getLength(); k++) {
               Node curr = children.item(k);
+              if(Utils.isWhitespaceNode(curr)) continue;
               actual.append("#NODENAME##").append(curr.getNodeName()).append("#").append("\n");
               actual.append("#LOCALNAME##").append(curr.getLocalName()).append("#").append("\n");
               actual.append("#URI##").append(curr.getNamespaceURI()).append("#").append("\n");
