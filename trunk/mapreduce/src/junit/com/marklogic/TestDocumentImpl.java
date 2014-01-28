@@ -549,6 +549,7 @@ public class TestDocumentImpl extends AbstractTestCase {
             				q.add(nl.item(k).getChildNodes());
             			if (nl.item(k).getNodeType() == Node.TEXT_NODE) continue;
             			if ("#cdata-section".equals(nl.item(k).getNodeName())) continue;
+            			if (nl.item(k).getNodeType() == Node.COMMENT_NODE) continue;
                         expected.append("#NODE##").
              		     append(nl.item(k).getNodeName()).append("#").append("\n");
                         for (int p=0; p<pres.length; p++) {
@@ -576,6 +577,7 @@ public class TestDocumentImpl extends AbstractTestCase {
             			if (nl.item(k).hasChildNodes()) 
             				q.add(nl.item(k).getChildNodes());
             			if (nl.item(k).getNodeType() == Node.TEXT_NODE) continue;
+            			if (nl.item(k).getNodeType() == Node.COMMENT_NODE) continue;
             			actual.append("#NODE##").
              		     append(nl.item(k).getNodeName()).append("#").append("\n");
                         for (int p=0; p<pres.length; p++) {
