@@ -61,11 +61,28 @@ public class AbstractTestCase extends TestCase {
     }
 
     protected void walkDOM(NodeList nodes, StringBuilder sb) {
+        boolean seenText = false;
         for (int i = 0; i < nodes.getLength(); i++) {
             Node child = nodes.item(i);
-            sb.append(child.getNodeType()).append("#");
-            sb.append(child.getNodeName()).append("#");
-            sb.append(child.getNodeValue()).append("#");
+            if (Utils.isWhitespaceNode(child)) continue;
+            
+            if (child.getNodeType() == Node.TEXT_NODE) seenText = true;
+            if ("#cdata-section".equals(child.getNodeName())) {
+                if (seenText) {
+                    //remove the \n from immediate previous text node
+                    sb.setLength(sb.length() -1 );
+                } else {
+                    sb.append(child.getNodeType()-1).append("#");
+                    //no text, cdata itself becomes text
+                    sb.append("#text").append("#");
+                }
+                sb.append(child.getNodeValue().replaceAll("\\s+", "")).append("#");
+            } else {
+                sb.append(child.getNodeType()).append("#");
+                sb.append(child.getNodeName()).append("#");
+                sb.append(child.getNodeValue()==null?null:child.getNodeValue().replaceAll("\\s+", "")).append("#");
+            }
+
             if (child.hasChildNodes()) {
                 sb.append("\n");
                 walkDOM(child.getChildNodes(), sb);
@@ -156,17 +173,32 @@ public class AbstractTestCase extends TestCase {
     protected void walkDOMNextSibling(NodeList nodes, StringBuilder sb) {
         if (nodes.getLength() <= 0)
             return;
-
+        boolean seenText = false;
         Node child = nodes.item(0);
         while (child != null) {
             if (Utils.isWhitespaceNode(child)) {
                 child = child.getNextSibling();
                 continue;
             }
-            sb.append(child.getNodeType()).append("#");
-            sb.append(child.getNodeName()).append("#");
-            sb.append(child.getNodeValue()).append("#");
+            if (child.getNodeType() == Node.TEXT_NODE) seenText = true;
+            if ("#cdata-section".equals(child.getNodeName())) {
+                if (seenText) {
+                    //remove the \n from immediate previous text node
+                    sb.setLength(sb.length() -1 );
+                } else {
+                    sb.append(child.getNodeType()-1).append("#");
+                    //no text, cdata itself becomes text
+                    sb.append("#text").append("#");
+                }
+                sb.append(child.getNodeValue().replaceAll("\\s+", ""));
+            } else {
+                sb.append(child.getNodeType()).append("#");
+                sb.append(child.getNodeName()).append("#");
+                sb.append(child.getNodeValue()==null? null:child.getNodeValue().replaceAll("\\s+", ""));
+                
+            }
             sb.append("\n");
+            
             walkDOMNextSibling(child.getChildNodes(), sb);
             // next sibling
             child = child.getNextSibling();
@@ -174,14 +206,31 @@ public class AbstractTestCase extends TestCase {
     }
 
     protected void walkDOMParent(NodeList nodes, StringBuilder sb) {
+        boolean firstSeenCDATA = false;
+        boolean seenText = false;
         for (int i = 0; i < nodes.getLength(); i++) {
             Node child = nodes.item(i);
             if (Utils.isWhitespaceNode(child))
                 continue;
-            sb.append(child.getNodeType()).append("#");
-            sb.append(child.getNodeName()).append("'s parent is ");
-            sb.append(child.getParentNode().getNodeName()).append("#");
+            if (child.getNodeType() == Node.TEXT_NODE) seenText = true;
+            if ("#cdata-section".equals(child.getNodeName())) {
+                if(firstSeenCDATA == false) {
+                    firstSeenCDATA = true;
+                    if(seenText) continue;
+                    //no text, so cdata itself will become text in xdm
+                    sb.append(child.getNodeType() - 1).append("#");
+                    sb.append("#text").append("'s parent is ");
+                    sb.append(child.getParentNode().getNodeName()).append("#");
+                } else {
+                    continue;
+                }
+            } else {
+                sb.append(child.getNodeType()).append("#");
+                sb.append(child.getNodeName()).append("'s parent is ");
+                sb.append(child.getParentNode().getNodeName()).append("#");
+            }
             sb.append("\n");
+            
             if (child.hasChildNodes()) {
                 walkDOMParent(child.getChildNodes(), sb);
             }
@@ -198,6 +247,7 @@ public class AbstractTestCase extends TestCase {
                 child = child.getPreviousSibling();
                 continue;
             }
+
             sb.append(child.getNodeType()).append("#");
             sb.append(child.getNodeName()).append("#");
             sb.append(child.getNodeValue()).append("#");
@@ -209,13 +259,27 @@ public class AbstractTestCase extends TestCase {
     }
 
     protected void walkDOMTextContent(NodeList nodes, StringBuilder sb) {
+        boolean seenText = false;
         for (int i = 0; i < nodes.getLength(); i++) {
             Node n = nodes.item(i);
             if (Utils.isWhitespaceNode(n))
                 continue;
-            sb.append(n.getNodeType()).append("#");
-            sb.append(n.getTextContent().replaceAll("\\s+", "")).append("#");
+            if (n.getNodeType() == Node.TEXT_NODE) seenText = true;
+            if ("#cdata-section".equals(n.getNodeName())) {
+                if (seenText) {
+                    //remove the # from immediate previous text node
+                    sb.setLength(sb.length() -1 );
+                } else {
+                    sb.append(n.getNodeType()-1).append("#");
+                }
+                sb.append(n.getTextContent().replaceAll("\\s+", ""));
+                
+            } else {
+                sb.append(n.getNodeType()).append("#");
+                sb.append(n.getTextContent().replaceAll("\\s+", ""));
+            }
             sb.append("\n");
+            
             if (n.hasChildNodes()) {
                 walkDOMTextContent(n.getChildNodes(), sb);
             }

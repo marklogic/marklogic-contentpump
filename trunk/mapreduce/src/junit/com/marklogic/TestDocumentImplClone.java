@@ -215,7 +215,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             NodeList children = doc.getFirstChild().getChildNodes();
             for (int k = 0; k < children.getLength(); k++) {
               Node curr = children.item(k);
-//              if(Utils.isWhitespaceNode(curr)) continue;
+              if(Utils.isWhitespaceNode(curr)) continue;
               expected.append("#NODENAME##").append(curr.getNodeName()).append("#").append("\n");
               String nodename = curr.getNodeName();
               int tok = nodename.indexOf(':'); 
@@ -553,7 +553,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             			if (nl.item(k).hasChildNodes()) 
             				q.add(nl.item(k).getChildNodes());
             			if (nl.item(k).getNodeType() == Node.TEXT_NODE) continue;
-            			if ("cdata-section".equals(nl.item(k).getNodeName())) continue;
+            			if ("#cdata-section".equals(nl.item(k).getNodeName())) continue;
                         expected.append("#NODE##").
              		     append(nl.item(k).getNodeName()).append("#").append("\n");
                         for (int p=0; p<pres.length; p++) {
@@ -637,14 +637,14 @@ public class TestDocumentImplClone extends AbstractTestCase {
             			if (nl.item(k).hasChildNodes()) 
             				q.add(nl.item(k).getChildNodes());
             			if (nl.item(k).getNodeType() != Node.ELEMENT_NODE) continue;
-            			if ("cdata-section".equals(nl.item(k).getNodeName())) continue;
+            			if ("#cdata-section".equals(nl.item(k).getNodeName())) continue;
                         expected.append("#NODE##").
              		     append(nl.item(k).getNodeName()).append("#").append("\n");
                         for (int p=0; p<attrs.length; p++) {
                         	Element elem = (Element)nl.item(k);
                         	String value = elem.getAttribute(attrs[p]);
                         	expected.append("#ATTR#").append(attrs[p]).
-                        		append("#VALUE#").append(value).append("\n");
+                        		append("#VALUE#").append(value.replaceAll("\\s+", "")).append("\n");
                         }
             		}
             	}
@@ -659,14 +659,14 @@ public class TestDocumentImplClone extends AbstractTestCase {
             			if (nl.item(k).hasChildNodes()) 
             				q.add(nl.item(k).getChildNodes());
             			if (nl.item(k).getNodeType() != Node.ELEMENT_NODE) continue;
-            			if ("cdata-section".equals(nl.item(k).getNodeName())) continue;
+            			if ("#cdata-section".equals(nl.item(k).getNodeName())) continue;
             			actual.append("#NODE##").
              		     append(nl.item(k).getNodeName()).append("#").append("\n");
                         for (int p=0; p<attrs.length; p++) {
                         	Element elem = (Element)nl.item(k);
                         	String value = elem.getAttribute(attrs[p]);
                         	actual.append("#ATTR#").append(attrs[p]).
-                        		append("#VALUE#").append(value).append("\n");
+                        		append("#VALUE#").append(value.replaceAll("\\s+", "")).append("\n");
                         }
             		}
             	}
