@@ -486,8 +486,8 @@ public class TestDocumentImpl extends AbstractTestCase {
                 for (int j=0; j < children.getLength(); j++) {
                 	if (children.item(j).hasChildNodes()) {
                 		Node child = children.item(j).getChildNodes().item(0);
-                		expected.append("#NODE1#").append(child.getNodeName());
-                		expected.append("#NODE2#").append(children.item(0).getNodeName()).append("#\n");
+                		// expected.append("#NODE1#").append(child.getNodeName());
+                		// expected.append("#NODE2#").append(children.item(0).getNodeName()).append("#\n");
                     	expected.append(getPostition(children.item(0).compareDocumentPosition(child))).append("#\n");
                     	expected.append(getPostition(child.compareDocumentPosition(children.item(0)))).append("#\n");
                 	}
@@ -502,8 +502,8 @@ public class TestDocumentImpl extends AbstractTestCase {
                 for (int j=0; j < children.getLength(); j++) {
                 	if (children.item(j).hasChildNodes()) {
                 		Node child = children.item(j).getChildNodes().item(0);
-                		actual.append("#NODE1#").append(child.getNodeName());
-                		actual.append("#NODE2#").append(children.item(0).getNodeName()).append("#\n");;
+                		// actual.append("#NODE1#").append(child.getNodeName());
+                		// actual.append("#NODE2#").append(children.item(0).getNodeName()).append("#\n");;
                 		actual.append(getPostition(children.item(0).compareDocumentPosition(child))).append("#\n");
                 		actual.append(getPostition(child.compareDocumentPosition(children.item(0)))).append("#\n");
                 	}
