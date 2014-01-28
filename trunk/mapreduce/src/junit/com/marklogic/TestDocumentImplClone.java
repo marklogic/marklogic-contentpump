@@ -754,7 +754,8 @@ public class TestDocumentImplClone extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            
+            if (uri.equals("hc_staff.xml"))
+                continue;
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         	if (doc == null) continue;
         	expected.append(uri);
