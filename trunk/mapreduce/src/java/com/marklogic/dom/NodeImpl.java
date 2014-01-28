@@ -299,6 +299,11 @@ public abstract class NodeImpl implements Node {
         Node p = getParentNode();
         return p.isDefaultNamespace(namespaceURI);
     }
+    
+    private boolean notequals(String a, String b){
+    	if (a==null) return (b!=null);
+    	return !a.equals(b);
+    }
 
     /** {@inheritDoc} */
     public boolean isEqualNode(Node other) {
@@ -306,16 +311,16 @@ public abstract class NodeImpl implements Node {
         // Note that normalization can affect equality; to avoid this,
         // nodes should be normalized before being compared.
         // For the moment, normalization cannot be done.
-
+    	if (other==null) return false;
         if (getNodeType() != other.getNodeType())
             return false;
-        if (getLocalName() != other.getLocalName())
+        if (!getLocalName().equals(other.getLocalName()))
             return false;
-        if (getNamespaceURI() != other.getNamespaceURI())
+        if (notequals(getNamespaceURI(),other.getNamespaceURI()))
             return false;
-        if (getPrefix() != other.getPrefix())
+        if (notequals(getPrefix(), other.getPrefix()))
             return false;
-        if (getNodeValue() != other.getNodeValue())
+        if (notequals(getNodeValue(),other.getNodeValue()))
             return false;
         if (hasChildNodes() != other.hasChildNodes())
             return false;
