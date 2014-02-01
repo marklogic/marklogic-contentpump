@@ -111,8 +111,9 @@ FileAndDirectoryInputFormat<DocumentURI, Text> {
                     LOG.error("Incorrect delimitor: " + delimiter
                         + ". Expects single character.");
                 }
-                String encoding = conf
-                    .get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
+                String encoding = conf.get(
+                    MarkLogicConstants.OUTPUT_CONTENT_ENCODING,
+                    MarkLogicConstants.DEFAULT_OUTPUT_CONTENT_ENCODING);
                 InputStreamReader instream = new InputStreamReader(fileIn, encoding);
 
                 CSVParser parser = new CSVParser(instream, new CSVStrategy(
