@@ -62,9 +62,7 @@ import com.marklogic.contentpump.utilities.ReflectionUtil;
  */
 public class LocalJobRunner implements ConfigConstants {
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
-    public static final int DEFAULT_IMPORT_THREAD_COUNT = 4;
-    public static final int DEFAULT_COPY_THREAD_COUNT = 4;
-    public static final int DEFAULT_EXPORT_THREAD_COUNT = 4;
+    public static final int DEFAULT_THREAD_COUNT = 4;
     
     private Job job;
     private ExecutorService pool;
@@ -83,17 +81,7 @@ public class LocalJobRunner implements ConfigConstants {
         this.job = job;
         this.cmd = cmd;
         
-        switch (cmd) {
-        case IMPORT:
-            threadCount = DEFAULT_IMPORT_THREAD_COUNT;
-            break;
-        case COPY:
-            threadCount = DEFAULT_COPY_THREAD_COUNT;
-            break;
-        case EXPORT:
-            threadCount = DEFAULT_EXPORT_THREAD_COUNT;
-            break;
-        }
+        threadCount = DEFAULT_THREAD_COUNT;
         if (cmdline.hasOption(THREAD_COUNT)) {
             threadCount = Integer.parseInt(
             		cmdline.getOptionValue(THREAD_COUNT));
