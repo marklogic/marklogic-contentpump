@@ -28,7 +28,7 @@ public class TestImportDocs {
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
             + " -mode local -output_uri_prefix test/"
             + " -output_collections test,ML -port 5275"
-            + " -fastload true"
+            + " -fastload false"
             + " -output_uri_replace wiki,'wiki1'";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -194,6 +194,30 @@ public class TestImportDocs {
             + " -namespace test"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -transform_module /lc.xqy";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportTransform25444() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/trans.xqy");
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/foo.0"
+            + " -transform_namespace dmc"
+            + " -transform_module /trans.xqy";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
@@ -387,7 +411,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips" 
-            + " -thread_count 3 -mode local"
+            + " -thread_count 2 -mode local"
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");

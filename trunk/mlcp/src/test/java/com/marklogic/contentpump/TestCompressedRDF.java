@@ -133,6 +133,41 @@ public class TestCompressedRDF {
 
         Utils.closeSession();
     }
+    
+    @Test
+    public void testZips_my_coll() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_compressed true -input_compression_codec zip"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semanticszip"
+                        + " -output_collections http://marklogic.com/collection/1"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("338", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("33056", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
+        assertTrue(result.hasNext());
+        assertEquals("12", result.next().asString());
+
+        Utils.closeSession();
+    }
 
     @Test
     public void testGZipNQ_quad_coll() throws Exception {
