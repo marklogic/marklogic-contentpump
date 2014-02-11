@@ -47,19 +47,20 @@ public class Constants {
         OUT_PATH = new Path("file", null, path);
     }
     
+   
+    /**
+     * mlcp version. Must set if unit tests run in distributed mode
+     */
+    public static String CONTENTPUMP_VERSION = prop.getProperty("CONTENTPUMP_VERSION");
+    
     /**
      * lib directory of mlcp binary package extracted. Must set if unit tests run in distributed mode
      */
     public static String CONTENTPUMP_HOME;
     static {
         String version = prop.getProperty("HADOOP", "1");
-        CONTENTPUMP_HOME = MLCP_HOME + "/target/mlcp-Hadoop" + version + "-1.1-lib";
+        CONTENTPUMP_HOME = MLCP_HOME + "/target/mlcp-Hadoop" + version + "-"+ CONTENTPUMP_VERSION + "-lib";
     }
-    
-    /**
-     * mlcp version. Must set if unit tests run in distributed mode
-     */
-    public static String CONTENTPUMP_VERSION = prop.getProperty("CONTENTPUMP_VERSION");
     /**
      * conf directory of hadoop. Must set if unit tests run in distributed mode
      */
