@@ -296,7 +296,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             jars.append(jar.toURI().toURL().toString());
         }
         conf.set("tmpjars", jars.toString());
-
+        if (LOG.isTraceEnabled())
+            LOG.trace("LIBJARS:" + jars.toString());
         job.waitForCompletion(true);    
     }
     

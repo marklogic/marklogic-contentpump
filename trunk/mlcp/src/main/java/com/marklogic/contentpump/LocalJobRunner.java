@@ -48,6 +48,7 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.TaskAttemptID;
 import org.apache.hadoop.mapreduce.TaskID;
+import org.apache.hadoop.mapreduce.TaskType;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringUtils;
 
@@ -198,7 +199,8 @@ public class LocalJobRunner implements ConfigConstants {
                 	pool.submit(task);
                 }
             } else { // single-threaded
-                TaskID taskId = new TaskID(new JobID(), true, i);
+                JobID jid = new JobID();
+                TaskID taskId = new TaskID(jid.getJtIdentifier(), jid.getId(), TaskType.MAP, i);
                 TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
                 TaskAttemptContext context = 
                     ReflectionUtil.createTaskAttemptContext(conf, taskAttemptId);
@@ -349,7 +351,8 @@ public class LocalJobRunner implements ConfigConstants {
             TrackingRecordReader trackingReader = null;
             RecordWriter<OUTKEY, OUTVALUE> writer = null;
             OutputCommitter committer = null;
-            TaskID taskId = new TaskID(new JobID(), true, id);
+            JobID jid = new JobID();
+            TaskID taskId = new TaskID(jid.getJtIdentifier(), jid.getId(), TaskType.MAP, id);
             TaskAttemptID taskAttemptId = new TaskAttemptID(taskId, 0);
             try {
                 context = ReflectionUtil.createTaskAttemptContext(conf, 
