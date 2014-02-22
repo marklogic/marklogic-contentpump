@@ -19,8 +19,7 @@
       </filterchain>
     </loadfile>
   <property name="version.number.string" value="X.X-X"/>  <!-- This is a no-op, only here to suppress a warning -->
-  <property name="mapreduce.bundle.name" value="Connector-for-Hadoop1-${version.number.string}"/>
-  <property name="mapreduce.cdh.bundle.name" value="Connector-for-Hadoop2-${version.number.string}"/>
+  <property name="mapreduce.bundle.name" value="Connector-for-Hadoop2-${version.number.string}"/>
   <tstamp><format property="date-string" pattern="MMMM dd, yyyy"/></tstamp>
 
   <!-- Static definitions of where things are relative to the root -->
@@ -30,7 +29,6 @@
   <property name="stagedir-src" value="${buildtmp}/stage-src"/>
   <property name="mapreduce.stagedir" value="${buildtmp}/stage"/>
   <property name="compiled.classes.dir" value="${buildtmp}/classes"/>
-  <property name="compiled.classes.dir.cdh" value="${buildtmp}/classes-cdh"/>
   <property name="test.data.dir" value="src/testdata"/>
   <property name="java.intermediate.dir" value="${buildtmp}/java"/>
   <property name="javadocdir" value="${buildtmp}/javadoc"/>
@@ -56,16 +54,12 @@
 
   <!-- Products of this build -->
   <property name="products" value="deliverable"/>
-  <property name="mapreduce.jar.name" value="marklogic-mapreduce1-${jar.version.number.string}.jar"/>
-  <property name="mapreduce.cdh.jar.name" value="marklogic-mapreduce2-${jar.version.number.string}.jar"/>
+  <property name="mapreduce.jar.name" value="marklogic-mapreduce2-${jar.version.number.string}.jar"/>
   <property name="mapreduce.examples.jar.name" value="marklogic-${mapreduce.app.name}-examples-${jar.version.number.string}.jar"/>
   <property name="mapreduce.output.jar" value="${java.intermediate.dir}/${mapreduce.jar.name}"/>
-  <property name="mapreduce.cdh.output.jar" value="${java.intermediate.dir}/${mapreduce.cdh.jar.name}"/>
   <property name="mapreduce.test.jar" value="${java.intermediate.dir}/mapreduce.test.jar"/>
-  <property name="mapreduce.cdh.test.jar" value="${java.intermediate.dir}/mapreduce.cdh.test.jar"/>
   <property name="mapreduce.javadoczip" value="${java.intermediate.dir}/${mapreduce.javadoczip.name}"/>
   <property name="mapreduce.bundle.zip" value="${products}/${mapreduce.bundle.name}.zip"/>
-  <property name="mapreduce.cdh.bundle.zip" value="${products}/${mapreduce.cdh.bundle.name}.zip"/>
   <property name="mapreduce.source.zip" value="${products}/${mapreduce.bundle.name}-src.zip"/>
 
   <!-- Configurable flags that will affect how targets run -->
@@ -87,7 +81,6 @@
   <target name="init">
     <mkdir dir="${buildtmp}"/>
     <mkdir dir="${compiled.classes.dir}"/>
-    <mkdir dir="${compiled.classes.dir.cdh}"/>
     <mkdir dir="${java.intermediate.dir}"/>
     <mkdir dir="${products}"/>
   </target>
@@ -104,18 +97,6 @@
   <!-- Produce the XCC Jar file product -->
 
   <path id="mapreduce.classpath">
-    <pathelement path="${xcc.jar}"/>
-    <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
-    <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
-    <pathelement path="${jarlib}/commons-modeler-2.0.1.jar"/>
-    <pathelement path="${jarlib}/hadoop-core-1.2.0.jar"/>
-    <pathelement path="${jarlib}/log4j-1.2.17.jar"/>
-    <pathelement path="${jarlib}/saxon9he.jar"/>
-    <pathelement path="${jarlib}/cpox.jar"/>
-    <pathelement path="${jarlib}/bliki-core-3.0.14-SNAPSHOT.jar"/>
-    <pathelement path="${jarlib}/xpp3-1.1.4c.jar"/>
-  </path>
-  <path id="mapreduce.cdh.classpath">
     <pathelement path="${xcc.jar}"/>
     <pathelement path="${jarlib}/avro-1.7.4.jar"/>
     <pathelement path="${jarlib}/commons-cli-1.2.jar"/>
@@ -145,18 +126,13 @@
     <pathelement path="${compiled.classes.dir}"/>
     <path refid="mapreduce.classpath"/>
   </path>
-
-  <path id="mapreduce.cdh.compile.classpath">
-    <pathelement path="${compiled.classes.dir.cdh}"/>
-    <path refid="mapreduce.cdh.classpath"/>
-  </path>
-
   <path id="mapreduce.testcases.classpath">
     <pathelement path="${compiled.classes.dir}"/>
     <pathelement path="${jarlib}/commons-logging-1.1.1.jar"/>
     <pathelement path="${jarlib}/commons-configuration-1.6.jar"/>
     <pathelement path="${jarlib}/commons-lang-2.5.jar"/>
-    <pathelement path="${jarlib}/hadoop-core-1.2.0.jar"/>
+    <pathelement path="${jarlib}/hadoop-common-2.0.0-cdh4.3.0.jar"/>
+    <pathelement path="${jarlib}/hadoop-core-2.0.0-mr1-cdh4.3.0.jar"/>
   	<pathelement path="${jarlib}/hamcrest-core-1.3.jar"/>
   	<pathelement path="${jarlib}/log4j-1.2.17.jar"/>
   </path>
@@ -164,12 +140,6 @@
   <target name="compile.mapreduce" depends="init">
     <javac classpathref="mapreduce.compile.classpath" srcdir="${java.source}"
       destdir="${compiled.classes.dir}" deprecation="on"
-      debug="${compile.debug.symbols.flag}" failonerror="on"
-      source="1.6" target="1.6">
-      <compilerarg value="-Xlint"/>
-    </javac>
-    <javac classpathref="mapreduce.cdh.compile.classpath" srcdir="${java.source}"
-      destdir="${compiled.classes.dir.cdh}" deprecation="on"
       debug="${compile.debug.symbols.flag}" failonerror="on"
       source="1.6" target="1.6">
       <compilerarg value="-Xlint"/>
@@ -188,32 +158,10 @@
         </section>
       </manifest>
     </jar>
-    <jar jarfile="${mapreduce.cdh.output.jar}" basedir="${compiled.classes.dir.cdh}"
-      includes="com/marklogic/dom/*,com/marklogic/tree/*,com/marklogic/io/*,com/marklogic/mapreduce/*,com/marklogic/mapreduce/functions/*,com/marklogic/mapreduce/utilities/*">
-      <manifest>
-        <section name="mapreduce">
-          <attribute name="Vendor" value="MarkLogic Corporation"/>
-          <attribute name="Description" value="Hadoop Connector for Java"/>
-          <attribute name="Build-Version" value="${version.number.string}"/>
-          <attribute name="Build-Date" value="${date-string}"/>
-        </section>
-      </manifest>
-    </jar>
   </target>
 
   <target name="mapreduce.test.jar" depends="compile.mapreduce" unless="classes.current">
     <jar jarfile="${mapreduce.test.jar}" basedir="${compiled.classes.dir}"
-      includes="com/marklogic/mapreduce/test/*">
-      <manifest>
-        <section name="mapreduce-test">
-          <attribute name="Vendor" value="MarkLogic Corporation"/>
-          <attribute name="Description" value="Hadoop Connector for Java"/>
-          <attribute name="Build-Version" value="${version.number.string}"/>
-          <attribute name="Build-Date" value="${date-string}"/>
-        </section>
-      </manifest>
-    </jar>
-    <jar jarfile="${mapreduce.cdh.test.jar}" basedir="${compiled.classes.dir.cdh}"
       includes="com/marklogic/mapreduce/test/*">
       <manifest>
         <section name="mapreduce-test">
@@ -323,7 +271,6 @@
     <copy todir="${mapreduce.stagedir}" file="LEGALNOTICES.txt"/>
     <mkdir dir="${mapreduce.stage.lib}"/>
     <copy todir="${mapreduce.stage.lib}"  file="${mapreduce.output.jar}"/>
-    <copy todir="${mapreduce.stage.lib}"  file="${mapreduce.cdh.output.jar}"/>
     <copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-modeler-2.0.1.jar"/>
     <copy todir="${mapreduce.stage.lib}"  file="${jarlib}/commons-license.txt"/>
     <jar jarfile="${mapreduce.stage.lib}/${mapreduce.examples.jar.name}">
