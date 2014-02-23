@@ -142,7 +142,7 @@ implements MarkLogicConstants {
                 function = ReflectionUtils.newInstance(lexiconClass, conf);
                 queryText = function.getInputQuery(nsCol, start, 
                         mlSplit.isLastSplit() ? 
-                                Long.MAX_VALUE : mlSplit.getLength());
+                                Long.MAX_VALUE : (long)length);
             } else {
                 String docExpr = conf.get(DOCUMENT_SELECTOR, 
                         MarkLogicInputFormat.DEFAULT_DOCUMENT_SELECTOR);

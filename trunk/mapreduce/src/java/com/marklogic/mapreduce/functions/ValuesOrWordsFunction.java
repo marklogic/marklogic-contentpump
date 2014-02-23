@@ -15,6 +15,7 @@
  */
 package com.marklogic.mapreduce.functions;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -54,6 +55,8 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
     @Override
     public String getInputQuery(Collection<String> nsCol, long start, 
             long count) {
+        long end = count == Long.MAX_VALUE ? count : start + count;
+        
         StringBuilder buf = new StringBuilder();      
         
         buf.append("xquery version \"1.0-ml\"; \n");
@@ -75,20 +78,34 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
         appendNamesParams(buf);
         // start
         buf.append(getStart());
-        buf.append(",");
-        // options
-        buf.append("(\"skip=").append(start);
-        buf.append("\",\"truncate=").append(count).append("\"");
+        // option
+        buf.append(",(");
         String[] userOptions = getUserDefinedOptions();
-        if (userOptions != null) {
+        if (userOptions != null) {           
             for (int i = 0; i < userOptions.length; i++) {
-                buf.append(",\"").append(userOptions[i]).append("\"");
+                if (i != 0) {
+                    buf.append(",\"");
+                }
+                buf.append(userOptions[i]).append("\"");
             }          
         }
         buf.append("),");
         // query
         buf.append(getLexiconQuery()).append("))");
-        return buf.toString();
+        // range
+        buf.append("[").append(start).append(" to ");
+        buf.append(end).append("]");
+        
+        return buf.toString();       
+    }
+    
+    public static void main(String[] args) {
+        Uris urisFunc = new Uris();
+        Collection<String> nsbindings = new ArrayList<String>();
+        for (int i = 0; i < args.length; i++) {
+            nsbindings.add(args[i]);
+        }
+        System.out.println(urisFunc.getInputQuery(nsbindings, 1, 1000));
     }
 
 }
