@@ -8,7 +8,7 @@ if [[ $HADOOP_MAPREDUCE_VERSION == "1" ]] ; then
 else
     EXCLUS=*hadoop-*-2.0.0-*
 fi
-echo $EXCLUS
+
 for file in ${LIB_HOME}/*.jar
 do
   if [[ $file == ${EXCLUS} ]] ; then
