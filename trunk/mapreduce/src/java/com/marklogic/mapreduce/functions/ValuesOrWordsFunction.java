@@ -84,9 +84,9 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
         if (userOptions != null) {           
             for (int i = 0; i < userOptions.length; i++) {
                 if (i != 0) {
-                    buf.append(",\"");
+                    buf.append(",");
                 }
-                buf.append(userOptions[i]).append("\"");
+                buf.append("\"").append(userOptions[i]).append("\"");
             }          
         }
         buf.append("),");
@@ -100,12 +100,21 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
     }
     
     public static void main(String[] args) {
-        Uris urisFunc = new Uris();
+        Words wordsFunc = new WordsFunction();
         Collection<String> nsbindings = new ArrayList<String>();
         for (int i = 0; i < args.length; i++) {
             nsbindings.add(args[i]);
         }
-        System.out.println(urisFunc.getInputQuery(nsbindings, 1, 1000));
+        System.out.println(wordsFunc.getInputQuery(nsbindings, 1, 1000));
+    }
+    
+    static class WordsFunction extends Words {
+        public String[] getUserDefinedOptions() {
+            String[] options =
+                {"document","concurrent"};
+            return options;
+        }
+
     }
 
 }
