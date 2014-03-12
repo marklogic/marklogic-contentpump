@@ -87,7 +87,7 @@ public class Utils {
             + "return xdmp:forest-clear($f)";
         runQuery(xccUri, q);
         session.close();
-        Thread.sleep(2000);
+        Thread.sleep(3000);
     }
     
     public static void setBucketPolicy(String xccUri)
