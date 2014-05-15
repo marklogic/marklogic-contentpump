@@ -28,18 +28,6 @@
       <id>marklogic</id>
       <url>http://developer.marklogic.com/maven2/</url>
     </repository>
-    <repository>
-        <id>in-repo</id>
-        <name>In Project Repo</name>
-        <releases>
-            <enabled>true</enabled>
-            <checksumPolicy>ignore</checksumPolicy>
-        </releases>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-        <url>file://${project.basedir}/lib</url>
-    </repository>
   </repositories>
   <properties>
     <skipTests>true</skipTests>
@@ -47,52 +35,10 @@
   </properties>
   <profiles>
     <profile>
-    <!--  local mode propile for junit  -->
+    <!--  local mode profile for junit  -->
       <id>local</id>
       <properties>
         <distributed.test.excludes>**/*TestDistributed*</distributed.test.excludes>
-      </properties>
-    </profile>
-    <profile>
-    <!--  idh propile for junit  -->
-      <id>idh</id>
-      <properties>
-        <distributed.test.excludes>nothing to exclude</distributed.test.excludes>
-        <hadoop.auth.excludes>cdh:hadoop-auth</hadoop.auth.excludes>
-        <hadoop.common.excludes>cdh:hadoop-common</hadoop.common.excludes>
-        <hadoop.core.excludes>org.apache.hadoop:hadoop-core</hadoop.core.excludes>
-        <hadoop.hdfs.excludes>cdh:hadoop-hdfs</hadoop.hdfs.excludes>
-        <hadoop.annotations.excludes>nothing to exclude</hadoop.annotations.excludes>
-        <hadoop.mapreduce.client.common.excludes>nothing to exclude</hadoop.mapreduce.client.common.excludes>
-        <hadoop.mapreduce.client.core.excludes>nothing to exclude</hadoop.mapreduce.client.core.excludes>
-        <hadoop.mapreduce.client.jobclient.excludes>nothing to exclude</hadoop.mapreduce.client.jobclient.excludes>
-        <hadoop.mapreduce.client.shuffle.excludes>nothing to exclude</hadoop.mapreduce.client.shuffle.excludes>
-        <hadoop.yarn.api.excludes>nothing to exclude</hadoop.yarn.api.excludes>
-        <hadoop.yarn.client.excludes>nothing to exclude</hadoop.yarn.client.excludes>
-        <hadoop.yarn.common.excludes>nothing to exclude</hadoop.yarn.common.excludes>
-        <hadoop.yarn.server.common.excludes>nothing to exclude</hadoop.yarn.server.common.excludes>
-        <hadoop.yarn.server.nodemanager.excludes>nothing to exclude</hadoop.yarn.server.nodemanager.excludes>
-      </properties>
-    </profile>
-    <profile>
-    <!--  cdh propile for junit  -->
-      <id>cdh</id>
-      <properties>
-        <distributed.test.excludes>nothing to exclude</distributed.test.excludes>
-        <hadoop.auth.excludes>org.apache.hadoop:hadoop-auth</hadoop.auth.excludes>
-        <hadoop.common.excludes>org.apache.hadoop:hadoop-common</hadoop.common.excludes>
-        <hadoop.core.excludes>nothing to exclude</hadoop.core.excludes>
-        <hadoop.hdfs.excludes>org.apache.hadoop:hadoop-hdfs</hadoop.hdfs.excludes>
-        <hadoop.annotations.excludes>org.apache.hadoop:hadoop-annotations</hadoop.annotations.excludes>
-        <hadoop.mapreduce.client.common.excludes>org.apache.hadoop:hadoop-mapreduce-client-commom</hadoop.mapreduce.client.common.excludes>
-        <hadoop.mapreduce.client.core.excludes>org.apache.hadoop:hadoop-mapreduce-client-core</hadoop.mapreduce.client.core.excludes>
-        <hadoop.mapreduce.client.jobclient.excludes>org.apache.hadoop:hadoop-mapreduce-client-jobclient</hadoop.mapreduce.client.jobclient.excludes>
-        <hadoop.mapreduce.client.shuffle.excludes>org.apache.hadoop:hadoop-mapreduce-client-shuffle</hadoop.mapreduce.client.shuffle.excludes>
-        <hadoop.yarn.api.excludes>org.apache.hadoop:hadoop-yarn-api</hadoop.yarn.api.excludes>
-        <hadoop.yarn.client.excludes>org.apache.hadoop:hadoop-yarn-client</hadoop.yarn.client.excludes>
-        <hadoop.yarn.common.excludes>org.apache.hadoop:hadoop-yarn-common</hadoop.yarn.common.excludes>
-        <hadoop.yarn.server.common.excludes>org.apache.hadoop:hadoop-yarn-server-common</hadoop.yarn.server.common.excludes>
-        <hadoop.yarn.server.nodemanager.excludes>org.apache.hadoop:hadoop-yarn-server-nodemanager</hadoop.yarn.server.nodemanager.excludes>
       </properties>
     </profile>
   </profiles>  
@@ -107,23 +53,6 @@
           <excludes>
             <exclude>${distributed.test.excludes}</exclude>
           </excludes> 
-<!--          <classpathDependencyScopeExclude>runtime</classpathDependencyScopeExclude> --> 
-          <classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.auth.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.common.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.core.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.hdfs.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.annotations.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.mapreduce.client.common.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.mapreduce.client.core.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.mapreduce.client.jobclient.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.mapreduce.client.shuffle.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.yarn.api.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.yarn.client.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.yarn.common.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.yarn.server.common.excludes}</classpathDependencyExcludes>
-            <classpathDependencyExcludes>${hadoop.yarn.server.nodemanager.excludes}</classpathDependencyExcludes>
-          </classpathDependencyExcludes>         
         </configuration>
       </plugin>
       <plugin>
@@ -310,17 +239,17 @@
     </dependency>
     <!--  CDH stuff -->
     <dependency>
-     <groupId>cdh</groupId>
+     <groupId>org.apache.hadoop</groupId>
      <artifactId>hadoop-common</artifactId>
      <version>2.0.0-alpha</version>
     </dependency>
     <dependency>
-     <groupId>cdh</groupId>
+     <groupId>org.apache.hadoop</groupId>
      <artifactId>hadoop-hdfs</artifactId>
      <version>2.0.0-alpha</version>
     </dependency>
     <dependency>
-     <groupId>cdh</groupId>
+     <groupId>org.apache.hadoop</groupId>
      <artifactId>hadoop-auth</artifactId>
      <version>2.0.0-alpha</version>
     </dependency>
@@ -387,161 +316,6 @@
           <artifactId>xmlenc</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-    <!--  IDH stuff -->
-   <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
-      <version>2.0.4-alpha</version>
-      <exclusions>
-        <exclusion>
-          <groupId>jdk.tools</groupId>
-          <artifactId>jdk.tools</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>xmlenc</groupId>
-          <artifactId>xmlenc</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-digester</groupId>
-          <artifactId>commons-digester</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-beanutils</groupId>
-          <artifactId>commons-beanutils-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-json</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-server</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-io</groupId>
-          <artifactId>commons-io</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-httpclient</groupId>
-          <artifactId>commons-httpclient</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-math</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-net</groupId>
-          <artifactId>commons-net</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.mortbay.jetty</groupId>
-          <artifactId>jetty-util</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>asm</groupId>
-          <artifactId>asm</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>javax.servlet.jsp</groupId>
-          <artifactId>jsp-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>tomcat</groupId>
-          <artifactId>jasper-runtime</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>tomcat</groupId>
-          <artifactId>jasper-compiler</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-el</groupId>
-          <artifactId>commons-el</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>commons-collections</groupId>
-          <artifactId>commons-collections</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.aspectj</groupId>
-          <artifactId>aspectjrt</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>net.sf.kosmosfs</groupId>
-          <artifactId>kfs</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.googlecode.json-simple</groupId>
-          <artifactId>json-simple</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.jcraft</groupId>
-          <artifactId>jsch</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.zookeeper</groupId>
-          <artifactId>zookeeper</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>net.java.dev.jets3t</groupId>
-          <artifactId>jets3t</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>oro</groupId>
-          <artifactId>oro</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.eclipse.jdt</groupId>
-          <artifactId>core</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-mapreduce-client-core</artifactId>
-      <version>2.0.4-alpha</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-hdfs</artifactId>
-      <version>2.0.4-alpha</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-daemon</groupId>
-          <artifactId>commons-daemon</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
-      <version>2.0.4-alpha</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-mapreduce-client-shuffle</artifactId>
-      <version>2.0.4-alpha</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-mapreduce-client-common</artifactId>
-      <version>2.0.4-alpha</version>
     </dependency>
   </dependencies>
 </project>
