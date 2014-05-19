@@ -15,6 +15,7 @@
  */
 package com.marklogic.mapreduce.functions;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -53,6 +54,7 @@ public abstract class ValueOrWordMatchFunction extends LexiconFunction {
     @Override
     public String getInputQuery(Collection<String> nsCol, long start, 
             long count) {
+        long end = count == Long.MAX_VALUE ? count : start + count;
         StringBuilder buf = new StringBuilder();      
         
         buf.append("xquery version \"1.0-ml\"; \n");
@@ -76,17 +78,28 @@ public abstract class ValueOrWordMatchFunction extends LexiconFunction {
         buf.append(getPattern());
         buf.append(",");
         // options
-        buf.append("(\"skip=").append(start);
-        buf.append("\",\"truncate=").append(count).append("\"");
+        buf.append("(");
         String[] userOptions = getUserDefinedOptions();
         if (userOptions != null) {
             for (int i = 0; i < userOptions.length; i++) {
-                buf.append(",\"").append(userOptions[i]).append("\"");
+                if (i != 0) { 
+                    buf.append(",\"");
+                }
+                buf.append(userOptions[i]).append("\"");
             }          
         }
         buf.append("),");
         // query
         buf.append(getLexiconQuery()).append("))");
+        // range 
+        buf.append("[").append(start).append(" to "); 
+        buf.append(end).append("]");
         return buf.toString();
+    }
+    
+    public static void main(String[] args) { 
+        UriMatch uriMatchFunc = new UriMatch();
+        Collection<String> nsbindings = new ArrayList<String>();
+        System.out.println(uriMatchFunc.getInputQuery(nsbindings, 1, 1000));
     }
 }
