@@ -42,8 +42,7 @@ public class KeyValueOutputFormat<KEYOUT, VALUEOUT> extends
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         TextArrayWritable hosts = getHosts(conf);
-        int taskId = context.getTaskAttemptID().getTaskID().getId();
-        String host = InternalUtilities.getHost(taskId, hosts);
+        String host = InternalUtilities.getHost(hosts);
         return new KeyValueWriter<KEYOUT, VALUEOUT>(conf, host);
     }
 

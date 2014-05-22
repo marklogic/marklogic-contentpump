@@ -299,16 +299,14 @@ public class InternalUtilities implements MarkLogicConstants {
     }
     
     /**
-     * Return the host from the host array based on the task id in a round
-     * robin fashion
-     * @param taskId
+     * Return the host from the host array based on a random fashion
      * @param hosts a WritableArray of host names
      * @return the host name
      */
-    public static String getHost(int taskId, TextArrayWritable hosts) {
+    public static String getHost(TextArrayWritable hosts) {
         String [] hostStrings = hosts.toStrings();
         int count = hostStrings.length;
-        int position = taskId % count;
+        int position = (int)(Math.random() * count);
         return hostStrings[position];
     }
     
