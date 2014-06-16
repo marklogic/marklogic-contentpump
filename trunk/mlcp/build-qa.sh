@@ -16,4 +16,4 @@ mkdir deliverable
 # build mlcp-Hadoop2  
 mvn clean
 mvn package
-cp target/mlcp-Hadoop2-*-bin.zip deliverable
+cp target/mlcp-Hadoop2*.zip deliverable
