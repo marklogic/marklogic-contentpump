@@ -782,4 +782,11 @@ public interface MarkLogicConstants {
      */    
     static final String ASSIGNMENT_POLICY =
         "mapreduce.marklogic.output.assignmentpolicy";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, indicates temporal collection for documents. 
+     * Optional.
+     */    
+    static final String TEMPORAL_COLLECTION =
+        "mapreduce.marklogic.output.temporalcollection";
 }
