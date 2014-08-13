@@ -307,6 +307,12 @@ public enum Command implements ConfigConstants {
                 .withDescription("Comma-separated list of document types")
                 .create(TYPE_FILTER);
             options.addOption(tf);
+            Option tcf = OptionBuilder
+            	.withArgName("String")
+            	.hasArg()
+            	.withDescription("temporal collection name")
+            	.create(TEMPORAL_COLLECTION);
+            options.addOption(tcf);                        
         }
 
         @Override
@@ -508,6 +514,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(PORT)) {
                 String port = cmdline.getOptionValue(PORT);
                 conf.set(MarkLogicConstants.OUTPUT_PORT, port);
+            }
+            if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
+                String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
+                conf.set(MarkLogicConstants.TEMPORAL_COLLECTION, tempColl);
             }
 
             String repairLevel = cmdline.getOptionValue(XML_REPAIR_LEVEL,
