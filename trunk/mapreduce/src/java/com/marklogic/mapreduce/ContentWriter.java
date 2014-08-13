@@ -249,6 +249,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (encoding != null) {
             options.setEncoding(encoding);
         }
+        
+        options.setTemporalCollection(conf.get(TEMPORAL_COLLECTION));
     }
 
 
