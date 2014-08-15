@@ -65,7 +65,9 @@ public class FileIterator implements Iterator<FileSplit> {
     public FileIterator(FileSplit inSplit, TaskAttemptContext context) {
         conf = context.getConfiguration();
         fileDirSplits = new LinkedList<FileSplit>();
-        fileDirSplits.add(inSplit);
+        LinkedList<FileSplit> src = new LinkedList<FileSplit>();
+        src.add(inSplit);
+        iterator = src.iterator();
         PathFilter jobFilter = getInputPathFilter();
         List<PathFilter> filters = new ArrayList<PathFilter>();
         filters.add(FileAndDirectoryInputFormat.hiddenFileFilter);
