@@ -58,6 +58,9 @@ public class CompressedDocumentReader<VALUEIN> extends
 
     @Override
     public void close() throws IOException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Closing " + file);
+        }
         if (zipIn != null) {
             zipIn.close();
         }
@@ -85,6 +88,9 @@ public class CompressedDocumentReader<VALUEIN> extends
     }
     
     protected void initStream(InputSplit inSplit) throws IOException {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Starting " + file);
+        }
         file = ((FileSplit) inSplit).getPath();  
 
         FSDataInputStream fileIn = fs.open(file);
