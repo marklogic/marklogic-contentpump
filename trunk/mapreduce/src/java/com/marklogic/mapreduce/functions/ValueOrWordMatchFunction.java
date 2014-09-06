@@ -85,7 +85,7 @@ public abstract class ValueOrWordMatchFunction extends LexiconFunction {
                 if (i != 0) { 
                     buf.append(",\"");
                 }
-                buf.append(userOptions[i]).append("\"");
+                buf.append("\"").append(userOptions[i]).append("\"");
             }          
         }
         buf.append("),");
