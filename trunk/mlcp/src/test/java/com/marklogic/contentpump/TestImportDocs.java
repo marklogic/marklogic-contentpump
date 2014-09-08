@@ -559,7 +559,7 @@ public class TestImportDocs {
         Utils.closeSession();
 
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportText#testImportDocsZipUTF16BE.txt");
+            + "/keys/TestImportText#testImportDocsZipUTF16BE.txt", "UTF-8");
         assertTrue(sb.toString().trim().equals(key));
     }
 
@@ -594,7 +594,7 @@ public class TestImportDocs {
         Utils.closeSession();
         
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportText#testImportTextUTF16LE.txt");
+            + "/keys/TestImportText#testImportTextUTF16LE.txt","UTF-8");
         assertTrue(sb.toString().trim().equals(key));
 
     }
@@ -631,7 +631,7 @@ public class TestImportDocs {
         Utils.closeSession();
 
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportText#testImportMixedUTF16LE.txt");
+            + "/keys/TestImportText#testImportMixedUTF16LE.txt", "UTF-8");
         assertTrue(str.trim().equals(key));
     }
 
@@ -668,7 +668,7 @@ public class TestImportDocs {
         Utils.closeSession();
 
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportText#testImportMixedUTF8.txt");
+            + "/keys/TestImportText#testImportMixedUTF8.txt","UTF-8");
         assertTrue(str.trim().equals(key));
     }
     
@@ -705,7 +705,7 @@ public class TestImportDocs {
         Utils.closeSession();
 
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportText#testImportTxtUTF8.txt");
+            + "/keys/TestImportText#testImportTxtUTF8.txt","UTF-8");
         assertTrue(str.trim().equals(key));
     }
 //    @Test
@@ -779,7 +779,7 @@ public class TestImportDocs {
         Utils.closeSession();
 
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportText#testImportTxtUTF8.txt");
+            + "/keys/TestImportText#testImportTxtUTF8.txt","UTF-8");
         assertTrue(str.trim().equals(key));
     }
     
@@ -865,7 +865,7 @@ public class TestImportDocs {
         Utils.closeSession();
 
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
-            + "/keys/TestImportText#testImportMixedTxtUTF16LE.txt");
+            + "/keys/TestImportText#testImportMixedTxtUTF16LE.txt","UTF-8");
         assertTrue(sb.toString().trim().equals(key));
 
     }
