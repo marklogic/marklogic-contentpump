@@ -3,10 +3,12 @@ package com.marklogic.contentpump;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -174,6 +176,19 @@ public class Utils {
     
     public static String readSmallFile(String filename) throws IOException {
         BufferedReader br = new BufferedReader(new FileReader(filename));
+        StringBuilder content = new StringBuilder();
+        String line;
+        while( (line = br.readLine()) != null) {
+            content.append(line + newLine);
+        }
+        br.close();
+        return content.toString().trim();
+    }
+    
+    public static String readSmallFile(String filename, String encoding) throws IOException {
+        BufferedReader br = new BufferedReader(
+            new InputStreamReader(
+                new FileInputStream(filename), encoding));
         StringBuilder content = new StringBuilder();
         String line;
         while( (line = br.readLine()) != null) {
