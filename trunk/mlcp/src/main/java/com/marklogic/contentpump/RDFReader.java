@@ -18,22 +18,16 @@ package com.marklogic.contentpump;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.DatasetFactory;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FileStatus;
@@ -50,19 +44,38 @@ import org.apache.jena.riot.lang.PipedQuadsStream;
 import org.apache.jena.riot.lang.PipedRDFIterator;
 import org.apache.jena.riot.lang.PipedRDFStream;
 import org.apache.jena.riot.lang.PipedTriplesStream;
-
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.marklogic.contentpump.utilities.FileIterator;
-import com.marklogic.contentpump.utilities.IdGenerator;
-import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.MarkLogicConstants;
 import org.apache.jena.riot.system.ErrorHandler;
 import org.apache.jena.riot.system.ParserProfile;
 import org.apache.jena.riot.system.RiotLib;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
+
+import com.hp.hpl.jena.graph.Node;
+import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.query.DatasetFactory;
+import com.hp.hpl.jena.rdf.model.Literal;
+import com.hp.hpl.jena.rdf.model.RDFNode;
+import com.hp.hpl.jena.rdf.model.Resource;
+import com.hp.hpl.jena.rdf.model.Statement;
+import com.hp.hpl.jena.rdf.model.StmtIterator;
+import com.hp.hpl.jena.sparql.core.Quad;
+import com.marklogic.contentpump.utilities.FileIterator;
+import com.marklogic.contentpump.utilities.IdGenerator;
+import com.marklogic.contentpump.utilities.PermissionUtil;
+import com.marklogic.mapreduce.ContentType;
+import com.marklogic.mapreduce.LinkedMapWritable;
+import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.xcc.AdhocQuery;
+import com.marklogic.xcc.ContentCapability;
+import com.marklogic.xcc.ContentPermission;
+import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.RequestOptions;
+import com.marklogic.xcc.ResultSequence;
+import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
  * Reader for RDF quads/triples. Uses Jena library to parse RDF and sends triples
@@ -96,6 +109,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected int collectionCount = 0;
     private static final int MAX_COLLECTIONS = 100;
     protected boolean ignoreCollectionQuad = false;
+    protected boolean hasOutputCol = false;
 
     protected StringBuilder buffer;
     protected boolean hasNext = true;
@@ -113,15 +127,21 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long end;
     protected boolean compressed;
     protected long injestedTriples = 0;
-
+    protected ArrayList<String> newGraphs = new ArrayList<String>();
+    protected Iterator<String> graphItr;
+    protected LinkedMapWritable roleMap;
+    protected HashMap<String,ContentPermission[]> permsMap;
+    
     private static final Object jenaLock = new Object();
     
-    public RDFReader() {
+    public RDFReader(LinkedMapWritable roleMap) {
         random = new Random();
         randomValue = random.nextLong();
         Calendar cal = Calendar.getInstance();
         milliSecs = cal.getTimeInMillis();
         compressed = false;
+        this.roleMap = roleMap;
+        permsMap = new HashMap<String,ContentPermission[]>();
     }
 
     @Override
@@ -162,6 +182,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         String[] collections = conf.getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
         ignoreCollectionQuad = (collections != null);
+        hasOutputCol = (collections != null);
 
         String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
                 MarkLogicConstants.DEFAULT_CONTENT_TYPE);
@@ -467,6 +488,85 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         return result;
     }
+    
+    /* 
+     * create graph doc
+     * 
+     * return ContentPermission[] for the graph
+     */
+    public ContentPermission[] insertGraphDoc(String graph) throws IOException {
+        ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+        Session session = null;
+        ResultSequence result = null;
+        ContentSource cs;
+        try {
+            cs = InternalUtilities.getOutputContentSource(conf,
+                conf.get(MarkLogicConstants.OUTPUT_HOST));
+            String[] outperms = conf
+                .getStrings(MarkLogicConstants.OUTPUT_PERMISSION);
+            List<ContentPermission> permissions = PermissionUtil
+                .getPermissions(outperms);
+
+            session = cs.newSession();
+            RequestOptions options = new RequestOptions();
+            options.setDefaultXQueryVersion("1.0-ml");
+            session.setDefaultRequestOptions(options);
+            StringBuilder sb = new StringBuilder();
+            sb.append("xquery version \"1.0-ml\";\n");
+            sb.append("for $perm in ");
+            sb.append("sem:create-graph-document(sem:iri(\"").append(escapeXml(graph))
+                .append("\"),");
+            if (permissions != null && permissions.size() > 0) {
+                for (int i = 0; i < permissions.size(); i++) {
+                    ContentPermission cp = permissions.get(i);
+                    if (i > 0)
+                        sb.append(",");
+                    sb.append("xdmp:permission(\"");
+                    sb.append(cp.getRole());
+                    sb.append("\",\"");
+                    sb.append(cp.getCapability());
+                    sb.append("\")");
+                }
+                sb.append(")");
+            } else {
+                sb.append("xdmp:default-permissions()");
+            }
+            sb.append(")\n");
+            sb.append("return ($perm/*:role-id/text(),$perm/*:capability/text())");
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(sb.toString());
+            }
+            AdhocQuery query = session.newAdhocQuery(sb.toString());
+            query.setOptions(options);
+            result = session.submitRequest(query);
+            while (result.hasNext()) {
+                Text roleid = new Text(result.next().asString());
+                if (!result.hasNext()) {
+                    throw new IOException("Invalid role map");
+                }
+                String roleName = roleMap.get(roleid).toString();
+                String cap = result.next().asString();
+                ContentCapability capability = PermissionUtil
+                    .getCapbility(cap);
+                perms.add(new ContentPermission(capability, roleName));
+            }
+
+        } catch (XccConfigException e) {
+            throw new IOException(e);
+        } catch (RequestException e) {
+            throw new IOException(e);
+        } finally {
+            if (result != null) {
+                result.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+        }
+
+        return perms.toArray(new ContentPermission[0]);
+    }
 
     public boolean nextInMemoryKeyValue() throws IOException, InterruptedException {
         if (lang == Lang.NQUADS || lang == Lang.TRIG) {
@@ -749,18 +849,37 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         return true;
     }
 
-    public void writeValue() {
+    public void writeValue() throws IOException {
         writeValue(null);
     }
 
-    public void writeValue(String collection) {
+    public void writeValue(String collection) throws IOException {
         if (value instanceof Text) {
             ((Text) value).set(buffer.toString());
         } else if (value instanceof RDFWritable) {
             ((RDFWritable) value).set(buffer.toString());
+            
             if (collection != null) {
                 ((RDFWritable) value).setCollection(collection);
             }
+            if(hasOutputCol){
+                String[] outCols = conf.getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
+                collection = outCols[0];
+            } else {
+                if (collection == null) {
+                    collection = "http://marklogic.com/semantics#default-graph";
+                }
+            }
+            ContentPermission[] perms = null;
+            if(!newGraphs.contains(collection)) {
+                newGraphs.add(collection);
+                perms = insertGraphDoc(collection);
+                permsMap.put(collection,perms);
+            } else {
+                perms = permsMap.get(collection);
+            }
+            ((RDFWritable) value).setPermissions(perms);
+
         } else if (value instanceof ContentWithFileNameWritable) {
             @SuppressWarnings("unchecked")
             VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)

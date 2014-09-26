@@ -320,6 +320,7 @@ public enum Command implements ConfigConstants {
                         throws IOException {
             applyConfigOptions(conf, cmdline);
             InputType type = getInputType(cmdline);
+            type.applyConfigOptions(conf, cmdline);
             
             // construct a job
             Job job = new Job(conf);

@@ -15,7 +15,11 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.IOException;
+
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.LinkedMapWritable;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -34,7 +38,14 @@ FileAndDirectoryInputFormat<DocumentURI, Text> {
     @Override
     public RecordReader<DocumentURI, Text> createRecordReader(
         InputSplit split, TaskAttemptContext context) {
-        return new CompressedRDFReader<Text>();
+        LinkedMapWritable roleMap = null;
+        try {
+            roleMap = getRoleMap(context);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return new CompressedRDFReader<Text>(roleMap);
     }
 
     @Override

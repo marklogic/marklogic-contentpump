@@ -39,6 +39,7 @@ import org.apache.jena.riot.lang.PipedTriplesStream;
 import com.hp.hpl.jena.graph.Triple;
 import com.hp.hpl.jena.sparql.core.Quad;
 import com.marklogic.mapreduce.CompressionCodec;
+import com.marklogic.mapreduce.LinkedMapWritable;
 
 /**
  * Reader for Compressed RDF statements.
@@ -201,8 +202,8 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         }
     }
 
-    public CompressedRDFReader() {
-        super();
+    public CompressedRDFReader(LinkedMapWritable roleMap) {
+        super(roleMap);
         compressed = true;
         //allocate a pool of size 1
         pool = Executors.newFixedThreadPool(1);
