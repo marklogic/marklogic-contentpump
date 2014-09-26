@@ -15,14 +15,28 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.IOException;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.ForestInputFormat;
+import com.marklogic.mapreduce.LinkedMapWritable;
+import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.xcc.AdhocQuery;
+import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.RequestOptions;
+import com.marklogic.xcc.ResultSequence;
+import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
  * Enum of supported input type.
@@ -61,6 +75,11 @@ public enum InputType implements ConfigConstants {
                     ContentType.MIXED.name());
             return ContentType.forName(type);
         }
+        
+        @Override
+        public void applyConfigOptions(Configuration conf,
+            CommandLine cmdline) throws IOException {
+        }
     },
     AGGREGATES {
         @Override
@@ -86,6 +105,11 @@ public enum InputType implements ConfigConstants {
         @Override
         public ContentType getContentType(CommandLine cmdline) {
             return ContentType.XML;   
+        }
+
+        @Override
+        public void applyConfigOptions(Configuration conf,
+            CommandLine cmdline) throws IOException {
         }
     },   
     DELIMITED_TEXT {
@@ -113,6 +137,11 @@ public enum InputType implements ConfigConstants {
         public ContentType getContentType(CommandLine cmdline) {
             return ContentType.XML;   
         }
+        
+        @Override
+        public void applyConfigOptions(Configuration conf,
+            CommandLine cmdline) throws IOException {
+        }
     },
     ARCHIVE {
         @Override
@@ -133,6 +162,11 @@ public enum InputType implements ConfigConstants {
         @Override
         public ContentType getContentType(CommandLine cmdline) {
             return ContentType.XML;   
+        }
+        
+        @Override
+        public void applyConfigOptions(Configuration conf,
+            CommandLine cmdline) throws IOException{
         }
     },
     SEQUENCEFILE {
@@ -159,8 +193,21 @@ public enum InputType implements ConfigConstants {
                     ContentType.XML.name());
             return ContentType.forName(type);
         }
+        
+        @Override
+        public void applyConfigOptions(Configuration conf,
+            CommandLine cmdline) throws IOException {
+        }
     },
     RDF {
+        private String ROLE_QUERY = "xdmp:eval('xquery version \"1.0-ml\";"
+            + "import module namespace sec=\"http://marklogic.com/xdmp/security\" at\n"
+            + "\"/MarkLogic/security.xqy\";\n"
+            + "for $role-id in sec:get-role-ids()/text() \n"
+            + "return ($role-id,sec:get-role-names($role-id)/text())'\n"
+            + ",(),<options xmlns=\"xdmp:eval\">"
+            + "<database>{xdmp:database(\"Security\")}</database>"
+            + "</options>)";
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
                 CommandLine cmdline, Configuration conf) {
@@ -185,6 +232,50 @@ public enum InputType implements ConfigConstants {
         public ContentType getContentType(CommandLine cmdline) {
             return ContentType.XML;
         }
+        
+        @Override
+        public void applyConfigOptions(Configuration conf, CommandLine cmdline)
+            throws IOException {
+            // try getting a connection
+            Session session = null;
+            ResultSequence result = null;
+            ContentSource cs;
+            try {
+                cs = InternalUtilities.getOutputContentSource(conf,
+                    conf.get(MarkLogicConstants.OUTPUT_HOST));
+
+                session = cs.newSession();
+                RequestOptions options = new RequestOptions();
+                options.setDefaultXQueryVersion("1.0-ml");
+                session.setDefaultRequestOptions(options);
+                AdhocQuery query = session.newAdhocQuery(ROLE_QUERY);
+                query.setOptions(options);
+                result = session.submitRequest(query);
+                LinkedMapWritable roleMap = new LinkedMapWritable();
+                while (result.hasNext()) {
+                    Text key = new Text(result.next().asString());
+                    if (!result.hasNext()) {
+                        throw new IOException("Invalid role map");
+                    }
+                    Text value = new Text(result.next().asString());
+                    roleMap.put(key, value);
+                }
+
+                DefaultStringifier.store(conf, roleMap,
+                    MarkLogicConstants.ROLE_MAP);
+            } catch (XccConfigException e) {
+                throw new IOException(e);
+            } catch (RequestException e) {
+                throw new IOException(e);
+            } finally {
+                if (result != null) {
+                    result.close();
+                }
+                if (session != null) {
+                    session.close();
+                }
+            }
+        }
     },
     FOREST {
         @Override
@@ -206,6 +297,11 @@ public enum InputType implements ConfigConstants {
         @Override
         public ContentType getContentType(CommandLine cmdline) {
             return ContentType.MIXED;
+        }
+        
+        @Override
+        public void applyConfigOptions(Configuration conf,
+            CommandLine cmdline) throws IOException {
         }
     };
 
@@ -254,6 +350,9 @@ public enum InputType implements ConfigConstants {
                     CommandLine cmdline, Configuration conf);
     
     public abstract ContentType getContentType(CommandLine cmdline);    
+    
+    public abstract void applyConfigOptions(Configuration conf,
+        CommandLine cmdline) throws IOException;
     
     public int getMinThreads() {
         return 1;

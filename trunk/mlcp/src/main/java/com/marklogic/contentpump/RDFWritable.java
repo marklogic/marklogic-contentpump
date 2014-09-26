@@ -21,6 +21,8 @@ import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
+import com.marklogic.xcc.ContentPermission;
+
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
@@ -43,7 +45,8 @@ public class RDFWritable<VALUE> implements CustomContent {
     private VALUE value;
     private String collectionUri = null;
     private byte type = 0; // Triples are always text
-
+    private ContentPermission[] permissions;
+    
     public RDFWritable() {
     }
 
@@ -53,6 +56,10 @@ public class RDFWritable<VALUE> implements CustomContent {
 
     public void setCollection(String collection) {
         collectionUri = collection;
+    }
+    
+    public void setPermissions(ContentPermission[] permissions) {
+        this.permissions = permissions;
     }
 
     public VALUE getValue() {
@@ -79,7 +86,9 @@ public class RDFWritable<VALUE> implements CustomContent {
             col[0] = collectionUri;
             options.setCollections(col);
         }
-
+        //permissions
+        options.setPermissions(permissions);
+        
         Content content = null;
         if (value instanceof Text) {
             content = ContentFactory.newContent(uri,

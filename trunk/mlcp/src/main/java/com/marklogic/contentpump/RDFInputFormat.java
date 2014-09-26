@@ -16,13 +16,17 @@
 
 package com.marklogic.contentpump;
 
-import com.marklogic.mapreduce.DocumentURI;
+import java.io.IOException;
+
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
+
+import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.LinkedMapWritable;
 
 /**
  * InputFormat for RDF.
@@ -36,8 +40,15 @@ public class RDFInputFormat extends FileAndDirectoryInputFormat<DocumentURI, Tex
     
     @Override
     public RecordReader<DocumentURI, Text> createRecordReader(InputSplit is,
-        TaskAttemptContext tac) {
-        return new RDFReader<Text>();
+        TaskAttemptContext context) {
+        LinkedMapWritable roleMap = null;
+        try {
+            roleMap = getRoleMap(context);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return new RDFReader<Text>(roleMap);
     }
- 
+    
 }

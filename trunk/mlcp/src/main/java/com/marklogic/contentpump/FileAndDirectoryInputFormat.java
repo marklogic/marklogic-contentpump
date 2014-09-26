@@ -28,11 +28,16 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.InvalidInputException;
+
+import com.marklogic.mapreduce.LinkedMapWritable;
+import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
  * An InputFormat that flattens directories and returns file-only splits.
@@ -183,5 +188,13 @@ FileInputFormat<K, V> {
             }
             return true;
         }
+    }
+    
+    protected LinkedMapWritable getRoleMap(TaskAttemptContext context) throws IOException{
+        //Restores the object from the configuration.
+        Configuration conf = context.getConfiguration();
+        LinkedMapWritable fhmap = DefaultStringifier.load(conf, MarkLogicConstants.ROLE_MAP, 
+            LinkedMapWritable.class);
+        return fhmap;
     }
 }

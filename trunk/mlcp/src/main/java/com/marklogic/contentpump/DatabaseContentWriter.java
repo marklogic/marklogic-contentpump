@@ -16,7 +16,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.contentpump.utilities.PermissionUtil;
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
@@ -38,7 +38,6 @@ import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.StatisticalAssignmentPolicy;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.Content;
-import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
@@ -168,44 +167,7 @@ public class DatabaseContentWriter<VALUE> extends
         }
     }
 
-    private List<ContentPermission> getPermissions(String[] perms) {
-        List<ContentPermission> permissions = null;
-        if (perms != null && perms.length > 0) {
-            int i = 0;
-            while (i + 1 < perms.length) {
-                String roleName = perms[i++];
-                if (roleName == null || roleName.isEmpty()) {
-                    LOG.error("Illegal role name: " + roleName);
-                    continue;
-                }
-                String perm = perms[i].trim();
-                ContentCapability capability = null;
-                if (perm.equalsIgnoreCase(ContentCapability.READ.toString())) {
-                    capability = ContentCapability.READ;
-                } else if (perm.equalsIgnoreCase(ContentCapability.EXECUTE
-                    .toString())) {
-                    capability = ContentCapability.EXECUTE;
-                } else if (perm.equalsIgnoreCase(ContentCapability.INSERT
-                    .toString())) {
-                    capability = ContentCapability.INSERT;
-                } else if (perm.equalsIgnoreCase(ContentCapability.UPDATE
-                    .toString())) {
-                    capability = ContentCapability.UPDATE;
-                } else {
-                    LOG.error("Illegal permission: " + perm);
-                }
-                if (capability != null) {
-                    if (permissions == null) {
-                        permissions = new ArrayList<ContentPermission>();
-                    }
-                    permissions
-                        .add(new ContentPermission(capability, roleName));
-                }
-                i++;
-            }
-        }
-        return permissions;
-    }
+
 
     /**
      * fetch the options information from conf and metadata, set to the field
@@ -548,7 +510,7 @@ public class DatabaseContentWriter<VALUE> extends
 
         String[] collections = conf.getStrings(OUTPUT_COLLECTION);
         String[] perms = conf.getStrings(OUTPUT_PERMISSION);
-        List<ContentPermission> permissions = getPermissions(perms);
+        List<ContentPermission> permissions = PermissionUtil.getPermissions(perms);
         if (meta != null) {
             HashSet<String> colSet = new HashSet<String>(meta.collectionsList);
             HashSet<ContentPermission> pSet = new HashSet<ContentPermission>(
