@@ -132,6 +132,16 @@ public class TestRDF {
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
 
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
         Utils.closeSession();
     }
 
@@ -198,6 +208,16 @@ public class TestRDF {
         assertTrue(result.hasNext());
         assertEquals("22", result.next().asString());
 
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+    
         Utils.closeSession();
     }
 
@@ -231,6 +251,16 @@ public class TestRDF {
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
 
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
         Utils.closeSession();
     }
 
@@ -264,6 +294,16 @@ public class TestRDF {
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
 
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
         Utils.closeSession();
     }
 
@@ -316,6 +356,12 @@ public class TestRDF {
         assertTrue(result.hasNext());
         assertEquals("9", result.next().asString());
 
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; "
+            + "fn:count(//sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("4", result.next().asString());
+    
         Utils.closeSession();
     }
 
@@ -375,6 +421,12 @@ public class TestRDF {
         assertTrue(result.hasNext());
         assertEquals("16", result.next().asString());
 
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; "
+            + "fn:count(//sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
         Utils.closeSession();
     }
 
@@ -416,7 +468,7 @@ public class TestRDF {
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Ani_DiFranco?oldid=490340130#absolute-line=1\"))");
         assertTrue(result.hasNext());
-        assertEquals("1", result.next().asString());
+        assertEquals("2", result.next().asString());
 
         Utils.closeSession();
     }
@@ -455,7 +507,7 @@ public class TestRDF {
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/collection/1\"))");
         assertTrue(result.hasNext());
-        assertEquals("20", result.next().asString());
+        assertEquals("21", result.next().asString());
 
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Ani_DiFranco?oldid=490340130#absolute-line=1\"))");
