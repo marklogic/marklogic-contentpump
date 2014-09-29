@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -130,13 +131,19 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     
     protected boolean countBased;
     
+    /** role-id -> role-name mapping **/
+    protected LinkedMapWritable roleMap;
+    
+    protected HashMap<String,ContentPermission[]> permsMap;
+    
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         this(conf, forestSourceMap, fastLoad, null);
     }
     
-    public ContentWriter(Configuration conf, 
-            Map<String, ContentSource> forestSourceMap, boolean fastLoad, AssignmentManager am) {
+    public ContentWriter(Configuration conf,
+        Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+        AssignmentManager am) {
         super(conf, null);
         
         this.fastLoad = fastLoad;
@@ -144,6 +151,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         this.forestSourceMap = forestSourceMap;
         
         this.am = am;
+        
+        permsMap = new HashMap<String,ContentPermission[]>();
+        
         // arraySize is the number of forests in fast load mode; 1 otherwise.
         int arraySize = forestSourceMap.size();
         forestIds = new String[arraySize];
@@ -590,4 +600,5 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         } 
         return 1000 / conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
     }
+    
 }
