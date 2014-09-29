@@ -789,4 +789,8 @@ public interface MarkLogicConstants {
      */    
     static final String TEMPORAL_COLLECTION =
         "mapreduce.marklogic.output.temporalcollection";
+    /**
+     * <Role-name,Role-id> map for internal use
+     */
+    static final String ROLE_MAP = "mapreduce.marklogic.output.rolemap";
 }
