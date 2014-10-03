@@ -540,6 +540,8 @@ public class DatabaseContentWriter<VALUE> extends
                     .toArray(new ContentPermission[permissions.size()]));
             }
         }
+        String tempcoll = conf.get(TEMPORAL_COLLECTION);
+        if (tempcoll != null) options.setTemporalCollection(tempcoll);
     }
 
     protected void rollbackDocCount(int fId) {

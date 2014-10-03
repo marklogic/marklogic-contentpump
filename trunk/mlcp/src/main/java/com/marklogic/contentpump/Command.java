@@ -940,6 +940,13 @@ public enum Command implements ConfigConstants {
                  .create(OUTPUT_PORT);
             outputPort.setRequired(true);
             options.addOption(outputPort);
+            Option tcf = OptionBuilder
+            	.withArgName("String")
+            	.hasArg()
+            	.withDescription("temporal collection name, used only" +
+            	    " for temporal documents")
+            	.create(TEMPORAL_COLLECTION);
+            options.addOption(tcf); 
             Option fastLoad = OptionBuilder
                  .withArgName("true,false")
                  .hasOptionalArg()
@@ -970,7 +977,7 @@ public enum Command implements ConfigConstants {
                 .withDescription("Whether to use a consistent timestamp to " +
                     "fetch data from the source database")
                 .create(SNAPSHOT);
-            options.addOption(snapshot);
+            options.addOption(snapshot);       
         }
 
         @Override
@@ -1041,6 +1048,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(INPUT_PORT)) {
                 String port = cmdline.getOptionValue(INPUT_PORT);
                 conf.set(MarkLogicConstants.INPUT_PORT, port);
+            }
+            if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
+                String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
+                conf.set(MarkLogicConstants.TEMPORAL_COLLECTION, tempColl);
             }
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
