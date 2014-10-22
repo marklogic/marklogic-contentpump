@@ -869,5 +869,29 @@ public class TestImportDocs {
         assertTrue(sb.toString().trim().equals(key));
 
     }
+    
+    @Test
+    public void testImportTemporalDoc() throws Exception {
+        String cmd = "IMPORT -password admin -username admin -host localhost"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/temporal"
+            + " -mode local -port 5275 -fastload false"
+            + " -temporal_collection mycollection";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        ResultSequence result = Utils.runQuery(
+          "xcc://admin:admin@localhost:5275",
+          "fn:count(fn:collection(\"mycollection\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());        
+
+        Utils.closeSession();
+    }
  
 }
