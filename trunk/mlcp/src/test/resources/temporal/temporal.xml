@@ -1,0 +1,9 @@
+<doc>
+  <p>This is my doc content</p>
+  <meta>
+    <valid-start xmlns="http://sample.com/bitemporal">2001-10-21T00:00:00Z</valid-start>
+    <valid-end xmlns="http://sample.com/bitemporal">2010-10-21T00:00:00Z</valid-end>
+    <system-start xmlns="http://sample.com/bitemporal"></system-start>
+    <system-end xmlns="http://sample.com/bitemporal"></system-end>
+  </meta>
+</doc>
