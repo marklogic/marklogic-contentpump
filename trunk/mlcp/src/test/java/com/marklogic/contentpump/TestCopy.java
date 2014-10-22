@@ -446,4 +446,40 @@ public class TestCopy{
         Utils.setDirectoryCreation("xcc://admin:admin@localhost:5275", "manual");
         Utils.closeSession();
     }
+    
+    @Test
+    public void testCopyTemporalDoc() throws Exception {
+        String cmd1 = "IMPORT -password admin -username admin -host localhost"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/temporal"
+            + " -mode local -port 5275 -fastload false";
+        String[] args1 = cmd1.split(" ");
+        assertFalse(args1.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB("xcc://admin:admin@localhost:6275", "CopyDst");
+        
+        String[] expandedArgs1 = null;
+        expandedArgs1 = OptionsFileUtil.expandArguments(args1);
+        ContentPump.runCommand(expandedArgs1);
+        
+        String cmd2 = "COPY -input_host localhost -input_port 5275"
+            + " -input_username admin -input_password admin"
+            + " -output_host localhost -output_port 6275"
+            + " -output_username admin -output_password admin"
+            + " -temporal_collection mycollection";
+        String[] args2 = cmd2.split(" ");
+        assertFalse(args2.length == 0);
+        
+        String[] expandedArgs2 = null;
+        expandedArgs2 = OptionsFileUtil.expandArguments(args2);
+        ContentPump.runCommand(expandedArgs2);
+        
+        ResultSequence result = Utils.runQuery(
+          "xcc://admin:admin@localhost:6275",
+          "fn:count(fn:collection(\"mycollection\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());        
+
+        Utils.closeSession();
+    }
 }
