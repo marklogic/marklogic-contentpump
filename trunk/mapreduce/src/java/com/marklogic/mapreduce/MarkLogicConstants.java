@@ -668,7 +668,7 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates type of content to be inserted when using 
-     * ContentOutputFormat.  Optional.  Valid choices: XML, TEXT, BINARY,
+     * ContentOutputFormat.  Optional.  Valid choices: XML, JSON, TEXT, BINARY,
      * MIXED, UNKNOWN.
      * Default: XML.
      */

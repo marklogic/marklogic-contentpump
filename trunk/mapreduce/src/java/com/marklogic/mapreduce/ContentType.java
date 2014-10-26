@@ -37,6 +37,16 @@ public enum ContentType {
             return Text.class;
         }
     },
+    JSON {
+        public DocumentFormat getDocumentFormat() {
+            return DocumentFormat.JSON;
+        }
+
+        @Override
+        public Class<? extends Writable> getWritableClass() {
+            return Text.class;
+        }
+    },
     TEXT {
         public DocumentFormat getDocumentFormat() {
             return DocumentFormat.TEXT;
@@ -95,6 +105,8 @@ public enum ContentType {
     public static ContentType forName(String typeName) {
         if (typeName.equalsIgnoreCase(XML.name())) {
             return XML;
+        } else if (typeName.equalsIgnoreCase(JSON.name())) {
+            return JSON;
         } else if (typeName.equalsIgnoreCase(TEXT.name())) {
             return TEXT;
         } else if (typeName.equalsIgnoreCase(BINARY.name())) {
@@ -113,12 +125,14 @@ public enum ContentType {
         if (ordinal == 0) {
             return XML;
         } else if (ordinal == 1) {
-            return TEXT;
+            return JSON;
         } else if (ordinal == 2) {
-            return BINARY;
+            return TEXT;
         } else if (ordinal == 3) {
-            return UNKNOWN;
+            return BINARY;
         } else if (ordinal == 4) {
+            return UNKNOWN;
+        } else if (ordinal == 5) {
             return MIXED;
         }
         return null;
