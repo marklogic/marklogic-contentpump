@@ -55,6 +55,7 @@ public class DatabaseDocument implements MarkLogicDocument {
      */
     public Text getContentAsText() {
         if (contentType == ContentType.XML || 
+            contentType == ContentType.JSON ||
             contentType == ContentType.TEXT) {
             return new Text(content);         
         }
@@ -84,16 +85,17 @@ public class DatabaseDocument implements MarkLogicDocument {
                             contentType);      
         }
         throw new UnsupportedOperationException(
-                            "Cannot convert binary data to Text.");        
+            "Cannot convert JSON or binary data to MarkLogicNode.");        
     }
     
     public String getContentAsString() throws UnsupportedEncodingException {
         if (contentType == ContentType.XML || 
+            contentType == ContentType.JSON ||
             contentType == ContentType.TEXT) {
             return new String(content, "UTF-8");         
         }
         throw new UnsupportedOperationException(
-        "Cannot convert binary data to Text.");
+        "Cannot convert binary data to String.");
     }
     
     /* (non-Javadoc)
@@ -113,6 +115,13 @@ public class DatabaseDocument implements MarkLogicDocument {
             } else if (item.getValueType() == ValueType.BINARY) {
                 content = ((XdmBinary) item.getItem()).asBinaryData();
                 contentType = ContentType.BINARY;
+            } else if (item.getValueType() == ValueType.ARRAY_NODE ||
+                item.getValueType() == ValueType.BOOLEAN_NODE ||
+                item.getValueType() == ValueType.NULL_NODE ||
+                item.getValueType() == ValueType.NUMBER_NODE ||
+                item.getValueType() == ValueType.OBJECT_NODE) {
+                content = item.asString().getBytes("UTF-8");
+                contentType = ContentType.JSON;
             } else {
                 contentType = ContentType.UNKNOWN;
             }
