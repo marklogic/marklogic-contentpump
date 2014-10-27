@@ -133,14 +133,21 @@ public abstract class ImportRecordReader<VALUEIN> extends
     protected String makeURIFromPath(Path file) {
         // get path portion of the file
        String path = file.toUri().getPath();
-       
+       if (LOG.isTraceEnabled()) {
+         LOG.trace("makeURIFromPath Path:"+path);
+       }
        // apply URI replace
        path = URIUtil.applyUriReplace(path, conf);
-       
+       if (LOG.isTraceEnabled()) {
+         LOG.trace("makeURIFromPath Path after uri replace:"+path);
+       }
        // create a URI out of it
        try {
            URI uri = new URI(null, null, null, 0, path, null, null);
            // return the encoded uri as document uri key
+           if (LOG.isTraceEnabled()) {
+             LOG.trace("makeURIFromPath document URI" + uri);
+           }
            return uri.toString();
        } catch (URISyntaxException ex) {
            LOG.warn("Error parsing file path, skipping " + file, ex);
