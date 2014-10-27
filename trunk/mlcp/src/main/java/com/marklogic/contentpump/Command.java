@@ -124,7 +124,7 @@ public enum Command implements ConfigConstants {
                 .withArgName("type")
                 .hasArg()
                 .withDescription("Type of document content. Valid choices: "
-                    + "XML, TEXT, BINARY, and MIXED.  Default type for " 
+                    + "XML, JSON, TEXT, BINARY, and MIXED.  Default type for " 
                     + "document is MIXED, where the type is determined "
                     + "from the MIME type mapping configured in MarkLogic "
                     + "Server.")
