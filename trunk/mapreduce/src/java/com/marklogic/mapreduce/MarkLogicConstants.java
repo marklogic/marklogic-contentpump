@@ -453,6 +453,15 @@ public interface MarkLogicConstants {
         "mapreduce.marklogic.output.port";
     /**
      * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the MarkLogic Server database to use for
+     * output operations. The default value is the target database assigned
+     * to the AppServer.
+     * .
+     */
+    static final String OUTPUT_DATABASE_NAME = 
+        "mapreduce.marklogic.output.databasename";
+    /**
+     * The config property name (<code>{@value}</code>)
      * which, if set, specifies whether the connection to the output server is
      * SSL enabled; false is assumed if not set.
      */

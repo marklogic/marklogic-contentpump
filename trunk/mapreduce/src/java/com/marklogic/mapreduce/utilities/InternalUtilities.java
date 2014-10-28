@@ -124,10 +124,7 @@ public class InternalUtilities implements MarkLogicConstants {
         String user = conf.get(INPUT_USERNAME, "");
         String password = conf.get(INPUT_PASSWORD, "");
         String port = conf.get(INPUT_PORT,"8000");
-        if (port == null || port.isEmpty()) {
-            throw new IllegalArgumentException(INPUT_PORT + 
-            " is not specified.");
-        }
+        String db = conf.get(INPUT_DATABASE_NAME);
         int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
         if (useSsl) {
@@ -140,16 +137,17 @@ public class InternalUtilities implements MarkLogicConstants {
                             sslOptionClass, conf);
                 
                 // construct content source
-                return getSecureContentSource(host, portInt, user, password,
-                        sslOptions);
+                return getSecureContentSource(host, portInt, user, password, 
+                        db, sslOptions);
             }
         }
         return ContentSourceFactory.newContentSource(host, portInt, 
-                user, password);
+                user, password, db);
     }
     
     static ContentSource getSecureContentSource(String host, int port,
-            String user, String password, SslConfigOptions sslOptions) 
+            String user, String password, String db, 
+            SslConfigOptions sslOptions) 
     throws XccConfigException {
         ContentSource contentSource = null;
       
@@ -161,7 +159,7 @@ public class InternalUtilities implements MarkLogicConstants {
   
         // construct content source
         contentSource = ContentSourceFactory.newContentSource(
-                host, port, user, password, null, options);        
+                host, port, user, password, db, options);        
  
         return contentSource;
     }
@@ -251,10 +249,7 @@ public class InternalUtilities implements MarkLogicConstants {
         String user = conf.get(OUTPUT_USERNAME, "");
         String password = conf.get(OUTPUT_PASSWORD, "");
         String port = conf.get(OUTPUT_PORT,"8000");
-        if (port == null) {
-            throw new IllegalArgumentException(OUTPUT_PORT + 
-            " is not specified.");
-        }
+        String db = conf.get(OUTPUT_DATABASE_NAME);
         int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
         if (useSsl) {
@@ -268,11 +263,11 @@ public class InternalUtilities implements MarkLogicConstants {
                 
                 // construct content source
                 return getSecureContentSource(hostName, portInt, user, password,
-                        sslOptions);
+                        db, sslOptions);
             }
         }
         return ContentSourceFactory.newContentSource(hostName, portInt, 
-                user, password);
+                user, password, db);
     }
 
     /**
