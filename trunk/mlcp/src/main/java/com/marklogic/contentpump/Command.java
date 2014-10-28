@@ -910,7 +910,6 @@ public enum Command implements ConfigConstants {
                 .hasArg()
                 .withDescription("Port of the input MarkLogic Server")
                 .create(INPUT_PORT);
-            inputPort.setRequired(true);
             options.addOption(inputPort);
             Option outputUsername = OptionBuilder
                 .withArgName("username")
@@ -938,7 +937,6 @@ public enum Command implements ConfigConstants {
                  .hasArg()
                  .withDescription("Port of the output MarkLogic Server")
                  .create(OUTPUT_PORT);
-            outputPort.setRequired(true);
             options.addOption(outputPort);
             Option tcf = OptionBuilder
             	.withArgName("String")
@@ -1445,7 +1443,6 @@ public enum Command implements ConfigConstants {
             .hasArg()
             .withDescription("Port of MarkLogic Server")
             .create(PORT);
-        port.setRequired(true);
         options.addOption(port);
     }
 
