@@ -52,6 +52,10 @@ implements MarkLogicConstants, ConfigConstants {
      */
     private OutputArchive xmlArchive;
     /**
+     * Archive for JSON
+     */
+    private OutputArchive jsonArchive;
+    /**
      * Archive for Binary
      */
     private OutputArchive binaryArchive;
@@ -85,6 +89,9 @@ implements MarkLogicConstants, ConfigConstants {
         }
         if (xmlArchive != null) {
             xmlArchive.close();
+        }
+        if (jsonArchive != null) {
+            jsonArchive.close();
         }
         if (binaryArchive != null) {
             binaryArchive.close();
@@ -147,7 +154,7 @@ implements MarkLogicConstants, ConfigConstants {
                 binaryArchive.write(zipEntryName, 
                         content.getContentAsByteArray());
             }
-        } else if(ContentType.TEXT.equals(type)) {
+        } else if (ContentType.TEXT.equals(type)) {
             if(txtArchive == null) {
                 txtArchive = new OutputArchive(dst, conf);
             }
@@ -158,7 +165,7 @@ implements MarkLogicConstants, ConfigConstants {
             }
             String text = content.getContentAsString();
             txtArchive.write(zipEntryName, text.getBytes(encoding));
-        } else if(ContentType.XML.equals(type)) {
+        } else if (ContentType.XML.equals(type)) {
             if(xmlArchive == null) {
                 xmlArchive = new OutputArchive(dst, conf);
             }
@@ -183,8 +190,27 @@ implements MarkLogicConstants, ConfigConstants {
                 }
                 xmlArchive.write(zipEntryName, doc.getBytes(encoding));
             }
+        } else if (ContentType.JSON.equals(type)) {
+            if (jsonArchive == null) {
+                jsonArchive = new OutputArchive(dst, conf);
+            }
+            if (!isExportDoc) {
+                jsonArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
+                        ((DatabaseDocumentWithMeta) content).getMeta()
+                            .toXML().getBytes(encoding));
+                jsonArchive.write(zipEntryName, 
+                            content.getContentAsString().getBytes(encoding));
+            } else {
+                String doc = content.getContentAsString();
+                if (doc == null) {
+                    LOG.warn("empty document for " + zipEntryName);
+                    return;
+                }
+                jsonArchive.write(zipEntryName, doc.getBytes(encoding));
+            }
         } else {
-            throw new IOException ("incorrect type: " + type);
+            LOG.warn("Skipping " + uri + ".  Unsupported content type: "
+                    + type.name());
         }
     }
 }
