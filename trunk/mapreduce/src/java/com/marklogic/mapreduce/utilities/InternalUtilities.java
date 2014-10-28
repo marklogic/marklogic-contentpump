@@ -123,7 +123,7 @@ public class InternalUtilities implements MarkLogicConstants {
     throws XccConfigException, IOException {      
         String user = conf.get(INPUT_USERNAME, "");
         String password = conf.get(INPUT_PASSWORD, "");
-        String port = conf.get(INPUT_PORT);
+        String port = conf.get(INPUT_PORT,"8000");
         if (port == null || port.isEmpty()) {
             throw new IllegalArgumentException(INPUT_PORT + 
             " is not specified.");
@@ -250,7 +250,7 @@ public class InternalUtilities implements MarkLogicConstants {
     throws XccConfigException, IOException {
         String user = conf.get(OUTPUT_USERNAME, "");
         String password = conf.get(OUTPUT_PASSWORD, "");
-        String port = conf.get(OUTPUT_PORT);
+        String port = conf.get(OUTPUT_PORT,"8000");
         if (port == null) {
             throw new IllegalArgumentException(OUTPUT_PORT + 
             " is not specified.");
