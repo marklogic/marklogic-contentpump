@@ -516,6 +516,10 @@ public enum Command implements ConfigConstants {
                 String port = cmdline.getOptionValue(PORT);
                 conf.set(MarkLogicConstants.OUTPUT_PORT, port);
             }
+            if (cmdline.hasOption(DATABASE)) {
+                String db = cmdline.getOptionValue(DATABASE);
+                conf.set(MarkLogicConstants.OUTPUT_DATABASE_NAME, db);
+            }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
                 conf.set(MarkLogicConstants.TEMPORAL_COLLECTION, tempColl);
@@ -844,6 +848,10 @@ public enum Command implements ConfigConstants {
                 String pswd = cmdline.getOptionValue(PASSWORD);
                 conf.set(MarkLogicConstants.INPUT_PASSWORD, pswd);
             }
+            if (cmdline.hasOption(DATABASE)) {
+                String db = cmdline.getOptionValue(DATABASE);
+                conf.set(MarkLogicConstants.INPUT_DATABASE_NAME, db);
+            }
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
                 conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
@@ -911,6 +919,12 @@ public enum Command implements ConfigConstants {
                 .withDescription("Port of the input MarkLogic Server")
                 .create(INPUT_PORT);
             options.addOption(inputPort);
+            Option inputDB = OptionBuilder
+                .withArgName("database")
+                .hasArg()
+                .withDescription("Database of the input MarkLogic Server")
+                .create(INPUT_DATABASE);
+            options.addOption(inputDB);
             Option outputUsername = OptionBuilder
                 .withArgName("username")
                 .hasArg()
@@ -938,6 +952,12 @@ public enum Command implements ConfigConstants {
                  .withDescription("Port of the output MarkLogic Server")
                  .create(OUTPUT_PORT);
             options.addOption(outputPort);
+            Option outputDB = OptionBuilder
+                .withArgName("database")
+                .hasArg()
+                .withDescription("Database of the output MarkLogic Server")
+                .create(OUTPUT_DATABASE);
+            options.addOption(outputDB);
             Option tcf = OptionBuilder
             	.withArgName("String")
             	.hasArg()
@@ -1030,6 +1050,10 @@ public enum Command implements ConfigConstants {
                 String port = cmdline.getOptionValue(OUTPUT_PORT);
                 conf.set(MarkLogicConstants.OUTPUT_PORT, port);
             }
+            if (cmdline.hasOption(OUTPUT_DATABASE)) {
+                String db = cmdline.getOptionValue(OUTPUT_DATABASE);
+                conf.set(MarkLogicConstants.OUTPUT_DATABASE_NAME, db);
+            }
 
             if (cmdline.hasOption(INPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(INPUT_USERNAME);
@@ -1046,6 +1070,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(INPUT_PORT)) {
                 String port = cmdline.getOptionValue(INPUT_PORT);
                 conf.set(MarkLogicConstants.INPUT_PORT, port);
+            }
+            if (cmdline.hasOption(INPUT_DATABASE)) {
+                String db = cmdline.getOptionValue(INPUT_DATABASE);
+                conf.set(MarkLogicConstants.INPUT_DATABASE_NAME, db);
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
@@ -1444,6 +1472,12 @@ public enum Command implements ConfigConstants {
             .withDescription("Port of MarkLogic Server")
             .create(PORT);
         options.addOption(port);
+        Option db = OptionBuilder
+            .withArgName(DATABASE)
+            .hasArg()
+            .withDescription("Database of MarkLogic Server")
+            .create(DATABASE);
+        options.addOption(db);
     }
 
     static void configCopyOptions(Options options) {

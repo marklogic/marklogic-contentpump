@@ -58,6 +58,7 @@ public interface ConfigConstants {
     static final String PASSWORD = "password";
     static final String HOST = "host";
     static final String PORT = "port";
+    static final String DATABASE = "database";
     static final String OUTPUT_DIRECTORY = "output_directory";
     static final String OUTPUT_COLLECTIONS = "output_collections";
     static final String OUTPUT_PERMISSIONS = "output_permissions";
@@ -97,10 +98,12 @@ public interface ConfigConstants {
     static final String INPUT_PASSWORD = "input_password";
     static final String INPUT_HOST = "input_host";
     static final String INPUT_PORT = "input_port";
+    static final String INPUT_DATABASE = "input_database";
     static final String OUTPUT_USERNAME = "output_username";
     static final String OUTPUT_PASSWORD = "output_password";
     static final String OUTPUT_HOST = "output_host";
     static final String OUTPUT_PORT = "output_port";
+    static final String OUTPUT_DATABASE = "output_database";
     static final String DELIMITER = "delimiter";
     static final String DEFAULT_DELIMITER = ",";
     // TODO: merge with "aggregate_uri_id" ??
