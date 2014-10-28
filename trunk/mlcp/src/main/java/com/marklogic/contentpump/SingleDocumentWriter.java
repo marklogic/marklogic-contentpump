@@ -123,7 +123,8 @@ implements MarkLogicConstants, ConfigConstants {
                     os.write(content.getContentAsByteArray());
                 }              
             } else if (ContentType.TEXT.equals(type)
-                || ContentType.XML.equals(type)) {
+                || ContentType.XML.equals(type)
+                || ContentType.JSON.equals(type)) {
                 if(encoding.equals("UTF-8")) {
                     Text t = content.getContentAsText();
                     os.write(t.getBytes(), 0, t.getLength());
