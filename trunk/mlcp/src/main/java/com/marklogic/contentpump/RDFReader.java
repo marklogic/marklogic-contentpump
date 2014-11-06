@@ -515,7 +515,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             sb.append("xquery version \"1.0-ml\";\n");
             sb.append("for $perm in ");
             sb.append("sem:create-graph-document(sem:iri(\"").append(escapeXml(graph))
-                .append("\"),");
+                .append("\"),(");
             if (permissions != null && permissions.size() > 0) {
                 for (int i = 0; i < permissions.size(); i++) {
                     ContentPermission cp = permissions.get(i);
@@ -540,6 +540,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             AdhocQuery query = session.newAdhocQuery(sb.toString());
             query.setOptions(options);
             result = session.submitRequest(query);
+            if(!result.hasNext()) return null;
             while (result.hasNext()) {
                 Text roleid = new Text(result.next().asString());
                 if (!result.hasNext()) {
