@@ -513,8 +513,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             session.setDefaultRequestOptions(options);
             StringBuilder sb = new StringBuilder();
             sb.append("xquery version \"1.0-ml\";\n");
+            sb.append("import module namespace semi = \"http://marklogic.com/semantics/impl\" at \"/MarkLogic/semantics/sem-impl.xqy\";");
             sb.append("for $perm in ");
-            sb.append("sem:create-graph-document(sem:iri(\"").append(escapeXml(graph))
+            sb.append("semi:create-graph-doc(sem:iri(\"").append(escapeXml(graph))
                 .append("\"),(");
             if (permissions != null && permissions.size() > 0) {
                 for (int i = 0; i < permissions.size(); i++) {
