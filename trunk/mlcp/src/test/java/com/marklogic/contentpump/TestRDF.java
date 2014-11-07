@@ -146,6 +146,50 @@ public class TestRDF {
     }
 
     @Test
+    public void testTurtlePermission() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.ttl"
+                        + " -output_permissions admin,read,admin,update"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("8", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("795", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.w3.org/TR/rdf-syntax-grammar\"])");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        Utils.closeSession();
+    }    
+    
+    @Test
     public void testRDFJSON() throws Exception {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
