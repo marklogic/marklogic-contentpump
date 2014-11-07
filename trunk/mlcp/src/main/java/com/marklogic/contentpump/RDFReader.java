@@ -530,7 +530,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 }
                 sb.append(")");
             } else {
-                sb.append("xdmp:default-permissions()");
+                sb.append("xdmp:default-permissions())");
             }
             sb.append(")\n");
             sb.append("return ($perm/*:role-id/text(),$perm/*:capability/text())");
