@@ -93,7 +93,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected int MAXTRIPLESPERDOCUMENT = 100;
     protected long INMEMORYTHRESHOLD = 1 * 1024 * 1000; // 1Mb
-    protected long INJESTIONNOTIFYSTEP = 10000;
+    protected long INGESTIONNOTIFYSTEP = 10000;
 
     protected Dataset dataset = null;
     protected StmtIterator statementIter = null;
@@ -126,7 +126,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long pos;
     protected long end;
     protected boolean compressed;
-    protected long injestedTriples = 0;
+    protected long ingestedTriples = 0;
     protected ArrayList<String> newGraphs = new ArrayList<String>();
     protected Iterator<String> graphItr;
     protected LinkedMapWritable roleMap;
@@ -917,9 +917,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected void notifyUser() {
-        injestedTriples++;
-        if (injestedTriples % INJESTIONNOTIFYSTEP == 0) {
-            LOG.info("Injested " + injestedTriples + " triples from " + origFn);
+        ingestedTriples++;
+        if (ingestedTriples % INGESTIONNOTIFYSTEP == 0) {
+            LOG.info("Ingested " + ingestedTriples + " triples from " + origFn);
         }
     }
 
