@@ -15,24 +15,27 @@
  */
 package com.marklogic.contentpump;
 
-import com.marklogic.mapreduce.CustomContent;
-import com.marklogic.mapreduce.MarkLogicConstants;
-import com.marklogic.mapreduce.MarkLogicNode;
-import com.marklogic.xcc.Content;
-import com.marklogic.xcc.ContentCreateOptions;
-import com.marklogic.xcc.ContentFactory;
-import com.marklogic.xcc.ContentPermission;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.Text;
-
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.Text;
+
+import com.marklogic.mapreduce.CustomContent;
+import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.MarkLogicNode;
+import com.marklogic.xcc.Content;
+import com.marklogic.xcc.ContentCapability;
+import com.marklogic.xcc.ContentCreateOptions;
+import com.marklogic.xcc.ContentFactory;
+import com.marklogic.xcc.ContentPermission;
 
 /**
  * Created with IntelliJ IDEA.
@@ -42,6 +45,8 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class RDFWritable<VALUE> implements CustomContent {
+    public static final Log LOG = 
+        LogFactory.getLog(RDFWritable.class);
     private VALUE value;
     private String collectionUri = null;
     private byte type = 0; // Triples are always text
@@ -87,7 +92,8 @@ public class RDFWritable<VALUE> implements CustomContent {
             options.setCollections(col);
         }
         //permissions
-        options.setPermissions(permissions);
+        if (permissions!=null)
+            options.setPermissions(permissions);
         
         Content content = null;
         if (value instanceof Text) {
@@ -121,6 +127,18 @@ public class RDFWritable<VALUE> implements CustomContent {
         } else if (value instanceof BytesWritable) {
             ((BytesWritable) value).write(out);
         }
+        //serialize permissions
+        if (permissions == null) {
+            out.writeByte(0);
+        } else {
+            out.writeByte(permissions.length);
+            for(int i=0; i<permissions.length; i++) {
+                Text role = new Text(permissions[i].getRole());
+                Text cap = new Text(permissions[i].getCapability().toString());
+                role.write(out);
+                cap.write(out);
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -150,5 +168,31 @@ public class RDFWritable<VALUE> implements CustomContent {
                 throw new IOException("incorrect type");
         }
         type = valueType;
+        byte hasPerms = in.readByte();
+        if (hasPerms != 0) {
+            int length = hasPerms;
+            permissions = new ContentPermission[length];
+            for(int i=0; i<length; i++) {
+                Text t = new Text();
+                t.readFields(in);
+                String role = t.toString();
+                t.readFields(in);
+                String perm = t.toString();
+                ContentCapability capability = null;
+                if (perm.equalsIgnoreCase(ContentCapability.READ.toString())) {
+                    capability = ContentCapability.READ;
+                } else if (perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString())) {
+                    capability = ContentCapability.EXECUTE;
+                } else if (perm.equalsIgnoreCase(ContentCapability.INSERT.toString())) {
+                    capability = ContentCapability.INSERT;
+                } else if (perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
+                    capability = ContentCapability.UPDATE;
+                } else {
+                    LOG.error("Illegal permission: " + perm);
+                }
+                permissions[i] = new ContentPermission(capability,role);
+            }
+
+        }
     }
 }
