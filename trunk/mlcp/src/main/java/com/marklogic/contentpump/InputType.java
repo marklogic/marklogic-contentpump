@@ -200,14 +200,10 @@ public enum InputType implements ConfigConstants {
         }
     },
     RDF {
-        private String ROLE_QUERY = "xdmp:eval('xquery version \"1.0-ml\";"
-            + "import module namespace sec=\"http://marklogic.com/xdmp/security\" at\n"
-            + "\"/MarkLogic/security.xqy\";\n"
-            + "for $role-id in sec:get-role-ids()/text() \n"
-            + "return ($role-id,sec:get-role-names($role-id)/text())'\n"
-            + ",(),<options xmlns=\"xdmp:eval\">"
-            + "<database>{xdmp:database(\"Security\")}</database>"
-            + "</options>)";
+        private String ROLE_QUERY = 
+            "import module namespace hadoop = " +
+            "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+            "hadoop:get-role-map()";
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
                 CommandLine cmdline, Configuration conf) {
@@ -243,8 +239,7 @@ public enum InputType implements ConfigConstants {
             try {
                 cs = InternalUtilities.getOutputContentSource(conf,
                     conf.get(MarkLogicConstants.OUTPUT_HOST));
-
-                session = cs.newSession();
+                session = cs.newSession("Security");
                 RequestOptions options = new RequestOptions();
                 options.setDefaultXQueryVersion("1.0-ml");
                 session.setDefaultRequestOptions(options);
