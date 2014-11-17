@@ -132,6 +132,7 @@ public class TransformHelper {
             optionsMap
                 .put("value-type", ValueType.XS_BASE64_BINARY.toString());
             break;
+        case JSON:            
         case TEXT:
             if (value instanceof BytesWritable) {
                 // in MIXED type, value is byteswritable
