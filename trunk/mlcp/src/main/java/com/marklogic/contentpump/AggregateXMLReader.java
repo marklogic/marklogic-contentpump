@@ -328,7 +328,11 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                         + xmlSR.getLocation());
             }
             sb.append("</");
-            sb.append(idName);
+            if (prefix != null && !prefix.equals("")) {
+                sb.append(prefix + ":" + name);
+            } else {
+                sb.append(name);
+            }
             sb.append(">");
             currDepth--;
         }
