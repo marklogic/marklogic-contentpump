@@ -614,7 +614,18 @@ public enum Command implements ConfigConstants {
                             ")for the job.");
                 }
             }
-
+            if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
+                String fileType = cmdline.getOptionValue(INPUT_FILE_TYPE);
+                if (fileType.equalsIgnoreCase(InputType.RDF.toString())) {
+                	throw new IllegalArgumentException(
+                	  "Cannot ingest RDF into temporal collection");
+                }
+            	if (ContentType.BINARY == contentType)
+            	{
+                    throw new IllegalArgumentException(
+    			      "Cannot ingest BINARY into temporal collection");
+                }
+            }
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
@@ -1109,6 +1120,17 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
+            }
+            if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
+                InputType inputType = getInputType(cmdline);   
+                String fileType = cmdline.getOptionValue(INPUT_FILE_TYPE);
+                ContentType contentType = inputType.getContentType(cmdline);
+                if (fileType.equalsIgnoreCase(InputType.RDF.toString())) 
+                	throw new IllegalArgumentException(
+                	  "Cannot ingest RDF into temporal collection");
+            	if (ContentType.BINARY == contentType)
+                    throw new IllegalArgumentException(
+    			      "Cannot ingest BINARY into temporal collection");
             }
             
             applyPartitionConfigOptions(conf, cmdline);
