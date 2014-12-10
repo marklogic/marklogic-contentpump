@@ -169,7 +169,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             if (LOG.isDebugEnabled()) {
                 LOG.debug(graphQry);
             }
-            LOG.info(graphQry);
             AdhocQuery query = session.newAdhocQuery(graphQry.toString());
             query.setOptions(options);
             session.submitRequest(query);
