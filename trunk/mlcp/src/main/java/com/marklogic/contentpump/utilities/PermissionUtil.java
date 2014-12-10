@@ -1,13 +1,26 @@
 package com.marklogic.contentpump.utilities;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.Text;
 
+import com.marklogic.mapreduce.LinkedMapWritable;
+import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCapability;
 import com.marklogic.xcc.ContentPermission;
+import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.RequestOptions;
+import com.marklogic.xcc.ResultSequence;
+import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.XccConfigException;
 
 public class PermissionUtil {
     public static final Log LOG = LogFactory.getLog(PermissionUtil.class);
@@ -40,6 +53,52 @@ public class PermissionUtil {
             }
         }
         return permissions;
+    }
+    
+    
+    public static List<ContentPermission> getDefaultPermissions(Configuration conf, LinkedMapWritable roleMap) throws IOException {
+        ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+        Session session = null;
+        ResultSequence result = null;
+        ContentSource cs;
+        try {
+            cs = InternalUtilities.getOutputContentSource(conf,
+                conf.get(MarkLogicConstants.OUTPUT_HOST));
+
+            session = cs.newSession();
+            RequestOptions options = new RequestOptions();
+            options.setDefaultXQueryVersion("1.0-ml");
+
+            AdhocQuery query = session
+                .newAdhocQuery("xdmp:default-permissions()");
+            query.setOptions(options);
+            result = session.submitRequest(query);
+            if (!result.hasNext())
+                return null;
+            while (result.hasNext()) {
+                Text roleid = new Text(result.next().asString());
+                if (!result.hasNext()) {
+                    throw new IOException("Invalid role map");
+                }
+                String roleName = roleMap.get(roleid).toString();
+                String cap = result.next().asString();
+                ContentCapability capability = PermissionUtil
+                    .getCapbility(cap);
+                perms.add(new ContentPermission(capability, roleName));
+            }
+        } catch (XccConfigException e) {
+            throw new IOException(e);
+        } catch (RequestException e) {
+            throw new IOException(e);
+        } finally {
+            if (result != null) {
+                result.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+        }
+        return perms;
     }
     
     public static ContentCapability getCapbility(String cap) {

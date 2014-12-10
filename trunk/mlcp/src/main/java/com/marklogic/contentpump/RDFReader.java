@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -127,10 +128,12 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long end;
     protected boolean compressed;
     protected long ingestedTriples = 0;
-    protected ArrayList<String> newGraphs = new ArrayList<String>();
+    protected HashSet<String> newGraphs = new HashSet<String>();
+    protected HashMap<String,ContentPermission[]> existingMapPerms;
     protected Iterator<String> graphItr;
     protected LinkedMapWritable roleMap;
-    protected HashMap<String,ContentPermission[]> permsMap;
+    protected ContentPermission[] defaultPerms;
+    protected StringBuilder graphQry;
     
     private static final Object jenaLock = new Object();
     
@@ -141,7 +144,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         milliSecs = cal.getTimeInMillis();
         compressed = false;
         this.roleMap = roleMap;
-        permsMap = new HashMap<String,ContentPermission[]>();
+        graphQry = new StringBuilder();
+        existingMapPerms = new HashMap<String,ContentPermission[]>();
     }
 
     @Override
@@ -150,6 +154,34 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             rdfIter.close();
         }
         dataset = null;
+        if(graphQry.length()==0) 
+            return;
+        //create graph doc in a batch
+        Session session = null;
+        ContentSource cs;
+        try {
+            cs = InternalUtilities.getOutputContentSource(conf,
+                conf.get(MarkLogicConstants.OUTPUT_HOST));
+            session = cs.newSession();
+            RequestOptions options = new RequestOptions();
+            options.setDefaultXQueryVersion("1.0-ml");
+            session.setDefaultRequestOptions(options);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(graphQry);
+            }
+            LOG.info(graphQry);
+            AdhocQuery query = session.newAdhocQuery(graphQry.toString());
+            query.setOptions(options);
+            session.submitRequest(query);
+        } catch (RequestException e) {
+            throw new IOException(e);
+        } catch (XccConfigException e) {
+            throw new IOException(e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
     }
 
     @Override
@@ -208,6 +240,17 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         initStream(inSplit);
+        String[] perms = conf.getStrings(MarkLogicConstants.OUTPUT_PERMISSION);
+        if(perms!=null) {
+            defaultPerms = PermissionUtil.getPermissions(perms).toArray(
+                new ContentPermission[perms.length>>1]);
+        } else {
+            List<ContentPermission> tmp = PermissionUtil.getDefaultPermissions(conf,roleMap);
+            if(tmp!=null)
+                defaultPerms = tmp.toArray(new ContentPermission[tmp.size()]);
+        }
+            
+        initExistingMapPerms();
     }
 
     protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
@@ -489,13 +532,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         return result;
     }
     
-    /* 
-     * create graph doc
-     * 
-     * return ContentPermission[] for the graph
-     */
-    public ContentPermission[] insertGraphDoc(String graph) throws IOException {
-        ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+    public void initExistingMapPerms() throws IOException {
         Session session = null;
         ResultSequence result = null;
         ContentSource cs;
@@ -513,13 +550,74 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             session.setDefaultRequestOptions(options);
             StringBuilder sb = new StringBuilder();
             sb.append("xquery version \"1.0-ml\";\n");
-            sb.append("import module namespace semi = \"http://marklogic.com/semantics/impl\" at \"/MarkLogic/semantics/sem-impl.xqy\";");
-            sb.append("for $perm in ");
-            sb.append("semi:create-graph-doc(sem:iri(\"").append(escapeXml(graph))
+            sb.append("for $doc in fn:collection(\"http://marklogic.com/semantics#graphs\")");
+            sb.append("return (fn:base-uri($doc),for $p in $doc/*:graph/*:permissions/*:permission return ($p/*:role-id/text(),$p/*:capability/text()),\"0\")");
+            
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(sb.toString());
+            }
+            AdhocQuery query = session.newAdhocQuery(sb.toString());
+            query.setOptions(options);
+            result = session.submitRequest(query);
+            while (result.hasNext()) {
+                String uri = result.next().asString();
+                String tmp = result.next().asString();
+                ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+                while(!tmp.equals("0")) {
+                    Text roleid = new Text(tmp);
+                    if (!result.hasNext()) {
+                        throw new IOException("Invalid role map");
+                    }
+                    String roleName = roleMap.get(roleid).toString();
+                    String cap = result.next().asString();
+                    ContentCapability capability = PermissionUtil
+                        .getCapbility(cap);
+                    perms.add(new ContentPermission(capability, roleName));
+                    tmp = result.next().asString();
+                }
+                
+                existingMapPerms.put(uri, perms.toArray(new ContentPermission[perms.size()]));
+                
+            }
+        } catch (XccConfigException e) {
+            throw new IOException(e);
+        } catch (RequestException e) {
+            throw new IOException(e);
+        } finally {
+            if (result != null) {
+                result.close();
+            }
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+    
+    /* 
+     * create graph doc
+     * 
+     * return ContentPermission[] for the graph
+     */
+    public ContentPermission[] insertGraphDoc(String graph) throws IOException {
+        ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+        Session session = null;
+        ResultSequence result = null;
+        ContentSource cs;
+        try {
+            cs = InternalUtilities.getOutputContentSource(conf,
+                conf.get(MarkLogicConstants.OUTPUT_HOST));
+            ContentPermission[] permissions = defaultPerms;
+
+            session = cs.newSession();
+            RequestOptions options = new RequestOptions();
+            options.setDefaultXQueryVersion("1.0-ml");
+            session.setDefaultRequestOptions(options);
+            StringBuilder sb = graphQry;
+            sb.append("sem:create-graph-document(sem:iri(\"").append(escapeXml(graph))
                 .append("\"),(");
-            if (permissions != null && permissions.size() > 0) {
-                for (int i = 0; i < permissions.size(); i++) {
-                    ContentPermission cp = permissions.get(i);
+            if (permissions != null && permissions.length > 0) {
+                for (int i = 0; i < permissions.length; i++) {
+                    ContentPermission cp = permissions[i];
                     if (i > 0)
                         sb.append(",");
                     sb.append("xdmp:permission(\"");
@@ -532,31 +630,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             } else {
                 sb.append("xdmp:default-permissions())");
             }
-            sb.append(")\n");
-            sb.append("return ($perm/*:role-id/text(),$perm/*:capability/text())");
-            
+            sb.append(");\n");
             if(LOG.isDebugEnabled()) {
                 LOG.debug(sb.toString());
             }
-            AdhocQuery query = session.newAdhocQuery(sb.toString());
-            query.setOptions(options);
-            result = session.submitRequest(query);
-            if(!result.hasNext()) return null;
-            while (result.hasNext()) {
-                Text roleid = new Text(result.next().asString());
-                if (!result.hasNext()) {
-                    throw new IOException("Invalid role map");
-                }
-                String roleName = roleMap.get(roleid).toString();
-                String cap = result.next().asString();
-                ContentCapability capability = PermissionUtil
-                    .getCapbility(cap);
-                perms.add(new ContentPermission(capability, roleName));
-            }
-
         } catch (XccConfigException e) {
-            throw new IOException(e);
-        } catch (RequestException e) {
             throw new IOException(e);
         } finally {
             if (result != null) {
@@ -873,12 +951,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 }
             }
             ContentPermission[] perms = null;
-            if(!newGraphs.contains(collection)) {
-                newGraphs.add(collection);
-                perms = insertGraphDoc(collection);
-                permsMap.put(collection,perms);
+            if (existingMapPerms.containsKey(collection)) {
+                perms = existingMapPerms.get(collection);
             } else {
-                perms = permsMap.get(collection);
+                perms = defaultPerms;
+                insertGraphDoc(collection);
             }
             ((RDFWritable) value).setPermissions(perms);
 
