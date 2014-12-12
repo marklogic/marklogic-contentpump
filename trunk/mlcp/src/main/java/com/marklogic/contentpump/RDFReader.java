@@ -93,6 +93,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
 
     protected int MAXTRIPLESPERDOCUMENT = 100;
+    protected int MAXGRAPHSPERREQUEST = 100;
+    protected int countPerBatch = 0;
     protected long INMEMORYTHRESHOLD = 1 * 1024 * 1000; // 1Mb
     protected long INGESTIONNOTIFYSTEP = 10000;
 
@@ -157,6 +159,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if(graphQry.length()==0) 
             return;
         //create graph doc in a batch
+        submitGraphQuery();
+    }
+
+    protected void submitGraphQuery() throws IOException{
         Session session = null;
         ContentSource cs;
         try {
@@ -170,6 +176,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 LOG.debug(graphQry);
             }
             AdhocQuery query = session.newAdhocQuery(graphQry.toString());
+            if(LOG.isDebugEnabled()) {
+                LOG.debug(graphQry.toString());
+            }
             query.setOptions(options);
             session.submitRequest(query);
         } catch (RequestException e) {
@@ -182,7 +191,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
         }
     }
-
     @Override
     public float getProgress() throws IOException, InterruptedException {
         if (!hasNext) {
@@ -599,19 +607,13 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
      */
     public ContentPermission[] insertGraphDoc(String graph) throws IOException {
         ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
-        Session session = null;
-        ResultSequence result = null;
-        ContentSource cs;
-        try {
-            cs = InternalUtilities.getOutputContentSource(conf,
-                conf.get(MarkLogicConstants.OUTPUT_HOST));
             ContentPermission[] permissions = defaultPerms;
-
-            session = cs.newSession();
-            RequestOptions options = new RequestOptions();
-            options.setDefaultXQueryVersion("1.0-ml");
-            session.setDefaultRequestOptions(options);
             StringBuilder sb = graphQry;
+            if (countPerBatch >= MAXGRAPHSPERREQUEST) {
+                countPerBatch = 0;
+                submitGraphQuery();
+                graphQry.setLength(0);
+            }
             sb.append("sem:create-graph-document(sem:iri(\"").append(escapeXml(graph))
                 .append("\"),(");
             if (permissions != null && permissions.length > 0) {
@@ -630,20 +632,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 sb.append("xdmp:default-permissions())");
             }
             sb.append(");\n");
-            if(LOG.isDebugEnabled()) {
-                LOG.debug(sb.toString());
-            }
-        } catch (XccConfigException e) {
-            throw new IOException(e);
-        } finally {
-            if (result != null) {
-                result.close();
-            }
-            if (session != null) {
-                session.close();
-            }
-        }
-
+            countPerBatch++;
         return perms.toArray(new ContentPermission[0]);
     }
 
