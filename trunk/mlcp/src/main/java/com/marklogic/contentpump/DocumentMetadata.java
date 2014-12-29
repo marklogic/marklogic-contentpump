@@ -202,9 +202,14 @@ public class DocumentMetadata {
             setFormat(DocumentFormat.TEXT);
             return;
         }
+ 
+        if (_format.equals(DocumentFormat.BINARY)) {
+            setFormat(DocumentFormat.BINARY);
+            return;
+        }
 
         // default
-        setFormat(DocumentFormat.BINARY);
+        setFormat(DocumentFormat.JSON);
     }
 
     /**
