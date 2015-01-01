@@ -1127,10 +1127,10 @@ public enum Command implements ConfigConstants {
                 InputType inputType = getInputType(cmdline);   
                 String fileType = cmdline.getOptionValue(INPUT_FILE_TYPE);
                 ContentType contentType = inputType.getContentType(cmdline);
-                if (fileType.equalsIgnoreCase(InputType.RDF.toString())) 
+                if (fileType!=null && fileType.equalsIgnoreCase(InputType.RDF.toString())) 
                 	throw new IllegalArgumentException(
                 	  "Cannot ingest RDF into temporal collection");
-            	if (ContentType.BINARY == contentType)
+            	if (contentType!=null && ContentType.BINARY == contentType)
                     throw new IllegalArgumentException(
     			      "Cannot ingest BINARY into temporal collection");
             }
