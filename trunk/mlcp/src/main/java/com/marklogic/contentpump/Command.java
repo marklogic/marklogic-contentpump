@@ -621,8 +621,7 @@ public enum Command implements ConfigConstants {
                 	throw new IllegalArgumentException(
                 	  "Cannot ingest RDF into temporal collection");
                 }
-            	if (fileType!=null && 
-            			ContentType.BINARY == contentType)
+            	if (contentType!=null && ContentType.BINARY == contentType)
             	{
                     throw new IllegalArgumentException(
     			      "Cannot ingest BINARY into temporal collection");
