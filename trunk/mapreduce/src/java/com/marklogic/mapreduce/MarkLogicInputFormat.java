@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2014 MarkLogic Corporation
+ * Copyright 2003-2015 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
