@@ -629,7 +629,15 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
-                conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
+                if (arg == null || arg.equalsIgnoreCase("true")) {
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, true);
+                } else if (arg.equalsIgnoreCase("false")) {
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, false);
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + TOLERATE_ERRORS
+                                    + ": " + arg);
+                }
             }
             
             applyPartitionConfigOptions(conf, cmdline);
