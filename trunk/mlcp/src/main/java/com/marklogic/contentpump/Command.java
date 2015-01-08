@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2014 MarkLogic Corporation
+ * Copyright 2003-2015 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -308,10 +308,10 @@ public enum Command implements ConfigConstants {
                 .create(TYPE_FILTER);
             options.addOption(tf);
             Option tcf = OptionBuilder
-            	.withArgName("String")
-            	.hasArg()
-            	.withDescription("temporal collection name")
-            	.create(TEMPORAL_COLLECTION);
+                .withArgName("String")
+                .hasArg()
+                .withDescription("temporal collection name")
+                .create(TEMPORAL_COLLECTION);
             options.addOption(tcf);                        
         }
 
@@ -616,15 +616,14 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String fileType = cmdline.getOptionValue(INPUT_FILE_TYPE);
-                if (fileType!=null && 
-                		fileType.equalsIgnoreCase(InputType.RDF.toString())) {
-                	throw new IllegalArgumentException(
-                	  "Cannot ingest RDF into temporal collection");
-                }
-            	if (contentType!=null && ContentType.BINARY == contentType)
-            	{
+                if (fileType != null && 
+                    fileType.equalsIgnoreCase(InputType.RDF.toString())) {
                     throw new IllegalArgumentException(
-    			      "Cannot ingest BINARY into temporal collection");
+                        "Cannot ingest RDF into temporal collection");
+                }
+            	if (contentType != null && ContentType.BINARY == contentType) {
+                    throw new IllegalArgumentException(
+                        "Cannot ingest BINARY into temporal collection");
                 }
             }
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
@@ -979,11 +978,11 @@ public enum Command implements ConfigConstants {
                 .create(OUTPUT_DATABASE);
             options.addOption(outputDB);
             Option tcf = OptionBuilder
-            	.withArgName("String")
-            	.hasArg()
-            	.withDescription("temporal collection name, used only" +
-            	    " for temporal documents")
-            	.create(TEMPORAL_COLLECTION);
+                .withArgName("String")
+                .hasArg()
+                .withDescription("temporal collection name, used only" +
+                    " for temporal documents")
+                .create(TEMPORAL_COLLECTION);
             options.addOption(tcf); 
             Option fastLoad = OptionBuilder
                  .withArgName("true,false")
@@ -1015,7 +1014,7 @@ public enum Command implements ConfigConstants {
                 .withDescription("Whether to use a consistent timestamp to " +
                     "fetch data from the source database")
                 .create(SNAPSHOT);
-            options.addOption(snapshot);       
+            options.addOption(snapshot);
         }
 
         @Override
@@ -1134,12 +1133,15 @@ public enum Command implements ConfigConstants {
                 InputType inputType = getInputType(cmdline);   
                 String fileType = cmdline.getOptionValue(INPUT_FILE_TYPE);
                 ContentType contentType = inputType.getContentType(cmdline);
-                if (fileType!=null && fileType.equalsIgnoreCase(InputType.RDF.toString())) 
-                	throw new IllegalArgumentException(
-                	  "Cannot ingest RDF into temporal collection");
-            	if (contentType!=null && ContentType.BINARY == contentType)
+                if (fileType != null && 
+                    fileType.equalsIgnoreCase(InputType.RDF.toString())) {
                     throw new IllegalArgumentException(
-    			      "Cannot ingest BINARY into temporal collection");
+                        "Cannot ingest RDF into temporal collection");
+                }
+                if (contentType != null && ContentType.BINARY == contentType) {
+                    throw new IllegalArgumentException(
+    		        "Cannot ingest BINARY into temporal collection");
+                }
             }
             
             applyPartitionConfigOptions(conf, cmdline);
@@ -1147,18 +1149,18 @@ public enum Command implements ConfigConstants {
             applyModuleConfigOptions(conf, cmdline, batchSize);
         }
 
-		@Override
-		public void setMapperClass(Job job, Configuration conf,
-				CommandLine cmdline) {
-			job.setMapperClass(DocumentMapper.class);			
-		}
+	@Override
+	public void setMapperClass(Job job, Configuration conf,
+                                   CommandLine cmdline) {
+	    job.setMapperClass(DocumentMapper.class);			
+        }
 
-		@Override
-		public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(Job job, 
-		        Class<? extends Mapper<?,?,?,?>> mapper,
-		        int threadCnt, int availableThreads) {
-			return mapper;
-		}
+	@Override
+	public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(Job job, 
+            Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
+            int availableThreads) {
+                return mapper;
+        }
     },
     EXTRACT {
         @Override
