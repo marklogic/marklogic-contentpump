@@ -24,7 +24,9 @@ import com.marklogic.xcc.exceptions.XccConfigException;
 
 public class PermissionUtil {
     public static final Log LOG = LogFactory.getLog(PermissionUtil.class);
-    
+    public static final String DEFAULT_PERM_QUERY = 
+        "for $p in xdmp:default-permissions() " +
+        "return ($p/*:role-id/text(),$p/*:capability/text())";
     /**
      * Get a list of ContentPermission fron given string
      * @param perms a string of role-name,capability pais, separated by commna
@@ -69,8 +71,7 @@ public class PermissionUtil {
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
 
-            AdhocQuery query = session
-                .newAdhocQuery("xdmp:default-permissions()");
+            AdhocQuery query = session.newAdhocQuery(DEFAULT_PERM_QUERY);
             query.setOptions(options);
             result = session.submitRequest(query);
             if (!result.hasNext())
@@ -78,7 +79,7 @@ public class PermissionUtil {
             while (result.hasNext()) {
                 Text roleid = new Text(result.next().asString());
                 if (!result.hasNext()) {
-                    throw new IOException("Invalid role map");
+                    throw new IOException("Invalid role,capability pair");
                 }
                 String roleName = roleMap.get(roleid).toString();
                 String cap = result.next().asString();
