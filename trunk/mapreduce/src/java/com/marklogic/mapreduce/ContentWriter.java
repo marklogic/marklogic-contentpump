@@ -460,6 +460,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             } else {
                 LOG.warn(e.getMessage());
             }
+            counts[fId] = 0;
         } catch (RequestException e) {
             if (sessions[sid] != null) {
                 sessions[sid].close();
