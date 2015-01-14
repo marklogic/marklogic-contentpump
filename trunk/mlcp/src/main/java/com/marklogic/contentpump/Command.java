@@ -104,8 +104,8 @@ public enum Command implements ConfigConstants {
                 .withArgName("type")
                 .hasArg()
                 .withDescription("Type of input file.  Valid choices are: "
-                    + "documents, XML aggregates, delimited text, export "
-                    + "archive, rdf and forest.")
+                    + "aggregates, archive, delimited_text, documents, forest,"
+                    + "rdf, sequencefile.")
                 .create(INPUT_FILE_TYPE);
             options.addOption(inputFileType);
             Option inputCompressed = OptionBuilder
@@ -166,7 +166,9 @@ public enum Command implements ConfigConstants {
                 .withArgName("language")
                 .hasArg()
                 .withDescription("Language name to associate with output "
-                        + "documents.")
+                + "documents.  A value of \"en\" indicates that the "
+                + "documents are in english.  The default is null, "
+                + "which indicates the server default.")
                 .create(OUTPUT_LANGUAGE);
             options.addOption(outputLanguage);
             Option outputCleanDir = OptionBuilder
@@ -242,7 +244,7 @@ public enum Command implements ConfigConstants {
                 .hasOptionalArg()
                 .withDescription(
                     "The charset encoding to be used by the MarkLogic when "
-                        + "loading documents")
+                        + "loading documents.  The default is \"UTF-8\".")
                 .create(CONTENT_ENCODING);
             options.addOption(encoding);
 
@@ -285,7 +287,8 @@ public enum Command implements ConfigConstants {
                 .withArgName("true,false")
                 .hasOptionalArg()
                 .withDescription(
-                    "Whether to split input files to load into MarkLogic")
+                    "Whether to split input files to load into MarkLogic.  "
+                     + " Only available for delimited_text.  Default is false.")
                 .create(SPLIT_INPUT);
             options.addOption(splitInput);
             
