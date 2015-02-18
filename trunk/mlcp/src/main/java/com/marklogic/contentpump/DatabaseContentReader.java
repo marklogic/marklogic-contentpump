@@ -136,11 +136,12 @@ public class DatabaseContentReader extends
         buf.append("[$mlmr:splitstart to $mlmr:splitend]");
         buf.append("\nfor $doc in $cols");
         buf.append("\nlet $uri := fn:base-uri($doc)\n return (");
-        
+
+        buf.append("'META',");
+        buf.append("$uri,");
+        buf.append("if(fn:empty($doc/node())) then 0 else xdmp:node-kind($doc/node())");
         if (copyCollection || copyPermission || copyProperties || copyQuality) {
-            buf.append("'META',");
-            buf.append("$uri,");
-            buf.append("if(fn:empty($doc/node())) then 0 else xdmp:node-kind($doc/node()),");
+            buf.append(",");
             if (copyCollection) {
                 buf.append("xdmp:document-get-collections($uri),\n");
             }
@@ -160,10 +161,12 @@ public class DatabaseContentReader extends
             } else {
                 buf.append("(),\n");
             }
-            // end-of-record marker
-            buf.append("0");
+        } else {
+            buf.append(",0,"); // quality
+            buf.append("(),\n");//properties
         }
-        
+        // end-of-record marker
+        buf.append("0");       
         buf.append(" )\n");
         buf.append(",'EOM',"); //end of metadata
         
