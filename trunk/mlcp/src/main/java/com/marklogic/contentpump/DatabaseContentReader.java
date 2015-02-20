@@ -416,10 +416,14 @@ public class DatabaseContentReader extends
         // children:
         // sec:capability ("read", "insert", "update")
         // and sec:role xs:unsignedLong (but we need string)
+        String permString = _permissionElement.asString();
+        int i = permString.indexOf("<sec:role-name>");
+        int j = permString.indexOf("</sec:role-name>")+16;
+        permString = permString.substring(0, i) + permString.substring(j);
+        
         LOG.debug("permissionElement = " + _permissionElement.asString());
-
+        _metadata.setPermString(permString);
         Element permissionW3cElement = _permissionElement.asW3cElement();
-        LOG.debug("permissionElement = " + permissionW3cElement.toString());
 
         NodeList capabilities = permissionW3cElement
             .getElementsByTagName("sec:capability");

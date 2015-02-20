@@ -49,7 +49,7 @@ public class DocumentMetadata {
     protected List<String> collectionsList = new Vector<String>();
 
     protected List<ContentPermission> permissionsList = new Vector<ContentPermission>();
-
+    protected String permString = null;
     protected int quality = 0;
 
     protected String properties = null;
@@ -119,6 +119,15 @@ public class DocumentMetadata {
         return collectionsList.toArray(new String[0]);
     }
 
+    public String getCollectionString() {
+        StringBuilder sb = new StringBuilder();
+        for(int i=0; i<collectionsList.size(); i++) {
+            if(i>0) sb.append(",");
+            sb.append("\""). append(collectionsList.get(i)).append("\"");
+            
+        }
+        return sb.toString();
+    }
     /**
      * @return
      */
@@ -151,6 +160,10 @@ public class DocumentMetadata {
      */
     public int getQuality() {
         return quality;
+    }
+
+    public String getQualityString() {
+        return String.valueOf(quality);
     }
 
     /**
@@ -231,6 +244,14 @@ public class DocumentMetadata {
                     "unknown capability: " + _capability);
 
         addPermission(new ContentPermission(capability, _role));
+    }
+
+    public String getPermString() {
+        return permString;
+    }
+
+    public void setPermString(String permString) {
+        this.permString = permString;
     }
 
     /**

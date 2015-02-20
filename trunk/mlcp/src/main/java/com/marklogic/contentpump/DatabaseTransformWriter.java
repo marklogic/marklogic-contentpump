@@ -109,7 +109,9 @@ public class DatabaseTransformWriter<VALUE> extends
             }
             
             if (isCopyProps && meta.getProperties() != null) {
-                setDocumentProperties(uri, meta.getProperties(), sessions[sid]);
+                setDocumentProperties(uri, meta.getProperties(),
+                    meta.getPermString(), meta.getCollectionString(),
+                    meta.getQualityString(), sessions[sid]);
                 stmtCounts[sid]++;
             }
 
