@@ -250,7 +250,8 @@ public class DatabaseContentWriter<VALUE> extends
                             sessions[sid] = getSession(forestId);
                         }
                         setDocumentProperties(uri, meta.getProperties(),
-                            sessions[sid]);
+                            meta.getPermString(), meta.getCollectionString(),
+                            meta.getQualityString(), sessions[sid]);
                         stmtCounts[sid]++;
                     }
                 }
@@ -280,7 +281,9 @@ public class DatabaseContentWriter<VALUE> extends
                             String u = metadatas[fId][i].getUri();
                             if (m != null && m.getProperties() != null) {
                                 setDocumentProperties(u, m.getProperties(),
-                                    sessions[sid]);
+                                    m.getPermString(),
+                                    meta.getCollectionString(),
+                                    meta.getQualityString(), sessions[sid]);
                                 stmtCounts[sid]++;
                             }
                         }
@@ -308,7 +311,8 @@ public class DatabaseContentWriter<VALUE> extends
                 
                 if (isCopyProps && meta.getProperties() != null) {
                     setDocumentProperties(uri, meta.getProperties(),
-                        sessions[sid]);
+                        meta.getPermString(), meta.getCollectionString(),
+                        meta.getQualityString(), sessions[sid]);
                     stmtCounts[sid]++;
                 }
             }
@@ -416,7 +420,9 @@ public class DatabaseContentWriter<VALUE> extends
                             String u = metadatas[i][j].getUri();
                             if (m != null && m.getProperties() != null) {
                                 setDocumentProperties(u, m.getProperties(),
-                                    sessions[sid]);
+                                    m.getPermString(),
+                                    m.getCollectionString(),
+                                    m.getQualityString(), sessions[sid]);
                                 stmtCounts[sid]++;
                             }
                         }
@@ -484,18 +490,29 @@ public class DatabaseContentWriter<VALUE> extends
      * @param forestId
      * @throws RequestException
      */
-    protected void setDocumentProperties(String _uri, String _xmlString,
+    protected void setDocumentProperties(String _uri, String _xmlString, String _permString, String _collString, String _quality,
         Session s) throws RequestException {
         String query = XQUERY_VERSION_1_0_ML
             + "declare variable $URI as xs:string external;\n"
             + "declare variable $XML-STRING as xs:string external;\n"
+            + "declare variable $PERM-STRING as xs:string external;\n"
+            + "declare variable $COLL-STRING as xs:string external;\n"
+            + "declare variable $QUALITY-STRING as xs:string external;\n"
             + "xdmp:document-set-properties($URI,\n"
-            + "  xdmp:unquote($XML-STRING)/prop:properties/node() )\n";
+            + "  xdmp:unquote($XML-STRING)/prop:properties/node() )\n"
+            + ", if('null' eq ($PERM-STRING)) then () else xdmp:document-set-permissions($URI,xdmp:unquote($PERM-STRING)/node())\n"
+            + ", if('null' eq ($COLL-STRING)) then () else xdmp:document-set-collections($URI,$COLL-STRING)\n"
+            + ", if('null' eq ($QUALITY)) then () else xdmp:document-set-quality($URI,xs:integer($QUALITY))\n"
+            ;
         AdhocQuery req = s.newAdhocQuery(query);
         req.setNewStringVariable("URI", _uri);
         req.setNewStringVariable("XML-STRING", _xmlString);
+        req.setNewStringVariable("PERM-STRING", _permString==null?"null":_permString);
+        req.setNewStringVariable("COLL-STRING", _collString==null?"null":_collString);
+        req.setNewStringVariable("QUALITY-STRING", _quality==null?"null":_quality);
         s.submitRequest(req);
     }
+    
 
     private void updateCopyOptions(ContentCreateOptions options,
         DocumentMetadata meta) {
