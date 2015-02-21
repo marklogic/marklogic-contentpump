@@ -121,6 +121,10 @@ public class DatabaseContentWriter<VALUE> extends
     //default boolean is false
     protected boolean countBased;
     
+    protected boolean isCopyProps;
+    protected boolean isCopyColls;
+    protected boolean isCopyPerms;
+    protected boolean isCopyQuality;
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
     public DatabaseContentWriter(Configuration conf,
@@ -165,6 +169,14 @@ public class DatabaseContentWriter<VALUE> extends
             }
             sfId = 0;
         }
+        isCopyProps = conf.getBoolean(
+            ConfigConstants.CONF_COPY_PROPERTIES, true);
+        isCopyPerms = conf.getBoolean(
+            ConfigConstants.CONF_COPY_PERMISSIONS, true);
+        isCopyColls = conf.getBoolean(
+            ConfigConstants.CONF_COPY_COLLECTIONS, true);
+        isCopyQuality = conf.getBoolean(
+            ConfigConstants.CONF_COPY_QUALITY, true);
     }
 
 
@@ -233,8 +245,7 @@ public class DatabaseContentWriter<VALUE> extends
                 throw new IOException("unexpected type " + value.getClass());
             }
 
-            boolean isCopyProps = conf.getBoolean(
-                ConfigConstants.CONF_COPY_PROPERTIES, true);
+            
             if(countBased) {
                 fId = 0;
             }
@@ -250,8 +261,10 @@ public class DatabaseContentWriter<VALUE> extends
                             sessions[sid] = getSession(forestId);
                         }
                         setDocumentProperties(uri, meta.getProperties(),
-                            meta.getPermString(), meta.getCollectionString(),
-                            meta.getQualityString(), sessions[sid]);
+                            isCopyPerms?meta.getPermString():null,
+                            isCopyColls?meta.getCollectionString():null,
+                            isCopyQuality?meta.getQualityString():null, 
+                            sessions[sid]);
                         stmtCounts[sid]++;
                     }
                 }
@@ -281,9 +294,10 @@ public class DatabaseContentWriter<VALUE> extends
                             String u = metadatas[fId][i].getUri();
                             if (m != null && m.getProperties() != null) {
                                 setDocumentProperties(u, m.getProperties(),
-                                    m.getPermString(),
-                                    meta.getCollectionString(),
-                                    meta.getQualityString(), sessions[sid]);
+                                    isCopyPerms?meta.getPermString():null,
+                                    isCopyColls?meta.getCollectionString():null,
+                                    isCopyQuality?meta.getQualityString():null, 
+                                    sessions[sid]);
                                 stmtCounts[sid]++;
                             }
                         }
@@ -311,8 +325,10 @@ public class DatabaseContentWriter<VALUE> extends
                 
                 if (isCopyProps && meta.getProperties() != null) {
                     setDocumentProperties(uri, meta.getProperties(),
-                        meta.getPermString(), meta.getCollectionString(),
-                        meta.getQualityString(), sessions[sid]);
+                        isCopyPerms?meta.getPermString():null,
+                        isCopyColls?meta.getCollectionString():null,
+                        isCopyQuality?meta.getQualityString():null, 
+                        sessions[sid]);
                     stmtCounts[sid]++;
                 }
             }
@@ -411,8 +427,7 @@ public class DatabaseContentWriter<VALUE> extends
                         } else {
                             stmtCounts[i]++;
                         }
-                        if (!conf.getBoolean(
-                            ConfigConstants.CONF_COPY_PROPERTIES, true)) {
+                        if (!isCopyProps) {
                             continue;
                         }
                         for (int j = 0; j < counts[i]; j++) {
@@ -420,9 +435,10 @@ public class DatabaseContentWriter<VALUE> extends
                             String u = metadatas[i][j].getUri();
                             if (m != null && m.getProperties() != null) {
                                 setDocumentProperties(u, m.getProperties(),
-                                    m.getPermString(),
-                                    m.getCollectionString(),
-                                    m.getQualityString(), sessions[sid]);
+                                    isCopyPerms?m.getPermString():null,
+                                    isCopyColls?m.getCollectionString():null,
+                                    isCopyQuality?m.getQualityString():null, 
+                                    sessions[sid]);
                                 stmtCounts[sid]++;
                             }
                         }
@@ -500,16 +516,16 @@ public class DatabaseContentWriter<VALUE> extends
             + "declare variable $QUALITY-STRING as xs:string external;\n"
             + "xdmp:document-set-properties($URI,\n"
             + "  xdmp:unquote($XML-STRING)/prop:properties/node() )\n"
-            + ", if('null' eq ($PERM-STRING)) then () else xdmp:document-set-permissions($URI,xdmp:unquote($PERM-STRING)/node())\n"
-            + ", if('null' eq ($COLL-STRING)) then () else xdmp:document-set-collections($URI,$COLL-STRING)\n"
-            + ", if('null' eq ($QUALITY)) then () else xdmp:document-set-quality($URI,xs:integer($QUALITY))\n"
+            + ", if('' eq ($PERM-STRING)) then () else xdmp:document-set-permissions($URI,xdmp:unquote($PERM-STRING)/node())\n"
+            + ", if('' eq ($COLL-STRING)) then () else xdmp:document-set-collections($URI,$COLL-STRING)\n"
+            + ", if('' eq ($QUALITY-STRING)) then () else xdmp:document-set-quality($URI,xs:integer($QUALITY-STRING))\n"
             ;
         AdhocQuery req = s.newAdhocQuery(query);
         req.setNewStringVariable("URI", _uri);
         req.setNewStringVariable("XML-STRING", _xmlString);
-        req.setNewStringVariable("PERM-STRING", _permString==null?"null":_permString);
-        req.setNewStringVariable("COLL-STRING", _collString==null?"null":_collString);
-        req.setNewStringVariable("QUALITY-STRING", _quality==null?"null":_quality);
+        req.setNewStringVariable("PERM-STRING", _permString==null?"":_permString);
+        req.setNewStringVariable("COLL-STRING", _collString==null||_collString.isEmpty()?"":_collString);
+        req.setNewStringVariable("QUALITY-STRING", _quality==null?"":_quality);
         s.submitRequest(req);
     }
     
