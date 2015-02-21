@@ -86,8 +86,6 @@ public class DatabaseTransformWriter<VALUE> extends
             DatabaseDocumentWithMeta doc = (DatabaseDocumentWithMeta) value;
             meta = doc.getMeta();
             newContentCreateOptions(meta);
-            boolean isCopyProps = conf.getBoolean(
-                ConfigConstants.CONF_COPY_PROPERTIES, true);
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(forestId);
             }
@@ -110,8 +108,10 @@ public class DatabaseTransformWriter<VALUE> extends
             
             if (isCopyProps && meta.getProperties() != null) {
                 setDocumentProperties(uri, meta.getProperties(),
-                    meta.getPermString(), meta.getCollectionString(),
-                    meta.getQualityString(), sessions[sid]);
+                    isCopyPerms?meta.getPermString():null,
+                    isCopyColls?meta.getCollectionString():null,
+                    isCopyQuality?meta.getQualityString():null, 
+                    sessions[sid]);
                 stmtCounts[sid]++;
             }
 
