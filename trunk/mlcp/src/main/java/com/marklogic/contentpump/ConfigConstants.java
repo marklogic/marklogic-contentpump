@@ -88,6 +88,7 @@ public interface ConfigConstants {
     static final String DIRECTORY_FILTER = "directory_filter";
     static final String TYPE_FILTER = "type_filter";
     static final String DOCUMENT_SELECTOR = "document_selector";
+    static final String PATH_NAMESPACE = "path_namespace";
     static final String SNAPSHOT = "snapshot";
     static final String OUTPUT_TYPE = "output_type";
     static final String DEFAULT_OUTPUT_TYPE = "document";

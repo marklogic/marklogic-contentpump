@@ -1611,6 +1611,13 @@ public enum Command implements ConfigConstants {
                     "element nodes from the server")
             .create(DOCUMENT_SELECTOR);
         options.addOption(ds);
+        Option ns = OptionBuilder
+            .withArgName("String")
+        	.hasArg()
+        	.withDescription("Comma-separated list of alias-URI bindings " +
+                    "used in document_selector")
+            .create(PATH_NAMESPACE);
+        options.addOption(ns);
     }
     
     static void applyModuleConfigOptions(Configuration conf,
@@ -1784,6 +1791,10 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(DOCUMENT_SELECTOR)) {
             conf.set(MarkLogicConstants.DOCUMENT_SELECTOR, 
                     cmdline.getOptionValue(DOCUMENT_SELECTOR));
+        }
+        if (cmdline.hasOption(PATH_NAMESPACE)) {
+            conf.set(MarkLogicConstants.PATH_NAMESPACE, 
+                    cmdline.getOptionValue(PATH_NAMESPACE));
         }
     }
 
