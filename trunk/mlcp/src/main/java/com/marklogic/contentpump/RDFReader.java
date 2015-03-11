@@ -614,8 +614,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 submitGraphQuery();
                 graphQry.setLength(0);
             }
-            sb.append("sem:create-graph-document(sem:iri(\"").append(escapeXml(graph))
-                .append("\"),(");
+            String escapedGraph = escapeXml(graph);
+            sb.append("if(fn:empty(fn:doc(\"").append(escapedGraph)
+                .append("\"))) then sem:create-graph-document(sem:iri(\"")
+                .append(escapedGraph).append("\"),(");
             if (permissions != null && permissions.length > 0) {
                 for (int i = 0; i < permissions.length; i++) {
                     ContentPermission cp = permissions[i];
@@ -631,7 +633,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             } else {
                 sb.append("xdmp:default-permissions())");
             }
-            sb.append(");\n");
+            sb.append(") else ();\n");
             countPerBatch++;
         return perms.toArray(new ContentPermission[0]);
     }
