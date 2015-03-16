@@ -225,12 +225,29 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Split query: " + splitQuery);
         }
+        boolean localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));
+        String localHost = null;
         try {
             ContentSource cs = InternalUtilities.getInputContentSource(jobConf);
             session = cs.newSession();
-            AdhocQuery query = session.newAdhocQuery(splitQuery);
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
+            
+            if (localMode) {
+                AdhocQuery hostQuery = session.newAdhocQuery(
+                    "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
+                hostQuery.setOptions(options);
+                result = session.submitRequest(hostQuery);
+                if(result.hasNext()) {
+                    ResultItem item = result.next();
+                    localHost = item.asString();
+                }
+                if (result != null) {
+                    result.close();
+                }
+            }
+            
+            AdhocQuery query = session.newAdhocQuery(splitQuery);
             query.setOptions(options);
             result = session.submitRequest(query);
             
@@ -249,8 +266,13 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     forestSplits.get(forestSplits.size() - 1).recordCount = 
                         ((XSInteger)item.getItem()).asLong();
                 } else if (index == 2) {
-                    forestSplits.get(forestSplits.size() - 1).hostName = 
-                        ((XSString)item.getItem()).asString();
+                    String hn = ((XSString) item.getItem()).asString();
+                    if (localMode && hn.equals(localHost)) {
+                        String inputHost = jobConf.get(INPUT_HOST);
+                        forestSplits.get(forestSplits.size() - 1).hostName = inputHost;
+                    } else {
+                        forestSplits.get(forestSplits.size() - 1).hostName = hn;
+                    }
                 }
                 count++;
             }
