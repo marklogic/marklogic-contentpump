@@ -297,9 +297,13 @@ public class InternalUtilities implements MarkLogicConstants {
      * Return the host from the host array based on a random fashion
      * @param hosts a WritableArray of host names
      * @return the host name
+     * @throws IOException 
      */
-    public static String getHost(TextArrayWritable hosts) {
+    public static String getHost(TextArrayWritable hosts) throws IOException {
         String [] hostStrings = hosts.toStrings();
+        if(hostStrings == null || hostStrings.length==0) 
+            throw new IOException("Number of forests is 0: "
+                + "check forests in database");
         int count = hostStrings.length;
         int position = (int)(Math.random() * count);
         return hostStrings[position];
