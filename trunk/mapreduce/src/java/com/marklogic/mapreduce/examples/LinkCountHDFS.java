@@ -49,6 +49,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -87,7 +88,8 @@ public class LinkCountHDFS {
             System.err.println("Usage: LinkCountHDFS inputDir outputDir");
             System.exit(2);
         }
-
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+        
         Job job = new Job(conf);
         job.setJarByClass(LinkCountHDFS.class);
         job.setInputFormatClass(HDFSInputFormat.class);
@@ -99,8 +101,8 @@ public class LinkCountHDFS {
         job.setOutputFormatClass(TextOutputFormat.class);
         job.setOutputKeyClass(Text.class);
         job.setOutputValueClass(IntWritable.class);
-        HDFSInputFormat.setInputPaths(job, new Path(args[0]));
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        HDFSInputFormat.setInputPaths(job, new Path(otherArgs[0]));
+        FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }

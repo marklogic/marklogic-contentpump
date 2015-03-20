@@ -43,6 +43,9 @@ public class DatabaseDocument implements MarkLogicDocument {
             DatabaseDocument.class);
     private byte[] content;
     private ContentType contentType;
+    
+    public DatabaseDocument(){}
+    
     /* (non-Javadoc)
      * @see com.marklogic.mapreduce.MarkLogicDocument#getContentType()
      */

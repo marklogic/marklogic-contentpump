@@ -39,6 +39,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.util.GenericOptionsParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -68,6 +69,7 @@ public class WikiLoader {
             System.err.println("Usage: WikiLoader configFile inputDir");
             System.exit(2);
         }
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
         Job job = new Job(conf);
         job.setJarByClass(WikiLoader.class);
@@ -80,7 +82,7 @@ public class WikiLoader {
         ContentInputFormat.setInputPaths(job, new Path(args[1]));
 
         conf = job.getConfiguration();
-        conf.addResource(args[0]);
+        conf.addResource(otherArgs[0]);
          
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
