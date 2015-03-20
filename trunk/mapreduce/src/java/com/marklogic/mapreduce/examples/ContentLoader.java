@@ -30,6 +30,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
@@ -58,6 +59,7 @@ public class ContentLoader {
             System.err.println("Usage: ContentLoader configFile inputDir");
             System.exit(2);
         }
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
         Job job = new Job(conf);
         job.setJarByClass(ContentLoader.class);
@@ -67,10 +69,10 @@ public class ContentLoader {
         job.setMapOutputValueClass(Text.class);
         job.setOutputFormatClass(ContentOutputFormat.class);
         
-        ContentInputFormat.setInputPaths(job, new Path(args[1]));
+        ContentInputFormat.setInputPaths(job, new Path(otherArgs[1]));
 
         conf = job.getConfiguration();
-        conf.addResource(args[0]);
+        conf.addResource(otherArgs[0]);
          
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }

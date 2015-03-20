@@ -21,6 +21,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.hadoop.util.GenericOptionsParser;
 import org.w3c.dom.Element;
 
 import com.marklogic.mapreduce.KeyValueOutputFormat;
@@ -59,7 +60,8 @@ public class RevisionGrouper {
             System.err.println("Usage: RevisionGrouper configFile");
             System.exit(2);
         }
-
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+        
         Job job = new Job(conf);
         job.setJarByClass(RevisionGrouper.class);
         job.setInputFormatClass(NodeInputFormat.class);
@@ -70,7 +72,7 @@ public class RevisionGrouper {
         job.setOutputValueClass(Text.class);
 
         conf = job.getConfiguration();
-        conf.addResource(args[0]);
+        conf.addResource(otherArgs[0]);
 
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }

@@ -41,6 +41,7 @@ import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentInputFormat;
@@ -75,7 +76,8 @@ public class ContentReader {
             System.err.println("Usage: ContentReader configFile outputDir");
             System.exit(2);
         }
-
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+        
         Job job = new Job(conf);
         job.setJarByClass(ContentReader.class);
         job.setInputFormatClass(DocumentInputFormat.class);
@@ -84,10 +86,10 @@ public class ContentReader {
         job.setMapOutputValueClass(DatabaseDocument.class);
         job.setOutputFormatClass(CustomOutputFormat.class);
        
-        CustomOutputFormat.setOutputPath(job, new Path(args[1]));
+        CustomOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
 
         conf = job.getConfiguration();
-        conf.addResource(args[0]);
+        conf.addResource(otherArgs[0]);
         conf.setClass(MarkLogicConstants.INPUT_SSL_OPTIONS_CLASS,  
                 SslOptions.class, SslConfigOptions.class);
 
