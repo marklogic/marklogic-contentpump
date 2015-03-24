@@ -24,4 +24,4 @@ set LIB_HOME=%cmdppath%lib
 
 REM echo ******** classpath: %classpath%
 
-java -cp "%classpath%" -DCONTENTPUMP_HOME="%LIB_HOME%" -Dfile.encoding="UTF-8" %JVM_OPTS% com.marklogic.contentpump.ContentPump %*
+java -cp "%classpath%" -DCONTENTPUMP_HOME="%LIB_HOME%" -Dfile.encoding="UTF-8" -Dxcc.txn.compatible=true %JVM_OPTS% com.marklogic.contentpump.ContentPump %*
