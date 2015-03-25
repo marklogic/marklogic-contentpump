@@ -19,8 +19,10 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URISyntaxException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -91,8 +93,10 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             docSelector = jobConf.get(DOCUMENT_SELECTOR, 
                     DEFAULT_DOCUMENT_SELECTOR);
         }
-        maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, 
-                DEFAULT_MAX_SPLIT_SIZE);
+        String mode = jobConf.get(EXECUTION_MODE);
+        long defaultSplitSize = mode.equals(MODE_DISTRIBUTED) ? 
+            DEFAULT_MAX_SPLIT_SIZE : DEFAULT_LOCAL_MAX_SPLIT_SIZE;
+        maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, defaultSplitSize);
         if (maxSplitSize <= 0) {
             throw new IllegalStateException(
                 "Max split size is required to be positive. It is set to " +

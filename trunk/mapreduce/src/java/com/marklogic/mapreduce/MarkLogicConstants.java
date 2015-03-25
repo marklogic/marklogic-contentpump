@@ -656,6 +656,12 @@ public interface MarkLogicConstants {
      * {@link #MAX_SPLIT_SIZE input.maxsplitsize} is not specified.
      */
     static final long DEFAULT_MAX_SPLIT_SIZE = 50000;
+    /** 
+     * The default maximum split size for input splits, used if
+     * {@link #MAX_SPLIT_SIZE input.maxsplitsize} is not specified
+     * and running in local mode.
+     */
+    static final long DEFAULT_LOCAL_MAX_SPLIT_SIZE = 20000;
     
     /**
      * The config property name (<code>{@value}</code>)
