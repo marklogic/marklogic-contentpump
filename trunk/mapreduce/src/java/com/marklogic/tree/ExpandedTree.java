@@ -97,6 +97,12 @@ public class ExpandedTree implements Writable {
 	public Capability permNodeCapability[];
 	public long permNodeRoleId[];
 	
+        public int arrayNodeTextRepID[]; // unsigned ArrayNodeRep.testRepID
+        public int arrayNodeChildNodeRepID[]; // unsigned ArrayNodeRep.childNodeRepID
+        public int arrayNodeNumChildren[]; // unsigned ArrayNodeRep.numChildren
+
+        public double doubles[]; 
+
 	public long binaryKey; // uint64_t BinaryNodeRep.binaryKey
 	public long binaryOffset; // uint64_t BinaryNodeRep.offset
 	public long binarySize; // uint64_t BinaryNodeRep.size
@@ -153,21 +159,22 @@ public class ExpandedTree implements Writable {
 	}
 	
 	public String getText(int index) {
+            int input = index;
 	    if (textReps==null) return null;
-    	StringBuilder buf = new StringBuilder();
-    	for (int i=textReps[index++]; i > 0; --i) {
-    	    if (LOG.isTraceEnabled()) {
-    	        LOG.trace("atom " + textReps[index] + " [" + 
-    	            atomString(textReps[index]) + "] length " + 
-    	            atomString(textReps[index]).length());
-    	    }
+    	    StringBuilder buf = new StringBuilder();
+    	    for (int i=textReps[index++]; i > 0; --i) {
+    	        if (LOG.isTraceEnabled()) {
+    	            LOG.trace("atom " + textReps[index] + " [" + 
+    	                atomString(textReps[index]) + "] length " + 
+    	                atomString(textReps[index]).length());
+    	        }
     		buf.append(atomString(textReps[index++]));
-    	}
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("getText(" + index + ") returning [" + buf.toString() + 
+    	    }
+            if (LOG.isTraceEnabled()) {
+            LOG.trace("getText(" + input + ") returning [" + buf.toString() + 
                     "] length " + buf.length());
-        }
-        return buf.toString();
+            }
+            return buf.toString();
 	}
 	
     public String[] getCollections() {
@@ -391,6 +398,24 @@ public class ExpandedTree implements Writable {
                 textReps[i] = in.readInt();
             }
         }
+        int numArrayNodeReps = in.readInt();
+        if (numArrayNodeReps > 0) {
+            arrayNodeTextRepID = new int [numArrayNodeReps];
+            arrayNodeChildNodeRepID = new int[numArrayNodeReps];
+            arrayNodeNumChildren = new int[numArrayNodeReps];
+            for (int i = 0; i < numArrayNodeReps; i++) {
+                arrayNodeTextRepID[i] = in.readInt();
+                arrayNodeChildNodeRepID[i] = in.readInt();
+                arrayNodeNumChildren[i] = in.readInt();
+            }
+        }
+        int numDoubles = in.readInt();
+        if (numDoubles > 0) {
+            doubles = new double [numDoubles];
+            for (int i = 0; i < numDoubles; i++) {
+                doubles[i] = in.readDouble();
+            }
+        }
     }
 
     @Override
@@ -509,5 +534,111 @@ public class ExpandedTree implements Writable {
                 out.writeInt(textReps[i]);
             }
         }
+        if (arrayNodeTextRepID != null &&
+            arrayNodeTextRepID.length > 0) {
+            out.writeInt(arrayNodeTextRepID.length);
+            for (int i = 0; i < arrayNodeTextRepID.length; i++) {
+                out.writeInt(arrayNodeTextRepID[i]);
+                out.writeInt(arrayNodeChildNodeRepID[i]);
+                out.writeInt(arrayNodeNumChildren[i]);
+            }
+        } else {
+            out.writeInt(0);
+        }
+        if (doubles != null &&
+            doubles.length > 0) {
+            out.writeInt(doubles.length);
+            for (int i = 0; i < doubles.length; i++) {
+                out.writeDouble(doubles[i]);
+            }
+        } else {
+            out.writeInt(0);
+        }
+
+
     }    
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        putNode(0,sb);
+        return sb.toString();
+    }
+
+    public void putNode(int index, StringBuilder sb) {
+
+	if (LOG.isTraceEnabled()) {
+	    LOG.trace(String.format("putNode index %d nodeKind %d", 
+                index, nodeKind[index]));
+	}
+        switch (nodeKind[index]) {
+            case NodeKind.TEXT: {
+                sb.append("\"");
+                int id = nodeRepID[index];
+                sb.append(getText(id));
+                sb.append("\"");
+                break;
+            }
+            case NodeKind.DOC: {
+                int id = nodeRepID[index];
+                //sb.append(getText(docNodeTextRepID[id]));
+                int limit = docNodeChildNodeRepID[id]+ docNodeNumChildren[id];
+                for (int i = docNodeChildNodeRepID[id]; i < limit; i++) {
+                   putNode(i, sb);
+                }
+                break;
+            }
+            case NodeKind.NULL: {
+                sb.append("null");
+                break;
+            }
+            case NodeKind.BOOLEAN: {
+                if (nodeRepID[index]==1) {
+                    sb.append("true");
+                }
+                else {
+                    sb.append("false");
+                }
+                break;
+            }
+            case NodeKind.NUMBER: {
+                sb.append(String.valueOf(doubles[nodeRepID[index]]));
+                break;
+            }
+            case NodeKind.ARRAY: {
+                sb.append("[");
+                int id = nodeRepID[index];
+                int limit = arrayNodeChildNodeRepID[id] + 
+                            arrayNodeNumChildren[id];
+                int i = 0;
+                for (int idx = arrayNodeChildNodeRepID[id]; 
+                     idx < limit; idx++,i++) {
+                   if (i!=0) sb.append(", ");
+                   putNode(idx, sb);
+                }
+                sb.append("]");
+                break;
+            }
+            case NodeKind.OBJECT: {
+                sb.append("{ ");
+                int id = nodeRepID[index];
+                int limit = arrayNodeChildNodeRepID[id] + 
+                            arrayNodeNumChildren[id];
+                int i=0;
+                for (int idx = arrayNodeChildNodeRepID[id]; 
+                     idx < limit; idx++, i++) {
+                   if (i!=0) sb.append(", ");
+                   sb.append("\"");
+                   sb.append(atomString(textReps[arrayNodeTextRepID[id] + i]));
+                   sb.append("\" : ");
+                   putNode(idx, sb);
+                }
+                sb.append(" }");
+                break;
+            }
+            default: {
+                sb.append("node:UNKNOWN ");
+                break;
+            }
+        }
+    }
 }

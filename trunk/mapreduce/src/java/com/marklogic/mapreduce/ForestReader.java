@@ -207,6 +207,11 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
                     kind == NodeKind.TEXT) {
                     match = true;
                     break;
+                } else if (type.equalsIgnoreCase("JSON") && 
+                    (kind == NodeKind.ARRAY ||
+                     kind == NodeKind.OBJECT)) {
+                    match = true;
+                    break;
                 } else if (type.equalsIgnoreCase("XML") && 
                     (kind == NodeKind.ELEM ||
                      kind == NodeKind.COMMENT ||

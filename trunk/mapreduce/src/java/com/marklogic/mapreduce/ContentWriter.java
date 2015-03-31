@@ -307,6 +307,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 content = ContentFactory.newContent(uri, 
                     ((DOMDocument) value).getContentAsMarkLogicNode().get(), 
                     options);
+            } else if (value instanceof JSONDocument) {
+                JSONDocument doc = (JSONDocument)value;
+                content = ContentFactory.newContent(uri, 
+                   doc.getContentAsByteArray(), options);
             } else if (value instanceof BinaryDocument) {
                 BinaryDocument doc = (BinaryDocument)value;
                 if (doc.isStreamable()) {
