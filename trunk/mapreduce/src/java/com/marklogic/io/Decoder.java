@@ -83,6 +83,13 @@ public class Decoder {
         return val;
     }
     
+    public double decodeDouble() throws IOException {
+        long lobits = decode32bits() & 0xffffffffL;
+        long hibits = decode32bits() & 0xffffffffL;
+        long bits = (hibits << 32) | lobits;
+        return Double.longBitsToDouble(bits);
+    }
+
     public void realign()
     {
         if (numBitsInReg < 32) {

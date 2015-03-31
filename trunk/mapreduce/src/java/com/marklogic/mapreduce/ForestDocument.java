@@ -62,6 +62,17 @@ public abstract class ForestDocument implements MarkLogicDocument {
             case NodeKind.COMMENT:
                 doc = new DOMDocument(tree);  
                 break;
+            case NodeKind.ARRAY:
+            case NodeKind.OBJECT:
+            case NodeKind.NULL:
+            case NodeKind.BOOLEAN:
+            case NodeKind.NUMBER:
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Creating JSONDocument "
+                            + rootNodeKind + " (" + uri + ")");
+                }
+                doc = new JSONDocument(tree);  
+                break;
             default:
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Skipping unsupported node kind "
@@ -112,7 +123,7 @@ public abstract class ForestDocument implements MarkLogicDocument {
         byte[] buf = getContentAsByteArray();
         return buf.length;
     }
-    
+
     @Override
     public boolean isStreamable() {
         return false;

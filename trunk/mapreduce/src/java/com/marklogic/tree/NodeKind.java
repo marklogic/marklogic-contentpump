@@ -28,6 +28,10 @@ public class NodeKind {
     public static final byte PERM = 8;
     public static final byte BINARY = 9;
     public static final byte NULL = 10;
+    public static final byte BOOLEAN = 11;
+    public static final byte NUMBER = 12;
+    public static final byte ARRAY = 13;
+    public static final byte OBJECT = 14;
     
     public static final short domType(byte kind) {
         switch (kind) {
