@@ -91,7 +91,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             docSelector = jobConf.get(DOCUMENT_SELECTOR, 
                     DEFAULT_DOCUMENT_SELECTOR);
         }
-        String mode = jobConf.get(EXECUTION_MODE);
+        String mode = jobConf.get(EXECUTION_MODE,MODE_DISTRIBUTED);
         long defaultSplitSize = mode.equals(MODE_DISTRIBUTED) ? 
             DEFAULT_MAX_SPLIT_SIZE : DEFAULT_LOCAL_MAX_SPLIT_SIZE;
         maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, defaultSplitSize);
