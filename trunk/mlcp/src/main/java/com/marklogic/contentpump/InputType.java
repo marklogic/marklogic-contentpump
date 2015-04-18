@@ -258,6 +258,9 @@ public enum InputType implements ConfigConstants {
 
                 DefaultStringifier.store(conf, roleMap,
                     MarkLogicConstants.ROLE_MAP);
+                if (conf.get(MarkLogicConstants.OUTPUT_DIRECTORY) == null) {
+                    conf.set(MarkLogicConstants.OUTPUT_DIRECTORY,"/triplestore");
+                }
             } catch (XccConfigException e) {
                 throw new IOException(e);
             } catch (RequestException e) {
