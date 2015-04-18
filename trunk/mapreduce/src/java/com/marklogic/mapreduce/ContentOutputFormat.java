@@ -361,7 +361,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                 if(conf.get(OUTPUT_PARTITION) == null && 
                    policy == AssignmentPolicy.Kind.RANGE) {
                     fastLoad = false;
-                } else if (policy == AssignmentPolicy.Kind.RANGE &&
+                } else if (policy == AssignmentPolicy.Kind.RANGE ||
                 		   policy == AssignmentPolicy.Kind.STATISTICAL) {
                     fastLoad = allowFastLoad;
                 } else {
