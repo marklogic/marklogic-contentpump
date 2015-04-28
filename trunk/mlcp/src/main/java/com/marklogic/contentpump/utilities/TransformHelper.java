@@ -27,6 +27,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 
+import com.marklogic.contentpump.ContentWithFileNameWritable;
 import com.marklogic.contentpump.DatabaseDocumentWithMeta;
 import com.marklogic.contentpump.RDFWritable;
 import com.marklogic.contentpump.TransformOutputFormat;
@@ -159,7 +160,11 @@ public class TransformHelper {
                 //RDFWritable's value is Text
                 query.setNewStringVariable("CONTENT",
                     ((RDFWritable) value).getValue().toString());
-            } else {
+            } else if (value instanceof ContentWithFileNameWritable) {
+                query.setNewStringVariable("CONTENT",
+                    ((ContentWithFileNameWritable) value).getValue().toString());
+            }
+            else {
                 // must be text or xml
                 query.setNewStringVariable("CONTENT",
                     ((Text) value).toString());
@@ -203,13 +208,22 @@ public class TransformHelper {
         }
 
         String[] collections = cOptions.getCollections();
-        if (collections != null) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < collections.length; i++) {
-                if (i != 0)
+        StringBuilder sb = new StringBuilder();
+        if (collections != null || value instanceof ContentWithFileNameWritable) {
+            if (collections != null) {
+                for (int i = 0; i < collections.length; i++) {
+                    if (i != 0)
+                        sb.append(",");
+                    sb.append(collections[i].trim());
+                }
+            } 
+                
+            if (value instanceof ContentWithFileNameWritable) {
+                if(collections != null)
                     sb.append(",");
-                sb.append(collections[i].trim());
+                sb.append(((ContentWithFileNameWritable) value).getFileName());
             }
+            
             optionsMap.put("collections", sb.toString());
         }
 
