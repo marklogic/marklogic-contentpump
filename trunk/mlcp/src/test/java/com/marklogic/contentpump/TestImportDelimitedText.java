@@ -180,6 +180,48 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
         assertTrue(sb.toString().equals(key));
     }
+    
+    @Test
+    public void testImportTransformDelimitedTextFileNameAsCollection() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -transform_module /lc.xqy"
+            + " -filename_as_collection true"
+            + " -delimited_uri_id first"
+            + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(cts:collections())");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
+
+        StringBuilder sb = new StringBuilder();
+        while(result.hasNext()) {
+            String s = result.next().asString();
+            sb.append(s);
+        }
+        Utils.closeSession();
+        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
+            + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
+        assertTrue(sb.toString().equals(key));
+    }
 
     @Test
     public void testImportTransformOne2ManyDelimitedText() throws Exception {
@@ -602,7 +644,7 @@ public class TestImportDelimitedText{
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() 
             + "/encoding/samplecsv.utf16be.csv -content_encoding utf-16be"
-            + " -delimited_uri_id first"
+            + " -delimited_uri_id first -mode local"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
         String[] args = cmd.split(" ");
@@ -781,5 +823,5 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportTransformDelimitedTextZip.txt");
         assertTrue(sb.toString().equals(key));
     }
-
+    
 }

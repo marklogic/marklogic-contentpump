@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lei:LEIDirectory xmlns:lei="www.leiutility.org" PublicationDateTime="2014-12-02T02:31:34.086Z" PublicationId="1" Content="FULL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.gmeiutility.org/Attachments/LEI_Issued_File_Schema.xsd">
+<lei:LegalEntity LastUpdateDate="2014-01-07T03:13:20.998Z">
+  <lei:LEI>EQYXK86SF381Q21S3020</lei:LEI>
+  <lei:LegalName>Merrill Lynch International Bank Limited</lei:LegalName>
+  <lei:OtherNames>
+    <lei:OtherName Type="PREVIOUS_LEGAL">Merrill Lynch Capital Markets Bank Limited</lei:OtherName>
+  </lei:OtherNames>
+  <lei:RegisteredAddress>
+    <lei:AddressLineOne>Central Park</lei:AddressLineOne>
+    <lei:AddressLineTwo>Leopardstown</lei:AddressLineTwo>
+    <lei:AddressLineThree>Dublin 18</lei:AddressLineThree>
+    <lei:City>Dublin</lei:City>
+    <lei:State>Co Dublin</lei:State>
+    <lei:Country>IE</lei:Country>
+  </lei:RegisteredAddress>
+  <lei:HeadquartersAddresses>
+    <lei:HeadquartersAddress>
+      <lei:AddressLineOne>Merrill Lynch Financial Centre</lei:AddressLineOne>
+      <lei:AddressLineTwo>2 King Edward Street</lei:AddressLineTwo>
+      <lei:City>London</lei:City>
+      <lei:Country>GB</lei:Country>
+      <lei:PostCode>EC1A 1HQ</lei:PostCode>
+    </lei:HeadquartersAddress>
+  </lei:HeadquartersAddresses>
+  <lei:BusinessRegistry></lei:BusinessRegistry>
+  <lei:BusinessRegistryNumber></lei:BusinessRegistryNumber>
+  <lei:ExpiryDate xsi:nil="true"></lei:ExpiryDate>
+  <lei:ExpiryReason></lei:ExpiryReason>
+  <lei:EntityStatus>ACTIVE</lei:EntityStatus>
+  <lei:LegalForm>LIMITED</lei:LegalForm>
+  <lei:RecordState>PUBLIC_SOURCES</lei:RecordState>
+  <lei:Events>
+    <lei:Event PortalDateTime="2012-06-06T15:51:54.791Z">ASSIGNED</lei:Event>
+    <lei:Event PortalDateTime="2013-08-28T16:25:42.436Z">LAST_MAINTAINED</lei:Event>
+    <lei:Event PortalDateTime="2012-08-29T03:00:43.193Z">LAST_MAINTAINED</lei:Event>
+    <lei:Event PortalDateTime="2014-01-07T03:13:21.000Z">REVIEWED</lei:Event>
+    <lei:Event PortalDateTime="2014-01-07T03:13:21.001Z">LAST_MAINTAINED</lei:Event>
+    </lei:Events>
+    <lei:RelatedLEIs></lei:RelatedLEIs>
+    <lei:MaintenanceState>CURRENT</lei:MaintenanceState>
+    <lei:NextMaintenanceDate>2015-01-03T10:30:16.217Z</lei:NextMaintenanceDate>
+</lei:LegalEntity>
+<lei:LegalEntity LastUpdateDate="2014-04-07T20:28:34.134Z">
+  <lei:LEI>549300J19KMJT7M91348</lei:LEI>
+  <lei:LegalName>C.B. Professional Building, LLC</lei:LegalName>
+  <lei:OtherNames></lei:OtherNames>
+  <lei:RegisteredAddress>
+    <lei:AddressLineOne>C/O Tom Shannon</lei:AddressLineOne>
+    <lei:AddressLineTwo>1568 North Wakonda Street</lei:AddressLineTwo>
+    <lei:City>Flagstaff</lei:City>
+    <lei:State>AZ</lei:State>
+    <lei:Country>US</lei:Country>
+    <lei:PostCode>86004</lei:PostCode>
+  </lei:RegisteredAddress>
+  <lei:HeadquartersAddresses>
+    <lei:HeadquartersAddress>
+      <lei:AddressLineOne>C/O Tom Shannon</lei:AddressLineOne>
+      <lei:AddressLineTwo>1568 North Wakonda Street</lei:AddressLineTwo><lei:City>Flagstaff</lei:City>
+      <lei:State>AZ</lei:State>
+      <lei:Country>US</lei:Country>
+      <lei:PostCode>86004</lei:PostCode>
+      </lei:HeadquartersAddress></lei:HeadquartersAddresses>
+      <lei:BusinessRegistry></lei:BusinessRegistry>
+      <lei:BusinessRegistryNumber></lei:BusinessRegistryNumber>
+      <lei:ExpiryDate xsi:nil="true"></lei:ExpiryDate>
+      <lei:ExpiryReason></lei:ExpiryReason>
+      <lei:EntityStatus>ACTIVE</lei:EntityStatus>
+      <lei:LegalForm>LIMITED LIABILITY COMPANY</lei:LegalForm>
+      <lei:RecordState>PUBLIC_SOURCES</lei:RecordState>
+    <lei:Events>
+      <lei:Event PortalDateTime="2013-03-19T00:47:50.075Z">REQUESTED</lei:Event>
+      <lei:Event PortalDateTime="2013-03-19T00:52:05.656Z">ASSIGNED</lei:Event>
+      <lei:Event PortalDateTime="2013-03-19T00:47:50.745Z">LAST_MAINTAINED</lei:Event>
+      </lei:Events>
+  <lei:RelatedLEIs></lei:RelatedLEIs>
+  <lei:MaintenanceState>NOT_CURRENT</lei:MaintenanceState>
+  <lei:NextMaintenanceDate>2014-03-19T00:47:50.743Z</lei:NextMaintenanceDate></lei:LegalEntity>
+  <lei:LegalEntity LastUpdateDate="2014-03-13T01:45:37.232Z">
+    <lei:LEI>549300W7IRXML5U6IK29</lei:LEI>
+    <lei:LegalName>Honeywell Tecnologia y Seguridad, S.A.</lei:LegalName>
+    <lei:OtherNames></lei:OtherNames><lei:RegisteredAddress><lei:AddressLineOne>Josefa Valcarcel, 24</lei:AddressLineOne><lei:City>Madrid</lei:City><lei:State>Madrid</lei:State><lei:Country>ES</lei:Country><lei:PostCode>28027</lei:PostCode></lei:RegisteredAddress><lei:HeadquartersAddresses><lei:HeadquartersAddress><lei:AddressLineOne>Josefa Valcarcel, 24</lei:AddressLineOne>
+    <lei:City>Madrid</lei:City>
+    <lei:State>Madrid</lei:State>
+    <lei:Country>ES</lei:Country>
+    <lei:PostCode>28027</lei:PostCode>
+    </lei:HeadquartersAddress></lei:HeadquartersAddresses>
+    <lei:BusinessRegistry>Registro Mercantil del Reino de España</lei:BusinessRegistry>
+    <lei:BusinessRegistryNumber>A80641780</lei:BusinessRegistryNumber>
+    <lei:ExpiryDate xsi:nil="true"></lei:ExpiryDate>
+    <lei:ExpiryReason></lei:ExpiryReason>
+    <lei:EntityStatus>ACTIVE</lei:EntityStatus>
+    <lei:LegalForm>SOCIEDAD ANONIMA</lei:LegalForm>
+    <lei:RecordState>PUBLIC_SOURCES</lei:RecordState>
+    <lei:Events>
+      <lei:Event PortalDateTime="2013-03-27T12:31:16.077Z">REQUESTED</lei:Event>
+      <lei:Event PortalDateTime="2013-03-27T12:31:44.654Z">ASSIGNED</lei:Event>
+      <lei:Event PortalDateTime="2013-04-04T15:18:13.995Z">REVIEWED</lei:Event>
+      <lei:Event PortalDateTime="2013-03-27T12:31:16.007Z">LAST_MAINTAINED</lei:Event>
+      <lei:Event PortalDateTime="2014-03-13T01:45:37.235Z">REVIEWED</lei:Event>
+      <lei:Event PortalDateTime="2014-03-13T01:45:37.236Z">LAST_MAINTAINED</lei:Event>
+    </lei:Events>
+    <lei:RelatedLEIs>
+      <lei:RelatedLEI Type="ULTIMATE_PARENT">ISRPG12PN4EIEOEMW547</lei:RelatedLEI>
+    </lei:RelatedLEIs>
+    <lei:MaintenanceState>CURRENT</lei:MaintenanceState>
+    <lei:NextMaintenanceDate>2015-03-10T12:17:49.649Z</lei:NextMaintenanceDate>
+  </lei:LegalEntity>
+  <lei:LegalEntity LastUpdateDate="2014-08-02T01:34:33.051Z">
+    <lei:LEI>54930043TLN29D03LW67</lei:LEI>
+    <lei:LegalName>American International Overseas Limited</lei:LegalName>
+    <lei:OtherNames></lei:OtherNames>
+    <lei:RegisteredAddress>
+      <lei:AddressLineOne>American International Building</lei:AddressLineOne>
+      <lei:AddressLineTwo>27 Richmond Road</lei:AddressLineTwo>
+      <lei:City>Pembroke</lei:City>
+      <lei:Country>BM</lei:Country>
+      <lei:PostCode>HM 08</lei:PostCode>
+    </lei:RegisteredAddress>
+    <lei:HeadquartersAddresses><lei:HeadquartersAddress>
+      <lei:AddressLineOne>American International Building</lei:AddressLineOne>
+      <lei:AddressLineTwo>27 Richmond Road</lei:AddressLineTwo>
+      <lei:City>Pembroke</lei:City>
+      <lei:Country>BM</lei:Country>
+      <lei:PostCode>HM 08</lei:PostCode>
+      </lei:HeadquartersAddress></lei:HeadquartersAddresses>
+      <lei:BusinessRegistry>Not Available</lei:BusinessRegistry>
+      <lei:BusinessRegistryNumber></lei:BusinessRegistryNumber>
+      <lei:ExpiryDate xsi:nil="true"></lei:ExpiryDate>
+      <lei:ExpiryReason></lei:ExpiryReason>
+      <lei:EntityStatus>ACTIVE</lei:EntityStatus>
+      <lei:LegalForm>LIMITED LIABILITY COMPANY</lei:LegalForm>
+      <lei:RecordState>PUBLIC_SOURCES</lei:RecordState>
+      <lei:Events><lei:Event PortalDateTime="2013-04-15T18:48:48.382Z">REQUESTED</lei:Event>
+      <lei:Event PortalDateTime="2013-04-19T21:36:54.417Z">ASSIGNED</lei:Event>
+      <lei:Event PortalDateTime="2013-04-23T03:01:41.692Z">REVIEWED</lei:Event>
+      <lei:Event PortalDateTime="2013-04-23T03:01:41.693Z">LAST_MAINTAINED</lei:Event>
+      <lei:Event PortalDateTime="2013-04-15T18:48:48.376Z">LAST_MAINTAINED</lei:Event>
+      <lei:Event PortalDateTime="2014-08-02T01:34:33.006Z">REVIEWED</lei:Event>
+      </lei:Events>
+      <lei:RelatedLEIs></lei:RelatedLEIs>
+      <lei:MaintenanceState>NOT_CURRENT</lei:MaintenanceState>
+      <lei:NextMaintenanceDate>2014-04-15T18:48:48.374Z</lei:NextMaintenanceDate>
+      </lei:LegalEntity>
+</lei:LEIDirectory>
