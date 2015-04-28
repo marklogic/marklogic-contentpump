@@ -42,6 +42,64 @@ public class TestImportAggregate {
     }
     
     @Test
+    public void testImportTransformMedlineFilenameAsCollection() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/agg/medline04.small.xml"
+            + " -mode local -thread_count 1"// -aggregate_uri_id PMID"
+            + " -input_file_type aggregates"
+            + " -transform_module /lc.xqy"
+            + " -filename_as_collection true"
+            + " -output_collections abc,cde"
+            + " -transform_namespace http://marklogic.com/module_invoke"
+            + " -output_uri_replace " + Constants.TEST_PATH.toUri().getPath() + ",'/medline'";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(cts:collections())");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportIDNameWithNS() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/agg/lei.xml"
+            + " -mode local -thread_count 1 -aggregate_uri_id LEI"
+            + " -aggregate_record_namespace www.leiutility.org"
+            + " -aggregate_record_element LegalEntity"
+            + " -input_file_type aggregates"
+            + " -output_uri_replace " + Constants.TEST_PATH.toUri().getPath() + ",'/lei'";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("4", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
     public void testImportMedlineUTF16LE() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
