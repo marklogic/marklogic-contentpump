@@ -179,10 +179,10 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             if (distributed) {
                 // So far all jobs created by mlcp are map only,
                 // so set number of reduce tasks to 0.
-                conf.setInt("mapred.reduce.tasks", 0);
+                conf.setInt("mapreduce.job.reduces", 0);
                 // No speculative runs since speculative tasks don't get to 
                 // clean up sessions properly
-                conf.setBoolean("mapred.map.tasks.speculative.execution",
+                conf.setBoolean("mapreduce.map.speculative",
                                 false);
             } else {
                 // set working directory
@@ -272,7 +272,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         }
         // set job jar
         Configuration conf = job.getConfiguration();       
-        conf.set("mapred.jar", cpJars[0].toURI().toURL().toString());
+        conf.set("mapreduce.job.jar", cpJars[0].toURI().toURL().toString());
 
         // find lib jars
         FilenameFilter filter = new FilenameFilter() {
