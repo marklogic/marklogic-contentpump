@@ -50,6 +50,11 @@ import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.xcc.Session;
 
+/**
+ * Load wiki documents from HDFS into MarkLogic Server.
+ * Used with the configuration file conf/marklogic-wiki.xml.
+ */
+
 public class WikiLoader {
     public static class ArticleMapper 
     extends Mapper<Text, Text, DocumentURI, Text> {
@@ -71,7 +76,7 @@ public class WikiLoader {
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "wiki loader");
         job.setJarByClass(WikiLoader.class);
         job.setInputFormatClass(WikiInputFormat.class);
         job.setMapperClass(ArticleMapper.class);

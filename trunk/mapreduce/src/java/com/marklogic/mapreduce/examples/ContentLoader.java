@@ -61,7 +61,7 @@ public class ContentLoader {
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "content loader");
         job.setJarByClass(ContentLoader.class);
         job.setInputFormatClass(ContentInputFormat.class);
         job.setMapperClass(ContentMapper.class);

@@ -40,7 +40,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
-import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -90,7 +89,7 @@ public class LinkCountHDFS {
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "link count hdfs");
         job.setJarByClass(LinkCountHDFS.class);
         job.setInputFormatClass(HDFSInputFormat.class);
         job.setMapperClass(RefMapper.class);
