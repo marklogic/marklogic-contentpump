@@ -76,7 +76,7 @@ public class LinkCountValue {
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "link count value");
         job.setJarByClass(LinkCountValue.class);
         job.setInputFormatClass(ValueInputFormat.class);
         job.setMapperClass(RefMapper.class);

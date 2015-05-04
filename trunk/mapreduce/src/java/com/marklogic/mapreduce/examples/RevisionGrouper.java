@@ -62,7 +62,7 @@ public class RevisionGrouper {
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "revision grouper");
         job.setJarByClass(RevisionGrouper.class);
         job.setInputFormatClass(NodeInputFormat.class);
         job.setMapperClass(RevisionMapper.class);

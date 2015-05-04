@@ -78,7 +78,7 @@ public class ContentReader {
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "content reader");
         job.setJarByClass(ContentReader.class);
         job.setInputFormatClass(DocumentInputFormat.class);
         job.setMapperClass(DocMapper.class);

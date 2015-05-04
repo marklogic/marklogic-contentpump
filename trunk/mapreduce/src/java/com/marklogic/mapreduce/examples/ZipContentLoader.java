@@ -63,7 +63,7 @@ public class ZipContentLoader {
           System.exit(2);
         }
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "zip content loader");
         job.setJarByClass(ZipContentLoader.class);
         job.setInputFormatClass(ZipContentInputFormat.class);
         job.setMapperClass(ZipContentMapper.class);

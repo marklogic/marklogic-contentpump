@@ -15,9 +15,9 @@
  */
 package com.marklogic.mapreduce.examples;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringBufferInputStream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -81,7 +81,7 @@ public class LinkCountInDoc {
             try {
                 DocumentBuilder docBuilder = 
                     DocumentBuilderFactory.newInstance().newDocumentBuilder();
-                InputStream sbis = new StringBufferInputStream(TEMPLATE);
+                InputStream sbis = new ByteArrayInputStream(TEMPLATE.getBytes());
                 element = docBuilder.parse(sbis).getDocumentElement();
                 result = new MarkLogicNode(element);
                 baseUri = context.getConfiguration().get(BASE_URI_PARAM_NAME);
@@ -131,7 +131,7 @@ public class LinkCountInDoc {
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "link count in doc");
         job.setJarByClass(LinkCountInDoc.class);
         job.setInputFormatClass(NodeInputFormat.class);
         job.setMapperClass(RefMapper.class);
