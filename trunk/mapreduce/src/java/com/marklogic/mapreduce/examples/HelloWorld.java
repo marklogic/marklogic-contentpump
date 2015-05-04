@@ -23,7 +23,6 @@ import java.util.Iterator;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -32,6 +31,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentInputFormat;
@@ -124,7 +124,8 @@ public class HelloWorld {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
 
-        Job job = new Job(conf);
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+        Job job = Job.getInstance(conf, "hello world");
         job.setJarByClass(HelloWorld.class);
         
         // Map related configuration

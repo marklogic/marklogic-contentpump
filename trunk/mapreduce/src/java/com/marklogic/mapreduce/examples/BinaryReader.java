@@ -63,7 +63,7 @@ public class BinaryReader {
             System.exit(2);
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "binary reader");
         job.setJarByClass(BinaryReader.class);
         job.setInputFormatClass(DocumentInputFormat.class);
         job.setMapperClass(DocMapper.class);
