@@ -75,7 +75,7 @@ public class WikiLoader {
             System.exit(2);
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-        
+       
         Job job = Job.getInstance(conf, "wiki loader");
         job.setJarByClass(WikiLoader.class);
         job.setInputFormatClass(WikiInputFormat.class);
@@ -84,7 +84,7 @@ public class WikiLoader {
         job.setMapOutputValueClass(Text.class);
         job.setOutputFormatClass(ContentOutputFormat.class);
         
-        ContentInputFormat.setInputPaths(job, new Path(args[1]));
+        ContentInputFormat.setInputPaths(job, new Path(otherArgs[1]));
 
         conf = job.getConfiguration();
         conf.addResource(otherArgs[0]);
