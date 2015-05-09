@@ -117,6 +117,8 @@
     <pathelement path="${jarlib}/slf4j-api-1.7.5.jar"/>
     <pathelement path="${jarlib}/slf4j-log4j12-1.7.5.jar"/>
     <pathelement path="${jarlib}/saxon9he.jar"/>
+    <pathelement path="${jarlib}/jackson-core-2.5.0.jar"/>
+    <pathelement path="${jarlib}/jackson-databind-2.5.0.jar"/>
     <pathelement path="${jarlib}/cpox.jar"/>
     <pathelement path="${jarlib}/bliki-core-3.0.14-SNAPSHOT.jar"/>
     <pathelement path="${jarlib}/xpp3-1.1.4c.jar"/>
