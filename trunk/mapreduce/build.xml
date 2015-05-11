@@ -128,6 +128,7 @@
     <pathelement path="${jarlib}/hadoop-yarn-api-2.6.0.jar"/>
     <pathelement path="${jarlib}/hadoop-yarn-common-2.6.0.jar"/>
     <pathelement path="${jarlib}/htrace-core-3.0.4.jar"/>
+    <pathelement path="${jarlib}/hadoop-annotations-2.6.0.jar"/>
   </path>
 
   <path id="mapreduce.compile.classpath">
