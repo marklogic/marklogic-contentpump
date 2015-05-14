@@ -663,7 +663,7 @@ public class CompressedTreeDecoder {
 
     private void decodeBinary(Decoder decoder, ExpandedTree rep, int nbytes) 
     throws IOException {
-        int nwords = (int) ((nbytes+3)/4);
+        int nwords = ((nbytes+3)/4);
         if (nwords <= 0) {
             LOG.error("nbytes=" + nbytes + ", nwords=" + nwords);
         }

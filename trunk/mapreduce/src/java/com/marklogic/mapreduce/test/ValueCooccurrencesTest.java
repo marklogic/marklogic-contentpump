@@ -36,7 +36,7 @@ public class ValueCooccurrencesTest {
             System.exit(2);
         }
 
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         job.setJarByClass(ValueCooccurrencesTest.class);
         job.setInputFormatClass(ValueInputFormat.class);
         job.setMapperClass(ValueCooccurrencesMapper.class);

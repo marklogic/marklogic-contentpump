@@ -36,7 +36,7 @@ public class ValueMatchTest {
             System.exit(2);
         }
 
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         job.setJarByClass(ValueMatchTest.class);
         job.setInputFormatClass(ValueInputFormat.class);
         job.setMapperClass(ValueMatchMapper.class);

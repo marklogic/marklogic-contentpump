@@ -72,7 +72,7 @@ public class MapTreeReduceTree extends Configured implements Tool {
             System.err.println("Usage: MapTreeReduceTree inputpath outputpath");
             System.exit(2);
         }
-        Job job = new Job(super.getConf());
+        Job job = Job.getInstance(super.getConf());
         job.setJarByClass(MapTreeReduceTree.class);
         
         // Map related configuration

@@ -79,14 +79,14 @@ public class ForestInputFormat<VALUE> extends
         for (Iterator<FileStatus> it = result.iterator(); it.hasNext();) {
             FileStatus file = it.next();
             String fileName = file.getPath().getName();
-            if (!file.isDir() && fileName.equals("Obsolete")) {
+            if (!file.isDirectory() && fileName.equals("Obsolete")) {
                 LOG.warn(
                     "Obsolete file found.  The forest is either live or isn't "
                     + "dismounted cleanly.  Ignoring forest " +            
                     file.getPath().getParent());
                 return Collections.emptyList();
             }
-            if (!file.isDir() || fileName.equals("Journals")
+            if (!file.isDirectory() || fileName.equals("Journals")
                     || fileName.equals("Large")) {
                 it.remove();
             }

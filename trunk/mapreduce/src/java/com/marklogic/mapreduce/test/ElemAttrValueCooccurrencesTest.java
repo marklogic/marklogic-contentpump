@@ -36,7 +36,7 @@ public class ElemAttrValueCooccurrencesTest {
             System.exit(2);
         }
 
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         job.setJarByClass(ElemAttrValueCooccurrencesTest.class);
         job.setInputFormatClass(ValueInputFormat.class);
         job.setMapperClass(ElemAttrCooccurrencesMapper.class);
