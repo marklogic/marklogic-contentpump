@@ -85,7 +85,7 @@ public class LinkCountCooccurrences {
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf, "link count cooccurrences");
         job.setJarByClass(LinkCountCooccurrences.class);
         job.setInputFormatClass(KeyValueInputFormat.class);
         job.setMapperClass(RefMapper.class);

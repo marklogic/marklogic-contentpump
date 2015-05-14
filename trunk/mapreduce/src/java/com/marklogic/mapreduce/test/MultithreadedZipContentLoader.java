@@ -45,7 +45,7 @@ public class MultithreadedZipContentLoader {
             System.exit(2);
         }
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         job.setJarByClass(MultithreadedZipContentLoader.class);
         job.setInputFormatClass(ZipContentInputFormat.class);
         job.setMapperClass(MultithreadedMapper.class);

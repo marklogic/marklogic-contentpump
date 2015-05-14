@@ -127,7 +127,7 @@ public class LargeBinaryDocument extends BinaryDocument {
             if (status.getLen() < offset) {
                 throw new RuntimeException("Reached end of file: " + path);
             }
-            byte[] buf = new byte[(int) len];
+            byte[] buf = new byte[len];
             is = fs.open(path);
             for (int toSkip = offset, skipped = 0; 
                  toSkip < offset; 

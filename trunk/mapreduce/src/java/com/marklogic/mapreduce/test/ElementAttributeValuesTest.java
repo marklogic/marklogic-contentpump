@@ -34,7 +34,7 @@ public class ElementAttributeValuesTest {
             System.exit(2);
         }
 
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         job.setJarByClass(ElementAttributeValuesTest.class);
         job.setInputFormatClass(ValueInputFormat.class);
         job.setMapperClass(ElementAttrValueMapper.class);

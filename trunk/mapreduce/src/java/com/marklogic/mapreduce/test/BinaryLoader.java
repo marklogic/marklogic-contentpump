@@ -42,7 +42,7 @@ public class BinaryLoader {
             System.exit(2);
         }
         
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         job.setJarByClass(BinaryLoader.class);
         job.setInputFormatClass(BinaryInputFormat.class);
         job.setMapperClass(ContentMapper.class);
