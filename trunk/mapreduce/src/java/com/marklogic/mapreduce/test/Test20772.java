@@ -50,7 +50,7 @@ public class Test20772 {
             System.exit(2);
         }
 
-        Job job = new Job(conf);
+        Job job = Job.getInstance(conf);
         job.setJarByClass(Test20772.class);
         
         // Map related configuration
