@@ -25,6 +25,7 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XName;
+import com.marklogic.xcc.RequestOptions;
 
 /**
  * MarkLogicRecordWriter for user specified key and value types.
@@ -40,6 +41,7 @@ extends MarkLogicRecordWriter<KEYOUT, VALUEOUT> {
     private ValueType keyType;
     private ValueType valueType;
     private String statement;
+    private String queryLanguage;
 
     public KeyValueWriter(Configuration conf, String host) {
         super(conf, host);
@@ -50,6 +52,7 @@ extends MarkLogicRecordWriter<KEYOUT, VALUEOUT> {
         valueType = ValueType.valueOf(valueDataType);
         
         statement = conf.get(OUTPUT_QUERY);
+        queryLanguage = conf.get(OUTPUT_QUERY_LANGUAGE);
     }
 
     @Override
@@ -58,6 +61,11 @@ extends MarkLogicRecordWriter<KEYOUT, VALUEOUT> {
         Session session = getSession();
         try {
             AdhocQuery request = session.newAdhocQuery(statement);
+            if (queryLanguage != null) {
+            	RequestOptions options = new RequestOptions();
+            	options.setQueryLanguage(queryLanguage);
+                request.setOptions(options);
+            }
             request.setNewVariable(new XName(MR_NAMESPACE, OUTPUT_KEY_VARNAME),   
                     InternalUtilities.newValue(keyType, key));
             request.setNewVariable(new XName(MR_NAMESPACE, OUTPUT_VALUE_VARNAME), 

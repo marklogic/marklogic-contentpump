@@ -127,6 +127,7 @@ implements MarkLogicConstants {
         length = mlSplit.getLength() * recToFragRatio;
         
         // generate the query
+        String queryLanguage = null;
         String queryText;
         long start = mlSplit.getStart() + 1;
         long end = mlSplit.isLastSplit() ? 
@@ -177,6 +178,7 @@ implements MarkLogicConstants {
             }
         } else {
             queryText = conf.get(MarkLogicConstants.INPUT_QUERY);
+            queryLanguage = conf.get(MarkLogicConstants.INPUT_QUERY_LANGUAGE);
             if (queryText == null) {
                 throw new IllegalStateException(
                   "Input query is required in advanced mode but not defined.");
@@ -216,6 +218,9 @@ implements MarkLogicConstants {
             }
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
+            if (queryLanguage != null) {
+            	options.setQueryLanguage(queryLanguage);
+            }
             String ts = conf.get(INPUT_QUERY_TIMESTAMP);
             if (ts != null) {
                 options.setEffectivePointInTime(new BigInteger(ts));

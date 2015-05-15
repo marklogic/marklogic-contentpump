@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Used with com.marklogic.mapreduce.test.CustomQuery.class -->
+
+<configuration>
+    <property>
+        <name>mapreduce.marklogic.input.username</name>
+        <value>username</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.password</name>
+        <value>password</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.host</name>
+        <value>hostname</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.port</name>
+        <value>port</value>
+	</property>
+	<property>
+	  <name>mapreduce.marklogic.input.querylanguage</name>
+	  <value>Javascript</value>
+	</property>
+    <property>
+        <name>mapreduce.marklogic.input.query</name>
+		<value><![CDATA[
+		 fn.doc();
+		  ]]></value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.splitquery</name>
+		<value><![CDATA[
+		var hadoop = require("/MarkLogic/hadoop.xqy");
+		hadoop.getSplits("", "fn:doc()", "cts:and-query(())")]]></value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.mode</name>
+        <value>advanced</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.input.maxsplitsize</name>
+        <value>1000</value>
+    </property>
+	<property>
+        <name>mapreduce.marklogic.output.username</name>
+		<value>username</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.password</name>
+        <value>username</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.host</name>
+        <value>hostname</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.port</name>
+        <value>portname</value>
+	</property>
+	<property>
+	  <name>mapreduce.marklogic.output.querylanguage</name>
+	  <value>XQuery</value>
+	</property>
+    <property>
+        <name>mapreduce.marklogic.output.query</name>
+		<value><![CDATA[
+        xquery version '1.0-ml';
+        declare namespace mlmr="http://marklogic.com/hadoop";
+        declare variable $mlmr:key as xs:string external;
+        declare variable $mlmr:value as xs:string external;
+		xdmp:document-insert($mlmr:key, xdmp:unquote($mlmr:value))
+        ]]></value>
+    </property>
+</configuration>
