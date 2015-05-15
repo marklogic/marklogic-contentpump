@@ -388,4 +388,10 @@ public class InternalUtilities implements MarkLogicConstants {
     public static int compareUnsignedLong(long x, long y) {
         return (x == y) ? 0 : ((x < y) ^ ((x < 0) != (y < 0)) ? -1 : 1);
     }
+    
+    public static void checkQueryLanguage(String s) {
+        if (!(s.equalsIgnoreCase("xquery") || s.equalsIgnoreCase("javascript"))) {
+            throw new IllegalArgumentException("Invalid output query language:" + s);
+        }
+    }
 }
