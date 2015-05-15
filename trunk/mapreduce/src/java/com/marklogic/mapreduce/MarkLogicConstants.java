@@ -808,4 +808,23 @@ public interface MarkLogicConstants {
      * <Role-name,Role-id> map for internal use
      */
     static final String ROLE_MAP = "mapreduce.marklogic.output.rolemap";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the query language will be used for input query and split query.
+     * Optional. Valid values: XQuery, Javascript.
+     * Default: XQuery.
+     * 
+     * @author mattsun
+     * 
+     */
+    static final String INPUT_QUERY_LANGUAGE = 
+    		"mapreduce.marklogic.input.querylanguage";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specified the query language will be used for output query.
+     * Optional. Valid values: XQuery, Javascript.
+     * Default: XQuery.
+     */
+    static final String OUTPUT_QUERY_LANGUAGE = 
+    		"mapreduce.makrlogic.output.querylanguage";
 }

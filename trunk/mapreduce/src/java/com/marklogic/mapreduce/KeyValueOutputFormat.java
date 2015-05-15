@@ -61,7 +61,10 @@ public class KeyValueOutputFormat<KEYOUT, VALUEOUT> extends
                     "supported for " + this.getClass().getName() + 
                     " and will be ignored.");
         }
-
+        String queryLanguage = conf.get(OUTPUT_QUERY_LANGUAGE);
+        if (queryLanguage != null) {
+            InternalUtilities.checkQueryLanguage(queryLanguage);
+        }
         // store hosts into config system
         DefaultStringifier.store(conf, queryHosts(cs), OUTPUT_FOREST_HOST);
     }

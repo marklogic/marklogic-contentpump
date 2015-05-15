@@ -77,6 +77,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         long maxSplitSize;
 
         String docSelector;
+        String queryLanguage;
         String splitQuery;
         String inputQuery;
         LexiconFunction function = null;
@@ -100,6 +101,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 "Max split size is required to be positive. It is set to " +
                 maxSplitSize);
         }
+        queryLanguage = jobConf.get(INPUT_QUERY_LANGUAGE);
         splitQuery = jobConf.get(SPLIT_QUERY);
         inputQuery = jobConf.get(INPUT_QUERY);
         boolean advancedMode = 
@@ -250,6 +252,10 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
             
             AdhocQuery query = session.newAdhocQuery(splitQuery);
+            if (queryLanguage != null) {
+                InternalUtilities.checkQueryLanguage(queryLanguage);
+                options.setQueryLanguage(queryLanguage);
+            }
             query.setOptions(options);
             result = session.submitRequest(query);
             
