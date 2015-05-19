@@ -15,9 +15,9 @@
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
-  <artifactId>mlcp-Hadoop2</artifactId>
+  <artifactId>mlcp</artifactId>
   <version>1.4</version>
-  <name>mlcp-Hadoop2</name>
+  <name>mlcp</name>
   <packaging>jar</packaging>
   <properties>
     <skipTests>true</skipTests>
@@ -195,7 +195,6 @@
       <artifactId>xercesImpl</artifactId>
       <version>2.10.0</version>
     </dependency>
-    <!-- hadoop stuff -->
     <dependency>
       <groupId>com.marklogic</groupId>
       <artifactId>marklogic-mapreduce2</artifactId>
