@@ -28,4 +28,4 @@ if [ $? -ne 0 ]; then
     echo " mlcp build FAILED!!"
     exit 1
 fi
-cp target/mlcp-Hadoop2*.zip deliverable
+cp target/mlcp-*.zip deliverable
