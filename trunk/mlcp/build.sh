@@ -12,7 +12,7 @@ mvn install:install-file -DgroupId=com.marklogic -DartifactId=marklogic-mapreduc
 rm -rf deliverable
 mkdir deliverable
 
-# build mlcp-Hadoop2  
+# build mlcp
 mvn clean
 mvn package 
-cp target/mlcp-Hadoop2*.zip deliverable
+cp target/mlcp-*.zip deliverable
