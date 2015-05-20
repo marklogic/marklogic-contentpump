@@ -24,6 +24,14 @@
       </includes>
     </fileSet>
     <fileSet>
+      <directory>src/lib</directory>
+      <outputDirectory>/lib</outputDirectory>
+      <fileMode>0755</fileMode>
+      <includes>
+        <include>*/*</include>
+      </includes>
+    </fileSet>
+    <fileSet>
       <includes>
         <include>LICENSE*</include>
         <include>LEGAL*</include>
