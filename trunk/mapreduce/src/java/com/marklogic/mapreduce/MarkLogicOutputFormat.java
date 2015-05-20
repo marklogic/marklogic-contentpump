@@ -29,8 +29,6 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputCommitter;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
@@ -101,8 +99,15 @@ implements MarkLogicConstants, Configurable {
     @Override
     public OutputCommitter getOutputCommitter(TaskAttemptContext context)
             throws IOException, InterruptedException {
-        return new FileOutputCommitter(FileOutputFormat.getOutputPath(context),
-                context);
+        return new OutputCommitter() {
+            public void abortTask(TaskAttemptContext taskContext) { }
+            public void commitTask(TaskAttemptContext taskContext) { }
+            public boolean needsTaskCommit(TaskAttemptContext taskContext) {
+              return false;
+            }
+            public void setupJob(JobContext jobContext) { }
+            public void setupTask(TaskAttemptContext taskContext) { }
+          };
     }  
 
     @Override
