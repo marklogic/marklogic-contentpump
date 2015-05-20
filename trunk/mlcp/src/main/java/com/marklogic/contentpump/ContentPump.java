@@ -142,7 +142,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 LOG.debug("HADOOP_CONF_DIR is set to " + hadoopConfDir);
             }
         }
-        conf.set(CONF_MODE, distributed ? MODE_DISTRIBUTED : MODE_LOCAL);
+        conf.set(EXECUTION_MODE, distributed ? MODE_DISTRIBUTED : MODE_LOCAL);
         
         if (distributed) {
             if (!cmdline.hasOption(SPLIT_INPUT)

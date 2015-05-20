@@ -108,7 +108,7 @@ implements MarkLogicConstants, ConfigConstants {
         Configuration conf = context.getConfiguration();
         String dst = null;
         
-        String mode = conf.get(CONF_MODE);
+        String mode = conf.get(MarkLogicConstants.EXECUTION_MODE);
         Date date = new Date();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssZ");
         String timestamp = sdf.format(date);

@@ -13,4 +13,4 @@ do
   fi
 done
 CLASSPATH=$DIR/conf:$CLASSPATH
-java -cp $CLASSPATH $VMARGS $JVM_OPTS com.marklogic.contentpump.ContentPump $*
+java -cp $CLASSPATH $VMARGS $JVM_OPTS -Djava.library.path=$DIR/lib/native com.marklogic.contentpump.ContentPump $*
