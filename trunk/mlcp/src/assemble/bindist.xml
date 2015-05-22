@@ -42,6 +42,48 @@
     <dependencySet>
       <scope>runtime</scope>
       <outputDirectory>/lib</outputDirectory>
+      <includes>
+        <include>org.htrace:htrace-core:jar:*</include>
+        <include>org.codehaus.jackson:jackson-xc:jar:*</include>
+        <include>org.codehaus.jackson:jackson-jaxrs:jar:*</include>
+        <include>com.sun.jersey:jersey-core:jar:*</include>
+        <include>com.sun.jersey:jersey-client:jar:*</include>
+        <include>org.apache.hadoop:hadoop-yarn-client:jar:*</include>
+        <include>commons-collections:commons-collections:jar:*</include>
+        <include>com.marklogic:*:*:*</include>                 
+        <include>org.apache.avro:avro:jar:*</include>
+        <include>commons-cli:commons-cli:jar:*</include>
+        <include>commons-codec:commons-codec:jar:*</include>
+        <include>commons-configuration:commons-configuration:jar:*</include>
+        <include>commons-lang:commons-lang:jar:*</include>
+        <include>commons-logging:commons-logging:jar:*</include>
+        <include>commons-modeler:commons-modeler:jar:*</include>
+        <include>com.google.guava:guava:jar:*</include>
+        <include>org.apache.hadoop:hadoop-annotations:jar:*</include>
+        <include>org.apache.hadoop:hadoop-auth:jar:*</include>
+        <include>org.apache.hadoop:hadoop-common:jar:*</include>
+        <include>org.apache.hadoop:hadoop-hdfs:jar:*</include>
+        <include>org.apache.hadoop:hadoop-mapreduce-client-common:jar:*</include>
+        <include>org.apache.hadoop:hadoop-mapreduce-client-core:jar:*</include>
+        <include>org.apache.hadoop:hadoop-mapreduce-client-jobclient:jar:*</include>
+        <include>org.apache.hadoop:hadoop-yarn-api:jar:*</include>
+        <include>org.apache.hadoop:hadoop-yarn-common:jar:*</include>
+        <include>org.codehaus.jackson:jackson-core-asl:jar:*</include>
+        <include>org.codehaus.jackson:jackson-mapper-asl:jar:*</include>
+        <include>log4j:log4j:jar:*</include>
+        <include>com.google.protobuf:protobuf-java:jar:*</include>
+        <include>org.slf4j:slf4j-api:jar:*</include>
+        <include>org.slf4j:slf4j-log4j12:jar:*</include>
+        <include>xerces:xercesImpl:jar:*</include>
+        <include>xpp3:xpp3:jar:*</include>
+        <include>org.apache.jena:jena-arq:jar:*</include>
+        <include>org.apache.jena:jena-core:jar:*</include>
+        <include>org.apache.jena:jena-iri:jar:*</include>
+        <include>org.apache.solr:solr-commons-csv:jar:*</include>
+        <include>xml-apis:xml-apis:jar:*</include>
+        <include>com.thoughtworks.xstream:xstream:jar:*</include>
+        <include>junit:junit:jar:*</include>
+      </includes>
     </dependencySet>
   </dependencySets>
 </assembly>

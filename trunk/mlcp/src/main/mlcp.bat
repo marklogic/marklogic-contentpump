@@ -13,6 +13,7 @@ set LIB_HOME=%cmdppath%lib\
 REM echo ******* LIB_HOME: LIB_HOME: %LIB_HOME%
 
 SetLocal EnableDelayedExpansion
+SetLocal
 
 set classpath=%cmdppath%conf
 
@@ -24,4 +25,6 @@ set LIB_HOME=%cmdppath%lib
 
 REM echo ******** classpath: %classpath%
 
-java -cp "%classpath%" -DCONTENTPUMP_HOME="%LIB_HOME%" -Dfile.encoding="UTF-8" %JVM_OPTS% com.marklogic.contentpump.ContentPump %*
+java -DCONTENTPUMP_HOME="%LIB_HOME%" -Dfile.encoding="UTF-8" %JVM_OPTS% com.marklogic.contentpump.ContentPump %*
+
+EndLocal
