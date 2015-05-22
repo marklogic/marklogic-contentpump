@@ -27,7 +27,7 @@ public interface ConfigConstants {
     // property names
     static final String HADOOP_CONFDIR_ENV_NAME = "HADOOP_CONF_DIR";
     static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
-    static final String CONTENTPUMP_JAR_PREFIX = "mlcp-Hadoop";
+    static final String CONTENTPUMP_JAR_PREFIX = "mlcp";
 
     // common
     static final String MODE = "mode";
@@ -162,7 +162,8 @@ public interface ConfigConstants {
         "mapreduce.marklogic.output_uriprefix";
     static final String CONF_OUTPUT_URI_SUFFIX = 
         "mapreduce.marklogic.output_urisuffix";
-    static final String CONF_OUTPUT_FILEPATH = "mapred.output.dir";
+    static final String CONF_OUTPUT_FILEPATH = 
+         "mapreduce.output.fileoutputformat.outputdir";
     static final String CONF_INPUT_FILE_PATTERN = 
         "mapreduce.marklogic.input.filepattern";
     static final String CONF_OUTPUT_FILENAME_AS_COLLECTION = 
