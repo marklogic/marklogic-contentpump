@@ -378,7 +378,8 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         // mix the lists of splits into one per host
         Set<String> hosts = hostForestSplits.keySet();
         int hostCount = hosts.size();
-        List<InputSplit>[] hostSplits = new ArrayList[hostCount];
+        List<InputSplit>[] hostSplits = (List<InputSplit>[])
+                new List<?>[hostCount];
         int i = 0;
         for (String host : hosts) {
             List<List<InputSplit>> splitLists = hostForestSplits.get(host);
