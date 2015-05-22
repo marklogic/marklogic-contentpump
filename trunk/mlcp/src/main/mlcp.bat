@@ -16,6 +16,8 @@ SetLocal EnableDelayedExpansion
 SetLocal
 
 set classpath=%cmdppath%conf
+set HADOOP_HOME=%cmdppath%
+set PATH=%PATH%;%HADOOP_HOME%bin
 
 for /F %%X in ('dir /B /D "%LIB_HOME%"') do (
   set tmp=%%X
