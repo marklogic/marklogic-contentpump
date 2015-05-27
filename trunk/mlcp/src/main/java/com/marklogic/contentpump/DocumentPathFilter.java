@@ -78,9 +78,9 @@ public class DocumentPathFilter implements PathFilter, Configurable {
     public void setConf(Configuration conf) {
         this.conf = conf;
         pattern = conf.get(ConfigConstants.CONF_INPUT_FILE_PATTERN, ".*");
-        String inPath = conf.get("mapred.input.dir");
+        String inPath = conf.get(ConfigConstants.CONF_INPUT_DIRECTORY);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("mapred.input.dir: " + inPath);
+            LOG.debug(ConfigConstants.CONF_INPUT_DIRECTORY + ": " + inPath);
         }
         Path path = new Path(inPath);
         try {
