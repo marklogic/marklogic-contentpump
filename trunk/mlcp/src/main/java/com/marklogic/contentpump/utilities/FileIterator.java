@@ -33,7 +33,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.contentpump.FileAndDirectoryInputFormat;
-
+import com.marklogic.contentpump.ConfigConstants;
 /**
  * A Iterator that returns a FileSplit per file, excluding directories
  * 
@@ -138,7 +138,7 @@ public class FileIterator implements Iterator<FileSplit> {
     }
 
     protected PathFilter getInputPathFilter() {
-        Class<?> filterClass = conf.getClass("mapred.input.pathFilter.class",
+        Class<?> filterClass = conf.getClass(ConfigConstants.CONF_INPUT_PATH_FILTER_CLASS,
             null, PathFilter.class);
         return (filterClass != null) ? (PathFilter) ReflectionUtils
             .newInstance(filterClass, conf) : null;

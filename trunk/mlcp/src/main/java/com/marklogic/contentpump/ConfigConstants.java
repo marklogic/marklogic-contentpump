@@ -204,4 +204,8 @@ public interface ConfigConstants {
             MarkLogicConstants.COLLECTION_FILTER;
     static final String CONF_DIRECTORY_FILTER = 
             MarkLogicConstants.DIRECTORY_FILTER;
+    static final String CONF_INPUT_DIRECTORY = 
+        "mapreduce.input.fileinputformat.inputdir";
+    static final String CONF_INPUT_PATH_FILTER_CLASS = 
+        "mapreduce.input.pathFilter.class";
 }

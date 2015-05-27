@@ -125,7 +125,7 @@ FileInputFormat<K, V> {
                 }
             }
         } catch (InvalidInputException ex) {
-            String inPath = conf.get("mapred.input.dir");
+            String inPath = conf.get(ConfigConstants.CONF_INPUT_DIRECTORY);
             String pattern = conf.get(ConfigConstants.CONF_INPUT_FILE_PATTERN,
                 ".*");
             throw new IOException(
