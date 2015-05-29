@@ -62,16 +62,14 @@
 	</property>
 	<property>
 	  <name>mapreduce.marklogic.output.querylanguage</name>
-	  <value>XQuery</value>
+	  <value>Javascript</value>
 	</property>
     <property>
         <name>mapreduce.marklogic.output.query</name>
-		<value><![CDATA[
-        xquery version '1.0-ml';
-        declare namespace mlmr="http://marklogic.com/hadoop";
-        declare variable $mlmr:key as xs:string external;
-        declare variable $mlmr:value as xs:string external;
-		xdmp:document-insert($mlmr:key, xdmp:unquote($mlmr:value))
+        <value><![CDATA[
+        var key;
+        var value;
+        xdmp.documentInsert(key,xdmp.unquote(value));
         ]]></value>
     </property>
 </configuration>
