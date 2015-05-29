@@ -826,5 +826,5 @@ public interface MarkLogicConstants {
      * Default: XQuery.
      */
     static final String OUTPUT_QUERY_LANGUAGE = 
-    		"mapreduce.makrlogic.output.querylanguage";
+    		"mapreduce.marklogic.output.querylanguage";
 }
