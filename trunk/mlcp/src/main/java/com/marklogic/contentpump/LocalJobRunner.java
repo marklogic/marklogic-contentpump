@@ -222,7 +222,7 @@ public class LocalJobRunner implements ConfigConstants {
                 
                 //no thread pool (only 1 thread specified) , use DocumentMapper
                 mapperContext.getConfiguration().setClass(
-                    "mapreduce.map.class", DocumentMapper.class, Mapper.class);
+                   CONF_MAPREDUCE_JOB_MAP_CLASS , DocumentMapper.class, Mapper.class);
                 mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) 
                     ReflectionUtils.newInstance(DocumentMapper.class,
                         mapperContext.getConfiguration());
