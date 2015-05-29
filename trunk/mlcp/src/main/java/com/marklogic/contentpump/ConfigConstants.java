@@ -208,4 +208,6 @@ public interface ConfigConstants {
         "mapreduce.input.fileinputformat.inputdir";
     static final String CONF_INPUT_PATH_FILTER_CLASS = 
         "mapreduce.input.pathFilter.class";
+    static final String CONF_MAPREDUCE_JOB_MAP_CLASS = 
+        "mapreduce.job.map.class";
 }
