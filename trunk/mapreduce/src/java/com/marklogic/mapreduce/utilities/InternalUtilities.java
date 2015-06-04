@@ -154,7 +154,7 @@ public class InternalUtilities implements MarkLogicConstants {
         // construct XCC SecurityOptions
         SecurityOptions options = 
             new SecurityOptions(sslOptions.getSslContext());
-        options.setEnabledProtocols(sslOptions.getEnabledCipherSuites());
+        options.setEnabledCipherSuites(sslOptions.getEnabledCipherSuites());
         options.setEnabledProtocols(sslOptions.getEnabledProtocols());
   
         // construct content source
