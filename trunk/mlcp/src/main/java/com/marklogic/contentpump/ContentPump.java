@@ -170,7 +170,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             // Tell Hadoop that we are running in local mode.  This is useful
             // when the user has Hadoop home or their Hadoop conf dir in their
             // classpath but want to run in local mode.
-            conf.set("mapred.job.tracker", "local");
+            conf.set(CONF_MAPREDUCE_JOBTRACKER_ADDRESS, "local");
         }
         
         // create job
@@ -186,7 +186,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                                 false);
             } else {
                 // set working directory
-                conf.set("mapred.working.dir", System.getProperty("user.dir"));
+                conf.set(CONF_MAPREDUCE_JOB_WORKING_DIR, System.getProperty("user.dir"));
             }
             job = command.createJob(conf, cmdline);
         } catch (Exception e) {

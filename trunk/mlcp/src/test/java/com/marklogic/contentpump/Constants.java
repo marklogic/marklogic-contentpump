@@ -59,7 +59,7 @@ public class Constants {
     public static String CONTENTPUMP_HOME;
     static {
         String version = prop.getProperty("HADOOP", "1");
-        CONTENTPUMP_HOME = MLCP_HOME + "/target/mlcp-Hadoop" + version + "-"+ CONTENTPUMP_VERSION + "-lib";
+        CONTENTPUMP_HOME = MLCP_HOME + "/target/mlcp-" + CONTENTPUMP_VERSION + "-lib";
     }
     /**
      * conf directory of hadoop. Must set if unit tests run in distributed mode

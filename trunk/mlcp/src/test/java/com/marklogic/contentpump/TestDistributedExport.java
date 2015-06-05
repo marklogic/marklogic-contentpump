@@ -75,7 +75,6 @@ public class TestDistributedExport {
     
     @Test
     public void testExportZipToHDFS() throws Exception {
-
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
@@ -105,7 +104,7 @@ public class TestDistributedExport {
         
         //export
         cmd = "EXPORT -host localhost -port 5275 -username admin -password admin"
-            + " -output_file_path " + "tmp/" + timestamp + "/test"
+            + " -output_file_path " + "/tmp/" + timestamp + "/test"
             + " -output_type document -compress"
             + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR;
         args = cmd.split(" ");
@@ -116,7 +115,7 @@ public class TestDistributedExport {
         Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
 
         cmd = "import -host localhost -port 5275 -username admin -password admin"
-            + " -input_file_path " + "tmp/" + timestamp
+            + " -input_file_path " + "/tmp/" + timestamp
             + " -input_file_type documents -document_type xml"
             + " -input_compressed true"
             + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR;

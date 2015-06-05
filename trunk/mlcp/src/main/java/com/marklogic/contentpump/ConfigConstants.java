@@ -210,4 +210,8 @@ public interface ConfigConstants {
         "mapreduce.input.pathFilter.class";
     static final String CONF_MAPREDUCE_JOB_MAP_CLASS = 
         "mapreduce.job.map.class";
+    static final String CONF_MAPREDUCE_JOB_WORKING_DIR = 
+        "mapreduce.job.working.dir";
+    static final String CONF_MAPREDUCE_JOBTRACKER_ADDRESS = 
+        "mapreduce.jobtracker.address";
 }

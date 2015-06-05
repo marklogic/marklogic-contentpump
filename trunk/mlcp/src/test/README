@@ -9,18 +9,23 @@ To run unit tests, the following configurations on MarkLogic Server are required
 5) create a XDBC server with port 6275 associated with database "CopyDst";
    use "/" for the root and the Modules database for modules.
 
+[Unit Test for Dev]
+1) Remove the comment mark around 'additionalClasspathElements' in pom.xml: maven-surefire-plugin to add log4j.properties in unit test classpath.
+2) To pass the TestCopy:testCopyTemporalDocs and TestImportDocs:testImportTemporalDoc, it's required to create a graph (temporal collection) named "mycollection" in CopyDst database. See src/test/resources/createCollection.txt for example.
+3) To pass the TestDistributedImportDocs:testImportTransformMixedDocs, it's required to enable triple index and collection lexicon on Document database.
+4) Append "-DCONTENTPUMP_HOME=${path to mlcp}/mlcp/target/mlcp-1.4-lib" to maven command.
+
+[Distributed]
 hadoop runs on localhost
 
 Check out mlcp source code to some directory, say MLCP_HOME.
 Modify MLCP_HOME/src/conf/test.properties
 1) set HADOOP_CONF_DIR to the hadoop's conf directory 
 2) set OUT_PATH to some temporary path for output
-3) set HADOOP to 1 or 2 or 2.0.4(depending on the version of your hadoop server)
-4) set CONTENTPUMP_VERSION=1.2 or 1.3 (b7 is 1.2, trunk is 1.3)
+3) set HADOOP to 2.6.0(depending on the version of your hadoop server)
+4) set CONTENTPUMP_VERSION=1.3 or 1.4 (b8 is 1.3, trunk is 1.4)
 
-
-*Run tests*
-
+[Run tests]
 Run all tests on Linux:
 first make sure HADOOP_CONF_DIR has been unset, then
 mvn test -DskipTests=false
@@ -37,3 +42,5 @@ mvn.bat test -DskipTests=false -Plocal
 
 By default, it will build and test using hadoop1's libraries; to test using hadoop2, append the following to the mvn command:
 -Dhadoop-deps.version=2
+
+[
