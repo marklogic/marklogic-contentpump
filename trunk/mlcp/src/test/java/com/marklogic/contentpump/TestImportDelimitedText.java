@@ -536,7 +536,7 @@ public class TestImportDelimitedText{
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.hard"
             + " -delimited_uri_id first"
-            + " -input_file_type delimited_text";
+            + " -input_file_type delimited_text -mode local";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
