@@ -39,6 +39,9 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.12.3</version>
         <configuration>
+          <!-- <additionalClasspathElements>
+            <additionalClasspathElement>${path to mlcp}/mlcp/src/conf</additionalClasspathElement>
+          </additionalClasspathElements> -->
           <skipTests>${skipTests}</skipTests>
           <excludes>
             <exclude>${distributed.test.excludes}</exclude>

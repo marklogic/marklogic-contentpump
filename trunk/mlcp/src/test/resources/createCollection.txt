@@ -1,0 +1,30 @@
+var admin = require("/MarkLogic/admin.xqy");
+var config = admin.getConfiguration();
+var dbid = xdmp.database("CopyDst");
+var validStart = admin.databaseRangeElementIndex(
+    "dateTime", "http://sample.com/bitemporal", "valid-start", "", fn.false() );
+var validEnd   = admin.databaseRangeElementIndex(
+    "dateTime", "http://sample.com/bitemporal", "valid-end", "", fn.false() );
+var systemStart = admin.databaseRangeElementIndex(
+    "dateTime", "http://sample.com/bitemporal", "system-start", "", fn.false() );
+var systemEnd   = admin.databaseRangeElementIndex(
+    "dateTime", "http://sample.com/bitemporal", "system-end", "", fn.false() );
+config = admin.databaseAddRangeElementIndex(config, dbid, validStart);
+config = admin.databaseAddRangeElementIndex(config, dbid, validEnd);
+config = admin.databaseAddRangeElementIndex(config, dbid, systemStart);
+config = admin.databaseAddRangeElementIndex(config, dbid, systemEnd);
+admin.saveConfiguration(config);
+
+var temporal = require("/MarkLogic/temporal.xqy");
+var validResult = temporal.axisCreate(
+    "valid", 
+    cts.elementReference(fn.QName("http://sample.com/bitemporal", "valid-start")), 
+    cts.elementReference(fn.QName("http://sample.com/bitemporal", "valid-end")));
+var systemResult = temporal.axisCreate(
+    "system", 
+    cts.elementReference(fn.QName("http://sample.com/bitemporal", "system-start")), 
+    cts.elementReference(fn.QName("http://sample.com/bitemporal", "system-end")));
+
+var temporal = require("/MarkLogic/temporal.xqy");
+var collectionResult = temporal.collectionCreate(
+"mycollection", "system", "valid");

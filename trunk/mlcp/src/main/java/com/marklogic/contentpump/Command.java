@@ -842,7 +842,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
-                String wkdir = conf.get("mapred.working.dir");
+                String wkdir = conf.get(CONF_MAPREDUCE_JOB_WORKING_DIR);
                 if (wkdir != null) {
                     path = new Path(wkdir, path).toString();
                 }
@@ -1170,7 +1170,7 @@ public enum Command implements ConfigConstants {
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {  
             if (cmdline.hasOption(OUTPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_FILE_PATH);
-                String wkdir = conf.get("mapred.working.dir");
+                String wkdir = conf.get(CONF_MAPREDUCE_JOB_WORKING_DIR);
                 if (wkdir != null) {
                     path = new Path(wkdir, path).toString();
                 }
