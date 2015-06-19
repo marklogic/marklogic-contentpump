@@ -294,10 +294,7 @@ public class DatabaseContentWriter<VALUE> extends
                             String u = metadatas[fId][i].getUri();
                             if (m != null && m.getProperties() != null) {
                                 setDocumentProperties(u, m.getProperties(),
-                                    isCopyPerms?meta.getPermString():null,
-                                    isCopyColls?meta.getCollectionString():null,
-                                    isCopyQuality?meta.getQualityString():null, 
-                                    sessions[sid]);
+                                    null,null,null,sessions[sid]);
                                 stmtCounts[sid]++;
                             }
                         }
@@ -324,10 +321,11 @@ public class DatabaseContentWriter<VALUE> extends
                 }
                 
                 if (isCopyProps && meta.getProperties() != null) {
+                    boolean naked = content == null;
                     setDocumentProperties(uri, meta.getProperties(),
-                        isCopyPerms?meta.getPermString():null,
-                        isCopyColls?meta.getCollectionString():null,
-                        isCopyQuality?meta.getQualityString():null, 
+                        isCopyPerms&&naked?meta.getPermString():null,
+                        isCopyColls&&naked?meta.getCollectionString():null,
+                        isCopyQuality&&naked?meta.getQualityString():null, 
                         sessions[sid]);
                     stmtCounts[sid]++;
                 }
