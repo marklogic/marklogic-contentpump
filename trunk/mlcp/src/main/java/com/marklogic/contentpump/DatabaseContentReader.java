@@ -118,8 +118,8 @@ public class DatabaseContentReader extends
             + mlSplit.getLength() - 1;
 
         String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR, "fn:collection()");
-        String cFilter = conf.get(ConfigConstants.CONF_COLLECTION_FILTER);
-        String dFilter = conf.get(ConfigConstants.CONF_DIRECTORY_FILTER);
+        String cFilter = conf.get(MarkLogicConstants.COLLECTION_FILTER);
+        String dFilter = conf.get(MarkLogicConstants.DIRECTORY_FILTER);
         
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");

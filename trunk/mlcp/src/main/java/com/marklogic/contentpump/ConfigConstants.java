@@ -86,6 +86,7 @@ public interface ConfigConstants {
     static final String DEFAULT_COPY_QUALITY = "true";
     static final String COLLECTION_FILTER = "collection_filter";
     static final String DIRECTORY_FILTER = "directory_filter";
+    static final String QUERY_FILTER = "query_filter";
     static final String TYPE_FILTER = "type_filter";
     static final String DOCUMENT_SELECTOR = "document_selector";
     static final String PATH_NAMESPACE = "path_namespace";
@@ -200,10 +201,6 @@ public interface ConfigConstants {
             "mapreduce.marklogic.mimetypes";
     static final String CONF_MIN_THREADS = 
             "mapreduce.marklogic.minthreads";
-    static final String CONF_COLLECTION_FILTER = 
-            MarkLogicConstants.COLLECTION_FILTER;
-    static final String CONF_DIRECTORY_FILTER = 
-            MarkLogicConstants.DIRECTORY_FILTER;
     static final String CONF_INPUT_DIRECTORY = 
         "mapreduce.input.fileinputformat.inputdir";
     static final String CONF_INPUT_PATH_FILTER_CLASS = 
