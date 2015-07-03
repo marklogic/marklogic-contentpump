@@ -671,7 +671,7 @@ public enum Command implements ConfigConstants {
                 if (inputType == InputType.FOREST) {
                     String colFilter = 
                             cmdline.getOptionValue(COLLECTION_FILTER);
-                    conf.set(CONF_COLLECTION_FILTER, colFilter);
+                    conf.set(MarkLogicConstants.COLLECTION_FILTER, colFilter);
                 } else {
                     LOG.warn("The setting for " + COLLECTION_FILTER + 
                             " is not applicable for " + inputType); 
@@ -681,7 +681,7 @@ public enum Command implements ConfigConstants {
                 if (inputType == InputType.FOREST) {
                     String dirFilter = 
                             cmdline.getOptionValue(DIRECTORY_FILTER);
-                    conf.set(CONF_DIRECTORY_FILTER, dirFilter);
+                    conf.set(MarkLogicConstants.DIRECTORY_FILTER, dirFilter);
                 } else {
                     LOG.warn("The setting for " + DIRECTORY_FILTER + 
                             " is not applicable for " + inputType); 
@@ -1188,11 +1188,11 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(COLLECTION_FILTER)) {
                 String colFilter = cmdline.getOptionValue(COLLECTION_FILTER);
-                conf.set(CONF_COLLECTION_FILTER, colFilter);
+                conf.set(MarkLogicConstants.COLLECTION_FILTER, colFilter);
             }
             if (cmdline.hasOption(DIRECTORY_FILTER)) {
                 String dirFilter = cmdline.getOptionValue(DIRECTORY_FILTER);
-                conf.set(CONF_DIRECTORY_FILTER, dirFilter);
+                conf.set(MarkLogicConstants.DIRECTORY_FILTER, dirFilter);
             }
             if (cmdline.hasOption(TYPE_FILTER)) {
                 String typeFilter = cmdline.getOptionValue(TYPE_FILTER);
@@ -1618,6 +1618,12 @@ public enum Command implements ConfigConstants {
                     "used in document_selector")
             .create(PATH_NAMESPACE);
         options.addOption(ns);
+        Option qf = OptionBuilder
+            .withArgName("String")
+            .hasArg()
+            .withDescription("cts query to retrieve documents with")
+            .create(QUERY_FILTER);
+        options.addOption(qf);
     }
     
     static void applyModuleConfigOptions(Configuration conf,
@@ -1723,13 +1729,16 @@ public enum Command implements ConfigConstants {
         int filters = cmdline.hasOption(COLLECTION_FILTER) ? 1 : 0;
         filters += cmdline.hasOption(DIRECTORY_FILTER) ? 1 : 0;
         filters += cmdline.hasOption(DOCUMENT_SELECTOR) ? 1 : 0;
+        filters += cmdline.hasOption(QUERY_FILTER) ? 1 : 0;
         if (filters > 1) {
             LOG.error("Only one of " + COLLECTION_FILTER + ", " +
-                    DIRECTORY_FILTER + ", " + DOCUMENT_SELECTOR +
+                    DIRECTORY_FILTER + ", " + QUERY_FILTER + " and " +
+                    DOCUMENT_SELECTOR +
                     " can be specified.");
             throw new IllegalArgumentException(
                     "Only one of " + COLLECTION_FILTER + ", " +
-                    DIRECTORY_FILTER + ", " + DOCUMENT_SELECTOR +
+                    DIRECTORY_FILTER + ", " + QUERY_FILTER + " and " +
+                    DOCUMENT_SELECTOR +
                     " can be specified.");
         }
         
@@ -1747,11 +1756,11 @@ public enum Command implements ConfigConstants {
                     sb.append("\"");
                 }
                 sb.append(")");
-                conf.set(ConfigConstants.CONF_COLLECTION_FILTER, sb.toString());
+                conf.set(MarkLogicConstants.COLLECTION_FILTER, sb.toString());
                 conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
                     "fn:collection(" + sb.toString() + ")");
             } else {
-                conf.set(ConfigConstants.CONF_COLLECTION_FILTER, "\"" + c + "\"");
+                conf.set(MarkLogicConstants.COLLECTION_FILTER, "\"" + c + "\"");
                 conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
                     "fn:collection(\"" + c + "\")");
             }
@@ -1774,7 +1783,7 @@ public enum Command implements ConfigConstants {
                     sb.append("\"");
                 }
                 sb.append(")");
-                conf.set(ConfigConstants.CONF_DIRECTORY_FILTER, sb.toString());
+                conf.set(MarkLogicConstants.DIRECTORY_FILTER, sb.toString());
                 conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
                     "xdmp:directory(" + sb.toString() + ",\"infinity\")");
             } else {
@@ -1782,7 +1791,7 @@ public enum Command implements ConfigConstants {
                     LOG.warn("directory_filter: Directory does not end "
                         + "with a forward slash (/): " + d);
                 }
-                conf.set(ConfigConstants.CONF_DIRECTORY_FILTER, "\"" + d
+                conf.set(MarkLogicConstants.DIRECTORY_FILTER, "\"" + d
                     + "\"");
                 conf.set(MarkLogicConstants.DOCUMENT_SELECTOR,
                     "xdmp:directory(\"" + d + "\",\"infinity\")");
@@ -1795,6 +1804,10 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(PATH_NAMESPACE)) {
             conf.set(MarkLogicConstants.PATH_NAMESPACE, 
                     cmdline.getOptionValue(PATH_NAMESPACE));
+        }
+        if (cmdline.hasOption(QUERY_FILTER)) {
+            conf.set(MarkLogicConstants.QUERY_FILTER, 
+                    cmdline.getOptionValue(QUERY_FILTER));
         }
     }
 
