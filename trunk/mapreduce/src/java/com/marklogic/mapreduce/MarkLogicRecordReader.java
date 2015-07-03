@@ -100,6 +100,51 @@ implements MarkLogicConstants {
     public float getProgress() throws IOException, InterruptedException {
         return count/length;
     }
+    
+    private void appendNamespace(Collection<String> nsCol, StringBuilder buf) {
+        for (Iterator<String> nsIt = nsCol.iterator(); 
+                nsIt.hasNext();) {
+            String ns = nsIt.next();
+            buf.append('"').append(ns).append('"');
+            if (nsIt.hasNext()) {
+                buf.append(',');
+            }
+        }
+    }
+    
+    private void buildDocExprQuery(String docExpr, Collection<String> nsCol, 
+            StringBuilder buf) {
+        String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
+        String indent = conf.get(INDENTED, "FALSE");
+        Indentation ind = Indentation.valueOf(indent);     
+        buf.append("declare variable $start as xs:integer external;\n");
+        buf.append("declare variable $end as xs:integer external;\n");
+       
+        buf.append(ind.getStatement());
+        buf.append("xdmp:with-namespaces(("); 
+        if (nsCol != null) {
+            appendNamespace(nsCol, buf);
+        }
+        buf.append("),fn:unordered(fn:unordered(");
+        buf.append(docExpr);
+        buf.append(")[$start to $end]");
+        buf.append(subExpr);
+        buf.append("))");
+    }
+    
+    private void buildSearchQuery(String ctsQuery, Collection<String> nsCol,
+            StringBuilder buf) {
+        String indent = conf.get(INDENTED, "FALSE");
+        Indentation ind = Indentation.valueOf(indent);
+        buf.append("declare variable $start as xs:integer external;\n");
+        buf.append("declare variable $end as xs:integer external;\n");
+       
+        buf.append(ind.getStatement());
+        buf.append("cts:search(fn:collection(),cts:query(xdmp:unquote('");
+        buf.append(ctsQuery);
+        buf.append("')/*),(\"unfiltered\",\"score-zero\",cts:unordered()))");
+        buf.append("[$start to $end]");
+    }
 
     @Override
     public void initialize(InputSplit split, TaskAttemptContext context)
@@ -119,7 +164,6 @@ implements MarkLogicConstants {
         // get job config properties
         boolean advancedMode = 
             conf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
-        boolean bindSplitRange =conf.getBoolean(BIND_SPLIT_RANGE, false);
         
         // initialize the total length
         float recToFragRatio = conf.getFloat(RECORD_TO_FRAGMENT_RATIO, 
@@ -128,52 +172,40 @@ implements MarkLogicConstants {
         
         // generate the query
         String queryLanguage = null;
-        String queryText;
+        String queryText = null;
         long start = mlSplit.getStart() + 1;
         long end = mlSplit.isLastSplit() ? 
                    Long.MAX_VALUE : start + mlSplit.getLength() - 1;
-        if (!advancedMode) {         
-            LexiconFunction function = null;
-            Class<? extends LexiconFunction> lexiconClass = 
-                conf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
-                        LexiconFunction.class);
+        if (!advancedMode) { 
+            StringBuilder buf = new StringBuilder();      
+            buf.append("xquery version \"1.0-ml\"; \n");
+            String docExpr = conf.get(DOCUMENT_SELECTOR);
             Collection<String> nsCol = 
-                conf.getStringCollection(PATH_NAMESPACE);
-            if (lexiconClass != null) {
-                function = ReflectionUtils.newInstance(lexiconClass, conf);
-                queryText = function.getInputQuery(nsCol, start, 
-                        mlSplit.isLastSplit() ? 
-                                Long.MAX_VALUE : (long)length);
-            } else {
-                String docExpr = conf.get(DOCUMENT_SELECTOR, 
-                        MarkLogicInputFormat.DEFAULT_DOCUMENT_SELECTOR);
-                String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
-                String indent = conf.get(INDENTED, "FALSE");
-                Indentation ind = Indentation.valueOf(indent);
-                StringBuilder buf = new StringBuilder();      
-                buf.append("xquery version \"1.0-ml\"; \n");
-               
-                buf.append(ind.getStatement());
-                buf.append("xdmp:with-namespaces(("); 
-                if (nsCol != null) {
-                    for (Iterator<String> nsIt = nsCol.iterator(); 
-                         nsIt.hasNext();) {
-                        String ns = nsIt.next();
-                        buf.append('"').append(ns).append('"');
-                        if (nsIt.hasNext()) {
-                            buf.append(',');
-                        }
+                    conf.getStringCollection(PATH_NAMESPACE);
+            if (docExpr == null) {
+                String ctsQuery = conf.get(QUERY_FILTER);
+                if (ctsQuery != null) {
+                    buildSearchQuery(ctsQuery, nsCol, buf);
+                    queryText = buf.toString();
+                } else {
+                    LexiconFunction function = null;
+                    Class<? extends LexiconFunction> lexiconClass = 
+                        conf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
+                                LexiconFunction.class);
+                    if (lexiconClass != null) {
+                        function = ReflectionUtils.newInstance(lexiconClass, 
+                                conf);
+                        queryText = function.getInputQuery(nsCol, start, 
+                                mlSplit.isLastSplit() ? 
+                                        Long.MAX_VALUE : (long)length);
                     }
                 }
-                buf.append("),fn:unordered(fn:unordered(");
-                buf.append(docExpr);
-                buf.append(")[");
-                buf.append(Long.toString(start));
-                buf.append(" to ");
-                buf.append(Long.toString(end));
-                buf.append("]");
-                buf.append(subExpr);
-                buf.append("))");
+            } 
+            if (queryText == null) {
+                if (docExpr == null) {
+                    docExpr = "fn:collection()";
+                }
+                buildDocExprQuery(docExpr, nsCol, buf);
                 queryText = buf.toString();
             }
         } else {
@@ -201,6 +233,8 @@ implements MarkLogicConstants {
             }
             AdhocQuery query = session.newAdhocQuery(queryText);
             if (advancedMode) {
+                boolean bindSplitRange = 
+                        conf.getBoolean(BIND_SPLIT_RANGE, false);
                 if (bindSplitRange) {
                     query.setNewIntegerVariable(MR_NAMESPACE, 
                             SPLIT_START_VARNAME, start);
@@ -215,6 +249,9 @@ implements MarkLogicConstants {
                     query.setCount(mlSplit.isLastSplit() ?
                             Long.MAX_VALUE : mlSplit.getLength());
                 }
+            } else {
+                query.setNewIntegerVariable("start", start);
+                query.setNewIntegerVariable("end", end);
             }
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);

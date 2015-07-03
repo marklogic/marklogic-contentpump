@@ -408,11 +408,20 @@ public interface MarkLogicConstants {
           "mapreduce.marklogic.input.filter.directory";
       /**
        * The config property name (<code>{@value}</code>)
+       * which, if set, indicates to only include documents matching the cts
+       * query {@link MarkLogicInputFormat}.
+       */
+      static final String QUERY_FILTER =
+          "mapreduce.marklogic.input.filter.query";
+      /**
+       * The config property name (<code>{@value}</code>)
        * which, if set, indicates to only include documents with one of 
        * specified types when using {@link ForestInputFormat}.
        */
       static final String TYPE_FILTER =
           "mapreduce.marklogic.input.filter.type";
+      
+      static final String EXTRACT_URI = "mapreduce.marklogic.input.extracturi";
     
     // output-related config property names
     /**

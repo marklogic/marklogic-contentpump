@@ -61,6 +61,65 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         LogFactory.getLog(MarkLogicInputFormat.class);
     static final String DEFAULT_DOCUMENT_SELECTOR = "fn:collection()";
     static final String DEFAULT_CTS_QUERY = "()";
+    Configuration jobConf = null;
+    String docSelector;
+    
+    private void appendNsBindings(StringBuilder buf) {
+        Collection<String> nsCol = 
+                jobConf.getStringCollection(PATH_NAMESPACE);        
+            
+        if (nsCol != null && !nsCol.isEmpty()) {
+            boolean isAlias = true;    
+            for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
+                String ns = nsIt.next();
+                if (isAlias) {
+                    buf.append("declare namespace ");
+                    buf.append(ns);
+                    buf.append("=\"");
+                    isAlias = false;
+                } else {
+                    buf.append(ns);
+                    buf.append("\";");
+                    isAlias = true;
+                }
+                if (nsIt.hasNext() && isAlias) {
+                    buf.append('\n');
+                }
+            }
+        }
+    }
+    
+    private void appendDocumentSelector(StringBuilder buf) { 
+        docSelector = jobConf.get(DOCUMENT_SELECTOR);
+        if (docSelector != null) {
+            buf.append(docSelector);
+        } else {
+            buf.append(DEFAULT_DOCUMENT_SELECTOR);
+        }
+    }
+    
+    private void appendQuery(StringBuilder buf) {
+        if (docSelector != null) {
+            buf.append(DEFAULT_CTS_QUERY); 
+            return;
+        }
+        String ctsQuery = jobConf.get(QUERY_FILTER);
+        if (ctsQuery != null) {
+            buf.append("cts:query(xdmp:unquote('");
+            buf.append(ctsQuery.replaceAll("\"", "&#34;"));
+            buf.append("')/*)");
+            return;
+        } 
+        Class<? extends LexiconFunction> lexiconClass = 
+                jobConf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
+                        LexiconFunction.class);
+        if (lexiconClass != null) {
+            LexiconFunction function = 
+                    ReflectionUtils.newInstance(lexiconClass, jobConf);
+            buf.append(function.getLexiconQuery());
+            return;
+        } 
+    }
 
     /**
      * Get input splits.
@@ -72,163 +131,51 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     public List<InputSplit> getSplits(JobContext jobContext) throws IOException,
             InterruptedException { 
         // get input from job configuration
-        Configuration jobConf = jobContext.getConfiguration();
+        jobConf = jobContext.getConfiguration();
         
-        long maxSplitSize;
-
-        String docSelector;
-        String queryLanguage;
-        String splitQuery;
-        String inputQuery;
-        LexiconFunction function = null;
-        Class<? extends LexiconFunction> lexiconClass = 
-            jobConf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
-                    LexiconFunction.class);
-        if (lexiconClass != null) {
-            // ignore setting for DOCUMENT_SELECTOR
-            docSelector = DEFAULT_DOCUMENT_SELECTOR;
-            function = ReflectionUtils.newInstance(lexiconClass, jobConf);
-        } else {
-            docSelector = jobConf.get(DOCUMENT_SELECTOR, 
-                    DEFAULT_DOCUMENT_SELECTOR);
-        }
-        String mode = jobConf.get(EXECUTION_MODE,MODE_DISTRIBUTED);
-        long defaultSplitSize = mode.equals(MODE_DISTRIBUTED) ? 
-            DEFAULT_MAX_SPLIT_SIZE : DEFAULT_LOCAL_MAX_SPLIT_SIZE;
-        maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, defaultSplitSize);
-        if (maxSplitSize <= 0) {
-            throw new IllegalStateException(
-                "Max split size is required to be positive. It is set to " +
-                maxSplitSize);
-        }
-        queryLanguage = jobConf.get(INPUT_QUERY_LANGUAGE);
-        splitQuery = jobConf.get(SPLIT_QUERY);
-        inputQuery = jobConf.get(INPUT_QUERY);
         boolean advancedMode = 
-            jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
-        boolean bindSplitRange = jobConf.getBoolean(BIND_SPLIT_RANGE, false);
-        
-        // fetch data from server
-        List<ForestSplit> forestSplits = null;
-        Session session = null;
-        ResultSequence result = null;
-        
-        if (!advancedMode) {
-            //warn about config parameters that are present but won't apply
-            if (splitQuery != null) {
-                LOG.warn("Config entry for " +
-                        "\"mapreduce.marklogic.input.splitquery\" will not " +
-                        "apply since the job is running in basic mode.  To " +
-                        "turn on advanced mode, set " +
-                        "\"mapreduce.marklogic.input.mode\" to \"advanced\".");
-            } else if (inputQuery != null) {
-                LOG.warn("Config entry for " +
-                        "\"mapreduce.marklogic.input.query\" will not " +
-                        "apply since the job is running in basic mode.  To " +
-                        "turn on advanced mode, set " +
-                        "\"mapreduce.marklogic.input.mode\" to \"advanced\".");
-            } else if (jobConf.get(BIND_SPLIT_RANGE) != null) {
-                LOG.warn("Config entry for " +
-                        "\"mapreduce.marklogic.input.bindsplitrange\" will " +
-                        "not apply since the job is running in basic mode.  " +
-                        "To turn on advanced mode, set " +
-                        "\"mapreduce.marklogic.input.mode\" to \"advanced\".");
-            }
-            
-            Collection<String> nsCol = 
-                jobConf.getStringCollection(PATH_NAMESPACE);        
-            
+                jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
+        String splitQuery;
+        String queryLanguage = null;
+        if (advancedMode) {
+            queryLanguage = jobConf.get(INPUT_QUERY_LANGUAGE);
+            splitQuery = jobConf.get(SPLIT_QUERY);
+        } else {
             StringBuilder buf = new StringBuilder();
             buf.append("xquery version \"1.0-ml\";\n");
             buf.append("import module namespace hadoop = ");
             buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
             buf.append("\"/MarkLogic/hadoop.xqy\";\n");
-            buf.append("hadoop:get-splits(");  
-            
-            if (nsCol != null && !nsCol.isEmpty()) {
-                boolean isAlias = true;
-                buf.append('\'');
-                for (Iterator<String> nsIt = nsCol.iterator(); nsIt.hasNext();) {
-                    String ns = nsIt.next();
-                    if (isAlias) {
-                        buf.append("declare namespace ");
-                        buf.append(ns);
-                        buf.append("=\"");
-                        isAlias = false;
-                    } else {
-                        buf.append(ns);
-                        buf.append("\";");
-                        isAlias = true;
-                    }
-                    if (nsIt.hasNext() && isAlias) {
-                        buf.append('\n');
-                    }
-                }
-                buf.append("\', \'");
-            } else {
-                buf.append("'', \'");
-            }
-            
-            buf.append(docSelector);
+            buf.append("hadoop:get-splits(\'"); 
+            appendNsBindings(buf);
             buf.append("\', \'");
-            if (function != null) {
-                buf.append(function.getLexiconQuery());
-            } else {
-                buf.append(DEFAULT_CTS_QUERY);
-            }
-            buf.append("\')");
-            
+            appendDocumentSelector(buf);
+            buf.append("\', \"");
+            appendQuery(buf);
+            buf.append("\")");
             splitQuery = buf.toString();
-        } else {
-            // warn about configs parameters that are present but won't apply
-            if (jobConf.get(DOCUMENT_SELECTOR) != null) {
-                LOG.warn("Config entry for " +
-                        "\"mapreduce.marklogic.input.documentselector\" " +
-                        "will not apply since the job is running in " +
-                        "advanced mode.  To switch to basic mode, set " +
-                        "\"mapreduce.marklogic.input.mode\" to \"basic\".");
-            } else if (jobConf.get(SUBDOCUMENT_EXPRESSION) != null) {
-                LOG.warn("Config entry for " +
-                        "\"mapreduce.marklogic.input.subdocumentexpr\" " +
-                        "will not apply since the job is running in " +
-                        "advanced mode.  To switch to basic mode, set " +
-                        "\"mapreduce.marklogic.input.mode\" to \"basic\".");
-            } else if (jobConf.get(INPUT_LEXICON_FUNCTION_CLASS) != null) {
-                LOG.warn("Config entry for " +
-                        "\"mapreduce.marklogic.input.lexiconfunctionclass\" " +
-                        "will not apply since the job is running in " +
-                        "advanced mode.  To switch to basic mode, set " +
-                        "\"mapreduce.marklogic.input.mode\" to \"basic\".");
-            } else if (jobConf.get(PATH_NAMESPACE) != null) {
-                LOG.warn("Config entry for " +
-                        "\"mapreduce.marklogic.input.namespace\" " +
-                        "will not apply since the job is running in " +
-                        "advanced mode.  To switch to basic mode, set " +
-                        "\"mapreduce.marklogic.input.mode\" to \"basic\".");
-            }
-            if (splitQuery == null) {
-                throw new IllegalStateException(
-                  "Split query is required in advanced mode but not defined.");
-            }
-            if (inputQuery == null) {
-                throw new IllegalStateException(
-                "Input query is required in advanced mode but not defined.");
-            }
-            if (bindSplitRange) {
-                if (!inputQuery.contains(SPLIT_START_VARNAME)) {
-                    LOG.warn("No split start variable is found in input " +
-                            "query when bind split range is set to true.");
-                }
-                if (!inputQuery.contains(SPLIT_END_VARNAME)) {
-                    LOG.warn("No split end variable is found in input " +
-                            "query when bind split range is set to true.");
-                }
-            }
+        } 
+        
+        String mode = jobConf.get(EXECUTION_MODE,MODE_DISTRIBUTED);
+        long defaultSplitSize = mode.equals(MODE_DISTRIBUTED) ? 
+            DEFAULT_MAX_SPLIT_SIZE : DEFAULT_LOCAL_MAX_SPLIT_SIZE;
+        long maxSplitSize = jobConf.getLong(MAX_SPLIT_SIZE, defaultSplitSize);
+        if (maxSplitSize <= 0) {
+            throw new IllegalStateException(
+                "Max split size is required to be positive. It is set to " +
+                maxSplitSize);
         }
+        
+        // fetch data from server
+        List<ForestSplit> forestSplits = null;
+        Session session = null;
+        ResultSequence result = null;            
         
         if (LOG.isDebugEnabled()) {
             LOG.debug("Split query: " + splitQuery);
         }
+        // TODO: no need to query the host with a separate round trip
+        // See fix 23798
         boolean localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));
         String localHost = null;
         try {
