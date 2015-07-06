@@ -119,6 +119,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             buf.append(function.getLexiconQuery());
             return;
         } 
+        buf.append(DEFAULT_CTS_QUERY);
     }
 
     /**
