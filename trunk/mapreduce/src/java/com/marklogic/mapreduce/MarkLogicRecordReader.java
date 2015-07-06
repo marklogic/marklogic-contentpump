@@ -116,9 +116,13 @@ implements MarkLogicConstants {
             StringBuilder buf) {
         String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
         String indent = conf.get(INDENTED, "FALSE");
-        Indentation ind = Indentation.valueOf(indent);     
-        buf.append("declare variable $start as xs:integer external;\n");
-        buf.append("declare variable $end as xs:integer external;\n");
+        Indentation ind = Indentation.valueOf(indent);
+        buf.append(
+                "declare namespace mlmr=\"http://marklogic.com/hadoop\";\n");
+        buf.append(
+                "declare variable $mlmr:splitstart as xs:integer external;\n");
+        buf.append(
+                "declare variable $mlmr:splitend as xs:integer external;\n");
        
         buf.append(ind.getStatement());
         buf.append("xdmp:with-namespaces(("); 
@@ -127,7 +131,7 @@ implements MarkLogicConstants {
         }
         buf.append("),fn:unordered(fn:unordered(");
         buf.append(docExpr);
-        buf.append(")[$start to $end]");
+        buf.append(")[$mlmr:splitstart to $mlmr:splitend]");
         buf.append(subExpr);
         buf.append("))");
     }
@@ -136,14 +140,18 @@ implements MarkLogicConstants {
             StringBuilder buf) {
         String indent = conf.get(INDENTED, "FALSE");
         Indentation ind = Indentation.valueOf(indent);
-        buf.append("declare variable $start as xs:integer external;\n");
-        buf.append("declare variable $end as xs:integer external;\n");
+        buf.append(
+                "declare namespace mlmr=\"http://marklogic.com/hadoop\";\n");
+        buf.append(
+                "declare variable $mlmr:splitstart as xs:integer external;\n");
+        buf.append(
+                "declare variable $mlmr:splitend as xs:integer external;\n");
        
         buf.append(ind.getStatement());
         buf.append("cts:search(fn:collection(),cts:query(xdmp:unquote('");
         buf.append(ctsQuery);
         buf.append("')/*),(\"unfiltered\",\"score-zero\",cts:unordered()))");
-        buf.append("[$start to $end]");
+        buf.append("[$mlmr:splitstart to $mlmr:splitend]");
     }
 
     @Override
@@ -244,14 +252,15 @@ implements MarkLogicConstants {
                     query.setPosition(start);
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("split start position: " + start);
-                    }
-                    
+                    }        
                     query.setCount(mlSplit.isLastSplit() ?
                             Long.MAX_VALUE : mlSplit.getLength());
                 }
             } else {
-                query.setNewIntegerVariable("start", start);
-                query.setNewIntegerVariable("end", end);
+                query.setNewIntegerVariable(MR_NAMESPACE, 
+                        SPLIT_START_VARNAME, start);
+                query.setNewIntegerVariable(MR_NAMESPACE, 
+                        SPLIT_END_VARNAME, end);
             }
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
