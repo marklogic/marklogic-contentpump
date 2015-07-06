@@ -117,20 +117,32 @@ public class DatabaseContentReader extends
         long end = mlSplit.isLastSplit() ? Long.MAX_VALUE : start
             + mlSplit.getLength() - 1;
 
-        String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR, "fn:collection()");
-        String cFilter = conf.get(MarkLogicConstants.COLLECTION_FILTER);
-        String dFilter = conf.get(MarkLogicConstants.DIRECTORY_FILTER);
-        
+        String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR);
+        String ctsQuery = null;
+        if (src == null) {
+            String docExpr = "fn:collection()";
+            ctsQuery = conf.get(QUERY_FILTER);
+            if (ctsQuery != null) {
+                StringBuilder buf = new StringBuilder();
+                buildSearchQuery(buf, ctsQuery, docExpr);
+                src = buf.toString();
+            } else {
+                src = docExpr;
+            }
+        }      
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
         buf.append("import module namespace hadoop = ");
         buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
         buf.append("\"/MarkLogic/hadoop.xqy\";\n");
-        buf.append("declare namespace mlmr=\"http://marklogic.com/hadoop\";");
-        buf.append("declare option xdmp:output \"indent=no\";");
-        buf.append("declare option xdmp:output \"indent-untyped=no\";");
-        buf.append("declare variable $mlmr:splitstart as xs:integer external;");
-        buf.append("declare variable $mlmr:splitend as xs:integer external;\n");
+        buf.append(
+                "declare namespace mlmr=\"http://marklogic.com/hadoop\";\n");
+        buf.append("declare option xdmp:output \"indent=no\";\n");
+        buf.append("declare option xdmp:output \"indent-untyped=no\";\n");
+        buf.append(
+                "declare variable $mlmr:splitstart as xs:integer external;\n");
+        buf.append(
+                "declare variable $mlmr:splitend as xs:integer external;\n");
         buf.append("let $cols := ");
         buf.append(src);
         buf.append("[$mlmr:splitstart to $mlmr:splitend]");
@@ -174,24 +186,43 @@ public class DatabaseContentReader extends
         buf.append(src);
         buf.append("[$mlmr:splitstart to $mlmr:splitend]");
         
-        // naked properties
-        
+        // naked properties       
         if (copyProperties) {
             buf.append(", if ($mlmr:splitstart eq 1) then ");
             buf.append("\nlet $props := cts:search(");
-            if (cFilter != null) {
-                buf.append("xdmp:collection-properties(");
-                buf.append(cFilter);
-                buf.append(")");
-            } else if (dFilter != null) {
-                buf.append("xdmp:directory-properties(");
-                buf.append(dFilter);
-                buf.append(", \"infinity\")");
+            if (ctsQuery == null) {
+                String cFilter = null, dFilter = null;
+                cFilter = conf.get(MarkLogicConstants.COLLECTION_FILTER);
+                if (cFilter != null) {
+                    buf.append("xdmp:collection-properties(");
+                    buf.append(cFilter);
+                    buf.append(")");
+                } else {
+                    dFilter = conf.get(MarkLogicConstants.DIRECTORY_FILTER);
+                    if (dFilter != null) {
+                        buf.append("xdmp:directory-properties(");
+                        buf.append(dFilter);
+                        buf.append(", \"infinity\")");
+                    } else {
+                        buf.append("xdmp:collection-properties()");
+                    }
+                }                
             } else {
                 buf.append("xdmp:collection-properties()");
             }
             buf.append(",");
-            buf.append("cts:not-query(cts:document-fragment-query(cts:and-query( () ))))\n");
+            if (ctsQuery == null) {
+                buf.append(
+                    "cts:not-query(cts:document-fragment-query(");
+                buf.append("cts:and-query(()))),");
+                buf.append("(\"unfiltered\",\"score-zero\",cts:unordered()))\n");
+            } else {
+                buf.append("cts:and-query((cts:query(xdmp:unquote('");
+                buf.append(ctsQuery);
+                buf.append("')/*),cts:not-query(cts:document-fragment-query(");
+                buf.append("cts:and-query(()))))),");
+                buf.append("(\"unfiltered\",\"score-zero\",cts:unordered()))\n");
+            }
             buf.append("for $doc in $props\n");
             buf.append("let $uri := fn:base-uri($doc)\n return (");
 
@@ -259,6 +290,16 @@ public class DatabaseContentReader extends
     }
 
     
+    private void buildSearchQuery(StringBuilder buf, String ctsQuery,
+            String expr) {
+        buf.append("cts:search(");
+        buf.append(expr);
+        buf.append(",");
+        buf.append("cts:query(xdmp:unquote('");
+        buf.append(ctsQuery);
+        buf.append("')/*),(\"unfiltered\",\"score-zero\",cts:unordered()))");
+    }
+
     private void initMetadataMap() throws IOException {
         while (result.hasNext()) {
             ResultItem item = result.next();
