@@ -207,7 +207,7 @@ public class TestImportDelimitedText{
         result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(cts:collections())");
         assertTrue(result.hasNext());
-        assertEquals("3", result.next().asString());
+        assertEquals("4", result.next().asString());
         Utils.closeSession();
         
         result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
@@ -824,4 +824,76 @@ public class TestImportDelimitedText{
         assertTrue(sb.toString().equals(key));
     }
     
+    @Test
+    public void testImportDelimitedTextDocJSON() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+                + " -input_file_path "
+                + Constants.TEST_PATH.toUri()
+                + "/csv"
+                + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
+                + " -document_type json";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        Utils.prepareDistributedMode();
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+                        "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        assertTrue(result.hasNext());
+        assertTrue(result.next().asString().equals("true"));
+    }
+    
+    @Test
+    public void testImportDelimitedTextDocJSONWithOptions() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+                + " -input_file_path "
+                + Constants.TEST_PATH.toUri()
+                + "/csv"
+                + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
+                + " -document_type json -delimited_root_name doc"
+                + " -delimited_uri_id first -split_input true";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        Utils.prepareDistributedMode();
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+                        "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+        Utils.closeSession();
+        
+        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        assertTrue(result.hasNext());
+        assertTrue(result.next().asString().equals("true"));
+        Utils.closeSession();
+        
+        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        StringBuilder sb = new StringBuilder();
+        while (result.hasNext()) {
+            String s = result.next().asString();
+            sb.append(s);
+        }
+
+        String key = Utils
+                .readSmallFile(Constants.TEST_PATH.toUri().getPath()
+                        + "/keys/TestImportDelimitedText#testImportDelimitedTextDocJSONWithOptions.txt");
+
+        assertTrue(sb.toString().equals(key));
+    }
 }

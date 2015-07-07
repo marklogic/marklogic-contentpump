@@ -231,4 +231,32 @@ public class Utils {
             session.close();
         }
     }
+    
+    public static ResultSequence assertDocsFormat(String xccUri, String docType) 
+            throws XccConfigException, URISyntaxException, RequestException {
+        ContentSource cs = csMap.get(xccUri);
+        if (cs == null) {
+            cs = ContentSourceFactory.newContentSource(new URI(
+            xccUri));
+            csMap.put(xccUri, cs);
+        }
+        
+        session = cs.newSession();
+        String query = "function testDocument() {"
+                + "var it=fn.doc();"
+                + "for (var u of it) {"
+                + "if (u.documentFormat != '" + docType +"') {"
+                + "return false;"
+                + "}}"
+                + "return true;}"
+                + "testDocument();";
+        AdhocQuery aquery = session.newAdhocQuery(query);
+        
+        RequestOptions options = new RequestOptions();
+        options.setCacheResult(false);
+        options.setQueryLanguage("javascript");
+        aquery.setOptions(options);
+        
+        return session.submitRequest(aquery);
+    }
 }
