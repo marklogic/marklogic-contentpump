@@ -135,7 +135,9 @@ public enum InputType implements ConfigConstants {
 
         @Override
         public ContentType getContentType(CommandLine cmdline) {
-            return ContentType.XML;   
+            String type = cmdline.getOptionValue(DOCUMENT_TYPE, 
+                    ContentType.XML.name());
+            return ContentType.forName(type);
         }
         
         @Override
