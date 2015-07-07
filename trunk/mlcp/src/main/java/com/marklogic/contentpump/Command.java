@@ -352,6 +352,13 @@ public enum Command implements ConfigConstants {
             
             InputType inputType = getInputType(cmdline);   
             ContentType contentType = inputType.getContentType(cmdline);
+            
+            if (InputType.DELIMITED_TEXT == inputType 
+                    && ContentType.XML != contentType 
+                    && contentType.JSON != contentType) {
+                throw new IllegalArgumentException("The setting for " + DOCUMENT_TYPE + "is not applicable for " + inputType);
+            }
+            
             conf.set(MarkLogicConstants.CONTENT_TYPE, contentType.name());
             
             if (ContentType.MIXED == contentType) {
