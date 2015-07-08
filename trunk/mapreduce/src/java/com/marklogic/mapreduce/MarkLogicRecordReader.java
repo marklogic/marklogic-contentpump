@@ -148,9 +148,10 @@ implements MarkLogicConstants {
                 "declare variable $mlmr:splitend as xs:integer external;\n");
        
         buf.append(ind.getStatement());
-        buf.append("cts:search(fn:collection(),cts:query(xdmp:unquote('");
+        buf.append(
+            "fn:unordered(cts:search(fn:collection(),cts:query(xdmp:unquote('");
         buf.append(ctsQuery);
-        buf.append("')/*),(\"unfiltered\",\"score-zero\",cts:unordered()))");
+        buf.append("')/*),(\"unfiltered\",\"score-zero\")))");
         buf.append("[$mlmr:splitstart to $mlmr:splitend]");
     }
 
