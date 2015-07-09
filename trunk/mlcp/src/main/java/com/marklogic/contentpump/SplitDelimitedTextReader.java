@@ -31,7 +31,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.DelimitedSplit;
 import com.marklogic.contentpump.utilities.IdGenerator;
-import com.marklogic.contentpump.utilities.XMLUtil;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
 
 /**

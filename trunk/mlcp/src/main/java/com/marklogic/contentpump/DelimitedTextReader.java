@@ -18,7 +18,6 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
 
 import org.apache.commons.csv.CSVParser;
@@ -38,9 +37,7 @@ import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.contentpump.utilities.JSONDocBuilder;
 import com.marklogic.contentpump.utilities.XMLDocBuilder;
-import com.marklogic.contentpump.utilities.XMLUtil;
 import com.marklogic.mapreduce.MarkLogicConstants;
-import com.sun.org.apache.xml.internal.utils.XMLChar;
 
 /**
  * Reader for DelimitedTextInputFormat.
@@ -57,8 +54,6 @@ public class DelimitedTextReader<VALUEIN> extends
      */
     protected String[] fields;
     protected char delimiter;
-    protected static String rootStart;
-    protected static String rootEnd;
     protected CSVParser parser;
     protected InputStreamReader instream;
     protected FSDataInputStream fileIn;
