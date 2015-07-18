@@ -105,9 +105,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
         String ctsQuery = jobConf.get(QUERY_FILTER);
         if (ctsQuery != null) {
-            buf.append("cts:query(xdmp:unquote('");
+            buf.append("\"cts:query(xdmp:unquote('");
             buf.append(ctsQuery.replaceAll("\"", "&#34;"));
-            buf.append("')/*)");
+            buf.append("')/*)\"");
             return;
         } 
         Class<? extends LexiconFunction> lexiconClass = 
@@ -116,7 +116,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         if (lexiconClass != null) {
             LexiconFunction function = 
                     ReflectionUtils.newInstance(lexiconClass, jobConf);
+            buf.append("'");
             buf.append(function.getLexiconQuery());
+            buf.append("'");
             return;
         } 
         buf.append(DEFAULT_CTS_QUERY);
@@ -151,9 +153,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             appendNsBindings(buf);
             buf.append("\', \'");
             appendDocumentSelector(buf);
-            buf.append("\', \"");
+            buf.append("\',");
             appendQuery(buf);
-            buf.append("\")");
+            buf.append(')');
             splitQuery = buf.toString();
         } 
         
