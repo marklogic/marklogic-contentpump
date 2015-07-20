@@ -121,7 +121,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             buf.append("'");
             return;
         } 
+        buf.append("'");
         buf.append(DEFAULT_CTS_QUERY);
+        buf.append("'");
     }
 
     /**
@@ -235,7 +237,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 count++;
             }
             LOG.info("Fetched " + 
-                    forestSplits == null ? 0 : forestSplits.size() + 
+                    (forestSplits == null ? 0 : forestSplits.size()) + 
                     " forest splits.");            
         } catch (XccConfigException e) {
             LOG.error(e);
