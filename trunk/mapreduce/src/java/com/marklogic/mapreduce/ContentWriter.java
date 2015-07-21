@@ -511,7 +511,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         try {
             sessions[id].commit();
             succeeded += commitUris[id].size();
-            LOG.info("succeeded+="+commitUris[id].size());
         } catch (RequestServerException e) {
             LOG.warn("Error commiting transaction", e);
             failed += commitUris[id].size();   
@@ -664,7 +663,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     try {
                         sessions[i].commit();
                         succeeded += commitUris[i].size();
-                        LOG.info("succeeded+="+commitUris[i].size());
                     } catch (RequestServerException e) {
                         // log error and continue on RequestServerException
                         LOG.warn("Error commiting transaction", e);
@@ -699,10 +697,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 ((ZipEntryInputStream)is).closeZipInputStream();
             }
         }
-        LOG.info("succeeded="+succeeded);
         context.getCounter(
             ContentPumpStats.SUCCEEDED_TO_WRITE).increment(succeeded);
-        LOG.info("failed="+failed);
         context.getCounter(
             ContentPumpStats.FAILED_TO_WRITE).increment(failed);
     }
