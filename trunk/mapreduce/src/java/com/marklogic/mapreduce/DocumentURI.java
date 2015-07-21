@@ -19,9 +19,9 @@ package com.marklogic.mapreduce;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
@@ -38,12 +38,16 @@ import com.marklogic.mapreduce.utilities.LegacyAssignmentPolicy;
 public class DocumentURI implements WritableComparable<DocumentURI> {
 
     
-    private String uri;
+    protected String uri;
 
     public DocumentURI() {}
     
     public DocumentURI(String uri) {
         this.uri = uri;
+    }
+    
+    public DocumentURI(DocumentURI uri) {
+        this.uri = uri.uri;
     }
 
     @Override
@@ -108,14 +112,16 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
                 throw new IllegalStateException("Invalid URI Format: " + uri);
             }
         }
-    } 
+    }
     
     public static void main(String[] args) throws URISyntaxException {
+        HashMap<String, DocumentURI> map = new HashMap<String, DocumentURI>();
         for (String arg : args) {
             URI uri = new URI(null, null, null, 0, arg, null, null);
             System.out.println("URI encoded: " + uri.toString());
             URI outuri = new URI(uri.toString());
             System.out.println("URI decoded: " + outuri.getPath());
-        }      
+            map.put(arg, new DocumentURI(arg));
+        }  
     }
 }

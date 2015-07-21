@@ -367,7 +367,7 @@ public class InternalUtilities implements MarkLogicConstants {
     }
     
     /**
-     * if outputDir is available and valid, modify DocumentURI, and return uri
+     * If outputDir is available and valid, modify DocumentURI, and return uri
      * in string
      * 
      * @param key
