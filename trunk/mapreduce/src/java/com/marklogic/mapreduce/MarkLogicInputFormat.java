@@ -100,7 +100,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     
     private void appendQuery(StringBuilder buf) {
         if (docSelector != null) {
+            buf.append("'");
             buf.append(DEFAULT_CTS_QUERY); 
+            buf.append("'");
             return;
         }
         String ctsQuery = jobConf.get(QUERY_FILTER);
