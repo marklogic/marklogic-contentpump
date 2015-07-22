@@ -1736,10 +1736,9 @@ public enum Command implements ConfigConstants {
         int filters = cmdline.hasOption(COLLECTION_FILTER) ? 1 : 0;
         filters += cmdline.hasOption(DIRECTORY_FILTER) ? 1 : 0;
         filters += cmdline.hasOption(DOCUMENT_SELECTOR) ? 1 : 0;
-        filters += cmdline.hasOption(QUERY_FILTER) ? 1 : 0;
         if (filters > 1) {
             LOG.error("Only one of " + COLLECTION_FILTER + ", " +
-                    DIRECTORY_FILTER + ", " + QUERY_FILTER + " and " +
+                    DIRECTORY_FILTER + " and " +
                     DOCUMENT_SELECTOR +
                     " can be specified.");
             throw new IllegalArgumentException(
