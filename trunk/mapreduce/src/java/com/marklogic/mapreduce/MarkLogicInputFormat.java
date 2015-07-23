@@ -99,33 +99,31 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     }
     
     private void appendQuery(StringBuilder buf) {
-        if (docSelector != null) {
-            buf.append("'");
-            buf.append(DEFAULT_CTS_QUERY); 
-            buf.append("'");
-            return;
-        }
         String ctsQuery = jobConf.get(QUERY_FILTER);
         if (ctsQuery != null) {
             buf.append("\"cts:query(xdmp:unquote('");
             buf.append(ctsQuery.replaceAll("\"", "&#34;"));
             buf.append("')/*)\"");
-            return;
-        } 
-        Class<? extends LexiconFunction> lexiconClass = 
-                jobConf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
-                        LexiconFunction.class);
-        if (lexiconClass != null) {
-            LexiconFunction function = 
-                    ReflectionUtils.newInstance(lexiconClass, jobConf);
+        } else if (docSelector != null) {
             buf.append("'");
-            buf.append(function.getLexiconQuery());
+            buf.append(DEFAULT_CTS_QUERY); 
             buf.append("'");
-            return;
-        } 
-        buf.append("'");
-        buf.append(DEFAULT_CTS_QUERY);
-        buf.append("'");
+        } else {
+            Class<? extends LexiconFunction> lexiconClass = 
+                    jobConf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
+                            LexiconFunction.class);
+            if (lexiconClass != null) {
+                LexiconFunction function = 
+                        ReflectionUtils.newInstance(lexiconClass, jobConf);
+                buf.append("'");
+                buf.append(function.getLexiconQuery());
+                buf.append("'");
+            } else {
+                buf.append("'");
+                buf.append(DEFAULT_CTS_QUERY);
+                buf.append("'");
+            }
+        }
     }
 
     /**
