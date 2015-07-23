@@ -112,19 +112,9 @@ implements MarkLogicConstants {
         }
     }
     
-    private void buildDocExprQuery(String docExpr, Collection<String> nsCol, 
+    protected void buildDocExprQuery(String docExpr, Collection<String> nsCol, 
             StringBuilder buf) {
         String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
-        String indent = conf.get(INDENTED, "FALSE");
-        Indentation ind = Indentation.valueOf(indent);
-        buf.append(
-                "declare namespace mlmr=\"http://marklogic.com/hadoop\";\n");
-        buf.append(
-                "declare variable $mlmr:splitstart as xs:integer external;\n");
-        buf.append(
-                "declare variable $mlmr:splitend as xs:integer external;\n");
-       
-        buf.append(ind.getStatement());
         buf.append("xdmp:with-namespaces(("); 
         if (nsCol != null) {
             appendNamespace(nsCol, buf);
@@ -136,22 +126,20 @@ implements MarkLogicConstants {
         buf.append("))");
     }
     
-    private void buildSearchQuery(String ctsQuery, Collection<String> nsCol,
-            StringBuilder buf) {
-        String indent = conf.get(INDENTED, "FALSE");
-        Indentation ind = Indentation.valueOf(indent);
-        buf.append(
-                "declare namespace mlmr=\"http://marklogic.com/hadoop\";\n");
-        buf.append(
-                "declare variable $mlmr:splitstart as xs:integer external;\n");
-        buf.append(
-                "declare variable $mlmr:splitend as xs:integer external;\n");
-       
-        buf.append(ind.getStatement());
-        buf.append(
-            "fn:unordered(cts:search(fn:collection(),cts:query(xdmp:unquote('");
+    protected void buildSearchQuery(String docExpr, String ctsQuery, 
+            Collection<String> nsCol, StringBuilder buf) {
+        if (docExpr == null) {
+            docExpr = "fn:collection()";
+        }
+        buf.append("xdmp:with-namespaces(("); 
+        if (nsCol != null) {
+            appendNamespace(nsCol, buf);
+        }
+        buf.append("),fn:unordered(cts:search(");
+        buf.append(docExpr);
+        buf.append(",cts:query(xdmp:unquote('");
         buf.append(ctsQuery);
-        buf.append("')/*),(\"unfiltered\",\"score-zero\")))");
+        buf.append("')/*),(\"unfiltered\",\"score-zero\"))))");
         buf.append("[$mlmr:splitstart to $mlmr:splitend]");
     }
 
@@ -188,26 +176,37 @@ implements MarkLogicConstants {
         if (!advancedMode) { 
             StringBuilder buf = new StringBuilder();      
             buf.append("xquery version \"1.0-ml\"; \n");
+            String indent = conf.get(INDENTED, "FALSE");
+            Indentation ind = Indentation.valueOf(indent);
+            buf.append(
+                    "declare namespace mlmr=\"http://marklogic.com/hadoop\";\n");
+            buf.append(
+                    "declare variable $mlmr:splitstart as xs:integer external;\n");
+            buf.append(
+                    "declare variable $mlmr:splitend as xs:integer external;\n");
+           
+            buf.append(ind.getStatement());
             String docExpr = conf.get(DOCUMENT_SELECTOR);
-            Collection<String> nsCol = 
-                    conf.getStringCollection(PATH_NAMESPACE);
-            if (docExpr == null) {
-                String ctsQuery = conf.get(QUERY_FILTER);
-                if (ctsQuery != null) {
-                    buildSearchQuery(ctsQuery, nsCol, buf);
-                    queryText = buf.toString();
-                } else {
-                    LexiconFunction function = null;
-                    Class<? extends LexiconFunction> lexiconClass = 
+            String ctsQuery = conf.get(QUERY_FILTER);
+            Collection<String> nsCol = docExpr != null ? 
+                    conf.getStringCollection(PATH_NAMESPACE) : null;
+            if (ctsQuery != null) {
+                buildSearchQuery(docExpr, ctsQuery, nsCol, buf);
+                queryText = buf.toString();
+            } else if (docExpr != null) {   
+                buildDocExprQuery(docExpr, nsCol, buf);
+                queryText = buf.toString();
+            } else {
+                LexiconFunction function = null;
+                Class<? extends LexiconFunction> lexiconClass = 
                         conf.getClass(INPUT_LEXICON_FUNCTION_CLASS, null,
                                 LexiconFunction.class);
-                    if (lexiconClass != null) {
-                        function = ReflectionUtils.newInstance(lexiconClass, 
-                                conf);
-                        queryText = function.getInputQuery(nsCol, start, 
-                                mlSplit.isLastSplit() ? 
-                                        Long.MAX_VALUE : (long)length);
-                    }
+                if (lexiconClass != null) {
+                    function = ReflectionUtils.newInstance(lexiconClass, 
+                            conf);
+                    queryText = function.getInputQuery(nsCol, start, 
+                            mlSplit.isLastSplit() ? 
+                                    Long.MAX_VALUE : (long)length);
                 }
             } 
             if (queryText == null) {
