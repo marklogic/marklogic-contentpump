@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
@@ -118,18 +119,15 @@ public class DatabaseContentReader extends
             + mlSplit.getLength() - 1;
 
         String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR);
+        Collection<String> nsCol = src != null ? 
+                conf.getStringCollection(PATH_NAMESPACE) : null;
         String ctsQuery = null;
-        if (src == null) {
-            String docExpr = "fn:collection()";
-            ctsQuery = conf.get(QUERY_FILTER);
-            if (ctsQuery != null) {
-                StringBuilder buf = new StringBuilder();
-                buildSearchQuery(buf, ctsQuery, docExpr);
-                src = buf.toString();
-            } else {
-                src = docExpr;
-            }
-        }      
+        ctsQuery = conf.get(QUERY_FILTER);
+        if (ctsQuery != null) {
+            StringBuilder buf = new StringBuilder();
+            buildSearchQuery(src, ctsQuery, nsCol, buf);
+            src = buf.toString();
+        }    
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
         buf.append("import module namespace hadoop = ");
@@ -145,7 +143,6 @@ public class DatabaseContentReader extends
                 "declare variable $mlmr:splitend as xs:integer external;\n");
         buf.append("let $cols := ");
         buf.append(src);
-        buf.append("[$mlmr:splitstart to $mlmr:splitend]");
         buf.append("\nfor $doc in $cols");
         buf.append("\nlet $uri := fn:base-uri($doc)\n return (");
 
@@ -184,32 +181,27 @@ public class DatabaseContentReader extends
         
         //doc
         buf.append(src);
-        buf.append("[$mlmr:splitstart to $mlmr:splitend]");
         
         // naked properties       
         if (copyProperties) {
             buf.append(", if ($mlmr:splitstart eq 1) then ");
             buf.append("\nlet $props := cts:search(");
-            if (ctsQuery == null) {
-                String cFilter = null, dFilter = null;
-                cFilter = conf.get(MarkLogicConstants.COLLECTION_FILTER);
-                if (cFilter != null) {
-                    buf.append("xdmp:collection-properties(");
-                    buf.append(cFilter);
-                    buf.append(")");
-                } else {
-                    dFilter = conf.get(MarkLogicConstants.DIRECTORY_FILTER);
-                    if (dFilter != null) {
-                        buf.append("xdmp:directory-properties(");
-                        buf.append(dFilter);
-                        buf.append(", \"infinity\")");
-                    } else {
-                        buf.append("xdmp:collection-properties()");
-                    }
-                }                
+            String cFilter = null, dFilter = null;
+            cFilter = conf.get(MarkLogicConstants.COLLECTION_FILTER);
+            if (cFilter != null) {
+                buf.append("xdmp:collection-properties(");
+                buf.append(cFilter);
+                buf.append(")");
             } else {
-                buf.append("xdmp:collection-properties()");
-            }
+                dFilter = conf.get(MarkLogicConstants.DIRECTORY_FILTER);
+                if (dFilter != null) {
+                    buf.append("xdmp:directory-properties(");
+                    buf.append(dFilter);
+                    buf.append(", \"infinity\")");
+                } else {
+                    buf.append("xdmp:collection-properties()");
+                }
+            }                
             buf.append(",");
             if (ctsQuery == null) {
                 buf.append(
@@ -287,17 +279,6 @@ public class DatabaseContentReader extends
             LOG.error(e);
             throw new IOException(e);
         }
-    }
-
-    
-    private void buildSearchQuery(StringBuilder buf, String ctsQuery,
-            String expr) {
-        buf.append("cts:search(");
-        buf.append(expr);
-        buf.append(",");
-        buf.append("cts:query(xdmp:unquote('");
-        buf.append(ctsQuery);
-        buf.append("')/*),(\"unfiltered\",\"score-zero\",cts:unordered()))");
     }
 
     private void initMetadataMap() throws IOException {
