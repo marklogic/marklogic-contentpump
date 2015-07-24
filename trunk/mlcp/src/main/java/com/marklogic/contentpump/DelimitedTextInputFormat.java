@@ -39,11 +39,9 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.contentpump.utilities.DelimitedSplit;
 import com.marklogic.contentpump.utilities.DocBuilder;
 import com.marklogic.contentpump.utilities.EncodingUtil;
-import com.marklogic.contentpump.utilities.XMLUtil;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
-import com.sun.org.apache.xml.internal.utils.XMLChar;
 
 /**
  * InputFormat for delimited text. Each line after metadata(1st line) is a

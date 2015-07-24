@@ -247,7 +247,15 @@ public enum Command implements ConfigConstants {
                         + "loading documents.  The default is \"UTF-8\".")
                 .create(CONTENT_ENCODING);
             options.addOption(encoding);
-
+            Option uriId = OptionBuilder
+                    .withArgName("uir name")
+                    .hasArg()
+                    .withDescription("Used with delimited JSON file. "
+                            + "Name of a key in the JSON document as the uri "
+                            + "of the JSON doucment in MarkLogic Server. "
+                            + "If omitted, will use generate_uri.")
+                    .create(URI_ID);
+            options.addOption(uriId);
             Option threadsPerSplit = OptionBuilder.withArgName("count")
                 .hasOptionalArg()
                 .withDescription("The number of threads per split")
@@ -435,6 +443,30 @@ public enum Command implements ConfigConstants {
                     }
                 }
             }
+            if (InputType.DELIMITED_JSON == inputType) {
+                if (cmdline.hasOption(URI_ID) && 
+                        cmdline.getOptionValue(URI_ID) == null) {
+                    throw new IllegalArgumentException("A value is required for option " + URI_ID);
+                } else if (!cmdline.hasOption(URI_ID)) {
+                    if (cmdline.hasOption(DELIMITED_GENERATE_URI) && 
+                        cmdline.getOptionValue(DELIMITED_GENERATE_URI).equalsIgnoreCase("false")) {
+                        throw new IllegalArgumentException(DELIMITED_GENERATE_URI + " must be true if "
+                                + URI_ID + " not specified");
+                    } else {
+                        conf.setBoolean(CONF_DELIMITED_JSON_GENERATE_URI, true);
+                    }
+                } else {
+                    String generateUri = cmdline.getOptionValue(DELIMITED_GENERATE_URI);
+                    if (cmdline.hasOption(DELIMITED_GENERATE_URI)
+                            && (generateUri == null || 
+                                generateUri.equalsIgnoreCase("true"))) {
+                        throw new IllegalArgumentException("Only one of " + DELIMITED_GENERATE_URI
+                                + " and " + URI_ID + " can be specified");
+                    }
+                    conf.set(CONF_DELIMITED_JSON_URI_ID,
+                            cmdline.getOptionValue(URI_ID));
+                }
+            }
             if (cmdline.hasOption(DELIMITED_ROOT_NAME)) {
                 String delimRoot = cmdline.getOptionValue(DELIMITED_ROOT_NAME);
                 conf.set(CONF_DELIMITED_ROOT_NAME, delimRoot);
@@ -443,12 +475,12 @@ public enum Command implements ConfigConstants {
                 String arg = 
                     cmdline.getOptionValue(DELIMITED_GENERATE_URI);
                 if (arg == null || arg.equalsIgnoreCase("true")) {
-                    conf.setBoolean(CONF_DELIMITED_GENERATE_URI, true);
-                    if (getInputType(cmdline) != InputType.DELIMITED_TEXT) {
+                    if (InputType.DELIMITED_TEXT == inputType) {
+                        conf.setBoolean(CONF_DELIMITED_GENERATE_URI, true);
+                    } else if (InputType.DELIMITED_JSON != inputType) {
                         throw new IllegalArgumentException(
                                 DELIMITED_GENERATE_URI + 
-                                " is only applicable to " +
-                                InputType.DELIMITED_TEXT.name());
+                                " is not applicable to " + inputType.name());
                     }
                 } else if (!arg.equalsIgnoreCase("false")) {
                     throw new IllegalArgumentException(
