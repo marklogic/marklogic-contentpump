@@ -80,7 +80,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     /**
      * Content lists for each forest.
      */
-    private Content[][] forestContents;
+    protected Content[][] forestContents;
     
     /**
      * An array of forest ids
@@ -90,17 +90,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     /** 
      * Counts of documents per forest.
      */
-    private int[] counts;
+    protected int[] counts;
     
     /**
      * URIs of the documents in a batch.
      */
-    private HashMap<Content, DocumentURI>[] pendingUris;
+    protected HashMap<Content, DocumentURI>[] pendingUris;
     
     /**
      * URIs of the documents to be committed.
      */
-    private List<DocumentURI>[] commitUris;
+    protected List<DocumentURI>[] commitUris;
     
     /**
      * Whether in fast load mode.
@@ -290,7 +290,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
     }
 
-    Content createContent(DocumentURI key, VALUEOUT value) 
+    protected Content createContent(DocumentURI key, VALUEOUT value) 
             throws IOException {
         String uri = key.getUri();
         Content content = null;
@@ -413,7 +413,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * @param batch batch of content to insert
      * @param fId forest Id
      */
-    void insertBatch(Content[] batch, int id) 
+    protected void insertBatch(Content[] batch, int id) 
     throws IOException {
         try {
             List<RequestException> errors = 
@@ -462,7 +462,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 sessions[id].close();
             }
             if (countBased) {
-                rollbackFrmtCount(id);
+                rollbackCount(id);
             }
             pendingUris[id].clear();
             throw new IOException(e);
@@ -478,7 +478,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         pendingUris[id].clear();
     }
     
-    void insertContent(Content content, int id) 
+    protected void insertContent(Content content, int id) 
     throws IOException {
         try {
             sessions[id].insertContent(content);
@@ -499,7 +499,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 sessions[id].close();
             }
             if (countBased) {
-                rollbackFrmtCount(id);
+                rollbackCount(id);
             }
             failed++;
             pendingUris[id].clear();
@@ -507,7 +507,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
     }
     
-    synchronized void commit(int id) throws IOException {
+    protected void commit(int id) throws IOException {
         try {
             sessions[id].commit();
             succeeded += commitUris[id].size();
@@ -519,13 +519,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     LOG.info("Failed document: " + failedUri);
                 }
             }
-            commitUris[id].clear();
         } catch (RequestException e) {
             if (sessions[id] != null) {
                 sessions[id].close();
             }
             if (countBased) {
-                rollbackFrmtCount(id);
+                rollbackCount(id);
             }
             failed += commitUris[id].size();
             commitUris[id].clear();
@@ -564,14 +563,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         pendingUris[sid].put(content, new DocumentURI(key));
         if (batchSize > 1) {
             forestContents[fId][counts[fId]++] = content;
-
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
                     sessions[sid] = getSession(forestId);
                 }  
                 insertBatch(forestContents[fId], sid); 
                 stmtCounts[sid]++;
-
+                
                 //reset forest index for statistical
                 if (countBased) {
                     sfId = -1;
@@ -589,19 +587,16 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 sfId = -1;
             }
         }
-        if (needCommit) {
-            if (stmtCounts[sid] == txnSize) {
-                commit(sid);  
-                stmtCounts[sid] = 0;         
-                commitUris[sid].clear();
-            }
+        if (needCommit && stmtCounts[sid] == txnSize) {
+            commit(sid);  
+            stmtCounts[sid] = 0;         
+            commitUris[sid].clear();
         }
     }
 
-    protected void rollbackFrmtCount(int fId) {
-        StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
-            .getPolicy();
-        sap.updateStats(fId, -batchSize);
+    protected void rollbackCount(int fId) {
+        ((StatisticalAssignmentPolicy)am.getPolicy()).updateStats(fId, 
+                -batchSize);
     }
     
     protected Session getSession(String forestId, TransactionMode mode) {
@@ -678,7 +673,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                             sessions[i].close();
                         }
                         if (countBased) {
-                            rollbackFrmtCount(i);
+                            rollbackCount(i);
                         }
                         failed += commitUris[i].size();
                         commitUris[i].clear();
