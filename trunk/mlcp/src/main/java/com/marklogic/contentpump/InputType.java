@@ -304,6 +304,39 @@ public enum InputType implements ConfigConstants {
         public void applyConfigOptions(Configuration conf,
             CommandLine cmdline) throws IOException {
         }
+    },
+    DELIMITED_JSON {
+        @Override
+        public Class<? extends FileInputFormat> getInputFormatClass(
+                CommandLine cmdline, Configuration conf) {
+            if (Command.isInputCompressed(cmdline)) {
+                return CompressedDelimitedJSONInputFormat.class;
+            } else {
+                return DelimitedJSONInputFormat.class;
+            }
+            
+        }
+
+        @Override
+        public Class<? extends OutputFormat> getOutputFormatClass(
+                CommandLine cmdline, Configuration conf) {
+            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+                return TransformOutputFormat.class;
+            } else {
+                return ContentOutputFormat.class;
+            }
+        }
+
+        @Override
+        public ContentType getContentType(CommandLine cmdline) {
+            return ContentType.JSON;
+        }
+
+        @Override
+        public void applyConfigOptions(Configuration conf, CommandLine cmdline)
+                throws IOException {
+        }
+        
     };
 
     public static InputType forName(String type) {
@@ -321,6 +354,8 @@ public enum InputType implements ConfigConstants {
             return RDF;
         } else if (type.equalsIgnoreCase(FOREST.name())) {
             return FOREST;
+        } else if (type.equalsIgnoreCase(DELIMITED_JSON.name())) {
+            return DELIMITED_JSON;
         } else {
             throw new IllegalArgumentException("Unknown input type: " + type);
         }

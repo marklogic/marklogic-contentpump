@@ -127,6 +127,8 @@ public interface ConfigConstants {
     static final String RDF_TRIPLES_PER_DOCUMENT  = "rdf_triples_per_document";
     static final String DEFAULT_ENCODING = "UTF-8";
 
+    static final String URI_ID = "uri_id";
+    
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
         "mapreduce.marklogic.input.compressioncodec";
@@ -209,4 +211,8 @@ public interface ConfigConstants {
         "mapreduce.job.working.dir";
     static final String CONF_MAPREDUCE_JOBTRACKER_ADDRESS = 
         "mapreduce.jobtracker.address";
+    static final String CONF_DELIMITED_JSON_URI_ID = 
+        "mapreduce.marklogic.delimitedjson.uriid";
+    static final String CONF_DELIMITED_JSON_GENERATE_URI = 
+            "mapreduce.marklogic.delimitedjson.generateuri";
 }
