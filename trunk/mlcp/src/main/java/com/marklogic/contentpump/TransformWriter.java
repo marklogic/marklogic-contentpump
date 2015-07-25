@@ -71,8 +71,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         InterruptedException {
         int fId = 0;
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String forestId = ContentOutputFormat.ID_PREFIX;
-        
+        String forestId = ContentOutputFormat.ID_PREFIX;  
         if (fastLoad) {
             if(!countBased) {
                 // placement for legacy or bucket
@@ -92,8 +91,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
         if(queries[sid] == null) {
             queries[sid] = getAdhocQuery(sid);
-        }
-        
+        }  
         TransformHelper.getTransformInsertQry(conf,
             queries[sid], moduleUri, functionNs, functionName, functionParam,
             uri, value, contentType, options);
@@ -102,12 +100,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             stmtCounts[sid]++;
             if (countBased) {
                 sfId = -1;
-            }
-            if (stmtCounts[sid] == txnSize && 
-                sessions[sid].getTransactionMode() == TransactionMode.UPDATE) {
-                sessions[sid].commit();
-                stmtCounts[sid] = 0;
-            }
+            }  
         } catch (RequestServerException e) {
             // log error and continue on RequestServerException
             if (e instanceof XQueryException) {
@@ -115,14 +108,26 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             } else {
                 LOG.warn(e.getMessage());
             }
+            LOG.info("Failed document: " + key);
+            failed++;
         } catch (RequestException e) {
             if (sessions[sid] != null) {
                 sessions[sid].close();
             }
             if (countBased) {
-                rollbackFrmtCount(sid);
+                rollbackCount(sid);
             }
             throw new IOException(e);
+        }
+        if (needCommit) {
+            commitUris[sid].add(key);
+        } else {
+            succeeded++;
+        }
+        if (stmtCounts[sid] == txnSize && needCommit) {
+            commit(sid);
+            commitUris[sid].clear();
+            stmtCounts[sid] = 0;
         }
     }
 
