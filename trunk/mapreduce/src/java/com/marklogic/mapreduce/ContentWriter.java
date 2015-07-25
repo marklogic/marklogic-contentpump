@@ -51,6 +51,7 @@ import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.ContentInsertException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
+import com.marklogic.xcc.exceptions.XQueryException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -420,7 +421,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     sessions[id].insertContentCollectErrors(batch);
             if (errors != null) {
                 for (RequestException ex : errors) {
-                    LOG.warn("Error inserting content", ex);
+                    Throwable cause = ex.getCause();
+                    if (cause != null) {
+                        if (cause instanceof XQueryException) {
+                            LOG.warn(
+                                ((XQueryException)cause).getFormatString());
+                        } else {
+                            LOG.warn(cause.getMessage());
+                        }
+                    }
                     if (ex instanceof ContentInsertException) {
                         Content content = ((ContentInsertException)ex)
                                 .getContent();
@@ -448,7 +457,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         } catch (RequestServerException e) {
             // log error and continue on RequestServerException
-            LOG.warn("Error inserting content", e);
+            if (e instanceof XQueryException) {
+                LOG.warn(((XQueryException)e).getFormatString());
+            } else {
+                LOG.warn(e.getMessage());
+            }
             failed += batch.length;   
             // remove the failed content from pendingUris
             for (Content fc : batch) {
@@ -487,7 +500,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 pendingUris[id].clear();
             }
         } catch (RequestServerException e) {
-            LOG.warn("Error inserting content", e);
+            if (e instanceof XQueryException) {
+                LOG.warn(((XQueryException)e).getFormatString());
+            } else {
+                LOG.warn(e.getMessage());
+            }
             failed++;   
             // remove the failed content from pendingUris
             DocumentURI failedUri = pendingUris[id].remove(content.getUri());
