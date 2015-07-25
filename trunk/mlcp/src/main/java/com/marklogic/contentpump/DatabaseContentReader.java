@@ -119,15 +119,19 @@ public class DatabaseContentReader extends
             + mlSplit.getLength() - 1;
 
         String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR);
-        Collection<String> nsCol = src != null ? 
-                conf.getStringCollection(PATH_NAMESPACE) : null;
+        Collection<String> nsCol = null;
+        if (src != null) {
+            nsCol = conf.getStringCollection(PATH_NAMESPACE);
+        } else {
+            src = "fn:collection()";
+        }
         String ctsQuery = null;
         ctsQuery = conf.get(QUERY_FILTER);
         if (ctsQuery != null) {
             StringBuilder buf = new StringBuilder();
             buildSearchQuery(src, ctsQuery, nsCol, buf);
             src = buf.toString();
-        }    
+        } 
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
         buf.append("import module namespace hadoop = ");

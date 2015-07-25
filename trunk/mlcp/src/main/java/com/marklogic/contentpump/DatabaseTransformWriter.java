@@ -26,6 +26,7 @@ import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.AdhocQuery;
+import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
@@ -81,60 +82,66 @@ public class DatabaseTransformWriter<VALUE> extends
         }
         int sid = fId;
 
-        try {
-            DocumentMetadata meta = null;
-            DatabaseDocumentWithMeta doc = (DatabaseDocumentWithMeta) value;
-            meta = doc.getMeta();
-            newContentCreateOptions(meta);
-            if (sessions[sid] == null) {
-                sessions[sid] = getSession(forestId);
-            }
-            if(queries[sid] == null) {
-                queries[sid] = getAdhocQuery(sid);
-            }
-            if (!meta.isNakedProps()) {
-                options.setFormat(doc.getContentType().getDocumentFormat());
-                AdhocQuery qry = TransformHelper
-                    .getTransformInsertQryMLDocWithMeta(conf, queries[sid],
-                        moduleUri, functionNs, functionName, functionParam,
-                        uri, doc, options);
+        DocumentMetadata meta = null;
+        DatabaseDocumentWithMeta doc = (DatabaseDocumentWithMeta) value;
+        meta = doc.getMeta();
+        ContentCreateOptions opt = newContentCreateOptions(meta);
+        if (sessions[sid] == null) {
+            sessions[sid] = getSession(forestId);
+        }
+        if(queries[sid] == null) {
+            queries[sid] = getAdhocQuery(sid);
+        }
+        if (!meta.isNakedProps()) {
+            opt.setFormat(doc.getContentType().getDocumentFormat());
+            AdhocQuery qry = 
+                    TransformHelper.getTransformInsertQryMLDocWithMeta(conf, 
+                            queries[sid], moduleUri, functionNs, functionName, 
+                            functionParam, uri, doc, opt);
+            try {
                 sessions[sid].submitRequest(qry);
                 stmtCounts[sid]++;
                 //reset forest index for statistical
                 if (countBased) {
                     sfId = -1;
                 }
+            } catch (RequestServerException e) {
+                // log error and continue on RequestServerException
+                if (e instanceof XQueryException) {
+                    LOG.warn(((XQueryException) e).getFormatString());
+                } else {
+                    LOG.warn(e.getMessage());
+                }
+                LOG.info("Failed document: " + key);
+                failed++;
+            } catch (RequestException e) {
+                if (sessions[sid] != null) {
+                    sessions[sid].close();
+                }
+                if (countBased) {
+                    rollbackCount(sid);
+                }
+                throw new IOException(e);
             }
-            
-            if (isCopyProps && meta.getProperties() != null) {
-                setDocumentProperties(uri, meta.getProperties(),
-                    isCopyPerms?meta.getPermString():null,
-                    isCopyColls?meta.getCollectionString():null,
-                    isCopyQuality?meta.getQualityString():null, 
-                    sessions[sid]);
-                stmtCounts[sid]++;
-            }
-
-            if (stmtCounts[sid] >= txnSize && 
-                sessions[sid].getTransactionMode() == TransactionMode.UPDATE) {
-                sessions[sid].commit();
-                stmtCounts[sid] = 0;
-            }
-        } catch (RequestServerException e) {
-            // log error and continue on RequestServerException
-            if (e instanceof XQueryException) {
-                LOG.warn(((XQueryException) e).getFormatString());
+            if (needCommit) {
+                commitUris[sid].add(key);
             } else {
-                LOG.warn(e.getMessage());
-            }
-        } catch (RequestException e) {
-            if (sessions[sid] != null) {
-                sessions[sid].close();
-            }
-            if (countBased) {
-                rollbackDocCount(sid);
-            }
-            throw new IOException(e);
+                succeeded++;
+            } 
+        }
+        if (isCopyProps && meta.getProperties() != null) {
+            boolean naked = meta.isNakedProps();
+            setDocumentProperties(uri, meta.getProperties(),
+                    isCopyPerms&&naked?meta.getPermString():null,
+                    isCopyColls&&naked?meta.getCollectionString():null,
+                    isCopyQuality&&naked?meta.getQualityString():null, 
+                    sessions[sid]);
+            stmtCounts[sid]++;
+        }
+        if (stmtCounts[sid] >= txnSize && needCommit) {
+            commit(sid);
+            stmtCounts[sid] = 0;
+            commitUris[sid].clear();
         }
     }
 
