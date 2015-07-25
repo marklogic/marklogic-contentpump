@@ -27,11 +27,12 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.contentpump.utilities.PermissionUtil;
 import com.marklogic.mapreduce.ContentOutputFormat;
+import com.marklogic.mapreduce.ContentPumpStats;
 import com.marklogic.mapreduce.ContentType;
+import com.marklogic.mapreduce.ContentWriter;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
-import com.marklogic.mapreduce.MarkLogicRecordWriter;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
@@ -60,66 +61,11 @@ import com.marklogic.xcc.exceptions.XQueryException;
  * 
  */
 public class DatabaseContentWriter<VALUE> extends
-    MarkLogicRecordWriter<DocumentURI, VALUE> implements MarkLogicConstants {
+    ContentWriter<VALUE> implements MarkLogicConstants {
     public static final Log LOG = LogFactory
         .getLog(DatabaseContentWriter.class);
 
-    /**
-     * Directory of the output documents.
-     */
-    protected String outputDir;
-
-    /**
-     * Content options of the output documents.
-     */
-    protected ContentCreateOptions options;
-
-    /**
-     * A map from a forest id to a ContentSource.
-     */
-    protected Map<String, ContentSource> forestSourceMap;
-
-    /**
-     * Content lists for each forest.
-     */
-    private Content[][] forestContents;
-
     private URIMetadata[][] metadatas;
-    /**
-     * An array of forest ids
-     */
-    protected String[] forestIds;
-
-    /**
-     * Counts of documents per forest.
-     */
-    private int[] counts;
-
-    /**
-     * Whether in fast load mode.
-     */
-    protected boolean fastLoad;
-
-    /**
-     * Batch size.
-     */
-    private int batchSize;
-
-    /**
-     * Counts of requests per forest.
-     */
-    protected int[] stmtCounts;
-
-    /**
-     * Sessions per forest.
-     */
-    protected Session[] sessions;
-    private boolean tolerateErrors;
-    
-    protected AssignmentManager am;
-    protected int sfId;
-    //default boolean is false
-    protected boolean countBased;
     
     protected boolean isCopyProps;
     protected boolean isCopyColls;
@@ -135,39 +81,12 @@ public class DatabaseContentWriter<VALUE> extends
     public DatabaseContentWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad,
         AssignmentManager am) {
-        super(conf, null);
+        super(conf, forestSourceMap, fastLoad, am);
 
-        this.fastLoad = fastLoad;
-
-        this.forestSourceMap = forestSourceMap;
-        this.am = am;
-        
-        // arraySize is the number of forests in fast load mode; 1 otherwise.
-        int arraySize = forestSourceMap.size();
-        forestIds = new String[arraySize];
-        forestIds = forestSourceMap.keySet().toArray(forestIds);
-        sessions = new Session[arraySize];
-        stmtCounts = new int[arraySize];
-
-        outputDir = conf.get(OUTPUT_DIRECTORY);
-        batchSize = conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
-        if (fastLoad
-            && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
-            || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
-            countBased = true;
-            if (batchSize > 1) {           
-                forestContents = new Content[1][batchSize];
-                counts = new int[1];
-                metadatas = new URIMetadata[1][batchSize];
-            }
-            sfId = -1;
+        if (countBased) {
+            metadatas = new URIMetadata[1][batchSize];
         } else {
-            if (batchSize > 1) {           
-                forestContents = new Content[arraySize][batchSize];
-                counts = new int[arraySize];
-                metadatas = new URIMetadata[arraySize][batchSize];
-            }
-            sfId = 0;
+            metadatas = new URIMetadata[forestIds.length][batchSize];
         }
         isCopyProps = conf.getBoolean(
             ConfigConstants.CONF_COPY_PROPERTIES, true);
@@ -179,36 +98,45 @@ public class DatabaseContentWriter<VALUE> extends
             ConfigConstants.CONF_COPY_QUALITY, true);
     }
 
-
-
     /**
      * fetch the options information from conf and metadata, set to the field
      * "options"
      */
-    protected void newContentCreateOptions(DocumentMetadata meta) {
-        options = new ContentCreateOptions();
-        updateCopyOptions(options, meta);
-        options.setLanguage(conf.get(OUTPUT_CONTENT_LANGUAGE));
-        options.setEncoding(conf.get(OUTPUT_CONTENT_ENCODING,
-            DEFAULT_OUTPUT_CONTENT_ENCODING));
-        String repairLevel = conf.get(OUTPUT_XML_REPAIR_LEVEL,
-            DEFAULT_OUTPUT_XML_REPAIR_LEVEL).toLowerCase();
-        if (DocumentRepairLevel.DEFAULT.toString().equals(repairLevel)) {
-            options.setRepairLevel(DocumentRepairLevel.DEFAULT);
-        } else if (DocumentRepairLevel.NONE.toString().equals(repairLevel)) {
-            options.setRepairLevel(DocumentRepairLevel.NONE);
-        } else if (DocumentRepairLevel.FULL.toString().equals(repairLevel)) {
-            options.setRepairLevel(DocumentRepairLevel.FULL);
-        }
+    protected ContentCreateOptions newContentCreateOptions(
+            DocumentMetadata meta) {
+        ContentCreateOptions opt = (ContentCreateOptions)options.clone();
+        if (meta != null) {
+            if (opt.getQuality() == 0) {
+                opt.setQuality(meta.quality);
+            }
+            HashSet<String> colSet = new HashSet<String>(meta.collectionsList);
+            if (opt.getCollections() != null) {
+                // union copy_collection and output_collection
+                for (String s : opt.getCollections()) {
+                    colSet.add(s);
+                }
+            }
+            opt.setCollections(colSet.toArray(new String[colSet.size()]));
+            HashSet<ContentPermission> pSet = new HashSet<ContentPermission>(
+                    meta.permissionsList);
+            if (opt.getPermissions() != null) {
+                // union of output_permission & copy_permission
+                for (ContentPermission p : opt.getPermissions()) {
+                    pSet.add(p);
+                }
+            }
+            opt.setPermissions(
+                    pSet.toArray(new ContentPermission[pSet.size()]));
+        }       
+        return opt;
     }
 
     @Override
     public void write(DocumentURI key, VALUE value) throws IOException,
-        InterruptedException {
-        int fId = 0;
+        InterruptedException {       
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
         String forestId = ContentOutputFormat.ID_PREFIX;
-
+        int fId = 0;
         if (fastLoad) {
             if(!countBased) {
                 // placement for legacy or bucket
@@ -224,133 +152,99 @@ public class DatabaseContentWriter<VALUE> extends
         }
         int sid = fId;
         
-        try {
-            Content content = null;
-            DocumentMetadata meta = null;
-            if (value instanceof DatabaseDocumentWithMeta) {
-                meta = ((DatabaseDocumentWithMeta) value).getMeta();
-                newContentCreateOptions(meta);
-                MarkLogicDocument doc = (MarkLogicDocument) value;
-                options.setFormat(doc.getContentType().getDocumentFormat());
-                if (!meta.isNakedProps()) {
-                    if (doc.getContentType() == ContentType.BINARY) {
-                        content = ContentFactory.newContent(uri,
-                            doc.getContentAsByteArray(), options);
-                    } else {
-                        content = ContentFactory.newContent(uri, doc
-                            .getContentAsText().toString(), options);
-                    }
-                }
-            } else {
-                throw new IOException("unexpected type " + value.getClass());
-            }
-
-            
-            if(countBased) {
-                fId = 0;
-            }
-            if (batchSize > 1) {
-                if (!meta.isNakedProps()) {
-                    // add new content
-                    forestContents[fId][counts[fId]] = content;
-                    metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
+        Content content = null;
+        DocumentMetadata meta = null;
+        if (value instanceof DatabaseDocumentWithMeta) {
+            meta = ((DatabaseDocumentWithMeta) value).getMeta();
+            ContentCreateOptions opt = newContentCreateOptions(meta);
+            MarkLogicDocument doc = (MarkLogicDocument)value;
+            opt.setFormat(doc.getContentType().getDocumentFormat());
+            if (!meta.isNakedProps()) {
+                if (doc.getContentType() == ContentType.BINARY) {
+                    content = ContentFactory.newContent(uri,
+                            doc.getContentAsByteArray(), opt);
                 } else {
-                    // naked properties
-                    if (isCopyProps) {
-                        if (sessions[sid] == null) {
-                            sessions[sid] = getSession(forestId);
-                        }
-                        setDocumentProperties(uri, meta.getProperties(),
+                    content = ContentFactory.newContent(uri, 
+                            doc.getContentAsText().toString(), opt);
+                }
+            }
+        } else {
+            throw new UnsupportedOperationException(value.getClass()
+                    + " is not supported.");
+        }      
+        if(countBased) {
+            fId = 0;
+        }
+        pendingUris[sid].put(content, new DocumentURI(key));
+        if (batchSize > 1) {
+            if (!meta.isNakedProps()) {
+                // add new content
+                forestContents[fId][counts[fId]] = content;
+                metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
+            } else {
+                // naked properties
+                if (isCopyProps) {
+                    if (sessions[sid] == null) {
+                        sessions[sid] = getSession(forestId);
+                    }
+                    setDocumentProperties(uri, meta.getProperties(),
                             isCopyPerms?meta.getPermString():null,
                             isCopyColls?meta.getCollectionString():null,
                             isCopyQuality?meta.getQualityString():null, 
                             sessions[sid]);
-                        stmtCounts[sid]++;
-                    }
-                }
-                if (counts[fId] == batchSize) {
-                    if (sessions[sid] == null) {
-                        sessions[sid] = getSession(forestId);
-                    }
-                    
-                    List<RequestException> errors = 
-                        sessions[sid].insertContentCollectErrors(
-                                forestContents[fId]);
-                    if (errors != null) {
-                        for (RequestException ex : errors) {
-                            if (ex instanceof XQueryException) {
-                                LOG.warn(((XQueryException) ex).getFormatString());
-                            } else {
-                                LOG.warn(ex.getMessage());
-                            }
-                        }                       
-                    }
-                    
                     stmtCounts[sid]++;
-                    if (isCopyProps) {
-                        // insert properties
-                        for (int i = 0; i < counts[fId]; i++) {
-                            DocumentMetadata m = metadatas[fId][i].getMeta();
-                            String u = metadatas[fId][i].getUri();
-                            if (m != null && m.getProperties() != null) {
-                                setDocumentProperties(u, m.getProperties(),
-                                    null,null,null,sessions[sid]);
-                                stmtCounts[sid]++;
-                            }
-                        }
-                    }
-                    
-                    //reset forest index for statistical
-                    if (countBased) {
-                        sfId = -1;
-                    }
-                    counts[fId] = 0;
                 }
-
-            } else {
+            }
+            if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
                     sessions[sid] = getSession(forestId);
-                }
-                if (content != null) {
-                    sessions[sid].insertContent(content);
-                    stmtCounts[sid]++;
+                }    
+                insertBatch(forestContents[fId], sid);     
+                stmtCounts[sid]++;
+                if (isCopyProps) {
+                    // insert properties
+                    for (int i = 0; i < counts[fId]; i++) {
+                        DocumentMetadata m = metadatas[fId][i].getMeta();
+                        String u = metadatas[fId][i].getUri();
+                        if (m != null && m.getProperties() != null) {
+                            setDocumentProperties(u, m.getProperties(),
+                                    null,null,null,sessions[sid]);
+                            stmtCounts[sid]++;
+                        }
+                    }
                 }
                 //reset forest index for statistical
                 if (countBased) {
                     sfId = -1;
                 }
-                
-                if (isCopyProps && meta.getProperties() != null) {
-                    boolean naked = content == null;
-                    setDocumentProperties(uri, meta.getProperties(),
+                counts[fId] = 0;
+            }
+        } else {
+            if (sessions[sid] == null) {
+                sessions[sid] = getSession(forestId);
+            }
+            if (content != null) {
+                insertContent(content, sid);
+                stmtCounts[sid]++;
+            }
+            //reset forest index for statistical
+            if (countBased) {
+                sfId = -1;
+            }     
+            if (isCopyProps && meta.getProperties() != null) {
+                boolean naked = content == null;
+                setDocumentProperties(uri, meta.getProperties(),
                         isCopyPerms&&naked?meta.getPermString():null,
                         isCopyColls&&naked?meta.getCollectionString():null,
                         isCopyQuality&&naked?meta.getQualityString():null, 
                         sessions[sid]);
-                    stmtCounts[sid]++;
-                }
+                stmtCounts[sid]++;
             }
-            if (stmtCounts[sid] >= txnSize
-                && sessions[sid].getTransactionMode() == TransactionMode.UPDATE) {
-                sessions[sid].commit();
-                stmtCounts[sid] = 0;
-            }
-        } catch (RequestServerException e) {
-            // log error and continue on RequestServerException
-            if (e instanceof XQueryException) {
-                LOG.warn(((XQueryException) e).getFormatString());
-            } else {
-                LOG.warn(e.getMessage());
-            }
-            counts[fId] = 0;
-        } catch (RequestException e) {
-            if (sessions[sid] != null) {
-                sessions[sid].close();
-            }
-            if (countBased) {
-                rollbackDocCount(sid);
-            }
-            throw new IOException(e);
+        }
+        if (stmtCounts[sid] == txnSize && needCommit) {
+            commit(sid);
+            stmtCounts[sid] = 0;
+            commitUris[sid].clear();
         }
     }
 
@@ -372,15 +266,6 @@ public class DatabaseContentWriter<VALUE> extends
         session.setTransactionMode(mode);
         return session;
     }
-    
-    private Session getSession(String forestId) {
-        TransactionMode mode = TransactionMode.AUTO;
-
-        if (txnSize > 1 || (batchSize > 1 && tolerateErrors)) {
-            mode = TransactionMode.UPDATE;
-        }
-        return getSession(forestId, mode);
-    }
 
     @Override
     public void close(TaskAttemptContext context) throws IOException,
@@ -399,66 +284,25 @@ public class DatabaseContentWriter<VALUE> extends
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0,
                         counts[i]);
-
                     if (sessions[sid] == null) {
                         String forestId = forestIds[i];
                         sessions[sid] = getSession(forestId);
                     }
-
-                    try {
-                        List<RequestException> errors = 
-                            sessions[sid].insertContentCollectErrors(remainder);
-                        if (errors != null) {
-                            for (RequestException ex : errors) {
-                                if (ex instanceof XQueryException) {
-                                    LOG.warn(((XQueryException) ex).
-                                            getFormatString());
-                                } else {
-                                    LOG.warn(ex.getMessage());
-                                }
-                            }                       
-                        }
-                        //RequestException if any is thrown before docCount is updated
-                        //so docCount doesn't need to rollback in this try-catch
-                        if (countBased) {
-                            stmtCounts[sfId]++;
-                            sfId = -1;
-                        } else {
-                            stmtCounts[i]++;
-                        }
-                        if (!isCopyProps) {
-                            continue;
-                        }
-                        for (int j = 0; j < counts[i]; j++) {
-                            DocumentMetadata m = metadatas[i][j].getMeta();
-                            String u = metadatas[i][j].getUri();
-                            if (m != null && m.getProperties() != null) {
-                                setDocumentProperties(u, m.getProperties(),
-                                    isCopyPerms?m.getPermString():null,
-                                    isCopyColls?m.getCollectionString():null,
-                                    isCopyQuality?m.getQualityString():null, 
-                                    sessions[sid]);
-                                stmtCounts[sid]++;
-                            }
-                        }
-                    } catch (RequestServerException e) {
-                        // log error and continue on RequestServerException
-                        if (e instanceof XQueryException) {
-                            LOG.warn(((XQueryException) e).getFormatString());
-                        } else {
-                            LOG.warn(e.getMessage());
-                        }
-                    } catch (RequestException e) {
-                        LOG.error(e);
-                        if (sessions[sid] != null) {
-                            sessions[sid].close();
-                        }
-                        if (countBased) {
-                            rollbackDocCount(sid);
-                        }
-                        if (e instanceof ServerConnectionException
-                            || e instanceof RequestPermissionException) {
-                            throw new IOException(e);
+                    insertBatch(remainder, sid);
+                    stmtCounts[sid]++;
+                    if (!isCopyProps) {
+                        continue;
+                    }
+                    for (int j = 0; j < counts[i]; j++) {
+                        DocumentMetadata m = metadatas[i][j].getMeta();
+                        String u = metadatas[i][j].getUri();
+                        if (m != null && m.getProperties() != null) {
+                            setDocumentProperties(u, m.getProperties(),
+                                isCopyPerms?m.getPermString():null,
+                                isCopyColls?m.getCollectionString():null,
+                                isCopyQuality?m.getQualityString():null, 
+                                sessions[sid]);
+                            stmtCounts[sid]++;
                         }
                     }
                 }
@@ -466,16 +310,20 @@ public class DatabaseContentWriter<VALUE> extends
         }
         for (int i = 0; i < sessions.length; i++) {
             if (sessions[i] != null) {
-                if (stmtCounts[i] > 0
-                    && sessions[i].getTransactionMode() == TransactionMode.UPDATE) {
+                if (stmtCounts[i] > 0 && needCommit) {
                     try {
                         sessions[i].commit();
+                        succeeded += commitUris[i].size();
                     } catch (RequestException e) {
-                        LOG.error(e);
-                        if (countBased) {
-                            rollbackDocCount(i);
+                        // log error and continue on RequestServerException
+                        LOG.warn("Error commiting transaction", e);
+                        failed += commitUris[i].size();   
+                        for (DocumentURI failedUri : commitUris[i]) {
+                            if (LOG.isInfoEnabled()) {
+                                LOG.info("Failed document: " + failedUri);
+                            }
                         }
-                        throw new IOException(e);
+                        commitUris[i].clear();
                     } finally {
                         sessions[i].close();
                     }
@@ -484,29 +332,24 @@ public class DatabaseContentWriter<VALUE> extends
                 }
             }
         }
-    }
-
-    @Override
-    public int getTransactionSize(Configuration conf) {
-        // return the specified txn size
-        if (conf.get(TXN_SIZE) != null) {
-            int txnSize = conf.getInt(TXN_SIZE, 0);
-            return txnSize <= 0 ? 1 : txnSize;
-        } 
-        return 1000 / conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
+        context.getCounter(
+                ContentPumpStats.SUCCEEDED_TO_WRITE).increment(succeeded);
+        context.getCounter(
+                ContentPumpStats.FAILED_TO_WRITE).increment(failed);
     }
 
     /**
      * 
-     * @param _uri
+     * @param uri
      *            uri of the document whose property is to be set
-     * @param _xmlString
+     * @param xmlString
      *            property in xml string
      * @param forestId
      * @throws RequestException
      */
-    protected void setDocumentProperties(String _uri, String _xmlString, String _permString, String _collString, String _quality,
-        Session s) throws RequestException {
+    protected void setDocumentProperties(String uri, String xmlString,
+        String permString, String collString, String quality,
+        Session s) {
         String query = XQUERY_VERSION_1_0_ML
             + "declare variable $URI as xs:string external;\n"
             + "declare variable $XML-STRING as xs:string external;\n"
@@ -520,68 +363,20 @@ public class DatabaseContentWriter<VALUE> extends
             + ", if('' eq ($QUALITY-STRING)) then () else xdmp:document-set-quality($URI,xs:integer($QUALITY-STRING))\n"
             ;
         AdhocQuery req = s.newAdhocQuery(query);
-        req.setNewStringVariable("URI", _uri);
-        req.setNewStringVariable("XML-STRING", _xmlString);
-        req.setNewStringVariable("PERM-STRING", _permString==null?"":_permString);
-        req.setNewStringVariable("COLL-STRING", _collString==null||_collString.isEmpty()?"":_collString);
-        req.setNewStringVariable("QUALITY-STRING", _quality==null?"":_quality);
-        s.submitRequest(req);
-    }
-    
-
-    private void updateCopyOptions(ContentCreateOptions options,
-        DocumentMetadata meta) {
-        String quality = conf.get(OUTPUT_QUALITY);
-        if (quality != null) {
-            // use output_quality
-            options.setQuality(Integer.parseInt(quality));
-        } else if (meta != null) {
-            // use the quality stored in meta
-            options.setQuality(meta.quality);
-        } // else use default, do nothing
-
-        String[] collections = conf.getStrings(OUTPUT_COLLECTION);
-        String[] perms = conf.getStrings(OUTPUT_PERMISSION);
-        List<ContentPermission> permissions = PermissionUtil.getPermissions(perms);
-        if (meta != null) {
-            HashSet<String> colSet = new HashSet<String>(meta.collectionsList);
-            HashSet<ContentPermission> pSet = new HashSet<ContentPermission>(
-                meta.permissionsList);
-            if (collections != null) {
-                // union copy_collection and output_collection
-                for (String s : collections) {
-                    colSet.add(s);
-                }
-            }
-            if (permissions != null) {
-                // union of output_permission & copy_permission
-                for (ContentPermission p : permissions) {
-                    pSet.add(p);
-                }
-            }
-            options.setCollections(colSet.toArray(new String[colSet.size()]));
-            options.setPermissions(pSet.toArray(new ContentPermission[pSet
-                .size()]));
-        } else {
-            // empty metadata
-            if (collections != null) {
-                options.setCollections(collections);
-            }
-            if (permissions != null) {
-                options.setPermissions(permissions
-                    .toArray(new ContentPermission[permissions.size()]));
-            }
+        req.setNewStringVariable("URI", uri);
+        req.setNewStringVariable("XML-STRING", xmlString);
+        req.setNewStringVariable("PERM-STRING", 
+                permString==null?"":permString);
+        req.setNewStringVariable("COLL-STRING", 
+                collString==null||collString.isEmpty()?"":collString);
+        req.setNewStringVariable("QUALITY-STRING", 
+                quality==null?"":quality);
+        try {
+            s.submitRequest(req);
+        } catch (RequestException ex) {
+            LOG.warn("Error setting document properties for " + uri, ex);
         }
-        String tempcoll = conf.get(TEMPORAL_COLLECTION);
-        if (tempcoll != null) options.setTemporalCollection(tempcoll);
     }
-
-    protected void rollbackDocCount(int fId) {
-        StatisticalAssignmentPolicy sap = (StatisticalAssignmentPolicy) am
-            .getPolicy();
-        sap.updateStats(fId, -batchSize);
-    }
-    
 }
 
 class URIMetadata {
