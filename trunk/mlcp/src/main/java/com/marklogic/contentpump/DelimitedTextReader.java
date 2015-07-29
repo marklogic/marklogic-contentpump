@@ -179,7 +179,7 @@ public class DelimitedTextReader<VALUEIN> extends
                     throw new IOException("Delimited_uri_id " + uriName
                         + " is not found.");
                 }
-                docBuilder.checkDocumentHeader(fields);
+                docBuilder.configFields(conf, fields);
                 values = parser.getLine();
 
                 if (values == null) {

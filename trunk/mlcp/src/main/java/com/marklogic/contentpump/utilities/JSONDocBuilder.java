@@ -17,20 +17,29 @@ package com.marklogic.contentpump.utilities;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.commons.logging.Log;
 import org.codehaus.jackson.JsonFactory;
 import org.codehaus.jackson.JsonGenerator;
+
+import com.marklogic.contentpump.ColumnDataType;
+import com.marklogic.contentpump.ConfigConstants;
 /**
  * Builder for json document.
  * @author mattsun
  *
  */
 public class JSONDocBuilder extends DocBuilder {
+    public static final Log LOG = LogFactory.getLog(JSONDocBuilder.class);
     protected JsonFactory jsonFactory;
     protected JsonGenerator generator;
     protected ByteArrayOutputStream baos;
+    protected Map<String,ColumnDataType> datatypeMap;
     /* 
      * @see com.marklogic.contentpump.DocBuilder#init(java.lang.String)
      */
@@ -39,7 +48,7 @@ public class JSONDocBuilder extends DocBuilder {
         jsonFactory = new JsonFactory();
         
     };
-
+    
     /* 
      * @see com.marklogic.contentpump.DocBuilder#newDoc()
      */
@@ -55,8 +64,16 @@ public class JSONDocBuilder extends DocBuilder {
      * @see com.marklogic.contentpump.DocBuilder#put(java.lang.String, java.lang.String)
      */
     @Override
-    public void put(String key, String value) throws IOException {
-        generator.writeStringField(key, value); 
+    public void put(String key, String value) throws IOException{
+        try {
+            Object valueObj = datatypeMap.get(key).parse(value);
+            generator.writeObjectField(key, valueObj);
+        } catch (ParseException e) {
+            LOG.error("Value " + value + " is not type "
+                    + datatypeMap.get(key).name());
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }       
         
     }
 
@@ -76,7 +93,32 @@ public class JSONDocBuilder extends DocBuilder {
      * @see com.marklogic.contentpump.DocBuilder#checkDocumentHeader()
      * @throws IOException
      */
+    @SuppressWarnings("unchecked")
     @Override
-    public void checkDocumentHeader(String[] fields) throws IOException {}
+    public void configFields(Configuration conf, String[] fields) throws IOException {
+        datatypeMap = new HashMap<String,ColumnDataType>();
+        for (String s: fields) {
+            datatypeMap.put(s, ColumnDataType.STRING);
+        }
+        String list = conf.get(ConfigConstants.CONF_DELIMITED_DATA_TYPE);
+        if (list == null) {
+            return;
+        }
+        String pairs[] = list.split(",");
+        for (int i = 0; i < pairs.length; i += 2) {
+            String colName = pairs[i];
+            String colDataType = pairs[i+1];
+            if (!datatypeMap.containsKey(colName)) {
+                throw new IllegalArgumentException("Column name " + colName + " not found.");
+            }
+            if ("Number".equalsIgnoreCase(colDataType)) {
+                datatypeMap.put(colName, ColumnDataType.NUMBER);
+            } else if ("Boolean".equalsIgnoreCase(colDataType)) {
+                datatypeMap.put(colName, ColumnDataType.BOOLEAN);
+            } else if (!"String".equalsIgnoreCase(colDataType)) {
+                throw new IllegalArgumentException("Unsupported column data type " + colDataType);
+            }
+        }
+    }
     
 }
