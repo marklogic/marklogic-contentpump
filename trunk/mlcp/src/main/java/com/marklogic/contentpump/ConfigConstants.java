@@ -128,6 +128,7 @@ public interface ConfigConstants {
     static final String DEFAULT_ENCODING = "UTF-8";
 
     static final String URI_ID = "uri_id";
+    static final String DATA_TYPE = "data_type";
     
     // configurations to be overwritten in hadoop conf
     static final String CONF_INPUT_COMPRESSION_CODEC = 
@@ -215,4 +216,6 @@ public interface ConfigConstants {
         "mapreduce.marklogic.delimitedjson.uriid";
     static final String CONF_DELIMITED_JSON_GENERATE_URI = 
             "mapreduce.marklogic.delimitedjson.generateuri";
+    static final String CONF_DELIMITED_DATA_TYPE = 
+            "mapreduce.marklogic.delimited.datatype";
 }

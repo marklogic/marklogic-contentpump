@@ -40,7 +40,7 @@ public abstract class DocBuilder {
      * Start to build the document.
      * @throws IOException
      */
-    public abstract void newDoc () throws IOException;
+    public abstract void newDoc() throws IOException;
     
     /**
      * Put a new key-value pair into the document.
@@ -61,25 +61,8 @@ public abstract class DocBuilder {
      * @param fields
      * @throws IOException
      */
-    public abstract void checkDocumentHeader(String[] fields) throws IOException;
-    
-    /**
-     * Check valid chars for xml doc.
-     * @param fields
-     * @throws IOException
-     */
-    public static void checkXMLDocumentHeader(String[] fields) throws IOException {
-        if (fields != null) {
-            for (int i = 0; i < fields.length; i++) {
-                if(fields[i].trim().equals("")) continue;
-                if (!XMLChar.isValidName(fields[i])) {
-                    fields[i] = XMLUtil.getValidName(fields[i]);
-                }
-            }
-        } else {
-            throw new IOException("Fields are not defined.");
-        }
-    }
+    public abstract void configFields(Configuration conf, String[] fields) throws IOException;
+
     /**
      * Return the built doc.
      * @return
