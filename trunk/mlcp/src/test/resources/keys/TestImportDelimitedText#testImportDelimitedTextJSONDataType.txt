@@ -1,0 +1,1 @@
+Bulls{"team":"Bulls", "zipcode":"60615", "score":98}Warriors{"team":"Warriors", "zipcode":"94085", "score":99}
