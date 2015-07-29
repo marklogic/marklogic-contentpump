@@ -550,7 +550,15 @@ public class FCheck {
             try {
 //                in.setLittleEndian(false);
             	in.getInputStream().mark(j);
-            	ExpandedTree tree = new CompressedTreeDecoder().decode(in);
+
+                // TODO: Is it better to read into a buffer or directly from the
+                // stream then reset and skip?
+                byte[] buf = new byte[j];
+                for (int read = 0; read < j; ) {
+                    read += in.read(buf, read, j - read);
+                }
+
+            	ExpandedTree tree = new CompressedTreeDecoder().decode(buf,j);
             	// TODO: count and verify bytes read
 //            	int computed = computeChecksum(docid, in, datWords);
                 System.out.println(tree.getDocumentURI());
