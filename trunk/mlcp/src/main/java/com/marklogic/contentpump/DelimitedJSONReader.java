@@ -150,10 +150,10 @@ public class DelimitedJSONReader<VALUEIN> extends
                     + " line " + reader.getLineNumber() + " skipped: no document ");
             setKey(null);
             return true;
-        } else if (line.startsWith(" ")) { // lines with trailing spaces considered invalid
+        } else if (line.startsWith(" ") || line.startsWith("\t")) { // lines with trailing spaces considered invalid
             LOG.error("File " + file.toUri() + 
                         " line " + reader.getLineNumber() + 
-                            " skipped: starts with spaces");
+                            " skipped: starts with space(s)");
             setKey(null);
             return true;
         } else {
