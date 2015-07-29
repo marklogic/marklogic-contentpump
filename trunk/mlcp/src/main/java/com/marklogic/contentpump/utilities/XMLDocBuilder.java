@@ -80,8 +80,17 @@ public class XMLDocBuilder extends DocBuilder {
      * @throws IOException
      */
     @Override
-    public void checkDocumentHeader(String[] fields) throws IOException {
-        DocBuilder.checkXMLDocumentHeader(fields);
+    public void configFields(Configuration conf, String[] fields) throws IOException {
+        if (fields != null) {
+            for (int i = 0; i < fields.length; i++) {
+                if(fields[i].trim().equals("")) continue;
+                if (!XMLChar.isValidName(fields[i])) {
+                    fields[i] = XMLUtil.getValidName(fields[i]);
+                }
+            }
+        } else {
+            throw new IOException("Fields are not defined.");
+        }
     }
     
 }

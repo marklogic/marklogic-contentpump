@@ -256,6 +256,15 @@ public enum Command implements ConfigConstants {
                             + "If omitted, will use generate_uri.")
                     .create(URI_ID);
             options.addOption(uriId);
+            Option dataType = OptionBuilder
+                    .withArgName("data type")
+                    .hasArg()
+                    .withDescription("Comma separated list of column name "
+                            + " and data type pairs. 1st to match column name,"
+                            + " case sensitive. 2nd the data type, case insensitive."
+                            + "Data type can be String, Number or Boolean.")
+                    .create(DATA_TYPE);
+            options.addOption(dataType);
             Option threadsPerSplit = OptionBuilder.withArgName("count")
                 .hasOptionalArg()
                 .withDescription("The number of threads per split")
@@ -364,7 +373,21 @@ public enum Command implements ConfigConstants {
             if (InputType.DELIMITED_TEXT == inputType 
                     && ContentType.XML != contentType 
                     && contentType.JSON != contentType) {
-                throw new IllegalArgumentException("The setting for " + DOCUMENT_TYPE + "is not applicable for " + inputType);
+                throw new IllegalArgumentException("The setting for " + DOCUMENT_TYPE + "is not applicable to " + inputType);
+            }
+            if (cmdline.hasOption(DATA_TYPE)) {
+                if (InputType.DELIMITED_TEXT != inputType) {
+                    throw new IllegalArgumentException(DATA_TYPE + " is only applicable to "
+                            + InputType.DELIMITED_TEXT.name());
+                }
+                String value = cmdline.getOptionValue(DATA_TYPE);
+                String[] types = value.split(",");
+                
+                if (types.length%2 != 0) {
+                    throw new IllegalArgumentException("Invalid option argument for "
+                            + DATA_TYPE + ": " + value);
+                }
+                conf.set(CONF_DELIMITED_DATA_TYPE, value);
             }
             
             conf.set(MarkLogicConstants.CONTENT_TYPE, contentType.name());

@@ -122,12 +122,6 @@ FileAndDirectoryInputFormat<DocumentURI, Text> {
                 String[] header = parser.getLine();
                 EncodingUtil.handleBOMUTF8(header, 0);
                 
-                String docType = conf.get(MarkLogicConstants.CONTENT_TYPE,
-                        MarkLogicConstants.DEFAULT_CONTENT_TYPE);
-                if (docType.equals("XML")) {
-                    DocBuilder.checkXMLDocumentHeader(header);
-                }
-                
                 hlist.clear();
                 for (String s : header) {
                     hlist.add(new Text(s));
