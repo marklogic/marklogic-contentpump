@@ -313,9 +313,7 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
             } 
             bytesRead += j;
             position++;
-            ByteArrayInputStream bis = new ByteArrayInputStream(buf);
-            BiendianDataInputStream is = new BiendianDataInputStream(bis);
-            ExpandedTree tree = new CompressedTreeDecoder().decode(is);
+            ExpandedTree tree = new CompressedTreeDecoder().decode(buf,j);
             tree.setFragmentOrdinal(ordIs.readLong());
             return tree;
         } catch (Exception e) {

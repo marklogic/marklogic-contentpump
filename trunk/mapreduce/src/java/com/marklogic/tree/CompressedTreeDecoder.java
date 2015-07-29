@@ -15,15 +15,20 @@
  */
 package com.marklogic.tree;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInput;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.zip.Inflater;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.marklogic.dom.NodeImpl;
+import com.marklogic.io.BiendianDataInputStream;
 import com.marklogic.io.Decoder;
+
+
 
 /**
  * Decoder of Compressed Tree.
@@ -100,14 +105,49 @@ public class CompressedTreeDecoder {
         }
     }
 
-    public ExpandedTree decode(DataInput in) throws IOException {
+    private int pow2ceil(int x) { 
+        int y=8;
+        while (y<x) y <<= 1;
+        return y;
+    }
+
+    public ExpandedTree decode(byte[] buf, int len) throws IOException {
         String bad;
-        Decoder decoder = new Decoder(in);
+        ByteArrayInputStream bis = new ByteArrayInputStream(buf);
+        BiendianDataInputStream is = new BiendianDataInputStream(bis);
+        Decoder decoder = new Decoder(is);
         ExpandedTree rep = new ExpandedTree();
 
         rep.uriKey = decoder.decode64bits();
         rep.uniqKey = decoder.decode64bits();
         rep.linkKey = decoder.decode64bits();
+
+        if (rep.linkKey == -1) {
+          rep.linkKey = decoder.decode64bits();
+          Inflater decompresser = new Inflater();
+          decompresser.setInput(buf, 32, len-32); 
+          
+          int resultLength = 0;
+          int offset = 0;
+          int buflen = Math.min((pow2ceil(len)*2), (1<<28));
+          byte[] result = new byte[buflen];
+          try {
+            for (;;) {
+              resultLength += decompresser.inflate(result,offset,buflen-offset);
+              if (decompresser.finished()) {
+                break;
+              }
+              offset=buflen;
+              buflen += Math.min(buflen,(1<<28));
+              result = java.util.Arrays.copyOf(result, buflen);
+            }
+          } catch (java.util.zip.DataFormatException ex) {
+            throw new IOException("zip inflate failed");
+          }
+          bis = new ByteArrayInputStream(result,0,resultLength);
+          is = new BiendianDataInputStream(bis);
+          decoder = new Decoder(is);
+        }
 
         rep.numKeys = decoder.decodeUnsigned();
 
