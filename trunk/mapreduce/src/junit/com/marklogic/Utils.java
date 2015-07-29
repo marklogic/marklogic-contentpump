@@ -76,7 +76,15 @@ public class Utils {
             try {
                 // in.setLittleEndian(false);
                 in.getInputStream().mark(j);
-                ExpandedTree tree = new CompressedTreeDecoder().decode(in);
+
+                // TODO: Is it better to read into a buffer or directly from the
+                // stream then reset and skip?
+                byte[] buf = new byte[j];
+                for (int read = 0; read < j; ) {
+                    read += in.read(buf, read, j - read);
+                }
+
+                ExpandedTree tree = new CompressedTreeDecoder().decode(buf,j);
                 treeList.add(tree);
             } catch (Exception e) {
                 System.err.println("Fail at position " + position);
