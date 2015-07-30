@@ -33,7 +33,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.codehaus.jackson.JsonLocation;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -197,27 +196,26 @@ public class DelimitedJSONReader<VALUEIN> extends
         if (root instanceof Map || root instanceof ArrayList) {
             q.add(root);
         } else {
-            throw new JsonParseException("Invalid JSON", new JsonLocation(null,0,0,0));
-        }
-        
+            throw new UnsupportedOperationException("invalid JSON");
+        }    
         while (!q.isEmpty()) {
             Object current = q.remove();
             if (current instanceof ArrayList) {
                 for (Object element : (ArrayList<Object>)current) {
-                    if (element instanceof Map || element instanceof ArrayList) {
+                    if (element instanceof Map || 
+                        element instanceof ArrayList) {
                         q.add(element);
                     }
                 }
             } else { // instanceof Map
                 // First Match
-                Map<String,?> map = (Map)current;
+                Map<String,?> map = (Map<String,?>)current;
                 if (map.containsKey(uriName)) {
                     Object uriValue = map.get(uriName);
-                    if (uriValue instanceof Number || uriValue instanceof String) {
+                    if (uriValue instanceof Number || 
+                        uriValue instanceof String) {
                         return uriValue.toString();
                     } else {
-                        LOG.error("File " + file.toUri() + " line "
-                                + reader.getLineNumber() + " skipped: uri_id expects string or number");
                         return null;
                     }
                 }
@@ -227,15 +225,13 @@ public class DelimitedJSONReader<VALUEIN> extends
                     Entry<String,?> KVpair = (Entry<String,?>)it.next();
                     Object pairValue = KVpair.getValue();
                     
-                    if (pairValue instanceof Map || pairValue instanceof ArrayList) {
+                    if (pairValue instanceof Map || 
+                        pairValue instanceof ArrayList) {
                         q.add(pairValue);
                     }
                 };
             }
         }
-        LOG.error("File " + file.toUri() + " line "
-                      + reader.getLineNumber()
-                              + " skipped: no uri " + uriName + " found");
         return null;
     }  
 }
