@@ -41,6 +41,7 @@ import com.marklogic.contentpump.utilities.IdGenerator;
 
 /**
  * Reader for DelimitedJSONInputFormat.
+ * 
  * @author mattsun
  *
  * @param <VALUEIN>
@@ -138,6 +139,7 @@ public class DelimitedJSONReader<VALUEIN> extends
             return false;
         }
         String line = reader.readLine();
+        int lineNumber = reader.getLineNumber();
         if (line == null) {
             if (findNextFileEntryAndInitReader()) {
                 return nextKeyValue();
@@ -145,68 +147,49 @@ public class DelimitedJSONReader<VALUEIN> extends
                 bytesRead = totalBytes;
                 return false;
             }
-        } else if (line.trim().equals("")){ // blank lines or lines containing only spaces
-            LOG.warn("File " + file.toUri() + ""
-                    + " line " + reader.getLineNumber() + " skipped: no document ");
-            setKey(null);
+        } else if (line.trim().equals("")) { 
+            setKey("", lineNumber, 0);
+            key.setSkipReason("empty lines");
             return true;
-        } else if (line.startsWith(" ") || line.startsWith("\t")) { // lines with trailing spaces considered invalid
-            LOG.error("File " + file.toUri() + 
-                        " line " + reader.getLineNumber() + 
-                            " skipped: starts with space(s)");
-            setKey(null);
+        } else if (line.startsWith(" ") || line.startsWith("\t")) {
+            setKey(null, lineNumber, 0);
+            key.setSkipReason("leading space");
             return true;
         } else {
             if (generateId) {
-                setKey(idGen.incrementAndGet());
+                setKey(getEncodedURI(idGen.incrementAndGet()), lineNumber, 0);
             } else {
                 String uri = null;
                 try {
                     uri = findUriInJSON(line.trim());
-                } catch (JsonParseException ex) {
-                    LOG.error("File " + file.toUri() + " line "
-                            + reader.getLineNumber()
-                                    + " skipped: not valid JSON document");
+                    if (uri == null) {
+                        setKey("", lineNumber, 0);
+                        key.setSkipReason("no qualifying URI value found");
+                    } else {
+                        setKey(getEncodedURI(uri), lineNumber, 0);
+                    }
+                } catch (Exception ex) {
+                    setKey(uri, lineNumber, 0);
+                    key.setSkipReason(ex.getMessage());
                 }
-                setKey(uri);
                 if (uri == null) {
                     return true;
                 }
-            }
-            
+            }    
             if (value instanceof Text) {
-                ((Text) value).set(line);
-            } else if (value instanceof ContentWithFileNameWritable) {
-                VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                        .getValue();
-                if (realValue instanceof Text) {
-                    ((Text) realValue).set(line);
-                } else {
-                    LOG.error("Expects Text in delimited JSON");
-                    setKey(null);
-                }
+                ((Text)value).set(line);
             } else {
-                LOG.error("Expects Text in delimited JSON");
-                setKey(null);
-            }
+                ((Text)((ContentWithFileNameWritable<VALUEIN>)
+                        value).getValue()).set(line);
+            } 
         }
         bytesRead += (long)line.getBytes().length;
-        return true;
-        
-    }
-    
-    @Override
-    protected void setKey(String val) {
-        if (val == null) {
-            key = null;
-        } else {
-            String uri = getEncodedURI(val);
-            super.setKey(uri);
-        }
+        return true;  
     }
     
     @SuppressWarnings("unchecked")
-    protected String findUriInJSON(String line) throws JsonParseException, IOException {
+    protected String findUriInJSON(String line) 
+    throws JsonParseException, IOException {
         /* Breadth-First-Search */
         Map<String,?> root = mapper.readValue(line.getBytes(),Map.class);
         
@@ -221,8 +204,6 @@ public class DelimitedJSONReader<VALUEIN> extends
                 if (uriValue instanceof Number || uriValue instanceof String) {
                     return uriValue.toString();
                 } else {
-                    LOG.error("File " + file.toUri() + " line "
-                            + reader.getLineNumber() + " skipped: uri_id expects string or number");
                     return null;
                 }
             }
@@ -232,14 +213,13 @@ public class DelimitedJSONReader<VALUEIN> extends
                 Entry<String,?> KVpair = (Entry<String,?>)it.next();
                 Object pairValue = KVpair.getValue();
                 
-                if (pairValue instanceof Map) q.add((Map<String,?>)pairValue);
-                else if (pairValue instanceof ArrayList) q.addAll((ArrayList<Map<String,?>>)pairValue);
+                if (pairValue instanceof Map) {
+                    q.add((Map<String,?>)pairValue);
+                } else if (pairValue instanceof ArrayList) {
+                    q.addAll((ArrayList<Map<String,?>>)pairValue);
+                }
             };
         }
-        LOG.error("File " + file.toUri() + " line "
-                      + reader.getLineNumber()
-                              + " skipped: no uri " + uriName + " found");
         return null;
-    }
-    
+    }  
 }

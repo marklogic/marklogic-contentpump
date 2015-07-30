@@ -32,10 +32,10 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.marklogic.contentpump.utilities.URIUtil;
 import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.utilities.URIUtil;
 
 /**
  * Abstract class of RecorderReader for import.
@@ -43,10 +43,11 @@ import com.marklogic.mapreduce.MarkLogicConstants;
  *
  * @param <VALUEIN>
  */
-public abstract class ImportRecordReader<VALUEIN> extends
-    RecordReader<DocumentURI, VALUEIN> implements ConfigConstants {
+public abstract class ImportRecordReader<VALUEIN> 
+extends RecordReader<DocumentURIWithSourceInfo, VALUEIN> 
+implements ConfigConstants {
     public static final Log LOG = LogFactory.getLog(ImportRecordReader.class);
-    protected DocumentURI key = new DocumentURI();
+    protected DocumentURIWithSourceInfo key = new DocumentURIWithSourceInfo();
     protected VALUEIN value;
     protected String mode;
     protected boolean streaming = false;
@@ -55,31 +56,41 @@ public abstract class ImportRecordReader<VALUEIN> extends
     protected Path file;
     protected FileSystem fs;
     protected Iterator<FileSplit> iterator;
+    protected String srcId = null;
+    protected String subId = "";
+    
     /**
      * Apply URI prefix and suffix configuration options and set the result as 
      * DocumentURI key.
      * 
      * @param uri Source string of document URI.
+     * @param line Line number in the source if applicable; -1 otherwise.
+     * @param col Column number in the source if applicable; -1 otherwise.
      */
-    protected void setKey(String uri) {
-        if (uri == null) {
-            key = null;
-            return;
+    protected void setKey(String uri, int line, int col) {
+        if (srcId == null) {
+            srcId = file.toString();
         }
-        // reconstruct key if set to null
         if (key == null) {
-            key = new DocumentURI();
+            key = new DocumentURIWithSourceInfo(uri, srcId, subId, line, col);
         }
         // apply prefix and suffix for URI
-        uri = URIUtil.applyPrefixSuffix(uri, conf);
-        key.setUri(uri);      
+        if (uri != null && !uri.isEmpty()) {
+            uri = URIUtil.applyPrefixSuffix(uri, conf);
+        }
+        key.setUri(uri == null ? "" : uri);   
+        key.setSrcId(srcId);
+        key.setSubId(subId);
+        key.setColNumber(col);
+        key.setLineNumber(line);
+        key.setSkipReason("");
     }
 
     @Override
     public abstract void close() throws IOException;
 
     @Override
-    public DocumentURI getCurrentKey() throws IOException,
+    public DocumentURIWithSourceInfo getCurrentKey() throws IOException,
         InterruptedException {
         return key;
     }
@@ -130,7 +141,7 @@ public abstract class ImportRecordReader<VALUEIN> extends
         }
     }
 
-    protected String makeURIFromPath(Path file) {
+    protected String makeURIFromPath(Path file) throws URISyntaxException {
         // get path portion of the file
        String path = file.toUri().getPath();
        if (LOG.isTraceEnabled()) {
@@ -142,17 +153,12 @@ public abstract class ImportRecordReader<VALUEIN> extends
          LOG.trace("makeURIFromPath Path after uri replace:"+path);
        }
        // create a URI out of it
-       try {
-           URI uri = new URI(null, null, null, 0, path, null, null);
-           // return the encoded uri as document uri key
-           if (LOG.isTraceEnabled()) {
-             LOG.trace("makeURIFromPath document URI" + uri);
-           }
-           return uri.toString();
-       } catch (URISyntaxException ex) {
-           LOG.warn("Error parsing file path, skipping " + file, ex);
-           return null;
+       URI uri = new URI(null, null, null, 0, path, null, null);
+       // return the encoded uri as document uri key
+       if (LOG.isTraceEnabled()) {
+           LOG.trace("makeURIFromPath document URI" + uri);
        }
+       return uri.toString();
     }
     
     protected String getEncodedURI(String val) {  
@@ -166,16 +172,12 @@ public abstract class ImportRecordReader<VALUEIN> extends
         }
     }
     
-    protected String makeURIForZipEntry(Path zipFile, String val) {  
+    protected String makeURIForZipEntry(Path zipFile, String val) 
+    throws URISyntaxException {  
         Path path = new Path(zipFile, val);
         val = URIUtil.applyUriReplace(path.toUri().getPath(), conf);
-        try {
-            URI uri = new URI(null, null, null, 0, val, null, null);
-            return uri.toString();
-        } catch (URISyntaxException e) {
-            LOG.warn("Error parsing value as URI, skipping " + val, e);
-            return null;
-        }
+        URI uri = new URI(null, null, null, 0, val, null, null);
+        return uri.toString();
     }
 
     @Override

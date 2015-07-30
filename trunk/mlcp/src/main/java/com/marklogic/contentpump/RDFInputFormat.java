@@ -25,13 +25,14 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 import com.marklogic.mapreduce.LinkedMapWritable;
 
 /**
  * InputFormat for RDF.
  */
-public class RDFInputFormat extends FileAndDirectoryInputFormat<DocumentURI, Text> {
+public class RDFInputFormat extends 
+FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
    
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
@@ -39,7 +40,7 @@ public class RDFInputFormat extends FileAndDirectoryInputFormat<DocumentURI, Tex
     }
     
     @Override
-    public RecordReader<DocumentURI, Text> createRecordReader(InputSplit is,
+    public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(InputSplit is,
         TaskAttemptContext context) {
         LinkedMapWritable roleMap = null;
         try {

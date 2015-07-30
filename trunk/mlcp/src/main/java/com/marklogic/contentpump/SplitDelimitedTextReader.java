@@ -35,6 +35,7 @@ import com.marklogic.mapreduce.utilities.TextArrayWritable;
 
 /**
  * Reader for DelimitedTextInputFormat if split_input is true
+ * 
  * @author ali
  *
  * @param <VALUEIN>
@@ -75,12 +76,10 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                 return false;
             }
             pos += getBytesCountFromLine(values);
-
             if (values.length != fields.length) {
-                LOG.error(file.toUri() + " line " + parser.getLineNumber()
-                    + " is inconsistent with column definition: "
-                    + convertToLine(fields));
-                key = null;
+                setKey(null, 0, 0);
+                key.setSkipReason(
+                        "number of fields do not match number of columns");
                 return true;
             }
             docBuilder.newDoc();
@@ -90,48 +89,29 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                     continue;
                 if (!generateId && uriId == i) {
                     if (values[i] == null || values[i].equals("")) {
-                        LOG.error("Column used for uri_id is empty:"
-                            + this.file.toUri().getPath()
-                            + " line ending at byte " + pos);
-                        // clear the key of previous record
-                        key = null;
+                        setKey(values[i], 0, 0);
+                        key.setSkipReason("empty URI value");
                         return true;
                     }
-                    String uri = getEncodedURI(values[i]);
-                    if (uri != null) {
-                        setKey(uri);
-                        // LOG.info(uri + "-" + pos);
-                    } else {
-                        key = null;
-                        return true;
-                    }
+                    setKey(getEncodedURI(values[i]), 0, 0);
                 }
                 docBuilder.put(fields[i], values[i]);
             }
             docBuilder.build();
             if (generateId) {
-                setKey(idGen.incrementAndGet());
+                setKey(getEncodedURI(idGen.incrementAndGet()), 0, 0);
             }
             if (value instanceof Text) {
-                ((Text) value).set(docBuilder.getDoc());
-            } else if (value instanceof ContentWithFileNameWritable) {
-                VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                    .getValue();
-                if (realValue instanceof Text) {
-                    ((Text) realValue).set(docBuilder.getDoc());
-                } else {
-                    LOG.error("Expects Text in delimited text");
-                    key = null;
-                }
+                ((Text)value).set(docBuilder.getDoc());
             } else {
-                LOG.error("Expects Text in delimited text");
-                key = null;
+                ((Text)((ContentWithFileNameWritable<VALUEIN>)
+                        value).getValue()).set(docBuilder.getDoc());
             }
         } catch (IOException ex) {
             if (ex.getMessage().contains(
                 "invalid char between encapsulated token end delimiter")) {
-                LOG.error(ex.getMessage());
-                key = null;
+                setKey(null, parser.getLineNumber(), 0);
+                key.setSkipReason(ex.getMessage());
             } else {
                 throw ex;
             }

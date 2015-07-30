@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,12 +48,10 @@ extends ImportRecordReader<VALUEIN> {
     protected TaskAttemptContext context;
     protected int batchSize;
     
-    public CombineDocumentReader() {     
-    }
+    public CombineDocumentReader() {}
 
     @Override
-    public void close() throws IOException {
-    }
+    public void close() throws IOException {}
 
     /**
      * progress becomes inaccurate if #files exceeds the FILE_SPLIT_COUNT_LIMIT
@@ -87,16 +86,17 @@ extends ImportRecordReader<VALUEIN> {
             byte[] buf = new byte[(int)split.getLength()];
             try {
                 String uri = makeURIFromPath(file);
-                if (uri != null) {
-                    setKey(uri);
-                } else {
-                    key = null;
-                    return true;
-                }
+                setKey(uri, 0, 0);
+            } catch (URISyntaxException ex) {
+                setKey(null, 0, 0);
+                key.setSkipReason(ex.getMessage());
+                return true;
+            }
+            try {
                 fileIn.readFully(buf);
                 if (value instanceof Text) {
                     ((Text) value).set(new String(buf, encoding));
-                } else if (value instanceof BytesWritable) {
+                } else {
                     if (batchSize > 1) {
                         // Copy data since XCC won't do it when Content is 
                         // created.
@@ -104,11 +104,7 @@ extends ImportRecordReader<VALUEIN> {
                     } else {
                         ((BytesWritable) value).set(buf, 0, buf.length);
                     }
-                } else {
-                    LOG.error("Unexpected type: " + value.getClass());
-                    key = null;
-                    return true;
-                }
+                } 
                 bytesRead += buf.length;
                 return true;
             } catch (IOException e) {
@@ -118,7 +114,6 @@ extends ImportRecordReader<VALUEIN> {
                 fileIn.close();
             }
         }
-
         return false;
     }
 }

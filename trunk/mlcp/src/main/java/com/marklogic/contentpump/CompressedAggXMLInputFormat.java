@@ -22,7 +22,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 
 /**
  * InputFormat for compressed aggregate XML.
@@ -30,10 +30,10 @@ import com.marklogic.mapreduce.DocumentURI;
  *
  */
 public class CompressedAggXMLInputFormat extends
-FileAndDirectoryInputFormat<DocumentURI, Text> {
+FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
 
     @Override
-    public RecordReader<DocumentURI, Text> createRecordReader(
+    public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(
         InputSplit split, TaskAttemptContext context) {
         return new CompressedAggXMLReader<Text>();
     }

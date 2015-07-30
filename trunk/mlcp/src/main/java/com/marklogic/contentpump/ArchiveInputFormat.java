@@ -29,19 +29,20 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 /**
  * FileInputFormat for reading archive.
  * @author ali
  *
  */
 public class ArchiveInputFormat extends
-    FileAndDirectoryInputFormat<DocumentURI, DatabaseDocumentWithMeta> {
+    FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, 
+    DatabaseDocumentWithMeta> {
     public static final Log LOG = LogFactory.getLog(ArchiveInputFormat.class);
     private static String EXTENSION = ".zip";
     
     @Override
-    public RecordReader<DocumentURI, DatabaseDocumentWithMeta> createRecordReader(InputSplit split,
+    public RecordReader<DocumentURIWithSourceInfo, DatabaseDocumentWithMeta> createRecordReader(InputSplit split,
         TaskAttemptContext context) throws IOException, InterruptedException {
         return new ArchiveRecordReader();
     }

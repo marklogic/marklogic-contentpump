@@ -20,19 +20,21 @@ package com.marklogic.contentpump;
  * option is set to true.
  */
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.mapreduce.CompressionCodec;
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 import com.marklogic.mapreduce.StreamLocator;
 
 public class StreamingDocumentReader extends 
 CombineDocumentReader<StreamLocator> {
 
     @Override
-    public DocumentURI getCurrentKey() throws IOException, InterruptedException {
+    public DocumentURIWithSourceInfo getCurrentKey() 
+            throws IOException, InterruptedException {
         return key;
     }
 
@@ -40,15 +42,16 @@ CombineDocumentReader<StreamLocator> {
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if (iterator.hasNext()) {
             FileSplit split = iterator.next();
-            Path path = split.getPath();
-            String uri = makeURIFromPath(path);
-            if (uri != null) {
-                setKey(uri);
-            } else {
-                key = null;
+            file = split.getPath();
+            try {
+                String uri = makeURIFromPath(file);
+                setKey(uri, 0, 0);
+            } catch (URISyntaxException ex) {
+                setKey(null, 0, 0);
+                key.setSkipReason(ex.getMessage());
                 return true;
-            }   
-            value = new StreamLocator(path, CompressionCodec.NONE);
+            } 
+            value = new StreamLocator(file, CompressionCodec.NONE);
             bytesRead += split.getLength();
             return true;
         }

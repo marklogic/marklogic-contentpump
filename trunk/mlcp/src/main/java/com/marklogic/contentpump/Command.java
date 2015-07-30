@@ -1898,18 +1898,18 @@ public enum Command implements ConfigConstants {
                                 + OUTPUT_URI_REPLACE + " :" + uriReplace);
                     }
                 }
-                conf.setStrings(CONF_OUTPUT_URI_REPLACE, uriReplace);
+                conf.setStrings(MarkLogicConstants.CONF_OUTPUT_URI_REPLACE, 
+                        uriReplace);
             }
         }
         if (cmdline.hasOption(OUTPUT_URI_PREFIX)) {
             String outPrefix = cmdline.getOptionValue(OUTPUT_URI_PREFIX);
-            conf.set(CONF_OUTPUT_URI_PREFIX, outPrefix);
+            conf.set(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX, outPrefix);
         }
         if (cmdline.hasOption(OUTPUT_URI_SUFFIX)) {
             String outSuffix = cmdline.getOptionValue(OUTPUT_URI_SUFFIX);
-            conf.set(CONF_OUTPUT_URI_SUFFIX, outSuffix);
+            conf.set(MarkLogicConstants.CONF_OUTPUT_URI_SUFFIX, outSuffix);
         }
-
         if (cmdline.hasOption(OUTPUT_COLLECTIONS)) {
             String collectionsString = cmdline.getOptionValue(
                     OUTPUT_COLLECTIONS);
