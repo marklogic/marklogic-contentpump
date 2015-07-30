@@ -319,10 +319,11 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
     }
     
     public static void logVersions() {
-        LOG.info("ContentPump version: " + Versions.getVersion());
-        LOG.info("Java version: " + System.getProperty("java.version"));
-        LOG.info("Hadoop version: " + VersionInfo.getVersion());
-        LOG.info("Supported MarkLogic versions: " + 
+        System.out.println("ContentPump version: " + Versions.getVersion());
+        System.out.println("Java version: " + 
+            System.getProperty("java.version"));
+        System.out.println("Hadoop version: " + VersionInfo.getVersion());
+        System.out.println("Supported MarkLogic versions: " + 
                 Versions.getMinServerVersion() + " - " + 
                 Versions.getMaxServerVersion());
     }
