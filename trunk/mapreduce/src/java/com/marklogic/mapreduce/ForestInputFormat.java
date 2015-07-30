@@ -62,13 +62,14 @@ import com.marklogic.mapreduce.utilities.InternalUtilities;
  * @param <VALUE> Only ForestDocument is currently supported, but types
  * such as Text or BytesWritable are possible candidates to be added.
  */
-public class ForestInputFormat<VALUE> extends
-        FileInputFormat<DocumentURI, VALUE> implements MarkLogicConstants {
+public class ForestInputFormat<VALUE> 
+extends FileInputFormat<DocumentURIWithSourceInfo, VALUE> 
+implements MarkLogicConstants {
     public static final Log LOG = LogFactory.getLog(ForestInputFormat.class);
     static final int STREAM_BUFFER_SIZE = 1 << 24;
 
     @Override
-    public RecordReader<DocumentURI, VALUE> createRecordReader(
+    public RecordReader<DocumentURIWithSourceInfo, VALUE> createRecordReader(
             InputSplit split, TaskAttemptContext context) throws IOException,
             InterruptedException {
         return new ForestReader<VALUE>();

@@ -74,10 +74,6 @@ public abstract class ForestDocument implements MarkLogicDocument {
                 doc = new JSONDocument(tree);  
                 break;
             default:
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Skipping unsupported node kind "
-                            + rootNodeKind + " (" + uri + ")");
-                }
                 return null;
         }
         doc.setFragmentOrdinal(tree.getFragmentOrdinal());
