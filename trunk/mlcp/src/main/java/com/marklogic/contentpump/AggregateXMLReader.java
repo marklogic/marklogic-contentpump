@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.Stack;
 
+import javax.xml.stream.Location;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -112,7 +113,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         file = ((FileSplit) inSplit).getPath();
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDir()) {
+        if(status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
@@ -233,6 +234,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         int attrCount = xmlSR.getAttributeCount();
         boolean isNewRootStart = false;
         currDepth++;
+        Location loc = xmlSR.getLocation();
         if (recordName == null) {
             recordName = name;
             if (recordNamespace == null) {
@@ -243,7 +245,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             newDoc = true;
             newUriId = true;
             if (useAutomaticId) {
-                setKey(idGen.incrementAndGet());
+                setKey(getEncodedURI(idGen.incrementAndGet()), 
+                        loc.getLineNumber(),loc.getColumnNumber());
             }
         } else {
             // record element name may not nest
@@ -256,13 +259,12 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 newDoc = true;
                 newUriId = true;
                 if (useAutomaticId) {
-                    setKey(idGen.incrementAndGet());
+                    setKey(getEncodedURI(idGen.incrementAndGet()), 
+                            loc.getLineNumber(), loc.getColumnNumber());
                 }
             }
-        }
-        
+        }   
         copyNameSpaceDecl();
-
         if (!newDoc) {
             return;
         }
@@ -285,7 +287,6 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 }
             }
         }
-
         for (int i = 0; i < attrCount; i++) {
             String aPrefix = xmlSR.getAttributePrefix(i);
             String aName = xmlSR.getAttributeLocalName(i);
@@ -295,7 +296,12 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 + "=\"" + aValue + "\"");
             if (!useAutomaticId && newDoc && ("@" + aName).equals(idName)) {
                 currentId = aValue;
-                setKey(aValue);
+                if (aValue == null || aValue.isEmpty()) {
+                    setKey("", loc.getLineNumber(), loc.getColumnNumber());
+                } else {
+                    setKey(getEncodedURI(aValue), loc.getLineNumber(), 
+                        loc.getColumnNumber());
+                }
             }
         }
         sb.append(">");
@@ -307,12 +313,16 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 throw new XMLStreamException("badly formed xml or " + idName
                     + " is not a simple node: at" + xmlSR.getLocation());
             }
-
             String newId = xmlSR.getText();
             currentId = newId;
             sb.append(newId);
             if (newUriId) {
-                setKey(newId);
+                if (newId == null || newId.isEmpty()) {
+                    setKey("", loc.getLineNumber(), loc.getColumnNumber());
+                } else {
+                    setKey(getEncodedURI(newId), loc.getLineNumber(), 
+                        loc.getColumnNumber());
+                }
                 newUriId = false;
             } else {
                 LOG.warn("Ignoring duplicate URI_ID: " + idName + " = " + 
@@ -335,10 +345,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
             sb.append(">");
             currDepth--;
-        }
-        
-        write(sb.toString());
-        
+        }    
+        write(sb.toString());       
     }
 
     /**
@@ -397,22 +405,10 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         if (value instanceof Text) {
             ((Text) value).set(buffer.toString());
-        } else if (value instanceof ContentWithFileNameWritable) {
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                .getValue();
-            if (realValue instanceof Text) {
-                ((Text) realValue).set(buffer.toString());
-            } else {
-                LOG.error("Expects Text in aggregate XML, but gets "
-                    + realValue.getClass().getCanonicalName());
-                key = null;
-            }
         } else {
-            LOG.error("Expects Text in aggregate XML, but gets "
-                + value.getClass().getCanonicalName());
-            key = null;
-        }
-        
+            ((Text)((ContentWithFileNameWritable<VALUEIN>)
+                    value).getValue()).set(buffer.toString());
+        }  
         cleanupEndElement();
         // end of new record
         return false;
@@ -537,15 +533,5 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         return false;
-    }
-    
-    @Override
-    protected void setKey(String val) {
-        if (val == null) {
-            key = null;
-        } else {
-            String uri = getEncodedURI(val);
-            super.setKey(uri);
-        }
     }
 }

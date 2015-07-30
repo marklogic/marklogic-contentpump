@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
-import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -39,9 +38,8 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
  *
  */
 public class ZipDelimitedJSONReader extends DelimitedJSONReader<Text> {
-    public static final Log LOG = LogFactory
-            .getLog(ZipDelimitedJSONReader.class);
-    
+    public static final Log LOG = 
+            LogFactory.getLog(ZipDelimitedJSONReader.class);  
     private byte[] buf = new byte[65536];
     private InputStream zipIn;
     private ZipEntry currZipEntry;
@@ -96,6 +94,7 @@ public class ZipDelimitedJSONReader extends DelimitedJSONReader<Text> {
             if (currZipEntry.getSize() == 0) {
                 continue;
             }
+            subId = currZipEntry.getName();
             long size = currZipEntry.getSize();
             if (size == -1) {
                 byteArrayOStream = new ByteArrayOutputStream();
@@ -110,11 +109,9 @@ public class ZipDelimitedJSONReader extends DelimitedJSONReader<Text> {
             instream = new InputStreamReader(
                     new ByteArrayInputStream(byteArrayOStream.toByteArray()), encoding);
             byteArrayOStream.close();
-            reader = new LineNumberReader(instream);
-            
+            reader = new LineNumberReader(instream);        
             return true;
-        }
-        
+        }   
         return false;
     }
 

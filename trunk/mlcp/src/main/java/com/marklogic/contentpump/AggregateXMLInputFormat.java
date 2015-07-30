@@ -23,12 +23,13 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 
 /**
  * InputFormat for aggregate XML.
  */
-public class AggregateXMLInputFormat extends FileAndDirectoryInputFormat<DocumentURI, Text> {
+public class AggregateXMLInputFormat extends 
+FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
    
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
@@ -36,8 +37,8 @@ public class AggregateXMLInputFormat extends FileAndDirectoryInputFormat<Documen
     }
     
     @Override
-    public RecordReader<DocumentURI, Text> createRecordReader(InputSplit is,
-        TaskAttemptContext tac) {
+    public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(
+            InputSplit is, TaskAttemptContext tac) {
         return new AggregateXMLReader<Text>();
     }
  

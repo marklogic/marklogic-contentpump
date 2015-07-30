@@ -67,7 +67,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
         file = ((FileSplit) inSplit).getPath();
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDir()) {
+        if (status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
@@ -167,6 +167,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             if (currZipEntry.getSize() == 0) {
                 continue;
             }
+            subId = currZipEntry.getName();
             long size = currZipEntry.getSize();
             if (size == -1) {
                 baos = new ByteArrayOutputStream();
@@ -188,7 +189,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             parser = new CSVParser(instream, new CSVStrategy(delimiter,
                 encapsulator, CSVStrategy.COMMENTS_DISABLED,
                 CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
-            //clear metadata
+            // clear metadata
             fields = null;
             if (super.nextKeyValue()) {
                 // current delim txt has next

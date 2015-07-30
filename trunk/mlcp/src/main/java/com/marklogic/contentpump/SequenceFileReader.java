@@ -34,6 +34,7 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
  * Reader for SequenceFileInputFormat.
+ * 
  * @author ali
  *
  * @param <VALUEIN>
@@ -67,7 +68,7 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         file = ((FileSplit) inSplit).getPath();
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDir()) {
+        if(status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
@@ -116,7 +117,7 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         while (reader.next(seqKey, seqValue)) {
-            setKey(((SequenceFileKey) seqKey).getDocumentURI().getUri());
+            setKey(((SequenceFileKey) seqKey).getDocumentURI().getUri(), 0, 0);
 
             if (value instanceof Text) {
                 ((Text) value)

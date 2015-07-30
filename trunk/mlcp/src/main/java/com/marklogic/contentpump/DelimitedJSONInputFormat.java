@@ -24,21 +24,21 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 
 /**
  * @author mattsun
  *
  */
 public class DelimitedJSONInputFormat extends 
-FileAndDirectoryInputFormat<DocumentURI, Text> {
-    public static final Log LOG = LogFactory
-            .getLog(DelimitedJSONInputFormat.class);
+FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
+    public static final Log LOG = LogFactory.getLog(
+            DelimitedJSONInputFormat.class);
 
     @Override
-    public RecordReader<DocumentURI, Text> createRecordReader(InputSplit split,
-            TaskAttemptContext context) throws IOException,
-            InterruptedException {
+    public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(
+            InputSplit split, TaskAttemptContext context) 
+            throws IOException, InterruptedException {
         return new DelimitedJSONReader<Text>();
     }
 

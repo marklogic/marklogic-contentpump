@@ -30,7 +30,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 
 /**
  * InputFormat for reading documents from file systems.  One document on the
@@ -40,7 +40,7 @@ import com.marklogic.mapreduce.DocumentURI;
  *
  */
 public class CombineDocumentInputFormat<VALUE>
-extends FileAndDirectoryInputFormat<DocumentURI, VALUE> {
+extends FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
     public static final Log LOG = 
         LogFactory.getLog(CombineDocumentInputFormat.class);
     
@@ -50,8 +50,9 @@ extends FileAndDirectoryInputFormat<DocumentURI, VALUE> {
     }
     
     @Override
-    public RecordReader<DocumentURI, VALUE> createRecordReader(InputSplit split,
-            TaskAttemptContext context) throws IOException, InterruptedException {
+    public RecordReader<DocumentURIWithSourceInfo, VALUE> createRecordReader(
+            InputSplit split, TaskAttemptContext context) 
+            throws IOException, InterruptedException {
         return new CombineDocumentReader<VALUE>();
     } 
     

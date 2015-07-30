@@ -260,9 +260,11 @@ public enum InputType implements ConfigConstants {
 
                 DefaultStringifier.store(conf, roleMap,
                     MarkLogicConstants.ROLE_MAP);
-                if (conf.get(MarkLogicConstants.OUTPUT_DIRECTORY) == null
-                    && conf.get(CONF_OUTPUT_URI_PREFIX) == null) {
-                    conf.set(CONF_OUTPUT_URI_PREFIX, "/triplestore/");
+                if (conf.get(MarkLogicConstants.OUTPUT_DIRECTORY) == null && 
+                    conf.get(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX) 
+                        == null) {
+                    conf.set(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX, 
+                            "/triplestore/");
                 }
             } catch (XccConfigException e) {
                 throw new IOException(e);
@@ -379,7 +381,7 @@ public enum InputType implements ConfigConstants {
     public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
     getMapperClass(CommandLine cmdline, Configuration conf) {
         return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-        DocumentMapper.class;
+        ImportDocumentMapper.class;
     }
     
     public abstract Class<? extends OutputFormat> getOutputFormatClass(

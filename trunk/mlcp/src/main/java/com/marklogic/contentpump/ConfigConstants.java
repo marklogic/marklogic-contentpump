@@ -158,12 +158,6 @@ public interface ConfigConstants {
         "mapreduce.marklogic.delimited.generateuri";
     static final String CONF_SPLIT_INPUT = 
         "mapreduce.marklogic.splitinput";
-    static final String CONF_OUTPUT_URI_REPLACE = 
-        "mapreduce.marklogic.output.urireplace";
-    static final String CONF_OUTPUT_URI_PREFIX = 
-        "mapreduce.marklogic.output_uriprefix";
-    static final String CONF_OUTPUT_URI_SUFFIX = 
-        "mapreduce.marklogic.output_urisuffix";
     static final String CONF_OUTPUT_FILEPATH = 
          "mapreduce.output.fileoutputformat.outputdir";
     static final String CONF_INPUT_FILE_PATTERN = 

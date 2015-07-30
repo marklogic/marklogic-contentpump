@@ -26,8 +26,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 import com.marklogic.mapreduce.MarkLogicConstants;
 
 /**
@@ -39,19 +38,20 @@ import com.marklogic.mapreduce.MarkLogicConstants;
  * @param <VALUE>
  */
 public class CompressedDocumentInputFormat<VALUE> extends
-FileAndDirectoryInputFormat<DocumentURI, VALUE> {
+FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
     public static final Log LOG = 
         LogFactory.getLog(CompressedDocumentReader.class);
     
 	@SuppressWarnings("unchecked")
     @Override
-	public RecordReader<DocumentURI, VALUE> createRecordReader(InputSplit arg0,
-			TaskAttemptContext arg1) throws IOException, InterruptedException {
-	    Configuration conf = arg1.getConfiguration();
+	public RecordReader<DocumentURIWithSourceInfo, VALUE> createRecordReader(
+	        InputSplit split, TaskAttemptContext context) 
+	        throws IOException, InterruptedException {
+	    Configuration conf = context.getConfiguration();
 	    boolean streaming = conf.getBoolean(
 	            MarkLogicConstants.OUTPUT_STREAMING, false);
 	    if (streaming) {
-	        return (RecordReader<DocumentURI, VALUE>) 
+	        return (RecordReader<DocumentURIWithSourceInfo, VALUE>) 
 	            new CompressedStreamingReader();
 	    } else {
 	        return new CompressedDocumentReader<VALUE>();

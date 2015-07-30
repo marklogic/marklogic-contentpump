@@ -64,7 +64,6 @@ import com.hp.hpl.jena.sparql.core.Quad;
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.contentpump.utilities.PermissionUtil;
-import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.LinkedMapWritable;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
@@ -108,7 +107,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected PipedRDFStream rdfInputStream;
     protected Lang lang;
 
-    protected Hashtable<String, Vector> collectionHash = new Hashtable<String, Vector> ();
+    protected Hashtable<String, Vector> collectionHash = 
+            new Hashtable<String, Vector> ();
     protected int collectionCount = 0;
     private static final int MAX_COLLECTIONS = 100;
     protected boolean ignoreCollectionQuad = false;
@@ -123,7 +123,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long milliSecs;
 
     protected String origFn;
-    protected String inputFn; // Tracks input filename even in the CompressedRDFReader case
+    // Tracks input filename even in the CompressedRDFReader case
+    protected String inputFn; 
     protected long splitStart;
     protected long start;
     protected long pos;
@@ -223,25 +224,21 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         ignoreCollectionQuad = (collections != null);
         hasOutputCol = (collections != null);
 
-        String type = conf.get(MarkLogicConstants.CONTENT_TYPE,
-                MarkLogicConstants.DEFAULT_CONTENT_TYPE);
-        ContentType contentType = ContentType.valueOf(type);
         Class<? extends Writable> valueClass = RDFWritable.class;
 
         @SuppressWarnings("unchecked")
-        VALUEIN localValue = (VALUEIN) ReflectionUtils.newInstance(valueClass, conf);
+        VALUEIN localValue = (VALUEIN) ReflectionUtils.newInstance(valueClass, 
+                conf);
 
         value = localValue;
         encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING,
                 DEFAULT_ENCODING);
 
-        // ===================
-
         file = ((FileSplit) inSplit).getPath();
         fs = file.getFileSystem(context.getConfiguration());
         
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDir()) {
+        if(status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
@@ -291,11 +288,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 }
             }
         }
-
         origFn = fsname;
-        inputFn = Long.toHexString(fuse(scramble(random.nextLong()),fuse(scramble(milliSecs),random.nextLong())));
+        inputFn = Long.toHexString(fuse(scramble(random.nextLong()),
+                fuse(scramble(milliSecs), random.nextLong())));
         idGen = new IdGenerator(inputFn + "-" + splitStart);
-
         lang = null;
         if (".rdf".equals(ext)) {
             lang = Lang.RDFXML;
@@ -314,14 +310,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         } else {
             lang = Lang.RDFXML; // We have to default to something!
         }
-
         synchronized (jenaLock) {
             if (size < INMEMORYTHRESHOLD) {
                 dataset = DatasetFactory.createMem();
-                //LOG.info("In-memory RDF processing (" + size + " < " + INMEMORYTHRESHOLD + ")");
-            } else {
-                //LOG.info("Streamed RDF processing (" + size + " >= " + INMEMORYTHRESHOLD + ")");
-            }
+            } 
         }
     }
 
@@ -329,7 +321,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         try {
             loadModel(fsname, fs.open(file));
         } catch (Exception e) {
-            LOG.fatal("Failed to parse: " + origFn);
+            LOG.error("Failed to parse: " + origFn);
         }
     }
 
@@ -515,14 +507,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                             .replaceAll("&lt;")).replaceAll("&gt;");
     }
 
-    @Override
-    protected void setKey(String val) {
-        if (val == null) {
-            key = null;
-        } else {
-            String uri = getEncodedURI(val) + ".xml";
-            super.setKey(uri);
-        }
+    protected void setKey() {
+        setKey(getEncodedURI(idGen.incrementAndGet()) + ".xml", 0, 0);
     }
 
     @Override
@@ -546,11 +532,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
                 conf.get(MarkLogicConstants.OUTPUT_HOST));
-            String[] outperms = conf
-                .getStrings(MarkLogicConstants.OUTPUT_PERMISSION);
-            List<ContentPermission> permissions = PermissionUtil
-                .getPermissions(outperms);
-
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
@@ -651,8 +632,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             hasNext = false;
             return false;
         }
-
-        setKey(idGen.incrementAndGet());
+        setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>\n");
         write("<sem:origin>" + origFn + "</sem:origin>\n");
         int max = MAXTRIPLESPERDOCUMENT;
@@ -694,8 +674,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 return false;
             }
         }
-
-        setKey(idGen.incrementAndGet());
+        setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && statementIter.hasNext()) {
@@ -728,8 +707,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 return false;
             }
         }
-
-        setKey(idGen.incrementAndGet());
+        setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && statementIter.hasNext()) {
@@ -786,7 +764,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected boolean nextStreamingTripleKeyValue() throws IOException, InterruptedException {
-        setKey(idGen.incrementAndGet());
+        setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && rdfIter.hasNext()) {
@@ -818,7 +796,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected boolean nextStreamingQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
-        setKey(idGen.incrementAndGet());
+        setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
         while (max > 0 && rdfIter.hasNext()) {
@@ -896,11 +874,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 break;
             }
         }
-
-        @SuppressWarnings("unchecked")
         Vector<String> triples = collectionHash.get(collection);
-
-        setKey(idGen.incrementAndGet());
+        setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         for (String t : triples) {
             write(t);
@@ -927,10 +902,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if (value instanceof Text) {
             ((Text) value).set(buffer.toString());
         } else if (value instanceof RDFWritable) {
-            ((RDFWritable) value).set(buffer.toString());
+            ((RDFWritable)value).set(buffer.toString());
             
             if (collection != null) {
-                ((RDFWritable) value).setCollection(collection);
+                ((RDFWritable)value).setCollection(collection);
             }
             if(hasOutputCol){
                 String[] outCols = conf.getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
@@ -947,23 +922,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 perms = defaultPerms;
                 insertGraphDoc(collection);
             }
-            ((RDFWritable) value).setPermissions(perms);
-
-        } else if (value instanceof ContentWithFileNameWritable) {
-            @SuppressWarnings("unchecked")
-            VALUEIN realValue = ((ContentWithFileNameWritable<VALUEIN>) value)
-                    .getValue();
-            if (realValue instanceof Text) {
-                ((Text) realValue).set(buffer.toString());
-            } else {
-                LOG.error("Expects RDF, but gets "
-                        + realValue.getClass().getCanonicalName());
-                key = null;
-            }
+            ((RDFWritable)value).setPermissions(perms);
         } else {
-            LOG.error("Expects RDF, but gets "
-                    + value.getClass().getCanonicalName());
-            key = null;
+            ((Text)((ContentWithFileNameWritable<VALUEIN>)
+                    value).getValue()).set(buffer.toString());
         }
 
         buffer.setLength(0);
@@ -1049,30 +1011,27 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         @Override
         public void run() {
             LangRIOT parser;
-
             try {
-                parser = RiotReader.createParser(in, lang, fsname, rdfInputStream);
+                parser = RiotReader.createParser(in, lang, fsname, 
+                        rdfInputStream);
             } catch (Exception ex) {
                 // Yikes something went horribly wrong, bad encoding maybe?
-                LOG.fatal("Failed to parse: " + origFn);
-                ex.printStackTrace();
+                LOG.error("Failed to parse: " + origFn, ex);
 
                 byte[] b = new byte[0] ;
                 InputStream emptyBAIS = new ByteArrayInputStream(b) ;
-                parser = RiotReader.createParser(emptyBAIS, lang, fsname, rdfInputStream);
+                parser = RiotReader.createParser(emptyBAIS, lang, fsname, 
+                        rdfInputStream);
             }
-
             try {
                 ErrorHandler handler = new ParserErrorHandler(fsname);
                 ParserProfile prof = RiotLib.profile(lang, fsname, handler);
                 parser.setProfile(prof);
                 parser.parse();
-            } catch (Exception e) {
+            } catch (Exception ex) {
                 failed = true;
-                LOG.fatal("Failed to parse: " + origFn);
-                e.printStackTrace();
+                LOG.error("Failed to parse: " + origFn, ex);
             }
         }
-        
     }
 }

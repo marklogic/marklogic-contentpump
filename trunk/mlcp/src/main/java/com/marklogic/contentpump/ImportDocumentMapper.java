@@ -1,5 +1,6 @@
 /*
  * Copyright 2003-2015 MarkLogic Corporation
+
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,28 +18,32 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.Counter;
+
 import com.marklogic.mapreduce.ContentPumpStats;
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 
 /**
- * Maps (file name, content) as (DocumentURI, VALUE) to (URI, document) as
- * (DocumentURI, VALUE).
+ * Mapper for import keyed by DocumentURIWithSourceInfo.
  * 
- * @author ali
+ * @author jchen
  * 
  * @param <VALUE>
  */
-public class DocumentMapper<VALUE> extends
-    BaseMapper<DocumentURI, VALUE, DocumentURI, VALUE> {
-    
+public class ImportDocumentMapper<VALUE> extends 
+    BaseMapper<DocumentURIWithSourceInfo, VALUE, DocumentURIWithSourceInfo, 
+    VALUE> {
+    public static final Log LOG = LogFactory.getLog(ImportDocumentMapper.class);
     protected Counter readCount;
     protected Counter attemptedCount;
     
-    public void map(DocumentURI uri, VALUE fileContent, Context context)
-        throws IOException, InterruptedException {
+    public void map(DocumentURIWithSourceInfo uri, VALUE fileContent, 
+        Context context) throws IOException, InterruptedException {
         readCount.increment(1);
-        if (uri == null) {
+        if (uri.isSkip()) {
+            LOG.info("Skipped record: " + uri);
             return;
         } 
         attemptedCount.increment(1);
@@ -52,5 +57,4 @@ public class DocumentMapper<VALUE> extends
         attemptedCount = context.getCounter(
                         ContentPumpStats.ATTEMPTED_WRITES);
     }
-
 }

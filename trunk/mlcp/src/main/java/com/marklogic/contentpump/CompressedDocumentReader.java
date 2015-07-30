@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -52,9 +53,7 @@ public class CompressedDocumentReader<VALUEIN> extends
     protected boolean hasNext = true;
     protected CompressionCodec codec;
     protected int batchSize;
-    public CompressedDocumentReader() {
-
-    }
+    public CompressedDocumentReader() {}
 
     @Override
     public void close() throws IOException {
@@ -80,7 +79,7 @@ public class CompressedDocumentReader<VALUEIN> extends
         file = ((FileSplit) inSplit).getPath();  
         fs = file.getFileSystem(conf);
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDir()) {
+        if(status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
@@ -105,15 +104,16 @@ public class CompressedDocumentReader<VALUEIN> extends
             break;
         case GZIP:
             zipIn = new GZIPInputStream(fileIn);
-            String uri = makeURIFromPath(file);
-            if (uri == null) {
-                key = null;
-            } else {
+            try {
+                String uri = makeURIFromPath(file);
                 if (uri.toLowerCase().endsWith(".gz") || 
                     uri.toLowerCase().endsWith(".gzip")) {
                     uri = uri.substring(0, uri.lastIndexOf('.'));
                 } 
-                setKey(uri);
+                setKey(uri, 0, 0);
+            } catch (URISyntaxException ex) {
+                setKey(null, 0, 0);
+                key.setSkipReason(ex.getMessage());
             }
             break;
         default:
@@ -133,12 +133,14 @@ public class CompressedDocumentReader<VALUEIN> extends
             ZipInputStream zis = (ZipInputStream) zipIn;
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry != null && zipEntry.getSize() != 0) {
-                    String uri = makeURIForZipEntry(file, zipEntry.getName());
-                    if (uri != null) {
-                        setKey(uri);
+                    subId = zipEntry.getName();
+                    try {
+                        String uri = makeURIForZipEntry(file, subId);
+                        setKey(uri, 0, 0);
                         setValue(zipEntry.getSize());
-                    } else {
-                        key = null;
+                    } catch (URISyntaxException ex) {
+                        setKey(null, 0, 0);
+                        key.setSkipReason(ex.getMessage());
                     }
                     return true;
                 }
@@ -152,8 +154,7 @@ public class CompressedDocumentReader<VALUEIN> extends
         } else {
             throw new UnsupportedOperationException("Unsupported codec: "
                 + codec.name());
-        }
-        
+        }       
         if (iterator != null && iterator.hasNext()) {
             close();
             initStream(iterator.next());
@@ -164,7 +165,6 @@ public class CompressedDocumentReader<VALUEIN> extends
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected void setValue(long length) throws IOException {
         ByteArrayOutputStream baos;
         if (length > 0) {
@@ -179,18 +179,13 @@ public class CompressedDocumentReader<VALUEIN> extends
         }
         if (value instanceof Text) {
             ((Text) value).set(baos.toString(encoding));
-        } else if (value instanceof BytesWritable) {
+        } else {
             if (batchSize > 1) {
                 // Copy data since XCC won't do it when Content is created.
-                value = (VALUEIN) new BytesWritable();
+                value = (VALUEIN)new BytesWritable();
             }
             ((BytesWritable) value).set(baos.toByteArray(), 0, baos.size());
-        } else {
-            String error = "Unsupported input value class: " + 
-                value.getClass();
-            LOG.error(error, new UnsupportedOperationException(error)); 
-            key = null;
-        }
+        } 
         baos.close();
     }
 }
