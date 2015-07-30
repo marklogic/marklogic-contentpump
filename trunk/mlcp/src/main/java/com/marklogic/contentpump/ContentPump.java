@@ -55,9 +55,6 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             System.exit(1);
         }
         
-        // log versions
-        logVersions();
-        
         String[] expandedArgs = null;
         try {
             expandedArgs = OptionsFileUtil.expandArguments(args);
@@ -71,22 +68,17 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         System.exit(rc);
     }
 
-    private static void logVersions() {
-        LOG.info("ContentPump version: " + Versions.getVersion());
-        LOG.info("Java version: " + System.getProperty("java.version"));
-        LOG.info("Hadoop version: " + VersionInfo.getVersion());
-        LOG.info("Supported MarkLogic versions: " + 
-                Versions.getMinServerVersion() + " - " + 
-                Versions.getMaxServerVersion());
-    }
-
     public static int runCommand(String[] args) throws IOException {
         // get command
         String cmd = args[0];
         if (cmd.equalsIgnoreCase("help")) {
             printUsage();
             return 1;
+        } else if (cmd.equalsIgnoreCase("version")) {
+            logVersions();
+            return 1;
         }
+        
         Command command = Command.forName(cmd);
 
         // get options arguments
@@ -322,6 +314,16 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         System.out.println("  EXPORT  export data from a MarkLogic database");
         System.out.println("  COPY    copy data from one MarkLogic database to another");
         System.out.println("  EXTRACT extract data from MarkLogic forests");
-        System.out.println("  HELP   list available commands");
+        System.out.println("  HELP    list available commands");
+        System.out.println("  VERSION print the version");
+    }
+    
+    public static void logVersions() {
+        LOG.info("ContentPump version: " + Versions.getVersion());
+        LOG.info("Java version: " + System.getProperty("java.version"));
+        LOG.info("Hadoop version: " + VersionInfo.getVersion());
+        LOG.info("Supported MarkLogic versions: " + 
+                Versions.getMinServerVersion() + " - " + 
+                Versions.getMaxServerVersion());
     }
 }
