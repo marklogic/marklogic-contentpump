@@ -35,7 +35,8 @@ import com.marklogic.mapreduce.utilities.LegacyAssignmentPolicy;
  * 
  * @author jchen
  */
-public class DocumentURI implements WritableComparable<DocumentURI> {
+public class DocumentURI 
+implements WritableComparable<DocumentURI>, Cloneable {
 
     
     protected String uri;
@@ -99,6 +100,11 @@ public class DocumentURI implements WritableComparable<DocumentURI> {
             default:
                 return LegacyAssignmentPolicy.getPlacementId(this, size);
         }
+    }
+    
+    @Override
+    public Object clone() {
+        return new DocumentURI(uri);
     }
     
     public void validate() {

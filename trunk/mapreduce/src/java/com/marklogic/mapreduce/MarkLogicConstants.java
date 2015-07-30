@@ -772,7 +772,12 @@ public interface MarkLogicConstants {
      */
     static final String OUTPUT_PARTITION =
         "mapreduce.marklogic.output.partition";
-    
+    static final String CONF_OUTPUT_URI_REPLACE = 
+            "mapreduce.marklogic.output.urireplace";
+    static final String CONF_OUTPUT_URI_PREFIX = 
+            "mapreduce.marklogic.output_uriprefix";
+    static final String CONF_OUTPUT_URI_SUFFIX = 
+            "mapreduce.marklogic.output_urisuffix";
     /**
      * Default output XML repair level
      */

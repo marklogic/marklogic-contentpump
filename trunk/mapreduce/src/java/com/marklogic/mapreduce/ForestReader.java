@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.mapreduce.utilities.URIUtil;
 import com.marklogic.io.BiendianDataInputStream;
 import com.marklogic.tree.CompressedTreeDecoder;
 import com.marklogic.tree.ExpandedTree;
@@ -47,8 +48,9 @@ import com.marklogic.tree.NodeKind;
  * @param <VALUEIN> Currently only support ForestDocument, but other types like
  * Text or BytesWritable are possible candidates to be added.
  */
-public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
-        implements MarkLogicConstants {
+public class ForestReader<VALUEIN> 
+extends RecordReader<DocumentURIWithSourceInfo, VALUEIN>
+implements MarkLogicConstants {
     public static final Log LOG = LogFactory.getLog(ForestReader.class);
     protected FileSplit split;
     protected long bytesRead;
@@ -56,7 +58,7 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
     protected BiendianDataInputStream dataIs;
     protected BiendianDataInputStream ordIs;
     protected BiendianDataInputStream tsIs;
-    protected DocumentURI key;
+    protected DocumentURIWithSourceInfo key;
     protected VALUEIN value;
     protected Class<? extends Writable> valueClass;
     protected int position;
@@ -69,6 +71,7 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
     protected Collection<String> colFilters;
     protected Collection<String> dirFilters;
     protected Collection<String> typeFilters;
+    protected String srcId = null;
 
     @Override
     public void close() throws IOException {
@@ -90,7 +93,7 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
     }
 
     @Override
-    public DocumentURI getCurrentKey() throws IOException, InterruptedException {
+    public DocumentURIWithSourceInfo getCurrentKey() throws IOException, InterruptedException {
         return key;
     }
 
@@ -156,10 +159,8 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
             // no support for fragments
             if (tree.containLinks() || tree.getFragmentOrdinal() != 0) {
                 // send to DocumentMapper for book keeping
-                if (LOG.isDebugEnabled() && tree.containLinks()) {
-                    LOG.debug("Skipping fragmented document: " + uri);
-                }
-                key = null;
+                setKey(null, uri, 0, 0);
+                key.setSkipReason("fragment or link");
                 value = null;
                 return true;
             }
@@ -169,17 +170,42 @@ public class ForestReader<VALUEIN> extends RecordReader<DocumentURI, VALUEIN>
             value = (VALUEIN) ForestDocument.createDocument(conf, 
                     largeForestDir, tree, uri);
             if (value == null) { // send to DocumentMapper for book keeping
-                key = null;
+                setKey(null, uri, 0, 0);
+                key.setSkipReason("unsupported node type");
                 return true;
             }
-            if (key == null) {
-                key = new DocumentURI(uri);
-            } else {
-                key.setUri(uri);
-            }
+            setKey(URIUtil.applyUriReplace(uri, conf), uri, 0, 0);
             return true;
         }
         return false;
+    }
+    
+    /**
+     * Apply URI prefix and suffix configuration options and set the result as 
+     * DocumentURI key.
+     * 
+     * @param uri Source string of document URI.
+     * @param sub Sub-entry of the source of the document origin.
+     * @param line Line number in the source if applicable; -1 otherwise.
+     * @param col Column number in the source if applicable; -1 otherwise.
+     */
+    protected void setKey(String uri, String sub, int line, int col) {
+        if (srcId == null) {
+            srcId = split.getPath().toString();
+        }
+        if (key == null) {
+            key = new DocumentURIWithSourceInfo(uri, srcId, sub, 
+                    line, col);
+        }
+        // apply prefix and suffix for URI
+        if (uri != null && !uri.isEmpty()) {
+            uri = URIUtil.applyPrefixSuffix(uri, conf);
+        }
+        key.setUri(uri);   
+        key.setSrcId(srcId);
+        key.setSubId(sub);
+        key.setColNumber(col);
+        key.setLineNumber(line);
     }
 
     protected boolean applyFilter(String uri, ExpandedTree tree) {
