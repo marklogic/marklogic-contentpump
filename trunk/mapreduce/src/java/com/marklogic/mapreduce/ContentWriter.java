@@ -577,7 +577,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if(countBased) {
             fId = 0;
         }
-        pendingUris[sid].put(content, new DocumentURI(key));
+        pendingUris[sid].put(content, (DocumentURI)key.clone());
         if (batchSize > 1) {
             forestContents[fId][counts[fId]++] = content;
             if (counts[fId] == batchSize) {
@@ -710,9 +710,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         }
         context.getCounter(
-            ContentPumpStats.SUCCEEDED_TO_WRITE).increment(succeeded);
+            ContentPumpStats.SUCCESSFUL_WRITES).increment(succeeded);
         context.getCounter(
-            ContentPumpStats.FAILED_TO_WRITE).increment(failed);
+            ContentPumpStats.FAILED_WRITES).increment(failed);
     }
     
     @Override

@@ -31,39 +31,76 @@ import org.apache.hadoop.io.Text;
 
 public class DocumentURIWithSourceInfo extends DocumentURI {
 
-    private String srcId = null;
-    private String subId = null;
-    private int lineNumber = -1;
-    private int colNumber = -1;
+    private String srcId = "";
+    private String subId = "";
+    private int lineNumber = 0;
+    private int colNumber = 0;
+    private boolean skip = false;
+    private String skipReason = "";
     
-    DocumentURIWithSourceInfo() {};
+    public DocumentURIWithSourceInfo() {};
     
-    DocumentURIWithSourceInfo(String uri, String src) {
-        this.uri = uri;
+    public DocumentURIWithSourceInfo(String uri, String src) {
+        if (uri == null) {
+            uri = "";
+        } else {
+            this.uri = uri;
+        }    
         srcId = src;
+        skip = uri.isEmpty();
     }
     
-    DocumentURIWithSourceInfo(String uri, String src, String sub) {
-        this.uri = uri;
+    public DocumentURIWithSourceInfo(String uri, String src, String sub) {
+        if (uri == null) {
+            uri = "";
+        } else {
+            this.uri = uri;
+        } 
         srcId = src;
         subId = sub;
+        skip = uri.isEmpty();
     }
     
-    DocumentURIWithSourceInfo(String uri, String src, String sub, int line,
-            int col) {
+    public DocumentURIWithSourceInfo(String uri, String src, String sub, 
+            int line, int col) {
+        if (uri == null) {
+            uri = "";
+        } else {
+            this.uri = uri;
+        } 
+        srcId = src;
+        subId = sub;
+        lineNumber = line;
+        colNumber = col;
+        skip = uri.isEmpty();
+    }
+    
+    public DocumentURIWithSourceInfo(String uri, String src, String sub, 
+            int line, int col, boolean skip) {
         this.uri = uri;
         srcId = src;
         subId = sub;
         lineNumber = line;
         colNumber = col;
+        this.skip = skip;
     }
     
-    DocumentURIWithSourceInfo(DocumentURIWithSourceInfo uri) {
+    public DocumentURIWithSourceInfo(DocumentURIWithSourceInfo uri) {
         this.uri = uri.uri;
         this.srcId = uri.srcId;
         this.subId = uri.subId;
         this.lineNumber = uri.lineNumber;
         this.colNumber = uri.colNumber;
+        this.skip = uri.skip;
+        this.skipReason = uri.skipReason;
+    }
+    
+    public boolean isSkip() {
+        return skip;
+    }
+    
+    public void setSkip(boolean skip) {
+        this.skip = skip;
     }
     
     @Override
@@ -73,6 +110,8 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         subId = Text.readString(in);
         lineNumber = in.readInt();
         colNumber = in.readInt();
+        skip = in.readBoolean();
+        skipReason = Text.readString(in);
     }
 
     @Override
@@ -82,6 +121,8 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         Text.writeString(out, subId);
         out.writeInt(lineNumber);
         out.writeInt(colNumber);
+        out.writeBoolean(skip);
+        Text.writeString(out, skipReason);
     }
 
     public String getSrcId() {
@@ -116,22 +157,39 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         this.colNumber = colNumber;
     }
     
+    public String getSkipReason() {
+        return skipReason;
+    }
+
+    public void setSkipReason(String reason) {
+        this.skipReason = reason;
+    }
+
     @Override
     public String toString() {
         StringBuilder buf = new StringBuilder();
-        buf.append(uri);
-        if (subId != null) {
+        buf.append(uri.isEmpty() ? "()" : uri);       
+        if (subId.length() > 0) {
             buf.append(" from ").append(subId);
         }
-        if (srcId != null) {
+        if (srcId.length() > 0) {
             buf.append(" in ").append(srcId);
         }
-        if (lineNumber != -1) {
-            buf.append(" at line ").append(lineNumber);
+        if (lineNumber > 0) {
+            buf.append(" at ").append(lineNumber);
         }
-        if (colNumber != -1) {
-            buf.append(" column ").append(colNumber);
+        if (colNumber > 0) {
+            buf.append(":").append(colNumber);
+        }
+        if (!skipReason.isEmpty()) {
+            buf.append(", reason: ");
+            buf.append(skipReason);
         }
         return buf.toString();
+    }
+    
+    @Override
+    public Object clone() {
+        return new DocumentURIWithSourceInfo(this);
     }
 }
