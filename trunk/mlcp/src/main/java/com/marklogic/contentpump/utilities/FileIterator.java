@@ -93,7 +93,7 @@ public class FileIterator implements Iterator<FileSplit> {
                     FileSystem fs = file.getFileSystem(conf);
 
                     FileStatus status = fs.getFileStatus(file);
-                    if (status.isDir()) {
+                    if (status.isDirectory()) {
                         FileStatus[] children = fs.listStatus(
                             status.getPath(), inputFilter);
                         for (FileStatus stat : children) {
@@ -110,7 +110,7 @@ public class FileIterator implements Iterator<FileSplit> {
                     FileSystem fs = file.getFileSystem(conf);
                     FileStatus status = fs.getFileStatus(file);
 
-                    if (!status.isDir()) {
+                    if (!status.isDirectory()) {
                         return split;
                     }
                     FileStatus[] children = fs.listStatus(status.getPath(),

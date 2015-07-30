@@ -25,7 +25,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.CompressionCodec;
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 
 /**
  * InputFormat for compressed delimited json.
@@ -33,16 +33,15 @@ import com.marklogic.mapreduce.DocumentURI;
  *
  */
 public class CompressedDelimitedJSONInputFormat extends
-        FileAndDirectoryInputFormat<DocumentURI, Text> {
+        FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
 
     @Override
-    public RecordReader<DocumentURI, Text> createRecordReader(InputSplit split,
+    public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(InputSplit split,
             TaskAttemptContext context) throws IOException,
             InterruptedException {
-        String codec = context.getConfiguration()
-                .get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC, 
-                        CompressionCodec.ZIP.toString());
-        
+        String codec = context.getConfiguration().get(
+                ConfigConstants.CONF_INPUT_COMPRESSION_CODEC, 
+                CompressionCodec.ZIP.toString()); 
         if (codec.equalsIgnoreCase(CompressionCodec.ZIP.toString())) {
             return new ZipDelimitedJSONReader();
         } else if (codec.equalsIgnoreCase(CompressionCodec.GZIP.toString())) {

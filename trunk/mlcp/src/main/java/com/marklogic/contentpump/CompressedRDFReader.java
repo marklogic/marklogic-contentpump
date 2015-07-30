@@ -43,6 +43,7 @@ import com.marklogic.mapreduce.LinkedMapWritable;
 
 /**
  * Reader for Compressed RDF statements.
+ * 
  * @author nwalsh
  *
  * @param <VALUEIN>
@@ -50,8 +51,9 @@ import com.marklogic.mapreduce.LinkedMapWritable;
 public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(CompressedRDFReader.class);
 
-    // When we're looking at compressed data, for the purposes of deciding if we should stream or not,
-    // we assume it'll be (compressedSize * COMPRESSIONFACTOR) when it's uncompressed.
+    // When we're looking at compressed data, for the purposes of deciding if 
+    // we should stream or not, we assume it'll be (compressedSize * 
+    // COMPRESSIONFACTOR) when it's uncompressed.
     public static final long COMPRESSIONFACTOR = 2;
 
     private byte[] buf = new byte[65536];
@@ -72,44 +74,44 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         }
     }
 
-
     @Override
     protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
         file = ((FileSplit) inSplit).getPath();
         FSDataInputStream fileIn = fs.open(file);
         URI zipURI = file.toUri();
-
-        String codecString = conf.get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC, CompressionCodec.ZIP.toString());
+        String codecString = 
+                conf.get(ConfigConstants.CONF_INPUT_COMPRESSION_CODEC, 
+                        CompressionCodec.ZIP.toString());
         if (codecString.equalsIgnoreCase(CompressionCodec.ZIP.toString())) {
             zipIn = new ZipInputStream(fileIn);
             codec = CompressionCodec.ZIP;
-
-            while ((currZipEntry = ((ZipInputStream) zipIn).getNextEntry()) != null) {
+            while ((currZipEntry = ((ZipInputStream) zipIn).getNextEntry()) 
+                    != null) {
                 if (currZipEntry.getSize() != 0) {
+                    subId = currZipEntry.getName();
                     break;
                 }
             }
-
             if (currZipEntry == null) { // no entry in zip
                 LOG.warn("No valid entry in zip:" + file.toUri());
                 return;
             }
-
             ByteArrayOutputStream baos;
             long size = currZipEntry.getSize();
             if (size == -1) {
                 baos = new ByteArrayOutputStream();
-                initParser(zipURI.toASCIIString() + "/" + currZipEntry.getName(), INMEMORYTHRESHOLD); // if we don't know the size, assume it's big!
+                // if we don't know the size, assume it's big!
+                initParser(zipURI.toASCIIString() + "/" + subId,
+                        INMEMORYTHRESHOLD); 
             } else {
                 baos = new ByteArrayOutputStream((int) size);
-                initParser(zipURI.toASCIIString() + "/" + currZipEntry.getName(), size);
+                initParser(zipURI.toASCIIString() + "/" + subId, size);
             }
             int nb;
             while ((nb = zipIn.read(buf, 0, buf.length)) != -1) {
                 baos.write(buf, 0, nb);
             }
-
-            parse(currZipEntry.getName(), new ByteArrayInputStream(baos.toByteArray()));
+            parse(subId, new ByteArrayInputStream(baos.toByteArray()));
         } else if (codecString.equalsIgnoreCase(CompressionCodec.GZIP.toString())) {
             long size = inSplit.getLength();
             zipIn = new GZIPInputStream(fileIn);

@@ -24,7 +24,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 
 /**
  * InputFormat for compressed delimited text.
@@ -32,10 +32,11 @@ import com.marklogic.mapreduce.DocumentURI;
  *
  */
 public class CompressedDelimitedTextInputFormat extends 
-FileAndDirectoryInputFormat<DocumentURI, Text> {
+FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
     @Override
-    public RecordReader<DocumentURI, Text> createRecordReader(InputSplit arg0,
-        TaskAttemptContext arg1) throws IOException, InterruptedException {
+    public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(
+            InputSplit split, TaskAttemptContext context) 
+            throws IOException, InterruptedException {
         return new CompressedDelimitedTextReader();
     }
     

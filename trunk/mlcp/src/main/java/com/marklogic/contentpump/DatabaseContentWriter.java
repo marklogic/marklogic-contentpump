@@ -17,7 +17,6 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -25,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.contentpump.utilities.PermissionUtil;
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentPumpStats;
 import com.marklogic.mapreduce.ContentType;
@@ -34,23 +32,16 @@ import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
-import com.marklogic.mapreduce.utilities.AssignmentPolicy;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
-import com.marklogic.mapreduce.utilities.StatisticalAssignmentPolicy;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
-import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
-import com.marklogic.xcc.exceptions.RequestPermissionException;
-import com.marklogic.xcc.exceptions.RequestServerException;
-import com.marklogic.xcc.exceptions.ServerConnectionException;
-import com.marklogic.xcc.exceptions.XQueryException;
 
 /**
  * MarkLogicRecordWriter that can 
@@ -333,9 +324,9 @@ public class DatabaseContentWriter<VALUE> extends
             }
         }
         context.getCounter(
-                ContentPumpStats.SUCCEEDED_TO_WRITE).increment(succeeded);
+                ContentPumpStats.SUCCESSFUL_WRITES).increment(succeeded);
         context.getCounter(
-                ContentPumpStats.FAILED_TO_WRITE).increment(failed);
+                ContentPumpStats.FAILED_WRITES).increment(failed);
     }
 
     /**

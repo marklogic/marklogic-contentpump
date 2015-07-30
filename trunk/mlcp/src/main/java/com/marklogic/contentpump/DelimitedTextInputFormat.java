@@ -39,7 +39,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.contentpump.utilities.DelimitedSplit;
 import com.marklogic.contentpump.utilities.DocBuilder;
 import com.marklogic.contentpump.utilities.EncodingUtil;
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
 
@@ -51,13 +51,14 @@ import com.marklogic.mapreduce.utilities.TextArrayWritable;
  * 
  */
 public class DelimitedTextInputFormat extends
-FileAndDirectoryInputFormat<DocumentURI, Text> {
-    public static final Log LOG = LogFactory
-        .getLog(DelimitedTextInputFormat.class);
+FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
+    public static final Log LOG = LogFactory.getLog(
+            DelimitedTextInputFormat.class);
     @Override
-    public RecordReader<DocumentURI, Text> createRecordReader(InputSplit arg0,
-        TaskAttemptContext arg1) throws IOException, InterruptedException {
-        if(isSplitInput(arg1.getConfiguration())) {
+    public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(
+            InputSplit split, TaskAttemptContext context) 
+            throws IOException, InterruptedException {
+        if (isSplitInput(context.getConfiguration())) {
             return new SplitDelimitedTextReader<Text>();
         } else {
             return new DelimitedTextReader<Text>();

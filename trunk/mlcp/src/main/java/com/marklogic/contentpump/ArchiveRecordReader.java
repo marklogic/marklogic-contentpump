@@ -32,6 +32,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DatabaseDocument;
+import com.marklogic.mapreduce.utilities.URIUtil;
 
 /**
  * Read archive, construct MarkLogicDocumentWithMeta as value.
@@ -50,6 +51,7 @@ public class ArchiveRecordReader extends
     private boolean allowEmptyMeta = false;
     private int count = 0;
     private String zipfile;
+    
     /**
      * the type of files in this archive Valid choices: XML, TEXT, BINARY
      */
@@ -80,7 +82,7 @@ public class ArchiveRecordReader extends
         file = ((FileSplit) inSplit).getPath();
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDir()) {
+        if(status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
@@ -113,18 +115,19 @@ public class ArchiveRecordReader extends
             value = new DatabaseDocumentWithMeta();
         }
         while ((zipEntry = zis.getNextEntry()) != null) {
-            String name = zipEntry.getName();
+            subId = zipEntry.getName();
             long length = zipEntry.getSize();
-            if (name.endsWith(DocumentMetadata.NAKED)) {
+            if (subId.endsWith(DocumentMetadata.NAKED)) {
                 ((DatabaseDocumentWithMeta) value)
                     .setMeta(getMetadataFromStream(length));
-                setKey(name.substring(0, name.length()
-                    - DocumentMetadata.NAKED.length()));
+                String uri = subId.substring(0, subId.length()
+                        - DocumentMetadata.NAKED.length());
+                setKey(URIUtil.applyUriReplace(uri, conf), 0, 0);
                 value.setContent(null);
                 count++;
                 return true;
             }
-            if (count % 2 == 0 && name.endsWith(DocumentMetadata.EXTENSION)) {
+            if (count % 2 == 0 && subId.endsWith(DocumentMetadata.EXTENSION)) {
                 ((DatabaseDocumentWithMeta) value)
                     .setMeta(getMetadataFromStream(length));
                 count++;
@@ -132,17 +135,15 @@ public class ArchiveRecordReader extends
             }
             // no meta data
             if (count % 2 == 0 && !allowEmptyMeta) {
-                // expects meta, while not allowing empty meta
-                LOG.error("Archive damaged: no/incorrect metadata for " + name
-                    + " in " + zipfile);
+                setKey(null, 0, 0);
+                key.setSkipReason("Missing metadata");
                 return true;
             } else {
-                setKey(name);
+                setKey(subId, 0, 0);
                 readDocFromStream(length, (DatabaseDocument) value);
                 count++;
                 return true;
             }
-
         }
         //end of a zip
         if (iterator != null && iterator.hasNext()) {

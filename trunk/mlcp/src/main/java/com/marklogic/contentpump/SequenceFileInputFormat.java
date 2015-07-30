@@ -21,7 +21,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 
 /**
  * InputFromat for SequenceFile.
@@ -30,10 +30,10 @@ import com.marklogic.mapreduce.DocumentURI;
  * @param <VALUE>
  */
 public class SequenceFileInputFormat <VALUE> extends 
-FileAndDirectoryInputFormat<DocumentURI, VALUE> {
+FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
 
     @Override
-    public RecordReader<DocumentURI, VALUE> createRecordReader(
+    public RecordReader<DocumentURIWithSourceInfo, VALUE> createRecordReader(
         InputSplit arg0, TaskAttemptContext arg1) throws IOException,
         InterruptedException {
         return new SequenceFileReader<VALUE>();

@@ -40,6 +40,7 @@ import com.marklogic.mapreduce.CompressionCodec;
 
 /**
  * Reader for CompressedAggXMLInputFormat.
+ * 
  * @author ali
  *
  * @param <VALUEIN>
@@ -72,7 +73,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
         fs = file.getFileSystem(context.getConfiguration());
 
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDir()) {
+        if(status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
@@ -91,6 +92,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
             codec = CompressionCodec.ZIP;
             while ((currZipEntry = ((ZipInputStream) zipIn).getNextEntry()) != null) {
                 if (currZipEntry.getSize() != 0) {
+                    subId = currZipEntry.getName();
                     break;
                 }
             }
@@ -169,6 +171,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
                     if (currZipEntry.getSize() == 0) {
                         continue;
                     }
+                    subId = currZipEntry.getName();
                     long size = currZipEntry.getSize();
                     if (size == -1) {
                         baos = new ByteArrayOutputStream();

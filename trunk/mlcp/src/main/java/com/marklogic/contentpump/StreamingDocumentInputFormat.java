@@ -22,7 +22,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 import com.marklogic.mapreduce.StreamLocator;
 
 /**
@@ -39,7 +39,7 @@ CombineDocumentInputFormat<StreamLocator> {
     }
     
     @Override
-    public RecordReader<DocumentURI, StreamLocator> createRecordReader(
+    public RecordReader<DocumentURIWithSourceInfo, StreamLocator> createRecordReader(
             InputSplit split, TaskAttemptContext context) 
             throws IOException, InterruptedException {
         return new StreamingDocumentReader();
