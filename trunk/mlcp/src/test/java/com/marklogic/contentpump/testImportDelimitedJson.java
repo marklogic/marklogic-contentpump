@@ -422,4 +422,39 @@ public class testImportDelimitedJson {
                         + "/keys/TestImportDelimitedJson#testImportDelimitedJsonGZipFnCollection.txt");
         assertTrue(sb.toString().equals(key));
     }
+    
+    @Test
+    public void testImportDelimitedJSONArray() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/testUri2"
+                + " -uri_id val -generate_uri false"
+                + " -input_file_type delimited_json";
+        
+        String[] args = cmd.split(" ");
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+                "fn:count(fn:doc())");
+        assertTrue(result.hasNext());
+        assertEquals("4", result.next().asString());
+        
+        Utils.closeSession();
+        
+        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        StringBuilder sb = new StringBuilder();
+        while (result.hasNext()) {
+            String s = result.next().asString();
+            sb.append(s);
+        }
+        
+        String key = Utils
+                .readSmallFile(Constants.TEST_PATH.toUri().getPath()
+                        + "/keys/TestImportDelimitedJson#testImportDelimitedJSONArray.txt");
+        assertTrue(sb.toString().equals(key));
+        
+    }
 }
