@@ -55,6 +55,9 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             System.exit(1);
         }
         
+        // log versions
+        logVersions();
+        
         String[] expandedArgs = null;
         try {
             expandedArgs = OptionsFileUtil.expandArguments(args);
@@ -66,6 +69,15 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         
         int rc = runCommand(expandedArgs);
         System.exit(rc);
+    }
+
+    private static void logVersions() {
+        LOG.info("ContentPump version: " + Versions.getVersion());
+        LOG.info("Java version: " + System.getProperty("java.version"));
+        LOG.info("Hadoop version: " + VersionInfo.getVersion());
+        LOG.info("Supported MarkLogic versions: " + 
+                Versions.getMinServerVersion() + " - " + 
+                Versions.getMaxServerVersion());
     }
 
     public static int runCommand(String[] args) throws IOException {
@@ -116,10 +128,6 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             command.printUsage(command, options.getPublicOptions());
             return 1; // Exit on exception here.
         }
-        
-        // log the Hadoop version
-        String hadoopVersion = VersionInfo.getVersion();
-        LOG.info("Hadoop library version: " + hadoopVersion);     
         
         // check running mode and hadoop conf dir configuration 
         String mode = cmdline.getOptionValue(MODE);
