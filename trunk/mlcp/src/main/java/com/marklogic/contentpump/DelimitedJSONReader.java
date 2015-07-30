@@ -33,6 +33,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
+import org.codehaus.jackson.JsonLocation;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -191,35 +192,50 @@ public class DelimitedJSONReader<VALUEIN> extends
     protected String findUriInJSON(String line) 
     throws JsonParseException, IOException {
         /* Breadth-First-Search */
-        Map<String,?> root = mapper.readValue(line.getBytes(),Map.class);
-        
-        Queue<Map<String,?>> q = new LinkedList<Map<String,?>>();
-        q.add(root);
+        Queue<Object> q = new LinkedList<Object>();
+        Object root = mapper.readValue(line.getBytes(), Object.class);
+        if (root instanceof Map || root instanceof ArrayList) {
+            q.add(root);
+        } else {
+            throw new JsonParseException("Invalid JSON", new JsonLocation(null,0,0,0));
+        }
         
         while (!q.isEmpty()) {
-            Map<String,?> current = q.remove();
-            // First Match
-            if (current.containsKey(uriName)) {
-                Object uriValue = current.get(uriName);
-                if (uriValue instanceof Number || uriValue instanceof String) {
-                    return uriValue.toString();
-                } else {
-                    return null;
+            Object current = q.remove();
+            if (current instanceof ArrayList) {
+                for (Object element : (ArrayList<Object>)current) {
+                    if (element instanceof Map || element instanceof ArrayList) {
+                        q.add(element);
+                    }
                 }
+            } else { // instanceof Map
+                // First Match
+                Map<String,?> map = (Map)current;
+                if (map.containsKey(uriName)) {
+                    Object uriValue = map.get(uriName);
+                    if (uriValue instanceof Number || uriValue instanceof String) {
+                        return uriValue.toString();
+                    } else {
+                        LOG.error("File " + file.toUri() + " line "
+                                + reader.getLineNumber() + " skipped: uri_id expects string or number");
+                        return null;
+                    }
+                }
+                // Add child elements to queue
+                Iterator<?> it = map.entrySet().iterator();
+                while (it.hasNext()) {
+                    Entry<String,?> KVpair = (Entry<String,?>)it.next();
+                    Object pairValue = KVpair.getValue();
+                    
+                    if (pairValue instanceof Map || pairValue instanceof ArrayList) {
+                        q.add(pairValue);
+                    }
+                };
             }
-            // Add child elements to queue
-            Iterator<?> it = current.entrySet().iterator();
-            while (it.hasNext()) {
-                Entry<String,?> KVpair = (Entry<String,?>)it.next();
-                Object pairValue = KVpair.getValue();
-                
-                if (pairValue instanceof Map) {
-                    q.add((Map<String,?>)pairValue);
-                } else if (pairValue instanceof ArrayList) {
-                    q.addAll((ArrayList<Map<String,?>>)pairValue);
-                }
-            };
         }
+        LOG.error("File " + file.toUri() + " line "
+                      + reader.getLineNumber()
+                              + " skipped: no uri " + uriName + " found");
         return null;
     }  
 }
