@@ -15,7 +15,6 @@
  */
 package com.marklogic.mapreduce;
 
-import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
