@@ -80,7 +80,7 @@ extends ImportRecordReader<VALUEIN> {
     public boolean nextKeyValue() throws IOException, InterruptedException {
         while (iterator.hasNext()) {
             FileSplit split = iterator.next();
-            Path file = split.getPath();
+            file = split.getPath();
             FileSystem fs = file.getFileSystem(context.getConfiguration());
             FSDataInputStream fileIn = fs.open(file);
             byte[] buf = new byte[(int)split.getLength()];
