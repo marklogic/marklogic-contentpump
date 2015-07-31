@@ -89,7 +89,9 @@ implements ConfigConstants {
         } else {
             key.setSkip(false);
         }
-        System.out.println(key);
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Set key: " + key);
+        }
     }
 
     @Override
