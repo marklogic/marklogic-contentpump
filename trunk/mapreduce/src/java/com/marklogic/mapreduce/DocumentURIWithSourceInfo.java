@@ -176,7 +176,7 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
             buf.append(" in ").append(srcId);
         }
         if (lineNumber > 0) {
-            buf.append(" at ").append(lineNumber);
+            buf.append(" at line ").append(lineNumber);
         }
         if (colNumber > 0) {
             buf.append(":").append(colNumber);
