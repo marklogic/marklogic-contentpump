@@ -84,6 +84,12 @@ implements ConfigConstants {
         key.setColNumber(col);
         key.setLineNumber(line);
         key.setSkipReason("");
+        if (uri == null || uri.isEmpty()) {
+            key.setSkip(true);
+        } else {
+            key.setSkip(false);
+        }
+        System.out.println(key);
     }
 
     @Override

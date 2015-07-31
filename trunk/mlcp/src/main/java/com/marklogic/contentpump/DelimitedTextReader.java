@@ -125,9 +125,9 @@ public class DelimitedTextReader<VALUEIN> extends
                 ConfigConstants.DEFAULT_DELIMITER);
         if (delimStr.length() == 1) {
             delimiter = delimStr.charAt(0);
-        } else {
-            LOG.error("Incorrect delimitor: " + delimiter
-                + ". Expects single character.");
+        } else {  
+            throw new UnsupportedOperationException("Invalid delimiter: " +
+                    delimStr);
         }
         uriName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
         docBuilder.init(conf);
