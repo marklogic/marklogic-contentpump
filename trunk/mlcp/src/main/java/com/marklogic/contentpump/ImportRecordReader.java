@@ -69,7 +69,7 @@ implements ConfigConstants {
      */
     protected void setKey(String uri, int line, int col) {
         if (srcId == null) {
-            srcId = file.toString();
+            srcId = file == null ? "" : file.toString();
         }
         if (key == null) {
             key = new DocumentURIWithSourceInfo(uri, srcId, subId, line, col);
