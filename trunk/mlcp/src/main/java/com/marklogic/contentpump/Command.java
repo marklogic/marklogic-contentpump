@@ -450,6 +450,10 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(DELIMITER)) {
                 String delim = cmdline.getOptionValue(DELIMITER);
+                if (delim == null || delim.length() != 1) {
+                    throw new IllegalArgumentException("Invalid delimiter: " +
+                            delim); 
+                }
                 conf.set(CONF_DELIMITER, delim);
             }
             if (cmdline.hasOption(DELIMITED_URI_ID)) {
