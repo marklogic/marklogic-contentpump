@@ -245,8 +245,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             newDoc = true;
             newUriId = true;
             if (useAutomaticId) {
-                setKey(getEncodedURI(idGen.incrementAndGet()), 
-                        loc.getLineNumber(),loc.getColumnNumber());
+                setKey(idGen.incrementAndGet(), loc.getLineNumber(),
+                        loc.getColumnNumber(), true);
             }
         } else {
             // record element name may not nest
@@ -259,8 +259,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 newDoc = true;
                 newUriId = true;
                 if (useAutomaticId) {
-                    setKey(getEncodedURI(idGen.incrementAndGet()), 
-                            loc.getLineNumber(), loc.getColumnNumber());
+                    setKey(idGen.incrementAndGet(), loc.getLineNumber(), 
+                            loc.getColumnNumber(), true);
                 }
             }
         }   
@@ -296,12 +296,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 + "=\"" + aValue + "\"");
             if (!useAutomaticId && newDoc && ("@" + aName).equals(idName)) {
                 currentId = aValue;
-                if (aValue == null || aValue.isEmpty()) {
-                    setKey("", loc.getLineNumber(), loc.getColumnNumber());
-                } else {
-                    setKey(getEncodedURI(aValue), loc.getLineNumber(), 
-                        loc.getColumnNumber());
-                }
+                setKey(aValue, loc.getLineNumber(), loc.getColumnNumber(), 
+                        true);
             }
         }
         sb.append(">");
@@ -317,16 +313,11 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             currentId = newId;
             sb.append(newId);
             if (newUriId) {
-                if (newId == null || newId.isEmpty()) {
-                    setKey("", loc.getLineNumber(), loc.getColumnNumber());
-                } else {
-                    setKey(getEncodedURI(newId), loc.getLineNumber(), 
-                        loc.getColumnNumber());
-                }
+                setKey(newId, loc.getLineNumber(), loc.getColumnNumber(), 
+                        true);
                 newUriId = false;
-            } else {
-                LOG.warn("Ignoring duplicate URI_ID: " + idName + " = " + 
-                        newId);
+            } else if (LOG.isDebugEnabled()) {
+                LOG.debug("Duplicate URI_ID match found: key = " + key);
             }
             if (LOG.isTraceEnabled()) {
                 LOG.trace("URI_ID: " + newId);

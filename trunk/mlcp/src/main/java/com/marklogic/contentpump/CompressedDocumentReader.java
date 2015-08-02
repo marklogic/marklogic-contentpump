@@ -18,7 +18,6 @@ package com.marklogic.contentpump;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -104,21 +103,16 @@ public class CompressedDocumentReader<VALUEIN> extends
             break;
         case GZIP:
             zipIn = new GZIPInputStream(fileIn);
-            try {
-                String uri = makeURIFromPath(file);
-                if (uri.toLowerCase().endsWith(".gz") || 
+            String uri = makeURIFromPath(file);
+            if (uri.toLowerCase().endsWith(".gz") || 
                     uri.toLowerCase().endsWith(".gzip")) {
-                    uri = uri.substring(0, uri.lastIndexOf('.'));
-                } 
-                setKey(uri, 0, 0);
-            } catch (URISyntaxException ex) {
-                setKey(null, 0, 0);
-                key.setSkipReason(ex.getMessage());
-            }
+                uri = uri.substring(0, uri.lastIndexOf('.'));
+            } 
+            setKey(uri, 0, 0, true);
             break;
         default:
             String error = "Unsupported codec: " + codec.name();
-            LOG.error(error, new UnsupportedOperationException(error));
+            LOG.warn(error, new UnsupportedOperationException(error));
         }
     }
 
@@ -134,14 +128,11 @@ public class CompressedDocumentReader<VALUEIN> extends
             while ((zipEntry = zis.getNextEntry()) != null) {
                 if (zipEntry != null && zipEntry.getSize() != 0) {
                     subId = zipEntry.getName();
-                    try {
-                        String uri = makeURIForZipEntry(file, subId);
-                        setKey(uri, 0, 0);
-                        setValue(zipEntry.getSize());
-                    } catch (URISyntaxException ex) {
-                        setKey(null, 0, 0);
-                        key.setSkipReason(ex.getMessage());
+                    String uri = makeURIForZipEntry(file, subId);
+                    if (setKey(uri, 0, 0, true)) {
+                        return true;
                     }
+                    setValue(zipEntry.getSize());
                     return true;
                 }
             }
@@ -152,8 +143,7 @@ public class CompressedDocumentReader<VALUEIN> extends
             hasNext = false;
             return true;
         } else {
-            throw new UnsupportedOperationException("Unsupported codec: "
-                + codec.name());
+            return false;
         }       
         if (iterator != null && iterator.hasNext()) {
             close();

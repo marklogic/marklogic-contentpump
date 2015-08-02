@@ -32,7 +32,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DatabaseDocument;
-import com.marklogic.mapreduce.utilities.URIUtil;
 
 /**
  * Read archive, construct MarkLogicDocumentWithMeta as value.
@@ -50,7 +49,6 @@ public class ArchiveRecordReader extends
     private byte[] buf = new byte[65536];
     private boolean allowEmptyMeta = false;
     private int count = 0;
-    private String zipfile;
     
     /**
      * the type of files in this archive Valid choices: XML, TEXT, BINARY
@@ -91,7 +89,6 @@ public class ArchiveRecordReader extends
     
     protected void initStream(InputSplit inSplit) throws IOException {
         file = ((FileSplit) inSplit).getPath();
-        zipfile = file.toUri().getPath();
         int index = file.toUri().getPath().lastIndexOf(EXTENSION);
         String subStr = file.toUri().getPath().substring(0, index);
         index = subStr.lastIndexOf('-');
@@ -122,7 +119,7 @@ public class ArchiveRecordReader extends
                     .setMeta(getMetadataFromStream(length));
                 String uri = subId.substring(0, subId.length()
                         - DocumentMetadata.NAKED.length());
-                setKey(URIUtil.applyUriReplace(uri, conf), 0, 0);
+                setKey(uri, 0, 0, false);
                 value.setContent(null);
                 count++;
                 return true;
@@ -135,11 +132,10 @@ public class ArchiveRecordReader extends
             }
             // no meta data
             if (count % 2 == 0 && !allowEmptyMeta) {
-                setKey(null, 0, 0);
-                key.setSkipReason("Missing metadata");
+                setSkipKey(0, 0, "Missing metadata");
                 return true;
             } else {
-                setKey(subId, 0, 0);
+                setKey(subId, 0, 0, false);
                 readDocFromStream(length, (DatabaseDocument) value);
                 count++;
                 return true;

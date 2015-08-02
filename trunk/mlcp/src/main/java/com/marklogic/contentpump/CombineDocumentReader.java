@@ -16,13 +16,11 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -84,12 +82,8 @@ extends ImportRecordReader<VALUEIN> {
             FileSystem fs = file.getFileSystem(context.getConfiguration());
             FSDataInputStream fileIn = fs.open(file);
             byte[] buf = new byte[(int)split.getLength()];
-            try {
-                String uri = makeURIFromPath(file);
-                setKey(uri, 0, 0);
-            } catch (URISyntaxException ex) {
-                setKey(null, 0, 0);
-                key.setSkipReason(ex.getMessage());
+            String uri = makeURIFromPath(file);
+            if (setKey(uri, 0, 0, true)) {
                 return true;
             }
             try {

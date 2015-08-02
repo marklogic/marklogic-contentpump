@@ -508,7 +508,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected void setKey() {
-        setKey(getEncodedURI(idGen.incrementAndGet()) + ".xml", 0, 0);
+        setKey(idGen.incrementAndGet() +".xml", 0, 0, true);
     }
 
     @Override
