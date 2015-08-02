@@ -158,8 +158,7 @@ implements MarkLogicConstants {
             // no support for fragments
             if (tree.containLinks() || tree.getFragmentOrdinal() != 0) {
                 // send to DocumentMapper for book keeping
-                setKey(null, uri, 0, 0);
-                key.setSkipReason("fragment or link");
+                setSkipKey(uri, 0, 0, "fragment or link");
                 value = null;
                 return true;
             }
@@ -169,11 +168,10 @@ implements MarkLogicConstants {
             value = (VALUEIN) ForestDocument.createDocument(conf, 
                     largeForestDir, tree, uri);
             if (value == null) { // send to DocumentMapper for book keeping
-                setKey(null, uri, 0, 0);
-                key.setSkipReason("unsupported node type");
+                setSkipKey(uri, 0, 0, "unsupported node type");
                 return true;
             }
-            setKey(URIUtil.applyUriReplace(uri, conf), uri, 0, 0);
+            setKey(uri, uri, 0, 0);
             return true;
         }
         return false;
@@ -192,19 +190,47 @@ implements MarkLogicConstants {
         if (srcId == null) {
             srcId = split.getPath().toString();
         }
-        if (key == null) {
-            key = new DocumentURIWithSourceInfo(uri, srcId, sub, 
-                    line, col);
-        }
         // apply prefix and suffix for URI
-        if (uri != null && !uri.isEmpty()) {
-            uri = URIUtil.applyPrefixSuffix(uri, conf);
+        uri = URIUtil.applyUriReplace(uri, conf);
+        uri = URIUtil.applyPrefixSuffix(uri, conf);
+        if (key == null) {
+            key = new DocumentURIWithSourceInfo(uri, srcId, sub, line, col);
+        } else {   
+            key.setSkipReason("");
+            key.setUri(uri);   
+            key.setSrcId(srcId);
+            key.setSubId(sub);
+            key.setColNumber(col);
+            key.setLineNumber(line);
         }
-        key.setUri(uri);   
-        key.setSrcId(srcId);
-        key.setSubId(sub);
-        key.setColNumber(col);
-        key.setLineNumber(line);
+    }
+    
+    /**
+     * Set the result as 
+     * DocumentURI key.
+     * 
+     * @param uri Source string of document URI.
+     * @param line Line number in the source if applicable; -1 otherwise.
+     * @param col Column number in the source if applicable; -1 otherwise.
+     * 
+     * @return true if key indicates the record is to be skipped; false 
+     * otherwise.
+     */
+    protected void setSkipKey(String sub, int line, int col, String reason) {
+        if (key == null) {
+            key = new DocumentURIWithSourceInfo("", srcId, sub, line, col);
+        } else {
+            key.setUri("");   
+            key.setSrcId(srcId);
+            key.setSubId(sub);
+            key.setColNumber(col);
+            key.setLineNumber(line);
+        }
+        key.setSkipReason(reason);
+
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Set key: " + key);
+        }
     }
 
     protected boolean applyFilter(String uri, ExpandedTree tree) {

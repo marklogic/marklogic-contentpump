@@ -35,7 +35,6 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
     private String subId = "";
     private int lineNumber = 0;
     private int colNumber = 0;
-    private boolean skip = false;
     private String skipReason = "";
     
     public DocumentURIWithSourceInfo() {};
@@ -47,7 +46,6 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
             this.uri = uri;
         }    
         srcId = src;
-        skip = uri.isEmpty();
     }
     
     public DocumentURIWithSourceInfo(String uri, String src, String sub) {
@@ -58,7 +56,6 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         } 
         srcId = src;
         subId = sub;
-        skip = uri.isEmpty();
     }
     
     public DocumentURIWithSourceInfo(String uri, String src, String sub, 
@@ -72,7 +69,6 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         subId = sub;
         lineNumber = line;
         colNumber = col;
-        skip = uri.isEmpty();
     }
     
     public DocumentURIWithSourceInfo(String uri, String src, String sub, 
@@ -82,7 +78,6 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         subId = sub;
         lineNumber = line;
         colNumber = col;
-        this.skip = skip;
     }
     
     public DocumentURIWithSourceInfo(DocumentURIWithSourceInfo uri) {
@@ -91,16 +86,11 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         this.subId = uri.subId;
         this.lineNumber = uri.lineNumber;
         this.colNumber = uri.colNumber;
-        this.skip = uri.skip;
         this.skipReason = uri.skipReason;
     }
     
     public boolean isSkip() {
-        return skip;
-    }
-    
-    public void setSkip(boolean skip) {
-        this.skip = skip;
+        return uri.isEmpty();
     }
     
     @Override
@@ -110,7 +100,6 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         subId = Text.readString(in);
         lineNumber = in.readInt();
         colNumber = in.readInt();
-        skip = in.readBoolean();
         skipReason = Text.readString(in);
     }
 
@@ -121,7 +110,6 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         Text.writeString(out, subId);
         out.writeInt(lineNumber);
         out.writeInt(colNumber);
-        out.writeBoolean(skip);
         Text.writeString(out, skipReason);
     }
 
