@@ -71,7 +71,7 @@ implements WritableComparable<DocumentURI>, Cloneable {
     }
     
     public void setUri(String uri) {
-        this.uri = uri;
+        this.uri = uri == null ? "" : uri;
     }
     
     @Override
