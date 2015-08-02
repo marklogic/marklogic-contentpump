@@ -68,7 +68,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         if (parser == null || pos >= end) {
             return false;
         }
-
         try {
             String[] values = parser.getLine();
             if (values == null) {
@@ -77,8 +76,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
             }
             pos += getBytesCountFromLine(values);
             if (values.length != fields.length) {
-                setKey(null, 0, 0);
-                key.setSkipReason(
+                setSkipKey(0, 0, 
                         "number of fields do not match number of columns");
                 return true;
             }
@@ -88,18 +86,17 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                 if (fields[i].trim().equals(""))
                     continue;
                 if (!generateId && uriId == i) {
-                    if (values[i] == null || values[i].equals("")) {
-                        setKey(values[i], 0, 0);
-                        key.setSkipReason("empty URI value");
+                    if (setKey(values[i], 0, 0, true)) {
                         return true;
                     }
-                    setKey(getEncodedURI(values[i]), 0, 0);
                 }
                 docBuilder.put(fields[i], values[i]);
             }
             docBuilder.build();
             if (generateId) {
-                setKey(getEncodedURI(idGen.incrementAndGet()), 0, 0);
+                if (setKey(idGen.incrementAndGet(), 0, 0, true)) {
+                    return true;
+                }
             }
             if (value instanceof Text) {
                 ((Text)value).set(docBuilder.getDoc());
@@ -110,8 +107,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         } catch (IOException ex) {
             if (ex.getMessage().contains(
                 "invalid char between encapsulated token end delimiter")) {
-                setKey(null, parser.getLineNumber(), 0);
-                key.setSkipReason(ex.getMessage());
+                setSkipKey(parser.getLineNumber(), 0, ex.getMessage());
             } else {
                 throw ex;
             }

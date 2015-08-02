@@ -115,10 +115,9 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if (reader == null) {
             return false;
         }
-
         while (reader.next(seqKey, seqValue)) {
-            setKey(((SequenceFileKey) seqKey).getDocumentURI().getUri(), 0, 0);
-
+            setKey(((SequenceFileKey) seqKey).getDocumentURI().getUri(), 0, 0, 
+                    false);
             if (value instanceof Text) {
                 ((Text) value)
                     .set(new String(((SequenceFileValue<Text>) seqValue)

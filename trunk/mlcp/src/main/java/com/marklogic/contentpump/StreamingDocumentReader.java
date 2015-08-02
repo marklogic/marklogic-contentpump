@@ -20,9 +20,6 @@ package com.marklogic.contentpump;
  * option is set to true.
  */
 import java.io.IOException;
-import java.net.URISyntaxException;
-
-import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.mapreduce.CompressionCodec;
@@ -43,12 +40,8 @@ CombineDocumentReader<StreamLocator> {
         if (iterator.hasNext()) {
             FileSplit split = iterator.next();
             file = split.getPath();
-            try {
-                String uri = makeURIFromPath(file);
-                setKey(uri, 0, 0);
-            } catch (URISyntaxException ex) {
-                setKey(null, 0, 0);
-                key.setSkipReason(ex.getMessage());
+            String uri = makeURIFromPath(file);
+            if (setKey(uri, 0, 0, true)) {
                 return true;
             } 
             value = new StreamLocator(file, CompressionCodec.NONE);

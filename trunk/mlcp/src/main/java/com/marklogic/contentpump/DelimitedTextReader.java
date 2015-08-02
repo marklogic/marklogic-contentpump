@@ -200,28 +200,27 @@ public class DelimitedTextReader<VALUEIN> extends
             }
             int line = parser.getLineNumber();
             if (values.length != fields.length) {
-                setKey(null, line, 0);
-                key.setSkipReason(
+                setSkipKey(line, 0, 
                         "number of fields do not match number of columns");
                 return true;
             }  
             docBuilder.newDoc();           
             for (int i = 0; i < fields.length; i++) {
                 //skip the empty column in header
-                if(fields[i].trim().equals("")) continue;
+                if(fields[i].trim().equals("")) {
+                    continue;
+                }
                 if (!generateId && uriId == i) {
-                    if (values[i] == null || values[i].isEmpty()) {
-                        setKey(values[i], line, 0);
-                        key.setSkipReason("empty URI value");
+                    if (setKey(values[i], line, 0, true)) {
                         return true;
                     }
-                    setKey(getEncodedURI(values[i]), line, 0);
                 }
                 docBuilder.put(fields[i], values[i]);
             }
             docBuilder.build();
-            if (generateId) {
-                setKey(getEncodedURI(idGen.incrementAndGet()), line, 0);
+            if (generateId &&
+                setKey(idGen.incrementAndGet(), line, 0, true)) {
+                return true;
             }
             if (value instanceof Text) {
                 ((Text)value).set(docBuilder.getDoc());
@@ -232,8 +231,7 @@ public class DelimitedTextReader<VALUEIN> extends
         } catch (IOException ex) {
             if (ex.getMessage().contains(
                 "invalid char between encapsulated token end delimiter")) {
-                setKey(null, parser.getLineNumber(), 0);
-                key.setSkipReason(ex.getMessage());
+                setSkipKey(parser.getLineNumber(), 0, ex.getMessage());
             } else {
                 throw ex;
             }
