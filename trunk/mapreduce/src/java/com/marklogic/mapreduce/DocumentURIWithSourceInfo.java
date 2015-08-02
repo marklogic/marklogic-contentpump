@@ -71,15 +71,6 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
         colNumber = col;
     }
     
-    public DocumentURIWithSourceInfo(String uri, String src, String sub, 
-            int line, int col, boolean skip) {
-        this.uri = uri;
-        srcId = src;
-        subId = sub;
-        lineNumber = line;
-        colNumber = col;
-    }
-    
     public DocumentURIWithSourceInfo(DocumentURIWithSourceInfo uri) {
         this.uri = uri.uri;
         this.srcId = uri.srcId;
