@@ -148,29 +148,28 @@ public class DelimitedJSONReader<VALUEIN> extends
                 return false;
             }
         } else if (line.trim().equals("")) { 
-            setKey("", lineNumber, 0);
-            key.setSkipReason("empty lines");
+            setSkipKey(lineNumber, 0, "empty lines");
             return true;
         } else if (line.startsWith(" ") || line.startsWith("\t")) {
-            setKey(null, lineNumber, 0);
-            key.setSkipReason("leading space");
+            setSkipKey(lineNumber, 0, "leading space");
             return true;
         } else {
             if (generateId) {
-                setKey(getEncodedURI(idGen.incrementAndGet()), lineNumber, 0);
+                if (setKey(idGen.incrementAndGet(), lineNumber, 0, true)) {
+                    return true;
+                }
             } else {
                 String uri = null;
                 try {
                     uri = findUriInJSON(line.trim());
                     if (uri == null) {
-                        setKey("", lineNumber, 0);
-                        key.setSkipReason("no qualifying URI value found");
+                        setSkipKey(lineNumber, 0, 
+                                "no qualifying URI value found");
                     } else {
-                        setKey(getEncodedURI(uri), lineNumber, 0);
+                        setKey(uri, lineNumber, 0, true);
                     }
                 } catch (Exception ex) {
-                    setKey(uri, lineNumber, 0);
-                    key.setSkipReason(ex.getMessage());
+                    setSkipKey(lineNumber, 0, ex.getMessage());
                 }
                 if (uri == null) {
                     return true;

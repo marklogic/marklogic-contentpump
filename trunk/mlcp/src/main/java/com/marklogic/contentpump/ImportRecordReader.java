@@ -60,35 +60,78 @@ implements ConfigConstants {
     protected String subId = "";
     
     /**
-     * Apply URI prefix and suffix configuration options and set the result as 
-     * DocumentURI key.
+     * Apply URI replace option, encode URI if specified, apply URI prefix and
+     * suffix configuration options and set the result as DocumentURI key.
      * 
      * @param uri Source string of document URI.
-     * @param line Line number in the source if applicable; -1 otherwise.
-     * @param col Column number in the source if applicable; -1 otherwise.
+     * @param line Line number in the source if applicable; 0 otherwise.
+     * @param col Column number in the source if applicable; 0 otherwise.
+     * @param encode Encode uri if set to true.
+     * 
+     * @return true if key indicates the record is to be skipped; false 
+     * otherwise.
      */
-    protected void setKey(String uri, int line, int col) {
+    protected boolean setKey(String uri, int line, int col, boolean encode) {
         if (srcId == null) {
             srcId = file == null ? "" : file.toString();
         }
         if (key == null) {
-            key = new DocumentURIWithSourceInfo(uri, srcId, subId, line, col);
+            key = new DocumentURIWithSourceInfo(uri, srcId);
         }
-        // apply prefix and suffix for URI
+        // apply prefix, suffix and replace for URI
         if (uri != null && !uri.isEmpty()) {
+            uri = URIUtil.applyUriReplace(uri, conf);
+            key.setSkipReason("");
+            if (encode) {
+                try {
+                    URI uriObj = new URI(null, null, null, 0, uri, null, null);
+                    uri = uriObj.toString();
+                } catch (URISyntaxException e) {
+                    uri = null;
+                    key.setSkipReason(e.getMessage());
+                }
+            }
             uri = URIUtil.applyPrefixSuffix(uri, conf);
+        } else {
+            key.setSkipReason("empty uri value");
         }
-        key.setUri(uri == null ? "" : uri);   
+        key.setUri(uri);   
         key.setSrcId(srcId);
         key.setSubId(subId);
         key.setColNumber(col);
-        key.setLineNumber(line);
-        key.setSkipReason("");
-        if (uri == null || uri.isEmpty()) {
-            key.setSkip(true);
-        } else {
-            key.setSkip(false);
+        key.setLineNumber(line);     
+    
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Set key: " + key);
+        }     
+        return key.isSkip();
+    }
+
+    /**
+     * Set the result as DocumentURI key.
+     * 
+     * @param uri Source string of document URI.
+     * @param line Line number in the source if applicable; -1 otherwise.
+     * @param col Column number in the source if applicable; -1 otherwise.
+     * 
+     * @return true if key indicates the record is to be skipped; false 
+     * otherwise.
+     */
+    protected void setSkipKey(int line, int col, String reason) {
+        if (srcId == null) {
+            srcId = file == null ? "" : file.toString();
         }
+        if (key == null) {
+            key = new DocumentURIWithSourceInfo("", srcId, subId, line, col);
+        } else {
+            key.setUri("");   
+            key.setSrcId(srcId);
+            key.setSubId(subId);
+            key.setColNumber(col);
+            key.setLineNumber(line);
+        }
+        key.setSkipReason(reason);
+
         if (LOG.isTraceEnabled()) {
             LOG.trace("Set key: " + key);
         }
@@ -149,43 +192,14 @@ implements ConfigConstants {
         }
     }
 
-    protected String makeURIFromPath(Path file) throws URISyntaxException {
+    protected String makeURIFromPath(Path file) {
         // get path portion of the file
-       String path = file.toUri().getPath();
-       if (LOG.isTraceEnabled()) {
-         LOG.trace("makeURIFromPath Path:"+path);
-       }
-       // apply URI replace
-       path = URIUtil.applyUriReplace(path, conf);
-       if (LOG.isTraceEnabled()) {
-         LOG.trace("makeURIFromPath Path after uri replace:"+path);
-       }
-       // create a URI out of it
-       URI uri = new URI(null, null, null, 0, path, null, null);
-       // return the encoded uri as document uri key
-       if (LOG.isTraceEnabled()) {
-           LOG.trace("makeURIFromPath document URI" + uri);
-       }
-       return uri.toString();
+       return file.toUri().getPath().toString();
     }
     
-    protected String getEncodedURI(String val) {  
-        val = URIUtil.applyUriReplace(val, conf);
-        try {
-            URI uri = new URI(null, null, null, 0, val, null, null);
-            return uri.toString();
-        } catch (URISyntaxException e) {
-            LOG.warn("Error parsing value as URI, skipping " + val, e);
-            return null;
-        }
-    }
-    
-    protected String makeURIForZipEntry(Path zipFile, String val) 
-    throws URISyntaxException {  
+    protected String makeURIForZipEntry(Path zipFile, String val) {  
         Path path = new Path(zipFile, val);
-        val = URIUtil.applyUriReplace(path.toUri().getPath(), conf);
-        URI uri = new URI(null, null, null, 0, val, null, null);
-        return uri.toString();
+        return path.toUri().getPath();
     }
 
     @Override
