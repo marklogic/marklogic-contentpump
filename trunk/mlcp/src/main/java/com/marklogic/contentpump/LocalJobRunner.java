@@ -220,11 +220,13 @@ public class LocalJobRunner implements ConfigConstants {
                 
                 trackingReader.initialize(split, mapperContext);
                 
-                //no thread pool (only 1 thread specified) , use DocumentMapper
+                // no thread pool (only 1 thread specified)
+                Class<? extends Mapper<?,?,?,?>> mapClass = 
+                        job.getMapperClass();
                 mapperContext.getConfiguration().setClass(
-                   CONF_MAPREDUCE_JOB_MAP_CLASS , DocumentMapper.class, Mapper.class);
+                   CONF_MAPREDUCE_JOB_MAP_CLASS , mapClass, Mapper.class);
                 mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) 
-                    ReflectionUtils.newInstance(DocumentMapper.class,
+                    ReflectionUtils.newInstance(mapClass,
                         mapperContext.getConfiguration());
                 mapper.run(mapperContext);
                 trackingReader.close();
