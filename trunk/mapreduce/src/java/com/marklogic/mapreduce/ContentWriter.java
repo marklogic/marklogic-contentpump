@@ -424,15 +424,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     Throwable cause = ex.getCause();
                     if (cause != null) {
                         if (cause instanceof XQueryException) {
-                            LOG.warn(
+                            LOG.error(
                                 ((XQueryException)cause).getFormatString());
                         } else {
-                            LOG.warn(cause.getMessage());
+                            LOG.error(cause.getMessage());
                         }
                     }
                     if (ex instanceof ContentInsertException) {
-                        Content content = ((ContentInsertException)ex)
-                                .getContent();
+                        Content content = 
+                                ((ContentInsertException)ex).getContent();
                         if (!needCommit &&
                             batch[batch.length-1] == content) {
                             failed += batch.length;   
@@ -440,17 +440,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                             for (Content fc : batch) {
                                 DocumentURI failedUri = 
                                         pendingUris[id].remove(fc);
-                                if (LOG.isInfoEnabled()) {
-                                    LOG.info("Failed document: " + failedUri);
-                                }
+                                LOG.warn("Failed document " + failedUri);
                             }
                         } else {
                             DocumentURI failedUri = 
                                     pendingUris[id].remove(content);
                             failed++;
-                            if (LOG.isInfoEnabled()) {
-                                LOG.info("Failed document: " + failedUri);
-                            }
+                            LOG.warn("Failed document " + failedUri);
                         }
                     }
                 }
@@ -458,17 +454,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         } catch (RequestServerException e) {
             // log error and continue on RequestServerException
             if (e instanceof XQueryException) {
-                LOG.warn(((XQueryException)e).getFormatString());
+                LOG.error(((XQueryException)e).getFormatString());
             } else {
-                LOG.warn(e.getMessage());
+                LOG.error(e.getMessage());
             }
             failed += batch.length;   
             // remove the failed content from pendingUris
             for (Content fc : batch) {
                 DocumentURI failedUri = pendingUris[id].remove(fc);
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Failed document: " + failedUri);
-                }
+                LOG.warn("Failed document " + failedUri);
             }
         } catch (RequestException e) {
             if (sessions[id] != null) {
@@ -501,16 +495,14 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         } catch (RequestServerException e) {
             if (e instanceof XQueryException) {
-                LOG.warn(((XQueryException)e).getFormatString());
+                LOG.error(((XQueryException)e).getFormatString());
             } else {
-                LOG.warn(e.getMessage());
+                LOG.error(e.getMessage());
             }
             failed++;   
             // remove the failed content from pendingUris
             DocumentURI failedUri = pendingUris[id].remove(content.getUri());
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Failed document: " + failedUri);
-            }
+            LOG.warn("Failed document " + failedUri);
         } catch (RequestException e) {
             if (sessions[id] != null) {
                 sessions[id].close();
@@ -529,12 +521,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             sessions[id].commit();
             succeeded += commitUris[id].size();
         } catch (RequestServerException e) {
-            LOG.warn("Error commiting transaction", e);
+            LOG.error("Error commiting transaction", e);
             failed += commitUris[id].size();   
             for (DocumentURI failedUri : commitUris[id]) {
-                if (LOG.isInfoEnabled()) {
-                    LOG.info("Failed document: " + failedUri);
-                }
+                LOG.warn("Failed document: " + failedUri);
             }
         } catch (RequestException e) {
             if (sessions[id] != null) {
@@ -677,12 +667,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         succeeded += commitUris[i].size();
                     } catch (RequestServerException e) {
                         // log error and continue on RequestServerException
-                        LOG.warn("Error commiting transaction", e);
+                        LOG.error("Error commiting transaction", e);
                         failed += commitUris[i].size();   
                         for (DocumentURI failedUri : commitUris[i]) {
-                            if (LOG.isInfoEnabled()) {
-                                LOG.info("Failed document: " + failedUri);
-                            }
+                            LOG.warn("Failed document " + failedUri);
                         }
                         commitUris[i].clear();
                     } catch (RequestException e) {
@@ -710,9 +698,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         }
         context.getCounter(
-            ContentPumpStats.SUCCESSFUL_WRITES).increment(succeeded);
+            ContentPumpStats.OUTPUT_RECORDS_COMMITTED).increment(succeeded);
         context.getCounter(
-            ContentPumpStats.FAILED_WRITES).increment(failed);
+            ContentPumpStats.OUTPUT_RECORDS_FAILED).increment(failed);
     }
     
     @Override
