@@ -17,8 +17,8 @@
 package com.marklogic.mapreduce;
 
 public enum ContentPumpStats {
-    ATTEMPTED_READS,
-    ATTEMPTED_WRITES,
-    SUCCESSFUL_WRITES,
-    FAILED_WRITES;
+    INPUT_RECORDS,
+    OUTPUT_RECORDS,
+    OUTPUT_RECORDS_COMMITTED,
+    OUTPUT_RECORDS_FAILED
 }
