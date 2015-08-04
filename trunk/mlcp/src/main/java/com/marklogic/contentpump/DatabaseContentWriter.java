@@ -306,12 +306,10 @@ public class DatabaseContentWriter<VALUE> extends
                         succeeded += commitUris[i].size();
                     } catch (RequestException e) {
                         // log error and continue on RequestServerException
-                        LOG.warn("Error commiting transaction", e);
+                        LOG.error("Error commiting transaction", e);
                         failed += commitUris[i].size();   
                         for (DocumentURI failedUri : commitUris[i]) {
-                            if (LOG.isInfoEnabled()) {
-                                LOG.info("Failed document: " + failedUri);
-                            }
+                            LOG.warn("Failed document " + failedUri);
                         }
                         commitUris[i].clear();
                     } finally {
@@ -364,7 +362,7 @@ public class DatabaseContentWriter<VALUE> extends
         try {
             s.submitRequest(req);
         } catch (RequestException ex) {
-            LOG.warn("Error setting document properties for " + uri, ex);
+            LOG.error("Error setting document properties for " + uri, ex);
         }
     }
 }

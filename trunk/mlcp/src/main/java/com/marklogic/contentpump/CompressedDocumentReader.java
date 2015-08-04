@@ -112,7 +112,7 @@ public class CompressedDocumentReader<VALUEIN> extends
             break;
         default:
             String error = "Unsupported codec: " + codec.name();
-            LOG.warn(error, new UnsupportedOperationException(error));
+            LOG.error(error, new UnsupportedOperationException(error));
         }
     }
 
