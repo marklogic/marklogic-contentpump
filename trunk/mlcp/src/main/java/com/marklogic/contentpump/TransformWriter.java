@@ -104,11 +104,11 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         } catch (RequestServerException e) {
             // log error and continue on RequestServerException
             if (e instanceof XQueryException) {
-                LOG.warn(((XQueryException) e).getFormatString());
+                LOG.error(((XQueryException) e).getFormatString());
             } else {
-                LOG.warn(e.getMessage());
+                LOG.error(e.getMessage());
             }
-            LOG.info("Failed document: " + key);
+            LOG.warn("Failed document " + key);
             failed++;
         } catch (RequestException e) {
             if (sessions[sid] != null) {

@@ -103,7 +103,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
             URI fileUri = new URI(null, null, null, 0, fileName, null, null);
             collectionUri = fileUri.toString();
         } catch (URISyntaxException e) {
-            LOG.warn("Error parsing file name as URI " + fileName, e);
+            LOG.error("Error parsing file name as URI " + fileName, e);
         }
         if (collections != null) {
             List<String> optionList = new ArrayList<String>();
@@ -180,7 +180,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
             URI uri = new URI(null, null, null, 0, val, null, null);
             return uri.toString();
         } catch (URISyntaxException e) {
-            LOG.warn("Error parsing value as URI, skipping " + val, e);
+            LOG.error("Error parsing value as URI, skipping " + val, e);
             return null;
         }
     }

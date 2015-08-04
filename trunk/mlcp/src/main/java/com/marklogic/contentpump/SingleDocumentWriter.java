@@ -109,7 +109,7 @@ implements MarkLogicConstants, ConfigConstants {
                             if (read > 0) {
                                 os.write(buf, 0, (int)read);
                             } else {
-                                LOG.warn("Premature EOF: uri=" + uri +
+                                LOG.error("Premature EOF: uri=" + uri +
                                         ",toRead=" + toRead);
                                 break;
                             }
@@ -144,11 +144,11 @@ implements MarkLogicConstants, ConfigConstants {
                     LOG.trace(sb);
                 }
             } else {
-                LOG.warn("Skipping " + uri + ".  Unsupported content type: "
+                LOG.error("Skipping " + uri + ".  Unsupported content type: "
                     + type.name());
             }
         } catch (Exception e) {
-            LOG.warn("Error saving: " + uri, e);
+            LOG.error("Error saving: " + uri, e);
         } finally {
             if (os != null) {
                 os.close();
@@ -168,7 +168,7 @@ implements MarkLogicConstants, ConfigConstants {
             }
             return childPath;
         } catch (Exception ex) {
-            LOG.warn("Error parsing URI " + uriStr + ".");
+            LOG.error("Error parsing URI " + uriStr + ".");
             return uriStr;
         }
     }

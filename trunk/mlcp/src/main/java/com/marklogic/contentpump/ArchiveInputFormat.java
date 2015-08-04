@@ -76,12 +76,10 @@ public class ArchiveInputFormat extends
             try {
                 ContentType.valueOf(typeStr);
             } catch (IllegalArgumentException ex) {
-                LOG.warn("Not a valid archive: " + zipfile);
+                LOG.error("Not a valid archive: " + zipfile);
                 iter.remove();
             }
         }
         return splits;
     }
-    
-    
 }
