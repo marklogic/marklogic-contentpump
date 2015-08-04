@@ -270,30 +270,29 @@ public class DatabaseContentWriter<VALUE> extends
                 len = forestIds.length;
                 sid = 0;
             }
-            for (int i = 0; i < len; i++, sid++) {
-                if (counts[i] > 0) {
-                    Content[] remainder = new Content[counts[i]];
-                    System.arraycopy(forestContents[i], 0, remainder, 0,
-                        counts[i]);
-                    if (sessions[sid] == null) {
-                        String forestId = forestIds[i];
-                        sessions[sid] = getSession(forestId);
-                    }
-                    insertBatch(remainder, sid);
-                    stmtCounts[sid]++;
-                    if (!isCopyProps) {
-                        continue;
-                    }
-                    for (int j = 0; j < counts[i]; j++) {
-                        DocumentMetadata m = metadatas[i][j].getMeta();
-                        String u = metadatas[i][j].getUri();
-                        if (m != null && m.getProperties() != null) {
-                            setDocumentProperties(u, m.getProperties(),
-                                isCopyPerms?m.getPermString():null,
-                                isCopyColls?m.getCollectionString():null,
-                                isCopyQuality?m.getQualityString():null, 
-                                sessions[sid]);
-                            stmtCounts[sid]++;
+            if (isCopyProps) {
+                for (int i = 0; i < len; i++, sid++) {
+                    if (counts[i] > 0) {
+                        Content[] remainder = new Content[counts[i]];
+                        System.arraycopy(forestContents[i], 0, remainder, 0,
+                                counts[i]);
+                        if (sessions[sid] == null) {
+                            String forestId = forestIds[i];
+                            sessions[sid] = getSession(forestId);
+                        }
+                        insertBatch(remainder, sid);
+                        stmtCounts[sid]++;
+                        if (!isCopyProps) {
+                            continue;
+                        }
+                        for (int j = 0; j < counts[i]; j++) {
+                            DocumentMetadata m = metadatas[i][j].getMeta();
+                            String u = metadatas[i][j].getUri();
+                            if (m != null && m.getProperties() != null) {
+                                setDocumentProperties(u, m.getProperties(),
+                                        null, null, null, sessions[sid]);
+                                stmtCounts[sid]++;
+                            }
                         }
                     }
                 }
