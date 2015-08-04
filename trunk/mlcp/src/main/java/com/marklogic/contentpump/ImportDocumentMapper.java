@@ -43,7 +43,7 @@ public class ImportDocumentMapper<VALUE> extends
         Context context) throws IOException, InterruptedException {
         readCount.increment(1);
         if (uri.isSkip()) {
-            LOG.info("Skipped record: " + uri);
+            LOG.warn("Skipped record: " + uri);
             return;
         } 
         attemptedCount.increment(1);

@@ -123,9 +123,9 @@ implements MarkLogicConstants, ConfigConstants {
                                             uri.getUri();
         if (zipEntryName == null) {
             if (isExportDoc) {
-                LOG.warn("Error parsing URI, skipping: " + uri);
+                LOG.error("Error parsing URI, skipping: " + uri);
             } else {
-                LOG.warn("Found document with empty URI.");
+                LOG.error("Found document with empty URI.");
             }
             return;
         }
@@ -185,7 +185,7 @@ implements MarkLogicConstants, ConfigConstants {
             } else {
                 String doc = content.getContentAsString();
                 if (doc == null) {
-                    LOG.warn("empty document for " + zipEntryName);
+                    LOG.error("Empty document for " + zipEntryName);
                     return;
                 }
                 xmlArchive.write(zipEntryName, doc.getBytes(encoding));
@@ -203,13 +203,13 @@ implements MarkLogicConstants, ConfigConstants {
             } else {
                 String doc = content.getContentAsString();
                 if (doc == null) {
-                    LOG.warn("empty document for " + zipEntryName);
+                    LOG.error("Empty document for " + zipEntryName);
                     return;
                 }
                 jsonArchive.write(zipEntryName, doc.getBytes(encoding));
             }
         } else {
-            LOG.warn("Skipping " + uri + ".  Unsupported content type: "
+            LOG.error("Skipping " + uri + ".  Unsupported content type: "
                     + type.name());
         }
     }
