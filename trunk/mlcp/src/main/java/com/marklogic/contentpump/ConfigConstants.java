@@ -109,7 +109,7 @@ public interface ConfigConstants {
     // TODO: merge with "aggregate_uri_id" ??
     static final String DELIMITED_URI_ID = "delimited_uri_id";
     static final String DELIMITED_ROOT_NAME = "delimited_root_name";
-    static final String DELIMITED_GENERATE_URI = "generate_uri";
+    static final String GENERATE_URI = "generate_uri";
     static final String SPLIT_INPUT = "split_input";
     static final String FAST_LOAD = "fastload";
     static final String CONTENT_ENCODING = "content_encoding";
@@ -141,21 +141,14 @@ public interface ConfigConstants {
         "mapreduce.input.fileinputformat.split.maxsize";
     static final String CONF_MIN_SPLIT_SIZE2 = 
         "mapreduce.input.fileinputformat.split.minsize";
-    static final String CONF_AGGREGATE_URI_ID = 
-        "mapreduce.marklogic.aggregate.uriid";
     static final String CONF_AGGREGATE_RECORD_ELEMENT = 
         "mapreduce.marklogic.aggregate.recordelement";
     static final String CONF_AGGREGATE_RECORD_NAMESPACE = 
         "mapreduce.marklogic.aggregate.recordnamespace";
     static final String CONF_DELIMITER = 
         "mapreduce.marklogic.delimited.delimiter";
-
-    static final String CONF_DELIMITED_URI_ID = 
-        "mapreduce.marklogic.delimited.uriid";
     static final String CONF_DELIMITED_ROOT_NAME = 
         "mapreduce.marklogic.delimited.rootname";
-    static final String CONF_DELIMITED_GENERATE_URI = 
-        "mapreduce.marklogic.delimited.generateuri";
     static final String CONF_SPLIT_INPUT = 
         "mapreduce.marklogic.splitinput";
     static final String CONF_OUTPUT_FILEPATH = 
@@ -206,10 +199,11 @@ public interface ConfigConstants {
         "mapreduce.job.working.dir";
     static final String CONF_MAPREDUCE_JOBTRACKER_ADDRESS = 
         "mapreduce.jobtracker.address";
-    static final String CONF_DELIMITED_JSON_URI_ID = 
-        "mapreduce.marklogic.delimitedjson.uriid";
-    static final String CONF_DELIMITED_JSON_GENERATE_URI = 
-            "mapreduce.marklogic.delimitedjson.generateuri";
+    static final String CONF_INPUT_URI_ID = 
+        "mapreduce.marklogic.input.uriid";
+    static final String CONF_INPUT_GENERATE_URI = 
+        "mapreduce.marklogic.input.generateuri";
     static final String CONF_DELIMITED_DATA_TYPE = 
             "mapreduce.marklogic.delimited.datatype";
+            
 }

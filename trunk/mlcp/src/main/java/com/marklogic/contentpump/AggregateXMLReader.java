@@ -144,7 +144,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     
     protected void initAggConf(TaskAttemptContext context) {
         Configuration conf = context.getConfiguration();
-        idName = conf.get(ConfigConstants.CONF_AGGREGATE_URI_ID);
+        idName = conf.get(ConfigConstants.CONF_INPUT_URI_ID);
         if (idName == null) {
             useAutomaticId = true;
         }

@@ -150,7 +150,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         bytesRead = 0;
         fileLen = inSplit.getLength();
         if (uriName == null) {
-            generateId = conf.getBoolean(CONF_DELIMITED_GENERATE_URI, false);
+            generateId = conf.getBoolean(CONF_INPUT_GENERATE_URI, false);
             if (generateId) {
                 idGen = new IdGenerator(file.toUri().getPath() + "-"
                     + ((FileSplit) inSplit).getStart());
