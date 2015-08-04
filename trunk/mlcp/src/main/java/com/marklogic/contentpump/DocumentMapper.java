@@ -48,9 +48,9 @@ public class DocumentMapper<VALUE> extends
     @Override
     public void setup(Context context) {
         readCount = context.getCounter(
-                        ContentPumpStats.ATTEMPTED_READS);
+                        ContentPumpStats.INPUT_RECORDS);
         attemptedCount = context.getCounter(
-                        ContentPumpStats.ATTEMPTED_WRITES);
+                        ContentPumpStats.OUTPUT_RECORDS);
     }
 
 }
