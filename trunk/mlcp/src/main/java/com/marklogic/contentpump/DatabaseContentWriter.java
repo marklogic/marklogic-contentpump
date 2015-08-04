@@ -321,9 +321,9 @@ public class DatabaseContentWriter<VALUE> extends
             }
         }
         context.getCounter(
-                ContentPumpStats.SUCCESSFUL_WRITES).increment(succeeded);
+            ContentPumpStats.OUTPUT_RECORDS_COMMITTED).increment(succeeded);
         context.getCounter(
-                ContentPumpStats.FAILED_WRITES).increment(failed);
+            ContentPumpStats.OUTPUT_RECORDS_FAILED).increment(failed);
     }
 
     /**
