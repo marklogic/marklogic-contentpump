@@ -107,7 +107,7 @@ public class DelimitedTextReader<VALUEIN> extends
         bytesRead = 0;
         fileLen = inSplit.getLength();
         if (uriName == null) {
-            generateId = conf.getBoolean(CONF_DELIMITED_GENERATE_URI, false);
+            generateId = conf.getBoolean(CONF_INPUT_GENERATE_URI, false);
             if (generateId) {
                 idGen = new IdGenerator(file.toUri().getPath() + "-"
                     + ((FileSplit) inSplit).getStart());
@@ -129,7 +129,7 @@ public class DelimitedTextReader<VALUEIN> extends
             throw new UnsupportedOperationException("Invalid delimiter: " +
                     delimStr);
         }
-        uriName = conf.get(ConfigConstants.CONF_DELIMITED_URI_ID, null);
+        uriName = conf.get(ConfigConstants.CONF_INPUT_URI_ID, null);
         docBuilder.init(conf);
     }
 

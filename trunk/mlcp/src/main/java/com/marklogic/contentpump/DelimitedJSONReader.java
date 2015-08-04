@@ -89,12 +89,12 @@ public class DelimitedJSONReader<VALUEIN> extends
         /*  Get file(s) in input split */
         file = ((FileSplit) inSplit).getPath();
         // Initialize reader properties
-        generateId = conf.getBoolean(CONF_DELIMITED_JSON_GENERATE_URI ,false);
+        generateId = conf.getBoolean(CONF_INPUT_GENERATE_URI,false);
         if (generateId){
             idGen = new IdGenerator(file.toUri().getPath() + "-"
                     + ((FileSplit) inSplit).getStart()); 
         } else {
-            uriName = conf.get(CONF_DELIMITED_JSON_URI_ID, null);
+            uriName = conf.get(CONF_INPUT_URI_ID, null);
             mapper = new ObjectMapper();
         }
         bytesRead = 0;

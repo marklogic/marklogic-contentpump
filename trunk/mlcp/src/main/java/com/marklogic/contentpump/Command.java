@@ -94,7 +94,7 @@ public enum Command implements ConfigConstants {
             Option aggregateUriId = OptionBuilder
                 .withArgName("QName")
                 .hasArg()
-                .withDescription("Name of the first element or attribute "
+                .withDescription("Deprecated. Name of the first element or attribute "
                         + "within a record element to be used as document URI."
                         + " If omitted, a sequence id will be generated to "
                         + " form the document URI.")                      
@@ -105,7 +105,7 @@ public enum Command implements ConfigConstants {
                 .hasArg()
                 .withDescription("Type of input file.  Valid choices are: "
                     + "aggregates, archive, delimited_text, documents, forest,"
-                    + "rdf, sequencefile.")
+                    + "rdf, sequencefile, delimited_json")
                 .create(INPUT_FILE_TYPE);
             options.addOption(inputFileType);
             Option inputCompressed = OptionBuilder
@@ -139,7 +139,7 @@ public enum Command implements ConfigConstants {
             Option delimitedUri = OptionBuilder
                 .withArgName("column name")
                 .hasArg()
-                .withDescription("Delimited uri id for delimited text.")
+                .withDescription("Deprecated. Delimited uri id for delimited text.")
                 .create(DELIMITED_URI_ID);
             options.addOption(delimitedUri);
             Option delimitedRoot = OptionBuilder
@@ -154,7 +154,7 @@ public enum Command implements ConfigConstants {
                 .hasOptionalArg()
                 .withDescription("Enables automatic URI generation for " +
                         "delimited text records.")
-                .create(DELIMITED_GENERATE_URI);
+                .create(GENERATE_URI);
             options.addOption(generateUri);
             Option namespace = OptionBuilder
                 .withArgName(NAMESPACE)
@@ -248,12 +248,12 @@ public enum Command implements ConfigConstants {
                 .create(CONTENT_ENCODING);
             options.addOption(encoding);
             Option uriId = OptionBuilder
-                    .withArgName("uir name")
+                    .withArgName("uri name")
                     .hasArg()
-                    .withDescription("Used with delimited JSON file. "
-                            + "Name of a key in the JSON document as the uri "
-                            + "of the JSON doucment in MarkLogic Server. "
-                            + "If omitted, will use generate_uri.")
+                    .withDescription("A column name in delimited text file "
+                            + "or an element name in aggregated XML "
+                            + "or a property name in delimited json, "
+                            + "whose value will be the document uri in MarkLogic Server.")
                     .create(URI_ID);
             options.addOption(uriId);
             Option dataType = OptionBuilder
@@ -362,6 +362,65 @@ public enum Command implements ConfigConstants {
             return job;
         }
 
+        void applyUriId(Configuration conf, InputType inputType, CommandLine cmdline) {
+            String uriId = null;
+            if (cmdline.hasOption(DELIMITED_URI_ID)) {
+                LOG.warn(DELIMITED_URI_ID + " has been depracated, use " + URI_ID);
+                uriId = cmdline.getOptionValue(DELIMITED_URI_ID);
+            }
+            if (cmdline.hasOption(AGGREGATE_URI_ID)) {
+                LOG.warn(AGGREGATE_URI_ID + " has been depracated, use " + URI_ID);
+                uriId = cmdline.getOptionValue(AGGREGATE_URI_ID);
+            }
+            if (cmdline.hasOption(URI_ID)) {
+                uriId = cmdline.getOptionValue(URI_ID);
+            }
+            String generate = null;
+            if (cmdline.hasOption(GENERATE_URI)) {
+                generate = cmdline.getOptionValue(GENERATE_URI);
+                if (generate == null) {
+                    generate = "true";
+                }
+                if (!"true".equalsIgnoreCase(generate) && 
+                        !"false".equalsIgnoreCase(generate)) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                                    GENERATE_URI + ": " + generate);
+                }
+            }
+            
+            if (uriId != null) {
+                if (InputType.AGGREGATES == inputType ||
+                        InputType.DELIMITED_JSON == inputType ||
+                        InputType.DELIMITED_TEXT == inputType) {
+                    conf.set(CONF_INPUT_URI_ID, uriId);
+                    if (InputType.AGGREGATES != inputType && 
+                            generate != null && 
+                            "true".equalsIgnoreCase(generate)) {
+                        throw new IllegalArgumentException("Only one of " + GENERATE_URI
+                                + " and " + URI_ID + " can be specified");
+                    }
+                } else {
+                    throw new IllegalArgumentException(
+                            URI_ID + 
+                            " is not applicable to " + inputType.name());
+                }
+            } else {
+                if (InputType.DELIMITED_TEXT == inputType) {
+                    if ("true".equalsIgnoreCase(generate)) {
+                        conf.setBoolean(CONF_INPUT_GENERATE_URI, true);
+                    }
+                } else if (InputType.DELIMITED_JSON == inputType) {
+                    if (generate != null && "false".equalsIgnoreCase(generate)) {
+                        throw new IllegalArgumentException(GENERATE_URI + " must be true if "
+                                + URI_ID + " not specified");
+                    } else {
+                        conf.setBoolean(CONF_INPUT_GENERATE_URI, true);
+                    }
+                }
+            }
+        }
+        
         @Override
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyCopyConfigOptions(conf, cmdline);
@@ -375,6 +434,9 @@ public enum Command implements ConfigConstants {
                     && contentType.JSON != contentType) {
                 throw new IllegalArgumentException("The setting for " + DOCUMENT_TYPE + "is not applicable to " + inputType);
             }
+            
+            applyUriId(conf, inputType, cmdline);
+            
             if (cmdline.hasOption(DATA_TYPE)) {
                 if (InputType.DELIMITED_TEXT != inputType) {
                     throw new IllegalArgumentException(DATA_TYPE + " is only applicable to "
@@ -434,10 +496,6 @@ public enum Command implements ConfigConstants {
                 conf.set(CONF_MIN_SPLIT_SIZE1, minSize);
                 conf.set(CONF_MIN_SPLIT_SIZE2, minSize);
             }
-            if (cmdline.hasOption(AGGREGATE_URI_ID)) {
-                String uriId = cmdline.getOptionValue(AGGREGATE_URI_ID);
-                conf.set(CONF_AGGREGATE_URI_ID, uriId);
-            }
             if (cmdline.hasOption(AGGREGATE_RECORD_ELEMENT)) {
                 String recElem = cmdline.getOptionValue(
                         AGGREGATE_RECORD_ELEMENT);
@@ -456,64 +514,9 @@ public enum Command implements ConfigConstants {
                 }
                 conf.set(CONF_DELIMITER, delim);
             }
-            if (cmdline.hasOption(DELIMITED_URI_ID)) {
-                String delimId = cmdline.getOptionValue(DELIMITED_URI_ID);
-                conf.set(CONF_DELIMITED_URI_ID, delimId);
-                
-                if (cmdline.hasOption(DELIMITED_GENERATE_URI)) {
-                    String arg = 
-                        cmdline.getOptionValue(DELIMITED_GENERATE_URI);
-                    if (arg == null || arg.equalsIgnoreCase("true")) {
-                        throw new IllegalArgumentException("The setting for " +
-                            DELIMITED_GENERATE_URI + " option conflicts with " 
-                            + DELIMITED_URI_ID);
-                    }
-                }
-            }
-            if (InputType.DELIMITED_JSON == inputType) {
-                if (cmdline.hasOption(URI_ID) && 
-                        cmdline.getOptionValue(URI_ID) == null) {
-                    throw new IllegalArgumentException("A value is required for option " + URI_ID);
-                } else if (!cmdline.hasOption(URI_ID)) {
-                    if (cmdline.hasOption(DELIMITED_GENERATE_URI) && 
-                        cmdline.getOptionValue(DELIMITED_GENERATE_URI).equalsIgnoreCase("false")) {
-                        throw new IllegalArgumentException(DELIMITED_GENERATE_URI + " must be true if "
-                                + URI_ID + " not specified");
-                    } else {
-                        conf.setBoolean(CONF_DELIMITED_JSON_GENERATE_URI, true);
-                    }
-                } else {
-                    String generateUri = cmdline.getOptionValue(DELIMITED_GENERATE_URI);
-                    if (cmdline.hasOption(DELIMITED_GENERATE_URI)
-                            && (generateUri == null || 
-                                generateUri.equalsIgnoreCase("true"))) {
-                        throw new IllegalArgumentException("Only one of " + DELIMITED_GENERATE_URI
-                                + " and " + URI_ID + " can be specified");
-                    }
-                    conf.set(CONF_DELIMITED_JSON_URI_ID,
-                            cmdline.getOptionValue(URI_ID));
-                }
-            }
             if (cmdline.hasOption(DELIMITED_ROOT_NAME)) {
                 String delimRoot = cmdline.getOptionValue(DELIMITED_ROOT_NAME);
                 conf.set(CONF_DELIMITED_ROOT_NAME, delimRoot);
-            }
-            if (cmdline.hasOption(DELIMITED_GENERATE_URI)) {
-                String arg = 
-                    cmdline.getOptionValue(DELIMITED_GENERATE_URI);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
-                    if (InputType.DELIMITED_TEXT == inputType) {
-                        conf.setBoolean(CONF_DELIMITED_GENERATE_URI, true);
-                    } else if (InputType.DELIMITED_JSON != inputType) {
-                        throw new IllegalArgumentException(
-                                DELIMITED_GENERATE_URI + 
-                                " is not applicable to " + inputType.name());
-                    }
-                } else if (!arg.equalsIgnoreCase("false")) {
-                    throw new IllegalArgumentException(
-                            "Unrecognized option argument for " + 
-                            DELIMITED_GENERATE_URI + ": " + arg);
-                }
             }
             if (cmdline.hasOption(OUTPUT_FILENAME_AS_COLLECTION)) {
                 String arg = cmdline.getOptionValue(
