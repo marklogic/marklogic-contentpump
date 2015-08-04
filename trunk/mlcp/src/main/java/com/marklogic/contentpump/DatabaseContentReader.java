@@ -131,7 +131,9 @@ public class DatabaseContentReader extends
             StringBuilder buf = new StringBuilder();
             buildSearchQuery(src, ctsQuery, nsCol, buf);
             src = buf.toString();
-        } 
+        } else {
+            src += "[$mlmr:splitstart to $mlmr:splitend]";
+        }   
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
         buf.append("import module namespace hadoop = ");
@@ -147,7 +149,6 @@ public class DatabaseContentReader extends
                 "declare variable $mlmr:splitend as xs:integer external;\n");
         buf.append("let $cols := ");
         buf.append(src);
-        buf.append("[$mlmr:splitstart to $mlmr:splitend]");
         buf.append("\nfor $doc in $cols");
         buf.append("\nlet $uri := fn:base-uri($doc)\n return (");
 
@@ -186,7 +187,6 @@ public class DatabaseContentReader extends
         
         //doc
         buf.append(src);
-        buf.append("[$mlmr:splitstart to $mlmr:splitend]");
         
         // naked properties       
         if (copyProperties) {
