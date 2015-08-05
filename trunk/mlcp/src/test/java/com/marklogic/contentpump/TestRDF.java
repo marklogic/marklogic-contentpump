@@ -189,17 +189,19 @@ public class TestRDF {
         Utils.closeSession();
     }    
  
-    @Test
+//    @Test
     public void testTurtlePermissionNonAdmin() throws Exception {
         String cmd =
-                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                "IMPORT -host localhost -port 5275 -username sparqlupdate -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.ttl"
-                        + " -output_permissions rest-admin,read,rest-admin,update"
+                        + " -output_collections http://marklogic.com/semantics/sb/customers/FT"
+                        + " -output_permissions sparql-update-user,read"
+//                        + " -thread_count 1"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
@@ -275,7 +277,7 @@ public class TestRDF {
     @Test
     public void testN3() throws Exception {
         String cmd =
-                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                "IMPORT -host localhost -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.n3"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
@@ -309,6 +311,104 @@ public class TestRDF {
         
         result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+    
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testN3_output_graph() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.n3"
+                        + " -output_graph http://myDefaultGraph.com"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("133", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("13257", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://myDefaultGraph.com\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("13257", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.w3.org/TR/2004/REC-DOM-Level-3-Val-20040127\"])");
+        assertTrue(result.hasNext());
+        assertEquals("22", result.next().asString());
+
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://myDefaultGraph.com\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+    
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testN3_override_graph() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.n3"
+                        + " -output_override_graph http://myDefaultGraph.com"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("133", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("13257", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://myDefaultGraph.com\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("13257", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.w3.org/TR/2004/REC-DOM-Level-3-Val-20040127\"])");
+        assertTrue(result.hasNext());
+        assertEquals("22", result.next().asString());
+
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://myDefaultGraph.com\"))");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
     
@@ -406,6 +506,8 @@ public class TestRDF {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.trig"
+                        + " -output_uri_prefix /xyz"
+                        + " -fastload false"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
         String[] args = cmd.split(" ");
@@ -542,12 +644,12 @@ public class TestRDF {
         ResultSequence result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
-        assertEquals("342", result.next().asString());
+        assertEquals("343", result.next().asString());
 
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
-        assertEquals("1999", result.next().asString());
+        assertEquals("2001", result.next().asString());
 
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
@@ -563,7 +665,64 @@ public class TestRDF {
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Ani_DiFranco?oldid=490340130#absolute-line=1\"))");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/semantics#default-graph\"))");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
 
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/semantics#default-graph\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testNQ_quad_performance() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + "/space/Downloads/root_support_bugtracking_attachments_30886_homepages_en.nq"
+                        + " -output_permissions admin,read,admin,update"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+//
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("50", result.next().asString());
+
+        
+        cmd =
+            "IMPORT -host localhost -port 5275 -username admin -password admin"
+                    + " -input_file_path " + "/space/Downloads/root_support_bugtracking_attachments_30886_homepages_en.nq"
+                    + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+        args = cmd.split(" ");
+
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        result = Utils
+            .runQuery(
+                "xcc://admin:admin@localhost:5275",
+                "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("100", result.next().asString());
+
+        result = Utils
+            .runQuery(
+                "xcc://admin:admin@localhost:5275",
+                "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("50", result.next().asString());
         Utils.closeSession();
     }
 
@@ -586,12 +745,12 @@ public class TestRDF {
         ResultSequence result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
-        assertEquals("20", result.next().asString());
+        assertEquals("21", result.next().asString());
 
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
-        assertEquals("1999", result.next().asString());
+        assertEquals("2001", result.next().asString());
 
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
@@ -601,12 +760,200 @@ public class TestRDF {
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/collection/1\"))");
         assertTrue(result.hasNext());
-        assertEquals("21", result.next().asString());
+        assertEquals("22", result.next().asString());
 
         result = Utils.runQuery(
                 "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Ani_DiFranco?oldid=490340130#absolute-line=1\"))");
         assertTrue(result.hasNext());
         assertEquals("0", result.next().asString());
+
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testNQ_override_graph() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.nq"
+                        + " -output_override_graph http://myOverrideGraph.com"
+//                        + " -output_graph xyz" //negative test
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("21", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2001", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+        assertTrue(result.hasNext());
+        assertEquals("7", result.next().asString());
+
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("0", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://myOverrideGraph.com\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2001", result.next().asString());
+
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testNQ_override_graph1() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.nq"
+                        + " -output_override_graph http://myOverrideGraph.com"
+                        + " -output_collections a,b,c" 
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("21", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2001", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+        assertTrue(result.hasNext());
+        assertEquals("7", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("0", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://myOverrideGraph.com\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2001", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"b\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2001", result.next().asString());
+
+
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testNQ_my_default_graph() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.nq"
+                        + " -output_graph http://mydefaultgraph.com"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("343", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2001", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+        assertTrue(result.hasNext());
+        assertEquals("7", result.next().asString());
+
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://mydefaultgraph.com\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testNQ_my_default_graph1() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.nq"
+                        + " -output_graph http://mydefaultgraph.com"
+                        + " -output_collections a,b,c"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("343", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2001", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+        assertTrue(result.hasNext());
+        assertEquals("7", result.next().asString());
+
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://mydefaultgraph.com\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
 
         Utils.closeSession();
     }
