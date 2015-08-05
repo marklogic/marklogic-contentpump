@@ -1,5 +1,7 @@
 # started 2012-06-04T11:00:11Z
 <http://dbpedia.org/resource/Autism> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Disease> <http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9> .
+<http://dbpedia.org/resource/Autism> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Disease1> .
+<http://dbpedia.org/resource/Autism> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Disease2> .
 <http://dbpedia.org/resource/Autism> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Thing> <http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9> .
 <http://dbpedia.org/resource/Animal_Farm> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Book> <http://en.wikipedia.org/wiki/Animal_Farm?oldid=494597186#absolute-line=5> .
 <http://dbpedia.org/resource/Animal_Farm> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://schema.org/Book> <http://en.wikipedia.org/wiki/Animal_Farm?oldid=494597186#absolute-line=5> .
