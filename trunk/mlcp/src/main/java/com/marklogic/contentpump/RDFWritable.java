@@ -74,9 +74,24 @@ public class RDFWritable<VALUE> implements CustomContent {
     @Override
     public Content getContent(Configuration conf, ContentCreateOptions options, String uri) {
         String[] collections = conf.getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
-
+        String outputGraph = conf.get(MarkLogicConstants.OUTPUT_GRAPH);
+        String outputOverrideGraph = conf.get(MarkLogicConstants.OUTPUT_OVERRIDE_GRAPH);
+        
         if (collections != null) {
             List<String> optionList = new ArrayList<String>();
+            if (collectionUri == null) { //no graph specified in quad
+                if( outputGraph != null)//output_graph is set
+                    optionList.add(outputGraph.trim()); 
+                else if (outputOverrideGraph != null) {
+                    optionList.add(outputOverrideGraph.trim()); 
+                }
+            } else {
+                if( outputOverrideGraph != null)
+                    optionList.add(outputOverrideGraph);
+                else
+                    optionList.add(collectionUri);//use quad's graph
+            }
+            //collections are always added
             Collections.addAll(optionList, collections);
             collections = optionList.toArray(new String[0]);
             for (int i = 0; i < collections.length; i++) {
@@ -85,7 +100,13 @@ public class RDFWritable<VALUE> implements CustomContent {
             options.setCollections(collections);
         } else {
             if (collectionUri == null) {
-                collectionUri = "http://marklogic.com/semantics#default-graph";
+                if (outputOverrideGraph != null) {
+                    collectionUri = outputOverrideGraph;
+                } else if (outputGraph != null) {
+                    collectionUri = outputGraph; 
+                } else { 
+                    collectionUri = "http://marklogic.com/semantics#default-graph";
+                }
             }
             String[] col = new String[1];
             col[0] = collectionUri;
