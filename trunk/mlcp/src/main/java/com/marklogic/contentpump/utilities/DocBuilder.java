@@ -19,8 +19,6 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 
-import com.sun.org.apache.xml.internal.utils.XMLChar;
-
 /**
  * 
  * Abstract class for document builder.

@@ -169,7 +169,6 @@ public class UseXCCHttp{
         "xcc://admin:admin@localhost:5275"));
         Session session = cs.newSession();
         ModuleImpl request = (ModuleImpl) session.newModuleInvoke("/foo.xqy");
-        StringBuffer sb = new StringBuffer();
 
         request.setNewStringVariable("foo", "bar");
 //        request.setOldEncodingStyle(true);

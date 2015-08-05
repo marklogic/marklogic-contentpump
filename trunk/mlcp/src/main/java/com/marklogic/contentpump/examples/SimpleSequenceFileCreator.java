@@ -59,6 +59,7 @@ public class SimpleSequenceFileCreator {
             }
         } finally {
             IOUtils.closeStream(writer);
+            buffer.close();
         }
     }
 }
