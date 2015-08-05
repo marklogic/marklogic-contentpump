@@ -89,7 +89,7 @@ FileInputFormat<K, V> {
                 // however, w/ Hadoop2, dir in local fs has non-zero length
                 long length = child.getLen();
                 BlockLocation[] blkLocations = null;
-                if (!child.isDir() || fs instanceof DistributedFileSystem == false) {
+                if (!child.isDirectory() || fs instanceof DistributedFileSystem == false) {
                     blkLocations = fs.getFileBlockLocations(child, 0, length);
                 } else if (length != 0) {
                     throw new IOException("non-zero length directory on HDFS:"
@@ -149,7 +149,7 @@ FileInputFormat<K, V> {
             Path file = split.getPath();
             FileSystem fs = file.getFileSystem(conf);
             FileStatus status = fs.getFileStatus(file);
-            if (status.isDir()) {
+            if (status.isDirectory()) {
                 FileStatus[] children = fs.listStatus(file, inputFilter);
                 if(children.length + count < SPLIT_COUNT_LIMIT) {
                     splits.remove(count);
