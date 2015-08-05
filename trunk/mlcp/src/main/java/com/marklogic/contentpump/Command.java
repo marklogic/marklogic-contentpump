@@ -61,6 +61,7 @@ public enum Command implements ConfigConstants {
             configCommonOutputOptions(options);
             configBatchTxn(options);
             configModule(options);
+            configRDFGraphOutputOptions(options);
             
 			Option inputFilePath = OptionBuilder
                 .withArgName("path")
@@ -425,6 +426,7 @@ public enum Command implements ConfigConstants {
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyCopyConfigOptions(conf, cmdline);
             applyCommonOutputConfigOptions(conf, cmdline);
+            applyRDFGraphOutputConfigOptions(conf, cmdline);
             
             InputType inputType = getInputType(cmdline);   
             ContentType contentType = inputType.getContentType(cmdline);
@@ -1505,6 +1507,16 @@ public enum Command implements ConfigConstants {
         options.addOption(minSplitSize);
     }
 
+    static void configRDFGraphOutputOptions(Options options) {
+        Option outputGraph = OptionBuilder.withArgName("graph").hasArg()
+            .withDescription("Default graph for quad").create(OUTPUT_GRAPH);
+        options.addOption(outputGraph);
+
+        Option outputOverrideGraph = OptionBuilder.withArgName("graph")
+            .hasArg().withDescription("Graph overrided for quad")
+            .create(OUTPUT_OVERRIDE_GRAPH);
+        options.addOption(outputOverrideGraph);
+    }
     static void configCommonOutputOptions(Options options) {
         Option outputUriReplace = OptionBuilder
             .withArgName("list")
@@ -1534,6 +1546,7 @@ public enum Command implements ConfigConstants {
                     + " to output documents")
             .create(OUTPUT_COLLECTIONS);
         options.addOption(outputCollections);
+        
         Option outputPermissions = OptionBuilder
             .withArgName("permissions")
             .hasArg()
@@ -1879,6 +1892,23 @@ public enum Command implements ConfigConstants {
         }
     }
 
+    static void applyRDFGraphOutputConfigOptions(Configuration conf,
+        CommandLine cmdline) {
+        if (cmdline.hasOption(OUTPUT_GRAPH) && cmdline.hasOption(OUTPUT_OVERRIDE_GRAPH)) {
+            throw new IllegalArgumentException(
+                "Only one of " + OUTPUT_GRAPH + ", " +
+                OUTPUT_OVERRIDE_GRAPH + " can be specified.");
+        }
+        if (cmdline.hasOption(OUTPUT_GRAPH)) {
+            String graph = cmdline.getOptionValue(OUTPUT_GRAPH);
+            conf.set(MarkLogicConstants.OUTPUT_GRAPH, graph);
+        }
+        if (cmdline.hasOption(OUTPUT_OVERRIDE_GRAPH)) {
+            String graph = cmdline.getOptionValue(OUTPUT_OVERRIDE_GRAPH);
+            conf.set(MarkLogicConstants.OUTPUT_OVERRIDE_GRAPH, graph);
+        }
+    }
+    
     static void applyCommonOutputConfigOptions(Configuration conf,
                     CommandLine cmdline) {
 
@@ -1922,6 +1952,7 @@ public enum Command implements ConfigConstants {
                     OUTPUT_COLLECTIONS);
             conf.set(MarkLogicConstants.OUTPUT_COLLECTION, collectionsString);
         }
+
         if (cmdline.hasOption(OUTPUT_PERMISSIONS)) {
             String permissionString = cmdline.getOptionValue(
                     OUTPUT_PERMISSIONS);

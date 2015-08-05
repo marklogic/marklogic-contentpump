@@ -88,6 +88,8 @@ import com.marklogic.xcc.exceptions.XccConfigException;
 public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(RDFReader.class);
     public static final String HASHALGORITHM = "SHA-256";
+    public static final String DEFAULT_GRAPH = "http://marklogic.com/semantics#default-graph";
+    public static final String JENA_DEFAULT_GRAPH = "urn:x-arq:DefaultGraphNode";
     protected static Pattern[] patterns = new Pattern[] {
             Pattern.compile("&"), Pattern.compile("<"), Pattern.compile(">") };
 
@@ -113,7 +115,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private static final int MAX_COLLECTIONS = 100;
     protected boolean ignoreCollectionQuad = false;
     protected boolean hasOutputCol = false;
-
+    protected String outputGraph;
+    protected String outputOverrideGraph;
     protected StringBuilder buffer;
     protected boolean hasNext = true;
     protected IdGenerator idGen;
@@ -221,7 +224,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
 
         String[] collections = conf.getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
-        ignoreCollectionQuad = (collections != null);
+        outputGraph = conf.get(MarkLogicConstants.OUTPUT_GRAPH);
+        outputOverrideGraph = conf.get(MarkLogicConstants.OUTPUT_OVERRIDE_GRAPH);
+        //if no defulat-graph set and output_collections is set
+        ignoreCollectionQuad = (outputGraph == null && collections != null)
+            || outputOverrideGraph != null;
         hasOutputCol = (collections != null);
 
         Class<? extends Writable> valueClass = RDFWritable.class;
@@ -832,7 +839,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
             Node graph = quad.getGraph();
             if (graph == null) {
-                collection = "http://marklogic.com/semantics#default-graph";
+                collection = DEFAULT_GRAPH;
             } else {
                 collection = resource(quad.getGraph());
             }
@@ -905,14 +912,30 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             ((RDFWritable)value).set(buffer.toString());
             
             if (collection != null) {
+                if(collection.equals(JENA_DEFAULT_GRAPH)) {
+                    collection = null;
+                }
                 ((RDFWritable)value).setCollection(collection);
             }
-            if(hasOutputCol){
-                String[] outCols = conf.getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
+            
+            if(hasOutputCol){// output_collections is set
+               if(outputOverrideGraph!=null) {
+                    collection = outputOverrideGraph;
+                } else if(outputGraph != null) {
+                    if (collection == null) {
+                        //no graph specified in quad, use output_graph
+                        collection = outputGraph;
+                    }
+                } else { // no output_graph or output_override_graph
+                    String[] outCols = conf
+                    .getStrings(MarkLogicConstants.OUTPUT_COLLECTION);
                 collection = outCols[0];
-            } else {
-                if (collection == null) {
-                    collection = "http://marklogic.com/semantics#default-graph";
+                }
+            } else {//no output_collections
+                if (collection == null) { //no quad in data
+                    collection = outputGraph != null ? outputGraph : outputOverrideGraph;
+                    if(collection == null)
+                        collection = DEFAULT_GRAPH;
                 }
             }
             ContentPermission[] perms = null;

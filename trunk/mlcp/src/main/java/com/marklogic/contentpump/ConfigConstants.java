@@ -59,6 +59,8 @@ public interface ConfigConstants {
     static final String DATABASE = "database";
     static final String OUTPUT_DIRECTORY = "output_directory";
     static final String OUTPUT_COLLECTIONS = "output_collections";
+    static final String OUTPUT_GRAPH = "output_graph";
+    static final String OUTPUT_OVERRIDE_GRAPH = "output_override_graph";
     static final String OUTPUT_PERMISSIONS = "output_permissions";
     static final String OUTPUT_QUALITY = "output_quality";
     static final String OUTPUT_CLEANDIR = "output_cleandir";
