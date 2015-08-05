@@ -527,6 +527,15 @@ public interface MarkLogicConstants {
      */
     static final String OUTPUT_COLLECTION =
         "mapreduce.marklogic.output.content.collection";
+    
+    /** Default graph for rdf **/
+    static final String OUTPUT_GRAPH =
+        "mapreduce.marklogic.output.rdf.graph";
+    
+    /** Graph overrided for rdf **/
+    static final String OUTPUT_OVERRIDE_GRAPH =
+        "mapreduce.marklogic.output.rdf.overridegraph";
+    
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies a comma-separated list role-capability
