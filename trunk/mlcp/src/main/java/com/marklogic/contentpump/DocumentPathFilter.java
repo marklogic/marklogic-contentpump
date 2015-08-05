@@ -59,7 +59,7 @@ public class DocumentPathFilter implements PathFilter, Configurable {
                     "Path in input_file_path doesn't exist: " + inPath);
             }
             for (FileStatus s : status) {
-                if (s.isDir()) {
+                if (s.isDirectory()) {
                     return true;
                 }
             }

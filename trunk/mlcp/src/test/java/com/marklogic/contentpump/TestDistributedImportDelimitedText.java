@@ -8,7 +8,6 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
-import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestDistributedImportDelimitedText {
