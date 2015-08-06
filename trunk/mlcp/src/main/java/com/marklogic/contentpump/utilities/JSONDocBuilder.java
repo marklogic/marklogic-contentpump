@@ -64,15 +64,18 @@ public class JSONDocBuilder extends DocBuilder {
      * @see com.marklogic.contentpump.DocBuilder#put(java.lang.String, java.lang.String)
      */
     @Override
-    public void put(String key, String value) throws IOException{
+    public void put(String key, String value) throws Exception{
         try {
             Object valueObj = datatypeMap.get(key).parse(value);
             generator.writeObjectField(key, valueObj);
         } catch (ParseException e) {
-            LOG.error("Value " + value + " is not type "
-                    + datatypeMap.get(key).name());
+            throw new ParseException("Value " + value + " is not type "
+                    + datatypeMap.get(key).name(), 0);
         } catch (Exception e) {
-            throw new IOException(e.getMessage());
+            String msg = e.getMessage();
+            if (!msg.contains("missing value")) {
+                throw new Exception(msg);
+            }
         }       
         
     }
@@ -93,7 +96,6 @@ public class JSONDocBuilder extends DocBuilder {
      * @see com.marklogic.contentpump.DocBuilder#checkDocumentHeader()
      * @throws IOException
      */
-    @SuppressWarnings("unchecked")
     @Override
     public void configFields(Configuration conf, String[] fields) throws IOException {
         datatypeMap = new HashMap<String,ColumnDataType>();
