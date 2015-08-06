@@ -46,7 +46,7 @@ public abstract class DocBuilder {
      * @param value
      * @throws IOException
      */
-    public abstract void put(String key, String value) throws IOException;
+    public abstract void put(String key, String value) throws Exception;
     
     /**
      * Build the document.

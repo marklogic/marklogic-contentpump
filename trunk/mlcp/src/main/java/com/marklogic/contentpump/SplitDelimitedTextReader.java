@@ -90,7 +90,12 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                         return true;
                     }
                 }
-                docBuilder.put(fields[i], values[i]);
+                try {
+                    docBuilder.put(fields[i], values[i]);
+                } catch (Exception e) {
+                    setSkipKey(0, 0, e.getMessage());
+                    return true;
+                }
             }
             docBuilder.build();
             if (generateId) {

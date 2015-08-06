@@ -58,7 +58,7 @@ public class XMLDocBuilder extends DocBuilder {
      * @see com.marklogic.contentpump.DocBuilder#put(java.lang.String, java.lang.String)
      */
     @Override
-    public void put(String key, String value) throws IOException {
+    public void put(String key, String value) throws Exception {
         sb.append('<').append(key).append('>');
         sb.append(XMLUtil.convertToCDATA(value));
         sb.append("</").append(key).append('>');

@@ -19,6 +19,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVStrategy;
@@ -177,7 +178,7 @@ public class DelimitedTextReader<VALUEIN> extends
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Header: " + convertToLine(fields));
                     }
-                    throw new IOException("Delimited_uri_id " + uriName
+                    throw new IOException(URI_ID + " " + uriName
                         + " is not found.");
                 }
                 docBuilder.configFields(conf, fields);
@@ -215,7 +216,12 @@ public class DelimitedTextReader<VALUEIN> extends
                         return true;
                     }
                 }
-                docBuilder.put(fields[i], values[i]);
+                try {
+                    docBuilder.put(fields[i], values[i]);
+                } catch (Exception e) {
+                    setSkipKey(line, 0, e.getMessage());
+                    return true;
+                }
             }
             docBuilder.build();
             if (generateId &&
