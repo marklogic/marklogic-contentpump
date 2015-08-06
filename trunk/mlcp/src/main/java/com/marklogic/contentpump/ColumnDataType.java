@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import java.text.NumberFormat;
+import java.text.ParseException;
 
 /**
  * Enum of column data types of delimited text.
@@ -34,6 +35,10 @@ public enum ColumnDataType {
     NUMBER {
         @Override
         public Object parse(String s) throws Exception {
+            s.trim();
+            if ("".equals(s)) {
+                throw new Exception("missing value");
+            }
             return NumberFormat.getInstance().parse(s);
         }
         
@@ -41,6 +46,13 @@ public enum ColumnDataType {
     BOOLEAN {
         @Override
         public Object parse(String s) throws Exception {
+            s.trim();
+            if ("".equals(s)) {
+                throw new Exception("missing value");
+            } else if (!"true".equalsIgnoreCase(s) && 
+                    !"false".equalsIgnoreCase(s)) {
+                throw new ParseException("", 0);
+            }
             return new Boolean(s);
         }
         
