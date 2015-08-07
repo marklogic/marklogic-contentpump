@@ -175,13 +175,21 @@ public class DelimitedTextReader<VALUEIN> extends
                 }
                 if (found == false) {
                     // idname doesn't match any columns
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Header: " + convertToLine(fields));
-                    }
-                    throw new IOException(URI_ID + " " + uriName
-                        + " is not found.");
+                    LOG.error("Skipped file: " + file.toUri()
+                            + ", reason: " + URI_ID + " " + uriName
+                            + " is not found");
+                    parser = null;
+                    return false;
                 }
-                docBuilder.configFields(conf, fields);
+                try {
+                    docBuilder.configFields(conf, fields);
+                } catch (IllegalArgumentException e) {
+                    LOG.error("Skipped file: " + file.toUri()
+                            + ", reason: " + e.getMessage());
+                    parser = null;
+                    return false;
+                }
+                
                 values = parser.getLine();
                 if (values == null) {
                     if(compressed) {

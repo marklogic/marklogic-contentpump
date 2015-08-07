@@ -138,7 +138,13 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         // get header from the DelimitedSplit
         TextArrayWritable taw = ((DelimitedSplit) inSplit).getHeader();
         fields = taw.toStrings();
-        docBuilder.configFields(conf, fields);
+        try {
+            docBuilder.configFields(conf, fields);
+        } catch (IllegalArgumentException e) {
+            LOG.error("Skipped file: " + file.toUri()
+                    + ", reason: " + e.getMessage());
+            return;
+        }
 
         fileIn = fs.open(file);
         lineSeparator = retrieveLineSeparator(fileIn);
@@ -175,11 +181,10 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         }
         if (found == false) {
             // idname doesn't match any columns
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Header: " + convertToLine(fields));
-            }
-            throw new IOException("Delimited_uri_id " + uriName
-                + " is not found in " + this.file.toUri().getPath());
+            LOG.error("Skipped file: " + file.toUri()
+                    + ", reason: " + URI_ID + " " + uriName
+                    + " is not found");
+            return;
         }
 
         // keep leading and trailing whitespaces to ensure accuracy of pos

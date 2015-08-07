@@ -59,7 +59,7 @@ public abstract class DocBuilder {
      * @param fields
      * @throws IOException
      */
-    public abstract void configFields(Configuration conf, String[] fields) throws IOException;
+    public abstract void configFields(Configuration conf, String[] fields) throws IllegalArgumentException, IOException;
 
     /**
      * Return the built doc.

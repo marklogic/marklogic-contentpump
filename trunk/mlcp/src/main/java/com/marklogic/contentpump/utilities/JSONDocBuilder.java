@@ -97,7 +97,7 @@ public class JSONDocBuilder extends DocBuilder {
      * @throws IOException
      */
     @Override
-    public void configFields(Configuration conf, String[] fields) throws IOException {
+    public void configFields(Configuration conf, String[] fields) throws IllegalArgumentException {
         datatypeMap = new HashMap<String,ColumnDataType>();
         for (String s: fields) {
             datatypeMap.put(s, ColumnDataType.STRING);
