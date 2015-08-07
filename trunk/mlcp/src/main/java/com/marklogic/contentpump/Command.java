@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import com.marklogic.contentpump.utilities.CommandlineOption;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
@@ -444,14 +445,22 @@ public enum Command implements ConfigConstants {
                     throw new IllegalArgumentException(DATA_TYPE + " is only applicable to "
                             + InputType.DELIMITED_TEXT.name());
                 }
-                String value = cmdline.getOptionValue(DATA_TYPE);
-                String[] types = value.split(",");
+                String type = cmdline.getOptionValue(DOCUMENT_TYPE, 
+                        ContentType.XML.name());
+                if ("XML".equalsIgnoreCase(type)) {
+                    LOG.warn(DATA_TYPE + " is only applicable when "
+                            + DOCUMENT_TYPE + " is " 
+                            + ContentType.JSON.name());
+                } else {
+                    String value = cmdline.getOptionValue(DATA_TYPE);
+                    String[] types = value.split(",");
                 
-                if (types.length%2 != 0) {
-                    throw new IllegalArgumentException("Invalid option argument for "
-                            + DATA_TYPE + ": " + value);
+                    if (types.length%2 != 0) {
+                        throw new IllegalArgumentException("Invalid option argument for "
+                                + DATA_TYPE + ": " + value);
+                    }
+                    conf.set(CONF_DELIMITED_DATA_TYPE, value);
                 }
-                conf.set(CONF_DELIMITED_DATA_TYPE, value);
             }
             
             conf.set(MarkLogicConstants.CONTENT_TYPE, contentType.name());
@@ -517,8 +526,18 @@ public enum Command implements ConfigConstants {
                 conf.set(CONF_DELIMITER, delim);
             }
             if (cmdline.hasOption(DELIMITED_ROOT_NAME)) {
-                String delimRoot = cmdline.getOptionValue(DELIMITED_ROOT_NAME);
-                conf.set(CONF_DELIMITED_ROOT_NAME, delimRoot);
+                String type = cmdline.getOptionValue(DOCUMENT_TYPE, 
+                        ContentType.XML.name());
+                if ("JSON".equalsIgnoreCase(type)) {
+                    LOG.warn(DELIMITED_ROOT_NAME 
+                            + " is only applicable when " 
+                            + DOCUMENT_TYPE + " is " 
+                            + ContentType.XML.name());
+                } else {
+                    String delimRoot = cmdline
+                            .getOptionValue(DELIMITED_ROOT_NAME);
+                    conf.set(CONF_DELIMITED_ROOT_NAME, delimRoot);
+                }
             }
             if (cmdline.hasOption(OUTPUT_FILENAME_AS_COLLECTION)) {
                 String arg = cmdline.getOptionValue(
