@@ -1,18 +1,3 @@
-/*
- * Copyright 2003-2015 MarkLogic Corporation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.marklogic.contentpump;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +13,7 @@ import com.marklogic.xcc.ResultSequence;
  * @author mattsun
  *
  */
-public class testDistributedImportDelimitedJson {
+public class TestImportDelimitedJson {
 
     @After
     public void tearDown() {
@@ -40,7 +25,6 @@ public class testDistributedImportDelimitedJson {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/sample1.txt"
                 + " -uri_id name -generate_uri false"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
                 + " -input_file_type delimited_json";
         
         String[] args = cmd.split(" ");
@@ -48,7 +32,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -82,7 +65,6 @@ public class testDistributedImportDelimitedJson {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson"
                 + " -uri_id name -generate_uri false -input_file_pattern sample.*\\.txt"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
                 + " -input_file_type delimited_json";
         
         String[] args = cmd.split(" ");
@@ -90,7 +72,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -124,7 +105,6 @@ public class testDistributedImportDelimitedJson {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson"
                 + " -generate_uri true -input_file_pattern sample.*\\.txt"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
                 + " -input_file_type delimited_json";
         
         String[] args = cmd.split(" ");
@@ -132,7 +112,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -167,7 +146,6 @@ public class testDistributedImportDelimitedJson {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/testUri.txt"
                 + " -uri_id name -generate_uri false"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
                 + " -input_file_type delimited_json";
         
         String[] args = cmd.split(" ");
@@ -175,7 +153,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -196,9 +173,7 @@ public class testDistributedImportDelimitedJson {
     public void testImportDelimitedJSONZip() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/zip/sample.zip"
-                + " -uri_id name -generate_uri false -input_compressed true"
-                + " -input_compression_codec zip"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
+                + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec zip"
                 + " -input_file_type delimited_json";
         
         String[] args = cmd.split(" ");
@@ -206,7 +181,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -239,9 +213,7 @@ public class testDistributedImportDelimitedJson {
     public void testImportDelimitedJSONZipDir() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/zip"
-                + " -uri_id name -generate_uri false -input_compressed true"
-                + " -input_compression_codec zip"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
+                + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec zip"
                 + " -input_file_type delimited_json";
         
         String[] args = cmd.split(" ");
@@ -249,7 +221,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -282,9 +253,7 @@ public class testDistributedImportDelimitedJson {
     public void testImportDelimitedJSONGzip() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/gzip/sample.gz"
-                + " -uri_id name -generate_uri false -input_compressed true"
-                + " -input_compression_codec gzip"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
+                + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec gzip"
                 + " -input_file_type delimited_json";
         
         String[] args = cmd.split(" ");
@@ -292,7 +261,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -325,9 +293,7 @@ public class testDistributedImportDelimitedJson {
     public void testImportDelimitedJSONGzipDir() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/gzip"
-                + " -uri_id name -generate_uri false -input_compressed true"
-                + " -input_compression_codec gzip"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
+                + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec gzip"
                 + " -input_file_type delimited_json";
         
         String[] args = cmd.split(" ");
@@ -335,7 +301,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -369,7 +334,6 @@ public class testDistributedImportDelimitedJson {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/zip/sample.zip"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec zip"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
                 + " -input_file_type delimited_json -filename_as_collection true";
         
         String[] args = cmd.split(" ");
@@ -377,7 +341,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -425,7 +388,6 @@ public class testDistributedImportDelimitedJson {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/gzip/sample.gz"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec gzip"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR + " -mode distributed"
                 + " -input_file_type delimited_json -filename_as_collection true";
         
         String[] args = cmd.split(" ");
@@ -433,7 +395,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
@@ -467,7 +428,6 @@ public class testDistributedImportDelimitedJson {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/testUri2"
                 + " -uri_id val -generate_uri false"
-                + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR
                 + " -input_file_type delimited_json";
         
         String[] args = cmd.split(" ");
@@ -475,7 +435,6 @@ public class testDistributedImportDelimitedJson {
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
