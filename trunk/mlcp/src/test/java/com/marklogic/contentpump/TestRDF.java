@@ -679,7 +679,7 @@ public class TestRDF {
         Utils.closeSession();
     }
     
-    @Test
+//    @Test
     public void testNQ_quad_performance() throws Exception {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"
