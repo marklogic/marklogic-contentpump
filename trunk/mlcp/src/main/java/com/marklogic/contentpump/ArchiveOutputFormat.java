@@ -19,6 +19,8 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapreduce.JobContext;
+import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -40,5 +42,20 @@ public class ArchiveOutputFormat extends
         Path path = new Path(conf.get(ConfigConstants.CONF_OUTPUT_FILEPATH));
         return new ArchiveWriter(path, context);
     }
+    
+    @Override
+    public synchronized 
+    OutputCommitter getOutputCommitter(TaskAttemptContext context
+                                       ) throws IOException {
+        return new OutputCommitter() {
+            public void abortTask(TaskAttemptContext taskContext) { }
+            public void commitTask(TaskAttemptContext taskContext) { }
+            public boolean needsTaskCommit(TaskAttemptContext taskContext) {
+              return false;
+            }
+            public void setupJob(JobContext jobContext) { }
+            public void setupTask(TaskAttemptContext taskContext) { }
+          };
+    } 
 
 }
