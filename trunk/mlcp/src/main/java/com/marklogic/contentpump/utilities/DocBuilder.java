@@ -17,7 +17,11 @@ package com.marklogic.contentpump.utilities;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+
+import com.marklogic.contentpump.DelimitedTextReader;
 
 /**
  * 
@@ -26,6 +30,8 @@ import org.apache.hadoop.conf.Configuration;
  *
  */
 public abstract class DocBuilder {
+    public static final Log LOG = 
+            LogFactory.getLog(DocBuilder.class);
     protected StringBuilder sb;
     
     /**
@@ -59,7 +65,15 @@ public abstract class DocBuilder {
      * @param fields
      * @throws IOException
      */
-    public abstract void configFields(Configuration conf, String[] fields) throws IllegalArgumentException, IOException;
+    public void configFields(Configuration conf, String[] fields) 
+            throws IllegalArgumentException, IOException {
+        for (int i = 0; i < fields.length; i++) {
+            fields[i] = fields[i].trim();
+            if ("".equals(fields[i])) {
+                LOG.warn("Column " + (i+1) + " has no header and will be skipped");
+            }
+        }
+    }
 
     /**
      * Return the built doc.
