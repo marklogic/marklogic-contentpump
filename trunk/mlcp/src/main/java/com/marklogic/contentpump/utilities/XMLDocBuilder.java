@@ -81,7 +81,8 @@ public class XMLDocBuilder extends DocBuilder {
      */
     @Override
     public void configFields(Configuration conf, String[] fields) throws IOException {
-        if (fields != null) {
+        if (null != fields) {
+            super.configFields(conf, fields);
             for (int i = 0; i < fields.length; i++) {
                 if(fields[i].trim().equals("")) continue;
                 if (!XMLChar.isValidName(fields[i])) {
@@ -89,7 +90,7 @@ public class XMLDocBuilder extends DocBuilder {
                 }
             }
         } else {
-            throw new IOException("Fields are not defined.");
+            throw new IOException("Fields not defined");
         }
     }
     
