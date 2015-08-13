@@ -49,6 +49,11 @@ public class GzipDelimitedJSONReader extends DelimitedJSONReader<Text> {
     }
     
     @Override
+    public float getProgress() throws IOException, InterruptedException {
+        return hasNext?0:1;
+    }
+    
+    @Override
     public void close() throws IOException {
         super.close();
         if (gzipIn != null) {
