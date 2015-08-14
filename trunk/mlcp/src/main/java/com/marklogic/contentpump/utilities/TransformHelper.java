@@ -277,6 +277,7 @@ public class TransformHelper {
 
             optionsMap.put("value-type", ValueType.TEXT.toString());
             break;
+        case JSON:
         case XML:
             query.setNewStringVariable("CONTENT", doc.getContentAsText()
                 .toString());
