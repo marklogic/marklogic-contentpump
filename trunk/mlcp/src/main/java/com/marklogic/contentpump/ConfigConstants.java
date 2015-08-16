@@ -207,5 +207,6 @@ public interface ConfigConstants {
         "mapreduce.marklogic.input.generateuri";
     static final String CONF_DELIMITED_DATA_TYPE = 
             "mapreduce.marklogic.delimited.datatype";
-            
+    static final int MAX_BATCH_SIZE = 200;
+    static final int MAX_TXN_SIZE = 4000;
 }
