@@ -565,16 +565,6 @@ public enum Command implements ConfigConstants {
                             OUTPUT_CLEANDIR + ": " + arg);
                 }
             }
-            String batchSize = cmdline.getOptionValue(BATCH_SIZE);
-            if (batchSize != null) {       
-                conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
-            }
-
-            String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
-            if (txnSize != null) {
-                conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
-            }
-
             if (cmdline.hasOption(NAMESPACE)) {
                 String ns = cmdline.getOptionValue(NAMESPACE);
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_NAMESPACE, ns);
@@ -734,7 +724,7 @@ public enum Command implements ConfigConstants {
             
             applyPartitionConfigOptions(conf, cmdline);
             
-            applyModuleConfigOptions(conf, cmdline, batchSize);
+            applyModuleConfigOptions(conf, cmdline);
             
             if (cmdline.hasOption(SPLIT_INPUT)) {
                 String arg = cmdline.getOptionValue(SPLIT_INPUT);
@@ -789,7 +779,7 @@ public enum Command implements ConfigConstants {
             }
         }
 
-		@Override
+        @Override
 		public void setMapperClass(Job job, Configuration conf,
 				CommandLine cmdline) {
 			String inputTypeOption = cmdline.getOptionValue(INPUT_FILE_TYPE,
@@ -1208,16 +1198,6 @@ public enum Command implements ConfigConstants {
                 String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
                 conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, outDir);
             }
-            String batchSize = cmdline.getOptionValue(BATCH_SIZE);
-            if (batchSize != null) {       
-                conf.set(MarkLogicConstants.BATCH_SIZE, batchSize);
-            }
-
-            String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
-            if (txnSize != null) {
-                conf.set(MarkLogicConstants.TXN_SIZE, txnSize);
-            }
-            
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
                 conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
@@ -1239,7 +1219,7 @@ public enum Command implements ConfigConstants {
             
             applyPartitionConfigOptions(conf, cmdline);
             
-            applyModuleConfigOptions(conf, cmdline, batchSize);
+            applyModuleConfigOptions(conf, cmdline);
         }
 
 	@Override
@@ -1652,13 +1632,15 @@ public enum Command implements ConfigConstants {
         Option batchSize = OptionBuilder
             .withArgName("number")
             .hasArg()
-            .withDescription("Number of document in one request")
+            .withDescription(
+                    "Number of documents in one request (default 100)")
             .create(BATCH_SIZE);
         options.addOption(batchSize);
         Option txnSize = OptionBuilder
             .withArgName("number")
             .hasArg()
-            .withDescription("Number of requests in one transaction")
+            .withDescription(
+                    "Number of requests in one transaction (default 10)")
             .create(TRANSACTION_SIZE);
         options.addOption(txnSize);
     }
@@ -1728,17 +1710,9 @@ public enum Command implements ConfigConstants {
     }
     
     static void applyModuleConfigOptions(Configuration conf,
-        CommandLine cmdline, String batchSize) {
+        CommandLine cmdline) {
         if (cmdline.hasOption(TRANSFORM_MODULE)) {
-            if (batchSize !=null && Integer.valueOf(batchSize)> 1) {
-                //batch size is set explicitly to > 1
-                throw new UnsupportedOperationException(
-                    "Server-side transformation can't work with batch size "
-                        + "greater than 1");
-            }
-            if(batchSize == null) {
-                conf.setInt(MarkLogicConstants.BATCH_SIZE, 1);
-            }
+            applyBatchTxn(conf, cmdline, 1);
             if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false) == true) {
                 throw new UnsupportedOperationException(
                     "Server-side transformation can't work with streaming");
@@ -1758,8 +1732,9 @@ public enum Command implements ConfigConstants {
                 arg = cmdline.getOptionValue(TRANSFORM_PARAM);
                 conf.set(CONF_TRANSFORM_PARAM, arg);
             }
+        } else {
+            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
         }
-
     }
     
     static void applyPartitionConfigOptions(Configuration conf,
@@ -1908,6 +1883,33 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(QUERY_FILTER)) {
             conf.set(MarkLogicConstants.QUERY_FILTER, 
                     cmdline.getOptionValue(QUERY_FILTER));
+        }
+    }
+    
+    static void applyBatchTxn(Configuration conf, CommandLine cmdline, 
+            int maxBatch) {
+        String batchSize = cmdline.getOptionValue(BATCH_SIZE);
+        int batch = MarkLogicConstants.DEFAULT_BATCH_SIZE > maxBatch ?
+                maxBatch : MarkLogicConstants.DEFAULT_BATCH_SIZE;
+        if (batchSize != null) {
+            batch = Integer.decode(batchSize);
+            if (batch > maxBatch) {
+                LOG.warn("The setting for " + BATCH_SIZE + 
+                        " is changed to " + maxBatch);
+                batch = maxBatch;
+            }
+            conf.setInt(MarkLogicConstants.BATCH_SIZE, batch);
+        }
+
+        String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
+        if (txnSize != null) {
+            int txn = Integer.decode(txnSize);
+            if (txn * batch > MAX_TXN_SIZE) {
+                txn = MAX_TXN_SIZE / batch;
+                LOG.warn("The setting for " + TRANSACTION_SIZE + 
+                        " is changed to " + txn);
+            }
+            conf.setInt(MarkLogicConstants.TXN_SIZE, txn);
         }
     }
 
