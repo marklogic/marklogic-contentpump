@@ -41,8 +41,8 @@ import com.marklogic.xcc.types.XdmBinary;
 public class DatabaseDocument implements MarkLogicDocument {
     public static final Log LOG = LogFactory.getLog(
             DatabaseDocument.class);
-    private byte[] content;
-    private ContentType contentType;
+    protected byte[] content;
+    protected ContentType contentType;
     
     public DatabaseDocument(){}
     
