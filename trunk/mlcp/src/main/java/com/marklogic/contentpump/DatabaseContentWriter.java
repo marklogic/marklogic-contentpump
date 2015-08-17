@@ -149,8 +149,8 @@ public class DatabaseContentWriter<VALUE> extends
             meta = ((DatabaseDocumentWithMeta) value).getMeta();
             ContentCreateOptions opt = newContentCreateOptions(meta);
             MarkLogicDocument doc = (MarkLogicDocument)value;
-            opt.setFormat(doc.getContentType().getDocumentFormat());
             if (!meta.isNakedProps()) {
+                opt.setFormat(doc.getContentType().getDocumentFormat());
                 if (doc.getContentType() == ContentType.BINARY) {
                     content = ContentFactory.newContent(uri,
                             doc.getContentAsByteArray(), opt);
