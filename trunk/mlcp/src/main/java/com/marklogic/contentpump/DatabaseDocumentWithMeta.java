@@ -20,6 +20,9 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.StringReader;
 
+import org.apache.hadoop.io.WritableUtils;
+
+import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DatabaseDocument;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
@@ -57,7 +60,13 @@ public class DatabaseDocumentWithMeta extends DatabaseDocument {
 
     @Override
     public void readFields(DataInput in) throws IOException {
-        super.readFields(in);
+        int contentLen = WritableUtils.readVInt(in);
+        if (0 != contentLen) {
+            content = new byte[contentLen];
+            in.readFully(content, 0, contentLen);
+            int ordinal = in.readInt();
+            contentType = ContentType.valueOf(ordinal);
+        }
         int len = in.readInt();
         byte[] xml = new byte[len];
         in.readFully(xml, 0, len);
@@ -67,7 +76,13 @@ public class DatabaseDocumentWithMeta extends DatabaseDocument {
 
     @Override
     public void write(DataOutput out) throws IOException {
-        super.write(out);
+        if (null != content) {
+            WritableUtils.writeVInt(out, content.length);
+            out.write(content, 0, content.length);
+            out.writeInt(contentType.ordinal());
+        } else {
+            WritableUtils.writeVInt(out, 0);
+        }
         byte[] xml = meta.toXML().getBytes();
         out.writeInt(xml.length);
         out.write(xml);
