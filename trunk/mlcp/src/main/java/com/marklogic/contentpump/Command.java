@@ -440,6 +440,11 @@ public enum Command implements ConfigConstants {
             
             applyUriId(conf, inputType, cmdline);
             
+            if (cmdline.hasOption(DOCUMENT_TYPE)
+                    && InputType.DOCUMENTS != inputType
+                    && InputType.DELIMITED_TEXT != inputType) {
+                LOG.warn(DOCUMENT_TYPE + " is not supported " + inputType.name());
+            }
             if (cmdline.hasOption(DATA_TYPE)) {
                 if (InputType.DELIMITED_TEXT != inputType) {
                     throw new IllegalArgumentException(DATA_TYPE + " is only applicable to "
