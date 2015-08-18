@@ -443,7 +443,7 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(DOCUMENT_TYPE)
                     && InputType.DOCUMENTS != inputType
                     && InputType.DELIMITED_TEXT != inputType) {
-                LOG.warn(DOCUMENT_TYPE + " is not supported " + inputType.name());
+                LOG.warn(DOCUMENT_TYPE + " is not supported for " + inputType.name());
             }
             if (cmdline.hasOption(DATA_TYPE)) {
                 if (InputType.DELIMITED_TEXT != inputType) {
