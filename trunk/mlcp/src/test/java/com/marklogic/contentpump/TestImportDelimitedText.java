@@ -858,7 +858,7 @@ public class TestImportDelimitedText{
                 + " -input_file_path "
                 + Constants.TEST_PATH.toUri()
                 + "/csv"
-                + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
+                + " -input_file_type delimited_text -input_file_pattern sample.+\\.csv"
                 + " -document_type json -delimited_root_name doc"
                 + " -delimited_uri_id first -split_input true";
         String[] args = cmd.split(" ");
@@ -873,7 +873,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
                         "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("4", result.next().asString());
         Utils.closeSession();
         
         result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
@@ -892,6 +892,7 @@ public class TestImportDelimitedText{
                 .readSmallFile(Constants.TEST_PATH.toUri().getPath()
                         + "/keys/TestImportDelimitedText#testImportDelimitedTextDocJSONWithOptions.txt");
 
+        System.out.println(sb.toString());
         assertTrue(sb.toString().equals(key));
     }
     
