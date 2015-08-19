@@ -74,6 +74,54 @@ public class TestCompressedRDF {
         
         Utils.closeSession();
     }
+    
+    @Test
+    public void test34887() throws Exception {
+        String cmd = 
+            "IMPORT -host localhost -port 5275 -username admin -password admin"
+            + " -input_compressed true -input_compression_codec zip"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/34887.zip"
+            + " -thread_count 1"
+            + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils
+            .runQuery(
+                "xcc://admin:admin@localhost:5275",
+                "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+
+        result = Utils
+            .runQuery(
+                "xcc://admin:admin@localhost:5275",
+                "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("3", result.next().asString());
+
+        result = Utils
+            .runQuery(
+                "xcc://admin:admin@localhost:5275",
+                "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+
+        result = Utils
+            .runQuery(
+                "xcc://admin:admin@localhost:5275",
+                "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/semantics#default-graph\")//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        Utils.closeSession();
+    }
 
     @Test
     public void testZip_quad_coll() throws Exception {
