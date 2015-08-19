@@ -1025,7 +1025,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             this.fsname = fsname;
             this.in = in;
             this.origFn = origFn;
-            System.err.println("O:" + origFn + " : " + fsname);
+            if(LOG.isDebugEnabled())
+                LOG.debug("O:" + origFn + " : " + fsname);
         }
 
         public boolean failed() {
@@ -1054,7 +1055,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 parser.parse();
             } catch (Exception ex) {
                 failed = true;
-                LOG.error("Failed to parse: " + origFn, ex);
+                LOG.error("Parse error in RDF document; processing partial document:"
+                    + origFn + " " + ex.getMessage());
             }
         }
     }
