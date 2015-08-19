@@ -172,7 +172,7 @@ public class TestDistributedImportDelimitedText {
                 + "/csv"
                 + " -hadoop_conf_dir "
                 + Constants.HADOOP_CONF_DIR
-                + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
+                + " -input_file_type delimited_text -input_file_pattern sample.+\\.csv"
                 + " -document_type json"
                 + " -split_input true -delimited_uri_id first";
         String[] args = cmd.split(" ");
@@ -188,7 +188,7 @@ public class TestDistributedImportDelimitedText {
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
                         "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("4", result.next().asString());
         Utils.closeSession();
         
         result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
