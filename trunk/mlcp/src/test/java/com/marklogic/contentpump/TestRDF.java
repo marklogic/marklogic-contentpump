@@ -367,6 +367,46 @@ public class TestRDF {
     }
     
     @Test
+    public void test34887() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/34887"
+                        + " -output_graph http://myDefaultGraph.com"
+                        + " -thread_count 1"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+    assertTrue(result.hasNext());
+    assertEquals("3", result.next().asString());
+
+    result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+    assertTrue(result.hasNext());
+    assertEquals("3", result.next().asString());
+
+    result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+    assertTrue(result.hasNext());
+    assertEquals("2", result.next().asString());
+
+    result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://myDefaultGraph.com\")//sem:triple)");
+    assertTrue(result.hasNext());
+    assertEquals("1", result.next().asString());
+    
+        Utils.closeSession();
+    }
+    
+    @Test
     public void testN3_override_graph() throws Exception {
         String cmd =
                 "IMPORT -host localhost -username admin -password admin"
