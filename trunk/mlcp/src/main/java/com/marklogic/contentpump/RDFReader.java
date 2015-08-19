@@ -130,6 +130,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected String inputFn; 
     protected long splitStart;
     protected long start;
+    /*stays 0 until we're done*/
     protected long pos;
     protected long end;
     protected boolean compressed;
@@ -360,8 +361,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             try {
                 parser.parse();
             } catch (Throwable e) {
-                LOG.error("Parse error in RDF document; processing partial document");
-                e.printStackTrace();
+                LOG.error("Parse error in RDF document; processing partial document:"
+                    + fsname + " " + e.getMessage());
             }
             in.close();
             graphNameIter = dataset.listNames();
