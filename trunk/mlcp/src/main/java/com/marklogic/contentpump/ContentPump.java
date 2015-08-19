@@ -56,15 +56,16 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         }
         
         String[] expandedArgs = null;
+        int rc = 1;
         try {
             expandedArgs = OptionsFileUtil.expandArguments(args);
+            rc = runCommand(expandedArgs);
         } catch (Exception ex) {
             LOG.error("Error while expanding arguments", ex);
             System.err.println(ex.getMessage());
             System.err.println("Try 'mlcp help' for usage.");
         }
         
-        int rc = runCommand(expandedArgs);
         System.exit(rc);
     }
 
