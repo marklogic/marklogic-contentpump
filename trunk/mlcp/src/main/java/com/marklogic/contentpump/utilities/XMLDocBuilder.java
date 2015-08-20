@@ -18,9 +18,9 @@ package com.marklogic.contentpump.utilities;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.xerces.util.XML11Char;
 
 import com.marklogic.contentpump.ConfigConstants;
-import org.apache.xerces.util.XML11Char;
 
 /**
  * Builder for xml document.
