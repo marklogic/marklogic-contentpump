@@ -17,8 +17,7 @@ package com.marklogic.contentpump.utilities;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.sun.org.apache.xml.internal.utils.XMLChar;
+import org.apache.xerces.util.XML11Char;
 
 public class XMLUtil {
     public static final Log LOG = LogFactory.getLog(XMLUtil.class);
@@ -31,13 +30,13 @@ public class XMLUtil {
     public static String getValidName(String name) {
         StringBuilder validname = new StringBuilder();
         char ch = name.charAt(0);
-        if (!XMLChar.isNameStart(ch)) {
+        if (!XML11Char.isXML11NameStart(ch)) {
             LOG.warn("Prepend _ to " + name);
             validname.append("_");
         }
         for (int i = 0; i < name.length(); i++) {
             ch = name.charAt(i);
-            if (!XMLChar.isName(ch)) {
+            if (!XML11Char.isXML11Name(ch)) {
                 LOG.warn("Character " + ch + " in " + name
                     + " is converted to _");
                 validname.append("_");
