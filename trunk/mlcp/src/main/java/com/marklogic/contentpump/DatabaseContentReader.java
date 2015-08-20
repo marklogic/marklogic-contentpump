@@ -127,14 +127,14 @@ public class DatabaseContentReader extends
         }
         String ctsQuery = null;
         ctsQuery = conf.get(QUERY_FILTER);
-        if (ctsQuery != null) {
-            StringBuilder buf = new StringBuilder();
-            buildSearchQuery(src, ctsQuery, nsCol, buf);
-            src = buf.toString();
-        } else {
-            src += "[$mlmr:splitstart to $mlmr:splitend]";
-        }   
         StringBuilder buf = new StringBuilder();
+        if (ctsQuery != null) {
+            buildSearchQuery(src, ctsQuery, nsCol, buf);
+        } else {
+            buildDocExprQuery(src, nsCol, buf);
+        }   
+        src = buf.toString();
+        buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
         buf.append("import module namespace hadoop = ");
         buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
