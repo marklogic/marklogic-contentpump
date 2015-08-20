@@ -859,7 +859,7 @@ public enum Command implements ConfigConstants {
             Option exportIndented = OptionBuilder
                 .withArgName("true,false")
                 .hasOptionalArg()
-                .withDescription("Whether to format data with indentation")
+                .withDescription("Whether to format XML data with indentation")
                 .create(OUTPUT_INDENTED);
             options.addOption(exportIndented);
             Option snapshot = OptionBuilder
