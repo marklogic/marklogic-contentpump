@@ -20,7 +20,7 @@ import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 
 import com.marklogic.contentpump.ConfigConstants;
-import com.sun.org.apache.xml.internal.utils.XMLChar;
+import org.apache.xerces.util.XML11Char;
 
 /**
  * Builder for xml document.
@@ -85,7 +85,7 @@ public class XMLDocBuilder extends DocBuilder {
             super.configFields(conf, fields);
             for (int i = 0; i < fields.length; i++) {
                 if(fields[i].trim().equals("")) continue;
-                if (!XMLChar.isValidName(fields[i])) {
+                if (!XML11Char.isXML11ValidName(fields[i])) {
                     fields[i] = XMLUtil.getValidName(fields[i]);
                 }
             }
