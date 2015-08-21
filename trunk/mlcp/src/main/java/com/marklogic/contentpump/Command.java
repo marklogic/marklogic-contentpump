@@ -1407,9 +1407,12 @@ public enum Command implements ConfigConstants {
                 if (inputType != InputType.DOCUMENTS) {
                     LOG.warn("Streaming option is not applicable to input " +
                             "type " + inputType);
-                }
-                conf.setBoolean(MarkLogicConstants.OUTPUT_STREAMING, true);
-                return true;
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_STREAMING, false);
+                    return false;
+                } else {
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_STREAMING, true);
+                    return true;
+                }  
             } 
         } 
         conf.setBoolean(MarkLogicConstants.OUTPUT_STREAMING, false);
