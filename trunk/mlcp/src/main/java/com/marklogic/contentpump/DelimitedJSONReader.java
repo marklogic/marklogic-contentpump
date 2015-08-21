@@ -139,7 +139,7 @@ public class DelimitedJSONReader<VALUEIN> extends
             return false;
         }
         String line = reader.readLine();
-        int lineNumber = reader.getLineNumber() + 1;
+        int lineNumber = reader.getLineNumber();
         if (line == null) {
             if (findNextFileEntryAndInitReader()) {
                 return nextKeyValue();
