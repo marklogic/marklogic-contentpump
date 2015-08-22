@@ -69,6 +69,8 @@ public class DatabaseContentReader extends
     protected boolean copyProperties;
     protected boolean copyQuality;
     protected HashMap<String, DocumentMetadata> metadataMap;
+    protected String ctsQuery = null;
+    protected boolean nakedDone = false;
     /**
      * Current key.
      */
@@ -92,7 +94,7 @@ public class DatabaseContentReader extends
         metadataMap = new HashMap<String, DocumentMetadata>();
     }
 
-     @Override
+    @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
         throws IOException, InterruptedException {
         mlSplit = (MarkLogicInputSplit) inSplit;
@@ -125,7 +127,6 @@ public class DatabaseContentReader extends
         } else {
             src = "fn:collection()";
         }
-        String ctsQuery = null;
         ctsQuery = conf.get(QUERY_FILTER);
         StringBuilder buf = new StringBuilder();
         if (ctsQuery != null) {
@@ -187,70 +188,8 @@ public class DatabaseContentReader extends
         
         //doc
         buf.append(src);
-        
-        // naked properties       
-        if (copyProperties) {
-            buf.append(", if ($mlmr:splitstart eq 1) then ");
-            buf.append("\nlet $props := cts:search(");
-            String cFilter = null, dFilter = null;
-            cFilter = conf.get(MarkLogicConstants.COLLECTION_FILTER);
-            if (cFilter != null) {
-                buf.append("xdmp:collection-properties(");
-                buf.append(cFilter);
-                buf.append(")");
-            } else {
-                dFilter = conf.get(MarkLogicConstants.DIRECTORY_FILTER);
-                if (dFilter != null) {
-                    buf.append("xdmp:directory-properties(");
-                    buf.append(dFilter);
-                    buf.append(", \"infinity\")");
-                } else {
-                    buf.append("xdmp:collection-properties()");
-                }
-            }                
-            buf.append(",");
-            if (ctsQuery == null) {
-                buf.append(
-                    "cts:not-query(cts:document-fragment-query(");
-                buf.append("cts:and-query(()))),");
-                buf.append("(\"unfiltered\",\"score-zero\",cts:unordered()))\n");
-            } else {
-                buf.append("cts:and-query((cts:query(xdmp:unquote('");
-                buf.append(ctsQuery);
-                buf.append("')/*),cts:not-query(cts:document-fragment-query(");
-                buf.append("cts:and-query(()))))),");
-                buf.append("(\"unfiltered\",\"score-zero\",cts:unordered()))\n");
-            }
-            buf.append("for $doc in $props\n");
-            buf.append("let $uri := fn:base-uri($doc)\n return (");
-
-            buf.append("'META',");
-            buf.append("$uri,");
-            buf.append("if(fn:empty($doc/node())) then 0 else xdmp:node-kind($doc/node()),");
-            if (copyCollection) {
-                buf.append("xdmp:document-get-collections($uri),\n");
-            }
-            if (copyPermission) {
-                buf.append("let $list := xdmp:document-get-permissions($uri)\n");
-                buf.append("return hadoop:get-permissions($list),");
-            }
-            // if copy-quality, else + 0
-            if (copyQuality) {
-                buf.append("xdmp:document-get-quality($uri),\n");
-            } else {
-                buf.append("0,");
-            }
-            buf.append("$doc/prop:properties, \n");
-
-            // end-of-record marker
-            buf.append("0");
-
-            buf.append(" )\n");
-            buf.append(" else ()");
-        }
 
         queryText = buf.toString();
-
         if (LOG.isDebugEnabled()) {
             LOG.debug(queryText);
         }
@@ -286,6 +225,94 @@ public class DatabaseContentReader extends
             throw new IOException(e);
         }
     }
+     
+    protected void queryNakedProperties() throws IOException {
+        StringBuilder buf = new StringBuilder();
+        buf.append("xquery version \"1.0-ml\"; \n");
+        buf.append("import module namespace hadoop = ");
+        buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
+        buf.append("\"/MarkLogic/hadoop.xqy\";\n");
+        buf.append("let $props := cts:search(");
+        String cFilter = null, dFilter = null;
+        cFilter = conf.get(MarkLogicConstants.COLLECTION_FILTER);
+        if (cFilter != null) {
+            buf.append("xdmp:collection-properties(");
+            buf.append(cFilter);
+            buf.append(")");
+        } else {
+            dFilter = conf.get(MarkLogicConstants.DIRECTORY_FILTER);
+            if (dFilter != null) {
+                buf.append("xdmp:directory-properties(");
+                buf.append(dFilter);
+                buf.append(", \"infinity\")");
+            } else {
+                buf.append("xdmp:collection-properties()");
+            }
+        }                
+        buf.append(",");
+        if (ctsQuery == null) {
+            buf.append(
+                    "cts:not-query(cts:document-fragment-query(");
+            buf.append("cts:and-query(()))),");
+            buf.append("(\"unfiltered\",\"score-zero\",cts:unordered()))\n");
+        } else {
+            buf.append("cts:and-query((cts:query(xdmp:unquote('");
+            buf.append(ctsQuery);
+            buf.append("')/*),cts:not-query(cts:document-fragment-query(");
+            buf.append("cts:and-query(()))))),");
+            buf.append("(\"unfiltered\",\"score-zero\",cts:unordered()))\n");
+        }
+        buf.append("for $doc in $props\n");
+        buf.append("let $uri := fn:base-uri($doc)\n return (");
+
+        buf.append("'META',");
+        buf.append("$uri,");
+        buf.append("if(fn:empty($doc/node())) then 0 else xdmp:node-kind($doc/node()),");
+        if (copyCollection) {
+            buf.append("xdmp:document-get-collections($uri),\n");
+        }
+        if (copyPermission) {
+            buf.append("let $list := xdmp:document-get-permissions($uri)\n");
+            buf.append("return hadoop:get-permissions($list),");
+        }
+        // if copy-quality, else + 0
+        if (copyQuality) {
+            buf.append("xdmp:document-get-quality($uri),\n");
+        } else {
+            buf.append("0,");
+        }
+        buf.append("$doc/prop:properties, \n");
+
+        // end-of-record marker
+        buf.append("0");
+
+        buf.append(")");
+        String queryText = buf.toString();
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(queryText);
+        }
+        
+        // set up a connection to the server
+        try {
+            AdhocQuery aquery = session.newAdhocQuery(queryText);
+            RequestOptions options = new RequestOptions();
+            options.setCacheResult(false);
+            String ts = conf.get(INPUT_QUERY_TIMESTAMP);
+            if (ts != null) {
+                options.setEffectivePointInTime(new BigInteger(ts));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Query timestamp: " + ts);
+                }
+            } 
+            aquery.setOptions(options);
+            result = session.submitRequest(aquery);
+            nakedDone = true;
+        } catch (RequestException e) {
+            LOG.error("Query: " + queryText);
+            LOG.error(e);
+            throw new IOException(e);
+        }
+    }
 
     private void initMetadataMap() throws IOException {
         while (result.hasNext()) {
@@ -309,7 +336,6 @@ public class DatabaseContentReader extends
                 throw new IOException("incorrect type");
             }
         }
-
     }
     
     /**
@@ -375,23 +401,30 @@ public class DatabaseContentReader extends
         }
         return uri;
     }
+   
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if (result == null || (!result.hasNext())) {
-            return false;
+            if (!nakedDone && copyProperties && mlSplit.getStart() == 1) {
+                queryNakedProperties();
+                if (!result.hasNext()) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
         }
         ResultItem currItem = null;
         currItem = result.next();
 
-        // naked properties are excluded from count
-        if (count < length) {
+        if (!nakedDone) {
             count++;
             // docs
             String uri = null;
             uri = currItem.getDocumentURI();
             if (uri == null) {
                 throw new IOException("Missing document URI for result "
-                    + count);
+                    + currItem.toString());
             }
             currentValue = new DatabaseDocumentWithMeta();
             DocumentMetadata metadata = metadataMap.get(uri);
@@ -405,8 +438,7 @@ public class DatabaseContentReader extends
                 LOG.error("no meta for " + uri);
             }
             return true;
-        } else {
-            // naked properties
+        } else { // naked properties
             currentValue = new DatabaseDocumentWithMeta();
             ResultItem item = currItem;
             String type = null;
@@ -448,8 +480,9 @@ public class DatabaseContentReader extends
         int i = permString.indexOf("<sec:role-name>");
         int j = permString.indexOf("</sec:role-name>")+16;
         permString = permString.substring(0, i) + permString.substring(j);
-        
-        LOG.debug("permissionElement = " + _permissionElement.asString());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("permissionElement = " + _permissionElement.asString());
+        }    
         _metadata.setPermString(permString);
         Element permissionW3cElement = _permissionElement.asW3cElement();
 
