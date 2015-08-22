@@ -405,7 +405,7 @@ public class DatabaseContentReader extends
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if (result == null || (!result.hasNext())) {
-            if (!nakedDone && copyProperties && mlSplit.getStart() == 1) {
+            if (!nakedDone && copyProperties && mlSplit.getStart() == 0) {
                 queryNakedProperties();
                 if (!result.hasNext()) {
                     return false;
