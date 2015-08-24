@@ -115,8 +115,8 @@ public class JSONDocBuilder extends DocBuilder {
         }
         String pairs[] = list.split(",");
         for (int i = 0; i < pairs.length; i += 2) {
-            String colName = pairs[i];
-            String colDataType = pairs[i+1];
+            String colName = pairs[i].trim();
+            String colDataType = pairs[i+1].trim();
             if (!datatypeMap.containsKey(colName)) {
                 throw new IllegalArgumentException("Column name " + colName + " not found.");
             }
