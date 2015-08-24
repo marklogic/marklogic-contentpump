@@ -112,7 +112,8 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         } catch (IOException ex) {
             if (ex.getMessage().contains(
                 "invalid char between encapsulated token end delimiter")) {
-                setSkipKey(parser.getLineNumber(), 0, ex.getMessage());
+                setSkipKey(0, 0, 
+                        "invalid char between encapsulated token end delimiter");
             } else {
                 throw ex;
             }
