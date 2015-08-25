@@ -294,7 +294,10 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 .getAttributeValue(i));
             sb.append(" " + (null == aPrefix ? "" : (aPrefix + ":")) + aName
                 + "=\"" + aValue + "\"");
-            if (!useAutomaticId && newDoc && ("@" + aName).equals(idName)) {
+            if (!useAutomaticId 
+                    && newDoc 
+                    && ("@" + aName).equals(idName) 
+                    && currentId == null) {
                 currentId = aValue;
                 setKey(aValue, loc.getLineNumber(), loc.getColumnNumber(), 
                         true);
@@ -305,25 +308,31 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         // allow for repeated idName elements: first one wins
         // NOTE: idName is namespace-insensitive
         if (!useAutomaticId && newDoc && name.equals(idName)) {
-            if (xmlSR.next() != XMLStreamConstants.CHARACTERS) {
+            int nextToken = xmlSR.next();
+            if (nextToken != XMLStreamConstants.CHARACTERS) {
                 throw new XMLStreamException("badly formed xml or " + idName
                     + " is not a simple node: at" + xmlSR.getLocation());
             }
-            String newId = xmlSR.getText();
-            currentId = newId;
-            sb.append(newId);
+            do {
+                String idStr = StringEscapeUtils.escapeXml(xmlSR.getText());
+                if (currentId == null) {
+                    currentId = "";
+                }
+                currentId += idStr;
+                sb.append(idStr);
+            } while ((nextToken = xmlSR.next()) == XMLStreamConstants.CHARACTERS);
             if (newUriId) {
-                setKey(newId, loc.getLineNumber(), loc.getColumnNumber(), 
+                setKey(currentId, loc.getLineNumber(), loc.getColumnNumber(), 
                         true);
                 newUriId = false;
             } else if (LOG.isDebugEnabled()) {
                 LOG.debug("Duplicate URI_ID match found: key = " + key);
             }
             if (LOG.isTraceEnabled()) {
-                LOG.trace("URI_ID: " + newId);
+                LOG.trace("URI_ID: " + currentId);
             }
             // advance to the END_ELEMENT
-            if (xmlSR.next() != XMLStreamConstants.END_ELEMENT) {
+            if (nextToken != XMLStreamConstants.END_ELEMENT) {
                 throw new XMLStreamException(
                     "badly formed xml: no END_TAG after id text"
                         + xmlSR.getLocation());
