@@ -254,13 +254,13 @@ public class DatabaseContentReader extends
             buf.append(
                     "cts:not-query(cts:document-fragment-query(");
             buf.append("cts:and-query(()))),");
-            buf.append("(\"unfiltered\",\"score-zero\",cts:unordered()))\n");
+            buf.append("(\"unfiltered\",\"score-zero\"))\n");
         } else {
             buf.append("cts:and-query((cts:query(xdmp:unquote('");
             buf.append(ctsQuery);
             buf.append("')/*),cts:not-query(cts:document-fragment-query(");
             buf.append("cts:and-query(()))))),");
-            buf.append("(\"unfiltered\",\"score-zero\",cts:unordered()))\n");
+            buf.append("(\"unfiltered\",\"score-zero\"))\n");
         }
         buf.append("for $doc in $props\n");
         buf.append("let $uri := fn:base-uri($doc)\n return (");
