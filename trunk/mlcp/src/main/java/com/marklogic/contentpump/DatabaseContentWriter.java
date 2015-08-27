@@ -346,8 +346,14 @@ public class DatabaseContentWriter<VALUE> extends
             + "declare variable $QUALITY-STRING as xs:string external;\n"
             + "xdmp:document-set-properties($URI,\n"
             + "  xdmp:unquote($XML-STRING)/prop:properties/node() )\n"
-            + ", if('' eq ($PERM-STRING)) then () else xdmp:document-set-permissions($URI,xdmp:unquote($PERM-STRING)/node())\n"
-            + ", if('' eq ($COLL-STRING)) then () else xdmp:document-set-collections($URI,$COLL-STRING)\n"
+            + ", if('' eq ($PERM-STRING)) then () else \n"
+            + "xdmp:document-set-permissions($URI, \n"
+            + "xdmp:unquote($PERM-STRING)/node()/sec:permission)\n"
+            + ", if('' eq ($COLL-STRING)) then () else \n"
+            + "let $f := fn:function-lookup(xs:QName('xdmp:from-json-string'), 1)\n"
+            + "return if ($f) then \n"
+            + "xdmp:document-set-collections($URI,json:array-values($f($COLL-STRING)))\n"
+            + "else xdmp:document-set-collections($URI,json:array-values(xdmp:from-json($COLL-STRING)))\n"
             + ", if('' eq ($QUALITY-STRING)) then () else xdmp:document-set-quality($URI,xs:integer($QUALITY-STRING))\n"
             ;
         AdhocQuery req = s.newAdhocQuery(query);
