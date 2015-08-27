@@ -251,7 +251,12 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             inSplit = iterator.next();
         }
 
-        initStream(inSplit);
+        try {
+            initStream(inSplit);
+        } catch (IOException e ){
+            LOG.error("Invalid input: " + file.getName() + ": " + e.getMessage());
+            throw e;
+        }
         String[] perms = conf.getStrings(MarkLogicConstants.OUTPUT_PERMISSION);
         if(perms!=null) {
             defaultPerms = PermissionUtil.getPermissions(perms).toArray(
@@ -636,6 +641,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextInMemoryTripleKeyValue() throws IOException, InterruptedException {
+        if(statementIter == null) return false;
         if (!statementIter.hasNext()) {
             hasNext = false;
             return false;
@@ -673,6 +679,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextInMemoryQuadKeyValueWithCollections() throws IOException, InterruptedException {
+        if(statementIter == null) return false;
         while (!statementIter.hasNext()) {
             if (graphNameIter.hasNext()) {
                 collection = graphNameIter.next();
@@ -706,6 +713,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextInMemoryQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
+        if(statementIter == null) return false;
         while (!statementIter.hasNext()) {
             if (graphNameIter.hasNext()) {
                 collection = graphNameIter.next();
@@ -749,6 +757,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextStreamingKeyValue() throws IOException, InterruptedException {
+        if(rdfIter == null) return false;
         if (!rdfIter.hasNext() && collectionHash.size() == 0) {
             if(compressed) {
                 hasNext = false;
@@ -772,6 +781,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected boolean nextStreamingTripleKeyValue() throws IOException, InterruptedException {
+        if(rdfIter == null) return false;
         setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
@@ -804,6 +814,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected boolean nextStreamingQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
+        if(rdfIter == null) return false;
         setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
@@ -828,6 +839,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextStreamingQuadKeyValueWithCollections() throws IOException, InterruptedException {
+        if(rdfIter == null) return false;
         if (!rdfIter.hasNext() && collectionHash.isEmpty()) {
             hasNext = false;
             return false;
