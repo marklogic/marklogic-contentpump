@@ -151,6 +151,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             buf.append("import module namespace hadoop = ");
             buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
             buf.append("\"/MarkLogic/hadoop.xqy\";\n");
+            buf.append("xdmp:host-name(xdmp:host());\n");
             buf.append("hadoop:get-splits(\'"); 
             appendNsBindings(buf);
             buf.append("\', \'");
@@ -189,7 +190,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
             
-            if (localMode) {
+            if (localMode && advancedMode) {
                 AdhocQuery hostQuery = session.newAdhocQuery(
                     "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
                 hostQuery.setOptions(options);
@@ -210,6 +211,11 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
             query.setOptions(options);
             result = session.submitRequest(query);
+            
+            if (!advancedMode && result.hasNext()) {
+                ResultItem item = result.next();
+                localHost = item.asString();
+            }
             
             int count = 0;
             while (result.hasNext()) {

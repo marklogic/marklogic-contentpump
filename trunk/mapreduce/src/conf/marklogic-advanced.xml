@@ -31,6 +31,7 @@
     <property>
         <name>mapreduce.marklogic.input.splitquery</name>
         <value><![CDATA[
+        xquery version "1.0-ml";
         declare namespace wp="http://www.mediawiki.org/xml/export-0.4/";
         import module namespace hadoop = "http://marklogic.com/xdmp/hadoop" at "/MarkLogic/hadoop.xqy"; 
         hadoop:get-splits('', 'fn:doc()', 'cts:and-query(())')]]></value>
