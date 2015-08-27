@@ -368,19 +368,25 @@ public class DatabaseContentReader extends
             metadata.addCollection(item.asString());
             item = result.next();
         }
+        
         // handle permissions, may not be present
+        StringBuilder buf = new StringBuilder();
+        buf.append("<perms>");
         while (item != null && ValueType.ELEMENT == item.getItemType()) {
             if (!copyPermission) {
                 item = result.next();
                 continue;
             }
             try {
-                readPermission((XdmElement) item.getItem(), metadata);
+                readPermission((XdmElement) item.getItem(), metadata, buf);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             item = result.next();
         }
+        buf.append("</perms>");
+        metadata.setPermString(buf.toString());
+        
         // handle quality, always present even if not requested (barrier)
         metadata.setQuality((XSInteger) item.getItem());
         item = result.next();
@@ -470,7 +476,7 @@ public class DatabaseContentReader extends
     }
 
     private void readPermission(XdmElement _permissionElement,
-        DocumentMetadata _metadata) throws Exception {
+            DocumentMetadata metadata, StringBuilder buf) throws Exception {
         // permission: turn into a ContentPermission object
         // each permission is a sec:permission element.
         // children:
@@ -479,11 +485,8 @@ public class DatabaseContentReader extends
         String permString = _permissionElement.asString();
         int i = permString.indexOf("<sec:role-name>");
         int j = permString.indexOf("</sec:role-name>")+16;
-        permString = permString.substring(0, i) + permString.substring(j);
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("permissionElement = " + _permissionElement.asString());
-        }    
-        _metadata.setPermString(permString);
+        buf.append(permString.substring(0, i));
+        buf.append(permString.substring(j));   
         Element permissionW3cElement = _permissionElement.asW3cElement();
 
         NodeList capabilities = permissionW3cElement
@@ -495,7 +498,7 @@ public class DatabaseContentReader extends
         if (0 < roles.getLength() && 0 < capabilities.getLength()) {
             role = roles.item(0);
             capability = capabilities.item(0);
-            _metadata.addPermission(capability.getTextContent(),
+            metadata.addPermission(capability.getTextContent(),
                 role.getTextContent());
             if (roles.getLength() > 1) {
                 LOG.warn("input permission: " + permissionW3cElement + ": "
