@@ -120,13 +120,19 @@ public class DocumentMetadata {
     }
 
     public String getCollectionString() {
-        StringBuilder sb = new StringBuilder();
-        for(int i=0; i<collectionsList.size(); i++) {
-            if(i>0) sb.append(",");
-            sb.append("\""). append(collectionsList.get(i)).append("\"");
-            
+        if (collectionsList.isEmpty()) {
+            return "";
         }
-        return sb.toString();
+        StringBuilder buf = new StringBuilder();
+        buf.append("[");
+        for (int i = 0; i < collectionsList.size(); i++) {
+            if (i > 0) {
+                buf.append(",");
+            }
+            buf.append("\"").append(collectionsList.get(i)).append("\"");      
+        }
+        buf.append("]");
+        return buf.toString();
     }
     /**
      * @return
