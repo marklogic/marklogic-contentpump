@@ -158,6 +158,92 @@ public class TestCompressedRDF {
     }
 
     @Test
+    public void testZip_quad_coll_mixZips() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_compressed true -input_compression_codec gzip"
+                        + " -thread_count 2"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/mixZip"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("5", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("454", result.next().asString());
+
+        result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+        
+        result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testZip_quad_coll_mixZips2() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
+                        + " -input_compressed true -input_compression_codec zip"
+                        + " -thread_count 2"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/mixZip"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils
+            .runQuery(
+                "xcc://admin:admin@localhost:5275",
+                "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("491", result.next().asString());
+
+        result = Utils
+            .runQuery(
+                "xcc://admin:admin@localhost:5275",
+                "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("16528", result.next().asString());
+
+        result = Utils
+            .runQuery(
+                "xcc://admin:admin@localhost:5275",
+                "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
+        assertTrue(result.hasNext());
+        assertEquals("6", result.next().asString());
+
+        Utils.closeSession();
+    }
+    
+    @Test
     public void testZip_my_coll() throws Exception {
         String cmd =
                 "IMPORT -host localhost -port 5275 -username admin -password admin"

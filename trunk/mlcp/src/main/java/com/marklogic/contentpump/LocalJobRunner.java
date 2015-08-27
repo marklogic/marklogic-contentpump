@@ -378,6 +378,13 @@ public class LocalJobRunner implements ConfigConstants {
                 mapper.run(mapperContext);
             } catch (Throwable t) {
                 LOG.error("Error running task: ", t);
+                try{
+                    synchronized(pool) {
+                        pool.notify();
+                    }
+                } catch (Throwable t1) {
+                    LOG.error(t1);
+                }
             } finally {
                 try {
                     if (trackingReader != null) {
