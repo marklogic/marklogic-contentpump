@@ -151,7 +151,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             buf.append("import module namespace hadoop = ");
             buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
             buf.append("\"/MarkLogic/hadoop.xqy\";\n");
-            buf.append("xdmp:host-name(xdmp:host());\n");
+            buf.append("xdmp:host-name(xdmp:host()),\n");
             buf.append("hadoop:get-splits(\'"); 
             appendNsBindings(buf);
             buf.append("\', \'");
