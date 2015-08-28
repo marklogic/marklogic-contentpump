@@ -180,8 +180,6 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Split query: " + splitQuery);
         }
-        // TODO: no need to query the host with a separate round trip
-        // See fix 23798
         boolean localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));
         String localHost = null;
         try {
