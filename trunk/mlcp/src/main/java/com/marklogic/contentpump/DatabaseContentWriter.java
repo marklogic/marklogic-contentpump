@@ -351,7 +351,7 @@ public class DatabaseContentWriter<VALUE> extends
             + "xdmp:unquote($PERM-STRING)/node()/sec:permission)\n"
             + ", if('' eq ($COLL-STRING)) then () else \n"
             + "let $f := fn:function-lookup(xs:QName('xdmp:from-json-string'), 1)\n"
-            + "return if ($f) then \n"
+            + "return if (fn:exists($f)) then \n"
             + "xdmp:document-set-collections($URI,json:array-values($f($COLL-STRING)))\n"
             + "else xdmp:document-set-collections($URI,json:array-values(xdmp:from-json($COLL-STRING)))\n"
             + ", if('' eq ($QUALITY-STRING)) then () else xdmp:document-set-quality($URI,xs:integer($QUALITY-STRING))\n"
