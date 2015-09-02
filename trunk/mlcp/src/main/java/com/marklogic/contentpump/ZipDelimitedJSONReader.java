@@ -55,7 +55,7 @@ public class ZipDelimitedJSONReader extends DelimitedJSONReader<Text> {
     @Override
     protected void initFileStream(InputSplit inSplit) 
             throws IOException, InterruptedException {
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         // TODO Do we support file name as collection with compression?    
         fileIn = fs.open(file);
         zipIn = new ZipInputStream(fileIn);
