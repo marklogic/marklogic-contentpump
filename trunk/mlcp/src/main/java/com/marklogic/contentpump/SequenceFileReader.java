@@ -65,7 +65,7 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         batchSize = conf.getInt(MarkLogicConstants.BATCH_SIZE, 
             MarkLogicConstants.DEFAULT_BATCH_SIZE);
         
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
         if(status.isDirectory()) {
@@ -79,7 +79,7 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     @SuppressWarnings("unchecked")
     protected void initReader(InputSplit inSplit) throws IOException{
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         reader = new SequenceFile.Reader(fs, file, conf);
         String keyClass = conf
             .get(ConfigConstants.CONF_INPUT_SEQUENCEFILE_KEY_CLASS);

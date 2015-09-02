@@ -75,7 +75,7 @@ public class CompressedDocumentReader<VALUEIN> extends
         initConfig(context);
         batchSize = conf.getInt(MarkLogicConstants.BATCH_SIZE, 
             MarkLogicConstants.DEFAULT_BATCH_SIZE);
-        file = ((FileSplit) inSplit).getPath();  
+        setFile(((FileSplit) inSplit).getPath());  
         fs = file.getFileSystem(conf);
         FileStatus status = fs.getFileStatus(file);
         if(status.isDirectory()) {
@@ -89,7 +89,7 @@ public class CompressedDocumentReader<VALUEIN> extends
         if (LOG.isDebugEnabled()) {
             LOG.debug("Starting " + file);
         }
-        file = ((FileSplit) inSplit).getPath();  
+        setFile(((FileSplit) inSplit).getPath());  
 
         FSDataInputStream fileIn = fs.open(file);
 

@@ -76,8 +76,8 @@ public class ArchiveRecordReader extends
         initConfig(context);
         allowEmptyMeta = conf.getBoolean(
             CONF_INPUT_ARCHIVE_METADATA_OPTIONAL, false);
-        
-        file = ((FileSplit) inSplit).getPath();
+         
+        setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
         if(status.isDirectory()) {
@@ -88,7 +88,7 @@ public class ArchiveRecordReader extends
     }
     
     protected void initStream(InputSplit inSplit) throws IOException {
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         int index = file.toUri().getPath().lastIndexOf(EXTENSION);
         String subStr = file.toUri().getPath().substring(0, index);
         index = subStr.lastIndexOf('-');

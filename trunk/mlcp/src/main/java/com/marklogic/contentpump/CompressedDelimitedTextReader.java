@@ -64,7 +64,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
         initDocType();
         initDelimConf();
         
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
         if (status.isDirectory()) {
@@ -76,7 +76,7 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
     }
     
     protected void initStream(InputSplit inSplit) throws IOException {
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         FSDataInputStream fileIn = fs.open(file);
         
         String codecString = conf.get(

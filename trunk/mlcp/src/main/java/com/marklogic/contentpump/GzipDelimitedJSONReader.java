@@ -40,7 +40,7 @@ public class GzipDelimitedJSONReader extends DelimitedJSONReader<Text> {
     @Override
     protected void initFileStream(InputSplit inSplit) 
             throws IOException, InterruptedException {
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         configFileNameAsCollection(conf, file);    
         fileIn = fs.open(file);
         gzipIn = new GZIPInputStream(fileIn);

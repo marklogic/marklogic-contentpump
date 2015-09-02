@@ -76,7 +76,7 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
 
     @Override
     protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         FSDataInputStream fileIn = fs.open(file);
         URI zipURI = file.toUri();
         String codecString = 

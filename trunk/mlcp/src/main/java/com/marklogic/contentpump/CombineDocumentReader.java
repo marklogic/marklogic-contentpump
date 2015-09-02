@@ -28,9 +28,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.FileIterator;
-import com.marklogic.mapreduce.CompressionCodec;
 import com.marklogic.mapreduce.MarkLogicConstants;
-import com.marklogic.mapreduce.StreamLocator;
 
 /**
  * RecordReader for CombineDocumentInputFormat.
@@ -80,7 +78,7 @@ extends ImportRecordReader<VALUEIN> {
     public boolean nextKeyValue() throws IOException, InterruptedException {
         while (iterator.hasNext()) {
             FileSplit split = iterator.next();
-            file = split.getPath();
+            setFile(split.getPath());
             String uri = makeURIFromPath(file);
             FileSystem fs = file.getFileSystem(context.getConfiguration());        
             FSDataInputStream fileIn = fs.open(file);

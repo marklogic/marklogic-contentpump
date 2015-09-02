@@ -87,7 +87,7 @@ public class DelimitedTextReader<VALUEIN> extends
         initConfig(context);
         initDocType();
         initDelimConf();
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
         if(status.isDirectory()) {
@@ -99,7 +99,7 @@ public class DelimitedTextReader<VALUEIN> extends
     
     protected void initParser(InputSplit inSplit) throws IOException,
         InterruptedException {
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         configFileNameAsCollection(conf, file);
 
         fileIn = fs.open(file);
