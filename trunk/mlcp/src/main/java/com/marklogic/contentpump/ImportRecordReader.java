@@ -56,7 +56,7 @@ implements ConfigConstants {
     protected Path file;
     protected FileSystem fs;
     protected Iterator<FileSplit> iterator;
-    protected String srcId = null;
+    private String srcId = null;
     protected String subId = "";
     
     /**
@@ -72,9 +72,6 @@ implements ConfigConstants {
      * otherwise.
      */
     protected boolean setKey(String uri, int line, int col, boolean encode) {
-        if (srcId == null) {
-            srcId = file == null ? "" : file.toString();
-        }
         if (key == null) {
             key = new DocumentURIWithSourceInfo(uri, srcId);
         }
@@ -118,9 +115,6 @@ implements ConfigConstants {
      * otherwise.
      */
     protected void setSkipKey(int line, int col, String reason) {
-        if (srcId == null) {
-            srcId = file == null ? "" : file.toString();
-        }
         if (key == null) {
             key = new DocumentURIWithSourceInfo("", srcId, subId, line, col);
         } else {
@@ -205,4 +199,13 @@ implements ConfigConstants {
     @Override
     public abstract boolean nextKeyValue() throws IOException,
         InterruptedException;
+
+    public Path getFile() {
+        return file;
+    }
+
+    public void setFile(Path file) {
+        this.file = file;
+        srcId = file.toString();
+    }
 }

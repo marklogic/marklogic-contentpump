@@ -69,7 +69,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
         initConfig(context);
         initAggConf(context);
         f = XMLInputFactory.newInstance();
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
 
         FileStatus status = fs.getFileStatus(file);
@@ -82,7 +82,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
 
     protected void initStreamReader(InputSplit inSplit) throws IOException,
     InterruptedException {
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         FSDataInputStream fileIn = fs.open(file);
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,

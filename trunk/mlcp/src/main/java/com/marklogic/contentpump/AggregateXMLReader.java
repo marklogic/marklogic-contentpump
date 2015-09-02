@@ -110,7 +110,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         initAggConf(context);
         
         f = XMLInputFactory.newInstance();
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
         if(status.isDirectory()) {
@@ -125,7 +125,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         start = 0;
         end = inSplit.getLength();
         overflow = false;
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         configFileNameAsCollection(conf, file);
 
         fInputStream = fs.open(file);

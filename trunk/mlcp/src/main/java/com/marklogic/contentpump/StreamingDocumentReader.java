@@ -39,7 +39,7 @@ CombineDocumentReader<StreamLocator> {
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if (iterator.hasNext()) {
             FileSplit split = iterator.next();
-            file = split.getPath();
+            setFile(split.getPath());
             String uri = makeURIFromPath(file);
             if (setKey(uri, 0, 0, true)) {
                 return true;
