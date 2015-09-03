@@ -87,7 +87,7 @@ public class DelimitedJSONReader<VALUEIN> extends
         /* Initialization in super class */
         initConfig(context);  
         /*  Get file(s) in input split */
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         // Initialize reader properties
         generateId = conf.getBoolean(CONF_INPUT_GENERATE_URI,false);
         if (generateId){
@@ -124,7 +124,7 @@ public class DelimitedJSONReader<VALUEIN> extends
     
     protected void initFileStream(InputSplit inSplit) 
             throws IOException, InterruptedException {
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         configFileNameAsCollection(conf, file);     
         fileIn = fs.open(file);
         instream = new InputStreamReader(fileIn, encoding);
