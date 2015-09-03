@@ -113,16 +113,15 @@ implements MarkLogicConstants {
     }
     
     protected void buildDocExprQuery(String docExpr, Collection<String> nsCol, 
-            StringBuilder buf) {
-        String subExpr = conf.get(SUBDOCUMENT_EXPRESSION, "");
+            String subExpr, StringBuilder buf) {
         buf.append("xdmp:with-namespaces(("); 
         if (nsCol != null) {
             appendNamespace(nsCol, buf);
         }
         buf.append("),fn:unordered(fn:unordered(");
-        buf.append(docExpr);
+        buf.append(docExpr == null ? "fn:collection()" : docExpr);
         buf.append(")[$mlmr:splitstart to $mlmr:splitend]");
-        buf.append(subExpr);
+        buf.append(subExpr == null ? "" : subExpr);
         buf.append("))");
     }
     
@@ -188,13 +187,14 @@ implements MarkLogicConstants {
             buf.append(ind.getStatement());
             String docExpr = conf.get(DOCUMENT_SELECTOR);
             String ctsQuery = conf.get(QUERY_FILTER);
-            Collection<String> nsCol = docExpr != null ? 
+            String subExpr = conf.get(SUBDOCUMENT_EXPRESSION);
+            Collection<String> nsCol = docExpr != null || subExpr != null? 
                     conf.getStringCollection(PATH_NAMESPACE) : null;
             if (ctsQuery != null) {
                 buildSearchQuery(docExpr, ctsQuery, nsCol, buf);
                 queryText = buf.toString();
-            } else if (docExpr != null) {   
-                buildDocExprQuery(docExpr, nsCol, buf);
+            } else if (docExpr != null || subExpr != null) {   
+                buildDocExprQuery(docExpr, nsCol, subExpr, buf);
                 queryText = buf.toString();
             } else {
                 LexiconFunction function = null;
@@ -210,10 +210,7 @@ implements MarkLogicConstants {
                 }
             } 
             if (queryText == null) {
-                if (docExpr == null) {
-                    docExpr = "fn:collection()";
-                }
-                buildDocExprQuery(docExpr, nsCol, buf);
+                buildDocExprQuery(docExpr, nsCol, subExpr, buf);
                 queryText = buf.toString();
             }
         } else {
@@ -273,6 +270,9 @@ implements MarkLogicConstants {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Query timestamp: " + ts);
                 }
+            }
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Input query: " + query);
             }
             query.setOptions(options);       
             result = session.submitRequest(query);
