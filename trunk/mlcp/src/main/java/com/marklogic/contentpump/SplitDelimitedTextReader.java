@@ -55,7 +55,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         initConfig(context);
         initDocType();
         initDelimConf();
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
         start = ((DelimitedSplit) inSplit).getStart();
         end = start + ((DelimitedSplit) inSplit).getLength();
@@ -133,7 +133,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
     @Override
     protected void initParser(InputSplit inSplit) throws IOException,
         InterruptedException {
-        file = ((DelimitedSplit) inSplit).getPath();
+        setFile(((DelimitedSplit) inSplit).getPath());
         configFileNameAsCollection(conf, file);
 
         // get header from the DelimitedSplit

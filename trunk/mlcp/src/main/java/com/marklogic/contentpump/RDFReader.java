@@ -242,7 +242,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING,
                 DEFAULT_ENCODING);
 
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
         
         FileStatus status = fs.getFileStatus(file);
@@ -271,7 +271,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
-        file = ((FileSplit) inSplit).getPath();
+        setFile(((FileSplit) inSplit).getPath());
         long size = inSplit.getLength();
         initParser(file.toUri().toASCIIString(), size);
         parse(file.getName());
