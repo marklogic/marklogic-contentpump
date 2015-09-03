@@ -132,7 +132,7 @@ public class DatabaseContentReader extends
         if (ctsQuery != null) {
             buildSearchQuery(src, ctsQuery, nsCol, buf);
         } else {
-            buildDocExprQuery(src, nsCol, buf);
+            buildDocExprQuery(src, nsCol, null, buf);
         }   
         src = buf.toString();
         buf = new StringBuilder();
