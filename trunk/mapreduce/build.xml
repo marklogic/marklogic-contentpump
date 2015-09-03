@@ -40,8 +40,7 @@
   <tstamp><format property="thisyear" pattern="yyyy"></format></tstamp>
   <property name="mapreduce.javadoc.included.packages" value="com.marklogic.mapreduce,com.marklogic.mapreduce.functions,com.marklogic.mapreduce.examples"/>
   <property name="javadoc.copyright.message" value="Copyright &amp;copy; ${thisyear} MarkLogic Corporation. All Rights Reserved."/>
-  <property name="javadoc.custom.css" value="${java.source}/stylesheet.css"/>
-  <property name="javadoc.jdk.javadoc.base" value="http://download.oracle.com/javase/6/docs/api/"/>
+  <property name="javadoc.jdk.javadoc.base" value="http://download.oracle.com/javase/7/docs/api/"/>
   <property name="mapreduce.examples.dir" value="${java.source}/com/marklogic/mapreduce/examples"/>
   <property name="mapreduce.javadoc.examples.dir" value="${javadocdir}/mapreduce/com/marklogic/mapreduce/examples/doc-files"/>
   <property name="mapreduce.javadoc.logging.props.dir" value="${javadocdir}/mapreduce/com/marklogic/mapreduce/doc-files"/>
@@ -218,7 +217,7 @@
       windowtitle="${mapreduce.product.name} v${version.number.string}"
       doctitle="${mapreduce.product.name} Version ${version.number.string}"
       overview="${java.source}/overview.html" author="false"
-      header="&lt;font color='#8A9B3C'&gt;${mapreduce.product.name.short} ${version.number.string}&lt;/font&gt;"
+      header="${mapreduce.product.name.short} ${version.number.string}"
       link="${javadoc.jdk.javadoc.base}"
     >
       <fileset dir="${java.source}">
@@ -240,7 +239,6 @@
           target="mldocs">developer.marklogic.com</a><p>
       ]]></bottom>
     </javadoc>
-    <copy file="${javadoc.custom.css}" todir="${javadocdir}/mapreduce" overwrite="true"/>
     <copy todir="${mapreduce.javadoc.examples.dir}"  overwrite="true">
       <fileset dir="${mapreduce.examples.dir}" includes="*.java"/>
     </copy>
