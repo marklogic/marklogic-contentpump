@@ -77,7 +77,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
             pos += getBytesCountFromLine(values);
             if (values.length != fields.length) {
                 setSkipKey(0, 0, 
-                        "number of fields do not match number of columns");
+                        "number of fields does not match number of columns");
                 return true;
             }
             docBuilder.newDoc();
