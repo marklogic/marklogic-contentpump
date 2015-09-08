@@ -208,7 +208,7 @@ public class DelimitedTextReader<VALUEIN> extends
             int line = parser.getLineNumber();
             if (values.length != fields.length) {
                 setSkipKey(line, 0, 
-                        "number of fields do not match number of columns");
+                        "number of fields does not match number of columns");
                 return true;
             }  
             docBuilder.newDoc();           
