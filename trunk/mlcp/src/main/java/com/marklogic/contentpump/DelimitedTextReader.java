@@ -20,9 +20,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.text.ParseException;
+import java.util.Iterator;
 
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVStrategy;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -33,6 +35,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.DocBuilder;
+import com.marklogic.contentpump.utilities.CSVParserFormatter;
 import com.marklogic.contentpump.utilities.EncodingUtil;
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
@@ -68,6 +71,7 @@ public class DelimitedTextReader<VALUEIN> extends
     protected int uriId = -1; // the column index used for URI
     protected boolean compressed;
     protected DocBuilder docBuilder;
+    protected Iterator<CSVRecord> parserIterator;
     
     @Override
     public void close() throws IOException {
@@ -116,9 +120,10 @@ public class DelimitedTextReader<VALUEIN> extends
                 uriId = 0;
             }
         }
-        parser = new CSVParser(instream, new CSVStrategy(delimiter,
-            encapsulator, CSVStrategy.COMMENTS_DISABLED,
-            CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
+        parser = new CSVParser(instream, CSVParserFormatter.
+        		getFormat(delimiter, encapsulator, true,
+        				true));
+        parserIterator = parser.iterator();
     }
 
     protected void initDelimConf() {
@@ -134,15 +139,29 @@ public class DelimitedTextReader<VALUEIN> extends
         docBuilder.init(conf);
     }
 
+    protected String[] getLine() throws IOException{
+    	CSVRecord record = (CSVRecord)parserIterator.next();
+        Iterator<String> recordIterator = record.iterator();
+        int recordSize = record.size();
+        String[] values = new String[recordSize];
+        for (int i = 0; i < recordSize; i++) {
+        	if (recordIterator.hasNext()) {
+        		values[i] = (String)recordIterator.next();
+        	} else {
+        		throw new IOException("Record size doesn't match the real size");
+        	}
+        }
+        return values;
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (parser == null) {
+        if (parser == null || parserIterator == null) {
             return false;
         }
         try {
-            String[] values = parser.getLine();
-            if (values == null) {
+            if (!parserIterator.hasNext()) {
                 if(compressed) {
                     bytesRead = fileLen;
                     return false;
@@ -157,6 +176,8 @@ public class DelimitedTextReader<VALUEIN> extends
                     }
                 }
             }
+            String[] values = getLine();
+            
             if (fields == null) {
                 fields = values;
                 if (Charset.defaultCharset().equals(Charset.forName("UTF-8"))) {
@@ -188,8 +209,7 @@ public class DelimitedTextReader<VALUEIN> extends
                     return false;
                 }
                 
-                values = parser.getLine();
-                if (values == null) {
+                if (!parserIterator.hasNext()) {
                     if(compressed) {
                         bytesRead = fileLen;
                         return false;
@@ -204,8 +224,9 @@ public class DelimitedTextReader<VALUEIN> extends
                         }
                     }
                 }
+                values = getLine();
             }
-            int line = parser.getLineNumber();
+            int line = (int)parser.getCurrentLineNumber();
             if (values.length != fields.length) {
                 setSkipKey(line, 0, 
                         "number of fields does not match number of columns");
@@ -240,11 +261,16 @@ public class DelimitedTextReader<VALUEIN> extends
                 ((Text)((ContentWithFileNameWritable<VALUEIN>)
                         value).getValue()).set(docBuilder.getDoc());
             }
-        } catch (IOException ex) {
+        } catch (RuntimeException ex) {
             if (ex.getMessage().contains(
-                "invalid char between encapsulated token end delimiter")) {
-                setSkipKey(parser.getLineNumber(), 0, 
-                        "invalid char between encapsulated token end delimiter");
+                "invalid char between encapsulated token and delimiter")) {
+                setSkipKey((int)parser.getCurrentLineNumber(), 0, 
+                        "invalid char between encapsulated token and delimiter");
+                // hasNext() will always be true here since this exception is caught
+                if (parserIterator.hasNext()) {
+                	// consume the rest fields of this line
+                	parserIterator.next();
+                }
             } else {
                 throw ex;
             }
