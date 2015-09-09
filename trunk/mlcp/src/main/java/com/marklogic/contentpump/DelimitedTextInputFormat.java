@@ -18,10 +18,11 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVStrategy;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -36,6 +37,7 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.CSVParserFormatter;
 import com.marklogic.contentpump.utilities.DelimitedSplit;
 import com.marklogic.contentpump.utilities.DocBuilder;
 import com.marklogic.contentpump.utilities.EncodingUtil;
@@ -115,17 +117,31 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
                     MarkLogicConstants.OUTPUT_CONTENT_ENCODING,
                     MarkLogicConstants.DEFAULT_OUTPUT_CONTENT_ENCODING);
                 InputStreamReader instream = new InputStreamReader(fileIn, encoding);
-
-                CSVParser parser = new CSVParser(instream, new CSVStrategy(
-                    delimiter, DelimitedTextReader.encapsulator,
-                    CSVStrategy.COMMENTS_DISABLED,
-                    CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
-                String[] header = parser.getLine();
-                EncodingUtil.handleBOMUTF8(header, 0);
+                CSVParser parser = new CSVParser(instream, CSVParserFormatter.
+                		getFormat(delimiter, DelimitedTextReader.encapsulator,
+                				true, true));
+                Iterator<CSVRecord> it = parser.iterator();
                 
-                hlist.clear();
-                for (String s : header) {
-                    hlist.add(new Text(s));
+                String[] header = null;
+                if (it.hasNext()) {
+                	CSVRecord record = (CSVRecord)it.next();
+                	Iterator<String> recordIterator = record.iterator();
+                    int recordSize = record.size();
+                    header = new String[recordSize];
+                    for (int i = 0; i < recordSize; i++) {
+                    	if (recordIterator.hasNext()) {
+                    		header[i] = (String)recordIterator.next();
+                    	} else {
+                    		throw new IOException("Record size doesn't match the real size");
+                    	}
+                    }
+                    
+                    EncodingUtil.handleBOMUTF8(header, 0);
+                    
+                    hlist.clear();
+                    for (String s : header) {
+                        hlist.add(new Text(s));
+                    }
                 }
                 instream.close();
             }

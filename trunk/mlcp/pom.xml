@@ -182,9 +182,9 @@
       <version>0.9.5</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.solr</groupId>
-      <artifactId>solr-commons-csv</artifactId>
-      <version>3.5.0</version>
+	  <groupId>org.apache.commons</groupId>
+	  <artifactId>commons-csv</artifactId>
+	  <version>1.2</version>
     </dependency>
     <dependency>
       <groupId>xml-apis</groupId>
