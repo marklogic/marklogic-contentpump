@@ -204,6 +204,9 @@ implements MarkLogicConstants {
                 if (lexiconClass != null) {
                     function = ReflectionUtils.newInstance(lexiconClass, 
                             conf);
+                    if (nsCol == null) {
+                        nsCol = conf.getStringCollection(PATH_NAMESPACE);
+                    }
                     queryText = function.getInputQuery(nsCol, start, 
                             mlSplit.isLastSplit() ? 
                                     Long.MAX_VALUE : (long)length);
