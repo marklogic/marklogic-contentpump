@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -29,6 +28,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.CSVParserFormatter;
 import com.marklogic.contentpump.utilities.DelimitedSplit;
 import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
@@ -65,15 +65,15 @@ public class SplitDelimitedTextReader<VALUEIN> extends
     @SuppressWarnings("unchecked")
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (parser == null || pos >= end) {
+        if (parser == null || pos >= end || parserIterator == null) {
             return false;
         }
         try {
-            String[] values = parser.getLine();
-            if (values == null) {
-                bytesRead = fileLen;
+            if (!parserIterator.hasNext()) {
+        		bytesRead = fileLen;
                 return false;
             }
+            String[] values = getLine();
             pos += getBytesCountFromLine(values);
             if (values.length != fields.length) {
                 setSkipKey(0, 0, 
@@ -109,11 +109,16 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                 ((Text)((ContentWithFileNameWritable<VALUEIN>)
                         value).getValue()).set(docBuilder.getDoc());
             }
-        } catch (IOException ex) {
+        } catch (RuntimeException ex) {
             if (ex.getMessage().contains(
-                "invalid char between encapsulated token end delimiter")) {
+                "invalid char between encapsulated token and delimiter")) {
                 setSkipKey(0, 0, 
-                        "invalid char between encapsulated token end delimiter");
+                        "invalid char between encapsulated token and delimiter");
+                // hasNext() will always be true here since this exception is caught
+                if (parserIterator.hasNext()) {
+                	// consume the rest fields of this line
+                	parserIterator.next();
+                }
             } else {
                 throw ex;
             }
@@ -190,15 +195,18 @@ public class SplitDelimitedTextReader<VALUEIN> extends
 
         // keep leading and trailing whitespaces to ensure accuracy of pos
         // do not skip empty line just in case the split boundary is \n
-        parser = new CSVParser(instream, new CSVStrategy(delimiter,
-            encapsulator, CSVStrategy.COMMENTS_DISABLED,
-            CSVStrategy.ESCAPE_DISABLED, false, false, false, false));
+        parser = new CSVParser(instream, CSVParserFormatter.
+        		getFormat(delimiter, encapsulator, false,
+        				false));
+        parserIterator = parser.iterator();
 
         // skip first line:
         // 1st split, skip header; other splits, skip partial line
-        String[] values = parser.getLine();
-        start += getBytesCountFromLine(values);
-        pos = start;
+        if (parserIterator.hasNext()) {
+            String[] values = getLine();
+            start += getBytesCountFromLine(values);
+            pos = start;
+        }
     }
 
     private String retrieveLineSeparator(FSDataInputStream fis)

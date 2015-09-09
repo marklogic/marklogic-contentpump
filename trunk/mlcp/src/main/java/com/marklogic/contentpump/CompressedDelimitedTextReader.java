@@ -25,7 +25,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVStrategy;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -35,6 +34,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
+import com.marklogic.contentpump.utilities.CSVParserFormatter;
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.mapreduce.CompressionCodec;
@@ -113,9 +113,10 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                 return nextKeyValueInZip();
             } else if (codec.equals(CompressionCodec.GZIP)) {
                 instream = new InputStreamReader(zipIn, encoding);
-                parser = new CSVParser(instream, new CSVStrategy(delimiter,
-                    encapsulator, CSVStrategy.COMMENTS_DISABLED,
-                    CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
+                parser = new CSVParser(instream, CSVParserFormatter.
+                		getFormat(delimiter, encapsulator, true,
+                				true));
+                parserIterator = parser.iterator();
                 return super.nextKeyValue();
             } else {
                 throw new UnsupportedOperationException("Unsupported codec: "
@@ -142,10 +143,10 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                     } else {
                         instream = new InputStreamReader(zipIn, encoding);
                     }
-                    parser = new CSVParser(instream, new CSVStrategy(
-                        delimiter, encapsulator,
-                        CSVStrategy.COMMENTS_DISABLED,
-                        CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
+                    parser = new CSVParser(instream, CSVParserFormatter.
+                    		getFormat(delimiter, encapsulator, true,
+                    				true));
+                    parserIterator = parser.iterator();
                     return super.nextKeyValue();
                 } else
                     return false;
@@ -186,9 +187,10 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                     new ByteArrayInputStream(baos.toByteArray()), encoding);
             }
             baos.close();
-            parser = new CSVParser(instream, new CSVStrategy(delimiter,
-                encapsulator, CSVStrategy.COMMENTS_DISABLED,
-                CSVStrategy.ESCAPE_DISABLED, true, true, false, true));
+            parser = new CSVParser(instream, CSVParserFormatter.
+        		getFormat(delimiter, encapsulator, true,
+        				true));
+            parserIterator = parser.iterator();
             // clear metadata
             fields = null;
             if (super.nextKeyValue()) {

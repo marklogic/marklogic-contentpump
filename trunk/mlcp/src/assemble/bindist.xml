@@ -44,7 +44,8 @@
     <dependencySet>
       <scope>runtime</scope>
       <outputDirectory>/lib</outputDirectory>
-      <includes>
+	  <includes>
+		<include>org.apache.commons:commons-csv:jar:*</include>
         <include>commons-httpclient:commons-httpclient:jar:*</include>
         <include>commons-io:commons-io:jar:*</include>
         <include>org.htrace:htrace-core:jar:*</include>
@@ -83,7 +84,6 @@
         <include>org.apache.jena:jena-arq:jar:*</include>
         <include>org.apache.jena:jena-core:jar:*</include>
         <include>org.apache.jena:jena-iri:jar:*</include>
-        <include>org.apache.solr:solr-commons-csv:jar:*</include>
         <include>xml-apis:xml-apis:jar:*</include>
         <include>com.thoughtworks.xstream:xstream:jar:*</include>
         <include>junit:junit:jar:*</include>
