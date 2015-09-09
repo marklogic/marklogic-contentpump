@@ -15,6 +15,11 @@
  */
 package com.marklogic.mapreduce.functions;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import com.marklogic.mapreduce.functions.ValuesOrWordsFunction.WordsFunction;
+
 /**
  * Wrapper class for the <code>cts:value-match</code> lexicon
  * function. Subclass this class to generate map input based on a lexicon.
@@ -61,5 +66,37 @@ public abstract class ValueMatch extends ValueOrWordMatchFunction {
             refs[i].append(buf);
         }
         buf.append("),\n");
+    }
+    
+    public static void main(String[] args) {
+        ValueMatch matchFunc = new ValueMatchFunction();
+        Collection<String> nsbindings = new ArrayList<String>();
+        for (int i = 0; i < args.length; i++) {
+            nsbindings.add(args[i]);
+        }
+        System.out.println(matchFunc.getInputQuery(nsbindings, 1, 1000));
+    }
+    
+    static class ValueMatchFunction extends ValueMatch {
+        @Override
+        public String getPattern() {
+            return "\"?3\"";
+        }
+
+        @Override
+        public Reference[] getReferences() {
+            PathReference pathRef = new MyPathReference();
+            return new Reference[] {pathRef};
+        }
+
+    }
+    
+    static class MyPathReference extends PathReference {
+
+        @Override
+        public String getPathExpression() {
+            return "/my:a[@his:b='B1']/my:c";
+        }
+
     }
 }
