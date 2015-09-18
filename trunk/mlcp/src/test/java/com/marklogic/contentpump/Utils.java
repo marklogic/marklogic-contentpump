@@ -59,7 +59,7 @@ public class Utils {
             return;
         String query = "xquery version \"1.0-ml\";\n"
             + "xdmp:eval('xdmp:document-load(\""
-            + Constants.TEST_PATH
+            + Constants.TEST_PATH.toUri()
             + moduleUri + "\", <options xmlns=\"xdmp:document-load\">"
             + "<uri>" + moduleUri + "</uri></options>)',(),<options xmlns=\"xdmp:eval\">"
             + "<database>{xdmp:database-forests(xdmp:database(\"Modules\"))}</database></options>)";
