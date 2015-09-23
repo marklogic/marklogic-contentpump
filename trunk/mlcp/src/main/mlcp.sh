@@ -12,4 +12,4 @@ do
   fi
 done
 CLASSPATH=$DIR/conf:$CLASSPATH
-java -cp "$CLASSPATH" -DCONTENTPUMP_HOME="$DIR/lib" -Dfile.encoding=UTF-8 $JVM_OPTS -Djava.library.path="$DIR/lib/native" com.marklogic.contentpump.ContentPump $*
+java -cp "$CLASSPATH" -DCONTENTPUMP_HOME="$DIR/lib" -Dfile.encoding=UTF-8 $JVM_OPTS -Djava.library.path="$DIR/lib/native" -Djavax.security.auth.useSubjectCredsOnly=false com.marklogic.contentpump.ContentPump $*
