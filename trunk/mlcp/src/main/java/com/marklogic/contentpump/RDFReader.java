@@ -686,6 +686,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 statementIter = dataset.getNamedModel(collection).listStatements();
             } else {
                 hasNext = false;
+                collection = null;
                 return false;
             }
         }
@@ -928,7 +929,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 if(collection.equals(JENA_DEFAULT_GRAPH)) {
                     collection = null;
                 }
-                ((RDFWritable)value).setCollection(collection);
             }
             
             if(hasOutputCol){// output_collections is set
@@ -959,6 +959,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 insertGraphDoc(collection);
             }
             ((RDFWritable)value).setPermissions(perms);
+            ((RDFWritable)value).setCollection(collection);
         } else {
             ((Text)((ContentWithFileNameWritable<VALUEIN>)
                     value).getValue()).set(buffer.toString());
