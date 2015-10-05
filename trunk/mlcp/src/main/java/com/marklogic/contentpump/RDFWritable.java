@@ -48,7 +48,7 @@ public class RDFWritable<VALUE> implements CustomContent {
     public static final Log LOG = 
         LogFactory.getLog(RDFWritable.class);
     private VALUE value;
-    private String collectionUri = null;
+    private String graphUri = null;
     private byte type = 0; // Triples are always text
     private ContentPermission[] permissions;
     
@@ -59,8 +59,8 @@ public class RDFWritable<VALUE> implements CustomContent {
         this.value = (VALUE) new Text((String) value);
     }
 
-    public void setCollection(String collection) {
-        collectionUri = collection;
+    public void setGraph(String uri) {
+        graphUri = uri;
     }
     
     public void setPermissions(ContentPermission[] permissions) {
@@ -79,7 +79,7 @@ public class RDFWritable<VALUE> implements CustomContent {
         
         if (collections != null) {
             List<String> optionList = new ArrayList<String>();
-            if (collectionUri == null) { //no graph specified in quad
+            if (graphUri == null) { //no graph specified in quad
                 if( outputGraph != null)//output_graph is set
                     optionList.add(outputGraph.trim()); 
                 else if (outputOverrideGraph != null) {
@@ -89,7 +89,7 @@ public class RDFWritable<VALUE> implements CustomContent {
                 if( outputOverrideGraph != null)
                     optionList.add(outputOverrideGraph);
                 else
-                    optionList.add(collectionUri);//use quad's graph
+                    optionList.add(graphUri);//use quad's graph
             }
             //collections are always added
             Collections.addAll(optionList, collections);
@@ -99,19 +99,21 @@ public class RDFWritable<VALUE> implements CustomContent {
             }
             options.setCollections(collections);
         } else {
-            if (collectionUri == null) {
+            if (graphUri == null) {
                 if (outputOverrideGraph != null) {
-                    collectionUri = outputOverrideGraph;
+                    graphUri = outputOverrideGraph;
                 } else if (outputGraph != null) {
-                    collectionUri = outputGraph; 
+                    graphUri = outputGraph; 
                 } else { 
-                    collectionUri = "http://marklogic.com/semantics#default-graph";
+                    graphUri = "http://marklogic.com/semantics#default-graph";
                 }
             }
             String[] col = new String[1];
-            col[0] = collectionUri;
+            col[0] = graphUri;
             options.setCollections(col);
         }
+        
+        options.setGraph(graphUri);
         //permissions
         if (permissions!=null)
             options.setPermissions(permissions);
@@ -133,11 +135,11 @@ public class RDFWritable<VALUE> implements CustomContent {
 
     @Override
     public void write(DataOutput out) throws IOException {
-        if (collectionUri == null) {
+        if (graphUri == null) {
             out.writeByte(0);
         } else {
             out.writeByte(1);
-            Text t = new Text(collectionUri);
+            Text t = new Text(graphUri);
             t.write(out);
         }
         out.writeByte(type);
@@ -169,7 +171,7 @@ public class RDFWritable<VALUE> implements CustomContent {
         if (hasCollection != 0) {
             Text t = new Text();
             t.readFields(in);
-            collectionUri = t.toString();
+            graphUri = t.toString();
         }
         byte valueType = in.readByte();
         switch (valueType) {

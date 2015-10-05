@@ -20,6 +20,8 @@ import java.io.IOException;
 import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 import com.marklogic.mapreduce.LinkedMapWritable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
@@ -32,20 +34,21 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
  * @author nwalsh
  *
  */
-public class CompressedRDFInputFormat extends
-FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
-
+public class CompressedRDFInputFormat extends RDFInputFormat {
+    public static final Log LOG = LogFactory.getLog(CompressedRDFInputFormat.class);
     @Override
     public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(
-        InputSplit split, TaskAttemptContext context) {
+        InputSplit split, TaskAttemptContext context)
+        throws IOException, InterruptedException {
+        String version = null;
         LinkedMapWritable roleMap = null;
         try {
+            version = getServerVersion(context);
             roleMap = getRoleMap(context);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new IOException("Error creating CompressedRecordReader:" + e.getMessage());
         }
-        return new CompressedRDFReader<Text>(roleMap);
+        return new CompressedRDFReader<Text>(version, roleMap);
     }
 
     @Override
