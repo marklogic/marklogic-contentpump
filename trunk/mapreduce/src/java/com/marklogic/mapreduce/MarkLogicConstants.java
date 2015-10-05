@@ -827,10 +827,7 @@ public interface MarkLogicConstants {
      */    
     static final String TEMPORAL_COLLECTION =
         "mapreduce.marklogic.output.temporalcollection";
-    /**
-     * <Role-name,Role-id> map for internal use
-     */
-    static final String ROLE_MAP = "mapreduce.marklogic.output.rolemap";
+   
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the query language will be used for input query and split query.
