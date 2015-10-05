@@ -204,8 +204,8 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         }
     }
 
-    public CompressedRDFReader(LinkedMapWritable roleMap) {
-        super(roleMap);
+    public CompressedRDFReader(String version, LinkedMapWritable roleMap) {
+        super(version, roleMap);
         compressed = true;
         //allocate a pool of size 1
         pool = Executors.newFixedThreadPool(1);

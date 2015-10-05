@@ -207,6 +207,15 @@ public interface ConfigConstants {
         "mapreduce.marklogic.input.generateuri";
     static final String CONF_DELIMITED_DATA_TYPE = 
             "mapreduce.marklogic.delimited.datatype";
+    /**
+     * <Role-name,Role-id> map for internal use
+     */
+    static final String CONF_ROLE_MAP = "mapreduce.marklogic.output.rolemap";
+    
+    /**
+     * MarkLogic Server version
+     */
+    static final String CONF_ML_VERSION = "mapreduce.marklogic.serverversion";
     static final int MAX_BATCH_SIZE = 200;
     static final int MAX_TXN_SIZE = 4000;
 }

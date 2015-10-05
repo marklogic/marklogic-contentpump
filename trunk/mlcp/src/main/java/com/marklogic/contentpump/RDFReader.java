@@ -135,24 +135,33 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long end;
     protected boolean compressed;
     protected long ingestedTriples = 0;
-    protected HashSet<String> newGraphs = new HashSet<String>();
+    /* new graphs identified within a RDFReader */
+    protected HashSet<String> newGraphs;
     protected HashMap<String,ContentPermission[]> existingMapPerms;
     protected Iterator<String> graphItr;
+    /* server version */
+    protected String version;
     protected LinkedMapWritable roleMap;
     protected ContentPermission[] defaultPerms;
     protected StringBuilder graphQry;
+    /* hadoop:get-role-map() only exists in ML 8.0-1~8.0-3 */
+    protected boolean roleMapExists;
+    protected boolean graphSupported;
     
     private static final Object jenaLock = new Object();
     
-    public RDFReader(LinkedMapWritable roleMap) {
+    public RDFReader(String version, LinkedMapWritable roleMap) {
         random = new Random();
         randomValue = random.nextLong();
         Calendar cal = Calendar.getInstance();
         milliSecs = cal.getTimeInMillis();
         compressed = false;
+        this.version = version;
         this.roleMap = roleMap;
+        roleMapExists = roleMap!=null && roleMap.size()>0 ;
         graphQry = new StringBuilder();
         existingMapPerms = new HashMap<String,ContentPermission[]>();
+        newGraphs = new HashSet<String>();
     }
 
     @Override
@@ -207,6 +216,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
             throws IOException, InterruptedException {
+        if (version == null)
+            throw new IOException("Server Version is null");
+        String majorVersion = version.substring(0, version.indexOf('.'));
+        graphSupported = Integer.valueOf(majorVersion) >= 8;
         conf = context.getConfiguration();
 
         String rdfopt = conf.get(ConfigConstants.RDF_STREAMING_MEMORY_THRESHOLD);
@@ -267,7 +280,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 defaultPerms = tmp.toArray(new ContentPermission[tmp.size()]);
         }
             
-        initExistingMapPerms();
+        if (roleMapExists) 
+            initExistingMapPerms();
     }
 
     protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
@@ -951,15 +965,12 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                         collection = DEFAULT_GRAPH;
                 }
             }
-            ContentPermission[] perms = null;
-            if (existingMapPerms.containsKey(collection)) {
-                perms = existingMapPerms.get(collection);
-            } else {
-                perms = defaultPerms;
+            ((RDFWritable)value).setPermissions(defaultPerms);
+            if (graphSupported && !newGraphs.contains(collection)) {
+                newGraphs.add(collection);
                 insertGraphDoc(collection);
             }
-            ((RDFWritable)value).setPermissions(perms);
-            ((RDFWritable)value).setCollection(collection);
+            ((RDFWritable)value).setGraph(collection);
         } else {
             ((Text)((ContentWithFileNameWritable<VALUEIN>)
                     value).getValue()).set(buffer.toString());

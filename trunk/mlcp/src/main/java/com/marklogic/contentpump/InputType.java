@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -204,8 +205,14 @@ public enum InputType implements ConfigConstants {
     RDF {
         private String ROLE_QUERY = 
             "import module namespace hadoop = " +
-            "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
-            "hadoop:get-role-map()";
+            "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
+            + "let $version := xdmp:version()\n"
+            + "let $f := "
+            + "  fn:function-lookup(xs:QName('hadoop:get-role-map'),0)\n"
+            + "let $hasFunc := fn:exists($f)"
+            + "return  ($version,$hasFunc," +
+            		"if($hasFunc eq fn:true()) then "
+            + "$f()\n" + "else () )";
         @Override
         public Class<? extends FileInputFormat> getInputFormatClass(
                 CommandLine cmdline, Configuration conf) {
@@ -248,18 +255,24 @@ public enum InputType implements ConfigConstants {
                 AdhocQuery query = session.newAdhocQuery(ROLE_QUERY);
                 query.setOptions(options);
                 result = session.submitRequest(query);
+                Text version = new Text(result.next().asString());
+                BooleanWritable hasFunc = new BooleanWritable(Boolean.getBoolean(result.next().asString()));
                 LinkedMapWritable roleMap = new LinkedMapWritable();
-                while (result.hasNext()) {
-                    Text key = new Text(result.next().asString());
-                    if (!result.hasNext()) {
-                        throw new IOException("Invalid role map");
+                if(hasFunc.get()) {
+                    while (result.hasNext()) {
+                        Text key = new Text(result.next().asString());
+                        if (!result.hasNext()) {
+                            throw new IOException("Invalid role map");
+                        }
+                        Text value = new Text(result.next().asString());
+                        roleMap.put(key, value);
                     }
-                    Text value = new Text(result.next().asString());
-                    roleMap.put(key, value);
+    
+                    DefaultStringifier.store(conf, roleMap,
+                        ConfigConstants.CONF_ROLE_MAP);
                 }
-
-                DefaultStringifier.store(conf, roleMap,
-                    MarkLogicConstants.ROLE_MAP);
+                DefaultStringifier.store(conf, version,
+                    ConfigConstants.CONF_ML_VERSION);
                 if (conf.get(MarkLogicConstants.OUTPUT_DIRECTORY) == null && 
                     conf.get(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX) 
                         == null) {

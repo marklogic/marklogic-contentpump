@@ -18,7 +18,11 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
@@ -33,7 +37,7 @@ import com.marklogic.mapreduce.LinkedMapWritable;
  */
 public class RDFInputFormat extends 
 FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
-   
+    public static final Log LOG = LogFactory.getLog(RDFInputFormat.class);
     @Override
     protected boolean isSplitable(JobContext context, Path filename) {
         return false;
@@ -41,15 +45,34 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
     
     @Override
     public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(InputSplit is,
-        TaskAttemptContext context) {
+        TaskAttemptContext context) throws IOException, InterruptedException {
+        String version = null;
         LinkedMapWritable roleMap = null;
         try {
+            version = getServerVersion(context);
             roleMap = getRoleMap(context);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw new IOException("Error creating RecordReader:" + e.getMessage());
         }
-        return new RDFReader<Text>(roleMap);
+        return new RDFReader<Text>(version,roleMap);
     }
     
+    protected LinkedMapWritable getRoleMap(TaskAttemptContext context) throws IOException{
+        //Restores the object from the configuration.
+        Configuration conf = context.getConfiguration();
+        LinkedMapWritable fhmap = null;
+        if(conf.get(ConfigConstants.CONF_ROLE_MAP)!=null) {
+            fhmap = DefaultStringifier.load(conf, ConfigConstants.CONF_ROLE_MAP, 
+                LinkedMapWritable.class);
+        }
+        return fhmap;
+    }
+    
+    protected String getServerVersion(TaskAttemptContext context) throws IOException{
+        //Restores the object from the configuration.
+        Configuration conf = context.getConfiguration();
+        Text version = DefaultStringifier.load(conf, ConfigConstants.CONF_ML_VERSION, 
+            Text.class);
+        return version.toString();
+    }
 }
