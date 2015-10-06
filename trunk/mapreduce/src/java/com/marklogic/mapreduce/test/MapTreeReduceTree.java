@@ -13,12 +13,13 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DOMDocument;
-import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 import com.marklogic.mapreduce.ForestDocument;
 import com.marklogic.mapreduce.ForestInputFormat;
 import com.marklogic.mapreduce.LargeBinaryDocument;
@@ -26,10 +27,12 @@ import com.marklogic.mapreduce.RegularBinaryDocument;
 
 public class MapTreeReduceTree extends Configured implements Tool {
     public static class MyMapper 
-    extends Mapper<DocumentURI, ForestDocument, DocumentURI, DOMDocument> {
+    extends Mapper<DocumentURIWithSourceInfo, ForestDocument, 
+    DocumentURIWithSourceInfo, DOMDocument> {
         public static final Log LOG = LogFactory.getLog(MyMapper.class);
         
-        public void map(DocumentURI key, ForestDocument value, Context context) 
+        public void map(DocumentURIWithSourceInfo key, ForestDocument value, 
+                Context context) 
         throws IOException, InterruptedException {
             if (value != null && value.getContentType()!=ContentType.BINARY) {
                 System.out.println(key);
@@ -53,10 +56,10 @@ public class MapTreeReduceTree extends Configured implements Tool {
     }
     
     public static class MyReducer
-    extends Reducer<DocumentURI, DOMDocument, Text, Text> {
+    extends Reducer<DocumentURIWithSourceInfo, DOMDocument, Text, Text> {
         Text keyText = new Text();
         Text valText = new Text();
-        public void reduce(DocumentURI key, Iterable<ForestDocument> docs, 
+        public void reduce(DocumentURIWithSourceInfo key, Iterable<ForestDocument> docs, 
             Context context) throws IOException, InterruptedException {        
             for (ForestDocument val : docs) {
                 keyText.set(key.getUri());
@@ -68,7 +71,9 @@ public class MapTreeReduceTree extends Configured implements Tool {
 
     @Override
     public int run(String[] args) throws Exception {
-        if (args.length < 2) {
+        Configuration conf = new Configuration();
+        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+        if (otherArgs.length < 2) {
             System.err.println("Usage: MapTreeReduceTree inputpath outputpath");
             System.exit(2);
         }
@@ -78,11 +83,11 @@ public class MapTreeReduceTree extends Configured implements Tool {
         // Map related configuration
         job.setInputFormatClass(ForestInputFormat.class);
         job.setMapperClass(MyMapper.class);
-        job.setMapOutputKeyClass(DocumentURI.class);
+        job.setMapOutputKeyClass(DocumentURIWithSourceInfo.class);
         job.setMapOutputValueClass(DOMDocument.class);
         job.setReducerClass(MyReducer.class);
-        FileInputFormat.setInputPaths(job, new Path(args[0]));
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
+        FileInputFormat.setInputPaths(job, new Path(otherArgs[0]));
+        FileOutputFormat.setOutputPath(job, new Path(otherArgs[1]));
 
         job.waitForCompletion(true);
         return 0;
