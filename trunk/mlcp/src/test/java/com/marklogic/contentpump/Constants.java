@@ -18,12 +18,16 @@ public class Constants {
      */
     public static String MLCP_HOME;
     static{
-        try {
+       try {
+            MLCP_HOME = System.getProperty("MLCP_HOME");
+            if (MLCP_HOME == null) {
             MLCP_HOME = new java.io.File( "." ).getCanonicalPath();
+            }
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+           
     }
     private static String TEST_DATA = "//////" + MLCP_HOME + "/src/test/resources";
     /**
