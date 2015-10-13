@@ -256,9 +256,9 @@ public enum InputType implements ConfigConstants {
                 query.setOptions(options);
                 result = session.submitRequest(query);
                 Text version = new Text(result.next().asString());
-                BooleanWritable hasFunc = new BooleanWritable(Boolean.getBoolean(result.next().asString()));
+                boolean hasFunc = Boolean.parseBoolean(result.next().asString());
                 LinkedMapWritable roleMap = new LinkedMapWritable();
-                if(hasFunc.get()) {
+                if(hasFunc) {
                     while (result.hasNext()) {
                         Text key = new Text(result.next().asString());
                         if (!result.hasNext()) {

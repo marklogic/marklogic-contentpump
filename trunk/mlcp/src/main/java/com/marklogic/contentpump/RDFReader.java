@@ -965,7 +965,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                         collection = DEFAULT_GRAPH;
                 }
             }
-            ((RDFWritable)value).setPermissions(defaultPerms);
+            if (roleMapExists && existingMapPerms.containsKey(collection)) {
+                ((RDFWritable)value).setPermissions(existingMapPerms.get(collection));
+            } else {
+                ((RDFWritable)value).setPermissions(defaultPerms);
+            }
             if (graphSupported && !newGraphs.contains(collection)) {
                 newGraphs.add(collection);
                 insertGraphDoc(collection);
