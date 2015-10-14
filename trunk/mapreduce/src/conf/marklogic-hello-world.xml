@@ -26,7 +26,7 @@
     </property>
     <property>
         <name>mapreduce.marklogic.input.valueclass</name>
-        <value>com.marklogic.mapreduce.MarkLogicNode</value>
+        <value>com.marklogic.mapreduce.DatabaseDocument</value>
     </property>
     <property>
         <name>mapreduce.marklogic.output.username</name>
