@@ -34,6 +34,8 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.ContentOutputFormat;
+import com.marklogic.mapreduce.ContentType;
+import com.marklogic.mapreduce.DatabaseDocument;
 import com.marklogic.mapreduce.DocumentInputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicNode;
@@ -66,21 +68,23 @@ import com.marklogic.mapreduce.MarkLogicNode;
  */
 public class HelloWorld {
     public static class MyMapper 
-    extends Mapper<DocumentURI, MarkLogicNode, IntWritable, Text> {
+    extends Mapper<DocumentURI, DatabaseDocument, IntWritable, Text> {
         public static final Log LOG =
             LogFactory.getLog(MyMapper.class);
         private final static IntWritable one = new IntWritable(1);
         private Text firstWord = new Text();
         
-        public void map(DocumentURI key, MarkLogicNode value, Context context) 
+        public void map(DocumentURI key, DatabaseDocument value, Context context) 
         throws IOException, InterruptedException {
-            if (key != null && value != null && value.get() != null &&
-                    value.get().getNodeType() == Node.DOCUMENT_NODE) {
-                // grab the first word from the document text
-                Document doc = (Document)value.get();
-                String text = doc.getDocumentElement().getTextContent();
-                firstWord.set(text.split(" ", 2)[0]);
-                context.write(one, firstWord);
+        	if (key != null && value != null && value.getContentSize() != 0) {
+        		ContentType contentType = value.getContentType();
+        		if (contentType == ContentType.XML) {
+        			// grab the first word from the document text
+                    Document doc = (Document)value.getContentAsMarkLogicNode().get();
+                    String text = doc.getDocumentElement().getTextContent();
+                    firstWord.set(text.split(" ", 2)[0]);
+                    context.write(one, firstWord);
+        		}      		                
             } else {
                 LOG.error("key: " + key + ", value: " + value);
             }
