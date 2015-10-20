@@ -75,6 +75,12 @@ public class TestCompressedRDF {
         Utils.closeSession();
     }
     
+    /**
+     * Although Jena parser tries its best to parse the corrupted file, 
+     * it's not guranteed to read the good data from the currupted file. 
+     * 
+     * We make sure we at least load all data from the good files.
+     */
     @Test
     public void test34887() throws Exception {
         String cmd = 
@@ -97,21 +103,24 @@ public class TestCompressedRDF {
                 "xcc://admin:admin@localhost:5275",
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
-        assertEquals("3", result.next().asString());
+        int tmp = Integer.parseInt(result.next().asString());
+        assertTrue(tmp == 2 || tmp == 3);
 
         result = Utils
             .runQuery(
                 "xcc://admin:admin@localhost:5275",
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
-        assertEquals("3", result.next().asString());
+        tmp = Integer.parseInt(result.next().asString());
+        assertTrue(tmp == 2 || tmp == 3);
 
         result = Utils
             .runQuery(
                 "xcc://admin:admin@localhost:5275",
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
         assertTrue(result.hasNext());
-        assertEquals("2", result.next().asString());
+        tmp = Integer.parseInt(result.next().asString());
+        assertTrue(tmp == 1 || tmp == 2);
 
         result = Utils
             .runQuery(
