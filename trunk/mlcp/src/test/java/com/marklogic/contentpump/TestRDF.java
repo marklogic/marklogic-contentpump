@@ -277,7 +277,7 @@ public class TestRDF {
     @Test
     public void testN3() throws Exception {
         String cmd =
-                "IMPORT -host localhost -username admin -password admin"
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.n3"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
 
@@ -320,7 +320,7 @@ public class TestRDF {
     @Test
     public void testN3_output_graph() throws Exception {
         String cmd =
-                "IMPORT -host localhost -username admin -password admin"
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.n3"
                         + " -output_graph http://myDefaultGraph.com"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
@@ -366,10 +366,16 @@ public class TestRDF {
         Utils.closeSession();
     }
     
+    /**
+     * Although Jena parser tries its best to parse the corrupted file, 
+     * it's not guranteed to read the good data from the currupted file. 
+     * 
+     * We make sure we at least load all data from the good files.
+     */
     @Test
     public void test34887() throws Exception {
         String cmd =
-                "IMPORT -host localhost -username admin -password admin"
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/34887"
                         + " -output_graph http://myDefaultGraph.com"
                         + " -thread_count 1"
@@ -383,26 +389,31 @@ public class TestRDF {
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
+        Utils.closeSession();
+        
         ResultSequence result = Utils
             .runQuery(
                 "xcc://admin:admin@localhost:5275",
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
-        assertEquals("3", result.next().asString());
+        int tmp = Integer.parseInt(result.next().asString());
+        assertTrue(tmp == 2 || tmp == 3);
 
         result = Utils
             .runQuery(
                 "xcc://admin:admin@localhost:5275",
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
-        assertEquals("3", result.next().asString());
+        tmp = Integer.parseInt(result.next().asString());
+        assertTrue(tmp == 2 || tmp == 3);
 
         result = Utils
             .runQuery(
                 "xcc://admin:admin@localhost:5275",
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
         assertTrue(result.hasNext());
-        assertEquals("2", result.next().asString());
+        tmp = Integer.parseInt(result.next().asString());
+        assertTrue(tmp == 1 || tmp == 2);
 
         result = Utils
             .runQuery(
@@ -417,7 +428,7 @@ public class TestRDF {
     @Test
     public void testN3_override_graph() throws Exception {
         String cmd =
-                "IMPORT -host localhost -username admin -password admin"
+                "IMPORT -host localhost -port 5275 -username admin -password admin"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semantics.n3"
                         + " -output_override_graph http://myDefaultGraph.com"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold;
