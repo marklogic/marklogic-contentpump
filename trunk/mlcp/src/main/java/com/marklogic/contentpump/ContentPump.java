@@ -116,7 +116,9 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         }
 
         for (String arg : cmdline.getArgs()) {
-            LOG.error("Unrecognized argument: " + arg);
+        	if (!arg.equalsIgnoreCase("-help")) {
+        		LOG.error("Unrecognized argument: " + arg);
+        	}            
             // Print the command usage message and exit.
             command.printUsage(command, options.getPublicOptions());
             return 1; // Exit on exception here.
