@@ -276,7 +276,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             sb.append(name);
         }
         // add namespaces declared into the new root element
-        if (isNewRootStart && namespace != null) {
+        if (isNewRootStart) {
             Set<String> keys = nameSpaces.keySet();
             for (String k : keys) {
                 String v = nameSpaces.get(k).peek();
