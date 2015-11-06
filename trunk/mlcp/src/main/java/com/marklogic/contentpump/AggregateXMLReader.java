@@ -286,6 +286,28 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     sb.append(" xmlns:" + k + "=\"" + v + "\"");
                 }
             }
+        } else {
+            // add new namespace declaration into current element
+            int stop = xmlSR.getNamespaceCount();
+            if (stop > 0) {
+                String nsDeclPrefix, nsDeclUri;
+                if (LOG.isTraceEnabled()) {
+                    LOG.trace("checking namespace declarations");
+                }
+                for (int i = 0; i < stop; i++) {
+                    nsDeclPrefix = xmlSR.getNamespacePrefix(i);
+                    nsDeclUri = xmlSR.getNamespaceURI(i);
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace(nsDeclPrefix + ":" + nsDeclUri);
+                    }
+                    if (DEFAULT_NS == nsDeclPrefix) {
+                        sb.append(" xmlns=\"" + nsDeclUri + "\"");
+                    } else {
+                        sb.append(" xmlns:" + nsDeclPrefix + "=\"" + nsDeclUri
+                            + "\"");
+                    }
+                }
+            }
         }
         for (int i = 0; i < attrCount; i++) {
             String aPrefix = xmlSR.getAttributePrefix(i);
