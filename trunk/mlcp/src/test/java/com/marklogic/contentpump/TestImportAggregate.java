@@ -446,6 +446,55 @@ public class TestImportAggregate {
         Utils.closeSession();
     }
     
+    @Test
+    public void testIDWithNS() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/agg/31691.xml"
+            + " -mode local -aggregate_record_element item"
+            + " -uri_id post_id -thread_count 1"
+            + " -input_file_type aggregates";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testIDWithNSZip() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/agg/31691.zip"
+            + " -mode local -aggregate_record_element item"
+            + " -input_compressed"
+            + " -uri_id post_id -thread_count 1"
+            + " -input_file_type aggregates";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        Utils.closeSession();
+    }
+    
 //    @Test
     public void testBadXML() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
