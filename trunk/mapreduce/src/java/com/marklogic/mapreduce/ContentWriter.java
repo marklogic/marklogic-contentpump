@@ -543,21 +543,18 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
         InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String forestId = ContentOutputFormat.ID_PREFIX;
-        int fId = 0;
-        if (fastLoad) {
-            if(!countBased) {
-                // placement for legacy or bucket
-                fId = am.getPlacementForestIndex(key);
-                sfId = fId;
-            } else {
-                if (sfId == -1) {
-                    sfId = am.getPlacementForestIndex(key);
-                }
-                fId = sfId;
+        int fId = 0;   
+        if(!countBased) {
+            // placement for legacy or bucket
+            fId = am.getPlacementForestIndex(key);
+            sfId = fId;
+        } else {
+            if (sfId == -1) {
+                sfId = am.getPlacementForestIndex(key);
             }
-            forestId = forestIds[fId];
+            fId = sfId;
         }
+        String forestId = forestIds[fId];
         int sid = fId;
         Content content = createContent(key,value); 
         if (content == null) {
