@@ -38,8 +38,7 @@ public class DatabaseTransformOutputFormat extends DatabaseContentOutputFormat {
     public RecordWriter<DocumentURI, DatabaseDocumentWithMeta> getRecordWriter(
         TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
-        Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
+        Map<String, ContentSource> sourceMap = getSourceMap(context);
         // construct the DatabaseTransformContentWriter
         return new DatabaseTransformWriter<DatabaseDocumentWithMeta>(conf,
             sourceMap, fastLoad, am);
