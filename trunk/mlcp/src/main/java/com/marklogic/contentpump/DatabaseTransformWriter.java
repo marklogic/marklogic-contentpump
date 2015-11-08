@@ -66,20 +66,17 @@ public class DatabaseTransformWriter<VALUE> extends
         InterruptedException {
         int fId = 0;
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String forestId = ContentOutputFormat.ID_PREFIX;
-        if (fastLoad) {
-            if(!countBased) {
-                // placement for legacy or bucket
-                fId = am.getPlacementForestIndex(key);
-                sfId = fId;
-            } else {
-                if (sfId == -1) {
-                    sfId = am.getPlacementForestIndex(key);
-                }
-                fId = sfId;
+        if(!countBased) {
+            // placement for legacy or bucket
+            fId = am.getPlacementForestIndex(key);
+            sfId = fId;
+        } else {
+            if (sfId == -1) {
+                sfId = am.getPlacementForestIndex(key);
             }
-            forestId = forestIds[fId];
+            fId = sfId;
         }
+        String forestId = forestIds[fId];
         int sid = fId;
 
         DocumentMetadata meta = null;
@@ -145,14 +142,6 @@ public class DatabaseTransformWriter<VALUE> extends
         }
     }
 
-    protected Session getSession(String forestId) {
-        TransactionMode mode = TransactionMode.AUTO;
-        if (txnSize > 1) {
-            mode = TransactionMode.UPDATE;
-        }
-        return getSession(forestId, mode);
-    }
-    
     protected AdhocQuery getAdhocQuery(int sid) {
         String qs = TransformHelper.constructQryString(moduleUri, functionNs,
                 functionName, functionParam);
