@@ -145,14 +145,13 @@ public class ContentOutputFormat<VALUEOUT> extends
             }
             // initialize server host name and assignment policy
             initialize(session);
+            // store forest-info map into config system
+            DefaultStringifier.store(conf, queryForestInfo(cs),
+                OUTPUT_FOREST_HOST);
             
             // ensure manual directory creation 
             if (fastLoad) {
                 LOG.info("Running in fast load mode");
-                    // store forest-info map into config system
-                DefaultStringifier.store(conf, queryForestInfo(cs),
-                    OUTPUT_FOREST_HOST);
-
                 AdhocQuery query = 
                 		session.newAdhocQuery(DIRECTORY_CREATE_QUERY);
                 result = session.submitRequest(query);
@@ -168,17 +167,6 @@ public class ContentOutputFormat<VALUEOUT> extends
                     throw new IllegalStateException(
                             "Failed to query directory creation mode.");
                 }
-            } else {
-                TextArrayWritable hostArray; 
-                // 23798: replace hostname in forest config with 
-                // user-specified output host
-                String outputHost = conf.get(OUTPUT_HOST);
-                if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
-                	hostArray = queryHosts(cs, initHostName, outputHost);
-                } else {
-                	hostArray = queryHosts(cs);
-                }
-                DefaultStringifier.store(conf, hostArray, OUTPUT_FOREST_HOST);
             }
     
             // validate capabilities
@@ -217,49 +205,37 @@ public class ContentOutputFormat<VALUEOUT> extends
         }
     }
     
-    protected Map<String, ContentSource> getSourceMap(boolean fastLoad, 
-    		TaskAttemptContext context) throws IOException{
+    protected Map<String, ContentSource> 
+    getSourceMap(TaskAttemptContext context) throws IOException{
         Configuration conf = context.getConfiguration();
         Map<String, ContentSource> sourceMap = 
             new LinkedHashMap<String, ContentSource>();
-        if (fastLoad) {
-            LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
-            // get host->contentSource mapping
-            Map<String, ContentSource> hostSourceMap = 
+        LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
+        // get host->contentSource mapping
+        Map<String, ContentSource> hostSourceMap = 
                 new HashMap<String, ContentSource>();
-            for (Writable v : forestStatusMap.values()) {
-                ForestInfo fs = (ForestInfo)v;
-                //unupdatable forests
-                if(fs.getUpdatable() == false) continue;
-                if (hostSourceMap.get(fs.getHostName()) == null) {
-                    try {
-                        ContentSource cs = InternalUtilities.getOutputContentSource(
+        for (Writable v : forestStatusMap.values()) {
+            ForestInfo fs = (ForestInfo)v;
+            // unupdatable forests
+            if (fs.getUpdatable() == false) continue;
+            if (hostSourceMap.get(fs.getHostName()) == null) {
+                try {
+                    ContentSource cs = InternalUtilities.getOutputContentSource(
                             conf, fs.getHostName().toString());
-                        hostSourceMap.put(fs.getHostName(), cs);
-                    } catch (XccConfigException e) {
-                        throw new IOException(e);
-                    } 
-                }
+                    hostSourceMap.put(fs.getHostName(), cs);
+                } catch (XccConfigException e) {
+                    throw new IOException(e);
+                } 
             }
-            
-            // consolidate forest->host map and host-contentSource map to 
-            // forest-contentSource map
-            for (Writable forestId : forestStatusMap.keySet()) {
-                String forest = ((Text)forestId).toString();
-                String hostName = ((ForestInfo)forestStatusMap.get(forestId)).getHostName();
-                ContentSource cs = hostSourceMap.get(hostName);
-                sourceMap.put(ID_PREFIX + forest, cs);
-            }
-        } else {
-            TextArrayWritable hosts = getHosts(conf);
-            String host = InternalUtilities.getHost(hosts);
-            try {
-                ContentSource cs = InternalUtilities.getOutputContentSource(
-                    conf, host);
-                sourceMap.put(ID_PREFIX, cs);
-            } catch (XccConfigException e) {
-                throw new IOException(e);
-            }
+        }
+
+        // consolidate forest->host map and host-contentSource map to 
+        // forest-contentSource map
+        for (Writable forestId : forestStatusMap.keySet()) {
+            String forest = ((Text)forestId).toString();
+            String hostName = ((ForestInfo)forestStatusMap.get(forestId)).getHostName();
+            ContentSource cs = hostSourceMap.get(hostName);
+            sourceMap.put(ID_PREFIX + forest, cs);
         }
         return sourceMap;
     }
@@ -269,8 +245,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
         // TODO: if MAPREDUCE-3377 still exists, need to re-run initialize
-        fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
-        Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
+        Map<String, ContentSource> sourceMap = getSourceMap(context);
         // construct the ContentWriter
         return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
     }
@@ -408,16 +383,14 @@ public class ContentOutputFormat<VALUEOUT> extends
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
             } else {
                 query = session.newAdhocQuery(FOREST_HOST_QUERY);
+                String pName = "";
                 if (policy == AssignmentPolicy.Kind.RANGE) {
-                    String pName = conf.get(OUTPUT_PARTITION);
-                    query.setNewStringVariable("partition-name", pName);
-                } else {
-                    query.setNewStringVariable("partition-name", "");
+                    pName = conf.get(OUTPUT_PARTITION, "");
                 }
+                query.setNewStringVariable("partition-name", pName);
                 query.setNewStringVariable("policy", 
                 		policy.toString().toLowerCase());
             }
-
             // query forest status mapping                 
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
