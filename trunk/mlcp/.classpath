@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src/test/java">
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
@@ -13,6 +13,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/xcc"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/Mapreduce"/>
 	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources">
 		<attributes>
@@ -29,8 +30,6 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/src/conf"/>
-	<classpathentry kind="lib" path="/space/projects/xcc/mlcp/mlcp-9.0/lib/mlcp-9.0.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/src"/>
+	<classpathentry kind="lib" path="/space/projects/xcc/mlcp/mlcp-1.4/conf"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

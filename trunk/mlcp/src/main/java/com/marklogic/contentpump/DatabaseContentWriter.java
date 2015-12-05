@@ -126,18 +126,21 @@ public class DatabaseContentWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {       
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
+        String forestId = ContentOutputFormat.ID_PREFIX;
         int fId = 0;
-        if(!countBased) {
-            // placement for legacy or bucket
-            fId = am.getPlacementForestIndex(key);
-            sfId = fId;
-        } else {
-            if (sfId == -1) {
-                sfId = am.getPlacementForestIndex(key);
+        if (fastLoad) {
+            if(!countBased) {
+                // placement for legacy or bucket
+                fId = am.getPlacementForestIndex(key);
+                sfId = fId;
+            } else {
+                if (sfId == -1) {
+                    sfId = am.getPlacementForestIndex(key);
+                }
+                fId = sfId;
             }
-            fId = sfId;
+            forestId = forestIds[fId];
         }
-        String forestId = forestIds[fId];
         int sid = fId;
         
         Content content = null;
@@ -234,6 +237,25 @@ public class DatabaseContentWriter<VALUE> extends
             stmtCounts[sid] = 0;
             commitUris[sid].clear();
         }
+    }
+
+    protected Session getSession(String forestId, TransactionMode mode) {
+        Session session = null;
+        ContentSource cs = forestSourceMap.get(forestId);
+        if (fastLoad) {
+            session = cs.newSession(forestId);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connect to forest " + forestId + " on "
+                    + session.getConnectionUri().getHost());
+            }
+        } else {
+            session = cs.newSession();
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connect to " + session.getConnectionUri().getHost());
+            }
+        }   
+        session.setTransactionMode(mode);
+        return session;
     }
 
     @Override

@@ -70,18 +70,21 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public void write(DocumentURI key, VALUEOUT value) throws IOException,
         InterruptedException {
         int fId = 0;
-        String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);  
-        if (!countBased) {
-            // placement for legacy or bucket
-            fId = am.getPlacementForestIndex(key);
-            sfId = fId;
-        } else {
-            if (sfId == -1) {
-                sfId = am.getPlacementForestIndex(key);
+        String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
+        String forestId = ContentOutputFormat.ID_PREFIX;  
+        if (fastLoad) {
+            if(!countBased) {
+                // placement for legacy or bucket
+                fId = am.getPlacementForestIndex(key);
+                sfId = fId;
+            } else {
+                if (sfId == -1) {
+                    sfId = am.getPlacementForestIndex(key);
+                }
+                fId = sfId;
             }
-            fId = sfId;
+            forestId = forestIds[fId];
         }
-        String forestId = forestIds[fId];
         int sid = fId;
         if (sessions[sid] == null) {
             sessions[sid] = getSession(forestId);
@@ -126,6 +129,14 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             commitUris[sid].clear();
             stmtCounts[sid] = 0;
         }
+    }
+
+    protected Session getSession(String forestId) {
+        TransactionMode mode = TransactionMode.AUTO;
+        if (txnSize > 1) {
+            mode = TransactionMode.UPDATE;
+        }
+        return getSession(forestId, mode);
     }
     
     protected AdhocQuery getAdhocQuery(int sid) {

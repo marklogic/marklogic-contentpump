@@ -114,7 +114,8 @@ public class TransformOutputFormat<VALUEOUT> extends
     public RecordWriter<DocumentURI, VALUEOUT> getRecordWriter(
         TaskAttemptContext context) throws IOException, InterruptedException {
         Configuration conf = context.getConfiguration();
-        Map<String, ContentSource> sourceMap = getSourceMap(context);
+        fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
+        Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         getMimetypesMap();
         // construct the ContentWriter
         return new TransformWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
