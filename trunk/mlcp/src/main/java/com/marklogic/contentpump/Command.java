@@ -1004,14 +1004,12 @@ public enum Command implements ConfigConstants {
                 .hasArg()
                 .withDescription("User name of the input MarkLogic Server")
                 .create(INPUT_USERNAME);
-            inputUsername.setRequired(true);
             options.addOption(inputUsername);
             Option inputPassword = OptionBuilder
                 .withArgName("password")
                 .hasArg()
                 .withDescription("Password of the input MarkLogic Server")
                 .create(INPUT_PASSWORD);
-            inputPassword.setRequired(true);
             options.addOption(inputPassword);
             Option inputHost = OptionBuilder
                 .withArgName("host")
@@ -1037,14 +1035,12 @@ public enum Command implements ConfigConstants {
                 .hasArg()
                 .withDescription("User Name of the output MarkLogic Server")
                 .create(OUTPUT_USERNAME);
-            outputUsername.setRequired(true);
             options.addOption(outputUsername);
             Option outputPassword = OptionBuilder
                 .withArgName("password")
                 .hasArg()
                 .withDescription("Password of the output MarkLogic Server")
                 .create(OUTPUT_PASSWORD);
-            outputPassword.setRequired(true);
             options.addOption(outputPassword);
             Option outputHost = OptionBuilder
                 .withArgName("host")
@@ -1575,14 +1571,12 @@ public enum Command implements ConfigConstants {
             .hasArg()
             .withDescription("User name of MarkLogic Server")
             .create(USERNAME);
-        username.setRequired(true);
         options.addOption(username);
         Option password = OptionBuilder
             .withArgName(PASSWORD)
             .hasArg()
             .withDescription("Password of MarkLogic Server")
             .create(PASSWORD);
-        password.setRequired(true);
         options.addOption(password);
         Option host = OptionBuilder
             .withArgName(HOST)
