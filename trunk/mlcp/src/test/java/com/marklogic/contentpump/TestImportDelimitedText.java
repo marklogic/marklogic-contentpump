@@ -69,7 +69,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("7", result.next().asString());
         Utils.closeSession();
         
         result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
@@ -140,7 +140,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(/rot)");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("7", result.next().asString());
         Utils.closeSession();
     }
 
@@ -165,7 +165,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("7", result.next().asString());
         Utils.closeSession();
         
         result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
@@ -190,6 +190,7 @@ public class TestImportDelimitedText{
             + " -transform_module /lc.xqy"
             + " -filename_as_collection true"
             + " -delimited_uri_id first"
+            + " -thread_count 1"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -203,7 +204,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("7", result.next().asString());
         result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(cts:collections())");
         assertTrue(result.hasNext());
@@ -245,7 +246,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("12", result.next().asString());
+        assertEquals("14", result.next().asString());
         Utils.closeSession();
 //        
 //        result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
@@ -264,6 +265,7 @@ public class TestImportDelimitedText{
 /*
  *  test output_language and namespace
  */
+
     @Test
     public void testImportTransformDelimitedTextLanNs() throws Exception {
         Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
@@ -287,7 +289,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("7", result.next().asString());
         Utils.closeSession();
         
 //        result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
@@ -844,7 +846,7 @@ public class TestImportDelimitedText{
         ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
                         "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("7", result.next().asString());
         Utils.closeSession();
         
         result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
@@ -969,4 +971,5 @@ public class TestImportDelimitedText{
 
         assertTrue(sb.toString().equals(key));
     }
+
 }
