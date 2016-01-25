@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2015 MarkLogic Corporation
+ * Copyright 2003-2016 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,9 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.text.ParseException;
 import java.util.Iterator;
 
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
