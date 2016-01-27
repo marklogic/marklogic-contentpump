@@ -1,6 +1,7 @@
 #!/bin/bash
 unset CLASSPATH
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../
+VMARGS="-Dfile.encoding=UTF-8 -Dxcc.txn.compatible=true -Djavax.security.auth.useSubjectCredsOnly=false"
 LIB_HOME=$DIR/lib
 
 for file in "${LIB_HOME}"/*.jar
@@ -12,4 +13,4 @@ do
   fi
 done
 CLASSPATH=$DIR/conf:$CLASSPATH
-java -cp "$CLASSPATH" -DCONTENTPUMP_HOME="$DIR/lib" -Dfile.encoding=UTF-8 $JVM_OPTS -Djava.library.path="$DIR/lib/native" -Djavax.security.auth.useSubjectCredsOnly=false com.marklogic.contentpump.ContentPump $*
+java -cp "$CLASSPATH" -DCONTENTPUMP_HOME="$DIR/lib" $VMARGS $JVM_OPTS -Djava.library.path="$DIR/lib/native" com.marklogic.contentpump.ContentPump $*
