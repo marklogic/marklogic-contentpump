@@ -89,7 +89,7 @@ public class PermissionUtil {
             AdhocQuery query = session.newAdhocQuery(DEFAULT_PERM_QUERY);
             query.setOptions(options);
             result = session.submitRequest(query);
-            if (!result.hasNext())
+            if (!result.hasNext() || roleMap == null)
                 return null;
             while (result.hasNext()) {
                 Text roleid = new Text(result.next().asString());
