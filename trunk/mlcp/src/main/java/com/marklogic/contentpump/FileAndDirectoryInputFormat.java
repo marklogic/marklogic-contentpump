@@ -33,6 +33,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.InvalidInputException;
+import org.apache.hadoop.mapreduce.security.TokenCache;
 
 /**
  * An InputFormat that flattens directories and returns file-only splits.
@@ -182,6 +183,87 @@ FileInputFormat<K, V> {
                 }
             }
             return true;
+        }
+    }
+
+    protected List<FileStatus> listStatus(JobContext job
+            ) throws IOException {
+        Path[] dirs = getInputPaths(job);
+        if (dirs.length == 0) {
+            throw new IOException("No input paths specified in job");
+        }
+
+        // get tokens for all the required FileSystems..
+        TokenCache.obtainTokensForNamenodes(job.getCredentials(), dirs, 
+                job.getConfiguration());
+
+        // Whether we need to recursive look into the directory structure
+        boolean recursive = getInputDirRecursive(job);
+
+        // creates a MultiPathFilter with the hiddenFileFilter and the
+        // user provided one (if any).
+        List<PathFilter> filters = new ArrayList<PathFilter>();
+        filters.add(hiddenFileFilter);
+        PathFilter jobFilter = getInputPathFilter(job);
+        if (jobFilter != null) {
+            filters.add(jobFilter);
+        }
+        PathFilter inputFilter = new MultiPathFilter(filters);
+
+        List<FileStatus> result = simpleListStatus(job, dirs, inputFilter, recursive);     
+
+        LOG.info("Total input paths to process : " + result.size()); 
+        return result;
+    }
+
+    private List<FileStatus> simpleListStatus(JobContext job, Path[] dirs,
+            PathFilter inputFilter, boolean recursive) throws IOException {
+        List<FileStatus> result = new ArrayList<FileStatus>();
+        List<IOException> errors = new ArrayList<IOException>();
+        Configuration conf = job.getConfiguration();
+        for (int i=0; i < dirs.length; ++i) {
+            Path p = dirs[i];
+            FileSystem fs = p.getFileSystem(conf);
+            FileStatus[] matches = fs.globStatus(p, inputFilter);
+            if (matches == null) {
+                errors.add(new IOException("Input path does not exist: " + p));
+            } else if (matches.length == 0) {
+                errors.add(new IOException("Input Pattern " + p + " matches 0 files"));
+            } else {
+                for (FileStatus globStat: matches) {
+                    if (globStat.isDirectory()) {
+                        FileStatus[] files = fs.listStatus(globStat.getPath(), inputFilter);
+                        for (int j = 0; j < files.length; j++) {
+                            if (recursive && files[j].isDirectory()) {
+                                simpleAddInputPathRecursively(result, fs, files[j].getPath(),inputFilter);
+                            } else {
+                                result.add(files[j]);
+                            }
+                        }
+                    } else {
+                        result.add(globStat);
+                    }
+                }
+            }
+        }
+
+        if (!errors.isEmpty()) {
+            throw new InvalidInputException(errors);
+        }
+        return result;
+    }
+
+    protected void simpleAddInputPathRecursively(List<FileStatus> result,
+            FileSystem fs, Path path, PathFilter inputFilter)
+                    throws IOException {
+        FileStatus[] files = fs.listStatus(path, inputFilter);
+        for (int j = 0; j < files.length; j++) {
+            if (files[j].isDirectory()) {
+                simpleAddInputPathRecursively(result, fs, files[j].getPath(),
+                        inputFilter);
+            } else {
+                result.add(files[j]);
+            }
         }
     }
 }
