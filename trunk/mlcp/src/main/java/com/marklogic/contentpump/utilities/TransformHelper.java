@@ -187,6 +187,10 @@ public class TransformHelper {
             optionsMap.put("language", "default-language=" + lang);
         }
         ContentPermission[] perms = cOptions.getPermissions();
+        StringBuilder rolesReadList = new StringBuilder();
+        StringBuilder rolesExeList = new StringBuilder();
+        StringBuilder rolesUpdateList = new StringBuilder();
+        StringBuilder rolesInsertList = new StringBuilder();
         if (perms != null && perms.length > 0) {
             for (ContentPermission cp : perms) {
                 String roleName = cp.getRole();
@@ -196,16 +200,32 @@ public class TransformHelper {
                 }
                 ContentCapability cc = cp.getCapability();
                 if (cc.equals(ContentCapability.READ)) {
-                    optionsMap.put("roles-read", roleName);
+                    if (rolesReadList.length() != 0) {
+                        rolesReadList.append(",");
+                    }
+                    rolesReadList.append(roleName);
                 } else if (cc.equals(ContentCapability.EXECUTE)) {
-                    optionsMap.put("roles-execute", roleName);
+                    if (rolesExeList.length() != 0) {
+                        rolesExeList.append(",");
+                    }
+                    rolesExeList.append(roleName);
                 } else if (cc.equals(ContentCapability.INSERT)) {
-                    optionsMap.put("roles-insert", roleName);
+                    if (rolesInsertList.length() != 0) {
+                        rolesInsertList.append(",");
+                    }
+                    rolesInsertList.append(roleName);
                 } else if (cc.equals(ContentCapability.UPDATE)) {
-                    optionsMap.put("roles-update", roleName);
+                    if (rolesUpdateList.length() != 0) {
+                        rolesUpdateList.append(",");
+                    }
+                    rolesUpdateList.append(roleName);
                 }
             }
         }
+        optionsMap.put("roles-read", rolesReadList.toString());
+        optionsMap.put("roles-execute", rolesExeList.toString());
+        optionsMap.put("roles-update", rolesUpdateList.toString());
+        optionsMap.put("roles-insert", rolesInsertList.toString());
 
         String[] collections = cOptions.getCollections();
         StringBuilder sb = new StringBuilder();
@@ -297,6 +317,10 @@ public class TransformHelper {
             optionsMap.put("language", "default-language=" + lang);
         }
         ContentPermission[] perms = cOptions.getPermissions();
+        StringBuilder rolesReadList = new StringBuilder();
+        StringBuilder rolesExeList = new StringBuilder();
+        StringBuilder rolesUpdateList = new StringBuilder();
+        StringBuilder rolesInsertList = new StringBuilder();
         if (perms != null && perms.length > 0) {
             for (ContentPermission cp : perms) {
                 String roleName = cp.getRole();
@@ -306,16 +330,32 @@ public class TransformHelper {
                 }
                 ContentCapability cc = cp.getCapability();
                 if (cc.equals(ContentCapability.READ)) {
-                    optionsMap.put("roles-read", roleName);
+                    if (rolesReadList.length() != 0) {
+                        rolesReadList.append(",");
+                    }
+                    rolesReadList.append(roleName);
                 } else if (cc.equals(ContentCapability.EXECUTE)) {
-                    optionsMap.put("roles-execute", roleName);
+                    if (rolesExeList.length() != 0) {
+                        rolesExeList.append(",");
+                    }
+                    rolesExeList.append(roleName);
                 } else if (cc.equals(ContentCapability.INSERT)) {
-                    optionsMap.put("roles-insert", roleName);
+                    if (rolesInsertList.length() != 0) {
+                        rolesInsertList.append(",");
+                    }
+                    rolesInsertList.append(roleName);
                 } else if (cc.equals(ContentCapability.UPDATE)) {
-                    optionsMap.put("roles-update", roleName);
+                    if (rolesUpdateList.length() != 0) {
+                        rolesUpdateList.append(",");
+                    }
+                    rolesUpdateList.append(roleName);
                 }
             }
         }
+        optionsMap.put("roles-read", rolesReadList.toString());
+        optionsMap.put("roles-execute", rolesExeList.toString());
+        optionsMap.put("roles-update", rolesUpdateList.toString());
+        optionsMap.put("roles-insert", rolesInsertList.toString());
 
         String[] collections = cOptions.getCollections();
         if (collections != null) {
