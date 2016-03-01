@@ -164,4 +164,40 @@ public class TestImportArchive {
         assertEquals("0", result.next().asString());
         Utils.closeSession();
     }
+    
+    @Test
+    public void testBug38160() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/38160/dummy-trans.xqy");
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin "
+                + "-input_file_path " + Constants.TEST_PATH.toUri() 
+                + "/38160/20130327183855-0700-000000-XML.zip" + " -input_file_type archive "
+                + "-mode local -transform_module /38160/dummy-trans.xqy "
+                + "-transform_namespace my.dummy.transform.module "
+                + "-output_permissions "
+                + "admin,read,admin-builtins,read,admin-module-internal,read,"
+                + "admin,insert,admin-builtins,insert,admin-module-internal,insert,"
+                + "admin,update,admin-builtins,update,admin-module-internal,update,"
+                + "admin,execute,admin-builtins,execute,admin-module-internal,execute";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        String permQry = "declare namespace sec = 'http://marklogic.com/xdmp/security';\n" + 
+                "let $perms := xdmp:document-get-permissions('/bug18908/xml/1.xml')\n" + 
+                "return (fn:count($perms/sec:capability[text()='read']), "
+                + "fn:count($perms/sec:capability[text()='insert']), "
+                + "fn:count($perms/sec:capability[text()='insert']), "
+                + "fn:count($perms/sec:capability[text()='execute']))";
+        ResultSequence result = Utils.runQuery(
+                "xcc://admin:admin@localhost:5275", permQry);
+        
+        for (int i = 0; i < 4; i++) {
+            assertTrue(result.hasNext());
+            assertEquals("3", result.next().asString());
+        }
+    }
 }
