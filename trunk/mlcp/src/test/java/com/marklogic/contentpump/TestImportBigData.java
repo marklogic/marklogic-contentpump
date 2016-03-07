@@ -74,7 +74,7 @@ public class TestImportBigData {
             sw.stop();
             long time = sw.elapsedTime(TimeUnit.SECONDS);
             System.out.println("Total time of listStatus: " + time + " seconds.");
-            assertTrue(time < 12L);
+            assertTrue(time < 20L);
         }        
         
         
