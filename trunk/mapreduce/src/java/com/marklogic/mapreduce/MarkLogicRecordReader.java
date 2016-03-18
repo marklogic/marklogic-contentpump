@@ -77,6 +77,10 @@ implements MarkLogicConstants {
      * Total expected count of the records in a split.
      */
     protected float length;
+    /**
+     * Redaction rule collection names.
+     */
+    protected String[] redactionRuleCol;
     
     public MarkLogicRecordReader(Configuration conf) {
         this.conf = conf;
@@ -112,17 +116,47 @@ implements MarkLogicConstants {
         }
     }
     
+    protected void buildSrcInDocExprQuery(String docExpr, String subExpr, StringBuilder buf) {
+        buf.append("fn:unordered(fn:unordered(");
+        buf.append(docExpr == null ? "fn:collection()" : docExpr);
+        buf.append(")[$mlmr:splitstart to $mlmr:splitend]");
+        buf.append(subExpr == null ? "" : subExpr);
+        buf.append(")");
+    }
+    
     protected void buildDocExprQuery(String docExpr, Collection<String> nsCol, 
             String subExpr, StringBuilder buf) {
         buf.append("xdmp:with-namespaces(("); 
         if (nsCol != null) {
             appendNamespace(nsCol, buf);
         }
-        buf.append("),fn:unordered(fn:unordered(");
-        buf.append(docExpr == null ? "fn:collection()" : docExpr);
-        buf.append(")[$mlmr:splitstart to $mlmr:splitend]");
-        buf.append(subExpr == null ? "" : subExpr);
-        buf.append("))");
+        buf.append("),");        
+        
+        if (redactionRuleCol != null) {
+        	buf.append("rdt:redact(");
+        	buildSrcInDocExprQuery(docExpr, subExpr, buf);
+        	buf.append(",((");
+        	
+        	for (int i = 0; i < redactionRuleCol.length; i++) {
+        		if (i != 0) {
+        			buf.append(",");
+        		}
+        		buf.append("\"" + redactionRuleCol[i] + "\"");
+        	}
+        	
+        	buf.append(")))");
+        } else {
+            buildSrcInDocExprQuery(docExpr, subExpr, buf);
+        }
+        buf.append(")");
+    }
+    
+    protected void buildSrcInSearchQuery(String docExpr, String ctsQuery, StringBuilder buf) {
+        buf.append("fn:unordered(cts:search(");
+        buf.append(docExpr);
+        buf.append(",cts:query(xdmp:unquote('");
+        buf.append(ctsQuery);
+        buf.append("')/*),(\"unfiltered\",\"score-zero\")))");  
     }
     
     protected void buildSearchQuery(String docExpr, String ctsQuery, 
@@ -134,11 +168,25 @@ implements MarkLogicConstants {
         if (nsCol != null) {
             appendNamespace(nsCol, buf);
         }
-        buf.append("),fn:unordered(cts:search(");
-        buf.append(docExpr);
-        buf.append(",cts:query(xdmp:unquote('");
-        buf.append(ctsQuery);
-        buf.append("')/*),(\"unfiltered\",\"score-zero\"))))");
+        buf.append("),");      
+        
+        if (redactionRuleCol != null) {
+            buf.append("rdt:redact(");
+            buildSrcInSearchQuery(docExpr, ctsQuery, buf);
+            buf.append(",((");
+            
+            for (int i = 0; i < redactionRuleCol.length; i++) {
+                if (i != 0) {
+                    buf.append(",");
+                }
+                buf.append("\"" + redactionRuleCol[i] + "\"");
+            }
+            buf.append(")))");
+        } else {
+            buildSrcInSearchQuery(docExpr, ctsQuery, buf);
+        }
+        
+        buf.append(")");
         buf.append("[$mlmr:splitstart to $mlmr:splitend]");
     }
 
@@ -160,6 +208,7 @@ implements MarkLogicConstants {
         // get job config properties
         boolean advancedMode = 
             conf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
+        redactionRuleCol = conf.getStrings(REDACTION_RULE_COLLECTION, null);
         
         // initialize the total length
         float recToFragRatio = conf.getFloat(RECORD_TO_FRAGMENT_RATIO, 
@@ -175,6 +224,10 @@ implements MarkLogicConstants {
         if (!advancedMode) { 
             StringBuilder buf = new StringBuilder();      
             buf.append("xquery version \"1.0-ml\"; \n");
+            if (redactionRuleCol != null) {
+            	buf.append(
+            		"import module namespace rdt = \"http://marklogic.com/xdmp/redaction\" at \"/MarkLogic/redaction.xqy\";\n");
+            }
             String indent = conf.get(INDENTED, "FALSE");
             Indentation ind = Indentation.valueOf(indent);
             buf.append(
@@ -185,6 +238,7 @@ implements MarkLogicConstants {
                     "declare variable $mlmr:splitend as xs:integer external;\n");
            
             buf.append(ind.getStatement());
+            buf.append("\n");
             String docExpr = conf.get(DOCUMENT_SELECTOR);
             String ctsQuery = conf.get(QUERY_FILTER);
             String subExpr = conf.get(SUBDOCUMENT_EXPRESSION);
