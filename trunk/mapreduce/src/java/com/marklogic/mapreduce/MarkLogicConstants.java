@@ -847,4 +847,12 @@ public interface MarkLogicConstants {
      */
     static final String OUTPUT_QUERY_LANGUAGE = 
     		"mapreduce.marklogic.output.querylanguage";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies a comma-separated list of
+     * redaction rule collection URIs. 
+     * Optional. If not set, no data will be redacted.
+     */
+    static final String REDACTION_RULE_COLLECTION = 
+    		"mapreduce.marklogic.input.redaction.rules";
 }
