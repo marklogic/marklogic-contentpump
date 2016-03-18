@@ -836,6 +836,7 @@ public enum Command implements ConfigConstants {
             configConnectionId(options);
             configCopyOptions(options);
             configFilteringOptions(options);
+            configRedactionOptions(options);
 
             Option outputType = OptionBuilder
                 .withArgName("type")
@@ -920,6 +921,7 @@ public enum Command implements ConfigConstants {
         public void applyConfigOptions(Configuration conf, CommandLine cmdline) {
             applyCopyConfigOptions(conf, cmdline);
             applyFilteringConfigOptions(conf, cmdline);
+            applyRedactionConfigOptions(conf, cmdline);
 
             if (cmdline.hasOption(OUTPUT_TYPE)) {
                 String outputType = cmdline.getOptionValue(OUTPUT_TYPE);
@@ -936,8 +938,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(OUTPUT_INDENTED)) {
                 String isIndented = cmdline.getOptionValue(OUTPUT_INDENTED);
                 // check value validity
-                Indentation indent = Indentation.forName(isIndented);
-                conf.set(MarkLogicConstants.INDENTED, indent.name());
+                if (isIndented != null) {
+                    Indentation indent = Indentation.forName(isIndented);
+                    conf.set(MarkLogicConstants.INDENTED, indent.name());
+                }                
             }
             if (cmdline.hasOption(HOST)) {
                 String host = cmdline.getOptionValue(HOST);
@@ -998,6 +1002,7 @@ public enum Command implements ConfigConstants {
             configFilteringOptions(options);
             configBatchTxn(options);
             configModule(options);
+            configRedactionOptions(options);
             
             Option inputUsername = OptionBuilder
                 .withArgName("username")
@@ -1136,6 +1141,7 @@ public enum Command implements ConfigConstants {
             applyCopyConfigOptions(conf, cmdline);
             applyFilteringConfigOptions(conf, cmdline);
             applyCommonOutputConfigOptions(conf, cmdline);
+            applyRedactionConfigOptions(conf, cmdline);
 
             if (cmdline.hasOption(OUTPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(OUTPUT_USERNAME);
@@ -1223,17 +1229,17 @@ public enum Command implements ConfigConstants {
             applyModuleConfigOptions(conf, cmdline);
         }
 
-	@Override
-	public void setMapperClass(Job job, Configuration conf,
-                                   CommandLine cmdline) {
-	    job.setMapperClass(DocumentMapper.class);			
+        @Override
+        public void setMapperClass(Job job, Configuration conf,
+                                       CommandLine cmdline) {
+            job.setMapperClass(DocumentMapper.class);           
         }
 
-	@Override
-	public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(Job job, 
-            Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
-            int availableThreads) {
-                return mapper;
+        @Override
+        public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(Job job, 
+                Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
+                int availableThreads) {
+                    return mapper;
         }
     },
     EXTRACT {
@@ -1472,6 +1478,15 @@ public enum Command implements ConfigConstants {
         } catch (Exception ex) {
             throw new IOException("Error getting query timestamp", ex);
         }     
+    }
+    
+    static void configRedactionOptions(Options options) {
+    	Option redaction = OptionBuilder
+            	.withArgName("redaction rules")
+            	.hasArg()
+            	.withDescription("Comma separated list of redaction rule collection URIs")
+            	.create(REDACTION);
+    	options.addOption(redaction);
     }
     
     static void configCommonOptions(Options options) {
@@ -1930,6 +1945,14 @@ public enum Command implements ConfigConstants {
             String graph = cmdline.getOptionValue(OUTPUT_OVERRIDE_GRAPH);
             conf.set(MarkLogicConstants.OUTPUT_OVERRIDE_GRAPH, graph);
         }
+    }
+    
+    static void applyRedactionConfigOptions(Configuration conf, 
+    		CommandLine cmdline) {
+    	if (cmdline.hasOption(REDACTION)) {
+    		String value = cmdline.getOptionValue(REDACTION);
+            conf.set(MarkLogicConstants.REDACTION_RULE_COLLECTION, value);
+    	}
     }
     
     static void applyCommonOutputConfigOptions(Configuration conf,

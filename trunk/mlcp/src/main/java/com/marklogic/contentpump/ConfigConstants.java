@@ -123,6 +123,7 @@ public interface ConfigConstants {
     static final String TRANSFORM_FUNCTION = "transform_function";
     static final String TRANSFORM_PARAM = "transform_param";
     static final String TEMPORAL_COLLECTION = "temporal_collection";
+    static final String REDACTION = "redaction";
 
     static final String RDF_STREAMING_MEMORY_THRESHOLD  = 
             "rdf_streaming_memory_threshold";

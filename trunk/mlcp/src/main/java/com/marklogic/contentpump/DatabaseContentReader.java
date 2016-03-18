@@ -121,6 +121,7 @@ public class DatabaseContentReader extends
             + mlSplit.getLength() - 1;
 
         String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR);
+        redactionRuleCol = conf.getStrings(REDACTION_RULE_COLLECTION, null);
         Collection<String> nsCol = null;
         if (src != null) {
             nsCol = conf.getStringCollection(PATH_NAMESPACE);
@@ -140,6 +141,10 @@ public class DatabaseContentReader extends
         buf.append("import module namespace hadoop = ");
         buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
         buf.append("\"/MarkLogic/hadoop.xqy\";\n");
+        if (redactionRuleCol != null) {
+            buf.append(
+                "import module namespace rdt = \"http://marklogic.com/xdmp/redaction\" at \"/MarkLogic/redaction.xqy\";\n");
+        }
         buf.append(
                 "declare namespace mlmr=\"http://marklogic.com/hadoop\";\n");
         buf.append("declare option xdmp:output \"indent=no\";\n");
