@@ -128,7 +128,7 @@ public class ExpandedTree implements Writable {
 
 	public boolean atomEquals(int atom, byte value[]) {
 		int p = 0;
-		int i = atomIndex[atom] + 1;
+		int i = atomIndex[atom] + (atomData[atomIndex[atom]]>>>7) + 1;
 		while (p < value.length) {
 			byte b = atomData[i];
 			if (LOG.isTraceEnabled()) {
@@ -151,8 +151,9 @@ public class ExpandedTree implements Writable {
 			value = atomString[i];
 		}
 		if (value == null) {
-			value = atomString[i] = new String(atomData, atomIndex[i] + 1,
-					atomIndex[i + 1] - atomIndex[i] - 2, UTF8);
+            int aidx = atomIndex[i] + (atomData[atomIndex[i]]>>>7) + 1;
+			value = atomString[i] = new String(atomData, aidx,
+					atomIndex[i + 1] - aidx - 1, UTF8);
 		}
 		if (value.isEmpty()) return null;
 		return value;
