@@ -19,9 +19,11 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -29,6 +31,9 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapreduce.Counter;
+import org.apache.hadoop.mapreduce.CounterGroup;
+import org.apache.hadoop.mapreduce.Counters;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.VersionInfo;
@@ -36,6 +41,13 @@ import org.apache.hadoop.util.VersionInfo;
 import com.marklogic.contentpump.utilities.CommandlineOptions;
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.xcc.AdhocQuery;
+import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.RequestOptions;
+import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
  * ContentPump entry point.  MarkLogic ContentPump is a tool that moves content 
@@ -173,7 +185,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             // classpath but want to run in local mode.
             conf.set(CONF_MAPREDUCE_JOBTRACKER_ADDRESS, "local");
         }
-        
+                
         // create job
         Job job = null;
         try { 
@@ -195,13 +207,13 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             e.printStackTrace();
             return 1;
         }
-        
+
         // run job
         try {
             if (distributed) {
                 // submit job
-                submitJob(job); 
-            } else {
+                submitJob(job);
+            } else {                
                 runJobLocally(job, cmdline, command);
             }
             return 0;
@@ -299,13 +311,88 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         conf.set("tmpjars", jars.toString());
         if (LOG.isTraceEnabled())
             LOG.trace("LIBJARS:" + jars.toString());
-        job.waitForCompletion(true);    
+        job.waitForCompletion(true);
+        auditMlcpFinish(job, job.getCounters());
+    }
+    
+    private static void auditMlcpFinish(Job job, Counters counters) 
+            throws IOException {
+        Configuration conf = job.getConfiguration();
+        if (!conf.getBoolean(AUDIT_MLCPFINISH_ENABLED, false)) {
+            return;
+        }
+        
+        StringBuilder auditBuf = new StringBuilder();
+        auditBuf.append("job=");
+        auditBuf.append(job.getJobID().toString());
+        auditBuf.append(";");        
+        
+        Iterator<CounterGroup> groupIt = counters.iterator();
+        int groupCounter = 0;
+        while (groupIt.hasNext()) {
+            CounterGroup group = groupIt.next();
+            if (groupCounter != 0) {
+                auditBuf.append("; ");
+            } else {
+                auditBuf.append(" ");
+            }
+            
+            auditBuf.append('(');
+            auditBuf.append(group.getDisplayName());
+            auditBuf.append(") ");
+
+            Iterator<Counter> counterIt = group.iterator();
+            int counterCount = 0;
+            while (counterIt.hasNext()) {
+                if (counterCount != 0) {
+                    auditBuf.append(", ");
+                }
+                Counter counter = counterIt.next();                    
+                auditBuf.append(counter.getDisplayName());
+                auditBuf.append('=');
+                auditBuf.append(counter.getValue());
+                counterCount++;
+            }
+            groupCounter++;
+        }
+        String auditMessage = auditBuf.toString();
+        
+        auditBuf = new StringBuilder();
+        auditBuf.append("xquery version \"1.0-ml\";\n");
+        auditBuf.append("xdmp:audit(\"mlcpfinish\",\"");
+        auditBuf.append(auditMessage);
+        auditBuf.append("\", xdmp:get-current-user())");
+        String auditQueryStr = auditBuf.toString();
+        
+        Session auditSession = null;
+        ContentSource auditCs = null;
+        try {
+            auditCs = InternalUtilities.getInputContentSource(conf);
+            auditSession = auditCs.newSession();
+            RequestOptions options = new RequestOptions();
+            options.setCacheResult(false);
+
+            AdhocQuery auditQuery = auditSession.newAdhocQuery(auditQueryStr);
+            auditQuery.setOptions(options);
+            auditSession.submitRequest(auditQuery);
+        } catch (XccConfigException e) {
+            LOG.error(e);
+            throw new IOException(e);
+        } catch (URISyntaxException e) {
+            LOG.error(e);
+            throw new IOException(e);
+        } catch (RequestException e) {
+            LOG.error(e);
+            LOG.error("Query: " + auditQueryStr);
+            throw new IOException(e);
+        }
     }
     
     private static void runJobLocally(Job job, CommandLine cmdline, Command cmd) 
     throws Exception {
         LocalJobRunner runner = new LocalJobRunner(job, cmdline, cmd);
         runner.run();  
+        auditMlcpFinish(job, runner.getReporter().counters);
     }
 
     private static void printUsage() {
