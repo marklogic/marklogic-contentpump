@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -36,6 +37,7 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.functions.LexiconFunction;
+import com.marklogic.mapreduce.utilities.AuditUtil;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
@@ -128,7 +130,30 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
         }
     }
+    
+    private void appendAuditQuery(StringBuilder buf) {
+        buf.append("\"AUDIT\",\n");
+        buf.append("let $group-id := xdmp:group()\n");
+        buf.append("let $enabled-event := xdmp:group-get-audit-event-type-enabled($group-id,(\"mlcp-start\", \"mlcp-finish\"))\n");
+        buf.append("let $mlcp-start-enabled := if ($enabled-event[1]) then \"mlcp-start\" else ()\n");
+        buf.append("let $mlcp-finish-enabled := if ($enabled-event[2]) then \"mlcp-finish\" else ()\n");
+        buf.append("return ($mlcp-start-enabled, $mlcp-finish-enabled)");
+    }
 
+    private void appendRedactionRuleValidateQuery(StringBuilder buf, String[] redactionRuleCol) {
+        buf.append("\"REDACT\",\n");
+        buf.append("rdt:rule-validate((");
+        for (int i = 0; i < redactionRuleCol.length; i++) {
+            if (i != 0) {
+                buf.append(", ");
+            }
+            buf.append("\"");
+            buf.append(redactionRuleCol[i]);
+            buf.append("\"");
+        }
+        buf.append("))");
+    }
+    
     /**
      * Get input splits.
      * @param jobContext job context
@@ -159,30 +184,20 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 buf.append("import module namespace rdt = "
                         + "\"http://marklogic.com/xdmp/redaction\" at "
                         + "\"/MarkLogic/redaction.xqy\";\n");
-                /*
-                buf.append("rdt:rule-validate((");
-                for (int i = 0; i < redactionRuleCol.length; i++) {
-                    if (i != 0) {
-                        buf.append(", ");
-                    }
-                    buf.append("\"");
-                    buf.append(redactionRuleCol[i]);
-                    buf.append("\"");
-                }
-                buf.append(")),\n");
-                */
             }
             buf.append("xdmp:host-name(xdmp:host()),\n");            
-            buf.append("let $f := ");
-            buf.append("fn:function-lookup(xs:QName('hadoop:get-splits-and-audit-enabled'),3)\n");
-            buf.append("let $invoke := if (exists($f)) then $f else xdmp:function(xs:QName(\"hadoop:get-splits\"))\n");
-            buf.append("return $invoke(\'"); 
+            buf.append("hadoop:get-splits(\'"); 
             appendNsBindings(buf);
             buf.append("\', \'");
             appendDocumentSelector(buf);
             buf.append("\',");
             appendQuery(buf);
-            buf.append(')');
+            buf.append("),\n");
+            appendAuditQuery(buf);
+            if (redactionRuleCol != null) {
+                buf.append(",\n");
+                appendRedactionRuleValidateQuery(buf, redactionRuleCol);
+            }
             splitQuery = buf.toString();
         } 
         
@@ -240,6 +255,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
             
             int count = 0;
+            // First while loop: splits info
             while (result.hasNext()) {
                 ResultItem item = result.next();
                 if (forestSplits == null) {
@@ -248,25 +264,13 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 int index = count % 3;
                 if (index == 0) {
                     ForestSplit split = new ForestSplit();
-                    ItemType itemType = item.getItemType();
-                    if (ItemType.XS_STRING == itemType) {
-                        String strItem = ((XSString)item.getItem()).asString();
-                        if ("AUDIT".equals(strItem)) {
-                            while (result.hasNext()) {
-                                String enabledEvent = ((XSString)result.next().getItem()).asString();
-                                if ("mlcp-start".equalsIgnoreCase(enabledEvent)) {
-                                    mlcpStartEventEnabled = true;
-                                } else if ("mlcp-finish".equalsIgnoreCase(enabledEvent)) {
-                                    mlcpFinishEventEnabled = true;
-                                } else {
-                                    throw new IOException("Unrecognized audit event " + enabledEvent);
-                                }
-                            }
-                            
+                    if (ItemType.XS_STRING == item.getItemType()) {
+                        if ("AUDIT".equals(((XSString)item.getItem()).asString())) {
+                            // Handled by next while loop
+                            break;
                         } else {
                             throw new IOException("Unexpected string item from getSplits query result");
                         }
-                        continue;
                     }
                     split.forestId = ((XSInteger)item.getItem()).asBigInteger();
                     forestSplits.add(split);
@@ -284,6 +288,44 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 }
                 count++;
             }
+            // Second while loop: audit settings
+            while (result.hasNext()) {
+                ResultItem item = result.next();
+                if (ItemType.XS_STRING != item.getItemType()) {
+                    throw new IOException("Unexpected item type " + item.getItemType().toString());
+                }
+                String itemStr = ((XSString)item.getItem()).asString();
+                if ("REDACT".equals(itemStr)) {
+                    break;
+                } else if ("mlcp-start".equals(itemStr)) {
+                    mlcpStartEventEnabled = true;
+                } else if ("mlcp-finish".equalsIgnoreCase(itemStr)) {
+                    mlcpFinishEventEnabled = true;
+                } else {
+                    throw new IOException("Unrecognized audit event " + itemStr);
+                }                
+            }
+            int ruleCount = 0;
+            List<String> ruleUris = new ArrayList<String>();
+            // Third while loop: redaction rules
+            while (result.hasNext()) {
+                ResultItem item = result.next();
+                if (ItemType.XS_STRING != item.getItemType()) {
+                    throw new IOException("Unexpected item type " + item.getItemType().toString());
+                }
+                String itemStr = ((XSString)item.getItem()).asString();
+                ruleUris.add(itemStr);
+                ++ruleCount;
+            }
+            if (ruleCount > 0) {
+                AuditUtil.prepareAuditMlcpFinish(jobConf, ruleCount);
+                if (LOG.isDebugEnabled()) {
+                    // TODO: Use this version if only JAVA 8 is supported
+                    // String logMessage = String.join(", ", ruleUris);
+                    LOG.debug("Redaction rules applied: " + StringUtils.join(ruleUris, ", "));
+                }
+            }            
+            
             LOG.info("Fetched " + 
                     (forestSplits == null ? 0 : forestSplits.size()) + 
                     " forest splits.");            
@@ -413,40 +455,8 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 more = more || (j + 1 < splitsPerHost.size());
             }
         }        
-        
         if (mlcpStartEventEnabled) {
-            String auditMessage = jobConf.get(AUDIT_MLCPSTART_MESSAGE);
-            StringBuilder auditBuf = new StringBuilder();
-            if (auditMessage != null) {                
-                auditBuf.append("xquery version \"1.0-ml\";\n");
-                auditBuf.append("xdmp:audit(\"mlcpstart\",\"");
-                auditBuf.append(auditMessage);
-                auditBuf.append("\", xdmp:get-current-user())");
-                String auditQueryStr = auditBuf.toString();
-                
-                Session auditSession = null;
-                ContentSource auditCs = null;
-                try {
-                    auditCs = InternalUtilities.getInputContentSource(jobConf);
-                    auditSession = auditCs.newSession();
-                    RequestOptions options = new RequestOptions();
-                    options.setCacheResult(false);
-
-                    AdhocQuery auditQuery = auditSession.newAdhocQuery(auditQueryStr);
-                    auditQuery.setOptions(options);
-                    auditSession.submitRequest(auditQuery);
-                } catch (XccConfigException e) {
-                    LOG.error(e);
-                    throw new IOException(e);
-                } catch (URISyntaxException e) {
-                    LOG.error(e);
-                    throw new IOException(e);
-                } catch (RequestException e) {
-                    LOG.error(e);
-                    LOG.error("Query: " + auditQueryStr);
-                    throw new IOException(e);
-                }
-            }            
+            AuditUtil.auditMlcpStart(jobConf, jobContext.getJobName());
         }
         jobConf.setBoolean(AUDIT_MLCPFINISH_ENABLED, mlcpFinishEventEnabled);
         

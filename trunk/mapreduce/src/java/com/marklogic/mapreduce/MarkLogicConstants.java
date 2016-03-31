@@ -858,7 +858,7 @@ public interface MarkLogicConstants {
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specified the message to be logged out
-     * by auditing event.
+     * by mlcp-start audit event.
      */
     static final String AUDIT_MLCPSTART_MESSAGE = 
             "mapreduce.marklogic.audit.mlcpstart.message";
@@ -868,4 +868,11 @@ public interface MarkLogicConstants {
      */
     static final String AUDIT_MLCPFINISH_ENABLED =
             "mapreduce.marklogic.audit.mlcpfinish.enabled";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specified the message to be logged out
+     * by mlcp-finish audit event
+     */
+    static final String AUDIT_MLCPFINISH_MESSAGE = 
+            "mapreduce.marklogic.audit.mlcpfinish.message";
 }
