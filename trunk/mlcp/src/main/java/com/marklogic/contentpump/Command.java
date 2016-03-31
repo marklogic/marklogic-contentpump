@@ -17,6 +17,7 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Random;
 
 import com.marklogic.contentpump.utilities.CommandlineOption;
 
@@ -30,6 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -361,6 +363,7 @@ public enum Command implements ConfigConstants {
                                 DocumentPathFilter.class);
             }
             
+            setJobId(cmdline, job);
             return job;
         }
 
@@ -914,6 +917,9 @@ public enum Command implements ConfigConstants {
             job.setOutputFormatClass(
                             outputType.getOutputFormatClass(cmdline));
             job.setOutputKeyClass(DocumentURI.class);
+
+            setJobId(cmdline, job);
+            prepareAuditMlcpStart(job, this.name(), cmdline);
             return job;
         }
 
@@ -1133,6 +1139,9 @@ public enum Command implements ConfigConstants {
                 job.setOutputFormatClass(DatabaseContentOutputFormat.class);
             }
             job.setOutputKeyClass(DocumentURI.class);
+            
+            setJobId(cmdline, job);
+            prepareAuditMlcpStart(job, this.name(), cmdline);
             return job;
         }
 
@@ -1343,6 +1352,8 @@ public enum Command implements ConfigConstants {
                 String path = cmdline.getOptionValue(INPUT_FILE_PATH);
                 FileInputFormat.setInputPaths(job, path);
             }
+            
+            setJobId(cmdline, job);
             return job;
         }
 
@@ -1361,7 +1372,9 @@ public enum Command implements ConfigConstants {
     };
 
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
-
+    private static int jobid = 0;
+    private static Random rand = new Random();
+    
     public static Command forName(String cmd) {
         if (cmd.equalsIgnoreCase(IMPORT.name())) {
             return IMPORT;
@@ -2025,6 +2038,44 @@ public enum Command implements ConfigConstants {
         return InputType.forName(inputTypeOption);
     }
 
+    static void setJobId(CommandLine cmdline, Job job) {
+        JobID newId = new JobID("local" + rand.nextInt(Integer.MAX_VALUE), ++jobid);
+        job.setJobID(newId);
+    }
+    
+    static void prepareAuditMlcpStart(Job job, 
+            String cmd, 
+            CommandLine cmdline) {
+        Configuration conf = job.getConfiguration();
+        StringBuilder buf = new StringBuilder();
+        buf.append("job=");
+        buf.append(job.getJobID().toString());
+        buf.append("; ");
+        buf.append(cmd);
+        buf.append(" ");
+        Option[] options = cmdline.getOptions();
+        for (int i = 0; i < options.length; i++) {
+            String name = options[i].getOpt();
+            // Hide password from command
+            if ("password".equalsIgnoreCase(name)) {
+                continue;
+            }
+            if (i != 0) {
+                buf.append(' ');
+            }
+            buf.append('-');
+            buf.append(name);
+            String value = cmdline.getOptionValue(name);
+            if (value != null) {
+                buf.append(' ');
+                buf.append(value);
+            }
+        }
+        
+        conf.set(MarkLogicConstants.AUDIT_MLCPSTART_MESSAGE, 
+                buf.toString());
+    }
+    
     public void printUsage(Command cmd, Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(HelpFormatter.DEFAULT_WIDTH, 

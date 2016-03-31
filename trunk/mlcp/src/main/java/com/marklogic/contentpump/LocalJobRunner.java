@@ -77,6 +77,7 @@ public class LocalJobRunner implements ConfigConstants {
     // minimally required thread per task defined by the job
     private int minThreads = 1;
     private Command cmd;
+    private ContentPumpReporter reporter;
     
     public LocalJobRunner(Job job, CommandLine cmdline, Command cmd) {
         this.job = job;
@@ -157,7 +158,7 @@ public class LocalJobRunner implements ConfigConstants {
         }
         Monitor monitor = new Monitor();
         monitor.start();
-        ContentPumpReporter reporter = new ContentPumpReporter();
+        reporter = new ContentPumpReporter();
         List<Future<Object>> taskList = new ArrayList<Future<Object>>();
         for (int i = 0; i < array.length; i++) {        
             InputSplit split = array[i];
@@ -508,5 +509,9 @@ public class LocalJobRunner implements ConfigConstants {
                 throw new RuntimeException("exception in compare", ie);
             }
         }
+    }
+
+    public ContentPumpReporter getReporter() {
+        return this.reporter;
     }
 }
