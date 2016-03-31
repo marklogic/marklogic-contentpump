@@ -855,4 +855,17 @@ public interface MarkLogicConstants {
      */
     static final String REDACTION_RULE_COLLECTION = 
     		"mapreduce.marklogic.input.redaction.rules";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specified the message to be logged out
+     * by auditing event.
+     */
+    static final String AUDIT_MLCPSTART_MESSAGE = 
+            "mapreduce.marklogic.audit.mlcpstart.message";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specified whether mlcp-finish audit event has been enabled on server.
+     */
+    static final String AUDIT_MLCPFINISH_ENABLED =
+            "mapreduce.marklogic.audit.mlcpfinish.enabled";
 }
