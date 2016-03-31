@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.util.Random;
 
 import com.marklogic.contentpump.utilities.CommandlineOption;
+import com.marklogic.mapreduce.utilities.AuditUtil;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;
@@ -31,7 +32,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -350,6 +350,7 @@ public enum Command implements ConfigConstants {
             Job job = Job.getInstance(conf);
             job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
             job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
+            job.setJobName(getNewJobName(conf));
 
             // set mapper class
             setMapperClass(job, conf, cmdline);
@@ -362,8 +363,6 @@ public enum Command implements ConfigConstants {
                 FileInputFormat.setInputPathFilter(job,
                                 DocumentPathFilter.class);
             }
-            
-            setJobId(cmdline, job);
             return job;
         }
 
@@ -917,9 +916,9 @@ public enum Command implements ConfigConstants {
             job.setOutputFormatClass(
                             outputType.getOutputFormatClass(cmdline));
             job.setOutputKeyClass(DocumentURI.class);
+            job.setJobName(getNewJobName(conf));
 
-            setJobId(cmdline, job);
-            prepareAuditMlcpStart(job, this.name(), cmdline);
+            AuditUtil.prepareAuditMlcpStart(job, this.name(), cmdline);
             return job;
         }
 
@@ -1139,9 +1138,9 @@ public enum Command implements ConfigConstants {
                 job.setOutputFormatClass(DatabaseContentOutputFormat.class);
             }
             job.setOutputKeyClass(DocumentURI.class);
-            
-            setJobId(cmdline, job);
-            prepareAuditMlcpStart(job, this.name(), cmdline);
+            job.setJobName(getNewJobName(conf));
+
+            AuditUtil.prepareAuditMlcpStart(job, this.name(), cmdline);
             return job;
         }
 
@@ -1347,13 +1346,13 @@ public enum Command implements ConfigConstants {
             setMapperClass(job, conf, cmdline);
             job.setMapOutputKeyClass(DocumentURI.class);
             job.setMapOutputValueClass(ForestDocument.class);
+            job.setJobName(getNewJobName(conf));
             
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(INPUT_FILE_PATH);
                 FileInputFormat.setInputPaths(job, path);
             }
             
-            setJobId(cmdline, job);
             return job;
         }
 
@@ -2038,42 +2037,16 @@ public enum Command implements ConfigConstants {
         return InputType.forName(inputTypeOption);
     }
 
-    static void setJobId(CommandLine cmdline, Job job) {
-        JobID newId = new JobID("local" + rand.nextInt(Integer.MAX_VALUE), ++jobid);
-        job.setJobID(newId);
-    }
-    
-    static void prepareAuditMlcpStart(Job job, 
-            String cmd, 
-            CommandLine cmdline) {
-        Configuration conf = job.getConfiguration();
-        StringBuilder buf = new StringBuilder();
-        buf.append("job=");
-        buf.append(job.getJobID().toString());
-        buf.append("; ");
-        buf.append(cmd);
-        buf.append(" ");
-        Option[] options = cmdline.getOptions();
-        for (int i = 0; i < options.length; i++) {
-            String name = options[i].getOpt();
-            // Hide password from command
-            if ("password".equalsIgnoreCase(name)) {
-                continue;
-            }
-            if (i != 0) {
-                buf.append(' ');
-            }
-            buf.append('-');
-            buf.append(name);
-            String value = cmdline.getOptionValue(name);
-            if (value != null) {
-                buf.append(' ');
-                buf.append(value);
-            }
-        }
-        
-        conf.set(MarkLogicConstants.AUDIT_MLCPSTART_MESSAGE, 
-                buf.toString());
+    static String getNewJobName(Configuration conf) {
+        String mode = conf.get(MarkLogicConstants.EXECUTION_MODE,
+                MarkLogicConstants.MODE_LOCAL);
+        StringBuilder jobNameBuf = new StringBuilder();
+        jobNameBuf.append(mode);
+        jobNameBuf.append('_');
+        jobNameBuf.append(rand.nextInt(Integer.MAX_VALUE));
+        jobNameBuf.append('_');
+        jobNameBuf.append(++jobid);
+        return jobNameBuf.toString();
     }
     
     public void printUsage(Command cmd, Options options) {
