@@ -155,6 +155,7 @@ public class DatabaseContentReader extends
                 "declare variable $mlmr:splitend as xs:integer external;\n");
         buf.append("let $cols := ");
         buf.append(src);
+        buf.append("\nlet $all-meta :=");
         buf.append("\nfor $doc in $cols");
         buf.append("\nlet $uri := fn:base-uri($doc)\n return (");
 
@@ -189,10 +190,8 @@ public class DatabaseContentReader extends
         // end-of-record marker
         buf.append("0");       
         buf.append(" )\n");
-        buf.append(",'EOM',"); //end of metadata
-        
-        //doc
-        buf.append(src);
+        buf.append("return ($all-meta");
+        buf.append(",'EOM',$cols)");
 
         queryText = buf.toString();
         if (LOG.isDebugEnabled()) {
