@@ -66,7 +66,7 @@ public class DatabaseTransformWriter<VALUE> extends
         InterruptedException {
         int fId = 0;
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String forestId = ContentOutputFormat.ID_PREFIX;
+        String csKey;
         if (fastLoad) {
             if(!countBased) {
                 // placement for legacy or bucket
@@ -78,7 +78,9 @@ public class DatabaseTransformWriter<VALUE> extends
                 }
                 fId = sfId;
             }
-            forestId = forestIds[fId];
+            csKey = forestIds[fId];
+        } else {
+            csKey = forestIds[hostId];
         }
         int sid = fId;
 
@@ -87,7 +89,7 @@ public class DatabaseTransformWriter<VALUE> extends
         meta = doc.getMeta();
         ContentCreateOptions opt = newContentCreateOptions(meta);
         if (sessions[sid] == null) {
-            sessions[sid] = getSession(forestId);
+            sessions[sid] = getSession(csKey);
         }
         if(queries[sid] == null) {
             queries[sid] = getAdhocQuery(sid);
@@ -138,10 +140,17 @@ public class DatabaseTransformWriter<VALUE> extends
                     sessions[sid]);
             stmtCounts[sid]++;
         }
+        boolean committed = false;
         if (stmtCounts[sid] >= txnSize && needCommit) {
             commit(sid);
             stmtCounts[sid] = 0;
             commitUris[sid].clear();
+            committed = true;
+        }
+        if ((!fastLoad) && ((!needCommit) || committed)) { 
+            // rotate to next host and reset session
+            hostId = (hostId++)%forestIds.length;
+            sessions[0] = null;
         }
     }
 

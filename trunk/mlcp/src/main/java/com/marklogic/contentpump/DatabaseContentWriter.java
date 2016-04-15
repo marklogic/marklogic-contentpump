@@ -126,7 +126,7 @@ public class DatabaseContentWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {       
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String forestId = ContentOutputFormat.ID_PREFIX;
+        String csKey;
         int fId = 0;
         if (fastLoad) {
             if(!countBased) {
@@ -139,7 +139,9 @@ public class DatabaseContentWriter<VALUE> extends
                 }
                 fId = sfId;
             }
-            forestId = forestIds[fId];
+            csKey = forestIds[fId];
+        } else {
+            csKey = forestIds[hostId];
         }
         int sid = fId;
         
@@ -167,6 +169,7 @@ public class DatabaseContentWriter<VALUE> extends
             fId = 0;
         }
         pendingUris[sid].put(content, new DocumentURI(key));
+        boolean inserted = false;
         if (batchSize > 1) {
             if (!meta.isNakedProps()) {
                 // add new content
@@ -176,7 +179,7 @@ public class DatabaseContentWriter<VALUE> extends
                 // naked properties
                 if (isCopyProps) {
                     if (sessions[sid] == null) {
-                        sessions[sid] = getSession(forestId);
+                        sessions[sid] = getSession(csKey);
                     }
                     setDocumentProperties(uri, meta.getProperties(),
                             isCopyPerms?meta.getPermString():null,
@@ -188,7 +191,7 @@ public class DatabaseContentWriter<VALUE> extends
             }
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(forestId);
+                    sessions[sid] = getSession(csKey);
                 }    
                 insertBatch(forestContents[fId], sid);     
                 stmtCounts[sid]++;
@@ -209,10 +212,11 @@ public class DatabaseContentWriter<VALUE> extends
                     sfId = -1;
                 }
                 counts[fId] = 0;
+                inserted = true;
             }
-        } else {
+        } else { // batchSize <= 1
             if (sessions[sid] == null) {
-                sessions[sid] = getSession(forestId);
+                sessions[sid] = getSession(csKey);
             }
             if (content != null) {
                 insertContent(content, sid);
@@ -231,11 +235,19 @@ public class DatabaseContentWriter<VALUE> extends
                         sessions[sid]);
                 stmtCounts[sid]++;
             }
+            inserted = true;
         }
+        boolean committed = false;
         if (stmtCounts[sid] == txnSize && needCommit) {
             commit(sid);
             stmtCounts[sid] = 0;
             commitUris[sid].clear();
+            committed = true;
+        }
+        if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
+            // rotate to next host and reset session
+            hostId = (hostId++)%forestIds.length;
+            sessions[0] = null;
         }
     }
 
@@ -267,7 +279,7 @@ public class DatabaseContentWriter<VALUE> extends
                 len = 1;
                 sid = sfId;
             } else {
-                len = forestIds.length;
+                len = fastLoad ? forestIds.length : 1;
                 sid = 0;
             }
             if (isCopyProps) {
