@@ -252,14 +252,16 @@ public class ContentOutputFormat<VALUEOUT> extends
             }
         } else {
             TextArrayWritable hosts = getHosts(conf);
-            String host = InternalUtilities.getHost(hosts);
-            try {
-                ContentSource cs = InternalUtilities.getOutputContentSource(
-                    conf, host);
-                sourceMap.put(ID_PREFIX, cs);
-            } catch (XccConfigException e) {
-                throw new IOException(e);
-            }
+            for (Writable host : hosts.get()) {
+                String hostStr = host.toString();
+                try {
+                    ContentSource cs = InternalUtilities.getOutputContentSource(
+                        conf, hostStr);
+                    sourceMap.put(hostStr, cs);
+                } catch (XccConfigException e) {
+                    throw new IOException(e);
+                }
+            } 
         }
         return sourceMap;
     }

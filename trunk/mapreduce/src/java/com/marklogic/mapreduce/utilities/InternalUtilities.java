@@ -269,29 +269,6 @@ public class InternalUtilities implements MarkLogicConstants {
         return ContentSourceFactory.newContentSource(hostName, portInt, 
                 user, password, db);
     }
-
-    /**
-     * Return the host from the forestHostMap based on the task id in a round
-     * robin fashion.
-     * 
-     * @param taskId
-     * @param forestStatusMap
-     * @return host name
-     */
-    public static String getHost(int taskId,
-            LinkedMapWritable forestStatusMap) {
-        int count = forestStatusMap.size();
-        int position = taskId % count;
-        int i = 0;
-        for (Writable v : forestStatusMap.values()) {
-            ForestInfo fs = (ForestInfo)v;
-            if (i++ == position) {
-                return fs.getHostName().toString();
-            }
-        }
-        throw new IllegalStateException("No host found while taskId = " + 
-                taskId + ", forestHostMap.size() = " + count);
-    }
     
     /**
      * Return the host from the host array based on a random fashion
