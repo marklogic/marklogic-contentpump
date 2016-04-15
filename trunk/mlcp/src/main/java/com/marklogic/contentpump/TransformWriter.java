@@ -71,9 +71,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         InterruptedException {
         int fId = 0;
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String forestId = ContentOutputFormat.ID_PREFIX;  
+        String csKey;  
         if (fastLoad) {
-            if(!countBased) {
+            if (!countBased) {
                 // placement for legacy or bucket
                 fId = am.getPlacementForestIndex(key);
                 sfId = fId;
@@ -83,13 +83,15 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 }
                 fId = sfId;
             }
-            forestId = forestIds[fId];
+            csKey = forestIds[fId];
+        } else {
+            csKey = forestIds[hostId];
         }
         int sid = fId;
         if (sessions[sid] == null) {
-            sessions[sid] = getSession(forestId);
+            sessions[sid] = getSession(csKey);
         }
-        if(queries[sid] == null) {
+        if (queries[sid] == null) {
             queries[sid] = getAdhocQuery(sid);
         }  
         TransformHelper.getTransformInsertQry(conf,
@@ -124,10 +126,17 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         } else {
             succeeded++;
         }
+        boolean committed = false;
         if (stmtCounts[sid] == txnSize && needCommit) {
             commit(sid);
             commitUris[sid].clear();
             stmtCounts[sid] = 0;
+            committed = true;
+        }
+        if ((!fastLoad) && ((!needCommit) || committed)) { 
+            // rotate to next host and reset session
+            hostId = (hostId++)%forestIds.length;
+            sessions[0] = null;
         }
     }
 
