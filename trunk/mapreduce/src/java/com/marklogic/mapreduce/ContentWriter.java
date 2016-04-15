@@ -84,7 +84,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected Content[][] forestContents;
     
     /**
-     * An array of forest ids
+     * An array of forest/host ids
      */
     protected String[] forestIds;
     
@@ -151,6 +151,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     
     protected boolean needCommit = false;
     
+    protected int hostId = 0;
+    
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         this(conf, forestSourceMap, fastLoad, null);
@@ -169,12 +171,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         permsMap = new HashMap<String,ContentPermission[]>();
         
-        // arraySize is the number of forests in fast load mode; 1 otherwise.
-        int arraySize = forestSourceMap.size();
-        forestIds = new String[arraySize];
+        int srcMapSize = forestSourceMap.size();
+        forestIds = new String[srcMapSize];
         // key order in key set is guaranteed by LinkedHashMap,
         // i.e., the order keys are inserted
         forestIds = forestSourceMap.keySet().toArray(forestIds);
+        hostId = (int)(Math.random() * srcMapSize);
+        
+        // arraySize is the number of forests in fast load mode; 1 otherwise.
+        int arraySize = fastLoad ? srcMapSize : 1;
         sessions = new Session[arraySize];
         stmtCounts = new int[arraySize];
         
@@ -543,7 +548,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
         InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String forestId = ContentOutputFormat.ID_PREFIX;
+        String csKey; 
         int fId = 0;
         if (fastLoad) {
             if(!countBased) {
@@ -556,7 +561,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 fId = sfId;
             }
-            forestId = forestIds[fId];
+            csKey = forestIds[fId];
+        } else {
+            csKey = forestIds[hostId];
         }
         int sid = fId;
         Content content = createContent(key,value); 
@@ -568,11 +575,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             fId = 0;
         }
         pendingUris[sid].put(content, (DocumentURI)key.clone());
+        boolean inserted = false;
         if (batchSize > 1) {
             forestContents[fId][counts[fId]++] = content;
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(forestId);
+                    sessions[sid] = getSession(csKey);
                 }  
                 insertBatch(forestContents[fId], sid); 
                 stmtCounts[sid]++;
@@ -582,10 +590,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     sfId = -1;
                 }
                 counts[fId] = 0;
+                inserted = true;
             }
         } else { // batchSize == 1
             if (sessions[sid] == null) {
-                sessions[sid] = getSession(forestId);
+                sessions[sid] = getSession(csKey);
             }
             insertContent(content, sid);   
             stmtCounts[sid]++;
@@ -593,11 +602,19 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (countBased) {
                 sfId = -1;
             }
+            inserted = true;
         }
+        boolean committed = false;
         if (needCommit && stmtCounts[sid] == txnSize) {
             commit(sid);  
             stmtCounts[sid] = 0;         
             commitUris[sid].clear();
+            committed = true;
+        }
+        if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
+            // rotate to next host and reset session
+            hostId = (hostId++)%forestIds.length;
+            sessions[0] = null;
         }
     }
 
@@ -642,7 +659,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 len = 1;
                 sid = sfId;
             } else {
-            	len = forestIds.length;
+            	len = fastLoad ? forestIds.length : 1;
             	sid = 0;
             }
             for (int i = 0; i < len; i++, sid++) {             
