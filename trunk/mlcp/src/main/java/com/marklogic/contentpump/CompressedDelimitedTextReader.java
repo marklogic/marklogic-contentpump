@@ -160,8 +160,11 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
     private boolean nextKeyValueInZip() throws IOException, InterruptedException{
         ByteArrayOutputStream baos;
         ZipInputStream zis = (ZipInputStream) zipIn;
-        
-        while ((currZipEntry = zis.getNextEntry()) != null) {
+        while (true) {
+            currZipEntry = zis.getNextEntry();
+            if (currZipEntry == null) {
+                break;
+            }
             if (LOG.isDebugEnabled()) {
                 LOG.debug("ZipEntry: " + currZipEntry.getName());
             }

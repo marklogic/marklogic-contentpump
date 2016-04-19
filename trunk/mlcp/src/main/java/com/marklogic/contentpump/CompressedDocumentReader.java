@@ -125,8 +125,15 @@ public class CompressedDocumentReader<VALUEIN> extends
         if (codec == CompressionCodec.ZIP) {
             ZipEntry zipEntry;
             ZipInputStream zis = (ZipInputStream) zipIn;
-            while ((zipEntry = zis.getNextEntry()) != null) {
-                if (zipEntry != null && zipEntry.getSize() != 0) {
+            while (true) {
+                try {
+                    zipEntry = zis.getNextEntry();
+                    if (zipEntry == null) {
+                        break;
+                    } 
+                    if (zipEntry.getSize() == 0) {
+                        continue;
+                    }
                     subId = zipEntry.getName();
                     String uri = makeURIForZipEntry(file, subId);
                     if (setKey(uri, 0, 0, true)) {
@@ -134,6 +141,9 @@ public class CompressedDocumentReader<VALUEIN> extends
                     }
                     setValue(zipEntry.getSize());
                     return true;
+                } catch (IllegalArgumentException e) {
+                    LOG.warn("Skipped a zip entry in : " + file.toUri()
+                            + ", reason: " + e.getMessage());
                 }
             }
         } else if (codec == CompressionCodec.GZIP) {
