@@ -90,10 +90,19 @@ public class CompressedAggXMLReader<VALUEIN> extends
         if (codecString.equalsIgnoreCase(CompressionCodec.ZIP.toString())) {
             zipIn = new ZipInputStream(fileIn);
             codec = CompressionCodec.ZIP;
-            while ((currZipEntry = ((ZipInputStream) zipIn).getNextEntry()) != null) {
-                if (currZipEntry.getSize() != 0) {
-                    subId = currZipEntry.getName();
-                    break;
+            while (true) {
+                try {
+                    currZipEntry = ((ZipInputStream)zipIn).getNextEntry();
+                    if (currZipEntry == null) {
+                        break;
+                    }
+                    if (currZipEntry.getSize() != 0) {
+                        subId = currZipEntry.getName();
+                        break;
+                    }
+                } catch (IllegalArgumentException e) {
+                    LOG.warn("Skipped a zip entry in : " + file.toUri()
+                            + ", reason: " + e.getMessage());
                 }
             }
             if (currZipEntry == null) { // no entry in zip
@@ -134,9 +143,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
         } else {
             throw new UnsupportedOperationException("Unsupported codec: "
                 + codec.name());
-        }
-
-        
+        }    
         if (useAutomaticId) {
             idGen = new IdGenerator(file.toUri().getPath() + "-"
                 + ((FileSplit)inSplit).getStart());
@@ -167,29 +174,38 @@ public class CompressedAggXMLReader<VALUEIN> extends
                 // xmlSR does not hasNext, 
                 // if there is next zipEntry, close xmlSR then create a new one
                 ByteArrayOutputStream baos;
-                while ((currZipEntry = zis.getNextEntry()) != null) {
-                    if (currZipEntry.getSize() == 0) {
-                        continue;
+                while (true) {
+                    try {
+                        currZipEntry = ((ZipInputStream)zipIn).getNextEntry();
+                        if (currZipEntry == null) {
+                            break;
+                        }
+                        if (currZipEntry.getSize() == 0) {
+                            continue;
+                        }
+                        subId = currZipEntry.getName();
+                        long size = currZipEntry.getSize();
+                        if (size == -1) {
+                            baos = new ByteArrayOutputStream();
+                        } else {
+                            baos = new ByteArrayOutputStream((int) size);
+                        }
+                        int nb;
+                        while ((nb = zis.read(buf, 0, buf.length)) != -1) {
+                            baos.write(buf, 0, nb);
+                        }
+                        xmlSR.close();
+                        start = 0;
+                        end = baos.size();
+                        xmlSR = f.createXMLStreamReader(new ByteArrayInputStream(
+                            baos.toByteArray()), encoding);
+                        nameSpaces.clear();
+                        baos.close();
+                        return nextRecordInAggregate();
+                    } catch (IllegalArgumentException e) {
+                        LOG.warn("Skipped a zip entry in : " + file.toUri()
+                                + ", reason: " + e.getMessage());
                     }
-                    subId = currZipEntry.getName();
-                    long size = currZipEntry.getSize();
-                    if (size == -1) {
-                        baos = new ByteArrayOutputStream();
-                    } else {
-                        baos = new ByteArrayOutputStream((int) size);
-                    }
-                    int nb;
-                    while ((nb = zis.read(buf, 0, buf.length)) != -1) {
-                        baos.write(buf, 0, nb);
-                    }
-                    xmlSR.close();
-                    start = 0;
-                    end = baos.size();
-                    xmlSR = f.createXMLStreamReader(new ByteArrayInputStream(
-                        baos.toByteArray()), encoding);
-                    nameSpaces.clear();
-                    baos.close();
-                    return nextRecordInAggregate();
                 }
                 // end of zip
                 if (iterator != null && iterator.hasNext()) {

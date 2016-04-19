@@ -85,11 +85,19 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         if (codecString.equalsIgnoreCase(CompressionCodec.ZIP.toString())) {
             zipIn = new ZipInputStream(fileIn);
             codec = CompressionCodec.ZIP;
-            while ((currZipEntry = ((ZipInputStream) zipIn).getNextEntry()) 
-                    != null) {
-                if (currZipEntry.getSize() != 0) {
-                    subId = currZipEntry.getName();
-                    break;
+            while (true) {
+                try {
+                    currZipEntry = ((ZipInputStream)zipIn).getNextEntry();
+                    if (currZipEntry == null) {
+                        break;
+                    }
+                    if (currZipEntry.getSize() != 0) {
+                        subId = currZipEntry.getName();
+                        break;
+                    }
+                } catch (IllegalArgumentException e) {
+                    LOG.warn("Skipped a zip entry in : " + file.toUri()
+                            + ", reason: " + e.getMessage());
                 }
             }
             if (currZipEntry == null) { // no entry in zip
