@@ -32,6 +32,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.AssignmentManager;
@@ -613,7 +614,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
             // rotate to next host and reset session
-            hostId = (hostId++)%forestIds.length;
+            hostId = (hostId + 1)%forestIds.length;
             sessions[0] = null;
         }
     }
@@ -714,10 +715,16 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 ((ZipEntryInputStream)is).closeZipInputStream();
             }
         }
-        context.getCounter(
-            ContentPumpStats.OUTPUT_RECORDS_COMMITTED).increment(succeeded);
-        context.getCounter(
-            ContentPumpStats.OUTPUT_RECORDS_FAILED).increment(failed);
+        Counter committedCounter = context.getCounter(
+                ContentPumpStats.OUTPUT_RECORDS_COMMITTED);
+        synchronized(committedCounter) {
+            committedCounter.increment(succeeded);
+        }
+        Counter failedCounter = context.getCounter(
+                ContentPumpStats.OUTPUT_RECORDS_FAILED);
+        synchronized(failedCounter) {
+            committedCounter.increment(failed);
+        }
     }
     
     @Override
