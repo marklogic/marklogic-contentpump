@@ -149,7 +149,7 @@ public class DatabaseTransformWriter<VALUE> extends
         }
         if ((!fastLoad) && ((!needCommit) || committed)) { 
             // rotate to next host and reset session
-            hostId = (hostId++)%forestIds.length;
+            hostId = (hostId + 1)%forestIds.length;
             sessions[0] = null;
         }
     }
