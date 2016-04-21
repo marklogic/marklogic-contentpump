@@ -246,7 +246,7 @@ public class DatabaseContentWriter<VALUE> extends
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
             // rotate to next host and reset session
-            hostId = (hostId++)%forestIds.length;
+            hostId = (hostId + 1)%forestIds.length;
             sessions[0] = null;
         }
     }
