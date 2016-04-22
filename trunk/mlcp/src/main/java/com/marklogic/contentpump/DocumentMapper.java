@@ -37,11 +37,15 @@ public class DocumentMapper<VALUE> extends
     
     public void map(DocumentURI uri, VALUE fileContent, Context context)
         throws IOException, InterruptedException {
-        readCount.increment(1);
+        synchronized(readCount) {
+            readCount.increment(1);
+        }
         if (uri == null) {
             return;
         } 
-        attemptedCount.increment(1);
+        synchronized(attemptedCount) {
+            attemptedCount.increment(1);
+        }
         context.write(uri, fileContent);
     }
     
