@@ -90,10 +90,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         int sid = fId;
         if (sessions[sid] == null) {
             sessions[sid] = getSession(csKey);
-        }
-        if (queries[sid] == null) {
             queries[sid] = getAdhocQuery(sid);
-        }  
+        } 
         TransformHelper.getTransformInsertQry(conf,
             queries[sid], moduleUri, functionNs, functionName, functionParam,
             uri, value, contentType, options);

@@ -90,8 +90,6 @@ public class DatabaseTransformWriter<VALUE> extends
         ContentCreateOptions opt = newContentCreateOptions(meta);
         if (sessions[sid] == null) {
             sessions[sid] = getSession(csKey);
-        }
-        if(queries[sid] == null) {
             queries[sid] = getAdhocQuery(sid);
         }
         if (!meta.isNakedProps()) {
