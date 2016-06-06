@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 import java.util.Random;
 
 import com.marklogic.contentpump.utilities.CommandlineOption;
-import com.marklogic.mapreduce.utilities.AuditUtil;
+import com.marklogic.contentpump.utilities.AuditUtil;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.HelpFormatter;

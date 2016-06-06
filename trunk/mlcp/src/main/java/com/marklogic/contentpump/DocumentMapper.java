@@ -18,7 +18,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 
 import org.apache.hadoop.mapreduce.Counter;
-import com.marklogic.mapreduce.ContentPumpStats;
+import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.DocumentURI;
 
 /**
@@ -52,9 +52,9 @@ public class DocumentMapper<VALUE> extends
     @Override
     public void setup(Context context) {
         readCount = context.getCounter(
-                        ContentPumpStats.INPUT_RECORDS);
+                MarkLogicCounter.INPUT_RECORDS);
         attemptedCount = context.getCounter(
-                        ContentPumpStats.OUTPUT_RECORDS);
+                MarkLogicCounter.OUTPUT_RECORDS);
     }
 
 }

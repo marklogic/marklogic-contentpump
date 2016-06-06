@@ -22,7 +22,6 @@ import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.MarkLogicInputFormat;
 
 /**
  * MarkLogic-based InputFormat for Database Content, taking DocumentURI as key
@@ -33,7 +32,7 @@ import com.marklogic.mapreduce.MarkLogicInputFormat;
  * @param <VALUE>
  */
 public class DatabaseContentInputFormat<VALUE> extends
-    MarkLogicInputFormat<DocumentURI, VALUE> {
+    DocumentInputFormat<VALUE> {
     @SuppressWarnings("unchecked")
     @Override
     public RecordReader<DocumentURI, VALUE> createRecordReader(
