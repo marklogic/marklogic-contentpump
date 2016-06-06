@@ -716,12 +716,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         }
         Counter committedCounter = context.getCounter(
-                ContentPumpStats.OUTPUT_RECORDS_COMMITTED);
+                MarkLogicCounter.OUTPUT_RECORDS_COMMITTED);
         synchronized(committedCounter) {
             committedCounter.increment(succeeded);
         }
         Counter failedCounter = context.getCounter(
-                ContentPumpStats.OUTPUT_RECORDS_FAILED);
+                MarkLogicCounter.OUTPUT_RECORDS_FAILED);
         synchronized(failedCounter) {
             committedCounter.increment(failed);
         }
