@@ -33,7 +33,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.VersionInfo;
 
-import com.marklogic.mapreduce.utilities.AuditUtil;
+import com.marklogic.contentpump.utilities.AuditUtil;
 import com.marklogic.contentpump.utilities.CommandlineOptions;
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.mapreduce.MarkLogicConstants;
@@ -196,7 +196,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             e.printStackTrace();
             return 1;
         }
-
+        
+        LOG.info("Job name: " + job.getJobName());
         // run job
         try {
             if (distributed) {

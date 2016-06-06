@@ -22,7 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.Counter;
 
-import com.marklogic.mapreduce.ContentPumpStats;
+import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 
 /**
@@ -57,8 +57,8 @@ public class ImportDocumentMapper<VALUE> extends
     @Override
     public void setup(Context context) {
         readCount = context.getCounter(
-                        ContentPumpStats.INPUT_RECORDS);
+                MarkLogicCounter.INPUT_RECORDS);
         attemptedCount = context.getCounter(
-                        ContentPumpStats.OUTPUT_RECORDS);
+                MarkLogicCounter.OUTPUT_RECORDS);
     }
 }
