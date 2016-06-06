@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -37,7 +36,6 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.functions.LexiconFunction;
-import com.marklogic.mapreduce.utilities.AuditUtil;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
@@ -66,8 +64,8 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     static final String DEFAULT_CTS_QUERY = "()";
     Configuration jobConf = null;
     String docSelector;
-    boolean mlcpStartEventEnabled = false;
-    boolean mlcpFinishEventEnabled = false;
+    String localHost = null;
+    boolean localMode = false;
     
     private void appendNsBindings(StringBuilder buf) {
         Collection<String> nsCol = 
@@ -103,7 +101,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
     }
     
-    private void appendQuery(StringBuilder buf) {
+    protected void appendQuery(StringBuilder buf) {
         String ctsQuery = jobConf.get(QUERY_FILTER);
         if (ctsQuery != null) {
             buf.append("\"cts:query(xdmp:unquote('");
@@ -131,28 +129,79 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
     }
     
-    private void appendAuditQuery(StringBuilder buf) {
-        buf.append("\"AUDIT\",\n");
-        buf.append("let $group-id := xdmp:group()\n");
-        buf.append("let $enabled-event := xdmp:group-get-audit-event-type-enabled($group-id,(\"mlcp-start\", \"mlcp-finish\"))\n");
-        buf.append("let $mlcp-start-enabled := if ($enabled-event[1]) then \"mlcp-start\" else ()\n");
-        buf.append("let $mlcp-finish-enabled := if ($enabled-event[2]) then \"mlcp-finish\" else ()\n");
-        buf.append("return ($mlcp-start-enabled, $mlcp-finish-enabled)");
-    }
-
     private void appendRedactionRuleValidateQuery(StringBuilder buf, String[] redactionRuleCol) {
-        buf.append("\"REDACT\",\n");
-        buf.append("rdt:rule-validate((");
-        for (int i = 0; i < redactionRuleCol.length; i++) {
-            if (i != 0) {
-                buf.append(", ");
+        buf.append("\"REDACT\"");
+        if (redactionRuleCol != null) {
+            buf.append(",\n");
+            buf.append("rdt:rule-validate((");
+            for (int i = 0; i < redactionRuleCol.length; i++) {
+                if (i != 0) {
+                    buf.append(", ");
+                }
+                buf.append("\"");
+                buf.append(redactionRuleCol[i]);
+                buf.append("\"");
             }
-            buf.append("\"");
-            buf.append(redactionRuleCol[i]);
-            buf.append("\"");
-        }
-        buf.append("))");
+            buf.append("))");
+        }        
     }
+    
+    protected void getForestSplits(JobContext jobContext,            
+            ResultSequence result, 
+            List<ForestSplit> forestSplits,
+            List<String> ruleUris) throws IOException {
+        int count = 0;
+        // First while loop: splits info
+        while (result.hasNext()) {
+            ResultItem item = result.next();
+            int index = count % 3;
+            if (index == 0) {
+                ForestSplit split = new ForestSplit();
+                if (ItemType.XS_STRING == item.getItemType()) {
+                    if ("REDACT".equals(((XSString)item.getItem()).asString())) {
+                        // Handled by next while loop
+                        break;
+                    } else {
+                        throw new IOException("Unexpected string item from getSplits query result");
+                    }
+                }
+                split.forestId = ((XSInteger)item.getItem()).asBigInteger();
+                forestSplits.add(split);
+            } else if (index == 1) {
+                forestSplits.get(forestSplits.size() - 1).recordCount = 
+                    ((XSInteger)item.getItem()).asLong();
+            } else if (index == 2) {
+                String hn = ((XSString) item.getItem()).asString();
+                if (localMode && hn.equals(localHost)) {
+                    String inputHost = jobConf.get(INPUT_HOST);
+                    forestSplits.get(forestSplits.size() - 1).hostName = inputHost;
+                } else {
+                    forestSplits.get(forestSplits.size() - 1).hostName = hn;
+                }
+            }
+            count++;
+        }
+        
+        // Second while loop: redaction rules
+        while (result.hasNext()) {
+            ResultItem item = result.next();
+            if (ItemType.XS_INTEGER == item.getItemType()) {
+                if (((XSInteger)item.getItem()).asPrimitiveInt() == 0) {
+                    break;
+                } else {
+                    throw new IOException("Unexpected item " + item.getItemType().toString());
+                }
+            } else if (ItemType.XS_STRING != item.getItemType() ) {
+                throw new IOException("Unexpected item " + item.getItemType().toString());
+            }
+            String itemStr = ((XSString)item.getItem()).asString();
+            ruleUris.add(itemStr);
+        }
+    }
+    
+    protected void appendCustom(StringBuilder buf) {
+        buf.append("()");
+    };
     
     /**
      * Get input splits.
@@ -169,7 +218,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
         String splitQuery;
         String queryLanguage = null;
-        String[] redactionRuleCol = jobConf.getStrings(REDACTION_RULE_COLLECTION, null);
+        String[] redactionRuleCol = jobConf.getStrings(REDACTION_RULE_COLLECTION);
         
         if (advancedMode) {
             queryLanguage = jobConf.get(INPUT_QUERY_LANGUAGE);
@@ -193,11 +242,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             buf.append("\',");
             appendQuery(buf);
             buf.append("),\n");
-            appendAuditQuery(buf);
-            if (redactionRuleCol != null) {
-                buf.append(",\n");
-                appendRedactionRuleValidateQuery(buf, redactionRuleCol);
-            }
+            appendRedactionRuleValidateQuery(buf, redactionRuleCol);
+            buf.append(",0,");
+            appendCustom(buf);
             splitQuery = buf.toString();
         } 
         
@@ -212,15 +259,14 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
         
         // fetch data from server
-        List<ForestSplit> forestSplits = null;
+        List<ForestSplit> forestSplits = new ArrayList<ForestSplit>();
         Session session = null;
         ResultSequence result = null;            
         
         if (LOG.isDebugEnabled()) {
             LOG.debug("Split query: " + splitQuery);
         }
-        boolean localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));
-        String localHost = null;
+        localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));        
         try {
             ContentSource cs = InternalUtilities.getInputContentSource(jobConf);
             session = cs.newSession();
@@ -253,81 +299,12 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 ResultItem item = result.next();
                 localHost = item.asString();
             }
-            
-            int count = 0;
-            // First while loop: splits info
-            while (result.hasNext()) {
-                ResultItem item = result.next();
-                if (forestSplits == null) {
-                    forestSplits = new ArrayList<ForestSplit>();
-                }
-                int index = count % 3;
-                if (index == 0) {
-                    ForestSplit split = new ForestSplit();
-                    if (ItemType.XS_STRING == item.getItemType()) {
-                        if ("AUDIT".equals(((XSString)item.getItem()).asString())) {
-                            // Handled by next while loop
-                            break;
-                        } else {
-                            throw new IOException("Unexpected string item from getSplits query result");
-                        }
-                    }
-                    split.forestId = ((XSInteger)item.getItem()).asBigInteger();
-                    forestSplits.add(split);
-                } else if (index == 1) {
-                    forestSplits.get(forestSplits.size() - 1).recordCount = 
-                        ((XSInteger)item.getItem()).asLong();
-                } else if (index == 2) {
-                    String hn = ((XSString) item.getItem()).asString();
-                    if (localMode && hn.equals(localHost)) {
-                        String inputHost = jobConf.get(INPUT_HOST);
-                        forestSplits.get(forestSplits.size() - 1).hostName = inputHost;
-                    } else {
-                        forestSplits.get(forestSplits.size() - 1).hostName = hn;
-                    }
-                }
-                count++;
+            List<String> ruleUris = null;
+            if (redactionRuleCol != null) {
+                ruleUris = new ArrayList<String>();
             }
-            // Second while loop: audit settings
-            while (result.hasNext()) {
-                ResultItem item = result.next();
-                if (ItemType.XS_STRING != item.getItemType()) {
-                    throw new IOException("Unexpected item type " + item.getItemType().toString());
-                }
-                String itemStr = ((XSString)item.getItem()).asString();
-                if ("REDACT".equals(itemStr)) {
-                    break;
-                } else if ("mlcp-start".equals(itemStr)) {
-                    mlcpStartEventEnabled = true;
-                } else if ("mlcp-finish".equalsIgnoreCase(itemStr)) {
-                    mlcpFinishEventEnabled = true;
-                } else {
-                    throw new IOException("Unrecognized audit event " + itemStr);
-                }                
-            }
-            int ruleCount = 0;
-            List<String> ruleUris = new ArrayList<String>();
-            // Third while loop: redaction rules
-            while (result.hasNext()) {
-                ResultItem item = result.next();
-                if (ItemType.XS_STRING != item.getItemType()) {
-                    throw new IOException("Unexpected item type " + item.getItemType().toString());
-                }
-                String itemStr = ((XSString)item.getItem()).asString();
-                ruleUris.add(itemStr);
-                ++ruleCount;
-            }
-            if (ruleCount > 0) {
-                AuditUtil.prepareAuditMlcpFinish(jobConf, ruleCount);
-                if (LOG.isDebugEnabled()) {
-                    // TODO: Use this version if only JAVA 8 is supported
-                    // String logMessage = String.join(", ", ruleUris);
-                    LOG.debug("Redaction rules applied: " + StringUtils.join(ruleUris, ", "));
-                }
-            }            
-            
-            LOG.info("Fetched " + 
-                    (forestSplits == null ? 0 : forestSplits.size()) + 
+            getForestSplits(jobContext, result, forestSplits, ruleUris);            
+            LOG.info("Fetched " + forestSplits.size() + 
                     " forest splits.");            
         } catch (XccConfigException e) {
             LOG.error(e);
@@ -455,10 +432,6 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 more = more || (j + 1 < splitsPerHost.size());
             }
         }        
-        if (mlcpStartEventEnabled) {
-            AuditUtil.auditMlcpStart(jobConf, jobContext.getJobName());
-        }
-        jobConf.setBoolean(AUDIT_MLCPFINISH_ENABLED, mlcpFinishEventEnabled);
         
         LOG.info("Made " + splitList.size() + " splits.");
         if (LOG.isDebugEnabled()) {
@@ -474,7 +447,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
      * 
      * @author jchen
      */
-    class ForestSplit {
+    protected class ForestSplit {
         BigInteger forestId;
         String hostName;
         long recordCount;
