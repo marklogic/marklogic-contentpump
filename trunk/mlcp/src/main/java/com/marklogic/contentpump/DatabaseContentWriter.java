@@ -25,7 +25,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.ContentOutputFormat;
-import com.marklogic.mapreduce.ContentPumpStats;
+import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.ContentWriter;
 import com.marklogic.mapreduce.DocumentURI;
@@ -333,9 +333,9 @@ public class DatabaseContentWriter<VALUE> extends
             }
         }
         context.getCounter(
-            ContentPumpStats.OUTPUT_RECORDS_COMMITTED).increment(succeeded);
+            MarkLogicCounter.OUTPUT_RECORDS_COMMITTED).increment(succeeded);
         context.getCounter(
-            ContentPumpStats.OUTPUT_RECORDS_FAILED).increment(failed);
+            MarkLogicCounter.OUTPUT_RECORDS_FAILED).increment(failed);
     }
 
     /**

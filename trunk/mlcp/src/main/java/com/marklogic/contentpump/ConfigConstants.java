@@ -208,6 +208,12 @@ public interface ConfigConstants {
         "mapreduce.marklogic.input.generateuri";
     static final String CONF_DELIMITED_DATA_TYPE = 
             "mapreduce.marklogic.delimited.datatype";
+    static final String CONF_AUDIT_MLCPSTART_MESSAGE = 
+            "mapreduce.marklogic.audit.mlcpstart.message";
+    static final String CONF_AUDIT_MLCPFINISH_ENABLED =
+            "mapreduce.marklogic.audit.mlcpfinish.enabled";
+    static final String CONF_AUDIT_MLCPFINISH_MESSAGE = 
+            "mapreduce.marklogic.audit.mlcpfinish.message";
     /**
      * <Role-name,Role-id> map for internal use
      */
