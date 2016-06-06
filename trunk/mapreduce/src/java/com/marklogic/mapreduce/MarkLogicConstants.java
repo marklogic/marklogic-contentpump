@@ -848,31 +848,11 @@ public interface MarkLogicConstants {
     static final String OUTPUT_QUERY_LANGUAGE = 
     		"mapreduce.marklogic.output.querylanguage";
     /**
-     * The config property name (<code>{@value}</code>)
-     * which, if set, specifies a comma-separated list of
-     * redaction rule collection URIs. 
-     * Optional. If not set, no data will be redacted.
-     */
+    * The config property name (<code>{@value}</code>)
+    * which, if set, specifies a comma-separated list of
+    * redaction rule collection URIs. 
+    * Optional. If not set, no data will be redacted.
+    */
     static final String REDACTION_RULE_COLLECTION = 
-    		"mapreduce.marklogic.input.redaction.rules";
-    /**
-     * The config property name (<code>{@value}</code>)
-     * which, if set, specified the message to be logged out
-     * by mlcp-start audit event.
-     */
-    static final String AUDIT_MLCPSTART_MESSAGE = 
-            "mapreduce.marklogic.audit.mlcpstart.message";
-    /**
-     * The config property name (<code>{@value}</code>)
-     * which, if set, specified whether mlcp-finish audit event has been enabled on server.
-     */
-    static final String AUDIT_MLCPFINISH_ENABLED =
-            "mapreduce.marklogic.audit.mlcpfinish.enabled";
-    /**
-     * The config property name (<code>{@value}</code>)
-     * which, if set, specified the message to be logged out
-     * by mlcp-finish audit event
-     */
-    static final String AUDIT_MLCPFINISH_MESSAGE = 
-            "mapreduce.marklogic.audit.mlcpfinish.message";
+            "mapreduce.marklogic.input.redaction.rules";
 }

@@ -16,7 +16,7 @@
  */
 package com.marklogic.mapreduce;
 
-public enum ContentPumpStats {
+public enum MarkLogicCounter {
     INPUT_RECORDS,
     OUTPUT_RECORDS,
     OUTPUT_RECORDS_COMMITTED,
