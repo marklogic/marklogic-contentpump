@@ -76,7 +76,7 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
                 throw new IOException("Unrecognized audit event " + itemStr);
             }                
         }
-        if (ruleUris.size() > 0) {
+        if (ruleUris != null && ruleUris.size() > 0) {
             AuditUtil.prepareAuditMlcpFinish(jobConf, ruleUris.size());
             if (LOG.isDebugEnabled()) {
                 // TODO: Use this version if only JAVA 8 is supported
