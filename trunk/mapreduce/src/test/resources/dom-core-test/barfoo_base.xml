@@ -1,0 +1,8 @@
+<html xmlns='http://www.w3.org/1999/xhtml' xml:base="http://www.w3.org/DOM/L3Test">
+<head>
+<title>XML Base sample</title>
+</head>
+<body xml:base="http://www.w3.org/DOM/EmployeeID" id="body"> 
+<p>bar</p><!-- keep comment adjacent to p  -->
+</body>
+</html>
