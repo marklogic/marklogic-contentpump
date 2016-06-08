@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly>
+  <id>src</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>src</directory>
+      <outputDirectory>/src</outputDirectory>
+      <excludes>
+        <exclude>conf/**</exclude>
+        <exclude>lib/**</exclude>
+        <exclude>test/**</exclude>
+        <exclude>main/resources/**</exclude>
+        <exclude>main/java/com/marklogic/mapreduce/examples/**</exclude>
+        <exclude>main/java/com/marklogic/mapreduce/test/**</exclude>
+        <!-- exclude>main/java/com/marklogic/tools/**</exclude -->
+        <exclude>main/java/doc-files/**</exclude>
+        <exclude>**/*.css</exclude>
+        <exclude>**/*.html</exclude>
+      </excludes>
+    </fileSet>
+  </fileSets>
+  <files>
+    <file>
+      <source>pom.xml</source>
+      <outputDirectory>/</outputDirectory>
+    </file>
+    <file>
+       <source>LICENSE.txt</source>
+       <outputDirectory>/</outputDirectory> 
+    </file>
+    <file>
+       <source>LEGALNOTICES.txt</source>
+       <outputDirectory>/</outputDirectory> 
+    </file>
+  </files>
+</assembly>

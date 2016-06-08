@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<SalesInfo xmlns="urn:product:Details"
+          xmlns:sls="urn:product:Sales">
+    <ProductName Code="C00001">Computer</ProductName>
+    <Price Units="$">2500</Price>
+    <Volume Units="Units">200</Volume>
+</SalesInfo>

@@ -1,0 +1,19 @@
+<myns:html xmlns:myns="http://www.w3c.org/1999/xhtml">
+
+<myns:head>
+	<myns:title>A really bad idea</myns:title>
+</myns:head>
+
+<myns:body>
+  <myns:h1>A really bad idea</myns:h1>
+    <myns:pre>
+      <myns:pre xmlns:myns="http://my.com/namespaces/test-data">
+        <myns:table>
+          <myns:data>
+            Hello World
+          </myns:data>
+        </myns:table>
+      </myns:pre>
+   </myns:pre>
+</myns:body>
+</myns:html>

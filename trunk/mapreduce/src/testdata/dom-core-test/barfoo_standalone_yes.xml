@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<html xmlns='http://www.w3.org/1999/xhtml'>
-<head>
-<title>getXmlStandalone test doc</title>
-</head>
-<body onload="parent.loadComplete()">
-<p>bar</p>
-</body>
-</html>
