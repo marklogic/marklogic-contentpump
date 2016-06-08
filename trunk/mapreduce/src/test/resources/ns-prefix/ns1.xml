@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<stk:InventoryInfo xmlns:stk="urn:product:Stock"
+        xmlns:inf="urn:product:Info">
+    <stk:ProductName inf:Code="X00101">Notebook PC</stk:ProductName>
+    <stk:Price>300000</stk:Price>
+    <stk:Volume>500</stk:Volume>
+</stk:InventoryInfo>

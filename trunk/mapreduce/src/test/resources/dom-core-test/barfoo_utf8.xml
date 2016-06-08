@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="uTf-8"?>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+<head>
+<title>test file</title>
+</head>
+<body onload="parent.loadComplete()">
+<p>bar</p>
+</body>
+</html>

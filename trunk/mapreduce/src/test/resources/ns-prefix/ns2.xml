@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<ProductInfo xmlns="urn:product:Info"
+          xmlns:stk="urn:product:Stock">
+    <ProductName Code="C00001" xmlns="">Computer</ProductName>
+    <Price>250000</Price>
+    <Volume>200</Volume>
+</ProductInfo>

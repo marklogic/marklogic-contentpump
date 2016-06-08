@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly>
+  <id>examples</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>${project.build.directory}/classes</directory>
+      <outputDirectory>/</outputDirectory>
+      <includes>
+        <include>com/marklogic/mapreduce/examples/**</include>
+      </includes>
+      <excludes>
+        <exclude>com/marklogic/mapreduce/examples/*HDFS*</exclude>
+      </excludes>
+    </fileSet>
+  </fileSets>
+</assembly>
+  

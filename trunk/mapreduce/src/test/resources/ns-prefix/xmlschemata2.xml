@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+ <library
+   xmlns="http://eric.van-der-vlist.com/ns/library"
+   xmlns:hr="http://eric.van-der-vlist.com/ns/person">
+  <book id="b0836217462" available="true">
+   <isbn>0836217462</isbn>
+   <title xml:lang="en">Being a Dog Is a Full-Time Job</title>
+   <hr:author id="CMS">
+    <hr:name>Charles M Schulz</hr:name>
+    <hr:born>1922-11-26</hr:born>
+    <hr:dead>2000-02-12</hr:dead>
+   </hr:author>
+   <character id="PP">
+    <hr:name>Peppermint Patty</hr:name>
+    <hr:born>1966-08-22</hr:born>
+    <qualification>bold, brash and tomboyish</qualification>
+    </character>
+   <character id="Snoopy">
+    <hr:name>Snoopy</hr:name>
+    <hr:born>1950-10-04</hr:born>
+    <qualification>extroverted beagle</qualification>
+   </character>
+   <character id="Schroeder">
+    <hr:name>Schroeder</hr:name>
+    <hr:born>1951-05-30</hr:born>
+    <qualification>brought classical music to the Peanuts strip</qualification>
+   </character>
+   <character id="Lucy">
+    <hr:name>Lucy</hr:name>
+    <hr:born>1952-03-03</hr:born>
+    <qualification>bossy, crabby and selfish</qualification>
+   </character>
+  </book>
+ </library>
