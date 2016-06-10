@@ -30,7 +30,7 @@ public class TestCopy{
     
 	@Test
 	public void testBug20168() throws Exception {
-		String cmd = "COPY -mode local -input_host localhost -input_port 5275 "
+		String cmd = "COPY -input_host localhost -input_port 5275 "
 				+ "-input_username admin -input_password admin "
 				+ "-output_host localhost -output_username admin "
 				+ "-output_password admin -output_port 6275 -thread_count 1";
@@ -357,7 +357,7 @@ public class TestCopy{
     public void testBug20059() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/20059"
-            + " -mode local -output_uri_prefix test/"
+            + " -output_uri_prefix test/"
             + " -output_collections test,ML -port 5275"
             + " -output_uri_replace wiki,'wiki1'";
         String[] args = cmd.split(" ");
@@ -451,7 +451,7 @@ public class TestCopy{
     public void testCopyTemporalDoc() throws Exception {
         String cmd1 = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/temporal"
-            + " -mode local -port 5275 -fastload false";
+            + " -port 5275 -fastload false";
         String[] args1 = cmd1.split(" ");
         assertFalse(args1.length == 0);
 
