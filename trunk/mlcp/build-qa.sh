@@ -11,7 +11,7 @@ if [ $? -ne 0 ]; then
     exit 1 
 fi
 # install connector jars
-mvn install:install-file -DgroupId=com.marklogic -DartifactId=marklogic-mapreduce2 -Dversion=2.2 -Dfile=../mapreduce/buildtmp/java/marklogic-mapreduce2-2.2.${DATE}.jar -Dpackaging=jar
+mvn install:install-file -DgroupId=com.marklogic -DartifactId=marklogic-mapreduce2 -Dversion=2.2 -Dfile=../mapreduce/target/marklogic-mapreduce2-2.2.${DATE}.jar -Dpackaging=jar
 if [ $? -ne 0 ]; then 
     echo " problem using haddop connector build ../mapreduce/buildtmp/java/marklogic-mapreduce2-2.2.${DATE}.jar, EXITING!!"
     exit 1
