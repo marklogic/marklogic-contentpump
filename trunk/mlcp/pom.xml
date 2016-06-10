@@ -1,48 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License. See accompanying LICENSE file.
-          -->
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>mlcp</artifactId>
   <version>9.0</version>
   <name>mlcp</name>
+  <description>MarkLogic Content Pump</description>
+  <url>https://github.com/marklogic/marklogic-contentpump</url>
   <packaging>jar</packaging>
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+    </license>
+  </licenses>
   <properties>
     <skipTests>true</skipTests>
     <distributed.test.excludes>nothing-to-exclude</distributed.test.excludes>
+    <hadoopConnectorVersion>2.2</hadoopConnectorVersion>
+    <hadoopConnectorBaseDir>${basedir}/../mapreduce</hadoopConnectorBaseDir>
+    <xccVersion>9.0</xccVersion>
+    <versionString>9.0</versionString>
+    <contentpumpHome>${project.build.directory}/mlcp-${versionString}-lib</contentpumpHome>
   </properties>
-  <profiles>
-    <profile>
-    <!--  local mode profile for junit  -->
-      <id>local</id>
-      <properties>
-        <distributed.test.excludes>**/*TestDistributed*</distributed.test.excludes>
-      </properties>
-    </profile>
-  </profiles>  
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>3.0.0</version>
+        <configuration>
+          <filesets>
+            <fileset>
+              <directory>deliverable</directory>
+            </fileset>
+          </filesets>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.12.3</version>
         <configuration>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${basedir}/src/conf</additionalClasspathElement>
+          </additionalClasspathElements>
           <skipTests>${skipTests}</skipTests>
-          <excludes>
-            <exclude>${distributed.test.excludes}</exclude>
-          </excludes> 
+          <argline>-DCONTENTPUMP_HOME=${contentpumpHome}</argline>
         </configuration>
       </plugin>
       <plugin>
@@ -86,6 +89,29 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+          <artifactId>maven-antrun-plugin</artifactId>
+          <executions>
+              <execution>
+                  <id>make_deliverable</id>
+                  <phase>package</phase>
+                  <configuration>
+                      <tasks>
+                          <mkdir dir="deliverable" />
+                          <copy todir="deliverable" overwrite="true">
+                              <fileset dir="${project.build.directory}">
+                                  <include name="*src.zip" />
+                                  <include name="*bin.zip" />
+                              </fileset>
+                          </copy>
+                      </tasks>
+                  </configuration>
+                  <goals>
+                      <goal>run</goal>
+                  </goals>
+              </execution>
+          </executions>
       </plugin>
     </plugins>
     <resources>
@@ -218,13 +244,17 @@
     </dependency>	
     <dependency>
       <groupId>com.marklogic</groupId>
-      <artifactId>marklogic-xcc</artifactId>
-      <version>9.0</version>
+      <artifactId>marklogic-mapreduce2</artifactId>
+      <version>${hadoopConnectorVersion}</version>
+      <scope>system</scope>
+      <systemPath>${hadoopConnectorBaseDir}/target/marklogic-mapreduce2-${hadoopConnectorVersion}.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>com.marklogic</groupId>
-      <artifactId>marklogic-mapreduce2</artifactId>
-      <version>2.2</version>
+      <artifactId>marklogic-xcc</artifactId>
+      <version>${xccVersion}</version>
+      <scope>system</scope>
+      <systemPath>${hadoopConnectorBaseDir}/src/lib/marklogic-xcc-${xccVersion}.jar</systemPath>
     </dependency>
   </dependencies>
 </project>

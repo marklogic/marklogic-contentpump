@@ -29,12 +29,12 @@ public class UseXCCHttp{
         System.setProperty("xcc.httpcompliant", "false");
     }
     
-    @Test
+    //@Test
     public void testImportMixedDocs() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
-            + " -mode local -output_uri_prefix test/"
+            + " -output_uri_prefix test/"
             + " -output_collections test,ML -port 5275"
             + " -output_uri_replace wiki,'wiki1' -thread_count 1"
             + " -batch_size 10";
@@ -67,12 +67,12 @@ public class UseXCCHttp{
         Utils.closeSession();
     }
     
-    @Test
+    //@Test
     public void testImportMixedDocsProxy() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
-            + " -mode local -output_uri_prefix test/"
+            + " -output_uri_prefix test/"
             + " -output_collections test,ML -port 80"
             + " -output_uri_replace wiki,'wiki1' -thread_count 1"
             + " -batch_size 10";
@@ -108,7 +108,7 @@ public class UseXCCHttp{
     /*
      * test using old xcc so that server catchs XDMP-RVSLNOTHTTP and rollback
      */
-    @Test
+    //@Test
     public void testHTTPRollback() throws Exception {
 //        System.setProperty("xcc.httpcompliant", "true");
 //        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
@@ -137,31 +137,31 @@ public class UseXCCHttp{
         session.close();
     }
     
-    @Test
+    //@Test
     public void testHTTPEval() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
         Utils.runQuery("xcc://admin:admin@localhost:8686", "\"Hello\"");
     }
     
-    @Test
+    //@Test
     public void testXDBCEval() throws Exception {
         System.setProperty("xcc.httpcompliant", "false");
         Utils.runQuery("xcc://admin:admin@localhost:5275", "\"Hello\"");
     }
     
-    @Test
+    //@Test
     public void testHTTPEvalProxy() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
         Utils.runQuery("xcc://admin:admin@ali:80", "\"Hello\"");
     }
     
-    @Test
+    //@Test
     public void testXDBCEvalProxy() throws Exception {
         System.setProperty("xcc.httpcompliant", "false");
         Utils.runQuery("xcc://admin:admin@ali:80", "\"Hello\"");
     }
     
-    @Test
+    //@Test
     public void testXDBCInvoke() throws Exception {
         System.setProperty("xcc.httpcompliant", "false");
 //        Utils.runQuery("xcc://admin:admin@localhost:5275", "\"Hello\"");
@@ -175,7 +175,7 @@ public class UseXCCHttp{
         session.submitRequest(request);
     }
     
-    @Test
+    //@Test
     public void testHTTPChunkingEncoding() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
 //        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
@@ -200,7 +200,7 @@ public class UseXCCHttp{
     }
     
     
-    @Test
+    //@Test
     public void testHTTPChunkingEncodingProxySingleStmt() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
 //        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
@@ -216,7 +216,7 @@ public class UseXCCHttp{
         session.insertContent(content);
         session.close();
     }
-    @Test
+    //@Test
     public void testHTTPChunkingEncodingProxy() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
 //        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
@@ -240,7 +240,7 @@ public class UseXCCHttp{
         session.close();
     }
     
-    @Test
+    //@Test
     public void testHTTPMultiChunks() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
 //        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
@@ -284,7 +284,7 @@ public class UseXCCHttp{
         Utils.closeSession();
     }
     
-    @Test
+    //@Test
     public void testHTTPMultiChunksProxy() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
 //        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
@@ -324,7 +324,7 @@ public class UseXCCHttp{
         return sb.toString();
     }
     
-    @Test
+    //@Test
     public void testHTTPChunkingEncodingResolve() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
 //        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
@@ -347,7 +347,7 @@ public class UseXCCHttp{
         session.close();
     }
     
-    @Test
+    //@Test
     public void testXDBCChunkingEncoding() throws Exception {
 //        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
         ContentCreateOptions options = new ContentCreateOptions();
