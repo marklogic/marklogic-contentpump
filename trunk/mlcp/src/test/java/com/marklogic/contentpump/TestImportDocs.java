@@ -26,7 +26,7 @@ public class TestImportDocs {
     public void testImportMixedDocs() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
-            + " -mode local -output_uri_prefix test/"
+            + " -output_uri_prefix test/"
             + " -output_collections test,ML -port 5275"
             + " -fastload false"
             + " -output_uri_replace wiki,'wiki1'";
@@ -63,7 +63,7 @@ public class TestImportDocs {
     public void testImportMixedDocsIncorrectHost() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhostx"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
-            + " -mode local -output_uri_prefix test/"
+            + " -output_uri_prefix test/"
             + " -output_collections test,ML -port 5275"
             + " -output_uri_replace wiki,'wiki1'";
         String[] args = cmd.split(" ");
@@ -100,7 +100,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
-            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -thread_count 1 -output_uri_prefix ABC"
             + " -fastload"
             + " -output_collections test,ML -document_type text";
         String[] args = cmd.split(" ");
@@ -124,7 +124,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
-            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -thread_count 1 -output_uri_prefix ABC"
             + " -output_collections test,ML -document_type binary";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -149,7 +149,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"///AbacuS.xml"
-            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -thread_count 1 -output_uri_prefix ABC"
             + " -output_collections test,ML"
             + " -output_permissions admin,read,admin,update,admin,insert,admin,execute"
             + " -output_quality 1"
@@ -186,7 +186,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/2012-06-13_16-26-58_431.jpg"
-            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -thread_count 1 -output_uri_prefix ABC"
             + " -output_collections test,ML -document_type binary"
             + " -output_permissions admin,read,admin,update,admin,insert,admin,execute"
             + " -output_quality 1"
@@ -240,7 +240,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
-            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -thread_count 1 -output_uri_prefix ABC"
             + " -output_collections test,ML -document_type text"
             + " -output_permissions admin,read,admin,update,admin,insert,admin,execute"
             + " -output_quality 1"
@@ -270,7 +270,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
-            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -thread_count 1 -output_uri_prefix ABC"
             + " -output_collections test,ML -document_type XML"
             + " -input_file_pattern ^A.*";
         String[] args = cmd.split(" ");
@@ -303,7 +303,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
-            + " -thread_count 1 -mode local -output_uri_prefix ABC"
+            + " -thread_count 1 -output_uri_prefix ABC"
             + " -document_type XML"
             + " -output_directory /test -fastload false"
             + " -input_file_pattern ^A.*";
@@ -329,7 +329,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki.zip"
-            + " -thread_count 4 -mode local"
+            + " -thread_count 4 "
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -354,7 +354,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki.zip"
-            + " -thread_count 4 -mode local -fastload"
+            + " -thread_count 4 -fastload"
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -380,7 +380,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki.zip" //"/space/tmp/cpox/tmp/WikiToZip-00000080.zip"
-            + " -thread_count 4 -mode local"
+            + " -thread_count 4 "
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -411,7 +411,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips" 
-            + " -thread_count 2 -mode local"
+            + " -thread_count 2 "
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -441,7 +441,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips" 
-            + " -thread_count 3 -mode local"
+            + " -thread_count 3 "
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML" 
             + " -thread_count_per_split 2";
@@ -473,7 +473,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips" 
-            + " -thread_count 3 -mode local"
+            + " -thread_count 3 "
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML" 
             + " -thread_count_per_split 1";
@@ -504,7 +504,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips" 
-            + " -mode local"
+            + " "
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML" 
             + " -thread_count_per_split 2";
@@ -531,7 +531,7 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() 
             + "/encoding/ML-utf-16be.zip -content_encoding UTF-16BE"
-            + " -thread_count 1 -mode local -document_type text"
+            + " -thread_count 1 -document_type text"
             + " -input_compressed -input_compression_codec zip"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
@@ -568,7 +568,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-16le.enc"
-            + " -thread_count 1 -mode local -content_encoding UTF-16LE"
+            + " -thread_count 1 -content_encoding UTF-16LE"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML -document_type text";
         String[] args = cmd.split(" ");
@@ -604,7 +604,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-16le.enc"
-            + " -thread_count 1 -mode local -content_encoding UTF-16LE"
+            + " -thread_count 1 -content_encoding UTF-16LE"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -640,7 +640,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.enc"
-            + " -thread_count 1 -mode local"
+            + " -thread_count 1 "
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -677,7 +677,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.enc"
-            + " -thread_count 1 -mode local -document_type TEXT"
+            + " -thread_count 1 -document_type TEXT"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -713,7 +713,7 @@ public class TestImportDocs {
 //        String cmd = 
 //            "IMPORT -password admin -username admin -host localhost -port 5275"
 //            + " -input_file_path " + "/space2/qa/mlcp/data/xml/bigdata/doc108.xml"// + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.txt"
-//            + " -thread_count 1 -mode local"
+//            + " -thread_count 1 "
 //            + " -content_encoding utf-8le"
 //            + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
 //            + " -output_collections test,ML";
@@ -751,7 +751,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-8.txt"
-            + " -thread_count 1 -mode local"
+            + " -thread_count 1 "
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -804,7 +804,7 @@ public class TestImportDocs {
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + "/space2/qa/mlcp/data/xml/bigdata"
             + " -input_file_pattern doc108.*"
-            + " -thread_count 1 -mode local -content_encoding UTF-8LE"
+            + " -thread_count 1 -content_encoding UTF-8LE"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -839,7 +839,7 @@ public class TestImportDocs {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/encoding/ML-utf-16le.txt"
-            + " -thread_count 1 -mode local -content_encoding UTF-16LE"
+            + " -thread_count 1 -content_encoding UTF-16LE"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML";
         String[] args = cmd.split(" ");
@@ -874,7 +874,7 @@ public class TestImportDocs {
     public void testImportTemporalDoc() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/temporal"
-            + " -mode local -port 5275 -fastload false"
+            + " -port 5275 -fastload false"
             + " -temporal_collection mycollection";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -900,7 +900,7 @@ public class TestImportDocs {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin "
                 + "-input_file_path " + Constants.TEST_PATH.toUri() 
                 + "/wiki/AynRand "
-                + "-mode local -transform_module /38160/dummy-trans.xqy "
+                + "-transform_module /38160/dummy-trans.xqy "
                 + "-transform_namespace my.dummy.transform.module "
                 + "-output_permissions "
                 + "admin,read,admin-builtins,read,admin-module-internal,read,"
@@ -929,5 +929,58 @@ public class TestImportDocs {
             assertTrue(result.hasNext());
             assertEquals("3", result.next().asString());
         }
+    }
+    
+    @Test
+    public void testImportTransformMixedDocs() throws Exception {
+        Utils.prepareModule("xcc://admin:admin@localhost:5275", "/lc.xqy");
+        String cmd = "IMPORT -password admin -username admin -host localhost"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
+            + " -port 5275 -output_uri_replace wiki,'wiki1'"
+            + " -output_uri_prefix test/"
+            + " -output_collections test,ML"
+            + " -fastload true"
+            + " -transform_module /lc.xqy"
+            + " -transform_namespace http://marklogic.com/module_invoke";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection(\"ML\"))");
+        assertTrue(result.hasNext());
+        assertEquals("93", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testImportMixedDocsZipMultiplewriter() throws Exception {
+        String cmd = 
+            "IMPORT -password admin -username admin -host localhost -port 5275"
+            + " -input_file_path " + Constants.TEST_PATH.toUri() + "/zips"
+            + " -thread_count_per_split 3"
+            + " -input_compressed -input_compression_codec zip"
+            + " -output_collections test,ML";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275",
+            "fn:count(fn:collection(\"test\"))");
+        assertTrue(result.hasNext());
+        assertEquals("186", result.next().asString());
+        Utils.closeSession();
     }
 }

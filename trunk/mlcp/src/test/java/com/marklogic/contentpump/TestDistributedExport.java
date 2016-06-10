@@ -72,7 +72,7 @@ public class TestDistributedExport {
 //        Utils.closeSession();
 //    }
     
-    @Test
+    //@Test
     public void testExportZipToHDFS() throws Exception {
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"

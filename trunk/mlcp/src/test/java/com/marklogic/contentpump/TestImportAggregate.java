@@ -22,7 +22,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.xml"
-            + " -mode local -thread_count 1"// -aggregate_uri_id PMID"
+            + " -thread_count 1"// -aggregate_uri_id PMID"
             + " -input_file_type aggregates"
             + " -output_uri_replace " + Constants.TEST_PATH.toUri().getPath() + ",'/medline'";
         String[] args = cmd.split(" ");
@@ -46,7 +46,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.xml"
-            + " -mode local -thread_count 1"// -aggregate_uri_id PMID"
+            + " -thread_count 1"// -aggregate_uri_id PMID"
             + " -input_file_type aggregates"
             + " -transform_module /lc.xqy"
             + " -filename_as_collection true"
@@ -78,7 +78,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/lei.xml"
-            + " -mode local -thread_count 1 -aggregate_uri_id LEI"
+            + " -thread_count 1 -aggregate_uri_id LEI"
             + " -aggregate_record_namespace www.leiutility.org"
             + " -aggregate_record_element LegalEntity"
             + " -input_file_type aggregates"
@@ -104,7 +104,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.utf16.xml"
-            + " -mode local -thread_count 1"// -aggregate_uri_id PMID"
+            + " -thread_count 1"// -aggregate_uri_id PMID"
             + " -input_file_type aggregates"
             + " -content_encoding UTF-16LE"
             + " -output_uri_replace " + Constants.TEST_PATH.toUri().getPath() + ",'/medline'";
@@ -129,7 +129,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/escapequote.xml"
-            + " -mode local -thread_count 1 -aggregate_record_element parent"
+            + " -thread_count 1 -aggregate_record_element parent"
             + " -input_file_type aggregates"
             + " -output_uri_prefix /data/ -output_uri_suffix .xml";
         String[] args = cmd.split(" ");
@@ -154,7 +154,7 @@ public class TestImportAggregate {
             + " admin -input_file_path" //+ Constants.TEST_PATH.toUri()
 //            + "/agg/medline04.small.xml"
             + " /space2/qa/mlcp/data/agg/bug19151"
-            + " -mode local -thread_count 4"// -transaction_size 1 -batch_size 100"
+            + " -thread_count 4"// -transaction_size 1 -batch_size 100"
             + " -aggregate_uri_id ArticleTitle"
             + " -input_file_type aggregates"
             + " -thread_count 1" //comment this line to reproduce
@@ -180,7 +180,6 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/21045.xml"
-            + " -mode local"
             + " -aggregate_record_element parent"
             + " -input_file_type aggregates"
             + " -output_uri_replace \"\\[,'',\\],'',:,''\"";
@@ -209,7 +208,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.xml"
-            + " -mode local -aggregate_uri_id PMID"
+            + " -aggregate_uri_id PMID"
             + " -input_file_type aggregates";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -232,7 +231,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/encoding/medline04.small.iso-8859-1.xml -content_encoding iso-8859-1"
-            + " -mode local -thread_count 1 -aggregate_uri_id PMID"
+            + " -thread_count 1 -aggregate_uri_id PMID"
             + " -input_file_type aggregates";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -255,7 +254,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/encoding/medline04.small.iso-8859-1.zip -content_encoding iso-8859-1"
-            + " -mode local -thread_count 1 -aggregate_uri_id PMID"
+            + " -thread_count 1 -aggregate_uri_id PMID"
             + " -input_file_type aggregates -input_compressed";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -278,7 +277,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/medlinezip/medline04.zip"
-            + " -mode local -thread_count 2 -aggregate_uri_id PMID"
+            + " -thread_count 2 -aggregate_uri_id PMID"
             + " -input_file_type aggregates -input_compressed -input_compressed true";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -302,7 +301,7 @@ public class TestImportAggregate {
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/medlinezip/medline04_utf16.zip"
             + " -content_encoding utf-16le"
-            + " -mode local -thread_count 2 -aggregate_uri_id PMID"
+            + " -thread_count 2 -aggregate_uri_id PMID"
             + " -input_file_type aggregates -input_compressed -input_compressed true";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -328,7 +327,7 @@ public class TestImportAggregate {
             + "/medlinezip/medline04.zip"
             + " -transform_module /lc.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -mode local -thread_count 2 -aggregate_uri_id PMID"
+            + " -thread_count 2 -aggregate_uri_id PMID"
             + " -input_file_type aggregates -input_compressed -input_compressed true";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -354,7 +353,7 @@ public class TestImportAggregate {
             + "/medlinezip/medline04.2.zip"
             + " -transform_module /lc.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -mode local -thread_count 2"
+            + " -thread_count 2"
             + " -input_file_type aggregates -input_compressed -input_compressed true";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -381,7 +380,7 @@ public class TestImportAggregate {
             + " -fastload"
             + " -transform_module /lc.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -mode local -thread_count 2 -aggregate_uri_id PMID"
+            + " -thread_count 2 -aggregate_uri_id PMID"
             + " -input_file_type aggregates -input_compressed -input_compressed true";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -404,7 +403,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.xml"
-            + " -mode local -aggregate_record_element ArticleTitle"
+            + " -aggregate_record_element ArticleTitle"
             + " -input_file_type aggregates";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -427,7 +426,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/24908.xml"
-            + " -mode local -aggregate_record_element wpt"
+            + " -aggregate_record_element wpt"
             + " -aggregate_record_namespace http://www.topografix.com/GPX/1/0"
             + " -input_file_type aggregates";
         String[] args = cmd.split(" ");
@@ -451,7 +450,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/31691.xml"
-            + " -mode local -aggregate_record_element item"
+            + " -aggregate_record_element item"
             + " -uri_id post_id -thread_count 1"
             + " -input_file_type aggregates";
         String[] args = cmd.split(" ");
@@ -475,7 +474,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/31691.zip"
-            + " -mode local -aggregate_record_element item"
+            + " -aggregate_record_element item"
             + " -input_compressed"
             + " -uri_id post_id -thread_count 1"
             + " -input_file_type aggregates";
@@ -500,7 +499,7 @@ public class TestImportAggregate {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/bad.xml"
-            + " -mode local -aggregate_record_element r"
+            + " -aggregate_record_element r"
             + " -input_file_type aggregates";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -520,7 +519,7 @@ public class TestImportAggregate {
     
     @Test
     public void testImportAggZip() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -mode local" +
+        String cmd = "IMPORT -host localhost -port 5275" +
         		" -username admin" + " -password admin" + 
         		" -input_file_path " + Constants.TEST_PATH.toUri() + "/agg.zip" + 
         		" -aggregate_record_element p -aggregate_uri_id id" +
@@ -555,5 +554,26 @@ public class TestImportAggregate {
         assertTrue(sb.toString().equals(key));
     }
     
+    @Test
+    public void testImportMedlineAutoID() throws Exception {
+        String cmd = "IMPORT -host localhost -port 5275 -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/agg/medline04.small.xml"
+            + " -thread_count 1"
+            + " -input_file_type aggregates";
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
 
+        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        Utils.closeSession();
+    }
 }

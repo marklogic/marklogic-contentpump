@@ -21,7 +21,7 @@ public class TestImportSequenceFile {
         String cmd = 
             "IMPORT -password admin -username admin -host localhost -port 5275"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/seqfile/file5.seq"
-            + " -thread_count 1 -mode local"
+            + " -thread_count 1"
             + " -input_file_type sequencefile --output_uri_prefix ABC"
             + " -sequencefile_key_class com.marklogic.contentpump.examples.SimpleSequenceFileKey"
             + " -sequencefile_value_class com.marklogic.contentpump.examples.SimpleSequenceFileValue"

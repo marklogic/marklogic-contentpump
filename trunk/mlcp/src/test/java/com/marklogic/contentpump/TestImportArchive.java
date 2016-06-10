@@ -171,7 +171,7 @@ public class TestImportArchive {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin "
                 + "-input_file_path " + Constants.TEST_PATH.toUri() 
                 + "/38160/20130327183855-0700-000000-XML.zip" + " -input_file_type archive "
-                + "-mode local -transform_module /38160/dummy-trans.xqy "
+                + "-transform_module /38160/dummy-trans.xqy "
                 + "-transform_namespace my.dummy.transform.module "
                 + "-output_permissions "
                 + "admin,read,admin-builtins,read,admin-module-internal,read,"
