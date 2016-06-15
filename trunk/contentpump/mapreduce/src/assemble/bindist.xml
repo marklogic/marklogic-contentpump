@@ -52,7 +52,7 @@
       <outputDirectory>/lib</outputDirectory>
     </file>
     <file>
-      <source>LICENSE.txt</source>
+      <source>${basedir}/../LICENSE.txt</source>
       <outputDirectory>/</outputDirectory>
     </file>
   </files>
