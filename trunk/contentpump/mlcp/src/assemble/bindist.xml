@@ -53,11 +53,16 @@
     </fileSet>
     <fileSet>
       <includes>
-        <include>LICENSE*</include>
         <include>LEGAL*</include>
       </includes>
     </fileSet>
   </fileSets>
+  <files>
+    <file>
+      <source>${basedir}/../LICENSE.txt</source>
+      <outputDirectory>/</outputDirectory>
+    </file>
+  </files>
   <dependencySets>
     <dependencySet>
       <scope>runtime</scope>
