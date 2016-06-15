@@ -4,7 +4,7 @@
   <groupId>com.marklogic</groupId>
   <artifactId>mlcp</artifactId>
   <version>9.0</version>
-  <name>mlcp</name>
+  <name>MarkLogic Content Pump</name>
   <description>MarkLogic Content Pump</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
   <packaging>jar</packaging>
