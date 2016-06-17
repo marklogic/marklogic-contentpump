@@ -91,6 +91,17 @@ public class AssignmentManager {
             initStatisticalPolicy(countAry, batchSize);
         }
             break;
+        case QUERY: {
+            String[] uForests = updatableForests
+                .toArray(new String[updatableForests.size()]);
+            long[] countAry = new long[updatableForests.size()];
+            for (int i = 0; i < countAry.length; i++) {
+                countAry[i] = ((ForestInfo) map.get(new Text(uForests[i])))
+                    .getFragmentCount();
+            }
+            initQueryPolicy(countAry, batchSize);
+        }
+            break;
         }
     }
 
@@ -105,6 +116,10 @@ public class AssignmentManager {
 
     public void initStatisticalPolicy(long[] docCount, int batchSize) {
         policy = new StatisticalAssignmentPolicy(docCount, batchSize);
+    }
+
+    public void initQueryPolicy(long[] docCount, int batchSize) {
+        policy = new QueryAssignmentPolicy(docCount, batchSize);
     }
 
     public void initLegacyPolicy(LinkedHashSet<String> uForests) {
