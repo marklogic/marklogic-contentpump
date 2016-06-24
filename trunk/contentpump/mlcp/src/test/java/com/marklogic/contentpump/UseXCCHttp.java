@@ -41,20 +41,20 @@ public class UseXCCHttp{
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), "Documents");
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275",
+            Utils.getDbXccUri(),
             "fn:count(fn:collection(\"ML\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        result = Utils.runQuery(Utils.getDbXccUri(),
             "xdmp:directory(\"test/\", \"infinity\")");
         int count = 0;
         while (result.hasNext()) {
@@ -111,12 +111,12 @@ public class UseXCCHttp{
     //@Test
     public void testHTTPRollback() throws Exception {
 //        System.setProperty("xcc.httpcompliant", "true");
-//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//        Utils.clearDB(Utils.getDocumentsDbXccUri(), "Documents");
         ContentCreateOptions options = new ContentCreateOptions();
         options.setFormatXml();
 
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
-                "xcc://admin:admin@localhost:5275"));
+                Utils.getDbXccUri()));
         Session session = cs.newSession();
 
         session.setTransactionMode(TransactionMode.UPDATE);
@@ -146,7 +146,7 @@ public class UseXCCHttp{
     //@Test
     public void testXDBCEval() throws Exception {
         System.setProperty("xcc.httpcompliant", "false");
-        Utils.runQuery("xcc://admin:admin@localhost:5275", "\"Hello\"");
+        Utils.runQuery(Utils.getDbXccUri(), "\"Hello\"");
     }
     
     //@Test
@@ -164,9 +164,9 @@ public class UseXCCHttp{
     //@Test
     public void testXDBCInvoke() throws Exception {
         System.setProperty("xcc.httpcompliant", "false");
-//        Utils.runQuery("xcc://admin:admin@localhost:5275", "\"Hello\"");
+//        Utils.runQuery(Utils.getDocumentsDbXccUri(), "\"Hello\"");
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
-        "xcc://admin:admin@localhost:5275"));
+        Utils.getDbXccUri()));
         Session session = cs.newSession();
         ModuleImpl request = (ModuleImpl) session.newModuleInvoke("/foo.xqy");
 
@@ -178,7 +178,7 @@ public class UseXCCHttp{
     //@Test
     public void testHTTPChunkingEncoding() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
-//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//        Utils.clearDB(Utils.getDocumentsDbXccUri(), "Documents");
         
         ContentCreateOptions options = new ContentCreateOptions();
         options.setFormatXml();
@@ -203,7 +203,7 @@ public class UseXCCHttp{
     //@Test
     public void testHTTPChunkingEncodingProxySingleStmt() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
-//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//        Utils.clearDB(Utils.getDocumentsDbXccUri(), "Documents");
         
         ContentCreateOptions options = new ContentCreateOptions();
         options.setFormatXml();
@@ -219,7 +219,7 @@ public class UseXCCHttp{
     //@Test
     public void testHTTPChunkingEncodingProxy() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
-//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//        Utils.clearDB(Utils.getDocumentsDbXccUri(), "Documents");
         
         ContentCreateOptions options = new ContentCreateOptions();
         options.setFormatXml();
@@ -243,7 +243,7 @@ public class UseXCCHttp{
     //@Test
     public void testHTTPMultiChunks() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
-//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//        Utils.clearDB(Utils.getDocumentsDbXccUri(), "Documents");
         
         
         System.out.println(getClass().getClassLoader().getResource("xcc.properties"));
@@ -261,7 +261,7 @@ public class UseXCCHttp{
         options.setFormatXml();
 
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
-                "xcc://admin:admin@localhost:5275"));
+                Utils.getDbXccUri()));
         
         System.out.println(System.getProperty("xcc.httpcompliant"));
         
@@ -277,7 +277,7 @@ public class UseXCCHttp{
         session.close();
         
         ResultSequence result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275",
+            Utils.getDbXccUri(),
             "fn:count(fn:doc(\"hascontent\")//r)");
         assertTrue(result.hasNext());
         assertEquals("1500000", result.next().asString());
@@ -287,7 +287,7 @@ public class UseXCCHttp{
     //@Test
     public void testHTTPMultiChunksProxy() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
-//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//        Utils.clearDB(Utils.getDocumentsDbXccUri(), "Documents");
         
         ContentCreateOptions options = new ContentCreateOptions();
         options.setFormatXml();
@@ -327,12 +327,12 @@ public class UseXCCHttp{
     //@Test
     public void testHTTPChunkingEncodingResolve() throws Exception {
         System.setProperty("xcc.httpcompliant", "true");
-//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//        Utils.clearDB(Utils.getDocumentsDbXccUri(), "Documents");
         ContentCreateOptions options = new ContentCreateOptions();
         options.setFormatXml();
         options.setResolveEntities(true);
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
-                "xcc://admin:admin@localhost:5275"));
+                Utils.getDbXccUri()));
         Session session = cs.newSession();
 
         session.setTransactionMode(TransactionMode.UPDATE);
@@ -349,12 +349,12 @@ public class UseXCCHttp{
     
     //@Test
     public void testXDBCChunkingEncoding() throws Exception {
-//        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+//        Utils.clearDB(Utils.getDocumentsDbXccUri(), "Documents");
         ContentCreateOptions options = new ContentCreateOptions();
         options.setFormatXml();
 
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
-                "xcc://admin:admin@localhost:5275"));
+                Utils.getDbXccUri()));
         Session session = cs.newSession();
 
         session.setTransactionMode(TransactionMode.UPDATE);
