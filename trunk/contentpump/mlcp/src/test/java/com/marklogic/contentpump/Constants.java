@@ -1,10 +1,16 @@
 package com.marklogic.contentpump;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Properties;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
+
+import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
  * The settings of running unit tests
@@ -68,5 +74,32 @@ public class Constants {
     public static String testDb;
     static {
         testDb = System.getProperty("TEST_DB", "Documents");
+    }
+    /**
+     * Static setup for all tests
+     */
+    static {
+        File bootstrapScript = new File("//////" + MLCP_HOME + "/src/test/bootstrap.sjs");
+        String setupQuery = "";
+        try {
+            setupQuery = FileUtils.readFileToString(bootstrapScript);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        StringBuilder buf = new StringBuilder();
+        buf.append("var testDbName = \"");
+        buf.append(Constants.testDb);
+        buf.append("\"\n");
+        buf.append("var copyDstName = \"");
+        buf.append(Constants.copyDst);
+        buf.append("\"\n");
+        buf.append(setupQuery);
+        try {
+            Utils.runQuery(Utils.getDbXccUri(), buf.toString(), "javascript");
+        } catch (XccConfigException | RequestException | URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 }
