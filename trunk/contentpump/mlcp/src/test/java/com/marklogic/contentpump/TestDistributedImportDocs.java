@@ -3,21 +3,28 @@ package com.marklogic.contentpump;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.After;
 import org.junit.Test;
+import org.junit.Before;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestDistributedImportDocs {
+    @Before
+    public void setup() {
+        assertNotNull("No HADOOP_CONF_DIR found!", Constants.HADOOP_CONF_DIR);
+    }
+    
     @After
     public void tearDown() {
         Utils.closeSession();
     }
     
-    //@Test
-    public void testImportMixedDocs() throws Exception {
+    @Test
+    public void testImportMixedDocs() throws Exception {        
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
             + " -port 5275 -output_uri_replace wiki,'wiki1'"
@@ -28,15 +35,14 @@ public class TestDistributedImportDocs {
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275",
+            Utils.getDbXccUri(),
             "fn:count(fn:collection(\"ML\"))");
         assertTrue(result.hasNext());
         
@@ -44,7 +50,7 @@ public class TestDistributedImportDocs {
         Utils.closeSession();
     }
     
-    //@Test
+    @Test
     public void testImportText() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
@@ -54,15 +60,14 @@ public class TestDistributedImportDocs {
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+            Utils.getDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();

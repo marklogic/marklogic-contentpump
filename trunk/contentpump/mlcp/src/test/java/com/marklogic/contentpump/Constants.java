@@ -19,50 +19,24 @@ public class Constants {
     public static String MLCP_HOME;
     static{
        try {
-            MLCP_HOME = System.getProperty("MLCP_HOME");
-            if (MLCP_HOME == null) {
             MLCP_HOME = new java.io.File( "." ).getCanonicalPath();
-            }
         } catch (IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
-        }
-           
+        }    
     }
     private static String TEST_DATA = "//////" + MLCP_HOME + "/src/test/resources";
     /**
      * Path of test data
      */
     public static Path TEST_PATH = new Path("file", null, TEST_DATA);
-    
-    public static Properties prop = new Properties(); 
-    static {
-        //load a properties file from class path, inside static method
-        try {
-            prop.load(new FileInputStream(MLCP_HOME + "/src/conf/test.properties"));
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
+    /**
+     * Path of output
+     * Default: /tmp/mlcpout
+     */
     public static Path OUT_PATH;
     static {
-        String path = prop.getProperty("OUT_PATH", "/tmp/mlcpout");
+        String path = System.getProperty("OUTPUT_PATH", "/tmp/mlcpout");
         OUT_PATH = new Path("file", null, path);
-    }
-    
-   
-    /**
-     * mlcp version. Must set if unit tests run in distributed mode
-     */
-    public static String CONTENTPUMP_VERSION = prop.getProperty("CONTENTPUMP_VERSION");
-    
-    /**
-     * lib directory of mlcp binary package extracted. Must set if unit tests run in distributed mode
-     */
-    public static String CONTENTPUMP_HOME;
-    static {
-        CONTENTPUMP_HOME = MLCP_HOME + "/target/mlcp-" + CONTENTPUMP_VERSION + "-lib";
     }
     /**
      * conf directory of hadoop. Must set if unit tests run in distributed mode
@@ -70,9 +44,29 @@ public class Constants {
     public static String HADOOP_CONF_DIR;
     static {
         HADOOP_CONF_DIR = System.getenv("HADOOP_CONF_DIR");
-        if (HADOOP_CONF_DIR == null) {
-            HADOOP_CONF_DIR = prop.getProperty("HADOOP_CONF_DIR");
-        }
     }
-//    public static String HADOOP_CONF_DIR = null;
+    /**
+     * Port of MarkLogic Server to communicate to.
+     * Default: 8000
+     */
+    public static String port;
+    static {
+        port = System.getProperty("PORT", "8000");
+    }
+    /**
+     * Destination database of COPY operations.
+     * Default: CopyDst
+     */
+    public static String copyDst;
+    static {
+        copyDst = System.getProperty("COPY_DST", "CopyDst");
+    }
+    /**
+     * Database used in tests. 
+     * Default: Document
+     */
+    public static String testDb;
+    static {
+        testDb = System.getProperty("TEST_DB", "Documents");
+    }
 }

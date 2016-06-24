@@ -32,12 +32,6 @@ public class Utils {
     private static Session session;
     public static String newLine = System.getProperty("line.separator");
     public static boolean moduleReady = false;
-    public static void prepareDistributedMode() {
-        Properties props = System.getProperties();
-        props.setProperty(ConfigConstants.CONTENTPUMP_HOME_PROPERTY_NAME,
-            Constants.CONTENTPUMP_HOME);
-        System.setProperties(props);
-    }
     
     public static ResultSequence runQuery(String xccUri, String query)
         throws XccConfigException, URISyntaxException, RequestException {
@@ -49,6 +43,32 @@ public class Utils {
         }
         session = cs.newSession();
         AdhocQuery aquery = session.newAdhocQuery(query);
+
+        RequestOptions options = new RequestOptions();
+        options.setCacheResult(false);
+        options.setDefaultXQueryVersion("1.0-ml");
+        aquery.setOptions(options);
+        return session.submitRequest(aquery);
+    }
+    
+    public static ResultSequence runQueryAgainstDb(String xccUri, String query, String db)
+        throws XccConfigException, URISyntaxException, RequestException {
+        StringBuilder buf = new StringBuilder();
+        buf.append("xdmp:eval('");
+        buf.append(query);
+        buf.append("',(),<options xmlns=\"xdmp:eval\">\n" + 
+                "            <database>{xdmp:database(\"");
+        buf.append(db);
+        buf.append("\")}</database>\n" + 
+                "          </options>)");
+        ContentSource cs = csMap.get(xccUri);
+        if (cs == null) {
+            cs = ContentSourceFactory.newContentSource(new URI(
+            xccUri));
+            csMap.put(xccUri, cs);
+        }
+        session = cs.newSession();
+        AdhocQuery aquery = session.newAdhocQuery(buf.toString());
 
         RequestOptions options = new RequestOptions();
         options.setCacheResult(false);
@@ -303,5 +323,9 @@ public class Utils {
             bos.write(bytesIn, 0, read);
         }
         bos.close();
+    }
+    
+    public static String getDbXccUri() {
+        return "xcc://admin:admin@localhost:" + Constants.port;
     }
 }
