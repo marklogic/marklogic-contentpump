@@ -2,23 +2,28 @@ package com.marklogic.contentpump;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestDistributedImportDelimitedText {
-
+    @Before
+    public void setup() {
+        assertNotNull("No HADOOP_CONF_DIR found!", Constants.HADOOP_CONF_DIR);
+    }
 
     @After
     public void tearDown() {
         Utils.closeSession();
     }
     
-    //@Test
+    @Test
     public void testImportDelimitedText() throws Exception {
         String cmd = 
             "IMPORT -host localhost -port 5275 -username admin -password admin"
@@ -29,20 +34,19 @@ public class TestDistributedImportDelimitedText {
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+            Utils.getDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
+        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -56,7 +60,7 @@ public class TestDistributedImportDelimitedText {
         assertTrue(sb.toString().equals(key));
     }
     
-    //@Test
+    @Test
     public void testImportDelimitedTextDocJSONWithOptions() throws Exception {
         String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
                 + " -input_file_path "
@@ -70,25 +74,24 @@ public class TestDistributedImportDelimitedText {
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        Utils.prepareDistributedMode();
         ContentPump.runCommand(expandedArgs);
 
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                         "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getAllDocs(Utils.getDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();

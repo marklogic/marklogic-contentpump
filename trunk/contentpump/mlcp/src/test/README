@@ -11,7 +11,7 @@ To run unit tests, the following configurations on MarkLogic Server are required
 
 [Unit Test for Dev]
 1) Remove the comment mark around 'additionalClasspathElements' in pom.xml: maven-surefire-plugin to add log4j.properties in unit test classpath.
-2) To pass the TestCopy:testCopyTemporalDocs and TestImportDocs:testImportTemporalDoc, it's required to create a graph (temporal collection) named "mycollection" in CopyDst database. See src/test/resources/createCollection.txt for example.
+2) To pass the TestImportDocs:testImportTemporalDoc, it's required to create a graph (temporal collection) named "mycollection" in Documents database. See src/test/resources/createCollection.txt for example.
 3) To pass the TestDistributedImportDocs:testImportTransformMixedDocs, it's required to enable triple index and collection lexicon on Document database.
 4) Append "-DCONTENTPUMP_HOME=${path to mlcp}/mlcp/target/mlcp-1.4-lib" to maven command.
 5) To pass TestImportDelimitedText:testImportTransformDelimitedTextFileNameAsCollection and TestImportAggregate:testImportTransformMedlineFilenameAsCollection, it's required to enable collection lexicion on Document database.

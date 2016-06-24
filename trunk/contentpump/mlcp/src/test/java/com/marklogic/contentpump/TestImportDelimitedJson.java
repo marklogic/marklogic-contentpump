@@ -22,32 +22,33 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSON() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/sample1.txt"
                 + " -uri_id name -generate_uri false"
-                + " -input_file_type delimited_json";
+                + " -input_file_type delimited_json"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getAllDocs(Utils.getDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -62,32 +63,33 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONDir() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson"
                 + " -uri_id name -generate_uri false -input_file_pattern sample.*\\.txt"
-                + " -input_file_type delimited_json";
+                + " -input_file_type delimited_json"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getAllDocs(Utils.getDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -102,32 +104,33 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONGenUri() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson"
                 + " -generate_uri true -input_file_pattern sample.*\\.txt"
-                + " -input_file_type delimited_json";
+                + " -input_file_type delimited_json"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
+        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
         String keys[] = {"src/test/resources/delimitedJson/sample1.txt-0-1</uri>",
                 "src/test/resources/delimitedJson/sample1.txt-0-2</uri>",
                 "src/test/resources/delimitedJson/sample1.txt-0-3</uri>",
@@ -143,26 +146,27 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONGenTestUri() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/testUri.txt"
                 + " -uri_id name -generate_uri false"
-                + " -input_file_type delimited_json";
+                + " -input_file_type delimited_json"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs("xcc://admin:admin@localhost:5275");
+        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
         String key = "<uri>rose</uri>";
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals(key));
@@ -171,32 +175,33 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONZip() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/zip/sample.zip"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec zip"
-                + " -input_file_type delimited_json";
+                + " -input_file_type delimited_json"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getAllDocs(Utils.getDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -211,32 +216,33 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONZipDir() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/zip"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec zip"
-                + " -input_file_type delimited_json";
+                + " -input_file_type delimited_json"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getAllDocs(Utils.getDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -251,32 +257,33 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONGzip() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/gzip/sample.gz"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec gzip"
-                + " -input_file_type delimited_json";
+                + " -input_file_type delimited_json"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getAllDocs(Utils.getDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -291,32 +298,33 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONGzipDir() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/gzip"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec gzip"
-                + " -input_file_type delimited_json";
+                + " -input_file_type delimited_json"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getAllDocs(Utils.getDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -331,32 +339,33 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONZipFnCollection() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/zip/sample.zip"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec zip"
-                + " -input_file_type delimited_json -filename_as_collection true";
+                + " -input_file_type delimited_json -filename_as_collection true"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.runQuery("xcc://admin:admin@localhost:5275","fn:collection(\"sample.zip_sample1.txt\");");
+        result = Utils.runQuery(Utils.getDbXccUri(),"fn:collection(\"sample.zip_sample1.txt\");");
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -370,7 +379,7 @@ public class TestImportDelimitedJson {
         
         Utils.closeSession();
         
-        result = Utils.runQuery("xcc://admin:admin@localhost:5275","fn:collection(\"sample.zip_sample2.txt\");");
+        result = Utils.runQuery(Utils.getDbXccUri(),"fn:collection(\"sample.zip_sample2.txt\");");
         sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -385,32 +394,33 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONGzipFnCollection() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/gzip/sample.gz"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec gzip"
-                + " -input_file_type delimited_json -filename_as_collection true";
+                + " -input_file_type delimited_json -filename_as_collection true"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat("xcc://admin:admin@localhost:5275","JSON");
+        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.runQuery("xcc://admin:admin@localhost:5275","fn:collection(\"sample.gz\");");
+        result = Utils.runQuery(Utils.getDbXccUri(),"fn:collection(\"sample.gz\");");
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -425,26 +435,27 @@ public class TestImportDelimitedJson {
     
     @Test
     public void testImportDelimitedJSONArray() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/testUri2"
                 + " -uri_id val -generate_uri false"
-                + " -input_file_type delimited_json";
+                + " -input_file_type delimited_json"
+                + " -port " + Constants.port + " -database Documents";
         
         String[] args = cmd.split(" ");
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery("xcc://admin:admin@localhost:5275",
+        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getAllDocs(Utils.getDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();

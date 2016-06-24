@@ -19,29 +19,30 @@ public class TestImportSequenceFile {
     @Test
     public void testImportSequenceFile() throws Exception {
         String cmd = 
-            "IMPORT -password admin -username admin -host localhost -port 5275"
+            "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/seqfile/file5.seq"
             + " -thread_count 1"
             + " -input_file_type sequencefile --output_uri_prefix ABC"
             + " -sequencefile_key_class com.marklogic.contentpump.examples.SimpleSequenceFileKey"
             + " -sequencefile_value_class com.marklogic.contentpump.examples.SimpleSequenceFileValue"
-            + " -sequencefile_value_type Text"; 
+            + " -sequencefile_value_type Text"
+            + " -port " + Constants.port + " -database Documents";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB("xcc://admin:admin@localhost:5275", "Documents");
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            "xcc://admin:admin@localhost:5275", "fn:count(fn:collection())");
+            Utils.getDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getOnlyDocs("xcc://admin:admin@localhost:5275");
+        result = Utils.getOnlyDocs(Utils.getDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());
