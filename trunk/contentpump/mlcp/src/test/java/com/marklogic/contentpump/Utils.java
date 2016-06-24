@@ -33,8 +33,8 @@ public class Utils {
     public static String newLine = System.getProperty("line.separator");
     public static boolean moduleReady = false;
     
-    public static ResultSequence runQuery(String xccUri, String query)
-        throws XccConfigException, URISyntaxException, RequestException {
+    public static ResultSequence runQuery(String xccUri, String query, String queryLanguage) 
+            throws XccConfigException, URISyntaxException, RequestException {
         ContentSource cs = csMap.get(xccUri);
         if (cs == null) {
             cs = ContentSourceFactory.newContentSource(new URI(
@@ -45,10 +45,16 @@ public class Utils {
         AdhocQuery aquery = session.newAdhocQuery(query);
 
         RequestOptions options = new RequestOptions();
+        options.setQueryLanguage(queryLanguage);
         options.setCacheResult(false);
         options.setDefaultXQueryVersion("1.0-ml");
         aquery.setOptions(options);
         return session.submitRequest(aquery);
+    }
+    
+    public static ResultSequence runQuery(String xccUri, String query)
+        throws XccConfigException, URISyntaxException, RequestException {
+        return runQuery(xccUri, query, "xquery");
     }
     
     public static ResultSequence runQueryAgainstDb(String xccUri, String query, String db)
