@@ -26,11 +26,12 @@ public class TestDistributedImportDelimitedText {
     @Test
     public void testImportDelimitedText() throws Exception {
         String cmd = 
-            "IMPORT -host localhost -port 5275 -username admin -password admin"
+            "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR
             + " -delimited_uri_id first"
-            + " -input_file_type delimited_text -input_file_pattern .*\\.csv";
+            + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
+            + " -port " + Constants.port + " -database Documents";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
@@ -43,7 +44,7 @@ public class TestDistributedImportDelimitedText {
         ResultSequence result = Utils.runQuery(
             Utils.getDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
-        assertEquals("6", result.next().asString());
+        assertEquals("7", result.next().asString());
         Utils.closeSession();
         
         result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
@@ -62,7 +63,7 @@ public class TestDistributedImportDelimitedText {
     
     @Test
     public void testImportDelimitedTextDocJSONWithOptions() throws Exception {
-        String cmd = "IMPORT -host localhost -port 5275 -username admin -password admin"
+        String cmd = "IMPORT -host localhost -username admin -password admin"
                 + " -input_file_path "
                 + Constants.TEST_PATH.toUri()
                 + "/csv"
@@ -70,7 +71,8 @@ public class TestDistributedImportDelimitedText {
                 + Constants.HADOOP_CONF_DIR
                 + " -input_file_type delimited_text -input_file_pattern sample.+\\.csv"
                 + " -document_type json"
-                + " -split_input true -delimited_uri_id first";
+                + " -split_input true -delimited_uri_id first"
+                + " -port " + Constants.port + " -database Documents";
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
