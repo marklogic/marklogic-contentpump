@@ -1,6 +1,0 @@
-[{"val":2},{"val":"3"}]
-["val":4]
-["val",5]
-[[{"val":6},{"val":7}],{"val":8}]
-[{"val":9},10,"hello world",[{"val":11}]]
-{"name":["marklogic",{"val":12}]}

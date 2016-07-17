@@ -1,3 +1,0 @@
-{"team":{"name":{"location":"chicago","logo":"bulls"}}
-{"name":[{"team":"Los Angeles Lakers"]}
-{"team":"chicago bulls", "state":"illinois", "person":{"name":"gasol"}, "name":"rose"}

@@ -1,3 +1,0 @@
-team,zipcode,score
-"Bulls",60615,98
-"Warriors",94085,99

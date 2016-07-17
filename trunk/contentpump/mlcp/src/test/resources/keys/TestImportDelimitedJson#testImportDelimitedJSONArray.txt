@@ -1,1 +1,0 @@
-12{"name":["marklogic", {"val":12}]}2[{"val":2}, {"val":"3"}]8[[{"val":6}, {"val":7}], {"val":8}]9[{"val":9}, 10, "hello world", [{"val":11}]]

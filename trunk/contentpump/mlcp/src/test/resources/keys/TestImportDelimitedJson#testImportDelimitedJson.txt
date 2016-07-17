@@ -1,1 +1,0 @@
-Chicago%20Bulls{"association":"NBA", "team":{"name":"Chicago Bulls"}}Golden%20State%20Warriors{"name":"Golden State Warriors"}Houston%20Rockets{"location":"Houston", "name":"Houston Rockets"}
