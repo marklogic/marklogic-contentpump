@@ -1,3 +1,0 @@
-{"association":"NBA","team":{"name":"Chicago Bulls"}}
-{"name":"Golden State Warriors"}
-{"location":"Houston","name":"Houston Rockets"}
