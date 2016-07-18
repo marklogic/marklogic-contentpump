@@ -1,6 +1,6 @@
-# MarkLogic Content Pump and Hadoop Connector
+# MarkLogic Content Pump
 
-The project contains MarkLogic Content Pump (MLCP) and MarkLogic Hadoop Connector. 
+The project contains MarkLogic Content Pump (MLCP) and MarkLogic Connector for Hadoop (Hadoop Connector).
 
 ## Features
 
@@ -25,14 +25,16 @@ Hadoop Connector is an extension to Hadoop's MapReduce framework that allows you
 ## Getting Started
 
 Here are some resources that help you quickly get started with MLCP and Hadoop Connector:
+
 - [Getting Started with MLCP](http://docs.marklogic.com/guide/mlcp/getting-started)
 - [Getting Started with the MarkLogic Connector for Hadoop](http://docs.marklogic.com/guide/mapreduce/quickstart)
 
 ## Documentation
 
-This document provides a comprehensive overview of MarkLogic Content Pump and Hadoop Connector. 
+This document provides a comprehensive overview of MLCP and Hadoop Connector. 
 
 For official product documentation, please refer to:
+
 - [MLCP User Guide](http://docs.marklogic.com/guide/mlcp)
 - [MarkLogic Connector for Hadoop Developer's Guide](http://docs.marklogic.com/guide/mapreduce)
 
@@ -46,16 +48,16 @@ If you have questions about how to use MLCP or Hadoop Connector, you can ask on 
 
 ## How to Build
 
-Requirements to build MLCP and Hadoop Connector
+[Apache Maven](https://maven.apache.org/) (version >= 3.03) is required to build.
 
-- [Java 1.8](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-- [Maven version later than 3.03](https://maven.apache.org/)
+MLCP and Hadoop Connector can be built together. Steps to build:
 
-MLCP and Hadoop Connector can be built together. In root directory run
 ``` bash
-$ mvn clean package
+$ git clone https://github.com/marklogic/marklogic-contentpump.git
+$ cd marklogic-contentpump
+$ mvn clean package -DskipTests=true
 ```
-After successful build, product packages can be found in **deliverable** directory of **mlcp** and **mapreduce** directory.
+After successful build, product packages can be found in **deliverable** directory under **mlcp** and **mapreduce** folder.
 
 Alternatively, MLCP and Hadoop Connector can be built separately from their own root directory (**mlcp** and **mapreduce**) with above command. Note that MLCP has a dependency on Hadoop Connector. So successfull build of Hadoop Connector is required for building MLCP. 
 
@@ -64,19 +66,13 @@ For information on contributing to this project see [CONTRIBUTING.md](). For inf
 
 ## Run Tests
 
-Both MLCP and Hadoop Connector come with unit tests that cover basic functionality of the products. **Please build the products before running tests as some tests rely on built binaries.**
-
+The unit tests included in MLCP and Hadoop Connector are a minimum set of all the tests we have for the products. They are only designed for sanity check. To run unit tests, under marklogic-contentpump root directory:
 ``` bash
-$ mvn clean package
-$ mvn test -DskipTests=false
+$ mvn test
 ```
+
+MLCP tests can be run in default mode (distributed or local) based on your environment. For detailed information about default mode of MLCP, please refer to the [documentention](http://docs.marklogic.com/guide/mlcp/import#id_69447) here. For database setups of MLCP unit tests and advanced usage, please refer to [How to run MLCP unit tests]().
 
 ## Support
 
 The MarkLogic Content Pump and Hadoop Connector are maintained by MarkLogic Engineering and distributed under the [Apache 2.0 license](https://github.com/marklogic/java-client-api/blob/master/LICENSE). It is designed for use in production applications with MarkLogic Server. Everyone is encouraged to file bug reports, feature requests, and pull requests through GitHub. This input is critical and will be carefully considered, but we can’t promise a specific resolution or timeframe for any request. In addition, MarkLogic provides technical support for [release tags](https://github.com/marklogic/marklogic-contentpump/releases) of MarkLogic Content Pump and Hadoop Connector to licensed customers under the terms outlined in the [Support Handbook](http://www.marklogic.com/files/Mark_Logic_Support_Handbook.pdf). For more information or to sign up for support, visit [help.marklogic.com](http://help.marklogic.com).
-
-## TODO
-
-- Release tags link should be fixed
-- CONTRIBUTING.md link
-- project wiki page link
