@@ -315,9 +315,10 @@ public class TestExport {
         Utils.closeSession();
         
         //export
-        cmd = "EXPORT -host localhost -port 5275 -username admin -password admin"
+        cmd = "EXPORT -host localhost -username admin -password admin"
             + " -output_file_path " + Constants.OUT_PATH.toUri()
-            + " -output_type document";
+            + " -output_type document"
+            + " -port " + Constants.port + " -database Documents";
         args = cmd.split(" ");
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
@@ -325,8 +326,9 @@ public class TestExport {
         //import it back
         Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
 
-        cmd = "import -host localhost -port 5275 -username admin -password admin"
-            + " -input_file_path " + Constants.OUT_PATH.toUri();
+        cmd = "import -host localhost -username admin -password admin"
+            + " -input_file_path " + Constants.OUT_PATH.toUri()
+            + " -port " + Constants.port + " -database Documents";
         args = cmd.split(" ");
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
