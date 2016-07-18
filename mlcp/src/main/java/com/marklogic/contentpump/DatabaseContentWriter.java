@@ -304,7 +304,7 @@ public class DatabaseContentWriter<VALUE> extends
                         String u = metadatas[i][j].getUri();
                         if (m != null && m.getProperties() != null) {
                             setDocumentProperties(u, m.getProperties(),
-                                    null, null, null, sessions[sid]);
+                                null, null, null, null, sessions[sid]);
                             stmtCounts[sid]++;
                         }
                     }
