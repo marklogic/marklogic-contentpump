@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.apache.commons.modeler.util.DomUtil;
 import org.apache.hadoop.conf.Configuration;
@@ -488,20 +489,6 @@ public class FCheck {
 
 	public void decodeTreeData(File dir) throws IOException {
         File file = new File(dir, "TreeData");
-//        LSSerializer writer;
-//        LSOutput lsout;
-//        try {
-////        	DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
-////        	DOMImplementationLS impl = (DOMImplementationLS)registry.getDOMImplementation("XML 3.0");
-////        	writer = impl.createLSSerializer();
-//        	//writer.getDomConfig().setParameter("canonical-form", "true");
-//        	lsout = impl.createLSOutput();
-//        	lsout.setCharacterStream(new PrintWriter(System.out));
-//        	lsout.setEncoding("UTF-8");
-//        }
-//        catch (Exception e) {
-//        	throw new RuntimeException("Unable to initialize XML serialization.", e);
-//        }
         if (verbose)
             System.out.println(file.getAbsolutePath() + " -> checkTreeData");
         treeDataSize = file.length();
@@ -548,7 +535,6 @@ public class FCheck {
             System.out.println("docid=" + docid + " datWords=" + datWords);
             
             try {
-//                in.setLittleEndian(false);
             	in.getInputStream().mark(j);
 
                 // TODO: Is it better to read into a buffer or directly from the
@@ -562,6 +548,19 @@ public class FCheck {
             	// TODO: count and verify bytes read
 //            	int computed = computeChecksum(docid, in, datWords);
                 System.out.println(tree.getDocumentURI());
+                if (verbose) {
+                    String[] cols = tree.getCollections();
+                    for (String col : cols) {
+                        System.out.println("collection: " + col);
+                    }
+                    Map<String, String> metaMap = tree.getMetadata();
+                    if (metaMap != null) {
+                        for (Map.Entry<String, String> entry : metaMap.entrySet()) {
+                            System.out.println("metadata: " + 
+                                    entry.getKey() + ":" + entry.getValue());
+                        }
+                    }
+                }
        
                 byte kind = tree.rootNodeKind();
                 if (kind == NodeKind.BINARY) {
@@ -570,10 +569,15 @@ public class FCheck {
                     System.out.println("element root");
                 } else if (kind == NodeKind.TEXT) {
                     System.out.println("text root");
+                } else if (kind == NodeKind.OBJECT) {
+                    System.out.println("json root");
+                } else if (kind == NodeKind.ARRAY) {
+                    System.out.println("json array");
                 } else {
-                    System.out.println("unexpected node kind: " + kind);
+                    System.out.println("unexpected root node kind: " + kind);
                 }
-                if (kind != NodeKind.BINARY) {
+                if (kind != NodeKind.BINARY && kind != NodeKind.OBJECT &&
+                    kind != NodeKind.ARRAY) {
                     Node root = tree.node(0);
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     DomUtil.writeXml(root, bos);

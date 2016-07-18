@@ -16,7 +16,6 @@
 package com.marklogic.tree;
 
 import java.io.ByteArrayInputStream;
-import java.io.DataInput;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.zip.Inflater;
@@ -272,124 +271,131 @@ public class CompressedTreeDecoder {
         int numDoubles = 0;
         // node counts
         rep.numNodeReps = decoder.decodeUnsigned();
-        if (LOG.isTraceEnabled())
+        if (LOG.isTraceEnabled()) {
             LOG.trace(String.format("numNodeReps %d", rep.numNodeReps));
-
-        if (rep.numNodeReps==0) {
-            // escape
-            int version = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("version %d", version));
-            assert(version==0);
-
-            rep.numNodeReps = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("rep.numNodeReps %d", 
-                    rep.numNodeReps));
-            if (rep.numNodeReps > 0) {
-                rep.nodes = new NodeImpl[rep.numNodeReps];
-                rep.nodeOrdinal = new long[rep.numNodeReps];
-                rep.nodeKind = new byte[rep.numNodeReps];
-                rep.nodeRepID = new int[rep.numNodeReps];
-                rep.nodeParentNodeRepID = new int[rep.numNodeReps];
-            }
-            numArrayNodeReps = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("numArrayNodeReps %d", 
-                    numArrayNodeReps));
-            if (numArrayNodeReps > 0) {
-                rep.arrayNodeTextRepID = new int[numArrayNodeReps];
-                rep.arrayNodeChildNodeRepID = new int[numArrayNodeReps];
-                rep.arrayNodeNumChildren = new int[numArrayNodeReps];
-            } 
-            numDoubles = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("numDoubles %d", numDoubles));
-            if (numDoubles > 0) {
-                rep.doubles = new double[numDoubles];
-            }
-            numDocNodeReps = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("numDocNodeReps %d", numDocNodeReps));
-            if (numDocNodeReps > 0) {
-                rep.docNodeTextRepID = new int[numDocNodeReps];
-                rep.docNodeChildNodeRepID = new int[numDocNodeReps];
-                rep.docNodeNumChildren = new int[numDocNodeReps];
-            }
-        } 
-        else {
-            // compat
-            if (rep.numNodeReps > 0) {
-                rep.nodes = new NodeImpl[rep.numNodeReps];
-                rep.nodeOrdinal = new long[rep.numNodeReps];
-                rep.nodeKind = new byte[rep.numNodeReps];
-                rep.nodeRepID = new int[rep.numNodeReps];
-                rep.nodeParentNodeRepID = new int[rep.numNodeReps];
-            }
-            numElemNodeReps = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("numElemNodeReps %d", 
-                    numElemNodeReps));
-            if (numElemNodeReps > 0) {
-                rep.elemNodeNodeNameRepID = new int[numElemNodeReps];
-                rep.elemNodeAttrNodeRepID = new int[numElemNodeReps];
-                rep.elemNodeChildNodeRepID = new int[numElemNodeReps];
-                rep.elemNodeElemDeclRepID = new int[numElemNodeReps];
-                rep.elemNodeNumAttributes = new int[numElemNodeReps];
-                rep.elemNodeNumDefaultAttrs = new int[numElemNodeReps];
-                rep.elemNodeNumChildren = new int[numElemNodeReps];
-                rep.elemNodeFlags = new int[numElemNodeReps];
-            }
-            numAttrNodeReps = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("numAttrNodeReps %d", 
-                    numAttrNodeReps));
-            if (numAttrNodeReps > 0) {
-                rep.attrNodeNodeNameRepID = new int[numAttrNodeReps];
-                rep.attrNodeTextRepID = new int[numAttrNodeReps];
-                rep.attrNodeAttrDeclRepID = new int[numAttrNodeReps];
-            }
-            rep.numLinkNodeReps = decoder.decodeUnsigned() * 4 / 3;
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("numLinkNodeReps %d", 
-                        rep.numLinkNodeReps));
-            if (rep.numLinkNodeReps > 0) {
-                rep.linkNodeKey = new long[rep.numLinkNodeReps];
-                rep.linkNodeNodeCount = new long[rep.numLinkNodeReps];
-                rep.linkNodeNodeNameRepID = new int[rep.numLinkNodeReps];
-                rep.linkNodeNodeRepID = new int[rep.numLinkNodeReps];
-            }
-            numDocNodeReps = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("numDocNodeReps %d", numDocNodeReps));
-            if (numDocNodeReps > 0) {
-                rep.docNodeTextRepID = new int[numDocNodeReps];
-                rep.docNodeChildNodeRepID = new int[numDocNodeReps];
-                rep.docNodeNumChildren = new int[numDocNodeReps];
-            }
-            numPINodeReps = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("numPINodeReps %d", numPINodeReps));
-            if (numPINodeReps > 0) {
-                rep.piNodeTargetAtom = new int[numPINodeReps];
-                rep.piNodeTextRepID = new int[numPINodeReps];
-            }
-            rep.numNSNodeReps = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
-                LOG.trace(String.format("numNSNodeReps %d", 
-                    rep.numNSNodeReps));
-            if (rep.numNSNodeReps > 0) {
-                rep.nsNodeOrdinal = new long[rep.numNSNodeReps];
-                rep.nsNodePrevNSNodeRepID = new int[rep.numNSNodeReps];
-                rep.nsNodePrefixAtom = new int[rep.numNSNodeReps];
-                rep.nsNodeUriAtom = new int[rep.numNSNodeReps];
-            }
         }
-
+        if (rep.numNodeReps==0) {
+            int version = decoder.decodeUnsigned();
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(String.format("version %d", version));
+            }
+            assert(version<=1);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(String.format("version %d", 
+                    version));
+            }
+            if (version > 1) {
+                throw new IOException("Unexpected tree version:" + version);
+            }    
+            rep.numNodeReps = decoder.decodeUnsigned();
+            if (version == 1) { // tree with metadata
+                rep.numMetadata = decoder.decodeUnsigned();
+                numElemNodeReps = decoder.decodeUnsigned();
+                numAttrNodeReps = decoder.decodeUnsigned();
+                rep.numLinkNodeReps = decoder.decodeUnsigned()*4/3;
+                numPINodeReps = decoder.decodeUnsigned();
+                rep.numNSNodeReps = decoder.decodeUnsigned();
+            } else { // json tree
+                rep.numMetadata = 0;
+                numElemNodeReps=0;
+                numAttrNodeReps=0;
+                numPINodeReps=0;
+                rep.numLinkNodeReps=0;
+                rep.numNSNodeReps=0;
+            }
+            numArrayNodeReps = decoder.decodeUnsigned(); 
+            numDoubles = decoder.decodeUnsigned();
+            numDocNodeReps = decoder.decodeUnsigned();
+        } else { // old format
+            rep.numMetadata = 0;
+            numArrayNodeReps=0;
+            numDoubles=0;
+            numElemNodeReps = decoder.decodeUnsigned();
+            numAttrNodeReps = decoder.decodeUnsigned();
+            rep.numLinkNodeReps = decoder.decodeUnsigned()*4/3;
+            numDocNodeReps = decoder.decodeUnsigned();
+            numPINodeReps = decoder.decodeUnsigned();
+            rep.numNSNodeReps = decoder.decodeUnsigned();
+        }
         rep.numPermNodeReps = decoder.decodeUnsigned();
-        if (LOG.isTraceEnabled())
-            LOG.trace(String.format("numPermNodeReps %d", 
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(String.format("rep.numNodeReps %d", 
+                    rep.numNodeReps));
+            LOG.trace(String.format("rep.numMetadata %d", 
+                    rep.numMetadata));
+            LOG.trace(String.format("numElemNodeReps %d", 
+                    numElemNodeReps));
+            LOG.trace(String.format("numAttrNodeReps %d", 
+                    numAttrNodeReps));
+            LOG.trace(String.format("rep.numLinkNodeReps %d", 
+                    rep.numLinkNodeReps));
+            LOG.trace(String.format("numPINodeReps %d", 
+                    numPINodeReps));
+            LOG.trace(String.format("rep.numNSNodeReps %d", 
+                    rep.numNSNodeReps));
+            LOG.trace(String.format("rep.numArrayNodeReps %d", 
+                    numArrayNodeReps));
+            LOG.trace(String.format("numDoubles %d", numDoubles));
+            LOG.trace(String.format("numDocNodeReps %d", numDocNodeReps));
+            LOG.trace(String.format("rep.numPermNodeReps %d", 
                     rep.numPermNodeReps));
+        }
+        if (rep.numNodeReps > 0) {
+            rep.nodes = new NodeImpl[rep.numNodeReps];
+            rep.nodeOrdinal = new long[rep.numNodeReps];
+            rep.nodeKind = new byte[rep.numNodeReps];
+            rep.nodeRepID = new int[rep.numNodeReps];
+            rep.nodeParentNodeRepID = new int[rep.numNodeReps];
+        }
+        if (numArrayNodeReps > 0) {
+            rep.arrayNodeTextRepID = new int[numArrayNodeReps];
+            rep.arrayNodeChildNodeRepID = new int[numArrayNodeReps];
+            rep.arrayNodeNumChildren = new int[numArrayNodeReps];
+        } 
+        if (numDoubles > 0) {
+            rep.doubles = new double[numDoubles];
+        }
+        if (numDocNodeReps > 0) {
+            rep.docNodeTextRepID = new int[numDocNodeReps];
+            rep.docNodeChildNodeRepID = new int[numDocNodeReps];
+            rep.docNodeNumChildren = new int[numDocNodeReps];
+        }
+        if (numElemNodeReps > 0) {
+            rep.elemNodeNodeNameRepID = new int[numElemNodeReps];
+            rep.elemNodeAttrNodeRepID = new int[numElemNodeReps];
+            rep.elemNodeChildNodeRepID = new int[numElemNodeReps];
+            rep.elemNodeElemDeclRepID = new int[numElemNodeReps];
+            rep.elemNodeNumAttributes = new int[numElemNodeReps];
+            rep.elemNodeNumDefaultAttrs = new int[numElemNodeReps];
+            rep.elemNodeNumChildren = new int[numElemNodeReps];
+            rep.elemNodeFlags = new int[numElemNodeReps];
+        }
+        if (numAttrNodeReps > 0) {
+            rep.attrNodeNodeNameRepID = new int[numAttrNodeReps];
+            rep.attrNodeTextRepID = new int[numAttrNodeReps];
+            rep.attrNodeAttrDeclRepID = new int[numAttrNodeReps];
+        }
+        if (rep.numLinkNodeReps > 0) {
+            rep.linkNodeKey = new long[rep.numLinkNodeReps];
+            rep.linkNodeNodeCount = new long[rep.numLinkNodeReps];
+            rep.linkNodeNodeNameRepID = new int[rep.numLinkNodeReps];
+            rep.linkNodeNodeRepID = new int[rep.numLinkNodeReps];
+        }
+        if (numDocNodeReps > 0) {
+            rep.docNodeTextRepID = new int[numDocNodeReps];
+            rep.docNodeChildNodeRepID = new int[numDocNodeReps];
+            rep.docNodeNumChildren = new int[numDocNodeReps];
+        }
+        if (numPINodeReps > 0) {
+            rep.piNodeTargetAtom = new int[numPINodeReps];
+            rep.piNodeTextRepID = new int[numPINodeReps];
+        }
+        if (rep.numNSNodeReps > 0) {
+            rep.nsNodeOrdinal = new long[rep.numNSNodeReps];
+            rep.nsNodePrevNSNodeRepID = new int[rep.numNSNodeReps];
+            rep.nsNodePrefixAtom = new int[rep.numNSNodeReps];
+            rep.nsNodeUriAtom = new int[rep.numNSNodeReps];
+        }       
         if (rep.numPermNodeReps > 0) {
             rep.permNodeOrdinal = new long[rep.numPermNodeReps];
             rep.permNodePrevPermNodeRepID = new int[rep.numPermNodeReps];
@@ -402,6 +408,16 @@ public class CompressedTreeDecoder {
         // collection atoms
         rep.colsTextRepID = rep.numTextReps;
         decodeText(rep, decoder, rep.atomLimit);
+        // metadata
+        rep.metaKeys = new int[rep.numMetadata];
+        rep.metaVals = new int[rep.numMetadata];
+        // meta
+        for (int i = 0; i < rep.numMetadata; ++i)
+            rep.metaKeys[i] = decoder.decodeUnsigned();
+        for (int i = 0; i < rep.numMetadata; ++i) {
+            rep.metaVals[i] = rep.numTextReps;
+            decodeText(rep, decoder, rep.atomLimit);
+        }
         // nodes
         int nextDocNodeRep = 0;
         int nextElemNodeRep = 0;
