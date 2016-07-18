@@ -38,9 +38,9 @@ For official product documentation, please refer to:
 - [MLCP User Guide](http://docs.marklogic.com/guide/mlcp)
 - [MarkLogic Connector for Hadoop Developer's Guide](http://docs.marklogic.com/guide/mapreduce)
 
-Wiki page of this project contains useful information when you work on development:
+Wiki pages of this project contain useful information when you work on development:
 
-- [Development on MarkLogic Content Pump and Hadoop Connector]()
+- [Wiki Page of marklogic-contentpump](https://github.com/marklogic/marklogic-contentpump/wiki)
 
 ## Got a question / Need help?
 
@@ -61,18 +61,20 @@ After successful build, product packages can be found in **deliverable** directo
 
 Alternatively, MLCP and Hadoop Connector can be built separately from their own root directory (**mlcp** and **mapreduce**) with above command. Note that MLCP has a dependency on Hadoop Connector. So successfull build of Hadoop Connector is required for building MLCP. 
 
-For information on contributing to this project see [CONTRIBUTING.md](). For information on working on development of this project see [project wiki page]().
+For information on contributing to this project see [CONTRIBUTING.md](https://github.com/marklogic/marklogic-contentpump/blob/master/CONTRIBUTING.md). For information on working on development of this project see [project wiki page](https://github.com/marklogic/marklogic-contentpump/wiki).
 
 
 ## Run Tests
 
-The unit tests included in MLCP and Hadoop Connector are a minimum set of all the tests we have for the products. They are only designed for sanity check. To run unit tests, under marklogic-contentpump root directory:
+Unit tests included in MLCP and Hadoop Connector are a minimum set of all the tests we have for the products. They are only designed for sanity check. To run unit tests, under marklogic-contentpump root directory:
+
 ``` bash
 $ mvn test
 ```
 
-MLCP tests can be run in default mode (distributed or local) based on your environment. For detailed information about default mode of MLCP, please refer to the [documentention](http://docs.marklogic.com/guide/mlcp/import#id_69447) here. For database setups of MLCP unit tests and advanced usage, please refer to [How to run MLCP unit tests]().
+MLCP tests are run in default mode (distributed or local) based on your environment. For detailed information about running unit tests, visit [Guideline to Run Tests](https://github.com/marklogic/marklogic-contentpump/wiki/Guideline-to-Run-Tests).
 
 ## Support
 
-The MarkLogic Content Pump and Hadoop Connector are maintained by MarkLogic Engineering and distributed under the [Apache 2.0 license](https://github.com/marklogic/java-client-api/blob/master/LICENSE). It is designed for use in production applications with MarkLogic Server. Everyone is encouraged to file bug reports, feature requests, and pull requests through GitHub. This input is critical and will be carefully considered, but we can’t promise a specific resolution or timeframe for any request. In addition, MarkLogic provides technical support for [release tags](https://github.com/marklogic/marklogic-contentpump/releases) of MarkLogic Content Pump and Hadoop Connector to licensed customers under the terms outlined in the [Support Handbook](http://www.marklogic.com/files/Mark_Logic_Support_Handbook.pdf). For more information or to sign up for support, visit [help.marklogic.com](http://help.marklogic.com).
+The MarkLogic Content Pump and Hadoop Connector are maintained by MarkLogic Engineering and distributed under the [Apache 2.0 license](https://github.com/marklogic/marklogic-contentpump/blob/master/LICENSE). It is designed for use in production applications with MarkLogic Server. Everyone is encouraged to file bug reports, feature requests, and pull requests through GitHub. This input is critical and will be carefully considered, but we can’t promise a specific resolution or timeframe for any request. In addition, MarkLogic provides technical support for [release tags](https://github.com/marklogic/marklogic-contentpump/releases) of MarkLogic Content Pump and Hadoop Connector to licensed customers under the terms outlined in the [Support Handbook](http://www.marklogic.com/files/Mark_Logic_Support_Handbook.pdf). For more information or to sign up for support, visit [help.marklogic.com](http://help.marklogic.com).
+
