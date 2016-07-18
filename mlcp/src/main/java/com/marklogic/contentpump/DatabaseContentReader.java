@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +31,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
@@ -44,9 +46,12 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.JsonItem;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XdmElement;
+import com.marklogic.xcc.types.XdmItem;
+import com.marklogic.xcc.types.impl.JSObjectImpl;
 
 /**
  * A MarkLogicRecordReader that fetches data from MarkLogic server and generates 
@@ -68,6 +73,7 @@ public class DatabaseContentReader extends
     protected boolean copyPermission;
     protected boolean copyProperties;
     protected boolean copyQuality;
+    protected boolean copyMetadata;
     protected HashMap<String, DocumentMetadata> metadataMap;
     protected String ctsQuery = null;
     protected boolean nakedDone = false;
@@ -90,6 +96,8 @@ public class DatabaseContentReader extends
             false);
         copyQuality = conf
             .getBoolean(ConfigConstants.CONF_COPY_QUALITY, false);
+        copyMetadata = conf
+            .getBoolean(ConfigConstants.CONF_COPY_METADATA, false);
         currentKey = new DocumentURI();
         metadataMap = new HashMap<String, DocumentMetadata>();
     }
@@ -121,7 +129,7 @@ public class DatabaseContentReader extends
             + mlSplit.getLength() - 1;
 
         String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR);
-        redactionRuleCol = conf.getStrings(REDACTION_RULE_COLLECTION, null);
+        redactionRuleCol = conf.getStrings(REDACTION_RULE_COLLECTION);
         Collection<String> nsCol = null;
         if (src != null) {
             nsCol = conf.getStringCollection(PATH_NAMESPACE);
@@ -177,11 +185,13 @@ public class DatabaseContentReader extends
             } else {
                 buf.append("0,");
             }
+            // if copy-metadata
+            if (copyMetadata) {
+                buf.append("xdmp:document-get-metadata($uri),\n");
+            }
             // if copy-properties, else + (),\n
             if (copyProperties) {
                 buf.append("xdmp:document-properties($uri)/prop:properties,\n");
-            } else {
-                buf.append("(),\n");
             }
         } else {
             buf.append(",0,"); // quality
@@ -285,6 +295,10 @@ public class DatabaseContentReader extends
         } else {
             buf.append("0,");
         }
+        // copy-metadata
+        if (copyMetadata) {
+            buf.append("xdmp:document-get-metadata($uri),\n");
+        }
         buf.append("$doc/prop:properties, \n");
 
         // end-of-record marker
@@ -384,7 +398,7 @@ public class DatabaseContentReader extends
             try {
                 readPermission((XdmElement) item.getItem(), metadata, buf);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new IOException(e);
             }
             item = result.next();
         }
@@ -393,10 +407,27 @@ public class DatabaseContentReader extends
         
         // handle quality, always present even if not requested (barrier)
         metadata.setQuality((XSInteger) item.getItem());
+        
+        // handle metadata
         item = result.next();
+        if (copyMetadata) {
+            XdmItem metaItem  = item.getItem();
+            if (metaItem instanceof JsonItem) {
+                JsonNode node = ((JsonItem)metaItem).asJsonNode();
+                metadata.meta = new HashMap<String, String>(node.size());
+                for (Iterator<String> names = node.fieldNames(); 
+                     names.hasNext();) {
+                    String key = names.next();
+                    JsonNode nodeVal = node.get(key);
+                    metadata.meta.put(key, nodeVal.asText());
+                }
+                item = result.next();
+            }
+        }
 
         // handle prop:properties node, optional
         // if not present, there will be a 0 as a marker
+    
         if (copyProperties && ValueType.ELEMENT == item.getItemType()) {
             String pString = item.asString();
             if (pString != null) {

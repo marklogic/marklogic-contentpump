@@ -24,7 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.mapreduce.ContentOutputFormat;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.ContentWriter;
@@ -42,6 +43,7 @@ import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.types.ValueType;
 
 /**
  * MarkLogicRecordWriter that can 
@@ -62,6 +64,7 @@ public class DatabaseContentWriter<VALUE> extends
     protected boolean isCopyColls;
     protected boolean isCopyPerms;
     protected boolean isCopyQuality;
+    protected boolean isCopyMeta;
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
     public DatabaseContentWriter(Configuration conf,
@@ -87,6 +90,8 @@ public class DatabaseContentWriter<VALUE> extends
             ConfigConstants.CONF_COPY_COLLECTIONS, true);
         isCopyQuality = conf.getBoolean(
             ConfigConstants.CONF_COPY_QUALITY, true);
+        isCopyMeta = conf.getBoolean(
+                ConfigConstants.CONF_COPY_METADATA, true);
     }
 
     /**
@@ -118,6 +123,7 @@ public class DatabaseContentWriter<VALUE> extends
             }
             opt.setPermissions(
                     pSet.toArray(new ContentPermission[pSet.size()]));
+            opt.setMetadata(meta.meta);
         }       
         return opt;
     }
@@ -175,19 +181,16 @@ public class DatabaseContentWriter<VALUE> extends
                 // add new content
                 forestContents[fId][counts[fId]] = content;
                 metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
-            } else {
-                // naked properties
-                if (isCopyProps) {
-                    if (sessions[sid] == null) {
-                        sessions[sid] = getSession(csKey);
-                    }
-                    setDocumentProperties(uri, meta.getProperties(),
-                            isCopyPerms?meta.getPermString():null,
-                            isCopyColls?meta.getCollectionString():null,
-                            isCopyQuality?meta.getQualityString():null, 
-                            sessions[sid]);
-                    stmtCounts[sid]++;
+            } else if (isCopyProps) { // naked properties
+                if (sessions[sid] == null) {
+                    sessions[sid] = getSession(csKey);
                 }
+                setDocumentProperties(uri, meta.getProperties(),
+                        isCopyPerms?meta.getPermString():null,
+                        isCopyColls?meta.getCollectionString():null,
+                        isCopyQuality?meta.getQualityString():null, 
+                        isCopyMeta?meta.getMeta():null, sessions[sid]);
+                stmtCounts[sid]++;
             }
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
@@ -202,7 +205,7 @@ public class DatabaseContentWriter<VALUE> extends
                         String u = metadatas[fId][i].getUri();
                         if (m != null && m.getProperties() != null) {
                             setDocumentProperties(u, m.getProperties(),
-                                    null,null,null,sessions[sid]);
+                                    null,null,null,null,sessions[sid]);
                             stmtCounts[sid]++;
                         }
                     }
@@ -231,8 +234,8 @@ public class DatabaseContentWriter<VALUE> extends
                 setDocumentProperties(uri, meta.getProperties(),
                         isCopyPerms&&naked?meta.getPermString():null,
                         isCopyColls&&naked?meta.getCollectionString():null,
-                        isCopyQuality&&naked?meta.getQualityString():null, 
-                        sessions[sid]);
+                        isCopyQuality&&naked?meta.getQualityString():null,
+                        isCopyMeta&&naked?meta.meta:null, sessions[sid]);
                 stmtCounts[sid]++;
             }
             inserted = true;
@@ -346,14 +349,16 @@ public class DatabaseContentWriter<VALUE> extends
      * @throws RequestException
      */
     protected void setDocumentProperties(String uri, String xmlString,
-        String permString, String collString, String quality,
-        Session s) {
+        String permString, String collString, String quality, 
+        Map<String, String> meta, Session s) {
         String query = XQUERY_VERSION_1_0_ML
             + "declare variable $URI as xs:string external;\n"
             + "declare variable $XML-STRING as xs:string external;\n"
             + "declare variable $PERM-STRING as xs:string external;\n"
             + "declare variable $COLL-STRING as xs:string external;\n"
             + "declare variable $QUALITY-STRING as xs:string external;\n"
+            + (meta == null ? 
+                    "" : "declare variable $META as map:map external;\n")
             + "xdmp:document-set-properties($URI,\n"
             + "  xdmp:unquote($XML-STRING)/prop:properties/node() )\n"
             + ", if('' eq ($PERM-STRING)) then () else \n"
@@ -365,7 +370,11 @@ public class DatabaseContentWriter<VALUE> extends
             + "xdmp:document-set-collections($URI,json:array-values($f($COLL-STRING)))\n"
             + "else xdmp:document-set-collections($URI,json:array-values(xdmp:from-json($COLL-STRING)))\n"
             + ", if('' eq ($QUALITY-STRING)) then () else xdmp:document-set-quality($URI,xs:integer($QUALITY-STRING))\n"
-            ;
+            + (meta == null ?
+                    "" : ", xdmp:document-set-metadata($URI,$META)");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(query);
+        }
         AdhocQuery req = s.newAdhocQuery(query);
         req.setNewStringVariable("URI", uri);
         req.setNewStringVariable("XML-STRING", xmlString);
@@ -375,6 +384,15 @@ public class DatabaseContentWriter<VALUE> extends
                 collString==null||collString.isEmpty()?"":collString);
         req.setNewStringVariable("QUALITY-STRING", 
                 quality==null?"":quality);
+        if (meta != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode node = mapper.createObjectNode();
+            for (Map.Entry<String, String> entry : meta.entrySet()) {
+                node.put(entry.getKey(), entry.getValue());
+            }
+            req.setNewVariable("META", ValueType.JS_OBJECT, node);
+        }
+        
         try {
             s.submitRequest(req);
         } catch (RequestException ex) {

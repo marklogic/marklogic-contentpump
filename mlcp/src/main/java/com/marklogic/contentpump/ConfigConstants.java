@@ -80,10 +80,12 @@ public interface ConfigConstants {
     static final String COPY_PERMISSIONS = "copy_permissions";
     static final String COPY_PROPERTIES = "copy_properties";
     static final String COPY_QUALITY = "copy_quality";
+    static final String COPY_METADATA = "copy_metadata";
     static final String DEFAULT_COPY_COLLECTIONS = "true";
     static final String DEFAULT_COPY_PERMISSIONS = "true";
     static final String DEFAULT_COPY_PROPERTIES = "true";
     static final String DEFAULT_COPY_QUALITY = "true";
+    static final String DEFAULT_COPY_METADATA = "true";
     static final String COLLECTION_FILTER = "collection_filter";
     static final String DIRECTORY_FILTER = "directory_filter";
     static final String QUERY_FILTER = "query_filter";
@@ -174,6 +176,8 @@ public interface ConfigConstants {
     static final String CONF_COPY_PROPERTIES = 
         "mapreduce.marklogic.copyproperties";
     static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
+    static final String CONF_COPY_METADATA = 
+         "mapreduce.marklogic.copymetadata";
     static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = 
         "mapreduce.marklogic.input.archive.metadataoptional";
     static final String CONF_THREADS_PER_SPLIT = 

@@ -1655,6 +1655,13 @@ public enum Command implements ConfigConstants {
                    + " to destination")
             .create(COPY_QUALITY);
         options.addOption(cpqt);
+        Option cpmeta = OptionBuilder
+            .withArgName("true,false")
+            .hasOptionalArg()
+            .withDescription("Whether to copy document metadata from source"
+                    + " to destination")
+            .create(COPY_METADATA);
+            options.addOption(cpmeta);
     }
 
     static void configBatchTxn(Options options) {
@@ -1826,6 +1833,20 @@ public enum Command implements ConfigConstants {
             }
         } else {
             conf.set(CONF_COPY_QUALITY, DEFAULT_COPY_QUALITY);
+        }
+        if (cmdline.hasOption(COPY_METADATA)) {
+            String arg = cmdline.getOptionValue(COPY_METADATA);
+            if (arg == null || arg.equalsIgnoreCase("true")) {
+                conf.setBoolean(CONF_COPY_METADATA, true);
+            } else if (arg.equalsIgnoreCase("false")) {
+                conf.setBoolean(CONF_COPY_METADATA, false);
+            } else {
+                throw new IllegalArgumentException(
+                        "Unrecognized option argument for " + COPY_METADATA
+                                + ": " + arg);
+            }
+        } else {
+            conf.set(CONF_COPY_METADATA, DEFAULT_COPY_METADATA);
         }
     }
 
