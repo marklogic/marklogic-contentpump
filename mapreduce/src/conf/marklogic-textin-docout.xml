@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Used with com.marklogic.mapreduce.examples.ContentLoader.class -->
+
+<configuration>
+    <property>
+        <name>mapreduce.marklogic.output.username</name>
+        <value>username</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.password</name>
+        <value>password</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.host</name>
+        <value>hostname</value>
+    </property>
+    <property>
+        <name>mapreduce.marklogic.output.port</name>
+        <value>port</value>
+    </property>
+    <property>
+        <name>mapred.reduce.tasks</name>
+        <value>0</value>
+    </property>
+    <property>
+        <name>mapred.map.tasks.speculative.execution</name>
+        <value>false</value>
+    </property>
+</configuration>

@@ -1,0 +1,176 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head><title>Overview of MarkLogic Connector for Hadoop</title</head>
+<body>
+<p>
+  This bundle provides an API for a MarkLogic Server content
+  connector for Apache Hadoop MapReduce. The overview covers the 
+  following topics:
+</p>
+<ul>
+  <li><a href="#Introduction">Introduction</a></li>
+  <li><a href="#Configuration">Configuration</a></li>
+</ul>
+
+<p>
+  For detailed information, see the <em>MarkLogic Connector for
+  Hadoop Developer's Guide</em>.
+</p>
+
+<h2 id="Introduction">Introduction</h2>
+<p>
+  The MarkLogic Connector for Hadoop API allows you to
+  use MarkLogic Server as either or both a Hadoop MapReduce
+  input source and an output destination. 
+</p>
+<p>
+  The following classes are provided for defining MarkLogic-specific
+  key and value types for your MapReduce key-value pairs:
+</p>
+<ul>
+  <li>{@link com.marklogic.mapreduce.NodePath} for keys</li>
+  <li>{@link com.marklogic.mapreduce.DocumentURI} for keys</li>
+  <li>{@link com.marklogic.mapreduce.MarkLogicNode} for values</li>
+</ul>
+<p>
+  You may also use Apache Hadoop MapReduce types such as Text in
+  certain circumstances. See {@link com.marklogic.mapreduce.ValueInputFormat}
+  {@link com.marklogic.mapreduce.KeyValueInputFormat}.
+</p>
+<p>
+  You may generate input data using MarkLogic Server lexicon functions
+  by subclassing one of the lexicon function wrapper classes in 
+  com.marklogic.mapreduce.functions. Use lexicon functions
+  with {@link com.marklogic.mapreduce.ValueInputFormat} and 
+  {@link com.marklogic.mapreduce.KeyValueInputFormat}.
+</p>
+<p>
+  The following classes are provided for defining 
+  MarkLogic-specific MapReduce input and output formats. 
+  Input and output formats need not be the same type.
+</p>
+<ul>
+  <li>{@link com.marklogic.mapreduce.DocumentInputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.ForestInputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.NodeInputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.ValueInputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.KeyValueInputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.ContentOutputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.NodeOutputFormat}</li>
+  <li>{@link com.marklogic.mapreduce.PropertyOutputFormat}</li>
+</ul>
+
+<h2 id="Configuration">Configuration</h2>
+<p>
+  Configure the connector using the standard Hadoop configuration
+  mechanism. That is, use a Hadoop configuration file to define
+  property values, or set properties programmatically on your
+  Job's {@link org.apache.hadoop.conf.Configuration} object.
+</p>
+<p>
+  The configuration properties available for the connector are
+  described in {@link com.marklogic.mapreduce.MarkLogicConstants}.
+</p>
+<p>
+ When using MarkLogic Server as an input source for MapReduce
+ tasks, you may use either basic or advanced input mode. The default 
+ is <code>basic</code> mode. The mode is controlled through
+ the {@link com.marklogic.mapreduce.MarkLogicConstants#INPUT_MODE
+ mapreduce.marklogic.input.mode} property. The following sections
+ describe the input modes briefly. For details, see the
+ <em>MarkLogic Connector for Hadoop Developer's Guide</em>.
+</p>
+
+<h3>Configuring the Input Query With a Path Expression</h3>
+<p>
+ In basic mode, you may supply components of an XQuery path expression
+ which the connector uses to generate input data. You may not use this
+ option along with a lexicon function class.
+</p>
+<p>To allow MarkLogic Server to optimize the input query, the path 
+ expression is constructed from two components: A 
+ {@link com.marklogic.mapreduce.MarkLogicConstants#DOCUMENT_SELECTOR 
+ document node selector} and a
+ {@link com.marklogic.mapreduce.MarkLogicConstants#SUBDOCUMENT_EXPRESSION
+ sub-document expression}.
+</p>
+<p>
+  The input split is not configurable in <code>basic</code> mode. The
+  splits are based on a rough count of the number of fragments in
+  each forest. Use <code>advanced</code> input mode for more control
+  over input split generation.
+</p>
+<p>
+ Conceptually, the input data for each task is constructed from a 
+ path expression similar to:
+</p>
+<pre class="codesample"><code>
+$document-selector/$subdocument-expression
+</code></pre>
+<p>
+ Both components of the input path expression are optional. If no 
+ document selector is given, <code>fn:collection()</code> is used.
+ If no subdocument expression is given, the document nodes returned
+ by the document selector are used as the input values.
+</p>
+<p>Examples:</p>
+<pre class="codesample"><code>
+document selector: none
+subdocument expression: none
+  =&gt; All document nodes in fn:collection()
+
+document selector: fn:collection("wiki-topics")
+subdocument expression: none
+  =&gt; All document nodes in the "wiki-topics" collection
+
+document selector: fn:collection("wiki-topics")
+subdocument expression: //wp:a[@href]
+  =&gt; All elements in the "wiki-topics" collection containing hrefs
+
+document selector: fn:collection("wiki-topics")
+subdocument expression: //wp:a[@href]/@title
+  =&gt; The titles of all documents in the "wiki-topics" collection 
+     containing hrefs
+</code></pre>
+
+<h3>Configuring the Input Query with a Lexicon Function</h3>
+<p>
+ In basic mode, you may gather input data using a MarkLogicServer
+ lexicon function. This option may not be used with the XPath
+ based configuration properties described above. If both are
+ configured for a job, the lexicon function takes precedence.
+</p>
+<p>
+ To use a lexicon function for input, implement a subclass of
+ one of the lexicon wrapper functions in com.marklogic.mapreduce.functions.
+ For example, to use <code>cts:element-values</code>, implement a
+ subclass of {@link com.marklogic.mapreduce.functions.ElementValues}.
+ Override the methods corresponding to the function parameter value
+ you want to include in the call.
+</p>
+<p>
+ For details, see "Using a Lexicon to Generate Key-Value Pairs" in
+ the <em>MarkLogic Connector for Hadoop Developer's Guide</em>.
+</p>
+
+<h3>Configuring the Input Query in Advanced Mode</h3>
+<p>
+ In <code>advanced</code> input mode, you must supply an 
+ {@link com.marklogic.mapreduce.MarkLogicConstants#SPLIT_QUERY 
+ input split query} and an 
+ {@link com.marklogic.mapreduce.MarkLogicConstants#INPUT_QUERY
+ input query}.
+ </p>
+ <p>
+  The split query is used to generate meta-data for Hadoop's
+  input splits. This query must return a sequence of triples, 
+  each of which includes a forest id, record (fragment) count, 
+  and list of host names. The count may be an estimate.
+</p>
+<p>
+ The input query is used to fetch the input data for each map task.
+ This query must return data that matches the configured InputFormat
+ subclass.
+</p>
+</body>
+</html>
+

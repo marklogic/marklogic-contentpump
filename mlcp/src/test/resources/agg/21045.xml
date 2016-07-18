@@ -1,0 +1,17 @@
+<root>
+	<parent>
+		<child>
+			<el at="A_B">test</el>
+		</child>
+	</parent>
+	<parent>
+		<child>
+			<el at="A&quot;B" />
+		</child>
+	</parent>
+	<parent>
+		<child>
+			<el at="AB" />
+		</child>
+	</parent>
+</root>

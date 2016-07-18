@@ -1,0 +1,22 @@
+<root xmlns:ml="www.marklogic.com" xmlns="test">
+ <r>
+  <p pid="p125">
+    <id>125</id>
+    <comment attr="com">test</comment>
+  </p>
+ </r>
+ <r>
+  <p pid="p126">
+    <id>126</id>
+    <comment>aait</comment>
+  </p>
+ </r>
+
+ <r>
+   <p pid="p127">
+       <id>127</id>
+           <comment>55555aait</comment>
+             </p>
+              </r>
+
+</root>

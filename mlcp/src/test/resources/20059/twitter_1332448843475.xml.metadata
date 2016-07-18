@@ -1,0 +1,33 @@
+<com.marklogic.ps.xqsync.XQSyncDocumentMetadata>
+  <format>
+    <name>xml</name>
+  </format>
+  <collectionsList class="vector">
+    <string>/tickets/ticket/5733797535782051749</string>
+    <string>twitter</string>
+  </collectionsList>
+  <permissionsList class="vector">
+    <com.marklogic.xcc.ContentPermission>
+      <capability>
+        <name>read</name>
+        <symbol>R</symbol>
+      </capability>
+      <role>app-user</role>
+    </com.marklogic.xcc.ContentPermission>
+    <com.marklogic.xcc.ContentPermission>
+      <capability>
+        <name>update</name>
+        <symbol>U</symbol>
+      </capability>
+      <role>infostudio-user</role>
+    </com.marklogic.xcc.ContentPermission>
+    <com.marklogic.xcc.ContentPermission>
+      <capability reference="../../com.marklogic.xcc.ContentPermission/capability"/>
+      <role>infostudio-user</role>
+    </com.marklogic.xcc.ContentPermission>
+  </permissionsList>
+  <quality>1</quality>
+  <properties>&lt;prop:properties xmlns:prop=&quot;http://marklogic.com/xdmp/property&quot;&gt;
+  &lt;prop:last-modified&gt;2012-05-09T15:55:35-04:00&lt;/prop:last-modified&gt;
+&lt;/prop:properties&gt;</properties>
+</com.marklogic.ps.xqsync.XQSyncDocumentMetadata>

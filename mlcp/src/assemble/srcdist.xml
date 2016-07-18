@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly>
+    <id>src</id>
+    <formats>
+      <format>zip</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <fileSets>
+      <fileSet>
+        <directory>src</directory>
+        <outputDirectory>/src</outputDirectory>
+        <excludes>
+          <exclude>**/test/**</exclude>
+          <exclude>**/test.properties</exclude> 
+        </excludes>
+      </fileSet>
+      <fileSet>
+        <directory>hadoop-deps</directory>
+        <outputDirectory>/hadoop-deps</outputDirectory>
+        <includes>
+          <include>pom*.xml</include>
+        </includes>
+      </fileSet>
+      <fileSet>
+        <includes>
+          <include>LICENSE*</include>
+          <include>LEGAL*</include>
+        </includes>
+      </fileSet>
+    </fileSets>
+    <files>
+      <file>
+        <source>pom.xml</source>
+        <outputDirectory>/</outputDirectory>
+      </file>
+    </files>
+</assembly>
+

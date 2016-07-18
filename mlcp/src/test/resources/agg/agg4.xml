@@ -1,0 +1,15 @@
+<!DOCTYPE MedlineCitationSet
+PUBLIC "-//NLM//DTD NLM Medline, 1st November 2003//EN"
+"http://www.nlm.nih.gov/databases/dtd/nlmmedline_031101.dtd">
+<root>
+  <p pid="p121">num1
+    <id>121</id>
+    <comment attr="com">test</comment>
+  </p>
+  <p pid="p122">num2
+    <id>122</id>
+    <comment>aait</comment>
+  </p>
+
+
+</root>

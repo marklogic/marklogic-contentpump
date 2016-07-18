@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly>
+  <id>bin</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>true</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>src/main</directory>
+      <outputDirectory>/bin</outputDirectory>
+      <fileMode>0755</fileMode>
+      <includes>
+        <include>*.sh</include>
+        <include>*.bat</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <directory>src/conf</directory>
+      <outputDirectory>/conf</outputDirectory>
+      <fileMode>0755</fileMode>
+      <includes>
+        <include>log4j.properties</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <includes>
+        <include>LICENSE*</include>
+        <include>LEGAL*</include>
+      </includes>
+    </fileSet>
+  </fileSets>
+  <dependencySets>
+    <dependencySet>
+      <scope>runtime</scope>
+      <outputDirectory>/lib</outputDirectory>
+    </dependencySet>
+  </dependencySets>
+</assembly>
