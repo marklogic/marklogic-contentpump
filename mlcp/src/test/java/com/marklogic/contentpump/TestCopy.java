@@ -399,7 +399,7 @@ public class TestCopy{
         //copy
         cmd = "COPY -input_host localhost"
             + " -input_username admin -input_password admin"
-            + " -output_host localhost5"
+            + " -output_host localhost"
             + " -output_username admin -output_password admin"
             + " -thread_count 1"
             + " -input_port " + Constants.port + " -input_database " + Constants.testDb
