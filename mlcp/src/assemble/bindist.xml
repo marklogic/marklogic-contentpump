@@ -7,6 +7,24 @@
   <includeBaseDirectory>true</includeBaseDirectory>
   <fileSets>
     <fileSet>
+        <directory>${basedir}/../mapreduce/target</directory>
+        <outputDirectory>/lib</outputDirectory>
+        <includes>
+          <include>marklogic-mapreduce*.jar</include>
+        </includes>
+        <excludes>
+          <exclude>marklogic-mapreduce*-examples.jar</exclude>
+          <exclude>marklogic-mapreduce*-test.jar</exclude>
+        </excludes>
+    </fileSet>
+    <fileSet>
+        <directory>${basedir}/../mapreduce/src/lib</directory>
+        <outputDirectory>/lib</outputDirectory>
+        <includes>
+          <include>marklogic-xcc*.jar</include>
+        </includes>
+    </fileSet>
+    <fileSet>
       <directory>src/main</directory>
       <outputDirectory>/bin</outputDirectory>
       <fileMode>0755</fileMode>
@@ -25,11 +43,16 @@
     </fileSet>
     <fileSet>
       <includes>
-        <include>LICENSE*</include>
         <include>LEGAL*</include>
       </includes>
     </fileSet>
   </fileSets>
+  <files>
+    <file>
+      <source>${basedir}/../LICENSE.txt</source>
+      <outputDirectory>/</outputDirectory>
+    </file>
+  </files>
   <dependencySets>
     <dependencySet>
       <scope>runtime</scope>
