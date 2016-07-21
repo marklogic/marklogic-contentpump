@@ -131,6 +131,7 @@ public class ExpandedTree implements Writable {
 	public int numMetadata; // unsigned
 
 	private long fragmentOrdinal;
+	private int quality;
 
 	public boolean atomEquals(int atom, byte value[]) {
 		int p = 0;
@@ -275,6 +276,14 @@ public class ExpandedTree implements Writable {
 
     public void setFragmentOrdinal(long fragmentOrdinal) {
         this.fragmentOrdinal = fragmentOrdinal;
+    }
+
+    public int getQuality() {
+        return quality;
+    }
+
+    public void setQuality(int quality) {
+        this.quality = quality;
     }
 
     @Override

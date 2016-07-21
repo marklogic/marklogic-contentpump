@@ -169,15 +169,10 @@ public interface ConfigConstants {
     static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE = 
         "mapreduce.marklogic.input.sequencefile.valuetype";
     static final String CONF_OUTPUT_TYPE = "mapreduce.marklogic.output.type";
-    static final String CONF_COPY_COLLECTIONS = 
-        "mapreduce.marklogic.copycollections";
     static final String CONF_COPY_PERMISSIONS = 
         "mapreduce.marklogic.copypermissions";
     static final String CONF_COPY_PROPERTIES = 
         "mapreduce.marklogic.copyproperties";
-    static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
-    static final String CONF_COPY_METADATA = 
-         "mapreduce.marklogic.copymetadata";
     static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = 
         "mapreduce.marklogic.input.archive.metadataoptional";
     static final String CONF_THREADS_PER_SPLIT = 

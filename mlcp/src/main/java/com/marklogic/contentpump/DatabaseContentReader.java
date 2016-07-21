@@ -51,7 +51,6 @@ import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XdmElement;
 import com.marklogic.xcc.types.XdmItem;
-import com.marklogic.xcc.types.impl.JSObjectImpl;
 
 /**
  * A MarkLogicRecordReader that fetches data from MarkLogic server and generates 
@@ -65,7 +64,8 @@ import com.marklogic.xcc.types.impl.JSObjectImpl;
 //changed, can't simply change query body
 
 public class DatabaseContentReader extends
-    MarkLogicRecordReader<DocumentURI, MarkLogicDocument> {
+    MarkLogicRecordReader<DocumentURI, MarkLogicDocument> implements
+    ConfigConstants {
     static final float DOCUMENT_TO_FRAGMENT_RATIO = 1;
     public static final Log LOG = LogFactory
         .getLog(DatabaseContentReader.class);
@@ -89,15 +89,14 @@ public class DatabaseContentReader extends
     public DatabaseContentReader(Configuration conf) {
         super(conf);
         copyCollection = conf.getBoolean(
-            ConfigConstants.CONF_COPY_COLLECTIONS, false);
+            MarkLogicConstants.COPY_COLLECTIONS, false);
         copyPermission = conf.getBoolean(
-            ConfigConstants.CONF_COPY_PERMISSIONS, false);
+            CONF_COPY_PERMISSIONS, false);
         copyProperties = conf.getBoolean(ConfigConstants.CONF_COPY_PROPERTIES,
             false);
-        copyQuality = conf
-            .getBoolean(ConfigConstants.CONF_COPY_QUALITY, false);
+        copyQuality = conf.getBoolean(MarkLogicConstants.COPY_QUALITY, false);
         copyMetadata = conf
-            .getBoolean(ConfigConstants.CONF_COPY_METADATA, false);
+            .getBoolean(ConfigConstants.COPY_METADATA, false);
         currentKey = new DocumentURI();
         metadataMap = new HashMap<String, DocumentMetadata>();
     }
@@ -132,11 +131,12 @@ public class DatabaseContentReader extends
         redactionRuleCol = conf.getStrings(REDACTION_RULE_COLLECTION);
         Collection<String> nsCol = null;
         if (src != null) {
-            nsCol = conf.getStringCollection(PATH_NAMESPACE);
+            nsCol = conf.getStringCollection(
+                    MarkLogicConstants.PATH_NAMESPACE);
         } else {
             src = "fn:collection()";
         }
-        ctsQuery = conf.get(QUERY_FILTER);
+        ctsQuery = conf.get(MarkLogicConstants.QUERY_FILTER);
         StringBuilder buf = new StringBuilder();
         if (ctsQuery != null) {
             buildSearchQuery(src, ctsQuery, nsCol, buf);

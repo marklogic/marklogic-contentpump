@@ -61,10 +61,8 @@ public class DatabaseContentWriter<VALUE> extends
     private URIMetadata[][] metadatas;
     
     protected boolean isCopyProps;
-    protected boolean isCopyColls;
     protected boolean isCopyPerms;
-    protected boolean isCopyQuality;
-    protected boolean isCopyMeta;
+    
     public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
 
     public DatabaseContentWriter(Configuration conf,
@@ -86,12 +84,6 @@ public class DatabaseContentWriter<VALUE> extends
             ConfigConstants.CONF_COPY_PROPERTIES, true);
         isCopyPerms = conf.getBoolean(
             ConfigConstants.CONF_COPY_PERMISSIONS, true);
-        isCopyColls = conf.getBoolean(
-            ConfigConstants.CONF_COPY_COLLECTIONS, true);
-        isCopyQuality = conf.getBoolean(
-            ConfigConstants.CONF_COPY_QUALITY, true);
-        isCopyMeta = conf.getBoolean(
-                ConfigConstants.CONF_COPY_METADATA, true);
     }
 
     /**

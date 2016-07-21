@@ -154,6 +154,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     
     protected int hostId = 0;
     
+    protected boolean isCopyColls;
+    protected boolean isCopyQuality;
+    protected boolean isCopyMeta;
+    
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         this(conf, forestSourceMap, fastLoad, null);
@@ -281,7 +285,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         streaming = conf.getBoolean(OUTPUT_STREAMING, false);
         tolerateErrors = conf.getBoolean(OUTPUT_TOLERATE_ERRORS, false);
         
-        String encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
+        String encoding = conf.get(OUTPUT_CONTENT_ENCODING);
         if (encoding != null) {
             options.setEncoding(encoding);
         }
@@ -295,6 +299,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 commitUris[i] = new ArrayList<DocumentURI>(txnSize*batchSize);
             }
         }
+        
+        isCopyColls = conf.getBoolean(COPY_COLLECTIONS, true);
+        isCopyQuality = conf.getBoolean(COPY_QUALITY, true);
+        isCopyMeta = conf.getBoolean(COPY_METADATA, true);
     }
 
     protected Content createContent(DocumentURI key, VALUEOUT value) 
@@ -317,33 +325,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
             content = ContentFactory.newContent(uri, 
                     ((MarkLogicNode)value).get(), options);
-        } else if (value instanceof DOMDocument) {
-            content = ContentFactory.newContent(uri, 
-                    ((DOMDocument) value).getContentAsMarkLogicNode().get(), 
-                    options);
-        } else if (value instanceof JSONDocument) {
-            JSONDocument doc = (JSONDocument)value;
-            content = ContentFactory.newContent(uri, 
-                    doc.getContentAsByteArray(), options);
-        } else if (value instanceof BinaryDocument) {
-            BinaryDocument doc = (BinaryDocument)value;
-            if (doc.isStreamable()) {
-                InputStream is = null;
-                try {
-                    is = doc.getContentAsByteStream();
-                    content = ContentFactory.newUnBufferedContent(uri, is, 
-                            options);
-                } catch (Exception ex) {
-                    if (is != null) {
-                        is.close();
-                    } 
-                    LOG.error("Error accessing large binary document " + 
-                            key + ", skipping...", ex);
-                } 
-            } else {
-                content = ContentFactory.newContent(uri, 
-                        doc.getContentAsByteArray(), options);
+        } else if (value instanceof ForestDocument) {
+            ContentCreateOptions newOptions = options;
+            if (isCopyColls || isCopyMeta || isCopyQuality) {
+                newOptions = (ContentCreateOptions)options.clone();
             }
+            content = ((ForestDocument)value).createContent(uri, newOptions,
+                    isCopyColls, isCopyMeta, isCopyQuality);
         } else if (value instanceof BytesWritable) {
             if (formatNeeded) {
                 options.setFormat(DocumentFormat.BINARY);

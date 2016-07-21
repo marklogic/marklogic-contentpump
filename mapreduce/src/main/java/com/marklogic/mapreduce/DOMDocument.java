@@ -19,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import javax.xml.transform.OutputKeys;
@@ -40,6 +41,9 @@ import com.marklogic.dom.NodeImpl;
 import com.marklogic.dom.TextImpl;
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
+import com.marklogic.xcc.Content;
+import com.marklogic.xcc.ContentCreateOptions;
+import com.marklogic.xcc.ContentFactory;
 
 /**
  * A {@link ForestDocument} containing a DOM document node 
@@ -171,5 +175,17 @@ public class DOMDocument extends ForestDocument {
     @Override
     public String getContentAsString() throws UnsupportedEncodingException {
         return toString();
+    }
+    
+    @Override
+    public Content createContent(String uri, ContentCreateOptions options,
+            boolean copyCollections, boolean copyMetadata, boolean copyQuality)
+    throws IOException {
+        if (copyCollections || copyMetadata || copyQuality) {
+            setContentOptions(options, copyCollections, copyMetadata, 
+                    copyQuality);
+        }
+        return ContentFactory.newContent(uri, 
+                getContentAsMarkLogicNode().get(), options);
     }
 }

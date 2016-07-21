@@ -20,6 +20,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +33,8 @@ import org.apache.hadoop.io.WritableUtils;
 
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
+import com.marklogic.xcc.Content;
+import com.marklogic.xcc.ContentCreateOptions;
 
 /**
  * A {@link MarkLogicDocument} retrieved from a MarkLogic forest through 
@@ -43,6 +49,8 @@ public abstract class ForestDocument implements MarkLogicDocument {
     
     private long fragmentOrdinal;
     private String[] collections;
+    private int quality;
+    private Map<String, String> metadata;
     
     public static ForestDocument createDocument(Configuration conf,
             Path forestDir, ExpandedTree tree, String uri) {
@@ -78,6 +86,8 @@ public abstract class ForestDocument implements MarkLogicDocument {
         }
         doc.setFragmentOrdinal(tree.getFragmentOrdinal());
         doc.setCollections(tree.getCollections());
+        doc.setMetadata(tree.getMetadata());
+        doc.setQuality(tree.getQuality());
         return doc;
     }
 
@@ -97,16 +107,54 @@ public abstract class ForestDocument implements MarkLogicDocument {
         collections = cols;
     }
     
+    public Map<String, String> getMetadata() {
+        return metadata;
+    }
+
+    private void setMetadata(Map<String, String> metadata) {
+        this.metadata = metadata;
+    }
+
     @Override
     public void readFields(DataInput in) throws IOException {
         fragmentOrdinal = in.readLong();
         collections = WritableUtils.readStringArray(in);
+        int numMetadata = in.readInt();
+        if (numMetadata > 0) {
+            String[] metaStrings = WritableUtils.readStringArray(in);
+            metadata = new HashMap<String, String>(numMetadata);
+            for (int i = 0; i < metaStrings.length - 1; i++) {
+                metadata.put(metaStrings[i], metaStrings[i + 1]);
+            }
+        }
+        quality = in.readInt();
+    }
+
+    public int getQuality() {
+        return quality;
+    }
+
+    public void setQuality(int quality) {
+        this.quality = quality;
     }
 
     @Override
     public void write(DataOutput out) throws IOException {
         out.writeLong(fragmentOrdinal);
         WritableUtils.writeStringArray(out, collections);
+        if (metadata.isEmpty()) {
+            out.writeInt(0);
+        } else {
+            out.writeInt(metadata.size());
+            String[] metaStrings = new String[metadata.size() * 2];
+            int i = 0;
+            for (Entry<String, String> entry : metadata.entrySet()) {
+                metaStrings[i++] = entry.getKey();
+                metaStrings[i++] = entry.getValue();
+            }
+            WritableUtils.writeStringArray(out, metaStrings);
+        }
+        out.writeInt(quality);
     }
     
     @Override
@@ -123,5 +171,40 @@ public abstract class ForestDocument implements MarkLogicDocument {
     @Override
     public boolean isStreamable() {
         return false;
+    }
+    
+    abstract public Content createContent(String uri, 
+            ContentCreateOptions options, boolean copyCollections, 
+            boolean copyMetadata, boolean copyQuality) 
+    throws IOException;
+    
+    protected void setContentOptions(ContentCreateOptions options,
+            boolean copyCollections, boolean copyMetadata, 
+            boolean copyQuality) {
+        if (copyCollections && collections.length != 0) {
+            String[] cols = options.getCollections();
+            if (cols == null || cols.length == 0) {
+                options.setCollections(collections);
+            } else { // merge
+                HashSet<String> colsSet = new HashSet<String>();
+                if (cols != null) {
+                    for (String col : cols) {
+                        colsSet.add(col);
+                    }
+                }
+                for (String col : collections) {
+                    colsSet.add(col);
+                }
+                String[] newCols = new String[colsSet.size()];
+                colsSet.toArray(newCols);
+                options.setCollections(newCols);
+            }
+        }
+        if (copyMetadata) {
+            options.setMetadata(metadata);
+        }
+        if (copyQuality) {
+            options.setQuality(quality);
+        }
     }
 }

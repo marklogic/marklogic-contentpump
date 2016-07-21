@@ -57,6 +57,7 @@ implements MarkLogicConstants {
     protected BiendianDataInputStream dataIs;
     protected BiendianDataInputStream ordIs;
     protected BiendianDataInputStream tsIs;
+    protected BiendianDataInputStream qualIs;
     protected DocumentURIWithSourceInfo key;
     protected VALUEIN value;
     protected Class<? extends Writable> valueClass;
@@ -82,6 +83,9 @@ implements MarkLogicConstants {
         }
         if (tsIs != null) {
             tsIs.close();
+        }
+        if (qualIs != null) {
+            qualIs.close();
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("Nascent count: " + nascentCnt + 
@@ -117,6 +121,8 @@ implements MarkLogicConstants {
         dataIs.skipBytes(this.split.getStart());
         Path ordPath = new Path(dataPath.getParent(), "Ordinals");
         ordIs = new BiendianDataInputStream(fs.open(ordPath));
+        Path qualPath = new Path(dataPath.getParent(), "Qualities");
+        qualIs = new BiendianDataInputStream(fs.open(qualPath));
         Path tsPath = new Path(dataPath.getParent(), "Timestamps");
         tsIs = new BiendianDataInputStream(fs.open(tsPath));
         valueClass = conf.getClass(INPUT_VALUE_CLASS, ForestDocument.class, 
@@ -316,6 +322,7 @@ implements MarkLogicConstants {
             if (prevDocid == -1 && docid != 0) { // need to skip tsIs and ordIs
                 ordIs.skipBytes(docid * 8);
                 tsIs.skipBytes(docid * 8 * 2);
+                qualIs.skipBytes(docid * 4);
                 if (LOG.isTraceEnabled()) {
                     LOG.trace("First docid: " + docid);
                 }
@@ -325,6 +332,7 @@ implements MarkLogicConstants {
                     int toSkip = docidDiff * 8;
                     ordIs.skipBytes(toSkip);
                     tsIs.skipBytes(toSkip * 2);
+                    qualIs.skipBytes(docidDiff * 4);
                 }
             }
             prevDocid = docid;
@@ -366,6 +374,7 @@ implements MarkLogicConstants {
             position++;
             ExpandedTree tree = new CompressedTreeDecoder().decode(buf,j);
             tree.setFragmentOrdinal(ordIs.readLong());
+            tree.setQuality(qualIs.readInt());
             return tree;
         } catch (Exception e) {
             LOG.error("Unexpected error occurred reading forest data", e);

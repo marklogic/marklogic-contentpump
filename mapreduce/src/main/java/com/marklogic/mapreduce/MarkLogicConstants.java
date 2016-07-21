@@ -781,11 +781,25 @@ public interface MarkLogicConstants {
      */
     static final String OUTPUT_PARTITION =
         "mapreduce.marklogic.output.partition";
-    static final String CONF_OUTPUT_URI_REPLACE = 
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies a comma separated list of regex pattern and
+     * string pairs, 1st to match a uri segment, 2nd the string to replace 
+     * with, with the 2nd one in ''. 
+     */
+    static final String OUTPUT_URI_REPLACE = 
             "mapreduce.marklogic.output.urireplace";
-    static final String CONF_OUTPUT_URI_PREFIX = 
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies a string to prepend to all document URIs. 
+     */
+    static final String OUTPUT_URI_PREFIX = 
             "mapreduce.marklogic.output_uriprefix";
-    static final String CONF_OUTPUT_URI_SUFFIX = 
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies a string to append to all document URIs. 
+     */
+    static final String OUTPUT_URI_SUFFIX = 
             "mapreduce.marklogic.output_urisuffix";
     /**
      * Default output XML repair level
@@ -855,4 +869,25 @@ public interface MarkLogicConstants {
     */
     static final String REDACTION_RULE_COLLECTION = 
             "mapreduce.marklogic.input.redaction.rules";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to copy document collections from
+     * source to destination. 
+     */
+    static final String COPY_COLLECTIONS = 
+            "mapreduce.marklogic.copycollections";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to copy document quality from
+     * source to destination. 
+     */
+    static final String COPY_QUALITY = 
+            "mapreduce.marklogic.copyquality";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to copy document metadata from
+     * source to destination. 
+     */
+    static final String COPY_METADATA = 
+            "mapreduce.marklogic.copymetadata";
 }

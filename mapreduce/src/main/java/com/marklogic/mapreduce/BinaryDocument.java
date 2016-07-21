@@ -15,6 +15,13 @@
  */
 package com.marklogic.mapreduce;
 
+import java.io.IOException;
+import java.io.InputStream;
+
+import com.marklogic.xcc.Content;
+import com.marklogic.xcc.ContentCreateOptions;
+import com.marklogic.xcc.ContentFactory;
+
 /**
  * A {@link ForestDocument} representing a binary document in MarkLogic
  * accessed via Direct Access.
@@ -23,4 +30,30 @@ package com.marklogic.mapreduce;
  * @author jchen
  */
 public abstract class BinaryDocument extends ForestDocument {
+    @Override
+    public Content createContent(String uri, ContentCreateOptions options,
+            boolean copyCollections, boolean copyMetadata, boolean copyQuality)
+    throws IOException {
+        if (copyCollections || copyMetadata || copyQuality) {
+            setContentOptions(options, copyCollections, copyMetadata, 
+                    copyQuality);
+        }
+        if (isStreamable()) {
+            InputStream is = null;
+            try {
+                is = getContentAsByteStream();
+                return ContentFactory.newUnBufferedContent(uri, is, 
+                        options);
+            } catch (Exception ex) {
+                if (is != null) {
+                    is.close();
+                } 
+                throw new IOException("Error accessing large binary document "
+                        + uri + ", skipping...", ex);
+            } 
+        } else {
+            return  ContentFactory.newContent(uri, 
+                    getContentAsByteArray(), options);
+        }
+    }
 }
