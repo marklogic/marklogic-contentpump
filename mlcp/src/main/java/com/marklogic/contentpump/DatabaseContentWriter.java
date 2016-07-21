@@ -30,7 +30,6 @@ import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.ContentWriter;
 import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
@@ -54,16 +53,17 @@ import com.marklogic.xcc.types.ValueType;
  * 
  */
 public class DatabaseContentWriter<VALUE> extends
-    ContentWriter<VALUE> implements MarkLogicConstants {
-    public static final Log LOG = LogFactory
-        .getLog(DatabaseContentWriter.class);
+    ContentWriter<VALUE> implements ConfigConstants {
+    public static final Log LOG = 
+            LogFactory.getLog(DatabaseContentWriter.class);
 
     private URIMetadata[][] metadatas;
     
     protected boolean isCopyProps;
     protected boolean isCopyPerms;
     
-    public static final String XQUERY_VERSION_1_0_ML = "xquery version \"1.0-ml\";\n";
+    public static final String XQUERY_VERSION_1_0_ML = 
+            "xquery version \"1.0-ml\";\n";
 
     public DatabaseContentWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
@@ -80,10 +80,8 @@ public class DatabaseContentWriter<VALUE> extends
         } else {
             metadatas = new URIMetadata[forestIds.length][batchSize];
         }
-        isCopyProps = conf.getBoolean(
-            ConfigConstants.CONF_COPY_PROPERTIES, true);
-        isCopyPerms = conf.getBoolean(
-            ConfigConstants.CONF_COPY_PERMISSIONS, true);
+        isCopyProps = conf.getBoolean(CONF_COPY_PROPERTIES, true);
+        isCopyPerms = conf.getBoolean(CONF_COPY_PERMISSIONS, true);
     }
 
     /**

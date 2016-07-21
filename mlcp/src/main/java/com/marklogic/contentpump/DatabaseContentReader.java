@@ -88,15 +88,12 @@ public class DatabaseContentReader extends
 
     public DatabaseContentReader(Configuration conf) {
         super(conf);
-        copyCollection = conf.getBoolean(
-            MarkLogicConstants.COPY_COLLECTIONS, false);
-        copyPermission = conf.getBoolean(
-            CONF_COPY_PERMISSIONS, false);
-        copyProperties = conf.getBoolean(ConfigConstants.CONF_COPY_PROPERTIES,
-            false);
-        copyQuality = conf.getBoolean(MarkLogicConstants.COPY_QUALITY, false);
-        copyMetadata = conf
-            .getBoolean(ConfigConstants.COPY_METADATA, false);
+        copyCollection = conf.getBoolean(MarkLogicConstants.COPY_COLLECTIONS, 
+                true);
+        copyPermission = conf.getBoolean(CONF_COPY_PERMISSIONS, true);
+        copyProperties = conf.getBoolean(CONF_COPY_PROPERTIES,true);
+        copyQuality = conf.getBoolean(MarkLogicConstants.COPY_QUALITY, true);
+        copyMetadata = conf.getBoolean(MarkLogicConstants.COPY_METADATA, true);
         currentKey = new DocumentURI();
         metadataMap = new HashMap<String, DocumentMetadata>();
     }
