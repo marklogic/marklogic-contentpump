@@ -1,6 +1,6 @@
-## Contributing to MarkLogic Content Pump and Hadoop Connector
+## Contributing to MarkLogic Content Pump
 
-MarkLogic Content Pump and Hadoop Connector welcome new contributors. The document will guide you through the process.
+MarkLogic Content Pump (MLCP) and MarkLogic Connector for Hadoop (Hadoop Connector) welcome new contributors. The document will guide you through the process.
 
 - [Got a question / Need help?](#question)
 - [Issue/Bug Report or Feature Request](#issue)
@@ -14,7 +14,7 @@ If you have questions about how to use MLCP or Hadoop Connector, you can ask on 
 
 ##<a name="issue"></a>Issue/Bug Report or Feature Request
 
-If you found a bug or ran into any issue in MLCP or Hadoop Connecotr or the documentations of these products, you can help us by submitting an issue to [GitHub Issue Tracker](). You are also welcome to submit a pull request with a fix for the issue you filed.
+If you found a bug or ran into any issue in MLCP or Hadoop Connector or the documentations of these products, you can help us by submitting an issue to [GitHub Issue Tracker](). You are also welcome to submit a pull request with a fix for the issue you filed.
 
 If you would like to request a new feature, please submit an issue to [GitHub Issue Tracker](). If you would like to implement a new feature then first create a new issue and discuss it with one of our project maintainers.
 
@@ -24,7 +24,7 @@ If you would like to request a new feature, please submit an issue to [GitHub Is
 
 If your issue appears to be a bug, and hasn't been reported, open a new issue. Providing the following information will increase the chances of your issue being dealt with quickly:
 
-- **Steps to reproduce the bug** - What is the MLCP command or Hadoop program? Code snippet helps (and *Markdown* is our good friend)
+- **Steps to reproduce the bug** - What is the MLCP command or Java program? Code snippet helps (and *Markdown* is our good friend)
 - **Input and Output** - What is the input and expected output? What is the actual output (exception stack trace)?
 - **Environment** - System? MarkLogic Server version? MLCP (Hadoop Connector) version? Details help.
 - **Suggest a fix** -  if you can't fix the bug yourself, perhaps you can point to what might be causing the problem (line of code or commit)
@@ -96,11 +96,13 @@ $ git rebase upstream/dev
 
 #### Test Your Change
 
-Be sure to run the tests before submitting your pull request. Pull requrests with failing tests won't be accepted. For changes made to Hadoop Connector, it's necessary to run tests in both Hadoop Connector and MLCP to make sure no regression is introduced with the change.
+Be sure to run the tests before submitting your pull request. Pull requrests with failing tests won't be accepted. The unit tests included in MLCP and Hadoop Connector are a minimum set of all the tests we have for the products. They are only designed for sanity check. To run unit tests, under marklogic-contentpump root directory:
 ```
-$ mvn clean package
-$ mvn test -DskipTests=false
+$ mvn test
 ```
+We will run large regression test sets against the change from the pull requests.
+
+Please refer to wiki page [How to Run Tests]() to learn about the guidelines and must know about running tests to verify your change.
 
 #### Push Your Change
 
@@ -139,9 +141,3 @@ $ git branch -D my-feature-branch
 $ git pull --ff upstream dev
 ```
 
-## Todo
-- [GitHub Issue Tracker] link
-- All bug fixes and new features go into the **dev** branch.
-- $ git checkout -b my-feature-branch -t origin/dev
-- git rebase upstream/dev
-- all *dev* word
