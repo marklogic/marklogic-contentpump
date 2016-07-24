@@ -50,7 +50,7 @@ public abstract class ForestDocument implements MarkLogicDocument {
     private long fragmentOrdinal;
     private String[] collections;
     private int quality;
-    private Map<String, String> metadata;
+    private Map<String, String> metadata = null;
     
     public static ForestDocument createDocument(Configuration conf,
             Path forestDir, ExpandedTree tree, String uri) {
@@ -142,7 +142,7 @@ public abstract class ForestDocument implements MarkLogicDocument {
     public void write(DataOutput out) throws IOException {
         out.writeLong(fragmentOrdinal);
         WritableUtils.writeStringArray(out, collections);
-        if (metadata.isEmpty()) {
+        if (metadata == null || metadata.isEmpty()) {
             out.writeInt(0);
         } else {
             out.writeInt(metadata.size());
