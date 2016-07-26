@@ -343,7 +343,8 @@ public class ContentOutputFormat<VALUEOUT> extends
             item = result.next();
             allowFastLoad = Boolean.parseBoolean(item.asString());
             if ((policy == AssignmentPolicy.Kind.STATISTICAL 
-                || policy == AssignmentPolicy.Kind.RANGE)
+                || policy == AssignmentPolicy.Kind.RANGE
+                || policy == AssignmentPolicy.Kind.QUERY)
                 && !allowFastLoad && conf.getBoolean(OUTPUT_FAST_LOAD, false)) {
                 throw new IOException(
                     "Fastload can't be used: rebalancer is on and "
@@ -361,10 +362,12 @@ public class ContentOutputFormat<VALUEOUT> extends
             if (conf.get(OUTPUT_DIRECTORY) != null) {
                 // output_dir is set, attempt to do fastload
                 if(conf.get(OUTPUT_PARTITION) == null && 
-                   policy == AssignmentPolicy.Kind.RANGE) {
+                   (policy == AssignmentPolicy.Kind.RANGE ||
+                    policy == AssignmentPolicy.Kind.QUERY)) {
                     fastLoad = false;
                 } else if (policy == AssignmentPolicy.Kind.RANGE ||
-                		   policy == AssignmentPolicy.Kind.STATISTICAL) {
+                           policy == AssignmentPolicy.Kind.QUERY ||
+                	   policy == AssignmentPolicy.Kind.STATISTICAL) {
                     fastLoad = allowFastLoad;
                 } else {
                 	fastLoad = true;
@@ -376,7 +379,8 @@ public class ContentOutputFormat<VALUEOUT> extends
         } else {
             fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false);
             if (fastLoad && conf.get(OUTPUT_PARTITION) == null
-                && policy == AssignmentPolicy.Kind.RANGE) {
+                && (policy == AssignmentPolicy.Kind.RANGE ||
+                    policy == AssignmentPolicy.Kind.QUERY)) {
                 throw new IllegalArgumentException(
                     "output_partition is required for fastload mode.");
             }
@@ -410,7 +414,8 @@ public class ContentOutputFormat<VALUEOUT> extends
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
             } else {
                 query = session.newAdhocQuery(FOREST_HOST_QUERY);
-                if (policy == AssignmentPolicy.Kind.RANGE) {
+                if (policy == AssignmentPolicy.Kind.RANGE ||
+                    policy == AssignmentPolicy.Kind.QUERY) {
                     String pName = conf.get(OUTPUT_PARTITION);
                     query.setNewStringVariable("partition-name", pName);
                 } else {

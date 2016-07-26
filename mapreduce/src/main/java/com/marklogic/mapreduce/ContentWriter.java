@@ -198,7 +198,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
 
         if (fastLoad
             && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
-            || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
+            || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE
+            || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.QUERY)) {
             countBased = true;
             if (batchSize > 1) {           
                 forestContents = new Content[1][batchSize];
