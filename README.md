@@ -9,7 +9,7 @@ MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest w
 * Copy subsets of data between databases
 * Load documents from HDFS, including Hadoop `SequenceFile`s
 
-mlcp can run locally, across many threads on a single machine or distributed across many nodes in a Hadoop cluster.
+mlcp can run locally, across many threads on a single machine, or distributedly, across many nodes in a Hadoop cluster.
 
 The Hadoop Connector is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. mlcp uses the Hadoop Connector internally, but it can also be used to build Hadoop MapReduce jobs that interact with MarkLogic, outside of mlcp, such as in a larger Hadoop application. Core features of the  Hadoop Connector include:
 
@@ -55,7 +55,7 @@ For information on contributing to this project see [CONTRIBUTING.md](https://gi
 
 ## Tests
 
-The unit tests included in this repository are designed to provide illustrative examples of the APIs and to sanity check external contributions. MarkLogic Engineering runs a more comprehensive set of unit, integration, and performance tests externally. To run unit tests, under `marklogic-contentpump/` root directory:
+The unit tests included in this repository are designed to provide illustrative examples of the APIs and to sanity check external contributions. MarkLogic Engineering runs a more comprehensive set of unit, integration, and performance tests internally. To run unit tests, under `marklogic-contentpump/` root directory:
 
 ``` bash
 $ mvn test
