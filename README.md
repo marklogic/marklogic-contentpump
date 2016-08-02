@@ -6,7 +6,7 @@ MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest w
 * Split and load large, aggregate XML files or delimited text
 * Bulk load billions of triples or quads from RDF files
 * Archive and restore database contents across environments
-* Export data from database to file systems
+* Export data from a database to a file system
 * Copy subsets of data between databases
 * Load documents from HDFS, including Hadoop `SequenceFile`s
 
