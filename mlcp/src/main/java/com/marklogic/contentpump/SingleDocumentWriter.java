@@ -82,7 +82,9 @@ implements MarkLogicConstants, ConfigConstants {
                 path = new Path(dir, childPath);
             }
             FileSystem fs = path.getFileSystem(conf);
-            if (fs instanceof DistributedFileSystem) {
+            if (fs instanceof DistributedFileSystem || 
+                fs.getClass().equals(
+                    Class.forName("com.mapr.fs.MapRFileSystem"))) {
                 os = fs.create(path, false);
             } else {
                 File f = new File(path.toUri().getPath());

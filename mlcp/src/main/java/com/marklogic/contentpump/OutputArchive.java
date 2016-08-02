@@ -83,19 +83,25 @@ public class OutputArchive {
             LOG.debug("Creating output archive: " + zpath);
             LOG.debug("Default charset: " + Charset.defaultCharset());
         }
-        // if fs instanceof DistributedFileSystem, use hadoop api; otherwise,
-        // use java api
-        if (fs instanceof DistributedFileSystem) {
-            FSDataOutputStream fsout = fs.create(zpath, false);
-            outputStream = new ZipOutputStream(fsout);
-        } else {
-            File f = new File(zpath.toUri().getPath());
-            if (!f.exists()) {
-                f.getParentFile().mkdirs();
-                f.createNewFile();
+        // if fs instanceof DistributedFileSystem or MapRFileSystem, 
+        // use hadoop api; otherwise, use java api
+        try {
+            if (fs instanceof DistributedFileSystem  || 
+                fs.getClass().equals(
+                    Class.forName("com.mapr.fs.MapRFileSystem"))) {
+                FSDataOutputStream fsout = fs.create(zpath, false);
+                outputStream = new ZipOutputStream(fsout);
+            } else {
+                File f = new File(zpath.toUri().getPath());
+                if (!f.exists()) {
+                    f.getParentFile().mkdirs();
+                    f.createNewFile();
+                }
+                FileOutputStream fos = new FileOutputStream(f, false);
+                outputStream = new ZipOutputStream(fos);
             }
-            FileOutputStream fos = new FileOutputStream(f, false);
-            outputStream = new ZipOutputStream(fos);
+        } catch (ClassNotFoundException e) {
+            LOG.error("File system class not found");
         }
 
     }
