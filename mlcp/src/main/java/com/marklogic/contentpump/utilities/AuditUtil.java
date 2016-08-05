@@ -153,7 +153,7 @@ public class AuditUtil {
         for (int i = 0; i < options.length; i++) {
             String name = options[i].getOpt();
             // Hide password from command
-            if ("password".equalsIgnoreCase(name)) {
+            if (name.matches(".*password")) {
                 continue;
             }
             if (i != 0) {
