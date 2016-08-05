@@ -28,7 +28,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
+//import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
@@ -82,17 +83,15 @@ implements MarkLogicConstants, ConfigConstants {
                 path = new Path(dir, childPath);
             }
             FileSystem fs = path.getFileSystem(conf);
-            if (fs instanceof DistributedFileSystem || 
-                fs.getClass().equals(
-                    Class.forName("com.mapr.fs.MapRFileSystem"))) {
-                os = fs.create(path, false);
-            } else {
+            if (fs instanceof LocalFileSystem) {
                 File f = new File(path.toUri().getPath());
                 if (!f.exists()) {
                     f.getParentFile().mkdirs();
                     f.createNewFile();
                 }
                 os = new FileOutputStream(f, false);
+            } else {
+                os = fs.create(path, false);
             }
 
             ContentType type = content.getContentType();
