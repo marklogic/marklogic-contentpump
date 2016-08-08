@@ -39,7 +39,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RiotReader;
+import org.apache.jena.riot.lang.RiotParsers;
 import org.apache.jena.riot.lang.LangRIOT;
 import org.apache.jena.riot.lang.PipedQuadsStream;
 import org.apache.jena.riot.lang.PipedRDFIterator;
@@ -51,16 +51,16 @@ import org.apache.jena.riot.system.RiotLib;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFLib;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.DatasetFactory;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.sparql.core.Quad;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.sparql.core.Quad;
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.contentpump.utilities.PermissionUtil;
@@ -373,7 +373,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             new Thread(jenaStreamingParser).start();
         } else {
             StreamRDF dest = StreamRDFLib.dataset(dataset.asDatasetGraph());
-            LangRIOT parser = RiotReader.createParser(in, lang, fsname, dest);
+            LangRIOT parser = RiotParsers.createParser(in, lang, fsname, dest);
             ErrorHandler handler = new ParserErrorHandler(fsname);
             ParserProfile prof = RiotLib.profile(lang, fsname, handler);
             parser.setProfile(prof);
@@ -1065,7 +1065,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         public void run() {
             LangRIOT parser;
             try {
-                parser = RiotReader.createParser(in, lang, fsname, 
+                parser = RiotParsers.createParser(in, lang, fsname, 
                         rdfInputStream);
             } catch (Exception ex) {
                 // Yikes something went horribly wrong, bad encoding maybe?
@@ -1073,7 +1073,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
                 byte[] b = new byte[0] ;
                 InputStream emptyBAIS = new ByteArrayInputStream(b) ;
-                parser = RiotReader.createParser(emptyBAIS, lang, fsname, 
+                parser = RiotParsers.createParser(emptyBAIS, lang, fsname, 
                         rdfInputStream);
             }
             try {

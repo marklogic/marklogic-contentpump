@@ -36,8 +36,8 @@ import org.apache.jena.riot.lang.PipedQuadsStream;
 import org.apache.jena.riot.lang.PipedRDFIterator;
 import org.apache.jena.riot.lang.PipedTriplesStream;
 
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.core.Quad;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.core.Quad;
 import com.marklogic.mapreduce.CompressionCodec;
 import com.marklogic.mapreduce.LinkedMapWritable;
 

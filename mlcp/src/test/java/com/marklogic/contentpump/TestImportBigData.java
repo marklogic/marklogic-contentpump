@@ -69,10 +69,11 @@ public class TestImportBigData {
         
         String system = System.getProperty("os.name");
         if (!system.contains("win")) {
-            Stopwatch sw = new Stopwatch().start();
+
+            Stopwatch sw = Stopwatch.createStarted();
             stl.callWithTimeout(callGetSplit, 3L, TimeUnit.MINUTES, true);
             sw.stop();
-            long time = sw.elapsedTime(TimeUnit.SECONDS);
+            long time = sw.elapsed(TimeUnit.SECONDS);
             System.out.println("Total time of listStatus: " + time + " seconds.");
             assertTrue(time < 20L);
         }        
