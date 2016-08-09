@@ -822,7 +822,7 @@ public enum Command implements ConfigConstants {
 			    !job.getConfiguration().getBoolean(
 			            MarkLogicConstants.OUTPUT_STREAMING, false)) {
                 Class<? extends Mapper<?, ?, ?, ?>> mapperClass = 
-                	(Class<? extends Mapper<?, ?, ?, ?>>) (Class) MultithreadedMapper.class;
+                	(Class) MultithreadedMapper.class;
                 MultithreadedMapper.setMapperClass(job.getConfiguration(),
                     (Class<? extends BaseMapper<?, ?, ?, ?>>) mapper);
                 return mapperClass;
@@ -1132,7 +1132,7 @@ public enum Command implements ConfigConstants {
             job.setMapperClass(DocumentMapper.class);
             job.setMapOutputKeyClass(DocumentURI.class);
             job.setMapOutputValueClass(MarkLogicDocument.class);
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (cmdline.hasOption(TRANSFORM_MODULE)) {
                 job.setOutputFormatClass(DatabaseTransformOutputFormat.class);
             } else {
                 job.setOutputFormatClass(DatabaseContentOutputFormat.class);

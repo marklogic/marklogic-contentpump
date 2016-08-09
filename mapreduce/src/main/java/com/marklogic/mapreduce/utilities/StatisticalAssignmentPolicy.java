@@ -30,7 +30,7 @@ public class StatisticalAssignmentPolicy extends AssignmentPolicy {
         policy = AssignmentPolicy.Kind.STATISTICAL;
         frmtCount = new long[stats.length];
         this.batch = batch;
-        pq = new PriorityBlockingQueue<Stats>(stats.length);
+        pq = new PriorityBlockingQueue<>(stats.length);
 
         for (int i = 0; i < stats.length; i++) {
             pq.add(new Stats(i, stats[i]));
@@ -112,22 +112,28 @@ public class StatisticalAssignmentPolicy extends AssignmentPolicy {
             this.frmtCount = frmtCount;
         }
 
+        @Override
         public int compareTo(Stats o) {
-            if (frmtCount > o.frmtCount)
+            if (frmtCount > o.frmtCount) {
                 return 1;
-            else if (frmtCount < o.frmtCount)
+            } else if (frmtCount < o.frmtCount) {
                 return -1;
-            else
+            } else {
                 return 0;
+            }
         }
 
+        @Override
         public boolean equals(Object obj) {
-            if (obj == null)
+            if (obj == null) {
                 return false;
-            if (obj == this)
+            }
+            if (obj == this) {
                 return true;
-            if (obj.getClass() != getClass())
+            }
+            if (obj.getClass() != getClass()) {
                 return false;
+            }
             return fIdx == ((Stats) obj).fIdx;
         }
     }

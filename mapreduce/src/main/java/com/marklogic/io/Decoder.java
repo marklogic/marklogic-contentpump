@@ -73,10 +73,12 @@ public class Decoder {
     }
 
     public int decode32bits() throws IOException {
-        if (numBitsInReg == 0)
+        if (numBitsInReg == 0) {
             return in.readInt();
-        if (32 > numBitsInReg)
+        }
+        if (32 > numBitsInReg) {
             load();
+        }
         int val = (int)(reg & 0xffffffffL);
         reg >>>= 32;
         numBitsInReg -= 32;
@@ -114,21 +116,23 @@ public class Decoder {
                 numBitsInReg = 0;
             }
             for (; i<count; ++i) {
-                if (load32(array, i)) break;
+                if (load32(array, i)) { break; }
             }
         }
     }
 
     public int decodeUnary() throws IOException {
-        if (numBitsInReg < 16)
+        if (numBitsInReg < 16) {
             load();
+        }
         int e, n, v;
-        if ((n = (e = unary1[((int)reg & 0xff)]&0xff) + 1) <= 8)
+        if ((n = (e = unary1[((int)reg & 0xff)]&0xff) + 1) <= 8) {
             v = e;
-        else if ((n = (e = unary2[((int)reg & 0xffff)]&0xff) + 1) <= 16)
+        } else if ((n = (e = unary2[((int)reg & 0xffff)]&0xff) + 1) <= 16) {
             v = e;
-        else
+        } else {
             return _decodeUnary();
+        }
         reg >>>= n;
         numBitsInReg -= n;
         return v;
@@ -136,8 +140,9 @@ public class Decoder {
 
     int _decodeUnary() throws IOException {
         for (int i = 1;; ++i) {
-            if (i > numBitsInReg)
+            if (i > numBitsInReg) {
                 load();
+            }
             long msk = (1L << i) - 1;
             if ((reg & msk) == (msk >>> 1)) {
                 reg >>>= i;
@@ -148,17 +153,19 @@ public class Decoder {
     }
 
     public int decodeUnsigned() throws IOException {
-        if (numBitsInReg < 16)
+        if (numBitsInReg < 16) {
             load();
+        }
         int e, n, v;
-        if ((n = (e = unsigned1[(int)(reg & 0x3fL)]) >>> 5) <= 6)
+        if ((n = (e = unsigned1[(int)(reg & 0x3fL)]) >>> 5) <= 6) {
             v = e & 0x1f;
-        else if ((n = (e = unsigned2[(int)(reg & 0x7ffL)]) >>> 12) <= 11)
+        } else if ((n = (e = unsigned2[(int)(reg & 0x7ffL)]) >>> 12) <= 11) {
             v = e & 0xfff;
-        else if ((n = (e = unsigned3[(int)(reg & 0xffffL)]) >>> 16) <= 16)
+        } else if ((n = (e = unsigned3[(int)(reg & 0xffffL)]) >>> 16) <= 16) {
             v = e & 0xffff;
-        else
+        } else {
             return _decodeUnsigned();
+        }
         reg >>>= n;
         numBitsInReg -= n;
         return v;
@@ -166,19 +173,22 @@ public class Decoder {
 
     int _decodeUnsigned() throws IOException {
         int nbits = decodeUnary() * 4;
-        if (nbits > numBitsInReg)
+        if (nbits > numBitsInReg) {
             load();
+        }
         long val = reg & ((nbits < 64) ? ((1L << nbits) - 1) : -1L);
-        for (int i = 0; i < nbits; i += 4)
+        for (int i = 0; i < nbits; i += 4) {
             val += (1L << i);
+        }
         reg >>>= nbits;
         numBitsInReg -= nbits;
         return (int)(val & 0xffffffffL);
     }
 
     public int decodeUnsigned(int n) throws IOException {
-        if (n > numBitsInReg)
+        if (n > numBitsInReg) {
             load();
+        }
         long v = reg & ((n < 64) ? ((1L << n) - 1) : -1L);
         reg >>>= n;
         numBitsInReg -= n;
@@ -190,8 +200,9 @@ public class Decoder {
         for (int i = 0; i < 256; i++) {
             table[i] = (byte)0xff;
             for (int j = 0; j < 8; j++) {
-                if ((i & ((1 << (j + 1)) - 1)) != ((1 << j) - 1))
+                if ((i & ((1 << (j + 1)) - 1)) != ((1 << j) - 1)) {
                     continue;
+                }
                 table[i] = (byte)j;
                 break;
             }
@@ -213,8 +224,9 @@ public class Decoder {
         for (int i = 0; i < 65536; i++) {
             table[i] = (byte)0xff;
             for (int j = 0; j < 16; j++) {
-                if ((i & ((1 << (j + 1)) - 1)) != ((1 << j) - 1))
+                if ((i & ((1 << (j + 1)) - 1)) != ((1 << j) - 1)) {
                     continue;
+                }
                 table[i] = (byte)j;
                 break;
             }
@@ -230,12 +242,13 @@ public class Decoder {
             int entry = unary1[i];
             int bbits = entry * 4;
             int ubits = entry + 1;
-            if (bbits + ubits > 6)
+            if (bbits + ubits > 6) {
                 table[i] = (byte)0xe0;
-            else {
+            } else {
                 int val = (i >>> ubits) & ((1 << bbits) - 1);
-                for (int j = 0; j < bbits; j += 4)
+                for (int j = 0; j < bbits; j += 4) {
                     val += (1 << j);
+                }
                 table[i] = (byte)(((bbits + ubits) << 5) | val);
             }
         }
@@ -256,12 +269,13 @@ public class Decoder {
             int entry = unary2[i];
             int bbits = entry * 4;
             int ubits = entry + 1;
-            if (bbits + ubits > 11)
+            if (bbits + ubits > 11) {
                 table[i] = (short)0xf000;
-            else {
+            } else {
                 int val = (i >>> ubits) & ((1 << bbits) - 1);
-                for (int j = 0; j < bbits; j += 4)
+                for (int j = 0; j < bbits; j += 4) {
                     val += (1 << j);
+                }
                 table[i] = (short)(((bbits + ubits) << 12) | val);
             }
         }
@@ -282,12 +296,13 @@ public class Decoder {
             int entry = unary2[i]&0xff;
             int bbits = entry * 4;
             int ubits = entry + 1;
-            if (bbits + ubits > 16)
+            if (bbits + ubits > 16) {
                 table[i] = 0xffff0000;
-            else {
+            } else {
                 int val = (i >>> ubits) & ((1 << bbits) - 1);
-                for (int j = 0; j < bbits; j += 4)
+                for (int j = 0; j < bbits; j += 4) {
                     val += (1 << j);
+                }
                 table[i] = (((bbits + ubits) << 16) | val);
             }
         }

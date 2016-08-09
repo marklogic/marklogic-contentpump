@@ -43,6 +43,9 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
+import java.util.Arrays;
+import java.util.Set;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * MarkLogicRecordWriter that can 
@@ -95,21 +98,17 @@ public class DatabaseContentWriter<VALUE> extends
             if (opt.getQuality() == 0) {
                 opt.setQuality(meta.quality);
             }
-            HashSet<String> colSet = new HashSet<String>(meta.collectionsList);
+            Set<String> colSet = new HashSet<>(meta.collectionsList);
             if (opt.getCollections() != null) {
                 // union copy_collection and output_collection
-                for (String s : opt.getCollections()) {
-                    colSet.add(s);
-                }
+                colSet.addAll(Arrays.asList(opt.getCollections()));
             }
             opt.setCollections(colSet.toArray(new String[colSet.size()]));
-            HashSet<ContentPermission> pSet = new HashSet<ContentPermission>(
+            Set<ContentPermission> pSet = new HashSet<>(
                     meta.permissionsList);
             if (opt.getPermissions() != null) {
-                // union of output_permission & copy_permission
-                for (ContentPermission p : opt.getPermissions()) {
-                    pSet.add(p);
-                }
+              // union of output_permission & copy_permission
+              pSet.addAll(Arrays.asList(opt.getPermissions()));
             }
             opt.setPermissions(
                     pSet.toArray(new ContentPermission[pSet.size()]));
@@ -244,6 +243,7 @@ public class DatabaseContentWriter<VALUE> extends
         }
     }
 
+    @Override
     protected Session getSession(String forestId, TransactionMode mode) {
         Session session = null;
         ContentSource cs = forestSourceMap.get(forestId);
@@ -335,8 +335,11 @@ public class DatabaseContentWriter<VALUE> extends
      *            uri of the document whose property is to be set
      * @param xmlString
      *            property in xml string
-     * @param forestId
-     * @throws RequestException
+   * @param permString
+   * @param collString
+   * @param quality
+   * @param meta
+   * @param s
      */
     protected void setDocumentProperties(String uri, String xmlString,
         String permString, String collString, String quality, 
@@ -369,11 +372,11 @@ public class DatabaseContentWriter<VALUE> extends
         req.setNewStringVariable("URI", uri);
         req.setNewStringVariable("XML-STRING", xmlString);
         req.setNewStringVariable("PERM-STRING", 
-                permString==null?"":permString);
+                permString == null ? "" : permString);
         req.setNewStringVariable("COLL-STRING", 
-                collString==null||collString.isEmpty()?"":collString);
+                StringUtils.isEmpty(collString) ? "" : collString);
         req.setNewStringVariable("QUALITY-STRING", 
-                quality==null?"":quality);
+                quality == null ? "" : quality);
         if (meta != null) {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode node = mapper.createObjectNode();

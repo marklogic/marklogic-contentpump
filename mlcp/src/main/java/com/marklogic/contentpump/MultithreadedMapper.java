@@ -172,6 +172,9 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 
     /**
      * Run the application's maps using a thread pool.
+     * @param context
+     * @throws java.io.IOException
+     * @throws java.lang.InterruptedException
      */
 	@Override
     public void run(Context context) throws IOException, InterruptedException {
@@ -190,7 +193,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         try {
 	        List<Future<?>> taskList = null;
 	        if (threadPool != null) {
-            	taskList = new ArrayList<Future<?>>();
+            	taskList = new ArrayList<>();
                 synchronized (threadPool) {
                     for (int i = 0; i < numberOfThreads; ++i) {
                         MapRunner runner = new MapRunner();
@@ -218,7 +221,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                     f.get();
                 }
 	        } else {
-	            runners = new ArrayList<MapRunner>(numberOfThreads);
+	            runners = new ArrayList<>(numberOfThreads);
                 for (int i = 0; i < numberOfThreads; ++i) {
                     MapRunner thread;
                     thread = new MapRunner();
@@ -292,6 +295,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             return true;
         }
 
+        @Override
         public K1 getCurrentKey() {
             return key;
         }
@@ -324,6 +328,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             outer.setStatus(status);
         }
 
+        @Override
         public float getProgress() {
             Method getProgressMethod;
             try {

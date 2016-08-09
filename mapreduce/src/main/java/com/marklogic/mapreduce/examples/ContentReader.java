@@ -33,14 +33,12 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
 import com.marklogic.mapreduce.ContentType;
@@ -60,6 +58,7 @@ public class ContentReader {
     extends Mapper<DocumentURI, DatabaseDocument, DocumentURI, DatabaseDocument> {
         public static final Log LOG =
             LogFactory.getLog(DocMapper.class);
+        @Override
         public void map(DocumentURI key, DatabaseDocument value, Context context) 
         throws IOException, InterruptedException {
             if (key != null && value != null) {
@@ -120,18 +119,21 @@ public class ContentReader {
             TrustManager[] trustManagers = null;
             // Trust anyone.
             trustManagers = new TrustManager[] { new X509TrustManager() {
+                @Override
                 public void checkClientTrusted(X509Certificate[] x509Certificates, String s)
                         throws CertificateException {
                     // nothing to do
                 }
 
+                @Override
                 public void checkServerTrusted(X509Certificate[] x509Certificates, String s)
                         throws CertificateException {
                     // nothing to do
                 }
 
+                @Override
                 public X509Certificate[] getAcceptedIssuers() {
-                    return null;
+                    return new X509Certificate[]{};
                 }
             } };
            

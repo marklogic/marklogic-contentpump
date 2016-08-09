@@ -66,6 +66,6 @@ public abstract class LexiconFunction {
      * </p>
      */
     public String[] getUserDefinedOptions() {
-        return null;
+        return new String[]{};
     }
 }

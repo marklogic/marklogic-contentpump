@@ -39,6 +39,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
+import java.util.Map;
 
 /**
  * Reader for AggregateXMLInputFormat.
@@ -60,8 +61,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected String idName;
     protected String currentId = null;
     private boolean keepGoing = true;
-    protected HashMap<String, Stack<String>> nameSpaces = 
-        new HashMap<String, Stack<String>>();
+    protected Map<String, Stack<String>> nameSpaces = new HashMap<>();
     protected boolean startOfRecord = true;
     protected boolean hasNext = true;
     private boolean newDoc = false;
@@ -183,7 +183,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 if (nameSpaces.containsKey(nsDeclPrefix)) {
                     nameSpaces.get(nsDeclPrefix).push(nsDeclUri);
                 } else {
-                    Stack<String> s = new Stack<String>();
+                    Stack<String> s = new Stack<>();
                     s.push(nsDeclUri);
                     nameSpaces.put(nsDeclPrefix, s);
                 }
@@ -271,7 +271,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         StringBuilder sb = new StringBuilder();
         sb.append("<");
         if (prefix != null && !prefix.equals("")) {
-            sb.append(prefix + ":" + name);
+            sb.append(prefix).append(':').append(name);
         } else {
             sb.append(name);
         }
@@ -280,7 +280,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             Set<String> keys = nameSpaces.keySet();
             for (String k : keys) {
                 String v = nameSpaces.get(k).peek();
-                if (DEFAULT_NS == k) {
+                if (DEFAULT_NS.equals(k)) {
                     sb.append(" xmlns=\"" + v + "\"");
                 } else {
                     sb.append(" xmlns:" + k + "=\"" + v + "\"");
@@ -300,7 +300,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(nsDeclPrefix + ":" + nsDeclUri);
                     }
-                    if (DEFAULT_NS == nsDeclPrefix) {
+                    if (DEFAULT_NS.equals(nsDeclPrefix)) {
                         sb.append(" xmlns=\"" + nsDeclUri + "\"");
                     } else {
                         sb.append(" xmlns:" + nsDeclPrefix + "=\"" + nsDeclUri
@@ -409,7 +409,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
           .equals(namespace)))) {
          // not the end of the record: go look for more nodes
             
-            if( currDepth == 1) {
+            if ( currDepth == 1) {
                 cleanupEndElement();
             } else {
                 removeNameSpaceDecl();

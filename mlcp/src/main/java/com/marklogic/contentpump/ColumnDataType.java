@@ -28,14 +28,14 @@ public enum ColumnDataType {
     STRING {
         @Override
         public Object parse(String s) throws Exception {
-            return new String(s);
+            return s;
         }
         
     },
     NUMBER {
         @Override
         public Object parse(String s) throws Exception {
-            s.trim();
+            s = s.trim();
             if ("".equals(s)) {
                 throw new Exception("missing value");
             }
@@ -46,14 +46,14 @@ public enum ColumnDataType {
     BOOLEAN {
         @Override
         public Object parse(String s) throws Exception {
-            s.trim();
+            s = s.trim();
             if ("".equals(s)) {
                 throw new Exception("missing value");
             } else if (!"true".equalsIgnoreCase(s) && 
                     !"false".equalsIgnoreCase(s)) {
                 throw new ParseException("", 0);
             }
-            return new Boolean(s);
+            return Boolean.valueOf(s);
         }
         
     };

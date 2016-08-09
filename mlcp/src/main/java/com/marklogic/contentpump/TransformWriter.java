@@ -22,7 +22,6 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 
 import com.marklogic.contentpump.utilities.TransformHelper;
-import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentWriter;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
@@ -138,6 +137,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
     }
 
+    @Override
     protected Session getSession(String forestId) {
         TransactionMode mode = TransactionMode.AUTO;
         if (txnSize > 1) {

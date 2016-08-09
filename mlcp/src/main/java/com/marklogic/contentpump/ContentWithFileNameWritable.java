@@ -84,7 +84,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
     }
 
     public String getFileName() {
-        return fileName.toString();
+        return fileName;
     }
 
     public void setFileName(String fileName) {

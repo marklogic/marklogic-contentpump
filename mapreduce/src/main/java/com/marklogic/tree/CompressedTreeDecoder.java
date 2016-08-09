@@ -66,7 +66,7 @@ public class CompressedTreeDecoder {
 
     private void decodeText(ExpandedTree rep, Decoder decoder, int atomLimit) 
     throws IOException {
-        if (atomLimit == 0) return;
+        if (atomLimit == 0) { return; }
         int numAtoms = decoder.decodeUnsigned();
         int index = rep.numTextReps;
         int minSize = rep.numTextReps + numAtoms + 1;
@@ -90,7 +90,7 @@ public class CompressedTreeDecoder {
 
     private void addText(ExpandedTree rep, int numKeys) 
     throws IOException {
-        if (numKeys == 0) return;
+        if (numKeys == 0) { return; }
         int index = rep.numTextReps;
         int minSize = rep.numTextReps + numKeys + 1;
         if (rep.textReps == null) {
@@ -105,8 +105,8 @@ public class CompressedTreeDecoder {
     }
 
     private int pow2ceil(int x) { 
-        int y=8;
-        while (y<x) y <<= 1;
+        int y = 8;
+        while (y<x) { y <<= 1; }
         return y;
     }
 
@@ -150,9 +150,9 @@ public class CompressedTreeDecoder {
 
         rep.numKeys = decoder.decodeUnsigned();
 
-        if (rep.numKeys == 0)
+        if (rep.numKeys == 0) {
             rep.keys = null;
-        else {
+        } else {
             rep.keys = new long[rep.numKeys];
             for (int i = 0; i < rep.numKeys; ++i) {
                 rep.keys[i] = decoder.decode64bits();
@@ -170,11 +170,12 @@ public class CompressedTreeDecoder {
 
         // atoms
         int numAtomDataWords = decoder.decodeUnsigned();
-        if (LOG.isTraceEnabled())
+        if (LOG.isTraceEnabled()) {
             LOG.trace(String.format("numAtomDataWords %d", numAtomDataWords));
-        if (numAtomDataWords == 0)
+        }
+        if (numAtomDataWords == 0) {
             rep.atomData = null;
-        else {
+        } else {
             rep.atomData = new byte[numAtomDataWords * 4];
             for (int i = 0, j = 0; i < numAtomDataWords; ++i) {
                 int word = decoder.decode32bits();
@@ -203,22 +204,25 @@ public class CompressedTreeDecoder {
             int j = 0;
             for (int i = 0; i < rep.atomLimit; ++i) {
                 rep.atomIndex[i] = j;
-                if (LOG.isTraceEnabled())
+                if (LOG.isTraceEnabled()) {
                     LOG.trace(String.format("  atomIndex[%d] %08x", i, 
                             rep.atomIndex[i]));
-                if (rep.atomData != null) while (rep.atomData[j++] != 0);
+                }
+                if (rep.atomData != null) { while (rep.atomData[j++] != 0); }
             }
             rep.atomIndex[rep.atomLimit] = j;
         }
         for (int i = 0; i < rep.atomLimit; ++i) {
-            if (LOG.isTraceEnabled())
+            if (LOG.isTraceEnabled()) {
                 LOG.trace(String.format("  atomString[%d] %s", i, 
                         rep.atomString(i)));
+            }
         }
         // node names
         int numNodeNameReps = decoder.decodeUnsigned();
-        if (LOG.isTraceEnabled())
+        if (LOG.isTraceEnabled()) {
             LOG.trace(String.format("numNodeNameReps %d", numNodeNameReps));
+        } 
         if (numNodeNameReps == 0) {
             rep.nodeNameNameAtom = null;
             rep.nodeNameNamespaceAtom = null;
@@ -232,25 +236,28 @@ public class CompressedTreeDecoder {
         int xsiTypeNodeNameRepID = Integer.MAX_VALUE;
         for (int j = 0; j < numNodeNameReps; j++) {
             rep.nodeNameNameAtom[j] = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
+            if (LOG.isTraceEnabled()) {
                 LOG.trace(String.format("  nodeNameNameAtom[%d] %d", j, 
                         rep.nodeNameNameAtom[j]));
+            }
             assert (rep.nodeNameNameAtom[j] < rep.atomLimit);
             rep.nodeNameNamespaceAtom[j] = decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
+            if (LOG.isTraceEnabled()) {
                 LOG.trace(String.format("  nodeNameNamespaceAtom[%d] %d", j, 
                         rep.nodeNameNamespaceAtom[j]));
+            }
             assert (rep.nodeNameNamespaceAtom[j] < rep.atomLimit);
             if (rep.atomEquals(rep.nodeNameNamespaceAtom[j], xmlURIBytes)) {
-                if (rep.atomEquals(rep.nodeNameNameAtom[j], spaceBytes))
+                if (rep.atomEquals(rep.nodeNameNameAtom[j], spaceBytes)) {
                     xmlSpaceNodeNameRepID = j;
-                else if (rep.atomEquals(rep.nodeNameNameAtom[j], langBytes)) {
+                } else if (rep.atomEquals(rep.nodeNameNameAtom[j], langBytes)) {
                     xmlLangNodeNameRepID = j;
                 } else if (rep.atomEquals(rep.nodeNameNameAtom[j], baseBytes))
                     xmlBaseNodeNameRepID = j;
             } else if (rep.atomEquals(rep.nodeNameNameAtom[j], xsiURIBytes)) {
-                if (rep.atomEquals(rep.nodeNameNameAtom[j], typeBytes))
+                if (rep.atomEquals(rep.nodeNameNameAtom[j], typeBytes)) {
                     xsiTypeNodeNameRepID = j;
+                }
             }
         }
         if (LOG.isTraceEnabled()) {
@@ -412,8 +419,9 @@ public class CompressedTreeDecoder {
         rep.metaKeys = new int[rep.numMetadata];
         rep.metaVals = new int[rep.numMetadata];
         // meta
-        for (int i = 0; i < rep.numMetadata; ++i)
+        for (int i = 0; i < rep.numMetadata; ++i) {
             rep.metaKeys[i] = decoder.decodeUnsigned();
+        }
         for (int i = 0; i < rep.numMetadata; ++i) {
             rep.metaVals[i] = rep.numTextReps;
             decodeText(rep, decoder, rep.atomLimit);
@@ -432,18 +440,20 @@ public class CompressedTreeDecoder {
         long lastPermNodeRepOrdinal = 0;
         for (int i = 0; i < rep.numNodeReps; i++) {
             rep.nodeKind[i] = (byte)decoder.decodeUnsigned(4);
-            if (LOG.isTraceEnabled())
+            if (LOG.isTraceEnabled()) {
                 LOG.trace(String.format("  nodeKind[%d] %s", i, 
                         rep.nodeKind[i]));
+            }
             //assert (rep.nodeKind[i] != NodeKind.NULL);
             parentNodeRepID += decoder.decodeUnsigned();
-            if (LOG.isTraceEnabled())
+            if (LOG.isTraceEnabled()) {
                 LOG.trace(String.format("  parentNodeRepID[%d] %d", i, 
                         parentNodeRepID));
+            }
             assert (parentNodeRepID <= i);
-            if (parentNodeRepID == i)
+            if (parentNodeRepID == i) {
                 rep.nodeParentNodeRepID[i] = Integer.MAX_VALUE;
-            else {
+            } else {
                 rep.nodeParentNodeRepID[i] = parentNodeRepID;
                 assert (rep.nodeKind[parentNodeRepID] == NodeKind.ELEM || 
                         rep.nodeKind[parentNodeRepID] == NodeKind.DOC || 
@@ -456,16 +466,18 @@ public class CompressedTreeDecoder {
                     switch (rep.nodeKind[i]) {
                     case NodeKind.ATTR:
                         if (rep.elemNodeAttrNodeRepID[parentRepID] == 
-                            Integer.MAX_VALUE)
+                            Integer.MAX_VALUE) {
                             rep.elemNodeAttrNodeRepID[parentRepID] = i;
+                        }
                         assert (rep.elemNodeAttrNodeRepID[parentRepID] + 
                                 rep.elemNodeNumAttributes[parentRepID] == i);
                         ++rep.elemNodeNumAttributes[parentRepID];
                         break;
                     default:
                         if (rep.elemNodeChildNodeRepID[parentRepID] == 
-                            Integer.MAX_VALUE)
+                            Integer.MAX_VALUE) {
                             rep.elemNodeChildNodeRepID[parentRepID] = i;
+                        }
                         assert (rep.elemNodeChildNodeRepID[parentRepID] + 
                                 rep.elemNodeNumChildren[parentRepID] == i);
                         ++rep.elemNodeNumChildren[parentRepID];
@@ -474,8 +486,9 @@ public class CompressedTreeDecoder {
                 }
                 case NodeKind.DOC: {
                     if (rep.docNodeChildNodeRepID[parentNodeRepID] == 
-                            Integer.MAX_VALUE)
+                            Integer.MAX_VALUE) {
                         rep.docNodeChildNodeRepID[parentNodeRepID] = i;
+                    }
                     assert (rep.docNodeChildNodeRepID[parentNodeRepID] + 
                             rep.docNodeNumChildren[parentNodeRepID] == i);
                     ++rep.docNodeNumChildren[parentNodeRepID];
@@ -484,8 +497,9 @@ public class CompressedTreeDecoder {
                 case NodeKind.ARRAY:
                 case NodeKind.OBJECT: {
                     if (rep.arrayNodeChildNodeRepID[parentRepID] == 
-                            Integer.MAX_VALUE)
+                            Integer.MAX_VALUE) {
                         rep.arrayNodeChildNodeRepID[parentRepID] = i;
+                    }
                     assert (rep.arrayNodeChildNodeRepID[parentRepID] + 
                             rep.arrayNodeNumChildren[parentRepID] == i);
                     ++rep.arrayNodeNumChildren[parentRepID];
@@ -526,21 +540,22 @@ public class CompressedTreeDecoder {
                 assert (rep.attrNodeNodeNameRepID[rep.nodeRepID[i]] 
                         < numNodeNameReps);
                 if (rep.attrNodeNodeNameRepID[rep.nodeRepID[i]] == 
-                        xmlSpaceNodeNameRepID)
+                        xmlSpaceNodeNameRepID) {
                     rep.elemNodeFlags[rep.nodeRepID[parentNodeRepID]] |= 
                     xmlSpaceAttrPresentFlag;
-                else if (rep.attrNodeNodeNameRepID[rep.nodeRepID[i]] == 
-                        xmlLangNodeNameRepID)
+                } else if (rep.attrNodeNodeNameRepID[rep.nodeRepID[i]] == 
+                        xmlLangNodeNameRepID) {
                     rep.elemNodeFlags[rep.nodeRepID[parentNodeRepID]] |= 
                     xmlLangAttrPresentFlag;
-                else if (rep.attrNodeNodeNameRepID[rep.nodeRepID[i]] == 
-                        xmlBaseNodeNameRepID)
+                } else if (rep.attrNodeNodeNameRepID[rep.nodeRepID[i]] == 
+                        xmlBaseNodeNameRepID) {
                     rep.elemNodeFlags[rep.nodeRepID[parentNodeRepID]] |= 
                     xmlBaseAttrPresentFlag;
-                else if (rep.attrNodeNodeNameRepID[rep.nodeRepID[i]] == 
-                        xsiTypeNodeNameRepID)
+                } else if (rep.attrNodeNodeNameRepID[rep.nodeRepID[i]] == 
+                        xsiTypeNodeNameRepID) {
                     rep.elemNodeFlags[rep.nodeRepID[parentNodeRepID]] |= 
                     xsiTypeAttrPresentFlag;
+                }
                 rep.attrNodeTextRepID[rep.nodeRepID[i]] = rep.numTextReps;
                 decodeText(rep, decoder, rep.atomLimit);
                 rep.attrNodeAttrDeclRepID[rep.nodeRepID[i]] = 
@@ -690,13 +705,14 @@ public class CompressedTreeDecoder {
                     int atomLimit = rep.atomLimit;
                     for (int j=0; j<numKeys; ++j) {
                         int atom = decoder.decodeUnsigned();
-                        assert(atom<atomLimit);
-                        if (atom>=atomLimit) {
+                        assert(atom < atomLimit);
+                        if (atom >= atomLimit) {
                             bad="atom";
-                            if (LOG.isTraceEnabled())
+                            if (LOG.isTraceEnabled()) {
                                 LOG.trace(String.format(
                                     "bad atom %d atomLimit %d",
                                     atom,atomLimit));
+                            }
                         }
                         rep.textReps[rep.numTextReps++] = atom;
                     }
@@ -787,19 +803,22 @@ public class CompressedTreeDecoder {
                 if (rep.nodeKind[parentNodeID] == NodeKind.ELEM) {
                     int elemID = rep.nodeRepID[parentNodeID];
                     if (++nodeID < rep.elemNodeChildNodeRepID[elemID] + 
-                            rep.elemNodeNumChildren[elemID])
+                            rep.elemNodeNumChildren[elemID]) {
                         break;
+                    }
                 } else if (rep.nodeKind[parentNodeID] == NodeKind.DOC) {
                     int docID = rep.nodeRepID[parentNodeID];
                     if (++nodeID < rep.docNodeChildNodeRepID[docID] + 
-                            rep.docNodeNumChildren[docID])
+                            rep.docNodeNumChildren[docID]) {
                         break;
+                    }
                 } else if (rep.nodeKind[parentNodeID] == NodeKind.ARRAY ||
                            rep.nodeKind[parentNodeID] == NodeKind.OBJECT) {
                     int docID = rep.nodeRepID[parentNodeID];
                     if (++nodeID < rep.arrayNodeChildNodeRepID[docID] + 
-                            rep.arrayNodeNumChildren[docID])
+                            rep.arrayNodeNumChildren[docID]) {
                         break;
+                    }
                 }
                 nodeID = parentNodeID;
                 parentNodeID = rep.nodeParentNodeRepID[nodeID];
@@ -807,15 +826,17 @@ public class CompressedTreeDecoder {
         }
         for (int j = rep.numNodeReps - rep.numNSNodeReps - rep.numPermNodeReps;
              j < rep.numNodeReps; 
-             ++j)
+             ++j) {
             rep.nodeOrdinal[j] = ordinal++;
+        }
         for (int k = rep.numNodeReps - rep.numPermNodeReps; 
              k < rep.numNodeReps; 
-             ++k)
+             ++k) {
             rep.nodeOrdinal[k] = ordinal++;
+        }
         // TODO: compared performance
         if (Boolean.getBoolean("xcc.decode.atoms")) {
-            for (int x = 0; x < rep.atomLimit; ++x) rep.atomString(x);
+            for (int x = 0; x < rep.atomLimit; ++x) { rep.atomString(x); }
         }
     }
 

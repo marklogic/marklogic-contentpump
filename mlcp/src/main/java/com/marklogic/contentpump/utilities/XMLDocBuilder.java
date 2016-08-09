@@ -84,7 +84,7 @@ public class XMLDocBuilder extends DocBuilder {
         if (null != fields) {
             super.configFields(conf, fields);
             for (int i = 0; i < fields.length; i++) {
-                if(fields[i].trim().equals("")) continue;
+                if(fields[i].trim().equals("")) { continue; }
                 if (!XML11Char.isXML11ValidName(fields[i])) {
                     fields[i] = XMLUtil.getValidName(fields[i]);
                 }

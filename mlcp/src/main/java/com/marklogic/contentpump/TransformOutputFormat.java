@@ -64,8 +64,9 @@ public class TransformOutputFormat<VALUEOUT> extends
      * @throws IOException
      */
     private LinkedMapWritable getMimetypesMap() throws IOException {
-        if (mimetypeMap != null)
+        if (mimetypeMap != null) {
             return mimetypeMap;
+        }
         String mtmap = conf.get(ConfigConstants.CONF_MIMETYPES);
         if (mtmap != null) {
             mimetypeMap = DefaultStringifier.load(conf,
@@ -84,8 +85,9 @@ public class TransformOutputFormat<VALUEOUT> extends
             options.setDefaultXQueryVersion("1.0-ml");
             query.setOptions(options);
             result = session.submitRequest(query);
-            if (!result.hasNext())
+            if (!result.hasNext()) {
                 throw new IOException("Server-side transform requires MarkLogic 7 or later");
+            }
             mimetypeMap = new LinkedMapWritable();
             while (result.hasNext()) {
                 String suffs = result.next().asString();
@@ -118,7 +120,7 @@ public class TransformOutputFormat<VALUEOUT> extends
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         getMimetypesMap();
         // construct the ContentWriter
-        return new TransformWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
+        return new TransformWriter<>(conf, sourceMap, fastLoad, am);
     }
 
     @Override

@@ -92,9 +92,12 @@ public class DocumentImpl extends NodeImpl implements Document {
      * 
      * 
      */
+    @Override
     public Node cloneNode(boolean deep) {
         try {
-            if (isXMLDoc == UNKNOWN_TYPE) isXMLDoc = getDocumentType();
+            if (isXMLDoc == UNKNOWN_TYPE) {
+              isXMLDoc = getDocumentType();
+            }
             if (isXMLDoc == NON_XML) {
                 throw new UnsupportedOperationException(
                     "Text document cannot be cloned");
@@ -124,7 +127,9 @@ public class DocumentImpl extends NodeImpl implements Document {
      * @return true if XML document; otherwise false.
      */
     public boolean isXMLDoc() {
-        if (isXMLDoc == UNKNOWN_TYPE) isXMLDoc = getDocumentType();
+        if (isXMLDoc == UNKNOWN_TYPE) {
+          isXMLDoc = getDocumentType();
+        }
         return isXMLDoc == VALID_XML;
     }
 
@@ -173,13 +178,16 @@ public class DocumentImpl extends NodeImpl implements Document {
         return tree.docNodeChildNodeRepID[tree.nodeRepID[node]];
     }
 
+    @Override
     public NodeList getChildNodes() {
         return new NodeList() {
 
+            @Override
             public int getLength() {
                 return getNumChildren();
             }
 
+            @Override
             public Node item(int index) {
                 return (index < getNumChildren()) ? tree
                     .node(getFirstChildIndex() + index) : null;
@@ -187,21 +195,25 @@ public class DocumentImpl extends NodeImpl implements Document {
         };
     }
 
+    @Override
     public Node getFirstChild() {
         int i = getFirstChildIndex();
         return (i != Integer.MAX_VALUE) ? tree.node(i) : null;
     }
 
+    @Override
     public Node getLastChild() {
         int i = tree.docNodeChildNodeRepID[tree.nodeRepID[node]];
         return (i != Integer.MAX_VALUE) ? tree.node(i
             + tree.docNodeNumChildren[node] - 1) : null;
     }
 
+    @Override
     public boolean hasChildNodes() {
         return (getFirstChildIndex() != Integer.MAX_VALUE);
     }
 
+    @Override
     protected Node getNextChild(int child) {
         if (child - getFirstChildIndex() + 1 < getNumChildren()) {
             return tree.node(child + 1);
@@ -210,6 +222,7 @@ public class DocumentImpl extends NodeImpl implements Document {
         }
     }
 
+    @Override
     protected Node getPreviousChild(int node) {
         if (node != getFirstChildIndex()) {
             return tree.node(node - 1);
@@ -219,60 +232,71 @@ public class DocumentImpl extends NodeImpl implements Document {
     }
 
     /** Unsupported. */
+    @Override
     public Node adoptNode(Node arg0) throws DOMException {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Attr createAttribute(String arg0) throws DOMException {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Attr createAttributeNS(String arg0, String arg1)
         throws DOMException {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public CDATASection createCDATASection(String arg0) throws DOMException {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Comment createComment(String arg0) {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public DocumentFragment createDocumentFragment() {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Element createElement(String arg0) throws DOMException {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Element createElementNS(String arg0, String arg1)
         throws DOMException {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public EntityReference createEntityReference(String arg0)
         throws DOMException {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public ProcessingInstruction createProcessingInstruction(String arg0,
         String arg1) throws DOMException {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Text createTextNode(String arg0) {
     	throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
@@ -281,14 +305,16 @@ public class DocumentImpl extends NodeImpl implements Document {
      * Returns a dummy DocumentTypeImpl object that contains nothing. It is not
      * expected to do anything with the returned object.
      */
+    @Override
     public DocumentType getDoctype() {
         return new DocumentTypeImpl(tree, node);
     }
 
+    @Override
     public Element getDocumentElement() {
-        if (documentElement != null)
+        if (documentElement != null) {
             return documentElement;
-
+        }
         NodeList children = getChildNodes();
         for (int i = 0; i < children.getLength(); i++) {
             Node n = children.item(i);
@@ -306,58 +332,70 @@ public class DocumentImpl extends NodeImpl implements Document {
         return e != null ? e.isDefaultNamespace(namespaceURI) : false;
     }
 
+    @Override
     public String getDocumentURI() {
         return tree.getDocumentURI();
     }
 
     /** Unsupported. */
+    @Override
     public DOMConfiguration getDomConfig() {
         return null;
     }
 
     /** Unsupported. */
+    @Override
     public Element getElementById(String arg0) {
         return null;
     }
 
+    @Override
     public NodeList getElementsByTagNameNS(String namespaceURI, String name) {
         return getElementsByTagNameNSOrNodeName(namespaceURI, name, false);
     }
 
+    @Override
     public NodeList getElementsByTagName(String localName) {
         return getElementsByTagNameNSOrNodeName(null, localName, true);
     }
 
     /** Unsupported. */
+    @Override
     public DOMImplementation getImplementation() {
         return null;
     }
 
     /** Unsupported. */
+    @Override
     public String getInputEncoding() {
         return null;
     }
 
     /** Unsupported. */
+    @Override
     public boolean getStrictErrorChecking() {
         return false;
     }
 
     /** Unsupported. */
+    @Override
     public String getXmlEncoding() {
         return null;
     }
 
     /** Unsupported. */
+    @Override
     public boolean getXmlStandalone() {
         return true;
     }
 
+    @Override
     public String getXmlVersion() {
         return "1.0";
     }
 
     /** Unsupported. */
+    @Override
     public Node importNode(Node arg0, boolean arg1) throws DOMException {
         return null;
     }
@@ -373,32 +411,38 @@ public class DocumentImpl extends NodeImpl implements Document {
     }
 
     /** Unsupported. */
+    @Override
     public void normalizeDocument() {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Node renameNode(Node arg0, String arg1, String arg2)
         throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setDocumentURI(String arg0) {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setStrictErrorChecking(boolean arg0) {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setXmlStandalone(boolean arg0) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setXmlVersion(String arg0) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

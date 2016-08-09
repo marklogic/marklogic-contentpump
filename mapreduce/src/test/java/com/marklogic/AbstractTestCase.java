@@ -28,7 +28,7 @@ public class AbstractTestCase extends TestCase {
     String forest;
     String stand;
     int num;
-    static Set<String> expectedMissingNSDecl = new HashSet<String>();
+    static Set<String> expectedMissingNSDecl = new HashSet<>();
     static {
         expectedMissingNSDecl.add("acronym@xmlns=#parent is null#nextSibling is null");
     }
@@ -43,7 +43,7 @@ public class AbstractTestCase extends TestCase {
     // requires to return a collection of arrays
     @Parameters
     public static Collection data() {
-        List<ForestData[]> dataList = new ArrayList<ForestData[]>();
+        List<ForestData[]> dataList = new ArrayList<>();
         ForestData[] ds1 = { new ForestData("src/test/resources/ns-prefix",
             "ns-prefix-forest", "00000001", 23) };
         dataList.add(ds1);
@@ -64,9 +64,9 @@ public class AbstractTestCase extends TestCase {
         boolean seenText = false;
         for (int i = 0; i < nodes.getLength(); i++) {
             Node child = nodes.item(i);
-            if (Utils.isWhitespaceNode(child)) continue;
+            if (Utils.isWhitespaceNode(child)) { continue; }
             
-            if (child.getNodeType() == Node.TEXT_NODE) seenText = true;
+            if (child.getNodeType() == Node.TEXT_NODE) { seenText = true; }
             if ("#cdata-section".equals(child.getNodeName())) {
                 if (seenText) {
                     //remove the \n from immediate previous text node
@@ -98,7 +98,7 @@ public class AbstractTestCase extends TestCase {
                     LOG.debug(n.getNodeName());
             }
             if (n.hasAttributes()) {
-                ArrayList<String> list = new ArrayList<String>();
+                List<String> list = new ArrayList<>();
                 sb.append(n.getNodeName()).append("#\n");
                 NamedNodeMap nnMap = n.getAttributes();
                 for (int j = 0; j < nnMap.getLength(); j++) {
@@ -180,7 +180,7 @@ public class AbstractTestCase extends TestCase {
                 child = child.getNextSibling();
                 continue;
             }
-            if (child.getNodeType() == Node.TEXT_NODE) seenText = true;
+            if (child.getNodeType() == Node.TEXT_NODE) { seenText = true; }
             if ("#cdata-section".equals(child.getNodeName())) {
                 if (seenText) {
                     //remove the \n from immediate previous text node
@@ -210,13 +210,14 @@ public class AbstractTestCase extends TestCase {
         boolean seenText = false;
         for (int i = 0; i < nodes.getLength(); i++) {
             Node child = nodes.item(i);
-            if (Utils.isWhitespaceNode(child))
+            if (Utils.isWhitespaceNode(child)) {
                 continue;
-            if (child.getNodeType() == Node.TEXT_NODE) seenText = true;
+            }
+            if (child.getNodeType() == Node.TEXT_NODE) { seenText = true; }
             if ("#cdata-section".equals(child.getNodeName())) {
                 if(firstSeenCDATA == false) {
                     firstSeenCDATA = true;
-                    if(seenText) continue;
+                    if(seenText) { continue; }
                     //no text, so cdata itself will become text in xdm
                     sb.append(child.getNodeType() - 1).append("#");
                     sb.append("#text").append("'s parent is ");
@@ -238,9 +239,9 @@ public class AbstractTestCase extends TestCase {
     }
 
     protected void walkDOMPreviousSibling(NodeList nodes, StringBuilder sb) {
-        if (nodes.getLength() <= 0)
+        if (nodes.getLength() <= 0) {
             return;
-
+        }
         Node child = nodes.item(nodes.getLength() - 1);
         while (child != null) {
             if (Utils.isWhitespaceNode(child)) {
@@ -267,9 +268,10 @@ public class AbstractTestCase extends TestCase {
         boolean seenText = false;
         for (int i = 0; i < nodes.getLength(); i++) {
             Node n = nodes.item(i);
-            if (Utils.isWhitespaceNode(n))
+            if (Utils.isWhitespaceNode(n)) {
                 continue;
-            if (n.getNodeType() == Node.TEXT_NODE) seenText = true;
+            }
+            if (n.getNodeType() == Node.TEXT_NODE) { seenText = true; }
             if ("#cdata-section".equals(n.getNodeName())) {
                 if (seenText) {
                     //remove the # from immediate previous text node

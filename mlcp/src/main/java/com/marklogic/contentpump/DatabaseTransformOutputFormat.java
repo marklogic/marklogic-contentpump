@@ -22,9 +22,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
-import com.marklogic.contentpump.DatabaseContentOutputFormat;
-import com.marklogic.contentpump.DatabaseTransformWriter;
-import com.marklogic.contentpump.DatabaseDocumentWithMeta;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.xcc.ContentSource;
 
@@ -41,7 +38,7 @@ public class DatabaseTransformOutputFormat extends DatabaseContentOutputFormat {
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the DatabaseTransformContentWriter
-        return new DatabaseTransformWriter<DatabaseDocumentWithMeta>(conf,
+        return new DatabaseTransformWriter<>(conf,
             sourceMap, fastLoad, am);
     }
 }

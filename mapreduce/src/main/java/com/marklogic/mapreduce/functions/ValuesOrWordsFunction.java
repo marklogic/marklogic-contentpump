@@ -16,6 +16,7 @@
 package com.marklogic.mapreduce.functions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -101,14 +102,13 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
     
     public static void main(String[] args) {
         Words wordsFunc = new WordsFunction();
-        Collection<String> nsbindings = new ArrayList<String>();
-        for (int i = 0; i < args.length; i++) {
-            nsbindings.add(args[i]);
-        }
+        Collection<String> nsbindings = new ArrayList<>(args.length);
+        nsbindings.addAll(Arrays.asList(args));
         System.out.println(wordsFunc.getInputQuery(nsbindings, 1, 1000));
     }
     
     static class WordsFunction extends Words {
+        @Override
         public String[] getUserDefinedOptions() {
             String[] options =
                 {"document","concurrent"};

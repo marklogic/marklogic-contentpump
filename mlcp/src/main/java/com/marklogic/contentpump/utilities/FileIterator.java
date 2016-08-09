@@ -52,9 +52,9 @@ public class FileIterator implements Iterator<FileSplit> {
         TaskAttemptContext context) {
         this.iterator = iterator;
         conf = context.getConfiguration();
-        fileDirSplits = new LinkedList<FileSplit>();
+        fileDirSplits = new LinkedList<>();
         PathFilter jobFilter = getInputPathFilter();
-        List<PathFilter> filters = new ArrayList<PathFilter>();
+        List<PathFilter> filters = new ArrayList<>();
         filters.add(FileAndDirectoryInputFormat.hiddenFileFilter);
         if (jobFilter != null) {
             filters.add(jobFilter);
@@ -64,12 +64,12 @@ public class FileIterator implements Iterator<FileSplit> {
 
     public FileIterator(FileSplit inSplit, TaskAttemptContext context) {
         conf = context.getConfiguration();
-        fileDirSplits = new LinkedList<FileSplit>();
-        LinkedList<FileSplit> src = new LinkedList<FileSplit>();
+        fileDirSplits = new LinkedList<>();
+        LinkedList<FileSplit> src = new LinkedList<>();
         src.add(inSplit);
         iterator = src.iterator();
         PathFilter jobFilter = getInputPathFilter();
-        List<PathFilter> filters = new ArrayList<PathFilter>();
+        List<PathFilter> filters = new ArrayList<>();
         filters.add(FileAndDirectoryInputFormat.hiddenFileFilter);
         if (jobFilter != null) {
             filters.add(jobFilter);
@@ -101,11 +101,11 @@ public class FileIterator implements Iterator<FileSplit> {
                                 stat.getLen(), null);
                             fileDirSplits.add(child);
                         }
-                    } else
+                    } else {
                         return split;
-
+                    }
                 } else if (!fileDirSplits.isEmpty()) {
-                    FileSplit split = (FileSplit) fileDirSplits.remove(0);
+                    FileSplit split = fileDirSplits.remove(0);
                     Path file = split.getPath();
                     FileSystem fs = file.getFileSystem(conf);
                     FileStatus status = fs.getFileStatus(file);
@@ -116,14 +116,13 @@ public class FileIterator implements Iterator<FileSplit> {
                     FileStatus[] children = fs.listStatus(status.getPath(),
                         inputFilter);
 
-                    List<FileSplit> expdFileSpts = new LinkedList<FileSplit>();
+                    List<FileSplit> expdFileSpts = new LinkedList<>();
                     for (FileStatus stat : children) {
                         FileSplit child = new FileSplit(stat.getPath(), 0,
                             stat.getLen(), null);
                         expdFileSpts.add(child);
                     }
                     iterator = expdFileSpts.iterator();
-                    continue;
                 }
             } catch (IOException e) {
                 LOG.error("Invalid next file", e);

@@ -17,13 +17,10 @@ import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
 import com.marklogic.mapreduce.ContentType;
-import com.marklogic.mapreduce.DOMDocument;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.ForestDocument;
 import com.marklogic.mapreduce.ForestInputFormat;
 import com.marklogic.mapreduce.JSONDocument;
-import com.marklogic.mapreduce.LargeBinaryDocument;
-import com.marklogic.mapreduce.RegularBinaryDocument;
 
 public class MapTreeReduceTreeJSON extends Configured implements Tool {
     public static class MyMapper 

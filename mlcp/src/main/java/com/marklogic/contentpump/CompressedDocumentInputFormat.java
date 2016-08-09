@@ -40,7 +40,7 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 public class CompressedDocumentInputFormat<VALUE> extends
 FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
     public static final Log LOG = 
-        LogFactory.getLog(CompressedDocumentReader.class);
+        LogFactory.getLog(CompressedDocumentInputFormat.class);
     
 	@SuppressWarnings("unchecked")
     @Override
@@ -54,7 +54,7 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
 	        return (RecordReader<DocumentURIWithSourceInfo, VALUE>) 
 	            new CompressedStreamingReader();
 	    } else {
-	        return new CompressedDocumentReader<VALUE>();
+	        return new CompressedDocumentReader<>();
 	    }
 	}
 

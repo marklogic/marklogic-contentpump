@@ -19,7 +19,6 @@ import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -63,7 +62,7 @@ public enum InputType implements ConfigConstants {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (cmdline.hasOption(TRANSFORM_MODULE)) {
                 return TransformOutputFormat.class;
             } else {
                 return ContentOutputFormat.class;
@@ -96,7 +95,7 @@ public enum InputType implements ConfigConstants {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (cmdline.hasOption(TRANSFORM_MODULE)) {
                 return TransformOutputFormat.class;
             } else {
                 return ContentOutputFormat.class;
@@ -127,7 +126,7 @@ public enum InputType implements ConfigConstants {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (cmdline.hasOption(TRANSFORM_MODULE)) {
                 return TransformOutputFormat.class;
             } else {
                 return ContentOutputFormat.class;
@@ -153,9 +152,10 @@ public enum InputType implements ConfigConstants {
             return ArchiveInputFormat.class;
         }
         
+        @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (cmdline.hasOption(TRANSFORM_MODULE)) {
                 return DatabaseTransformOutputFormat.class;
             } else {
                 return DatabaseContentOutputFormat.class;
@@ -183,7 +183,7 @@ public enum InputType implements ConfigConstants {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (cmdline.hasOption(TRANSFORM_MODULE)) {
                 return TransformOutputFormat.class;
             } else {
                 return ContentOutputFormat.class;
@@ -226,7 +226,7 @@ public enum InputType implements ConfigConstants {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                 CommandLine cmdline, Configuration conf) {
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (cmdline.hasOption(TRANSFORM_MODULE)) {
                 return TransformOutputFormat.class;
             } else {
                 return ContentOutputFormat.class;
@@ -258,7 +258,7 @@ public enum InputType implements ConfigConstants {
                 Text version = new Text(result.next().asString());
                 boolean hasFunc = Boolean.parseBoolean(result.next().asString());
                 LinkedMapWritable roleMap = new LinkedMapWritable();
-                if(hasFunc) {
+                if (hasFunc) {
                     while (result.hasNext()) {
                         Text key = new Text(result.next().asString());
                         if (!result.hasNext()) {
@@ -303,7 +303,7 @@ public enum InputType implements ConfigConstants {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (cmdline.hasOption(TRANSFORM_MODULE)) {
                 return TransformOutputFormat.class;
             } else {
                 return ContentOutputFormat.class;
@@ -335,7 +335,7 @@ public enum InputType implements ConfigConstants {
         @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                 CommandLine cmdline, Configuration conf) {
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
+            if (cmdline.hasOption(TRANSFORM_MODULE)) {
                 return TransformOutputFormat.class;
             } else {
                 return ContentOutputFormat.class;
@@ -393,8 +393,7 @@ public enum InputType implements ConfigConstants {
      */
     public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
     getMapperClass(CommandLine cmdline, Configuration conf) {
-        return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-        ImportDocumentMapper.class;
+        return  (Class) ImportDocumentMapper.class;
     }
     
     public abstract Class<? extends OutputFormat> getOutputFormatClass(

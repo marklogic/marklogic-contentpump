@@ -53,6 +53,7 @@ import com.marklogic.xcc.exceptions.ContentInsertException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.exceptions.XQueryException;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -174,7 +175,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         this.am = am;
         
-        permsMap = new HashMap<String,ContentPermission[]>();
+        permsMap = new HashMap<>();
         
         int srcMapSize = forestSourceMap.size();
         forestIds = new String[srcMapSize];
@@ -193,7 +194,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         pendingUris = new HashMap[arraySize];
         for (int i = 0; i < arraySize; i++) {
-            pendingUris[i] = new HashMap<Content, DocumentURI>();
+            pendingUris[i] = new HashMap<>();
         }
 
         if (fastLoad
@@ -220,7 +221,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             int i = 0;
             while (i + 1 < perms.length) {
                 String roleName = perms[i++];
-                if (roleName == null || roleName.isEmpty()) {
+                if (StringUtils.isEmpty(roleName)) {
                     LOG.error("Illegal role name: " + roleName);
                     continue;
                 }
@@ -239,7 +240,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 if (capability != null) {
                     if (permissions == null) {
-                        permissions = new ArrayList<ContentPermission>();
+                        permissions = new ArrayList<>();
                     }
                     permissions.add(new ContentPermission(capability, roleName));
                 }
@@ -297,7 +298,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (needCommit) {
             commitUris = new ArrayList[arraySize];
             for (int i = 0; i < arraySize; i++) {
-                commitUris[i] = new ArrayList<DocumentURI>(txnSize*batchSize);
+                commitUris[i] = new ArrayList<>(txnSize*batchSize);
             }
         }
         
@@ -408,6 +409,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * 
      * @param batch batch of content to insert
      * @param fId forest Id
+     * @throws java.io.IOException
      */
     protected void insertBatch(Content[] batch, int id) 
     throws IOException {
@@ -561,7 +563,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             failed++;
             return;
         }
-        if(countBased) {
+        if (countBased) {
             fId = 0;
         }
         pendingUris[sid].put(content, (DocumentURI)key.clone());

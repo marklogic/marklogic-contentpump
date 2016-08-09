@@ -16,9 +16,9 @@
 package com.marklogic.mapreduce.functions;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
-import com.marklogic.mapreduce.functions.ValuesOrWordsFunction.WordsFunction;
 
 /**
  * Wrapper class for the <code>cts:value-match</code> lexicon
@@ -70,10 +70,8 @@ public abstract class ValueMatch extends ValueOrWordMatchFunction {
     
     public static void main(String[] args) {
         ValueMatch matchFunc = new ValueMatchFunction();
-        Collection<String> nsbindings = new ArrayList<String>();
-        for (int i = 0; i < args.length; i++) {
-            nsbindings.add(args[i]);
-        }
+        Collection<String> nsbindings = new ArrayList<>(args.length);
+        nsbindings.addAll(Arrays.asList(args));
         System.out.println(matchFunc.getInputQuery(nsbindings, 1, 1000));
     }
     

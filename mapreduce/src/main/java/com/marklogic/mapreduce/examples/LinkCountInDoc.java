@@ -38,6 +38,7 @@ import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.NodeInputFormat;
 import com.marklogic.mapreduce.NodeOutputFormat;
 import com.marklogic.mapreduce.NodePath;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Count the number of occurrences of each link title in documents in
@@ -53,6 +54,7 @@ public class LinkCountInDoc {
         private final static IntWritable one = new IntWritable(1);
         private Text refURI = new Text();
         
+        @Override
         public void map(NodePath key, MarkLogicNode value, Context context) 
         throws IOException, InterruptedException {
             if (value != null && value.get() != null) {
@@ -76,6 +78,7 @@ public class LinkCountInDoc {
         private MarkLogicNode result;
         private String baseUri;
         
+        @Override
         protected void setup(Context context) 
         throws IOException, InterruptedException {
             try {
@@ -97,6 +100,7 @@ public class LinkCountInDoc {
             }
         }
         
+        @Override
         public void reduce(Text key, Iterable<IntWritable> values, 
                 Context context
                 ) throws IOException, InterruptedException {        
@@ -118,8 +122,7 @@ public class LinkCountInDoc {
         // exclude key that is invalid for a document URI
         private boolean isInvalidName(Text key) {
             String keyString = key.toString();
-            return keyString == null || keyString.isEmpty() || 
-                    keyString.matches("( )*");
+            return StringUtils.isEmpty(keyString) || keyString.matches("( )*");
         }
     }
     

@@ -139,16 +139,16 @@ implements MarkLogicConstants {
         	
         	for (int i = 0; i < redactionRuleCol.length; i++) {
         		if (i != 0) {
-        			buf.append(",");
+        			buf.append(',');
         		}
-        		buf.append("\"" + redactionRuleCol[i] + "\"");
+        		buf.append('\"').append(redactionRuleCol[i]).append('\"');
         	}
         	
         	buf.append(")))");
         } else {
             buildSrcInDocExprQuery(docExpr, subExpr, buf);
         }
-        buf.append(")");
+        buf.append(')');
     }
     
     protected void buildSrcInSearchQuery(String docExpr, String ctsQuery, StringBuilder buf) {
@@ -177,16 +177,16 @@ implements MarkLogicConstants {
             
             for (int i = 0; i < redactionRuleCol.length; i++) {
                 if (i != 0) {
-                    buf.append(",");
+                    buf.append(',');
                 }
-                buf.append("\"" + redactionRuleCol[i] + "\"");
+                buf.append('\"').append(redactionRuleCol[i]).append('\"');
             }
             buf.append(")))");
         } else {
             buildSrcInSearchQuery(docExpr, ctsQuery, buf);
         }
         
-        buf.append(")");
+        buf.append(')');
         buf.append("[$mlmr:splitstart to $mlmr:splitend]");
     }
 

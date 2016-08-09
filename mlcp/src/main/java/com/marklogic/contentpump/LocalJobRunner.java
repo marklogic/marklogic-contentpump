@@ -159,14 +159,12 @@ public class LocalJobRunner implements ConfigConstants {
         Monitor monitor = new Monitor();
         monitor.start();
         reporter = new ContentPumpReporter();
-        List<Future<Object>> taskList = new ArrayList<Future<Object>>();
+        List<Future<Object>> taskList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {        
             InputSplit split = array[i];
             if (pool != null) {
                 LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE> task = 
-                    new LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE>(
-                        inputFormat, outputFormat, conf, i, split, reporter,
-                        progress[i]);
+                    new LocalMapTask<>(inputFormat, outputFormat, conf, i, split, reporter, progress[i]);
                 availableThreads = assignThreads(i, array.length);
                 Class<? extends Mapper<?, ?, ?, ?>> runtimeMapperClass = 
                     job.getMapperClass();
@@ -211,26 +209,22 @@ public class LocalJobRunner implements ConfigConstants {
                     outputFormat.getRecordWriter(context);
                 OutputCommitter committer = 
                     outputFormat.getOutputCommitter(context);
-                TrackingRecordReader trackingReader = 
-                    new TrackingRecordReader(reader, progress[i]);
-
-                Mapper.Context mapperContext = 
-                    ReflectionUtil.createMapperContext(mapper, conf, 
-                        taskAttemptId, trackingReader, writer, committer, 
-                        reporter, split);
-                
-                trackingReader.initialize(split, mapperContext);
-                
-                // no thread pool (only 1 thread specified)
-                Class<? extends Mapper<?,?,?,?>> mapClass = 
-                        job.getMapperClass();
-                mapperContext.getConfiguration().setClass(
-                   CONF_MAPREDUCE_JOB_MAP_CLASS , mapClass, Mapper.class);
-                mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) 
-                    ReflectionUtils.newInstance(mapClass,
-                        mapperContext.getConfiguration());
-                mapper.run(mapperContext);
-                trackingReader.close();
+                Mapper.Context mapperContext;
+                try (TrackingRecordReader trackingReader = new TrackingRecordReader(reader, progress[i])) {
+                    mapperContext = ReflectionUtil.createMapperContext(mapper, conf, 
+                            taskAttemptId, trackingReader, writer, committer,
+                            reporter, split);
+                    trackingReader.initialize(split, mapperContext);
+                    // no thread pool (only 1 thread specified)
+                    Class<? extends Mapper<?,?,?,?>> mapClass =
+                            job.getMapperClass();
+                    mapperContext.getConfiguration().setClass(
+                            CONF_MAPREDUCE_JOB_MAP_CLASS , mapClass, Mapper.class);
+                    mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>)
+                            ReflectionUtils.newInstance(mapClass,
+                                    mapperContext.getConfiguration());
+                    mapper.run(mapperContext);
+                }
                 writer.close(mapperContext);
                 committer.commitTask(context);
             }
@@ -379,7 +373,7 @@ public class LocalJobRunner implements ConfigConstants {
                 mapper.run(mapperContext);
             } catch (Throwable t) {
                 LOG.error("Error running task: ", t);
-                try{
+                try {
                     synchronized(pool) {
                         pool.notify();
                     }
@@ -451,6 +445,7 @@ public class LocalJobRunner implements ConfigConstants {
     class Monitor extends Thread {
         private String lastReport;
         
+        @Override
         public void run() {
             try {
                 while (!jobComplete.get() && !interrupted()) {
