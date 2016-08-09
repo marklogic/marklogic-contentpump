@@ -30,7 +30,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import com.marklogic.mapreduce.NodeInputFormat;
-import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.NodePath;
 import com.marklogic.mapreduce.KeyValueOutputFormat;
@@ -52,6 +51,7 @@ public class CustomQuery {
         private final static IntWritable one = new IntWritable(1);
         private Text docStr = new Text();
         
+        @Override
         public void map (NodePath key, MarkLogicNode value, Context context)
         throws IOException, InterruptedException {
             if (key != null && value != null && value.get() != null){
@@ -69,9 +69,12 @@ public class CustomQuery {
         
         private String removeHeader(String s) {
             // remove the header "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
-            int index = s.indexOf(">");
-            if (index == -1) return s;
-            else return s.substring(index+1);
+            int index = s.indexOf('>');
+            if (index == -1) { 
+                return s; 
+            } else { 
+                return s.substring(index+1);
+            }
         }
     }
     
@@ -82,6 +85,7 @@ public class CustomQuery {
         private Text uri = new Text();
         private Text content = new Text();
         
+        @Override
         public void reduce(IntWritable key, Iterable<Text> values, Context context)
         throws IOException, InterruptedException {
             StringBuilder buf = new StringBuilder();

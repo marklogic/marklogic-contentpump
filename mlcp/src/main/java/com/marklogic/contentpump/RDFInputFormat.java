@@ -54,14 +54,14 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
         } catch (IOException e) {
             throw new IOException("Error creating RecordReader:" + e.getMessage());
         }
-        return new RDFReader<Text>(version,roleMap);
+        return new RDFReader<>(version,roleMap);
     }
     
     protected LinkedMapWritable getRoleMap(TaskAttemptContext context) throws IOException{
         //Restores the object from the configuration.
         Configuration conf = context.getConfiguration();
         LinkedMapWritable fhmap = null;
-        if(conf.get(ConfigConstants.CONF_ROLE_MAP)!=null) {
+        if (conf.get(ConfigConstants.CONF_ROLE_MAP)!=null) {
             fhmap = DefaultStringifier.load(conf, ConfigConstants.CONF_ROLE_MAP, 
                 LinkedMapWritable.class);
         }

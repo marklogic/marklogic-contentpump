@@ -44,6 +44,7 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.XSBoolean;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * MarkLogicOutputFormat for Content.
@@ -191,7 +192,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                 int i = 0;
                 while (i + 1 < perms.length) {
                     String roleName = perms[i++];
-                    if (roleName == null || roleName.isEmpty()) {
+                    if (StringUtils.isEmpty(roleName)) {
                         throw new IllegalStateException(
                                 "Illegal role name: " + roleName);
                     }
@@ -221,20 +222,20 @@ public class ContentOutputFormat<VALUEOUT> extends
     		TaskAttemptContext context) throws IOException{
         Configuration conf = context.getConfiguration();
         Map<String, ContentSource> sourceMap = 
-            new LinkedHashMap<String, ContentSource>();
+            new LinkedHashMap<>();
         if (fastLoad) {
             LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
             // get host->contentSource mapping
             Map<String, ContentSource> hostSourceMap = 
-                new HashMap<String, ContentSource>();
+                new HashMap<>();
             for (Writable v : forestStatusMap.values()) {
                 ForestInfo fs = (ForestInfo)v;
                 //unupdatable forests
-                if(fs.getUpdatable() == false) continue;
+                if(fs.getUpdatable() == false) { continue; }
                 if (hostSourceMap.get(fs.getHostName()) == null) {
                     try {
                         ContentSource cs = InternalUtilities.getOutputContentSource(
-                            conf, fs.getHostName().toString());
+                            conf, fs.getHostName());
                         hostSourceMap.put(fs.getHostName(), cs);
                     } catch (XccConfigException e) {
                         throw new IOException(e);
@@ -245,7 +246,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             // consolidate forest->host map and host-contentSource map to 
             // forest-contentSource map
             for (Writable forestId : forestStatusMap.keySet()) {
-                String forest = ((Text)forestId).toString();
+                String forest = forestId.toString();
                 String hostName = ((ForestInfo)forestStatusMap.get(forestId)).getHostName();
                 ContentSource cs = hostSourceMap.get(hostName);
                 sourceMap.put(ID_PREFIX + forest, cs);
@@ -274,7 +275,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the ContentWriter
-        return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
+        return new ContentWriter<>(conf, sourceMap, fastLoad, am);
     }
     
     // forest host map is saved when checkOutputSpecs() is called.  In certain 
@@ -475,7 +476,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                     forest = null;
                 }
             }
-            if (forestStatusMap.size() == 0) {
+            if (forestStatusMap.isEmpty()) {
                 throw new IOException("Number of forests is 0: "
                     + "check forests in database");
             }

@@ -68,7 +68,7 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDirectory()) {
+        if (status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }

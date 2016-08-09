@@ -39,6 +39,7 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         this.element = element;
     }
 
+    @Override
     public int getLength() {
         if (LOG.isTraceEnabled()) {
             LOG.trace(element.getNodeName() + "@NumAttr:" + getNumAttr()
@@ -55,35 +56,44 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         return num >= 0 ? num : 0;
     }
 
+    @Override
     public Node getNamedItem(String name) {
         if (LOG.isTraceEnabled()) {
             LOG.trace(this.getClass().getSimpleName() + ".getNamedItem("
                 + element.node + ", " + name + ")");
         }
-        if (name == null)
+        if (name == null) {
             return null;
-        for (int i = 0; i < getLength(); i++)
-            if (name.equals(item(i).getNodeName()))
+        }
+        for (int i = 0; i < getLength(); i++) {
+            if (name.equals(item(i).getNodeName())) {
                 return item(i);
+            }
+        }
         return null;
     }
 
+    @Override
     public Node getNamedItemNS(String namespaceURI, String localName)
         throws DOMException {
         if (LOG.isTraceEnabled()) {
             LOG.trace(this.getClass().getSimpleName() + ".getNamedItemNS("
                 + element.node + ", " + namespaceURI + ", " + localName + ")");
         }
-        if (localName == null)
+        if (localName == null) {
             return null;
+        }
         for (int i = 0; i < getLength(); i++) {
-            if ((namespaceURI == null) != (item(i).getNamespaceURI() == null))
+            if ((namespaceURI == null) != (item(i).getNamespaceURI() == null)) {
                 continue;
+            }
             if (namespaceURI != null
-                && !namespaceURI.equals(item(i).getNamespaceURI()))
+                && !namespaceURI.equals(item(i).getNamespaceURI())) {
                 continue;
-            if (localName.equals(item(i).getLocalName()))
+            }
+            if (localName.equals(item(i).getLocalName())) {
                 return item(i);
+            }
         }
         return null;
     }
@@ -106,6 +116,7 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
      * is a namespace declaration, it is represented as an attribute whose owner
      * document is a document containing the attribute only.
      */
+    @Override
     public Node item(int index) {
         try {
             return item(index, null);
@@ -129,9 +140,9 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         } else {
             int nsIdx = index - numAttr;
             // if nsDecl is initialized, return it
-            if (nsDecl != null)
+            if (nsDecl != null) {
                 return nsDecl[nsIdx];
-
+            }
             // create owner doc
             if (ownerDoc == null) {
                 ownerDoc = getClonedOwnerDoc();
@@ -172,22 +183,26 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
     }
 
     /** Unsupported. */
+    @Override
     public Node removeNamedItem(String name) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Node removeNamedItemNS(String namespaceURI, String localName)
         throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Node setNamedItem(Node arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Node setNamedItemNS(Node arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

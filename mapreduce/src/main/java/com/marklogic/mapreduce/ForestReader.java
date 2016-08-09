@@ -141,7 +141,7 @@ implements MarkLogicConstants {
                 String newDir = dir + "/";
                 it.remove();
                 if (addedDirs == null) {
-                    addedDirs = new ArrayList<String>();
+                    addedDirs = new ArrayList<>();
                 }
                 addedDirs.add(newDir);
             }
@@ -277,7 +277,7 @@ implements MarkLogicConstants {
                     break;
                 }
             }
-            if (!match) return false;
+            if (!match) { return false; }
         }
         // apply collection filter
         if (!colFilters.isEmpty()) {
@@ -289,7 +289,7 @@ implements MarkLogicConstants {
                     break;
                 }
             }
-            if (!match) return false;
+            if (!match) { return false; }
         }
         return true;
     }
@@ -354,8 +354,8 @@ implements MarkLogicConstants {
             if (nascent == 0L || deleted != -1L) { // skip
                 position++;
                 bytesRead += dataIs.skipBytes(j);
-                if (nascent == 0L) nascentCnt++;
-                if (deleted != -1L) deletedCnt++;
+                if (nascent == 0L) { nascentCnt++; }
+                if (deleted != -1L) { deletedCnt++; }
                 return null;
             }
         } catch (EOFException e) {

@@ -27,6 +27,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.TypeInfo;
 
 import com.marklogic.tree.ExpandedTree;
+import java.util.List;
 
 /**
  * A read-only W3C DOM Node implementation of MarkLogic's internal
@@ -48,6 +49,7 @@ public class AttrImpl extends NodeImpl implements Attr {
         super(tree, node);
     }
 
+    @Override
     protected Node cloneNode(Document doc, boolean deep) {
         Attr attr = doc.createAttributeNS(getNamespaceURI(), getLocalName());
         attr.setValue(getValue());
@@ -66,6 +68,7 @@ public class AttrImpl extends NodeImpl implements Attr {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getName() {
         String prefix = getPrefix();
         return prefix == null || prefix.equals("") ? getLocalName() : prefix
@@ -111,6 +114,7 @@ public class AttrImpl extends NodeImpl implements Attr {
      * {@inheritDoc}
      * OwnerElement for a namespace attribute is null.
      */
+    @Override
     public Element getOwnerElement() {
         return (Element) tree.node(tree.nodeParentNodeRepID[node]);
     }
@@ -118,9 +122,10 @@ public class AttrImpl extends NodeImpl implements Attr {
     @Override
     protected int getPrefixID(int uriAtom) {
         int parentNodeRepID = tree.nodeParentNodeRepID[node];
-        if (parentNodeRepID == -1)
+        if (parentNodeRepID == -1) {
             parentNodeRepID = node;
-        ArrayList<Integer> ubp = new ArrayList<Integer>();
+        }
+        List<Integer> ubp = new ArrayList<>();
         long sum_ordinal = tree.ordinal + tree.nodeOrdinal[parentNodeRepID];
         for (int ns = getNSNodeID(sum_ordinal); ns >= 0; ns = nextNSNodeID(ns,
             0)) {
@@ -130,12 +135,15 @@ public class AttrImpl extends NodeImpl implements Attr {
                 ubp.add(prefix);
                 continue;
             }
-            if (uri != uriAtom)
+            if (uri != uriAtom) {
                 continue;
-            if (ubp.contains(prefix))
+            }
+            if (ubp.contains(prefix)) {
                 continue;
-            if (tree.atomString(prefix) == null)
+            }
+            if (tree.atomString(prefix) == null) {
                 continue;
+            }
             return prefix;
         }
         return -1;
@@ -145,32 +153,39 @@ public class AttrImpl extends NodeImpl implements Attr {
     @Override
     public String getPrefix() {
         int ns = tree.nodeNameNamespaceAtom[tree.attrNodeNodeNameRepID[tree.nodeRepID[node]]];
-        if (ns < 0)
+        if (ns < 0) {
             return null;
+        }
         String preserved = builtinNSPrefix(getNamespaceURI());
-        if (preserved != null)
+        if (preserved != null) {
             return preserved;
-        if (tree.atomString(ns) != null)
+        }
+        if (tree.atomString(ns) != null) {
             ns = getPrefixID(ns);
+        }
         return (ns >= 0) ? tree.atomString(ns) : null;
     }
 
     /** Unsupported. */
+    @Override
     public TypeInfo getSchemaTypeInfo() {
         return null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean getSpecified() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getValue() {
         return tree.getText(tree.attrNodeTextRepID[tree.nodeRepID[node]]);
     }
 
     /** Unsupported. */
+    @Override
     public boolean isId() {
         return false;
     }
@@ -188,6 +203,7 @@ public class AttrImpl extends NodeImpl implements Attr {
     }
 
     /** Unsupported. */
+    @Override
     public void setValue(String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

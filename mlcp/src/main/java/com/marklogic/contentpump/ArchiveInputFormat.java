@@ -56,11 +56,11 @@ public class ArchiveInputFormat extends
     public List<InputSplit> getSplits(JobContext job) throws IOException {
         List<InputSplit> splits = super.getSplits(job);
         Iterator<InputSplit> iter = splits.iterator();
-        while(iter.hasNext()) {
+        while (iter.hasNext()) {
             InputSplit s = iter.next();
             Path file = ((FileSplit) s).getPath();
             String zipfile = file.toUri().getPath();
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("Zip file name: " + zipfile);
             }
             int index = file.toUri().getPath().lastIndexOf(EXTENSION);

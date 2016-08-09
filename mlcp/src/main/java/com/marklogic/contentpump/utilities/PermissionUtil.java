@@ -36,6 +36,7 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import org.apache.commons.lang.StringUtils;
 
 public class PermissionUtil {
     public static final Log LOG = LogFactory.getLog(PermissionUtil.class);
@@ -53,7 +54,7 @@ public class PermissionUtil {
             int i = 0;
             while (i + 1 < perms.length) {
                 String roleName = perms[i++];
-                if (roleName == null || roleName.isEmpty()) {
+                if (StringUtils.isEmpty(roleName)) {
                     LOG.error("Illegal role name: " + roleName);
                     continue;
                 }
@@ -61,7 +62,7 @@ public class PermissionUtil {
                 ContentCapability capability = getCapbility(perm);
                 if (capability != null) {
                     if (permissions == null) {
-                        permissions = new ArrayList<ContentPermission>();
+                        permissions = new ArrayList<>();
                     }
                     permissions
                         .add(new ContentPermission(capability, roleName));
@@ -74,7 +75,7 @@ public class PermissionUtil {
     
     
     public static List<ContentPermission> getDefaultPermissions(Configuration conf, LinkedMapWritable roleMap) throws IOException {
-        ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+        List<ContentPermission> perms = new ArrayList<>();
         Session session = null;
         ResultSequence result = null;
         ContentSource cs;
@@ -89,8 +90,9 @@ public class PermissionUtil {
             AdhocQuery query = session.newAdhocQuery(DEFAULT_PERM_QUERY);
             query.setOptions(options);
             result = session.submitRequest(query);
-            if (!result.hasNext() || roleMap == null)
+            if (!result.hasNext() || roleMap == null) {
                 return null;
+            }
             while (result.hasNext()) {
                 Text roleid = new Text(result.next().asString());
                 if (!result.hasNext()) {

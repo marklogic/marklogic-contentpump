@@ -67,7 +67,7 @@ public class DatabaseTransformWriter<VALUE> extends
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
         String csKey;
         if (fastLoad) {
-            if(!countBased) {
+            if (!countBased) {
                 // placement for legacy or bucket
                 fId = am.getPlacementForestIndex(key);
                 sfId = fId;
@@ -151,6 +151,7 @@ public class DatabaseTransformWriter<VALUE> extends
         }
     }
 
+    @Override
     protected Session getSession(String forestId) {
         TransactionMode mode = TransactionMode.AUTO;
         if (txnSize > 1) {

@@ -40,6 +40,7 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.PropertyOutputFormat;
 import com.marklogic.mapreduce.ValueInputFormat;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Read title attributes in links as text and write summary as property to
@@ -52,6 +53,7 @@ public class LinkCountInProperty {
         private final static IntWritable one = new IntWritable(1);
         private Text refURI = new Text();
         
+        @Override
         public void map(LongWritable key, Text value, Context context) 
         throws IOException, InterruptedException {
             refURI.set(value.toString().trim());
@@ -69,6 +71,7 @@ public class LinkCountInProperty {
         private MarkLogicNode result;
         private String baseUri;
         
+        @Override
         protected void setup(Context context) 
         throws IOException, InterruptedException {
             try {
@@ -91,6 +94,7 @@ public class LinkCountInProperty {
             }
         }
         
+        @Override
         public void reduce(Text key, Iterable<IntWritable> values, 
                 Context context
                 ) throws IOException, InterruptedException {        
@@ -111,8 +115,7 @@ public class LinkCountInProperty {
         // exclude key that is invalid for a document URI
         private boolean isInvalidName(Text key) {
             String keyString = key.toString();
-            return keyString == null || keyString.isEmpty() || 
-                    keyString.matches("( )*");
+            return StringUtils.isEmpty(keyString) || keyString.matches("( )*");
         }
     }
     

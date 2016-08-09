@@ -141,8 +141,9 @@ public class ExpandedTree implements Writable {
 			if (LOG.isTraceEnabled()) {
 			    LOG.trace(String.format("%02x %02x", b, value[p]));
 			}
-			if ((b == 0) || (b != value[p]))
+			if ((b == 0) || (b != value[p])) {
 				return false;
+            }
 			p++;
 			i++;
 		}
@@ -150,7 +151,7 @@ public class ExpandedTree implements Writable {
 	}
 	
 	public String atomString(int i) {
-		if (i<0 || i==Integer.MAX_VALUE) return null;
+		if (i<0 || i==Integer.MAX_VALUE) { return null; }
 		String value = null;
 		if (atomString == null) {
 			atomString = new String[atomIndex.length];
@@ -162,13 +163,13 @@ public class ExpandedTree implements Writable {
 			value = atomString[i] = new String(atomData, aidx,
 					atomIndex[i + 1] - aidx - 1, UTF8);
 		}
-		if (value.isEmpty()) return null;
+		if (value.isEmpty()) { return null; }
 		return value;
 	}
 	
 	public String getText(int index) {
             int input = index;
-	    if (textReps==null) return null;
+	    if (textReps==null) { return null; }
     	    StringBuilder buf = new StringBuilder();
     	    for (int i=textReps[index++]; i > 0; --i) {
     	        if (LOG.isTraceEnabled()) {
@@ -179,7 +180,7 @@ public class ExpandedTree implements Writable {
     		buf.append(atomString(textReps[index++]));
     	    }
             if (LOG.isTraceEnabled()) {
-            LOG.trace("getText(" + input + ") returning [" + buf.toString() + 
+                LOG.trace("getText(" + input + ") returning [" + buf.toString() + 
                     "] length " + buf.length());
             }
             return buf.toString();
@@ -196,8 +197,8 @@ public class ExpandedTree implements Writable {
     }
     
     public Map<String, String> getMetadata() {
-        if (numMetadata == 0) return null;
-        Map<String, String> metaMap = new HashMap<String, String>(numMetadata);
+        if (numMetadata == 0) { return null; }
+        Map<String, String> metaMap = new HashMap<>(numMetadata);
         for (int i = 0; i < numMetadata; i++) {
             metaMap.put(atomString(metaKeys[i]), getText(metaVals[i]));
         }
@@ -583,6 +584,7 @@ public class ExpandedTree implements Writable {
 
     }    
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         putNode(0,sb);
@@ -597,10 +599,10 @@ public class ExpandedTree implements Writable {
 	}
         switch (nodeKind[index]) {
             case NodeKind.TEXT: {
-                sb.append("\"");
+                sb.append('\"');
                 int id = nodeRepID[index];
                 sb.append(getText(id));
-                sb.append("\"");
+                sb.append('\"');
                 break;
             }
             case NodeKind.DOC: {
@@ -630,17 +632,17 @@ public class ExpandedTree implements Writable {
                 break;
             }
             case NodeKind.ARRAY: {
-                sb.append("[");
+                sb.append('[');
                 int id = nodeRepID[index];
                 int limit = arrayNodeChildNodeRepID[id] + 
                             arrayNodeNumChildren[id];
                 int i = 0;
                 for (int idx = arrayNodeChildNodeRepID[id]; 
                      idx < limit; idx++,i++) {
-                   if (i!=0) sb.append(", ");
+                   if (i!=0) { sb.append(", "); }
                    putNode(idx, sb);
                 }
-                sb.append("]");
+                sb.append(']');
                 break;
             }
             case NodeKind.OBJECT: {
@@ -651,8 +653,8 @@ public class ExpandedTree implements Writable {
                 int i=0;
                 for (int idx = arrayNodeChildNodeRepID[id]; 
                      idx < limit; idx++, i++) {
-                   if (i!=0) sb.append(", ");
-                   sb.append("\"");
+                   if (i!=0) { sb.append(", "); }
+                   sb.append('\"');
                    sb.append(atomString(textReps[arrayNodeTextRepID[id] + i]));
                    sb.append("\" : ");
                    putNode(idx, sb);

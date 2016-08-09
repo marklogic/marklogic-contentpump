@@ -28,6 +28,7 @@ import com.marklogic.xcc.DocumentFormat;
  */
 public enum ContentType {
     XML {
+        @Override
         public DocumentFormat getDocumentFormat() {
             return DocumentFormat.XML;
         }
@@ -38,6 +39,7 @@ public enum ContentType {
         }
     },
     JSON {
+        @Override
         public DocumentFormat getDocumentFormat() {
             return DocumentFormat.JSON;
         }
@@ -48,6 +50,7 @@ public enum ContentType {
         }
     },
     TEXT {
+        @Override
         public DocumentFormat getDocumentFormat() {
             return DocumentFormat.TEXT;
         }
@@ -58,6 +61,7 @@ public enum ContentType {
         }
     },
     BINARY {
+        @Override
         public DocumentFormat getDocumentFormat() {
             return DocumentFormat.BINARY;
         }

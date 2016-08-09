@@ -29,6 +29,7 @@ import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * MarkLogicRecordWriter to insert/replace a node to MarkLogic Server.
@@ -48,7 +49,7 @@ implements MarkLogicConstants {
     public NodeWriter(Configuration conf, String host) {
         super(conf, host);
         String opTypeStr = conf.get(NODE_OPERATION_TYPE);
-        if (opTypeStr == null || opTypeStr.isEmpty()) {
+        if (StringUtils.isEmpty(opTypeStr)) {
             throw new IllegalArgumentException(
                     NODE_OPERATION_TYPE + " is not specified.");
         }

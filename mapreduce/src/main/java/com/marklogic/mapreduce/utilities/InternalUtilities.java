@@ -36,7 +36,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.LinkedMapWritable;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.DatabaseDocument;
 import com.marklogic.mapreduce.MarkLogicNode;
@@ -56,6 +55,7 @@ import com.marklogic.xcc.types.XSHexBinary;
 import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XdmBinary;
 import com.marklogic.xcc.types.XdmValue;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Internal utilities shared by mapreduce package.  No need to document.
@@ -101,7 +101,7 @@ public class InternalUtilities implements MarkLogicConstants {
     public static ContentSource getInputContentSource(Configuration conf) 
     throws URISyntaxException, XccConfigException, IOException {
         String host = conf.get(INPUT_HOST);
-        if (host == null || host.isEmpty()) {
+        if (StringUtils.isEmpty(host)) {
             throw new IllegalArgumentException(INPUT_HOST + 
                     " is not specified.");
         }
@@ -132,8 +132,7 @@ public class InternalUtilities implements MarkLogicConstants {
                 conf.getClass(INPUT_SSL_OPTIONS_CLASS, 
                 null, SslConfigOptions.class);
             if (sslOptionClass != null) {
-                SslConfigOptions sslOptions = 
-                    (SslConfigOptions)ReflectionUtils.newInstance(
+                SslConfigOptions sslOptions = ReflectionUtils.newInstance(
                             sslOptionClass, conf);
                 
                 // construct content source
@@ -241,7 +240,6 @@ public class InternalUtilities implements MarkLogicConstants {
      * @return content source
      * @throws IOException 
      * @throws XccConfigException 
-     * @throws IOException 
      */
     public static ContentSource getOutputContentSource(Configuration conf,
             String hostName) 
@@ -257,8 +255,7 @@ public class InternalUtilities implements MarkLogicConstants {
                 conf.getClass(OUTPUT_SSL_OPTIONS_CLASS, 
                 null, SslConfigOptions.class);
             if (sslOptionClass != null) {
-                SslConfigOptions sslOptions = 
-                    (SslConfigOptions)ReflectionUtils.newInstance(
+                SslConfigOptions sslOptions = ReflectionUtils.newInstance(
                             sslOptionClass, conf);
                 
                 // construct content source
@@ -278,9 +275,10 @@ public class InternalUtilities implements MarkLogicConstants {
      */
     public static String getHost(TextArrayWritable hosts) throws IOException {
         String [] hostStrings = hosts.toStrings();
-        if(hostStrings == null || hostStrings.length==0) 
+        if(hostStrings == null || hostStrings.length==0)  {
             throw new IOException("Number of forests is 0: "
                 + "check forests in database");
+        }
         int count = hostStrings.length;
         int position = (int)(Math.random() * count);
         return hostStrings[position];

@@ -71,7 +71,7 @@ public class ZipDelimitedJSONReader extends DelimitedJSONReader<Text> {
     @Override
     protected boolean findNextFileEntryAndInitReader() throws InterruptedException, IOException {
         do {
-            if (hasMoreEntryInZip()) return true;
+            if (hasMoreEntryInZip()) { return true; }
             if (iterator != null && iterator.hasNext()) {
                 initFileStream(iterator.next());
                 continue;

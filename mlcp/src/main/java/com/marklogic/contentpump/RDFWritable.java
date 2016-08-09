@@ -78,18 +78,19 @@ public class RDFWritable<VALUE> implements CustomContent {
         String outputOverrideGraph = conf.get(MarkLogicConstants.OUTPUT_OVERRIDE_GRAPH);
         
         if (collections != null) {
-            List<String> optionList = new ArrayList<String>();
+            List<String> optionList = new ArrayList<>();
             if (graphUri == null) { //no graph specified in quad
-                if( outputGraph != null)//output_graph is set
+                if (outputGraph != null) {//output_graph is set
                     optionList.add(outputGraph.trim()); 
-                else if (outputOverrideGraph != null) {
+                } else if (outputOverrideGraph != null) {
                     optionList.add(outputOverrideGraph.trim()); 
                 }
             } else {
-                if( outputOverrideGraph != null)
+                if (outputOverrideGraph != null) {
                     optionList.add(outputOverrideGraph);
-                else
+                } else {
                     optionList.add(graphUri);//use quad's graph
+                }
             }
             //collections are always added
             Collections.addAll(optionList, collections);
@@ -115,9 +116,9 @@ public class RDFWritable<VALUE> implements CustomContent {
         
         options.setGraph(graphUri);
         //permissions
-        if (permissions!=null)
+        if (permissions!=null) {
             options.setPermissions(permissions);
-        
+        }
         Content content = null;
         if (value instanceof Text) {
             content = ContentFactory.newContent(uri,
@@ -155,9 +156,9 @@ public class RDFWritable<VALUE> implements CustomContent {
             out.writeByte(0);
         } else {
             out.writeByte(permissions.length);
-            for(int i=0; i<permissions.length; i++) {
-                Text role = new Text(permissions[i].getRole());
-                Text cap = new Text(permissions[i].getCapability().toString());
+            for (ContentPermission permission : permissions) {
+                Text role = new Text(permission.getRole());
+                Text cap = new Text(permission.getCapability().toString());
                 role.write(out);
                 cap.write(out);
             }
@@ -195,7 +196,7 @@ public class RDFWritable<VALUE> implements CustomContent {
         if (hasPerms != 0) {
             int length = hasPerms;
             permissions = new ContentPermission[length];
-            for(int i=0; i<length; i++) {
+            for (int i=0; i<length; i++) {
                 Text t = new Text();
                 t.readFields(in);
                 String role = t.toString();

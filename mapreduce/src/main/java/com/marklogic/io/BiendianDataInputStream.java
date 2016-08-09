@@ -51,22 +51,27 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
         return littleEndian;
     }
 
+    @Override
     public final int read(byte b[]) throws IOException {
         return di.read(b, 0, b.length);
     }
 
+    @Override
     public final int read(byte b[], int off, int len) throws IOException {
         return di.read(b, off, len);
     }
 
+    @Override
     public final void readFully(byte b[]) throws IOException {
         readFully(b, 0, b.length);
     }
 
+    @Override
     public final void readFully(byte b[], int off, int len) throws IOException {
         di.readFully(b, off, len);
     }
 
+    @Override
     public final int skipBytes(int n) throws IOException {
         return di.skipBytes(n);
     }
@@ -81,24 +86,29 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
         return total + di.skipBytes((int)n);
     }
 
+    @Override
     public final boolean readBoolean() throws IOException {
         return di.readBoolean();
     }
 
+    @Override
     public final byte readByte() throws IOException {
         return di.readByte();
     }
 
+    @Override
     public final int readUnsignedByte() throws IOException {
         return di.readUnsignedByte();
     }
 
+    @Override
     public final short readShort() throws IOException {
         if (littleEndian) {
             final int a = in.read();
             final int b = in.read();
-            if ((a | b) < 0)
+            if ((a | b) < 0) {
                 throw new EOFException();
+            }
             return (short)((b << 8) + (a << 0));
         }
         else {
@@ -106,30 +116,35 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
         }
     }
 
+    @Override
     public final int readUnsignedShort() throws IOException {
         if (littleEndian) {
             final int a = in.read();
             final int b = in.read();
-            if ((a | b) < 0)
+            if ((a | b) < 0) {
                 throw new EOFException();
+            }
             return (b << 8) + (a << 0);
         } else {
             return di.readUnsignedShort();
         }
     }
 
+    @Override
     public final char readChar() throws IOException {
         if (littleEndian) {
             final int a = in.read();
             final int b = in.read();
-            if ((a | b) < 0)
+            if ((a | b) < 0) {
                 throw new EOFException();
+            }
             return (char)((b << 8) + (a << 0));
         } else {
             return di.readChar();
         }
     }
 
+    @Override
     public final int readInt() throws IOException {
         di.readFully(buf, 0, 4);
         if (littleEndian) {
@@ -141,6 +156,7 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
         }
     }
 
+    @Override
     public final long readLong() throws IOException {
         if (littleEndian) {
             di.readFully(buf, 0, 8);
@@ -154,19 +170,23 @@ public class BiendianDataInputStream extends InputStream implements DataInput {
         }
     }
 
+    @Override
     public final float readFloat() throws IOException {
         return di.readFloat();
     }
 
+    @Override
     public final double readDouble() throws IOException {
         return di.readDouble();
     }
 
     @SuppressWarnings("deprecation")
+    @Override
     public final String readLine() throws IOException {
         return di.readLine();
     }
 
+    @Override
     public final String readUTF() throws IOException {
         return DataInputStream.readUTF(this);
     }
