@@ -158,7 +158,7 @@ public class LocalJobRunner implements ConfigConstants {
         }
         Monitor monitor = new Monitor();
         monitor.start();
-        List<Future<Object>> taskList = new ArrayList<Future<Object>>();
+        List<Future<Object>> taskList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {        
             InputSplit split = array[i];
             if (pool != null) {
