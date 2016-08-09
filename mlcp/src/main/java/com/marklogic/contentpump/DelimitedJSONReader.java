@@ -90,7 +90,7 @@ public class DelimitedJSONReader<VALUEIN> extends
         setFile(((FileSplit) inSplit).getPath());
         // Initialize reader properties
         generateId = conf.getBoolean(CONF_INPUT_GENERATE_URI,false);
-        if (generateId){
+        if (generateId) {
             idGen = new IdGenerator(file.toUri().getPath() + "-"
                     + ((FileSplit) inSplit).getStart()); 
         } else {
@@ -182,7 +182,7 @@ public class DelimitedJSONReader<VALUEIN> extends
                         value).getValue()).set(line);
             } 
         }
-        bytesRead += (long)line.getBytes().length;
+        bytesRead += line.getBytes().length;
         return true;  
     }
     
@@ -190,7 +190,7 @@ public class DelimitedJSONReader<VALUEIN> extends
     protected String findUriInJSON(String line) 
     throws JsonParseException, IOException {
         /* Breadth-First-Search */
-        Queue<Object> q = new LinkedList<Object>();
+        Queue<Object> q = new LinkedList<>();
         Object root = mapper.readValue(line.getBytes(), Object.class);
         if (root instanceof Map || root instanceof ArrayList) {
             q.add(root);
@@ -200,7 +200,7 @@ public class DelimitedJSONReader<VALUEIN> extends
         while (!q.isEmpty()) {
             Object current = q.remove();
             if (current instanceof ArrayList) {
-                for (Object element : (ArrayList<Object>)current) {
+                for (Object element : (ArrayList<? extends Object>)current) {
                     if (element instanceof Map || 
                         element instanceof ArrayList) {
                         q.add(element);

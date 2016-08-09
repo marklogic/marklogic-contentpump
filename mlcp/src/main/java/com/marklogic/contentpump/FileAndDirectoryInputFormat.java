@@ -54,6 +54,7 @@ FileInputFormat<K, V> {
     // add my own hiddenFileFilter since the one defined in FileInputFormat
     // is not accessible.
     public static final PathFilter hiddenFileFilter = new PathFilter() {
+        @Override
         public boolean accept(Path p) {
             String name = p.getName();
             return !name.startsWith("_") && !name.startsWith(".");
@@ -70,7 +71,7 @@ FileInputFormat<K, V> {
     
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
-        List<InputSplit> splits = new ArrayList<InputSplit>();
+        List<InputSplit> splits = new ArrayList<>();
         Configuration conf = job.getConfiguration();
         try {
             List<FileStatus> files = listStatus(job);
@@ -132,7 +133,7 @@ FileInputFormat<K, V> {
         }
         
         PathFilter jobFilter = getInputPathFilter(job);
-        List<PathFilter> filters = new ArrayList<PathFilter>();
+        List<PathFilter> filters = new ArrayList<>();
         filters.add(hiddenFileFilter);
         if (jobFilter != null) {
             filters.add(jobFilter);
@@ -178,6 +179,7 @@ FileInputFormat<K, V> {
             this.filters = filters;
         }
 
+        @Override
         public boolean accept(Path path) {
             for (PathFilter filter : filters) {
                 if (!filter.accept(path)) {
@@ -188,6 +190,7 @@ FileInputFormat<K, V> {
         }
     }
 
+    @Override
     protected List<FileStatus> listStatus(JobContext job
             ) throws IOException {
         Path[] dirs = getInputPaths(job);
@@ -204,7 +207,7 @@ FileInputFormat<K, V> {
 
         // creates a MultiPathFilter with the hiddenFileFilter and the
         // user provided one (if any).
-        List<PathFilter> filters = new ArrayList<PathFilter>();
+        List<PathFilter> filters = new ArrayList<>();
         filters.add(hiddenFileFilter);
         PathFilter jobFilter = getInputPathFilter(job);
         if (jobFilter != null) {
@@ -220,8 +223,8 @@ FileInputFormat<K, V> {
 
     private List<FileStatus> simpleListStatus(JobContext job, Path[] dirs,
             PathFilter inputFilter, boolean recursive) throws IOException {
-        List<FileStatus> result = new ArrayList<FileStatus>();
-        List<IOException> errors = new ArrayList<IOException>();
+        List<FileStatus> result = new ArrayList<>();
+        List<IOException> errors = new ArrayList<>();
         Configuration conf = job.getConfiguration();
         for (int i=0; i < dirs.length; ++i) {
             Path p = dirs[i];
@@ -259,12 +262,11 @@ FileInputFormat<K, V> {
             FileSystem fs, Path path, PathFilter inputFilter)
                     throws IOException {
         FileStatus[] files = fs.listStatus(path, inputFilter);
-        for (int j = 0; j < files.length; j++) {
-            if (files[j].isDirectory()) {
-                simpleAddInputPathRecursively(result, fs, files[j].getPath(),
-                        inputFilter);
+        for (FileStatus file : files) {
+            if (file.isDirectory()) {
+                simpleAddInputPathRecursively(result, fs, file.getPath(), inputFilter);
             } else {
-                result.add(files[j]);
+                result.add(file);
             }
         }
     }

@@ -35,6 +35,7 @@ public class DocumentMapper<VALUE> extends
     protected Counter readCount;
     protected Counter attemptedCount;
     
+    @Override
     public void map(DocumentURI uri, VALUE fileContent, Context context)
         throws IOException, InterruptedException {
         synchronized(readCount) {

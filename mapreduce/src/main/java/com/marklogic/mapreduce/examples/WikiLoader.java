@@ -49,25 +49,27 @@ import com.marklogic.cpox.Utilities;
 import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.xcc.Session;
+import java.util.logging.Level;
 
 /**
- * Load wiki documents from HDFS into MarkLogic Server.
- * Used with the configuration file conf/marklogic-wiki.xml.
+ * Load wiki documents from HDFS into MarkLogic Server. Used with the
+ * configuration file conf/marklogic-wiki.xml.
  */
-
 public class WikiLoader {
-    public static class ArticleMapper 
-    extends Mapper<Text, Text, DocumentURI, Text> {
-        
+
+    public static class ArticleMapper
+            extends Mapper<Text, Text, DocumentURI, Text> {
+
         private DocumentURI uri = new DocumentURI();
-        
-        public void map(Text path, Text page, Context context) 
-        throws IOException, InterruptedException {
+
+        @Override
+        public void map(Text path, Text page, Context context)
+                throws IOException, InterruptedException {
             uri.setUri(path.toString());
             context.write(uri, page);
         }
     }
-    
+
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         if (args.length < 2) {
@@ -75,7 +77,7 @@ public class WikiLoader {
             System.exit(2);
         }
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-       
+
         Job job = Job.getInstance(conf, "wiki loader");
         job.setJarByClass(WikiLoader.class);
         job.setInputFormatClass(WikiInputFormat.class);
@@ -83,12 +85,12 @@ public class WikiLoader {
         job.setMapOutputKeyClass(DocumentURI.class);
         job.setMapOutputValueClass(Text.class);
         job.setOutputFormatClass(ContentOutputFormat.class);
-        
+
         ContentInputFormat.setInputPaths(job, new Path(otherArgs[1]));
 
         conf = job.getConfiguration();
         conf.addResource(otherArgs[0]);
-         
+
         System.exit(job.waitForCompletion(true) ? 0 : 1);
     }
 }
@@ -99,19 +101,20 @@ class WikiInputFormat extends FileInputFormat<Text, Text> {
     protected boolean isSplitable(JobContext context, Path filename) {
         return true;
     }
-    
+
     @Override
     public RecordReader<Text, Text> createRecordReader(InputSplit split,
             TaskAttemptContext context) throws IOException, InterruptedException {
         return new WikiReader();
     }
-    
+
 }
 
 class Article {
+
     String title;
     StringBuilder pageContent;
-    
+
     public Article(String title, StringBuilder pageContent) {
         this.title = title;
         this.pageContent = pageContent;
@@ -129,7 +132,7 @@ class WikiReader extends RecordReader<Text, Text> {
     private Text value = new Text();
     private List<Article> articles;
     private int recordCount = 0;
-    
+
     public WikiReader() {
     }
 
@@ -152,74 +155,76 @@ class WikiReader extends RecordReader<Text, Text> {
         if (articles == null || articles.isEmpty()) {
             return 0;
         }
-        return recordCount / (float)articles.size();
+        return recordCount / (float) articles.size();
     }
 
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
             throws IOException, InterruptedException {
-        Path file = ((FileSplit)inSplit).getPath();
+        Path file = ((FileSplit) inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
-        FSDataInputStream fileIn = fs.open(file);
-        byte[] buf = new byte[BUFFER_SIZE];
-        long bytesTotal = inSplit.getLength();
-        long start = ((FileSplit)inSplit).getStart();
-        fileIn.seek(start);
-        long bytesRead = 0;
-        StringBuilder pages = new StringBuilder();
-        int sindex = -1;
-        while (true) {
-            int length = (int)Math.min(bytesTotal - bytesRead, buf.length);
-            int read = fileIn.read(buf, 0, length);
-            if (read == -1) {
-                System.out.println("Unexpected EOF: bytesTotal=" + bytesTotal +
-                        "bytesRead=" + bytesRead);
-                break;
-            }
-            bytesRead += read;  
-            String temp = new String(new String(buf, 0, read));
-            if (sindex == -1) { // haven't found the start yet    
-                sindex = temp.indexOf(BEGIN_PAGE_TAG);
-                if (sindex > -1) {
-                    pages.append(temp.substring(sindex));
+        StringBuilder pages;
+        try (FSDataInputStream fileIn = fs.open(file)) {
+            byte[] buf = new byte[BUFFER_SIZE];
+            long bytesTotal = inSplit.getLength();
+            long start = ((FileSplit) inSplit).getStart();
+            fileIn.seek(start);
+            long bytesRead = 0;
+            pages = new StringBuilder();
+            int sindex = -1;
+            while (true) {
+                int length = (int) Math.min(bytesTotal - bytesRead, buf.length);
+                int read = fileIn.read(buf, 0, length);
+                if (read == -1) {
+                    System.out.println("Unexpected EOF: bytesTotal=" + bytesTotal
+                            + "bytesRead=" + bytesRead);
+                    break;
                 }
-            } else if (bytesRead < bytesTotal) { // haven't completed the split
-                pages.append(temp);
-            } else { // reached the end of this split
-                // look for end
-                int eindex = 0;
-                if (temp.contains(END_DOC_TAG) || // reached the end of doc
-                    temp.endsWith(END_PAGE_TAG)) {
-                    eindex = temp.lastIndexOf(END_PAGE_TAG);
-                    pages.append(temp.substring(0, 
-                        eindex + END_PAGE_TAG.length()));   
-                    System.out.println("Found end of doc.");
-                } else { // need to read ahead to look for end of page
-                    while (true) {
-                        read = fileIn.read(buf, 0, READ_AHEAD_SIZE);
-                        if (read == -1) { // no more to read
-                            System.out.println("Unexpected EOF: bytesTotal=" + bytesTotal +
-                                    "bytesRead=" + bytesRead);
-                            System.out.println(temp);
-                            break;
-                        }
-                        bytesRead += read;
-                        // look for end
-                        temp = new String(buf, 0, read);
-                        eindex = temp.indexOf(END_PAGE_TAG);
-                        if (eindex > -1) {
-                            pages.append(temp.substring(0, 
-                                    eindex + END_PAGE_TAG.length()));
-                            break;
-                        } else {
-                            pages.append(temp);
+                bytesRead += read;
+                String temp = new String(new String(buf, 0, read));
+                if (sindex == -1) { // haven't found the start yet
+                    sindex = temp.indexOf(BEGIN_PAGE_TAG);
+                    if (sindex > -1) {
+                        pages.append(temp.substring(sindex));
+                    }
+                } else if (bytesRead < bytesTotal) { // haven't completed the split
+                    pages.append(temp);
+                } else { // reached the end of this split
+                    // look for end
+                    int eindex = 0;
+                    if (temp.contains(END_DOC_TAG)
+                            || // reached the end of doc
+                            temp.endsWith(END_PAGE_TAG)) {
+                        eindex = temp.lastIndexOf(END_PAGE_TAG);
+                        pages.append(temp.substring(0,
+                                eindex + END_PAGE_TAG.length()));
+                        System.out.println("Found end of doc.");
+                    } else { // need to read ahead to look for end of page
+                        while (true) {
+                            read = fileIn.read(buf, 0, READ_AHEAD_SIZE);
+                            if (read == -1) { // no more to read
+                                System.out.println("Unexpected EOF: bytesTotal=" + bytesTotal
+                                        + "bytesRead=" + bytesRead);
+                                System.out.println(temp);
+                                break;
+                            }
+                            bytesRead += read;
+                            // look for end
+                            temp = new String(buf, 0, read);
+                            eindex = temp.indexOf(END_PAGE_TAG);
+                            if (eindex > -1) {
+                                pages.append(temp.substring(0,
+                                        eindex + END_PAGE_TAG.length()));
+                                break;
+                            } else {
+                                pages.append(temp);
+                            }
                         }
                     }
+                    break;
                 }
-                break;
             }
         }
-        fileIn.close();
         articles = WikiModelProcessor.process(pages);
     }
 
@@ -235,56 +240,57 @@ class WikiReader extends RecordReader<Text, Text> {
         return false;
     }
 
-    static class  WikiModelProcessor {
+    static class WikiModelProcessor {
+
         /**
-         * 
+         *
          */
         private static final String TITLE = "title";
 
         /**
-         * 
+         *
          */
         private static final String PAGE = "page";
 
         private static final String ROOT = "mediawiki";
 
         private static final String NS_XML = "http://www.w3.org/XML/1998/namespace";
-        
-        private static final String HEADER = 
-            "<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.4/\" " +
-            "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" " +
-            "xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.4/" +
-            "http://www.mediawiki.org/xml/export-0.4.xsd\" version=\"0.4\" " +
-            "xml:lang=\"en\"> \n" +
-            "  <siteinfo> \n" +
-            "    <sitename>Wikipedia</sitename> \n" +
-            "    <base>http://en.wikipedia.org/wiki/Main_Page</base> \n" +
-            "    <generator>MediaWiki 1.16alpha-wmf</generator> \n" +
-            "    <case>first-letter</case> \n" +
-            "    <namespaces> \n" +
-            "      <namespace key=\"-2\">Media</namespace> \n" +
-            "      <namespace key=\"-1\">Special</namespace> \n" +
-            "      <namespace key=\"0\" /> \n" +
-            "      <namespace key=\"1\">Talk</namespace> \n" +
-            "      <namespace key=\"2\">User</namespace> \n" +
-            "      <namespace key=\"3\">User talk</namespace> \n" +
-            "      <namespace key=\"4\">Wikipedia</namespace> \n" +
-            "      <namespace key=\"5\">Wikipedia talk</namespace> \n" +
-            "      <namespace key=\"6\">File</namespace> \n" +
-            "      <namespace key=\"7\">File talk</namespace> \n" +
-            "      <namespace key=\"8\">MediaWiki</namespace> \n" +
-            "      <namespace key=\"9\">MediaWiki talk</namespace> \n" +
-            "      <namespace key=\"10\">Template</namespace> \n" +
-            "      <namespace key=\"11\">Template talk</namespace> \n" +
-            "      <namespace key=\"12\">Help</namespace> \n" +
-            "      <namespace key=\"13\">Help talk</namespace> \n" +
-            "      <namespace key=\"14\">Category</namespace> \n" +
-            "      <namespace key=\"15\">Category talk</namespace> \n" +
-            "      <namespace key=\"100\">Portal</namespace> \n" +
-            "      <namespace key=\"101\">Portal talk</namespace> \n" +
-            "    </namespaces> \n" +
-            "  </siteinfo> \n";
-        
+
+        private static final String HEADER
+                = "<mediawiki xmlns=\"http://www.mediawiki.org/xml/export-0.4/\" "
+                + "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
+                + "xsi:schemaLocation=\"http://www.mediawiki.org/xml/export-0.4/"
+                + "http://www.mediawiki.org/xml/export-0.4.xsd\" version=\"0.4\" "
+                + "xml:lang=\"en\"> \n"
+                + "  <siteinfo> \n"
+                + "    <sitename>Wikipedia</sitename> \n"
+                + "    <base>http://en.wikipedia.org/wiki/Main_Page</base> \n"
+                + "    <generator>MediaWiki 1.16alpha-wmf</generator> \n"
+                + "    <case>first-letter</case> \n"
+                + "    <namespaces> \n"
+                + "      <namespace key=\"-2\">Media</namespace> \n"
+                + "      <namespace key=\"-1\">Special</namespace> \n"
+                + "      <namespace key=\"0\" /> \n"
+                + "      <namespace key=\"1\">Talk</namespace> \n"
+                + "      <namespace key=\"2\">User</namespace> \n"
+                + "      <namespace key=\"3\">User talk</namespace> \n"
+                + "      <namespace key=\"4\">Wikipedia</namespace> \n"
+                + "      <namespace key=\"5\">Wikipedia talk</namespace> \n"
+                + "      <namespace key=\"6\">File</namespace> \n"
+                + "      <namespace key=\"7\">File talk</namespace> \n"
+                + "      <namespace key=\"8\">MediaWiki</namespace> \n"
+                + "      <namespace key=\"9\">MediaWiki talk</namespace> \n"
+                + "      <namespace key=\"10\">Template</namespace> \n"
+                + "      <namespace key=\"11\">Template talk</namespace> \n"
+                + "      <namespace key=\"12\">Help</namespace> \n"
+                + "      <namespace key=\"13\">Help talk</namespace> \n"
+                + "      <namespace key=\"14\">Category</namespace> \n"
+                + "      <namespace key=\"15\">Category talk</namespace> \n"
+                + "      <namespace key=\"100\">Portal</namespace> \n"
+                + "      <namespace key=\"101\">Portal talk</namespace> \n"
+                + "    </namespaces> \n"
+                + "  </siteinfo> \n";
+
         private static final String FOOTER = "\n</mediawiki>";
 
         private static LinkedList<String> path;
@@ -308,9 +314,9 @@ class WikiReader extends RecordReader<Text, Text> {
         private static XmlPullParserFactory factory;
 
         private static XmlPullParser parser;
-        
+
         private static Session session;
-        
+
         private static List<Article> articles;
 
         /**
@@ -327,15 +333,15 @@ class WikiReader extends RecordReader<Text, Text> {
                 factory.setNamespaceAware(true);
                 xpp = factory.newPullParser();
                 xpp.setInput(new StringReader(input.toString()));
-    
+
                 // TODO feature isn't supported by xpp3 - look at xpp5?
                 // xpp.setFeature(XmlPullParser.FEATURE_DETECT_ENCODING, true);
                 // TODO feature isn't supported by xpp3 - look at xpp5?
                 // xpp.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, true);
                 xpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-    
+
                 logger.configureLogger(new Properties());
-    
+
                 process();
             } catch (Exception ex) {
                 logger.logException(ex);
@@ -350,10 +356,10 @@ class WikiReader extends RecordReader<Text, Text> {
          * @throws XmlPullParserException
          */
         private static void process() throws XmlPullParserException,
-        IOException {
+                IOException {
             // transform to final output
             int event;
-            path = new LinkedList<String>();
+            path = new LinkedList<>();
             article = null;
             title = null;
 
@@ -362,33 +368,33 @@ class WikiReader extends RecordReader<Text, Text> {
             while (true) {
                 event = xpp.next();
                 switch (event) {
-                case XmlPullParser.END_DOCUMENT:
-                    processEndDocument();
-                    // exit the loop
-                    return;
-                case XmlPullParser.END_TAG:
-                    processEndElement(xpp.getName());
-                    break;
-                case XmlPullParser.START_TAG:
-                    processStartElement(xpp.getName());
-                    break;
-                case XmlPullParser.TEXT:
-                    if (null != article) {
-                        String name = path.getLast();
-                        if ("comment".equals(name) || "text".equals(name)) {
-                            // parse comment elements
-                            // parse text elements
-                            article.append(parse(xpp.getText()));
-                        } else {
-                            article
-                            .append(Utilities
-                                    .escapeXml(xpp.getText()));
+                    case XmlPullParser.END_DOCUMENT:
+                        processEndDocument();
+                        // exit the loop
+                        return;
+                    case XmlPullParser.END_TAG:
+                        processEndElement(xpp.getName());
+                        break;
+                    case XmlPullParser.START_TAG:
+                        processStartElement(xpp.getName());
+                        break;
+                    case XmlPullParser.TEXT:
+                        if (null != article) {
+                            String name = path.getLast();
+                            if ("comment".equals(name) || "text".equals(name)) {
+                                // parse comment elements
+                                // parse text elements
+                                article.append(parse(xpp.getText()));
+                            } else {
+                                article
+                                        .append(Utilities
+                                                .escapeXml(xpp.getText()));
+                            }
                         }
-                    }
-                    break;
-                default:
-                    throw new IOException("unexpected event: " + event
-                            + " at " + xpp.getPositionDescription());
+                        break;
+                    default:
+                        throw new IOException("unexpected event: " + event
+                                + " at " + xpp.getPositionDescription());
                 }
             }
         }
@@ -417,8 +423,8 @@ class WikiReader extends RecordReader<Text, Text> {
                 // use this xpp object to check output from the wikimedia parser
                 parser = factory.newPullParser();
                 parser
-                .setInput(new StringReader("<dummy>" + xml
-                        + "</dummy>"));
+                        .setInput(new StringReader("<dummy>" + xml
+                                + "</dummy>"));
                 parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES,
                         true);
                 int event;
@@ -435,48 +441,48 @@ class WikiReader extends RecordReader<Text, Text> {
                                 parser, null);
                     }
                     switch (event) {
-                    case XmlPullParser.END_DOCUMENT:
-                        // exit the loop
-                        return xml;
-                    case XmlPullParser.END_TAG:
-                        parser.getName();
-                        parser.getNamespace();
-                        parser.getText();
-                        break;
-                    case XmlPullParser.START_TAG:
-                        parser.getName();
-                        parser.getNamespace();
-                        parser.getText();
-                        break;
-                    case XmlPullParser.TEXT:
-                        temp = parser.getText();
-                        if (null != temp) {
-                            chars = temp.toCharArray();
-                            // xpp3 doesn't check codepoint values
-                            // check them to avoid XDMP errors
-                            for (int i = 0; i < chars.length; i++) {
-                                c = chars[i];
-                                // #x9 | #xA | #xD
-                                // | [#x20-#xD7FF]
-                                // | [#xE000-#xFFFD]
-                                // | [#x10000-#x10FFFF]
-                                // this implementation is abbreviated
-                                if (9 == c || 10 == c || 13 == c || c > 31) {
-                                    continue;
+                        case XmlPullParser.END_DOCUMENT:
+                            // exit the loop
+                            return xml;
+                        case XmlPullParser.END_TAG:
+                            parser.getName();
+                            parser.getNamespace();
+                            parser.getText();
+                            break;
+                        case XmlPullParser.START_TAG:
+                            parser.getName();
+                            parser.getNamespace();
+                            parser.getText();
+                            break;
+                        case XmlPullParser.TEXT:
+                            temp = parser.getText();
+                            if (null != temp) {
+                                chars = temp.toCharArray();
+                                // xpp3 doesn't check codepoint values
+                                // check them to avoid XDMP errors
+                                for (int i = 0; i < chars.length; i++) {
+                                    c = chars[i];
+                                    // #x9 | #xA | #xD
+                                    // | [#x20-#xD7FF]
+                                    // | [#xE000-#xFFFD]
+                                    // | [#x10000-#x10FFFF]
+                                    // this implementation is abbreviated
+                                    if (9 == c || 10 == c || 13 == c || c > 31) {
+                                        continue;
+                                    }
+                                    throw new XmlPullParserException(
+                                            "bad codepoint value: " + c, parser,
+                                            null);
                                 }
-                                throw new XmlPullParserException(
-                                        "bad codepoint value: " + c, parser,
-                                        null);
                             }
-                        }
-                        break;
-                    default:
-                        throw new IOException("unexpected event: " + event
-                                + " at " + parser.getPositionDescription());
+                            break;
+                        default:
+                            throw new IOException("unexpected event: " + event
+                                    + " at " + parser.getPositionDescription());
                     }
                 }
             } catch (XmlPullParserException e) {
-                logger.warning(title + ": " + e.getMessage());
+                logger.log(Level.WARNING, "{0}: {1}", new Object[]{title, e.getMessage()});
                 errors++;
                 return Utilities.escapeXml(text);
             }
@@ -528,12 +534,12 @@ class WikiReader extends RecordReader<Text, Text> {
             // add article to list
             // include the language in the title        
             String path = language + "wiki/"
-            + (encodeTitle ? uri.toString() : title);
+                    + (encodeTitle ? uri.toString() : title);
             if (articles == null) {
-                articles = new ArrayList<Article>();
+                articles = new ArrayList<>();
             }
             articles.add(new Article(path, article));
-           
+
             // ready for the next page
             article = null;
         }
@@ -544,7 +550,7 @@ class WikiReader extends RecordReader<Text, Text> {
          * @throws XmlPullParserException
          */
         private static void processStartElement(String name)
-        throws IOException, XmlPullParserException {
+                throws IOException, XmlPullParserException {
             // logger.info(name);
             path.add(name);
             // look for start of article
@@ -564,11 +570,11 @@ class WikiReader extends RecordReader<Text, Text> {
                         // propagate the XML namespace
                         + (null == namespace ? ""
                                 : (" xmlns=\"" + namespace + "\""))
-                                // propagate the xml:lang attribute
-                                + (null == language ? ""
-                                        : (" xml:lang=\"" + language + "\""))
-                                        // end of the start tag
-                                        + ">");
+                        // propagate the xml:lang attribute
+                        + (null == language ? ""
+                                : (" xml:lang=\"" + language + "\""))
+                        // end of the start tag
+                        + ">");
                 pages++;
                 return;
             }

@@ -39,6 +39,7 @@ public class ImportDocumentMapper<VALUE> extends
     protected Counter readCount;
     protected Counter attemptedCount;
     
+    @Override
     public void map(DocumentURIWithSourceInfo uri, VALUE fileContent, 
         Context context) throws IOException, InterruptedException {
         synchronized(readCount) {

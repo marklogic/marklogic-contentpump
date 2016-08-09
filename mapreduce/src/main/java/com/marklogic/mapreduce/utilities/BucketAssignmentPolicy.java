@@ -51,9 +51,9 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
             int expectCount[] = new int[maxSize];
             int currentCount[] = new int[maxSize];
 
-            for (int j = 0; j < NUM_BUCKET; j++)
+            for (int j = 0; j < NUM_BUCKET; j++) {
                 assignment[j] = 0;
-
+            }
             for (int forestCount = 2; forestCount <= maxSize; forestCount++) {
 
                 int minAmount = NUM_BUCKET / forestCount;
@@ -95,6 +95,7 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
      * @param uri
      * @return index in the list of updatable forests
      */
+    @Override
     public int getPlacementForestIndex(DocumentURI uri) {
         return getBucketPlacementId(uri, buckets, NUM_BUCKET, forests.length,
             uForests.size());

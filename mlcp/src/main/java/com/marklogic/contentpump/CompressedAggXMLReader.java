@@ -73,13 +73,14 @@ public class CompressedAggXMLReader<VALUEIN> extends
         fs = file.getFileSystem(context.getConfiguration());
 
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDirectory()) {
+        if (status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
         initStreamReader(inSplit);
     }
 
+    @Override
     protected void initStreamReader(InputSplit inSplit) throws IOException,
     InterruptedException {
         setFile(((FileSplit) inSplit).getPath());

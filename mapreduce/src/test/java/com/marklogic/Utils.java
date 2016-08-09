@@ -24,7 +24,7 @@ public class Utils {
     public static final Log LOG = LogFactory.getLog(Utils.class);
     public static List<ExpandedTree> decodeTreeData(File dir, boolean verbose)
         throws IOException {
-        LinkedList<ExpandedTree> treeList = new LinkedList<ExpandedTree>();
+        LinkedList<ExpandedTree> treeList = new LinkedList<>();
         File file = new File(dir, "TreeData");
         if (verbose)
             System.out.println(file.getAbsolutePath() + " -> checkTreeData");

@@ -148,8 +148,9 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                     				true));
                     parserIterator = parser.iterator();
                     return super.nextKeyValue();
-                } else
+                } else {
                     return false;
+                }
             } else {
                 throw new UnsupportedOperationException("Unsupported codec: "
                     + codec.name());

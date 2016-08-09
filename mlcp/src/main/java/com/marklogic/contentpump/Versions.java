@@ -30,7 +30,7 @@ import org.apache.hadoop.io.IOUtils;
  */
 public class Versions {
 
-    public static final Log LOG = LogFactory.getLog(ContentPump.class);
+    public static final Log LOG = LogFactory.getLog(Versions.class);
     
     private Properties info;
     

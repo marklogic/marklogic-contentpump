@@ -92,7 +92,7 @@ public class DelimitedTextReader<VALUEIN> extends
         setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDirectory()) {
+        if (status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
@@ -138,13 +138,13 @@ public class DelimitedTextReader<VALUEIN> extends
     }
 
     protected String[] getLine() throws IOException{
-    	CSVRecord record = (CSVRecord)parserIterator.next();
+    	CSVRecord record = parserIterator.next();
         Iterator<String> recordIterator = record.iterator();
         int recordSize = record.size();
         String[] values = new String[recordSize];
         for (int i = 0; i < recordSize; i++) {
         	if (recordIterator.hasNext()) {
-        		values[i] = (String)recordIterator.next();
+        		values[i] = recordIterator.next();
         	} else {
         		throw new IOException("Record size doesn't match the real size");
         	}
@@ -160,7 +160,7 @@ public class DelimitedTextReader<VALUEIN> extends
         }
         try {
             if (!parserIterator.hasNext()) {
-                if(compressed) {
+                if (compressed) {
                     bytesRead = fileLen;
                     return false;
                 } else { 
@@ -208,7 +208,7 @@ public class DelimitedTextReader<VALUEIN> extends
                 }
                 
                 if (!parserIterator.hasNext()) {
-                    if(compressed) {
+                    if (compressed) {
                         bytesRead = fileLen;
                         return false;
                     } else { 
@@ -233,7 +233,7 @@ public class DelimitedTextReader<VALUEIN> extends
             docBuilder.newDoc();           
             for (int i = 0; i < fields.length; i++) {
                 //skip the empty column in header
-                if(fields[i].equals("")) {
+                if (fields[i].equals("")) {
                     continue;
                 }
                 if (!generateId && uriId == i) {
@@ -291,11 +291,7 @@ public class DelimitedTextReader<VALUEIN> extends
         String docType = conf.get(MarkLogicConstants.CONTENT_TYPE,
             MarkLogicConstants.DEFAULT_CONTENT_TYPE);
         
-        if (docType.equals("XML")) {
-            docBuilder = new XMLDocBuilder();
-        } else {
-            docBuilder = new JSONDocBuilder();
-        }
+        docBuilder = "XML".equals(docType) ? new XMLDocBuilder() : new JSONDocBuilder();
     }
 
 }

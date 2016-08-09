@@ -103,19 +103,23 @@ public class FCheck {
 	}
 
 	public void checkForestLabel(File dir) {
-		if (verbose)
+		if (verbose) {
 			System.out.println(dir.getAbsolutePath() + " -> checkForestLabel");
+        }
 		checkLabel(dir);
-		if (verbose)
+		if (verbose) {
 			System.out.println(dir.getAbsolutePath() + " <- checkForestLabel");
+        }
 	}
 
 	public void checkStandLabel(File dir) {
-		if (verbose)
+		if (verbose) {
 			System.out.println(dir.getAbsolutePath() + " -> checkStandLabel");
+        }
 		checkLabel(dir);
-		if (verbose)
+		if (verbose) {
 			System.out.println(dir.getAbsolutePath() + " <- checkStandLabel");
+        }
 	}
 
 	private boolean isObsolete(File dir) {
@@ -124,8 +128,9 @@ public class FCheck {
 
 	public void checkFrequencies(File dir) throws IOException {
 		File file = new File(dir, "Frequencies");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkFrequencies");
+        }
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		long prevKey = -1;
 		int position = 0;
@@ -150,35 +155,39 @@ public class FCheck {
 			}
 			prevKey = key;
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath()
 					+ " <- checkFrequencies [" + position + "]");
+        }
 	}
 
 	public void checkLinkKeys(File dir) throws IOException {
 		File file = new File(dir, "LinkKeys");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkLinkKeys");
+        }
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		int position = 0;
 		long key;
 		try {
 			for (;; ++position) {
 				key = in.readLong();
-				if (key == 0)
+				if (key == 0) {
 					break;
+                }
 			}
 		} catch (EOFException e) {
 		}
-		if (numFragments == 0)
+		if (numFragments == 0) {
 			numFragments = position;
-		else if (position != numFragments) {
+        } else if (position != numFragments) {
 			panic(file, "bad count" + ", count=" + position + ", numFragments="
 					+ numFragments);
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkLinkKeys ["
 					+ position + "]");
+        }
 	}
 
 	private int computeListChecksum(long key, DataInput in, int words)
@@ -201,8 +210,9 @@ public class FCheck {
 
 	public void checkListData(File dir) throws IOException {
 		File file = new File(dir, "ListData");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkListData");
+        }
 		listDataSize = file.length();
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		long prevKey = -1;
@@ -227,8 +237,9 @@ public class FCheck {
 			} catch (EOFException e) {
 				break;
 			}
-			if (key == -1L && csword == -1 && fdatw == -1)
+			if (key == -1L && csword == -1 && fdatw == -1) {
 				continue;
+            }
 			if (prevKey != -1 && compareUnsignedLong(key, prevKey) <= 0) {
 				panic(file,
 						String.format(
@@ -252,15 +263,17 @@ public class FCheck {
 			}
 		}
 		numLists = position;
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkListData ["
 					+ position + "]");
+        }
 	}
 
 	public void checkListIndex(File dir) throws IOException {
 		File file = new File(dir, "ListIndex");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkListIndex");
+        }
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		long prevKey = -1L;
 		long prevOffset = -1L;
@@ -295,15 +308,17 @@ public class FCheck {
 			}
 			prevOffset = offset;
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkListIndex ["
 					+ position + "]");
+        }
 	}
 
 	public void checkOrdinals(File dir) throws IOException {
 		File file = new File(dir, "Ordinals");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkOrdinals");
+        }
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		int position = 0;
 		@SuppressWarnings("unused")
@@ -318,15 +333,17 @@ public class FCheck {
 			panic(file, String.format("bad count, count=%d, numFragments=%d",
 					position, numFragments));
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkOrdinals ["
 					+ position + "]");
-	}
-
+        }
+    }
+    
 	public void checkQualities(File dir) throws IOException {
 		File file = new File(dir, "Qualities");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkQualities");
+        }
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		int position = 0;
 		@SuppressWarnings("unused")
@@ -341,15 +358,17 @@ public class FCheck {
 			panic(file, String.format("bad count, count=%d, numFragments=%d",
 					position, numFragments));
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkQualities ["
 					+ position + "]");
+        }
 	}
 
 	public void checkStopKeySet(File dir) throws IOException {
 		File file = new File(dir, "StopKeySet");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkStopKeySet");
+        }
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		long prevKey = -1;
 		int position = 0;
@@ -357,8 +376,9 @@ public class FCheck {
 		try {
 			for (;; ++position) {
 				key = in.readLong();
-				if (key == 0)
+				if (key == 0) {
 					break;
+                }
 				if (prevKey != -1 && key <= prevKey) {
 					panic(file,
 							String.format(
@@ -369,15 +389,17 @@ public class FCheck {
 			}
 		} catch (EOFException e) {
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkStopKeySet ["
 					+ position + "]");
+        }
 	}
 
 	public void checkTimestamps(File dir) throws IOException {
 		File file = new File(dir, "Timestamps");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkTimestamps");
+        }
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		int position = 0;
 		long nascent;
@@ -387,8 +409,9 @@ public class FCheck {
 			for (;; ++position) {
 				nascent = in.readLong();
 				deleted = in.readLong();
-				if (nascent == 0L && deleted == 0L)
+				if (nascent == 0L && deleted == 0L) {
 					break;
+                }
 				if (compareUnsignedLong(deleted, nascent) < 0 && nascent != -1) {
 					panic(file,
 							String.format(
@@ -398,15 +421,16 @@ public class FCheck {
 			}
 		} catch (EOFException e) {
 		}
-		if (numFragments == 0L)
+		if (numFragments == 0L) {
 			numFragments = position;
-		else if (position != numFragments) {
+        } else if (position != numFragments) {
 			panic(file, String.format("bad count, count=%d, numFragments=%d",
 					position, numFragments));
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkTimestamps ["
 					+ position + "]");
+        }
 	}
 
 	private int computeTreeChecksum(int key, DataInput in, int words)
@@ -426,8 +450,9 @@ public class FCheck {
 
 	public void checkTreeData(File dir) throws IOException {
 		File file = new File(dir, "TreeData");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkTreeData");
+        }
 		treeDataSize = file.length();
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		int prevDocid = -1;
@@ -482,15 +507,17 @@ public class FCheck {
 								+ Integer.toHexString(computed));
 			}
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkTreeData ["
 					+ position + "]");
+        }
 	}
 
 	public void decodeTreeData(File dir) throws IOException {
         File file = new File(dir, "TreeData");
-        if (verbose)
+        if (verbose) {
             System.out.println(file.getAbsolutePath() + " -> checkTreeData");
+        }
         treeDataSize = file.length();
         BiendianDataInputStream in = openFile(file, 1 << 18);
         int position = 0;
@@ -607,8 +634,9 @@ public class FCheck {
 
 	public void checkTreeIndex(File dir) throws IOException {
 		File file = new File(dir, "TreeIndex");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkTreeIndex");
+        }
 //		BiendianDataInputStream in = openFile(file, 1 << 18);
 		Path path = new Path(dir.getAbsolutePath());
 		FileSystem fs = path.getFileSystem(new Configuration());
@@ -680,77 +708,88 @@ public class FCheck {
 			}
 			prevOffset = offset;
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkTreeIndex ["
 					+ position + "]");
+        }
 	}
 
 	public void checkUniqKeys(File dir) throws IOException {
 		File file = new File(dir, "UniqKeys");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkUniqKeys");
+        }
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		int position = 0;
 		long key;
 		for (;; ++position) {
 			try {
 				key = in.readLong();
-				if (key == 0)
+				if (key == 0) {
 					break;
+                }
 			} catch (EOFException e) {
 				break;
 			}
 		}
 
-		if (numFragments == 0L)
+		if (numFragments == 0L) {
 			numFragments = position;
+        }
 		if ((long) position != numFragments) {
 			panic(file, String.format("bad count, count=%d, numFragments=%d",
 					position, numFragments));
 		}
 
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkUniqKeys ["
 					+ position + "]");
+        }
 	}
 
 	public void checkURIKeys(File dir) throws IOException {
 		File file = new File(dir, "URIKeys");
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " -> checkURIKeys");
+        }
 		BiendianDataInputStream in = openFile(file, 1 << 18);
 		int position = 0;
 		long key;
 		for (;; ++position) {
 			try {
 				key = in.readLong();
-				if (key == 0)
+				if (key == 0) {
 					break;
+                }
 			} catch (EOFException e) {
 				break;
 			}
 		}
 
-		if (numFragments == 0L)
+		if (numFragments == 0L) {
 			numFragments = position;
+        }
 		if ((long) position != numFragments) {
 			panic(file, String.format("bad count, count=%d, numFragments=%d",
 					position, numFragments));
 		}
 
-		if (verbose)
+		if (verbose) {
 			System.out.println(file.getAbsolutePath() + " <- checkURIKeys ["
 					+ position + "]");
+        }
 	}
 
 	public void checkRangeIndexes(File dir) {
 	}
 
 	public void checkStand(File dir) throws IOException {
-		if (verbose)
+		if (verbose) {
 			System.out.println(dir.getAbsolutePath() + " -> checkStand");
-		if (isObsolete(dir))
+        }
+		if (isObsolete(dir)) {
 			return;
+        }
 		numFragments = 0;
 		checkStandLabel(dir);
 		checkListData(dir);
@@ -767,8 +806,9 @@ public class FCheck {
 		checkURIKeys(dir);
 		checkRangeIndexes(dir);
 		decodeTreeData(dir);
-		if (verbose)
+		if (verbose) {
 			System.out.println(dir.getAbsolutePath() + " <- checkStand");
+        }
 	}
 
 	public void checkJournals(File dir) {
@@ -779,9 +819,10 @@ public class FCheck {
 	}
 
 	public void checkForest(File dir) throws IOException {
-		if (verbose)
+		if (verbose) {
 			System.out.println(dir.getAbsolutePath() + " -> checkForest ("
 					+ (littleEndian ? "Little" : "Big") + " Endian)");
+        }
 		checkForestLabel(dir);
 		File files[] = dir.listFiles();
 		Arrays.sort(files);
@@ -799,30 +840,34 @@ public class FCheck {
 				}
 			}
 		}
-		if (verbose)
+		if (verbose) {
 			System.out.println(dir.getAbsolutePath() + " <- checkForest");
+        }
 	}
 
 	public void fcheck(File dir) throws IOException {
-		if (verbose)
+		if (verbose) {
 			System.out.println(dir.getAbsolutePath() + " -> fcheck ");
+        }
 		littleEndian = !"Solaris".equals(System.getProperty("os.name"));
 		try {
 			try {
 				checkForest(dir);
 			} catch (Exception e) {
 				if ((e.getMessage() != null)
-						&& e.getMessage().indexOf("bad checksum") >= 0) {
-					if (verbose)
+						&& e.getMessage().contains("bad checksum")) {
+					if (verbose) {
 						System.out.println(e.getMessage());
+                    }
 					littleEndian = !littleEndian;
 					checkForest(dir);
 				} else {
 					throw e;
 				}
 			}
-			if (verbose)
+			if (verbose) {
 				System.out.println(dir.getAbsolutePath() + " <- fcheck OK");
+            }
 		} catch (Exception e) {
 	        e.printStackTrace();
 	        System.out.println(dir.getAbsolutePath() + " <- fcheck FAIL");

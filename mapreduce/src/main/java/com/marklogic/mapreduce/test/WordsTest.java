@@ -20,6 +20,7 @@ import com.marklogic.mapreduce.functions.Words;
 public class WordsTest {
     public static class WordsMapper 
     extends Mapper<LongWritable, Text, LongWritable, Text> {
+        @Override
         public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
             context.write(key, value);

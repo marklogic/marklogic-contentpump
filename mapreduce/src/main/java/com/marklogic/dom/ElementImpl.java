@@ -30,6 +30,8 @@ import org.w3c.dom.TypeInfo;
 
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * A read-only W3C DOM Node implementation of MarkLogic's internal
@@ -55,6 +57,7 @@ public class ElementImpl extends NodeImpl implements Element {
         numNSDecl = -1;
     }
 
+    @Override
     protected Node cloneNode(Document doc, boolean deep) {
         Element elem = doc.createElementNS(getNamespaceURI(), getTagName());
         elem.setPrefix(getPrefix());
@@ -62,7 +65,7 @@ public class ElementImpl extends NodeImpl implements Element {
         for (int i = 0; i < attributes.getLength(); i++) {
             Attr attr = (Attr) attributes.item(i);
             if (attr instanceof AttrImpl) {
-                elem.setAttributeNode((Attr) ((AttrImpl) attr).cloneNode(doc,
+                elem.setAttributeNode((Attr) ((NodeImpl) attr).cloneNode(doc,
                     deep));
             } else {
                 // ns decl, stored as Java DOM Attr
@@ -87,25 +90,29 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getAttribute(String name) {
     	Attr attr = getAttributeNode(name);
         return attr==null?"":attr.getValue();
     }
 
     /** {@inheritDoc} */
+    @Override
     public Attr getAttributeNode(String name) {
         return (attributes==null)?null:(Attr)(attributes.getNamedItem(name));
     }
 
     /** {@inheritDoc} */
+    @Override
     public Attr getAttributeNodeNS(String namespaceURI, String localName){
-        return (attributes==null)?null:(AttrImpl)getAttributes().getNamedItemNS(namespaceURI,
+        return (attributes==null) ? null : (Attr)getAttributes().getNamedItemNS(namespaceURI,
             localName);
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getAttributeNS(String namespaceURI, String localName) {
-    	if (attributes==null) return "";
+    	if (attributes==null) { return ""; }
     	AttrImpl attr = 
     		(AttrImpl) getAttributes().getNamedItemNS(namespaceURI,localName);
         return attr==null?"":attr.getValue();
@@ -127,10 +134,12 @@ public class ElementImpl extends NodeImpl implements Element {
     @Override
     public NodeList getChildNodes() {
         return new NodeList() {
+            @Override
             public int getLength() {
                 return tree.elemNodeNumChildren[tree.nodeRepID[node]];
             }
 
+            @Override
             public Node item(int index) {
                 return (index < getLength()) ? tree
                     .node(tree.elemNodeChildNodeRepID[tree.nodeRepID[node]]
@@ -145,7 +154,7 @@ public class ElementImpl extends NodeImpl implements Element {
         String namespace = this.getNamespaceURI();
         String prefix = this.getPrefix();
 
-        if (prefix == null || prefix.length() == 0) {
+        if (StringUtils.isEmpty(prefix)) {
             if (namespaceURI == null) {
                 return (namespace == namespaceURI);
             }
@@ -175,11 +184,13 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     /** {@inheritDoc} */
+    @Override
     public NodeList getElementsByTagNameNS(String namespaceURI, String name) {
         return getElementsByTagNameNSOrNodeName(namespaceURI, name, false);
     }
 
     /** {@inheritDoc} */
+    @Override
     public NodeList getElementsByTagName(String localName) {
         return getElementsByTagNameNSOrNodeName(null, localName, true);
     }
@@ -192,6 +203,7 @@ public class ElementImpl extends NodeImpl implements Element {
         return tree.elemNodeChildNodeRepID[tree.nodeRepID[node]];
     }
 
+    @Override
     public Node getFirstChild() {
         return tree.node(getFirstChildIndex());
     }
@@ -227,10 +239,11 @@ public class ElementImpl extends NodeImpl implements Element {
             + getTagName();
     }
 
+    @Override
     protected int getPrefixID(int uriAtom) {
         int a = -1;
         boolean useDefaultNS = true;
-        ArrayList<Integer> ubp = new ArrayList<Integer>();
+        List<Integer> ubp = new ArrayList<>();
         long minOrdinal = 0;
         for (int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0; ns = nextNSNodeID(
             ns, minOrdinal)) {
@@ -244,22 +257,26 @@ public class ElementImpl extends NodeImpl implements Element {
                 useDefaultNS &= (tree.atomString(prefix) != null);
                 continue;
             }
-            if (ubp.contains(prefix))
-                continue;
-            if (tree.atomString(prefix) != null) {
-                if (a == -1)
-                    a = prefix;
+            if (ubp.contains(prefix)) {
                 continue;
             }
-            if (useDefaultNS)
+            if (tree.atomString(prefix) != null) {
+                if (a == -1) {
+                    a = prefix;
+                }
+                continue;
+            }
+            if (useDefaultNS) {
                 return prefix;
+            }
         }
         return a;
     }
 
     public int getNumNSDecl() {
-        if (numNSDecl != -1)
+        if (numNSDecl != -1) {
             return numNSDecl;
+        }
         numNSDecl = 0;
         long minOrdinal = tree.nodeOrdinal[node];
         for (int ns = getNSNodeID(minOrdinal, minOrdinal); ns >= 0; ns = nextNSNodeID(
@@ -272,13 +289,16 @@ public class ElementImpl extends NodeImpl implements Element {
     @Override
     public String getPrefix() {
         int ns = tree.nodeNameNamespaceAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]];
-        if (ns < 0)
+        if (ns < 0) {
             return null;
+        }
         String preserved = builtinNSPrefix(getNamespaceURI());
-        if (preserved != null)
+        if (preserved != null) {
             return preserved;
-        if (tree.atomString(ns) != null)
+        }
+        if (tree.atomString(ns) != null) {
             ns = getPrefixID(ns);
+        }
         String r = (ns >= 0) ? tree.atomString(ns) : null;
         return r;
     }
@@ -289,24 +309,29 @@ public class ElementImpl extends NodeImpl implements Element {
             .node(child - 1) : null;
     }
 
+    @Override
     public TypeInfo getSchemaTypeInfo() {
         return null;
     }
 
+    @Override
     public String getTagName() {
         return tree
             .atomString(tree.nodeNameNameAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]]);
     }
 
+    @Override
     public boolean hasAttribute(String name) {
         return (getAttributes().getNamedItem(name) != null);
     }
 
+    @Override
     public boolean hasAttributeNS(String namespaceURI, String localName)
         throws DOMException {
         return (getAttributes().getNamedItemNS(namespaceURI, localName) != null);
     }
 
+    @Override
     public boolean hasAttributes() {
         return getAttributes().getLength() > 0;
     }
@@ -321,91 +346,109 @@ public class ElementImpl extends NodeImpl implements Element {
 
     @Override
     public String lookupNamespaceURI(String prefix) {
-        if (prefix == null)
+        if (prefix == null) {
             return null;
-        if (prefix.equals(getPrefix()))
+        }
+        if (prefix.equals(getPrefix())) {
             return getNamespaceURI();
+        }
         long minOrdinal = 0;
         for (int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0; ns = nextNSNodeID(
             ns, minOrdinal)) {
             int uri = tree.nsNodeUriAtom[ns];
             int pf = tree.nsNodePrefixAtom[ns];
-            if (tree.atomString(uri) == null)
+            if (tree.atomString(uri) == null) {
                 continue;
-            if (prefix.equals(tree.atomString(pf)))
+            }
+            if (prefix.equals(tree.atomString(pf))) {
                 return tree.atomString(uri);
+            }
         }
         return null;
     }
 
     @Override
     public String lookupPrefix(String namespaceURI) {
-        if (namespaceURI == null)
+        if (namespaceURI == null) {
             return null;
-        if (namespaceURI.equals(getNamespaceURI()))
+        }
+        if (namespaceURI.equals(getNamespaceURI())) {
             return getPrefix();
+        }
         long minOrdinal = 0;
         for (int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0; ns = nextNSNodeID(
             ns, minOrdinal)) {
             int uri = tree.nsNodeUriAtom[ns];
             int pf = tree.nsNodePrefixAtom[ns];
-            if (tree.atomString(pf) == null)
+            if (tree.atomString(pf) == null) {
                 continue;
-            if (namespaceURI.equals(tree.atomString(uri)))
+            }
+            if (namespaceURI.equals(tree.atomString(uri))) {
                 return tree.atomString(pf);
+            }
         }
         return null;
     }
 
     /** Unsupported. */
+    @Override
     public void removeAttribute(String name) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Attr removeAttributeNode(Attr oldAttr) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void removeAttributeNS(String namespaceURI, String localName)
         throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setAttribute(String name, String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Attr setAttributeNode(Attr newAttr) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Attr setAttributeNodeNS(Attr newAttr) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setAttributeNS(String namespaceURI, String qualifiedName,
         String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setIdAttribute(String name, boolean isId) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setIdAttributeNode(Attr idAttr, boolean isId)
         throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setIdAttributeNS(String namespaceURI, String localName,
         boolean isId) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);

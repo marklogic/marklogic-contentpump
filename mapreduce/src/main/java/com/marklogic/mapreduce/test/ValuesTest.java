@@ -22,6 +22,7 @@ import com.marklogic.mapreduce.functions.Values;
 public class ValuesTest {
     public static class ValueMapper 
     extends Mapper<LongWritable, Text, LongWritable, Text> {
+        @Override
         public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
             context.write(key, value);
