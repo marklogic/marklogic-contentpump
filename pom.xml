@@ -8,7 +8,7 @@
     <description>MarkLogic Content Pump and Connector for Hadoop</description>
     <packaging>pom</packaging>
     <properties>
-        <hadoop.version>2.7.2</hadoop.version>
+        <hadoop.version>2.6.4</hadoop.version>
         <jackson.version>2.8.1</jackson.version>
         <slf4j.version>1.7.21</slf4j.version>
         <xccVersion>9.0</xccVersion>
