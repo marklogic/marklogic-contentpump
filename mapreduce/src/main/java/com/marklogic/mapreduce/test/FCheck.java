@@ -88,7 +88,6 @@ public class FCheck {
 
 	private void checkLabel(File dir) {
 		File file = new File(dir, "Label");
-        System.out.println(file.getAbsolutePath() + " read:" + file.canRead() + " isDir: " + file.isDirectory());
 		if (!file.canRead()) {
 			panic(file, "stat");
 		}
