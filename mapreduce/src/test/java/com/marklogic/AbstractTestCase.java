@@ -8,12 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.TestCase;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Element;
@@ -21,8 +18,8 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-@RunWith(value = Parameterized.class)
-public class AbstractTestCase extends TestCase {
+
+public class AbstractTestCase {
     public static final Log LOG = LogFactory.getLog(AbstractTestCase.class);
     String testData;
     String forest;

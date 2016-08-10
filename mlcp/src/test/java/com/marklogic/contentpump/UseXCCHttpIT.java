@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 
 import org.junit.After;
-import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.Content;
@@ -21,7 +20,7 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.impl.ModuleImpl;
 
-public class UseXCCHttp{
+public class UseXCCHttpIT{
 
     @After
     public void tearDown() {

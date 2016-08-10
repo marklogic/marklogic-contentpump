@@ -14,6 +14,11 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+  <parent>
+    <groupId>com.marklogic</groupId>
+    <artifactId>marklogic-contentpump</artifactId>
+    <version>9.0</version>
+  </parent>
   <properties>
     <skipTests>false</skipTests>
     <test.excludes>**/*TestDistributed*</test.excludes>
@@ -142,7 +147,6 @@
         <dependency>
           <groupId>junit</groupId>
           <artifactId>junit</artifactId>
-          <version>4.11</version>
         </dependency>
         <dependency>
           <groupId>com.sun.jersey</groupId>
@@ -401,8 +405,12 @@
     <repository>
       <id>mapr-releases</id>
       <url>http://repository.mapr.com/maven/</url>
-      <snapshots><enabled>false</enabled></snapshots>
-      <releases><enabled>true</enabled></releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
     </repository>
   </repositories>
   <build>
@@ -420,8 +428,19 @@
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.12.3</version>
         <configuration>
           <additionalClasspathElements>
             <additionalClasspathElement>${basedir}/src/conf</additionalClasspathElement>
@@ -431,16 +450,6 @@
           <excludes>
             <exclude>${test.excludes}</exclude>
           </excludes>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <fork>true</fork>
-          <source>1.7</source>
-          <target>1.7</target>
         </configuration>
       </plugin>
       <plugin>
@@ -476,33 +485,33 @@
         </executions>
       </plugin>
       <plugin>
-          <artifactId>maven-antrun-plugin</artifactId>
-          <executions>
-              <execution>
-                  <id>make_deliverable</id>
-                  <phase>package</phase>
-                  <configuration>
-                      <tasks>
-                          <mkdir dir="deliverable" />
-                          <copy todir="deliverable" overwrite="true">
-                              <fileset dir="${project.build.directory}">
-                                  <include name="*src.zip" />
-                                  <include name="*bin*.zip" />
-                              </fileset>
-                          </copy>
-                      </tasks>
-                  </configuration>
-                  <goals>
-                      <goal>run</goal>
-                  </goals>
-              </execution>
-          </executions>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>make_deliverable</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <mkdir dir="deliverable" />
+                <copy todir="deliverable" overwrite="true">
+                  <fileset dir="${project.build.directory}">
+                    <include name="*src.zip" />
+                    <include name="*bin*.zip" />
+                  </fileset>
+                </copy>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
-          <filtering>true</filtering>
+        <filtering>true</filtering>
       </resource>
     </resources>
   </build>

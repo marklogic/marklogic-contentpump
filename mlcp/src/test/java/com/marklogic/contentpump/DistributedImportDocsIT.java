@@ -12,7 +12,7 @@ import org.junit.Before;
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
 
-public class TestDistributedImportDocs {
+public class DistributedImportDocsIT {
     @Before
     public void setup() {
         assertNotNull("No HADOOP_CONF_DIR found!", Constants.HADOOP_CONF_DIR);

@@ -13,10 +13,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(value = Parameterized.class)
-public class TestCompressedRDF {
+public class CompressedRDFIT {
     private long threshold = 0;
 
-    public TestCompressedRDF(long threshold) {
+    public CompressedRDFIT(long threshold) {
         this.threshold = threshold;
     }
 
