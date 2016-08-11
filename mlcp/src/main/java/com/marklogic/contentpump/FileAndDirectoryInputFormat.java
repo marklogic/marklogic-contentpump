@@ -27,6 +27,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -80,10 +81,13 @@ FileInputFormat<K, V> {
             for (FileStatus child : files) {
                 Path path = child.getPath();
                 FileSystem fs = path.getFileSystem(conf);
-                // length is 0 for dir according to FSDirectory.java in 0.20
+                // Only for directory on HDFS, the length is always zero
+                // If getFileBlockLocations is called with directory on HDFS,
+                // An exception will throw. See bug:24988
                 long length = child.getLen();
                 BlockLocation[] blkLocations = null;
-                if (!child.isDirectory()) {
+                if (!(child.isDirectory() && 
+                        fs instanceof DistributedFileSystem)) {
                     blkLocations = fs.getFileBlockLocations(child, 0, length);
                 } else if (length != 0) {
                     throw new IOException("non-zero length directory on HDFS:"
