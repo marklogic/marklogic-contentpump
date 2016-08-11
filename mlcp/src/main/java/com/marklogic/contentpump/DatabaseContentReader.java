@@ -184,7 +184,9 @@ public class DatabaseContentReader extends
             }
             // if copy-metadata
             if (copyMetadata) {
-                buf.append("xdmp:document-get-metadata($uri),\n");
+                buf.append(
+                    "(let $f := fn:function-lookup(xs:QName('xdmp:document-get-metadata'),1)\n"
+                    + "return if (exists($f)) then $f($uri) else ()),\n");
             }
             // if copy-properties, else + (),\n
             if (copyProperties) {
@@ -294,7 +296,8 @@ public class DatabaseContentReader extends
         }
         // copy-metadata
         if (copyMetadata) {
-            buf.append("xdmp:document-get-metadata($uri),\n");
+            buf.append("(let $f := fn:function-lookup(xs:QName('xdmp:document-get-metadata'),1)\n"
+                    + "return if (exists($f)) then $f($uri) else ()),\n");
         }
         buf.append("$doc/prop:properties, \n");
 
