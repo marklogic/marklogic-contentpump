@@ -46,11 +46,19 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
     
     protected void appendCustom(StringBuilder buf) {
         buf.append("\"AUDIT\",\n");
-        buf.append("let $group-id := xdmp:group()\n");
-        buf.append("let $enabled-event := xdmp:group-get-audit-event-type-enabled($group-id,(\"mlcp-start\", \"mlcp-finish\"))\n");
-        buf.append("let $mlcp-start-enabled := if ($enabled-event[1]) then \"mlcp-start\" else ()\n");
-        buf.append("let $mlcp-finish-enabled := if ($enabled-event[2]) then \"mlcp-finish\" else ()\n");
-        buf.append("return ($mlcp-start-enabled, $mlcp-finish-enabled)");
+        buf.append("let $f := \n");
+        buf.append("    fn:function-lookup(xs:QName('xdmp:group-get-audit-event-type-enabled'), 2)\n");
+        buf.append("return \n");
+        buf.append("    if (not(exists($f)))\n");
+        buf.append("    then ()\n");
+        buf.append("    else\n");
+        buf.append("        let $group-id := xdmp:group()\n");
+        buf.append("        let $enabled-event := $f($group-id,(\"mlcp-start\", \"mlcp-finish\"))\n");
+        buf.append("        let $mlcp-start-enabled := \n");
+        buf.append("                if ($enabled-event[1]) then \"mlcp-start\" else ()\n");
+        buf.append("        let $mlcp-finish-enabled := \n");
+        buf.append("                if ($enabled-event[2]) then \"mlcp-finish\" else ()\n");
+        buf.append("        return ($mlcp-start-enabled, $mlcp-finish-enabled)");
     }
     
     protected void getForestSplits(JobContext jobContext,
