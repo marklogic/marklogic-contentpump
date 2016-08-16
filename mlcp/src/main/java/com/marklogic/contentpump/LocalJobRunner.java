@@ -123,6 +123,7 @@ public class LocalJobRunner implements ConfigConstants {
         T extends org.apache.hadoop.mapreduce.InputSplit> 
     void run() throws Exception {
         Configuration conf = job.getConfiguration();
+        reporter = new ContentPumpReporter();
         InputFormat<INKEY,INVALUE> inputFormat = 
             (InputFormat<INKEY, INVALUE>)ReflectionUtils.newInstance(
                 job.getInputFormatClass(), conf);
@@ -151,14 +152,12 @@ public class LocalJobRunner implements ConfigConstants {
             }
             return;
         }
-        conf = job.getConfiguration();
         progress = new AtomicInteger[splits.size()];
         for (int i = 0; i < splits.size(); i++) {
             progress[i] = new AtomicInteger();
         }
         Monitor monitor = new Monitor();
         monitor.start();
-        reporter = new ContentPumpReporter();
         List<Future<Object>> taskList = new ArrayList<Future<Object>>();
         for (int i = 0; i < array.length; i++) {        
             InputSplit split = array[i];

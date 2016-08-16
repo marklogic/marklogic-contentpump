@@ -53,11 +53,19 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
         buf.append("    then ()\n");
         buf.append("    else\n");
         buf.append("        let $group-id := xdmp:group()\n");
-        buf.append("        let $enabled-event := $f($group-id,(\"mlcp-start\", \"mlcp-finish\"))\n");
+        buf.append("        let $enabled-event := $f($group-id,(\"");
+        buf.append(ConfigConstants.AUDIT_MLCPSTART_EVENT);
+        buf.append("\", \"");
+        buf.append(ConfigConstants.AUDIT_MLCPFINISH_EVENT);
+        buf.append("\"))\n");
         buf.append("        let $mlcp-start-enabled := \n");
-        buf.append("                if ($enabled-event[1]) then \"mlcp-start\" else ()\n");
+        buf.append("                if ($enabled-event[1]) then \"");
+        buf.append(ConfigConstants.AUDIT_MLCPSTART_EVENT);
+        buf.append("\" else ()\n");
         buf.append("        let $mlcp-finish-enabled := \n");
-        buf.append("                if ($enabled-event[2]) then \"mlcp-finish\" else ()\n");
+        buf.append("                if ($enabled-event[2]) then \"");
+        buf.append(ConfigConstants.AUDIT_MLCPFINISH_EVENT);
+        buf.append("\" else ()\n");
         buf.append("        return ($mlcp-start-enabled, $mlcp-finish-enabled)");
     }
     
@@ -76,9 +84,11 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
             String itemStr = ((XSString)item.getItem()).asString();
             if ("AUDIT".equals(itemStr)) {
                 continue;
-            } else if ("mlcp-start".equals(itemStr)) {
+            } else if (ConfigConstants.AUDIT_MLCPSTART_EVENT.
+                    equalsIgnoreCase(itemStr)) {
                 mlcpStartEventEnabled = true;
-            } else if ("mlcp-finish".equalsIgnoreCase(itemStr)) {
+            } else if (ConfigConstants.AUDIT_MLCPFINISH_EVENT.
+                    equalsIgnoreCase(itemStr)) {
                 mlcpFinishEventEnabled = true;
             } else {
                 throw new IOException("Unrecognized audit event " + itemStr);

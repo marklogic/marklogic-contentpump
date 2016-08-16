@@ -309,10 +309,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
     throws Exception {
         LocalJobRunner runner = new LocalJobRunner(job, cmdline, cmd);
         runner.run();
-        if (runner.getReporter() != null) {
-          AuditUtil.auditMlcpFinish(job.getConfiguration(),
-                  job.getJobName(), runner.getReporter().counters);
-        }
+        AuditUtil.auditMlcpFinish(job.getConfiguration(),
+                job.getJobName(), runner.getReporter().counters);
     }
 
     private static void printUsage() {

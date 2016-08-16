@@ -224,4 +224,15 @@ public interface ConfigConstants {
     static final String CONF_ML_VERSION = "mapreduce.marklogic.serverversion";
     static final int MAX_BATCH_SIZE = 200;
     static final int MAX_TXN_SIZE = 4000;
+    /**
+     * Auditing constants
+     */
+    static final String AUDIT_MLCPSTART_EVENT = 
+            "mlcp-copy-export-start";
+    static final String AUDIT_MLCPFINISH_EVENT = 
+            "mlcp-copy-export-finish";
+    static final String AUDIT_MLCPSTART_CODE =
+            "mlcpcopyexportstart";
+    static final String AUDIT_MLCPFINISH_CODE = 
+            "mlcpcopyexportfinish";
 }
