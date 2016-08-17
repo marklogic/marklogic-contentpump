@@ -40,8 +40,8 @@
     <java.source>src/main/java</java.source>
     <javadocdir>${project.build.directory}/site/javadoc/apidocs</javadocdir>
     <!-- Properties related to JavaDoc -->
-    <maven.build.timestamp.format>MMMM dd, yyyy</maven.build.timestamp.format>
-    <javadoc.copyright.message>Copyright &amp;copy; ${thisyear} MarkLogic Corporation. All Rights Reserved.</javadoc.copyright.message>
+    <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+    <javadoc.copyright.message>Copyright &amp;copy; ${date-string} MarkLogic Corporation. All Rights Reserved.</javadoc.copyright.message>
     <mapreduce.examples.dir>${java.source}/com/marklogic/mapreduce/examples</mapreduce.examples.dir>
     <mapreduce.javadoc.examples.dir>${javadocdir}/com/marklogic/mapreduce/examples/doc-files</mapreduce.javadoc.examples.dir>
     <mapreduce.javadoc.logging.props.dir>${javadocdir}/com/marklogic/mapreduce/doc-files</mapreduce.javadoc.logging.props.dir>
@@ -72,8 +72,8 @@
         <artifactId>maven-timestamp-plugin</artifactId>
         <version>1.0</version>
         <configuration>
-          <propertyName>thisyear</propertyName>
-          <timestampPattern>yyyy</timestampPattern>
+          <propertyName>thisdate</propertyName>
+          <timestampPattern>MMMM dd, yyyy</timestampPattern>
         </configuration>
         <executions>
           <execution>
@@ -154,7 +154,7 @@
               <Vendor>MarkLogic Corporation</Vendor>
               <Description>Hadoop Connector for Java</Description>
               <Build-Version>${version.number.string}</Build-Version>
-              <Build-Data>${date-string}</Build-Data>
+              <Build-Data>${thisdate}</Build-Data>
             </manifestEntries>
           </archive>
         </configuration> 
