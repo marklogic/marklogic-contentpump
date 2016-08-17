@@ -53,12 +53,24 @@
               <descriptors>
                 <descriptor>src/assemble/srcdist.xml</descriptor>
                 <descriptor>src/assemble/testdist.xml</descriptor>
-                <descriptor>src/assemble/bindist-mapr.xml</descriptor>
               </descriptors>
             </configuration>
             <executions>
               <execution>
                 <id>make-assembly-mapr</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>single</goal>
+                </goals>
+              </execution>
+              <execution>
+                <configuration>
+                  <finalName>mlcp-mapr-${versionString}</finalName>
+                  <descriptors>
+                    <descriptor>src/assemble/bindist-mapr.xml</descriptor>
+                  </descriptors>
+                </configuration>
+                <id>make-assembly-mapr-bin</id>
                 <phase>package</phase>
                 <goals>
                   <goal>single</goal>
