@@ -39,6 +39,7 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import java.util.List;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -170,7 +171,7 @@ implements MarkLogicConstants, Configurable {
             query.setOptions(options);
             result = session.submitRequest(query);
 
-            ArrayList<Text> hosts = new ArrayList<>();
+            List<Text> hosts = new ArrayList<>();
             while (result.hasNext()) {
                 ResultItem item = result.next();
                 String host = item.asString();
