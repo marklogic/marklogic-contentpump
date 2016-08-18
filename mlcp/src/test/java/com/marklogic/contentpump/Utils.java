@@ -206,43 +206,45 @@ public class Utils {
     }
     
     public static String readSmallFile(String filename) throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader(filename));
-        StringBuilder content = new StringBuilder();
+      StringBuilder content;
+      try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+        content = new StringBuilder();
         String line;
-        while ((line = br.readLine()) != null) {
-            content.append(line + newLine);
+        while( (line = br.readLine()) != null) {
+          content.append(line).append(newLine);
         }
-        br.close();
+      }
         return content.toString().trim();
     }
     
     public static String readSmallFile(String filename, String encoding) throws IOException {
-        BufferedReader br = new BufferedReader(
-            new InputStreamReader(
-                new FileInputStream(filename), encoding));
-        StringBuilder content = new StringBuilder();
+      StringBuilder content;
+      try (BufferedReader br = new BufferedReader(
+              new InputStreamReader(
+                      new FileInputStream(filename), encoding))) {
+        content = new StringBuilder();
         String line;
-        while ((line = br.readLine()) != null) {
-            content.append(line + newLine);
+        while( (line = br.readLine()) != null) {
+          content.append(line).append(newLine);
         }
-        br.close();
+      }
         return content.toString().trim();
     }
 
     public static void writeFile(String filename, StringBuilder sb)
         throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(
-            filename)));
+      try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(
+              filename)))) {
         bw.write(sb.toString());
-        bw.close();
+      }
     }
     
     public static void writeFile(String filename, String str)
         throws IOException {
-        BufferedWriter bw = new BufferedWriter(new FileWriter(new File(
-            filename)));
+      try (BufferedWriter bw = new BufferedWriter(new FileWriter(new File(
+              filename)))) {
         bw.write(str);
-        bw.close();
+      }
     }
     
     public static void deleteDirectory(File f) throws IOException {
@@ -254,8 +256,9 @@ public class Utils {
                 deleteDirectory(c);
             }
         }
-        if (!f.delete())
+        if (!f.delete()) {
             throw new FileNotFoundException("Failed to delete file: " + f);
+        }
     }
 
     public static void closeSession() {
@@ -299,23 +302,23 @@ public class Utils {
         if (!destDir.exists()) {
             destDir.mkdir();
         }
-        ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath));
+      try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
         ZipEntry entry = zipIn.getNextEntry();
         // iterates over entries in the zip file
         while (entry != null) {
-            String filePath = destDirectory + File.separator + entry.getName();
-            if (!entry.isDirectory()) {
-                // if the entry is a file, extracts it
-                extractFile(zipIn, filePath);
-            } else {
-                // if the entry is a directory, make the directory
-                File dir = new File(filePath);
-                dir.mkdir();
-            }
-            zipIn.closeEntry();
-            entry = zipIn.getNextEntry();
+          String filePath = destDirectory + File.separator + entry.getName();
+          if (!entry.isDirectory()) {
+            // if the entry is a file, extracts it
+            extractFile(zipIn, filePath);
+          } else {
+            // if the entry is a directory, make the directory
+            File dir = new File(filePath);
+            dir.mkdir();
+          }
+          zipIn.closeEntry();
+          entry = zipIn.getNextEntry();
         }
-        zipIn.close();
+      }
     }
     /**
      * Extracts a zip entry (file entry)
@@ -324,13 +327,13 @@ public class Utils {
      * @throws IOException
      */
     private static void extractFile(ZipInputStream zipIn, String filePath) throws IOException {
-        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath));
+      try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
         byte[] bytesIn = new byte[BUFFER_SIZE];
         int read = 0;
         while ((read = zipIn.read(bytesIn)) != -1) {
-            bos.write(bytesIn, 0, read);
+          bos.write(bytesIn, 0, read);
         }
-        bos.close();
+      }
     }
     
     public static String getDbXccUri() {
