@@ -121,16 +121,13 @@ public class PermissionUtil {
     
     public static ContentCapability getCapbility(String cap) {
         ContentCapability capability = null;
-        if (cap.equalsIgnoreCase(ContentCapability.READ.toString())) {
+        if (ContentCapability.READ.toString().equalsIgnoreCase(cap)) {
             capability = ContentCapability.READ;
-        } else if (cap.equalsIgnoreCase(ContentCapability.EXECUTE
-            .toString())) {
+        } else if (ContentCapability.EXECUTE.toString().equalsIgnoreCase(cap)) {
             capability = ContentCapability.EXECUTE;
-        } else if (cap.equalsIgnoreCase(ContentCapability.INSERT
-            .toString())) {
+        } else if (ContentCapability.INSERT.toString().equalsIgnoreCase(cap)) {
             capability = ContentCapability.INSERT;
-        } else if (cap.equalsIgnoreCase(ContentCapability.UPDATE
-            .toString())) {
+        } else if (ContentCapability.UPDATE.toString().equalsIgnoreCase(cap)) {
             capability = ContentCapability.UPDATE;
         } else {
             LOG.error("Illegal permission: " + cap);
