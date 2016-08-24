@@ -79,10 +79,10 @@ public class Constants {
      * Static setup for all tests
      */
     static {
-        File bootstrapScript = new File("//////" + MLCP_HOME + "/src/test/bootstrap.sjs");
-        String setupQuery = "";
+        File createIdxScript = new File("//////" + MLCP_HOME + "/src/test/bootstrap/createIndex.sjs");
+        String createIdxQry = "";
         try {
-            setupQuery = FileUtils.readFileToString(bootstrapScript);
+            createIdxQry = FileUtils.readFileToString(createIdxScript);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -94,7 +94,24 @@ public class Constants {
         buf.append("var copyDstName = \"");
         buf.append(Constants.copyDst);
         buf.append("\"\n");
-        buf.append(setupQuery);
+        buf.append(createIdxQry);
+        try {
+            Utils.runQuery(Utils.getDbXccUri(), buf.toString(), "javascript");
+        } catch (XccConfigException | RequestException | URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
+        File createAxisScript = new File("//////" + MLCP_HOME + "/src/test/bootstrap/createAxis.sjs");
+        String createAxisQry = "";
+        try {
+            createAxisQry = FileUtils.readFileToString(createAxisScript);
+        } catch (IOException e) {
+         // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        buf = new StringBuilder();
+        buf.append(createAxisQry);
         try {
             Utils.runQuery(Utils.getDbXccUri(), buf.toString(), "javascript");
         } catch (XccConfigException | RequestException | URISyntaxException e) {
