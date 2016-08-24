@@ -66,6 +66,11 @@ catch (e) {
   }
 }
 
+/*
+
+admin.saveConfiguration(config);
+config = admin.getConfiguration();
+
 try {
 	var validResult = temporal.axisCreate(
 	    "valid", 
@@ -109,6 +114,7 @@ catch (e) {
 		warnings.push(e.name + ": " + e.message);
 	}
 }
+*/
 
 if (!admin.databaseExists(config, copyDstName)) {
 	config = admin.databaseCreate(config, 
