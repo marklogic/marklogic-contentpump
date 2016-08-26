@@ -71,49 +71,6 @@
         </executions>
       </plugin>
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>javadoc_additional_resources</id>
-            <phase>compile</phase>
-            <configuration>
-              <tasks>
-                <mkdir dir="${mapreduce.javadoc.examples.dir}" /> 
-                <copy todir="${mapreduce.javadoc.examples.dir}" overwrite="true">
-                  <fileset dir="${mapreduce.examples.dir}" includes="*.java" />
-                </copy>
-                <move todir="${mapreduce.javadoc.examples.dir}">
-                  <fileset dir="${mapreduce.javadoc.examples.dir}" includes="*.java"/>
-                  <mapper type="glob" from="*" to="*.txt"/>
-                </move>
-                <echo file="${javadocdir}/default.xqy">xdmp:redirect-response("index.html")</echo>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>make_deliverable</id>
-            <phase>package</phase>
-            <configuration>
-              <tasks>
-                <mkdir dir="deliverable" />
-                <copy todir="deliverable" overwrite="true">
-                  <fileset dir="${project.build.directory}">
-                    <include name="*.zip" />
-                    <exclude name="*apidocs.zip" />
-                  </fileset>
-                </copy>
-              </tasks>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <configuration>
         </configuration>
@@ -157,6 +114,51 @@
                 <descriptor>src/assemble/docdist.xml</descriptor>
               </descriptors>
             </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <!--NOTE: maven-antrun-plugin must be listed after maven-assembly-plugin. 
+      Plugins in the same phase are executed in the order in which they appear in the pom-->
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>javadoc_additional_resources</id>
+            <phase>compile</phase>
+            <configuration>
+              <tasks>
+                <mkdir dir="${mapreduce.javadoc.examples.dir}" /> 
+                <copy todir="${mapreduce.javadoc.examples.dir}" overwrite="true">
+                  <fileset dir="${mapreduce.examples.dir}" includes="*.java" />
+                </copy>
+                <move todir="${mapreduce.javadoc.examples.dir}">
+                  <fileset dir="${mapreduce.javadoc.examples.dir}" includes="*.java"/>
+                  <mapper type="glob" from="*" to="*.txt"/>
+                </move>
+                <echo file="${javadocdir}/default.xqy">xdmp:redirect-response("index.html")</echo>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>make_deliverable</id>
+            <phase>package</phase>
+            <configuration>
+              <tasks>
+                <mkdir dir="deliverable" />
+                <copy todir="deliverable" overwrite="true">
+                  <fileset dir="${project.build.directory}">
+                    <include name="*.zip" />
+                    <exclude name="*apidocs.zip" />
+                  </fileset>
+                </copy>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
           </execution>
         </executions>
       </plugin>

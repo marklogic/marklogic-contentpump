@@ -316,6 +316,27 @@
   <build>
     <plugins>
       <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/assemble/srcdist.xml</descriptor>
+            <descriptor>src/assemble/testdist.xml</descriptor>
+            <descriptor>src/assemble/bindist.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    <!--NOTE: maven-antrun-plugin must be listed after maven-assembly-plugin. 
+      Plugins in the same phase are executed in the order in which they appear in the pom-->
+      <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
         <executions>
           <execution>
@@ -334,25 +355,6 @@
             </configuration>
             <goals>
               <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <configuration>
-          <descriptors>
-            <descriptor>src/assemble/srcdist.xml</descriptor>
-            <descriptor>src/assemble/testdist.xml</descriptor>
-            <descriptor>src/assemble/bindist.xml</descriptor>
-          </descriptors>
-        </configuration>
-        <executions>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
             </goals>
           </execution>
         </executions>
