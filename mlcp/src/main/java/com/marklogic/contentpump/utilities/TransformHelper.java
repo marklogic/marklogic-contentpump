@@ -64,7 +64,8 @@ public class TransformHelper {
                 "declare variable $INSERT-OPTIONS as element() external;\n")
             .append("hadoop:transform-and-insert(\"").append(moduleUri)
             .append("\",\"").append(functionNs).append("\",\"")
-            .append(functionName).append("\",\"").append(functionParam)
+            .append(functionName).append("\",\"")
+            .append(functionParam.replace("\"", "\"\""))
             .append("\", $URI, $CONTENT, $INSERT-OPTIONS)");
         return q.toString();
     }
