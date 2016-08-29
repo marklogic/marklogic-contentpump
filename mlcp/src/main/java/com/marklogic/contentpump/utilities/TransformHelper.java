@@ -253,6 +253,9 @@ public class TransformHelper {
             optionsMap.put("xml-repair-level", "repair-" + repairLevel);
         }
 
+        String temporalCollection = cOptions.getTemporalCollection();
+        optionsMap.put("temporal-collection", temporalCollection);
+
         String optionElem = mapToElement(optionsMap);
         query.setNewVariable("INSERT-OPTIONS", ValueType.ELEMENT, optionElem);
         return query;
