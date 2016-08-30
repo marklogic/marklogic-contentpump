@@ -31,7 +31,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 
 /**
  * Archive for export, create zip file(s).
@@ -83,12 +83,9 @@ public class OutputArchive {
             LOG.debug("Creating output archive: " + zpath);
             LOG.debug("Default charset: " + Charset.defaultCharset());
         }
-        // if fs instanceof DistributedFileSystem, use hadoop api; otherwise,
-        // use java api
-        if (fs instanceof DistributedFileSystem) {
-            FSDataOutputStream fsout = fs.create(zpath, false);
-            outputStream = new ZipOutputStream(fsout);
-        } else {
+        // if fs instanceof DistributedFileSystem or MapRFileSystem, 
+        // use hadoop api; otherwise, use java api
+        if (fs instanceof LocalFileSystem) {
             File f = new File(zpath.toUri().getPath());
             if (!f.exists()) {
                 f.getParentFile().mkdirs();
@@ -96,8 +93,10 @@ public class OutputArchive {
             }
             FileOutputStream fos = new FileOutputStream(f, false);
             outputStream = new ZipOutputStream(fos);
+        } else {
+            FSDataOutputStream fsout = fs.create(zpath, false);
+            outputStream = new ZipOutputStream(fsout);
         }
-
     }
 
     /**
