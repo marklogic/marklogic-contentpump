@@ -930,27 +930,15 @@ public enum Command implements ConfigConstants {
             if (mapperClass == null) {
                 setMapperClass(job, conf, cmdline);
             }
-            Class<?> mapOutputKeyClass =
-                    conf.getClass(JobContext.MAP_OUTPUT_KEY_CLASS, null);
-            if (mapOutputKeyClass == null) {
-                job.setMapOutputKeyClass(DocumentURI.class);
-            }
-            Class<?> mapOutputValueClass =
-                    conf.getClass(JobContext.MAP_OUTPUT_VALUE_CLASS, null);
-            if (mapOutputValueClass == null) {
-                job.setMapOutputValueClass(MarkLogicDocument.class);
-            }
             Class<?> outputFormatClass =
                     conf.getClass(JobContext.OUTPUT_FORMAT_CLASS_ATTR, null);
             if (outputFormatClass == null) {
                 job.setOutputFormatClass(
                              outputType.getOutputFormatClass(cmdline));
             }
-            Class<?> outputKeyClass =
-                    conf.getClass(JobContext.OUTPUT_KEY_CLASS, null);
-            if (outputKeyClass == null) {
-                job.setOutputKeyClass(DocumentURI.class);
-            }
+            job.setMapOutputKeyClass(DocumentURI.class);
+            job.setMapOutputValueClass(MarkLogicDocument.class);
+            job.setOutputKeyClass(DocumentURI.class);
 
             return job;
         }
@@ -1167,16 +1155,6 @@ public enum Command implements ConfigConstants {
             if (mapperClass == null) {
                 job.setMapperClass(DocumentMapper.class);
             }
-            Class<?> mapOutputKeyClass =
-                    conf.getClass(JobContext.MAP_OUTPUT_KEY_CLASS, null);
-            if (mapOutputKeyClass == null) {
-                job.setMapOutputKeyClass(DocumentURI.class);
-            }
-            Class<?> mapOutputValueClass =
-                    conf.getClass(JobContext.MAP_OUTPUT_VALUE_CLASS, null);
-            if (mapOutputValueClass == null) {
-                job.setMapOutputValueClass(MarkLogicDocument.class);
-            }
             Class<?> outputFormatClass =
                     conf.getClass(JobContext.OUTPUT_FORMAT_CLASS_ATTR, null);
             if (outputFormatClass == null) {
@@ -1187,12 +1165,10 @@ public enum Command implements ConfigConstants {
                     job.setOutputFormatClass(
                             DatabaseContentOutputFormat.class);
                 }
-             }
-            Class<?> outputKeyClass =
-                    conf.getClass(JobContext.OUTPUT_KEY_CLASS, null);
-            if (outputKeyClass == null) {
-                job.setOutputKeyClass(DocumentURI.class);
             }
+            job.setMapOutputKeyClass(DocumentURI.class);
+            job.setMapOutputValueClass(MarkLogicDocument.class);
+            job.setOutputKeyClass(DocumentURI.class);
 
             return job;
         }
