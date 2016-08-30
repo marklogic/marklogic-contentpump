@@ -44,6 +44,7 @@ public class BinaryReader {
     extends Mapper<DocumentURI, BytesWritable, DocumentURI, BytesWritable> {
         public static final Log LOG =
             LogFactory.getLog(DocMapper.class);
+        @Override
         public void map(DocumentURI key, BytesWritable value, Context context) 
         throws IOException, InterruptedException {
             if (key != null && value != null) {
@@ -113,10 +114,10 @@ class BinaryWriter extends RecordWriter<DocumentURI, BytesWritable> {
         String pathStr = dir.getName() + uri.getUri();
         Path path = new Path(pathStr);
         FileSystem fs = path.getFileSystem(conf);
-        FSDataOutputStream out = fs.create(path, false);
-        System.out.println("writing to: " + path);
-        out.write(content.getBytes(), 0, content.getLength());
-        out.flush();
-        out.close();
+        try (FSDataOutputStream out = fs.create(path, false)) {
+          System.out.println("writing to: " + path);
+          out.write(content.getBytes(), 0, content.getLength());
+          out.flush();
+        }
     }       
 }

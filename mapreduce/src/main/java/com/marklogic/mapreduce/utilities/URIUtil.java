@@ -43,9 +43,9 @@ public class URIUtil implements MarkLogicConstants {
      * @return result URI string
      */
     public static String applyUriReplace(String uriSource, Configuration conf) {
-        if (uriSource == null) return null;
+        if (uriSource == null) { return null; }
         String[] uriReplace = conf.getStrings(OUTPUT_URI_REPLACE);
-        if (uriReplace == null) return uriSource;
+        if (uriReplace == null) { return uriSource; }
         for (int i = 0; i < uriReplace.length - 1; i += 2) {
             String replacement = uriReplace[i+1].trim();
             replacement = replacement.substring(1, replacement.length()-1);
@@ -63,7 +63,7 @@ public class URIUtil implements MarkLogicConstants {
      */
     public static String applyPrefixSuffix(String uriSource, 
             Configuration conf) {
-        if (uriSource == null) return null;
+        if (uriSource == null) { return null; }
         String prefix = conf.get(OUTPUT_URI_PREFIX);
         String suffix = conf.get(OUTPUT_URI_SUFFIX);
         if (prefix == null && suffix == null) {

@@ -132,6 +132,7 @@ public class MarkLogicNode implements Writable {
         }
     }
     
+    @Override
     public void readFields(DataInput in) throws IOException {
         int type = in.readInt();
         DocumentBuilder docBuilder = builderLocal.get();
@@ -153,6 +154,7 @@ public class MarkLogicNode implements Writable {
         }   
     }
 
+    @Override
     public void write(DataOutput out) throws IOException {
         if (node != null) {
             int type = node.getNodeType();

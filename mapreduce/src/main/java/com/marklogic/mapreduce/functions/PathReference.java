@@ -24,6 +24,7 @@ package com.marklogic.mapreduce.functions;
  */
 public abstract class PathReference extends Reference {
 
+    @Override
     public void append(StringBuilder buf) {
         buf.append("cts:path-reference(\"");
         buf.append(getPathExpression());
@@ -58,6 +59,6 @@ public abstract class PathReference extends Reference {
      * </p>
      */
     public String[] getUserDefinedOptions() {
-        return null;
+        return new String[]{};
     }
 }

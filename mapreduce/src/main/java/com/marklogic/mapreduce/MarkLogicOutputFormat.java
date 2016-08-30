@@ -39,6 +39,8 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * MarkLogic-based OutputFormat superclass. Use the provided subclasses, such
@@ -80,7 +82,7 @@ implements MarkLogicConstants, Configurable {
     public void checkOutputSpecs(JobContext context) throws IOException,
             InterruptedException {
         String host = conf.get(OUTPUT_HOST);
-        if (host == null || host.isEmpty()) {
+        if (StringUtils.isEmpty(host)) {
             throw new IllegalStateException(OUTPUT_HOST +
                     " is not specified.");
         }                     
@@ -100,12 +102,17 @@ implements MarkLogicConstants, Configurable {
     public OutputCommitter getOutputCommitter(TaskAttemptContext context)
             throws IOException, InterruptedException {
         return new OutputCommitter() {
+            @Override
             public void abortTask(TaskAttemptContext taskContext) { }
+            @Override
             public void commitTask(TaskAttemptContext taskContext) { }
+            @Override
             public boolean needsTaskCommit(TaskAttemptContext taskContext) {
               return false;
             }
+            @Override
             public void setupJob(JobContext jobContext) { }
+            @Override
             public void setupTask(TaskAttemptContext taskContext) { }
           };
     }  
@@ -164,7 +171,7 @@ implements MarkLogicConstants, Configurable {
             query.setOptions(options);
             result = session.submitRequest(query);
 
-            ArrayList<Text> hosts = new ArrayList<Text>();
+            List<Text> hosts = new ArrayList<>();
             while (result.hasNext()) {
                 ResultItem item = result.next();
                 String host = item.asString();

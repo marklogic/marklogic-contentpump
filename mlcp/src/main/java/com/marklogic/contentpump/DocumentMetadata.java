@@ -49,7 +49,7 @@ public class DocumentMetadata {
 
     protected List<String> collectionsList = new Vector<String>();
 
-    protected List<ContentPermission> permissionsList = new Vector<ContentPermission>();
+    protected List<ContentPermission> permissionsList = new Vector<>();
     protected String permString = null;
     protected int quality = 0;
     protected Map<String, String> meta = null;
@@ -119,7 +119,7 @@ public class DocumentMetadata {
      * @return
      */
     public String[] getCollections() {
-        return collectionsList.toArray(new String[0]);
+        return collectionsList.toArray(new String[collectionsList.size()]);
     }
 
     public String getCollectionString() {
@@ -168,9 +168,9 @@ public class DocumentMetadata {
      */
     public ContentPermission[] getPermissions() {
         if (permissionsList.size() < 1) {
-            return null;
+            return new ContentPermission[]{};
         }
-        return permissionsList.toArray(new ContentPermission[0]);
+        return permissionsList.toArray(new ContentPermission[permissionsList.size()]);
     }
 
     /**
@@ -249,18 +249,18 @@ public class DocumentMetadata {
      */
     public void addPermission(String _capability, String _role) {
         ContentCapability capability;
-        if (ContentPermission.UPDATE.toString().equals(_capability))
+        if (ContentPermission.UPDATE.toString().equals(_capability)) {
             capability = ContentPermission.UPDATE;
-        else if (ContentPermission.INSERT.toString().equals(_capability))
+        } else if (ContentPermission.INSERT.toString().equals(_capability)) {
             capability = ContentPermission.INSERT;
-        else if (ContentPermission.EXECUTE.toString().equals(_capability))
+        } else if (ContentPermission.EXECUTE.toString().equals(_capability)) {
             capability = ContentPermission.EXECUTE;
-        else if (ContentPermission.READ.toString().equals(_capability))
+        } else if (ContentPermission.READ.toString().equals(_capability)) {
             capability = ContentPermission.READ;
-        else
+        } else {
             throw new UnimplementedFeatureException(
                     "unknown capability: " + _capability);
-
+        }
         addPermission(new ContentPermission(capability, _role));
     }
 

@@ -107,12 +107,8 @@ implements ConfigConstants {
     /**
      * Set the result as DocumentURI key.
      * 
-     * @param uri Source string of document URI.
      * @param line Line number in the source if applicable; -1 otherwise.
      * @param col Column number in the source if applicable; -1 otherwise.
-     * 
-     * @return true if key indicates the record is to be skipped; false 
-     * otherwise.
      */
     protected void setSkipKey(int line, int col, String reason) {
         if (key == null) {
@@ -179,7 +175,7 @@ implements ConfigConstants {
                 ((ContentWithFileNameWritable<VALUEIN>) value)
                     .setFileName(file.getName());
             } else {
-                Writable cvalue = new ContentWithFileNameWritable<VALUEIN>(
+                Writable cvalue = new ContentWithFileNameWritable<>(
                     (VALUEIN) value, file.getName());
                 value = (VALUEIN) cvalue;
             }
@@ -188,7 +184,7 @@ implements ConfigConstants {
 
     protected String makeURIFromPath(Path file) {
         // get path portion of the file
-       return file.toUri().getPath().toString();
+       return file.toUri().getPath();
     }
     
     protected String makeURIForZipEntry(Path zipFile, String val) {  

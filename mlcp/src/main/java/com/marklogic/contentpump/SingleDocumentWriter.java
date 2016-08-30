@@ -96,9 +96,7 @@ implements MarkLogicConstants, ConfigConstants {
             ContentType type = content.getContentType();
             if (ContentType.BINARY.equals(type)) {
                 if (content.isStreamable()) {
-                    InputStream is = null;
-                    try {
-                        is = content.getContentAsByteStream();
+                    try (InputStream is = content.getContentAsByteStream()) {
                         long size = content.getContentSize();
                         long bufSize = Math.min(size, 512<<10);
                         byte[] buf = new byte[(int)bufSize];
@@ -114,10 +112,6 @@ implements MarkLogicConstants, ConfigConstants {
                                 break;
                             }
                         }
-                    } finally {
-                       if (is != null) {
-                           is.close();
-                       }
                     }
                 } else {
                     os.write(content.getContentAsByteArray());
@@ -125,7 +119,7 @@ implements MarkLogicConstants, ConfigConstants {
             } else if (ContentType.TEXT.equals(type)
                 || ContentType.XML.equals(type)
                 || ContentType.JSON.equals(type)) {
-                if(encoding.equals("UTF-8")) {
+                if (encoding.equals("UTF-8")) {
                     Text t = content.getContentAsText();
                     os.write(t.getBytes(), 0, t.getLength());
                 } else {
@@ -139,7 +133,7 @@ implements MarkLogicConstants, ConfigConstants {
                     StringBuilder sb = new StringBuilder();
                     for (int i = 0; i < bytes.length; i++) {
                         sb.append(Byte.toString(bytes[i]));
-                        sb.append(" ");
+                        sb.append(' ');
                     }
                     LOG.trace(sb);
                 }

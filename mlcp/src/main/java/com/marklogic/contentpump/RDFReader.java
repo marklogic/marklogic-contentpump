@@ -76,6 +76,8 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Reader for RDF quads/triples. Uses Jena library to parse RDF and sends triples
@@ -109,8 +111,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected PipedRDFStream rdfInputStream;
     protected Lang lang;
 
-    protected Hashtable<String, Vector> collectionHash = 
-            new Hashtable<String, Vector> ();
+    protected Hashtable<String, Vector> collectionHash = new Hashtable<> ();
     protected int collectionCount = 0;
     private static final int MAX_COLLECTIONS = 100;
     protected boolean ignoreCollectionQuad = false;
@@ -136,8 +137,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected boolean compressed;
     protected long ingestedTriples = 0;
     /* new graphs identified within a RDFReader */
-    protected HashSet<String> newGraphs;
-    protected HashMap<String,ContentPermission[]> existingMapPerms;
+    protected Set<String> newGraphs;
+    protected Map<String,ContentPermission[]> existingMapPerms;
     protected Iterator<String> graphItr;
     /* server version */
     protected String version;
@@ -160,18 +161,19 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         this.roleMap = roleMap;
         roleMapExists = roleMap!=null && roleMap.size()>0 ;
         graphQry = new StringBuilder();
-        existingMapPerms = new HashMap<String,ContentPermission[]>();
-        newGraphs = new HashSet<String>();
+        existingMapPerms = new HashMap<>();
+        newGraphs = new HashSet<>();
     }
 
     @Override
     public void close() throws IOException {
-        if(rdfIter!=null) {
+        if (rdfIter!=null) {
             rdfIter.close();
         }
         dataset = null;
-        if(graphQry.length()==0) 
+        if (graphQry.length()==0) {
             return;
+        }
         //create graph doc in a batch
         submitGraphQuery();
     }
@@ -190,7 +192,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 LOG.debug(graphQry);
             }
             AdhocQuery query = session.newAdhocQuery(graphQry.toString());
-            if(LOG.isDebugEnabled()) {
+            if (LOG.isDebugEnabled()) {
                 LOG.debug(graphQry.toString());
             }
             query.setOptions(options);
@@ -216,8 +218,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     @Override
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
             throws IOException, InterruptedException {
-        if (version == null)
+        if (version == null) {
             throw new IOException("Server Version is null");
+        }
         String majorVersion = version.substring(0, version.indexOf('.'));
         graphSupported = Integer.valueOf(majorVersion) >= 8;
         conf = context.getConfiguration();
@@ -259,7 +262,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         fs = file.getFileSystem(context.getConfiguration());
         
         FileStatus status = fs.getFileStatus(file);
-        if(status.isDirectory()) {
+        if (status.isDirectory()) {
             iterator = new FileIterator((FileSplit)inSplit, context);
             inSplit = iterator.next();
         }
@@ -271,17 +274,19 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             throw e;
         }
         String[] perms = conf.getStrings(MarkLogicConstants.OUTPUT_PERMISSION);
-        if(perms!=null) {
+        if (perms!=null) {
             defaultPerms = PermissionUtil.getPermissions(perms).toArray(
                 new ContentPermission[perms.length>>1]);
         } else {
             List<ContentPermission> tmp = PermissionUtil.getDefaultPermissions(conf,roleMap);
-            if(tmp!=null)
+            if (tmp!=null) {
                 defaultPerms = tmp.toArray(new ContentPermission[tmp.size()]);
+            }
         }
             
-        if (roleMapExists) 
+        if (roleMapExists) {
             initExistingMapPerms();
+        }
     }
 
     protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
@@ -303,11 +308,11 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         String ext = null;
         if (fsname.contains(".")) {
-            int pos = fsname.lastIndexOf(".");
+            int pos = fsname.lastIndexOf('.');
             ext = fsname.substring(pos);
             if (".gz".equals(ext)) {
                 fsname = fsname.substring(0, pos);
-                pos = fsname.lastIndexOf(".");
+                pos = fsname.lastIndexOf('.');
                 if (pos >= 0) {
                     ext = fsname.substring(pos);
                 } else {
@@ -355,12 +360,12 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected void loadModel(final String fsname, final InputStream in) throws IOException {
         if (dataset == null) {
             if (lang == Lang.NQUADS || lang == Lang.TRIG) {
-                rdfIter = new PipedRDFIterator<Quad>();
+                rdfIter = new PipedRDFIterator<>();
                 @SuppressWarnings("unchecked")
                 PipedQuadsStream stream = new PipedQuadsStream(rdfIter);
                 rdfInputStream = stream;
             } else {
-                rdfIter = new PipedRDFIterator<Triple>();
+                rdfIter = new PipedRDFIterator<>();
                 @SuppressWarnings("unchecked")
                 PipedTriplesStream stream = new PipedTriplesStream(rdfIter);
                 rdfInputStream = stream;
@@ -402,18 +407,15 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
 
-    private long rotl(long x, long y)
-    {
+    private long rotl(long x, long y) {
         return (x<<y)^(x>>(64-y));
     }
 
-    private long fuse(long a, long b)
-    {
+    private long fuse(long a, long b) {
         return rotl(a,8)^b;
     }
 
-    private long scramble(long x)
-    {
+    private long scramble(long x) {
         return x^rotl(x,20)^rotl(x,40);
     }
 
@@ -577,8 +579,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             while (result.hasNext()) {
                 String uri = result.next().asString();
                 String tmp = result.next().asString();
-                ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
-                while(!tmp.equals("0")) {
+                List<ContentPermission> perms = new ArrayList<>();
+                while (!tmp.equals("0")) {
                     Text roleid = new Text(tmp);
                     if (!result.hasNext()) {
                         throw new IOException("Invalid role map");
@@ -614,7 +616,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
      * return ContentPermission[] for the graph
      */
     public ContentPermission[] insertGraphDoc(String graph) throws IOException {
-        ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+        List<ContentPermission> perms = new ArrayList<>();
             ContentPermission[] permissions = defaultPerms;
             StringBuilder sb = graphQry;
             if (countPerBatch >= MAXGRAPHSPERREQUEST) {
@@ -629,8 +631,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             if (permissions != null && permissions.length > 0) {
                 for (int i = 0; i < permissions.length; i++) {
                     ContentPermission cp = permissions[i];
-                    if (i > 0)
-                        sb.append(",");
+                    if (i > 0) {
+                        sb.append(',');
+                    }
                     sb.append("xdmp:permission(\"");
                     sb.append(cp.getRole());
                     sb.append("\",\"");
@@ -655,7 +658,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextInMemoryTripleKeyValue() throws IOException, InterruptedException {
-        if(statementIter == null) return false;
+        if (statementIter == null) { return false; }
         if (!statementIter.hasNext()) {
             hasNext = false;
             return false;
@@ -693,7 +696,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextInMemoryQuadKeyValueWithCollections() throws IOException, InterruptedException {
-        if(statementIter == null) return false;
+        if (statementIter == null) { return false; }
         while (!statementIter.hasNext()) {
             if (graphNameIter.hasNext()) {
                 collection = graphNameIter.next();
@@ -728,7 +731,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextInMemoryQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
-        if(statementIter == null) return false;
+        if(statementIter == null) { return false; }
         while (!statementIter.hasNext()) {
             if (graphNameIter.hasNext()) {
                 collection = graphNameIter.next();
@@ -772,9 +775,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextStreamingKeyValue() throws IOException, InterruptedException {
-        if(rdfIter == null) return false;
-        if (!rdfIter.hasNext() && collectionHash.size() == 0) {
-            if(compressed) {
+        if (rdfIter == null) { return false; }
+        if (!rdfIter.hasNext() && collectionHash.isEmpty()) {
+            if (compressed) {
                 hasNext = false;
                 return false;
             } else {
@@ -796,7 +799,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected boolean nextStreamingTripleKeyValue() throws IOException, InterruptedException {
-        if(rdfIter == null) return false;
+        if (rdfIter == null) { return false; }
         setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
@@ -829,7 +832,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected boolean nextStreamingQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
-        if(rdfIter == null) return false;
+        if (rdfIter == null) { return false; }
         setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
@@ -854,7 +857,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     public boolean nextStreamingQuadKeyValueWithCollections() throws IOException, InterruptedException {
-        if(rdfIter == null) return false;
+        if (rdfIter == null) { return false; }
         if (!rdfIter.hasNext() && collectionHash.isEmpty()) {
             hasNext = false;
             return false;
@@ -877,7 +880,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     + object(quad.getObject());
 
             if (!collectionHash.containsKey(collection)) {
-                collectionHash.put(collection, new Vector<String>());
+                collectionHash.put(collection, new Vector<>());
                 collectionCount++;
                 //System.err.println("Added " + collection + " (" + collectionHash.keySet().size() + ")");
             } else {
@@ -945,8 +948,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 }
             }
             
-            if(hasOutputCol){// output_collections is set
-               if(outputOverrideGraph!=null) {
+            if (hasOutputCol) {// output_collections is set
+               if (outputOverrideGraph!=null) {
                     collection = outputOverrideGraph;
                 } else if(outputGraph != null) {
                     if (collection == null) {
@@ -961,8 +964,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             } else {//no output_collections
                 if (collection == null) { //no quad in data
                     collection = outputGraph != null ? outputGraph : outputOverrideGraph;
-                    if(collection == null)
+                    if (collection == null) {
                         collection = DEFAULT_GRAPH;
+                    }
                 }
             }
             if (roleMapExists && existingMapPerms.containsKey(collection)) {
@@ -1053,8 +1057,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             this.fsname = fsname;
             this.in = in;
             this.origFn = origFn;
-            if(LOG.isDebugEnabled())
-                LOG.debug("O:" + origFn + " : " + fsname);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("O:" + origFn + " : " + fsname); 
+            }
         }
 
         public boolean failed() {

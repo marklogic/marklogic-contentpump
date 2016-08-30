@@ -43,7 +43,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
         StringBuffer actual = new StringBuffer();
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
-            if (t.rootNodeKind() != NodeKind.ELEM) continue;
+            if (t.rootNodeKind() != NodeKind.ELEM) { continue; }
             Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
             expected.append(t.getDocumentURI());
             actual.append(d.getDocumentURI());
@@ -66,7 +66,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
         	//text document failed in parsing as DOM
-        	if (doc == null) continue;
+        	if (doc == null) { continue; }
             expected.append(uri);
             expected.append("#FIRSTCHILD##").
             		 append(doc.getFirstChild().getNodeName()).append("#").append("\n");
@@ -103,33 +103,37 @@ public class TestDocumentImplClone extends AbstractTestCase {
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
             //text document failed in parsing as DOM
-            if (doc == null) continue;
+            if (doc == null) { continue; }
             expected.append("\n").append(uri).append("\n");
-        	Queue<NodeList> q = new LinkedList<NodeList>();
-        	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
+        	Queue<NodeList> q = new LinkedList<>();
+        	if (doc.hasChildNodes()) { q.add(doc.getChildNodes()); }
         	while (!q.isEmpty()) {
         		NodeList nl = q.poll();
         		for (int k=0; k<nl.getLength(); k++) {
-        			if (nl.item(k).hasChildNodes()) 
+        			if (nl.item(k).hasChildNodes()) {
         				q.add(nl.item(k).getChildNodes());
-                    if (nl.item(k).getNodeType() == Node.ELEMENT_NODE)
-                    expected.append("#CHILD##").
-           		     append(nl.item(k).getNodeName()).append("#").append("\n");
+                    }
+                    if (nl.item(k).getNodeType() == Node.ELEMENT_NODE) {
+                      expected.append("#CHILD##").
+                              append(nl.item(k).getNodeName()).append("#").append("\n");
+                    }
         		}
         	}
         	
             q.clear();
             Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
             actual.append("\n").append(uri).append("\n");
-        	if (d.hasChildNodes()) q.add(d.getChildNodes());
+        	if (d.hasChildNodes()) { q.add(d.getChildNodes()); }
         	while (!q.isEmpty()) {
         		NodeList nl = q.poll();
         		for (int k=0; k<nl.getLength(); k++) {
-        			if (nl.item(k).hasChildNodes()) 
+        			if (nl.item(k).hasChildNodes()) {
         				q.add(nl.item(k).getChildNodes());
-                    if (nl.item(k).getNodeType() == Node.ELEMENT_NODE)
-        			actual.append("#CHILD##").
-           		     append(nl.item(k).getNodeName()).append("#").append("\n");
+                    }
+                    if (nl.item(k).getNodeType() == Node.ELEMENT_NODE) {
+                        actual.append("#CHILD##").
+                              append(nl.item(k).getNodeName()).append("#").append("\n");
+                    }
         		}
         		
         	}
@@ -158,7 +162,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
         	String uri = t.getDocumentURI();
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
+        	if (doc == null) { continue; }
         	
             expected.append(doc.getNodeName());
             expected.append("#OWNDERDOCROOT##").
@@ -204,7 +208,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
         	String uri = t.getDocumentURI();
         	
         	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
+        	if (doc == null) { continue; }
             Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
         	
             expected.append(d.getDocumentURI()).append("\n");
@@ -213,7 +217,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             NodeList children = doc.getFirstChild().getChildNodes();
             for (int k = 0; k < children.getLength(); k++) {
               Node curr = children.item(k);
-              if(Utils.isWhitespaceNode(curr)) continue;
+              if (Utils.isWhitespaceNode(curr)) { continue; }
               expected.append("#NODENAME##").append(curr.getNodeName()).append("#").append("\n");
               String namespace = curr.getNamespaceURI();
               expected.append("#LOCALNAME##").append(curr.getLocalName()).append("#").append("\n");
@@ -223,7 +227,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             children = d.getFirstChild().getChildNodes();
             for (int k = 0; k < children.getLength(); k++) {
               Node curr = children.item(k);
-              if(Utils.isWhitespaceNode(curr)) continue;
+              if(Utils.isWhitespaceNode(curr)) { continue; }
               actual.append("#NODENAME##").append(curr.getNodeName()).append("#").append("\n");
               actual.append("#LOCALNAME##").append(curr.getLocalName()).append("#").append("\n");
               actual.append("#URI##").append(curr.getNamespaceURI()).append("#").append("\n");
@@ -249,55 +253,59 @@ public class TestDocumentImplClone extends AbstractTestCase {
         
         String tags[] = {"*","country","capital","h:capital","text","body","head","html:head"};
         
-        for (int s = 0; s < tags.length; s++){
+        for (int s = 0; s < tags.length; s++) {
         	expected.append("#TAG#").append(tags[s]).append("\n");
         	actual.append("#TAG#").append(tags[s]).append("\n");
-        for (int i = 0; i < trees.size(); i++) {
-            ExpandedTree t = trees.get(i);
-        	String uri = t.getDocumentURI();
-        	
-        	expected.append("#URI##").append(uri).append("#\n");
-        	actual.append("#URI##").append(uri).append("#\n");
-        	
-        	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
-        	int firstelement = 0;
-        	while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
-        	Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
-        	NodeList elementsExpected = rootExpected.getElementsByTagName(tags[s]);
-        	expected.append("#NUM##").append(elementsExpected.getLength()).
-        			append("#").append("\n");
-        	ArrayList<Node> esort = new ArrayList<Node>();
-        	for (int j = 0; j < elementsExpected.getLength(); j++) {
-        		esort.add(elementsExpected.item(j));
-        	}
-        	for (int j = 0; j < esort.size(); j++) {
-        		Node curr = esort.get(j);
-        		expected.append("#I##").append(j).append("#").
-        				append("#NODENAME##").append(curr.getNodeName()).append("#").
-        				append("\n");
-        	}
-        		            
-            Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
-            firstelement = 0;
-        	while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
-            Element rootActual = (Element) d.getChildNodes().item(firstelement);
-        	NodeList elementsActual = rootActual.getElementsByTagName(tags[s]);
-        	actual.append("#NUM##").append(elementsActual.getLength()).
-			 	append("#").append("\n");
-        	ArrayList<Node> asort = new ArrayList<Node>();
-        	for (int j = 0; j < elementsActual.getLength(); j++) {
-        		asort.add(elementsActual.item(j));
-        	}
-        	for (int j = 0; j < asort.size(); j++) {
-        		Node curr = asort.get(j);
-        		actual.append("#I##").append(j).append("#").
-        				append("#NODENAME##").append(curr.getNodeName()).append("#").
-        				append("\n");
-        	}
-         }
-    	expected.append("\n");
-    	actual.append("\n");
+            for (int i = 0; i < trees.size(); i++) {
+                ExpandedTree t = trees.get(i);
+                String uri = t.getDocumentURI();
+
+                expected.append("#URI##").append(uri).append("#\n");
+                actual.append("#URI##").append(uri).append("#\n");
+
+                Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+                if (doc == null) { continue; }
+                int firstelement = 0;
+                while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) {
+                  firstelement++;
+                }
+                Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
+                NodeList elementsExpected = rootExpected.getElementsByTagName(tags[s]);
+                expected.append("#NUM##").append(elementsExpected.getLength()).
+                        append("#").append("\n");
+                List<Node> esort = new ArrayList<>();
+                for (int j = 0; j < elementsExpected.getLength(); j++) {
+                    esort.add(elementsExpected.item(j));
+                }
+                for (int j = 0; j < esort.size(); j++) {
+                    Node curr = esort.get(j);
+                    expected.append("#I##").append(j).append("#").
+                            append("#NODENAME##").append(curr.getNodeName()).append("#").
+                            append("\n");
+                }
+
+                Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
+                firstelement = 0;
+                while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) {
+                  firstelement++;
+                }
+                Element rootActual = (Element) d.getChildNodes().item(firstelement);
+                NodeList elementsActual = rootActual.getElementsByTagName(tags[s]);
+                actual.append("#NUM##").append(elementsActual.getLength()).
+                    append("#").append("\n");
+                List<Node> asort = new ArrayList<>();
+                for (int j = 0; j < elementsActual.getLength(); j++) {
+                    asort.add(elementsActual.item(j));
+                }
+                for (int j = 0; j < asort.size(); j++) {
+                    Node curr = asort.get(j);
+                    actual.append("#I##").append(j).append("#").
+                            append("#NODENAME##").append(curr.getNodeName()).append("#").
+                            append("\n");
+                }
+             }
+            expected.append("\n");
+            actual.append("\n");
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug(expected.toString());
@@ -318,7 +326,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
         
         String tags[] = {"*","country","capital","text","body","head","html:head"};
                 
-        for (int s = 0; s < tags.length; s++){
+        for (int s = 0; s < tags.length; s++) {
         	expected.append("#TAG#").append(tags[s]).append("\n");
         	actual.append("#TAG#").append(tags[s]).append("\n");
 
@@ -330,14 +338,16 @@ public class TestDocumentImplClone extends AbstractTestCase {
             	actual.append("#URI##").append(uri).append("#\n");
             	
             	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-            	if (doc == null) continue;
+            	if (doc == null) { continue; }
             	int firstelement = 0;
-            	while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+            	while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) {
+                  firstelement++;
+                }
             	Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
             	NodeList elementsExpected = doc.getElementsByTagName(tags[s]);
             	expected.append("#NUM##").append(elementsExpected.getLength()).
             			append("#").append("\n");
-            	ArrayList<Node> esort = new ArrayList<Node>();
+            	List<Node> esort = new ArrayList<>();
             	for (int j = 0; j < elementsExpected.getLength(); j++) {
             		esort.add(elementsExpected.item(j));
             	}
@@ -350,12 +360,14 @@ public class TestDocumentImplClone extends AbstractTestCase {
             		            
                 Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
                 firstelement = 0;
-            	while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
+            	while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) {
+                  firstelement++;
+                }
                 Element rootActual = (Element) d.getChildNodes().item(firstelement);
             	NodeList elementsActual = d.getElementsByTagName(tags[s]);
             	actual.append("#NUM##").append(elementsActual.getLength()).
     			 	append("#").append("\n");
-            	ArrayList<Node> asort = new ArrayList<Node>();
+            	List<Node> asort = new ArrayList<>();
             	for (int j = 0; j < elementsActual.getLength(); j++) {
             		asort.add(elementsActual.item(j));
             	}
@@ -365,9 +377,10 @@ public class TestDocumentImplClone extends AbstractTestCase {
             				append("#NODENAME##").append(curr.getNodeName()).append("#").
             				append("\n");
             	}
-             }
-    	expected.append("\n");
-    	actual.append("\n");
+           
+                expected.append("\n");
+                actual.append("\n");
+            }
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug(expected.toString());
@@ -389,59 +402,64 @@ public class TestDocumentImplClone extends AbstractTestCase {
         String tags[] = {"*","country","capital","text","body","head","html:head"};
         String nss[] = {"*","http://www.w3.org/TR/html4/"};
         
-        for (int n = 0; n < nss.length; n++)
-        for (int s = 0; s < tags.length; s++){
-        	expected.append("#TAG#").append(tags[s]).append("\n");
-        	expected.append("#NS#").append(nss[n]).append("\n");
-        	actual.append("#TAG#").append(tags[s]).append("\n");
-        	actual.append("#NS#").append(nss[n]).append("\n");
+        for (int n = 0; n < nss.length; n++) {
+          for (int s = 0; s < tags.length; s++) {
+              expected.append("#TAG#").append(tags[s]).append("\n");
+              expected.append("#NS#").append(nss[n]).append("\n");
+              actual.append("#TAG#").append(tags[s]).append("\n");
+              actual.append("#NS#").append(nss[n]).append("\n");
 
-            for (int i = 0; i < trees.size(); i++) {
-                ExpandedTree t = trees.get(i);
-            	String uri = t.getDocumentURI();
-            	
-            	expected.append("#URI##").append(uri).append("#\n");
-            	actual.append("#URI##").append(uri).append("#\n");
-            	
-            	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-            	if (doc == null) continue;
-            	int firstelement = 0;
-            	while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
-            	Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
-            	NodeList elementsExpected = rootExpected.getElementsByTagNameNS(nss[n],tags[s]);
-            	expected.append("#NUM##").append(elementsExpected.getLength()).
-            			append("#").append("\n");
-            	ArrayList<Node> esort = new ArrayList<Node>();
-            	for (int j = 0; j < elementsExpected.getLength(); j++) {
-            		esort.add(elementsExpected.item(j));
-            	}
-            	for (int j = 0; j < esort.size(); j++) {
-            		Node curr = esort.get(j);
-            		expected.append("#I##").append(j).append("#").
-            				append("#NODENAME##").append(curr.getNodeName()).append("#").
-            				append("\n");
-            	}
-            		            
-                Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
-                firstelement = 0;
-            	while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) firstelement++;
-                Element rootActual = (Element) d.getChildNodes().item(firstelement);
-            	NodeList elementsActual = rootActual.getElementsByTagNameNS(nss[n],tags[s]);
-            	actual.append("#NUM##").append(elementsActual.getLength()).
-    			 	append("#").append("\n");
-            	ArrayList<Node> asort = new ArrayList<Node>();
-            	for (int j = 0; j < elementsActual.getLength(); j++) {
-            		asort.add(elementsActual.item(j));
-            	}
-            	for (int j = 0; j < asort.size(); j++) {
-            		Node curr = asort.get(j);
-            		actual.append("#I##").append(j).append("#").
-            				append("#NODENAME##").append(curr.getNodeName()).append("#").
-            				append("\n");
-            	}
-             }
-    	expected.append("\n");
-    	actual.append("\n");
+              for (int i = 0; i < trees.size(); i++) {
+                  ExpandedTree t = trees.get(i);
+                  String uri = t.getDocumentURI();
+
+                  expected.append("#URI##").append(uri).append("#\n");
+                  actual.append("#URI##").append(uri).append("#\n");
+
+                  Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+                  if (doc == null) { continue; }
+                  int firstelement = 0;
+                  while (doc.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) {
+                    firstelement++;
+                  }
+                  Element rootExpected = (Element) doc.getChildNodes().item(firstelement);
+                  NodeList elementsExpected = rootExpected.getElementsByTagNameNS(nss[n],tags[s]);
+                  expected.append("#NUM##").append(elementsExpected.getLength()).
+                          append("#").append("\n");
+                  List<Node> esort = new ArrayList<>();
+                  for (int j = 0; j < elementsExpected.getLength(); j++) {
+                      esort.add(elementsExpected.item(j));
+                  }
+                  for (int j = 0; j < esort.size(); j++) {
+                      Node curr = esort.get(j);
+                      expected.append("#I##").append(j).append("#").
+                              append("#NODENAME##").append(curr.getNodeName()).append("#").
+                              append("\n");
+                  }
+
+                  Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
+                  firstelement = 0;
+                  while (d.getChildNodes().item(firstelement).getNodeType() != Node.ELEMENT_NODE) {
+                    firstelement++;
+                  }
+                  Element rootActual = (Element) d.getChildNodes().item(firstelement);
+                  NodeList elementsActual = rootActual.getElementsByTagNameNS(nss[n],tags[s]);
+                  actual.append("#NUM##").append(elementsActual.getLength()).
+                      append("#").append("\n");
+                  List<Node> asort = new ArrayList<>();
+                  for (int j = 0; j < elementsActual.getLength(); j++) {
+                      asort.add(elementsActual.item(j));
+                  }
+                  for (int j = 0; j < asort.size(); j++) {
+                      Node curr = asort.get(j);
+                      actual.append("#I##").append(j).append("#").
+                              append("#NODENAME##").append(curr.getNodeName()).append("#").
+                              append("\n");
+                  }
+               }
+              expected.append("\n");
+              actual.append("\n");
+          }
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug(expected.toString());
@@ -451,12 +469,12 @@ public class TestDocumentImplClone extends AbstractTestCase {
     }
     
     protected String getPostition(short comp) {
-    	if (comp == 0x01) return "DOCUMENT_POSITION_DISCONNECTED";
-    	if (comp == 0x02) return "DOCUMENT_POSITION_PRECEDING";
-    	if (comp == 0x04) return "DOCUMENT_POSITION_FOLLOWING";
-    	if (comp == 10) return "OCUMENT_POSITION_CONTAINS";
-    	if (comp == 20) return "OCUMENT_POSITION_CONTAINED_BY";
-    	if (comp == 0x20) return "DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC";
+    	if (comp == 0x01) { return "DOCUMENT_POSITION_DISCONNECTED"; }
+    	if (comp == 0x02) { return "DOCUMENT_POSITION_PRECEDING"; }
+    	if (comp == 0x04) { return "DOCUMENT_POSITION_FOLLOWING"; }
+    	if (comp == 10) { return "OCUMENT_POSITION_CONTAINS"; }
+    	if (comp == 20) { return "OCUMENT_POSITION_CONTAINED_BY"; }
+    	if (comp == 0x20) { return "DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC"; }
     	return "INVALID";
     }
     
@@ -477,7 +495,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             	actual.append("#URI##").append(uri).append("#\n");
             	
                 Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-            	if (doc == null) continue;
+            	if (doc == null) { continue; }
                 NodeList children = doc.getChildNodes();
                 if (children.getLength() >= 2) {
                 	expected.append(getPostition(children.item(0).compareDocumentPosition(children.item(1)))).append("#\n");
@@ -538,28 +556,29 @@ public class TestDocumentImplClone extends AbstractTestCase {
             	
             	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
                 //text document failed in parsing as DOM
-                if (doc == null) continue;        	
+                if (doc == null) { continue; }	
                 expected.append("\n").append(uri).append("\n");
-            	Queue<NodeList> q = new LinkedList<NodeList>();
-            	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
+            	Queue<NodeList> q = new LinkedList<>();
+            	if (doc.hasChildNodes()) { q.add(doc.getChildNodes()); }
             	while (!q.isEmpty()) {
             		NodeList nl = q.poll();
             		for (int k=0; k<nl.getLength(); k++) {
-            			if (nl.item(k).hasChildNodes()) 
+            			if (nl.item(k).hasChildNodes()) {
             				q.add(nl.item(k).getChildNodes());
-            			if (nl.item(k).getNodeType() == Node.TEXT_NODE) continue;
-            			if ("#cdata-section".equals(nl.item(k).getNodeName())) continue;
-                        expected.append("#NODE##").
-             		     append(nl.item(k).getNodeName()).append("#").append("\n");
+                        }
+            			if (nl.item(k).getNodeType() == Node.TEXT_NODE) { continue; }
+            			if ("#cdata-section".equals(nl.item(k).getNodeName())) { continue; }
+                            expected.append("#NODE##").
+                                    append(nl.item(k).getNodeName()).append("#").append("\n");
                         for (int p=0; p<pres.length; p++) {
                         	String nslookup = nl.item(k).lookupNamespaceURI(pres[p]);
-                        	if (null == nslookup) continue;
+                        	if (null == nslookup) { continue; }
                         	expected.append("#PREFIX#").append(pres[p]).append("#NS#").
            						append(nslookup).append("\n");
                         }
                         for (int p=0; p<nss.length; p++) {
                         	String nslookup = nl.item(k).lookupPrefix(nss[p]);
-                        	if (null == nslookup) continue;
+                        	if (null == nslookup) { continue; }
                         	expected.append("#NS#").append(pres[p]).append("#PREFIX#").
            						append(nslookup).append("\n");
                         }
@@ -569,24 +588,25 @@ public class TestDocumentImplClone extends AbstractTestCase {
                 q.clear();
                 Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
                 actual.append("\n").append(uri).append("\n");
-            	if (d.hasChildNodes()) q.add(d.getChildNodes());
+            	if (d.hasChildNodes()) { q.add(d.getChildNodes()); }
             	while (!q.isEmpty()) {
             		NodeList nl = q.poll();
             		for (int k=0; k<nl.getLength(); k++) {
-            			if (nl.item(k).hasChildNodes()) 
+            			if (nl.item(k).hasChildNodes())  {
             				q.add(nl.item(k).getChildNodes());
-            			if (nl.item(k).getNodeType() == Node.TEXT_NODE) continue;
+                        }
+            			if (nl.item(k).getNodeType() == Node.TEXT_NODE) { continue; }
             			actual.append("#NODE##").
              		     append(nl.item(k).getNodeName()).append("#").append("\n");
                         for (int p=0; p<pres.length; p++) {
                         	String nslookup = nl.item(k).lookupNamespaceURI(pres[p]);
-                        	if (null == nslookup) continue;
+                        	if (null == nslookup) { continue; }
                         	actual.append("#PREFIX#").append(pres[p]).append("#NS#").
            						append(nslookup).append("\n");
                         }
                         for (int p=0; p<nss.length; p++) {
                         	String nslookup = nl.item(k).lookupPrefix(nss[p]);
-                        	if (null == nslookup) continue;
+                        	if (null == nslookup) { continue; }
                         	actual.append("#NS#").append(pres[p]).append("#PREFIX#").
            						append(nslookup).append("\n");
                         }
@@ -622,17 +642,18 @@ public class TestDocumentImplClone extends AbstractTestCase {
             	
             	Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
                 //text document failed in parsing as DOM
-                if (doc == null) continue;	
+                if (doc == null) { continue; }
                 expected.append("\n").append(uri).append("\n");
-            	Queue<NodeList> q = new LinkedList<NodeList>();
-            	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
+            	Queue<NodeList> q = new LinkedList<>();
+            	if (doc.hasChildNodes()) { q.add(doc.getChildNodes()); }
             	while (!q.isEmpty()) {
             		NodeList nl = q.poll();
             		for (int k=0; k<nl.getLength(); k++) {
-            			if (nl.item(k).hasChildNodes()) 
+            			if (nl.item(k).hasChildNodes()) {
             				q.add(nl.item(k).getChildNodes());
-            			if (nl.item(k).getNodeType() != Node.ELEMENT_NODE) continue;
-            			if ("#cdata-section".equals(nl.item(k).getNodeName())) continue;
+                        }
+            			if (nl.item(k).getNodeType() != Node.ELEMENT_NODE) { continue; }
+            			if ("#cdata-section".equals(nl.item(k).getNodeName())) { continue; }
                         expected.append("#NODE##").
              		     append(nl.item(k).getNodeName()).append("#").append("\n");
                         for (int p=0; p<attrs.length; p++) {
@@ -647,14 +668,15 @@ public class TestDocumentImplClone extends AbstractTestCase {
                 q.clear();
                 Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
                 actual.append("\n").append(uri).append("\n");
-            	if (d.hasChildNodes()) q.add(d.getChildNodes());
+            	if (d.hasChildNodes()) { q.add(d.getChildNodes()); }
             	while (!q.isEmpty()) {
             		NodeList nl = q.poll();
             		for (int k=0; k<nl.getLength(); k++) {
-            			if (nl.item(k).hasChildNodes()) 
+            			if (nl.item(k).hasChildNodes()) {
             				q.add(nl.item(k).getChildNodes());
-            			if (nl.item(k).getNodeType() != Node.ELEMENT_NODE) continue;
-            			if ("#cdata-section".equals(nl.item(k).getNodeName())) continue;
+                        }
+            			if (nl.item(k).getNodeType() != Node.ELEMENT_NODE) { continue; }
+            			if ("#cdata-section".equals(nl.item(k).getNodeName())) { continue; }
             			actual.append("#NODE##").
              		     append(nl.item(k).getNodeName()).append("#").append("\n");
                         for (int p=0; p<attrs.length; p++) {
@@ -687,12 +709,13 @@ public class TestDocumentImplClone extends AbstractTestCase {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-            if (doc == null) continue;
+            if (doc == null) { continue; }
             expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOM(children, expected);
-            if (LOG.isDebugEnabled()) 
+            if (LOG.isDebugEnabled()) {
                 LOG.debug("--------------");
+            }
             Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
             NodeList eChildren = d.getChildNodes();
             actual.append(uri);
@@ -722,7 +745,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
+        	if (doc == null) { continue; }
         	expected.append(uri);
         	NodeList children = doc.getChildNodes();
             walkDOMNextSibling(children, expected);
@@ -754,10 +777,11 @@ public class TestDocumentImplClone extends AbstractTestCase {
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
-            if (uri.equals("hc_staff.xml"))
+            if (uri.equals("hc_staff.xml")) {
                 continue;
+            }
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
+        	if (doc == null) { continue; }
         	expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOMPreviousSibling(children, expected);
@@ -790,7 +814,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             String uri = t.getDocumentURI();
             
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
+        	if (doc == null) { continue; }
         	expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOMParent(children, expected);
@@ -823,7 +847,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             String uri = t.getDocumentURI();
             
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
+        	if (doc == null) { continue; }
         	expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOMTextContent(children, expected);
@@ -850,23 +874,23 @@ public class TestDocumentImplClone extends AbstractTestCase {
                 		+ forest, stand), false);
             assertEquals(num, trees.size());
 
-        Set<String> expectedAttrSet = new HashSet<String>();
-        Set<String> actualAttrSet = new HashSet<String>();
+        Set<String> expectedAttrSet = new HashSet<>();
+        Set<String> actualAttrSet = new HashSet<>();
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
             expectedAttrSet.add(uri);
             actualAttrSet.add(uri);
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        	if (doc == null) continue;
+        	if (doc == null) { continue; }
             NodeList children = doc.getChildNodes();
             walkDOMAttr(children, expectedAttrSet);
             Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);
             NodeList eChildren = d.getChildNodes();
             walkDOMAttr (eChildren, actualAttrSet);
         }
-        for(String s : expectedAttrSet) {
-            if(actualAttrSet.contains(s) == false && expectedMissingNSDecl.contains(s) == false) {
+        for (String s : expectedAttrSet) {
+            if (actualAttrSet.contains(s) == false && expectedMissingNSDecl.contains(s) == false) {
                 if (LOG.isDebugEnabled()) 
                     LOG.debug("NOT_FOUND:" + s);
                 assertTrue(actualAttrSet.contains(s));
@@ -888,7 +912,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
             Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-            if (doc == null) continue;
+            if (doc == null) { continue; }
             expected.append(uri);
             NodeList children = doc.getChildNodes();
             walkDOMElem(children, expected);
@@ -925,8 +949,9 @@ public class TestDocumentImplClone extends AbstractTestCase {
                 expected.append(ns[ni]).append("@isDefaultNS:");
                 Document doc = Utils.readXMLasDOMDocument(new File(testData,
                     uri));
-                if (doc == null)
+                if (doc == null) {
                     continue;
+                }
                 expected.append(doc.isDefaultNamespace(ns[ni])).append("\n");
 
                 Document d = (Document) new DocumentImpl(t, 0).cloneNode(true);

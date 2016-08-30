@@ -35,6 +35,8 @@ import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCreateOptions;
+import java.util.Arrays;
+import java.util.Set;
 
 /**
  * A {@link MarkLogicDocument} retrieved from a MarkLogic forest through 
@@ -186,15 +188,11 @@ public abstract class ForestDocument implements MarkLogicDocument {
             if (cols == null || cols.length == 0) {
                 options.setCollections(collections);
             } else { // merge
-                HashSet<String> colsSet = new HashSet<String>();
+                Set<String> colsSet = new HashSet<>();
                 if (cols != null) {
-                    for (String col : cols) {
-                        colsSet.add(col);
-                    }
+                  colsSet.addAll(Arrays.asList(cols));
                 }
-                for (String col : collections) {
-                    colsSet.add(col);
-                }
+                colsSet.addAll(Arrays.asList(collections));
                 String[] newCols = new String[colsSet.size()];
                 colsSet.toArray(newCols);
                 options.setCollections(newCols);

@@ -24,7 +24,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.JobContext;
 
 import com.marklogic.contentpump.utilities.AuditUtil;
-import com.marklogic.contentpump.ConfigConstants;
 import com.marklogic.mapreduce.MarkLogicInputFormat;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
@@ -44,6 +43,7 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
     boolean mlcpStartEventEnabled = false;
     boolean mlcpFinishEventEnabled = false;
     
+    @Override
     protected void appendCustom(StringBuilder buf) {
         buf.append("\"AUDIT\",\n");
         buf.append("let $f := \n");
@@ -69,6 +69,7 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
         buf.append("        return ($mlcp-start-enabled, $mlcp-finish-enabled)");
     }
     
+    @Override
     protected void getForestSplits(JobContext jobContext,
             ResultSequence result, 
             List<ForestSplit> forestSplits,

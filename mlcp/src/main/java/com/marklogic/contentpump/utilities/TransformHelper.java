@@ -39,6 +39,8 @@ import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.types.ValueType;
+import java.util.Map;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Helper class for server-side transform
@@ -71,12 +73,13 @@ public class TransformHelper {
     }
 
     private static String getTypeFromMap(String uri) {
-        int idx = uri.lastIndexOf(".");
+        int idx = uri.lastIndexOf('.');
         Text format = null;
         if (idx != -1) {
             String suff = uri.substring(idx + 1, uri.length());
-            if (suff.equalsIgnoreCase("xml"))
+            if (suff.equalsIgnoreCase("xml")) {
                 return "xml";
+            }
             format = (Text) TransformOutputFormat.mimetypeMap.get(new Text(suff));
         }
         if (format == null) {
@@ -117,7 +120,7 @@ public class TransformHelper {
         String functionName, String functionParam, String uri,
         Object value, String type, ContentCreateOptions cOptions)
         throws InterruptedIOException, UnsupportedEncodingException {
-        HashMap<String, String> optionsMap = new HashMap<String, String>();
+        Map<String, String> optionsMap = new HashMap<>();
 
         query.setNewStringVariable("URI", uri);
         ContentType contentType = ContentType.valueOf(type);
@@ -195,7 +198,7 @@ public class TransformHelper {
         if (perms != null && perms.length > 0) {
             for (ContentPermission cp : perms) {
                 String roleName = cp.getRole();
-                if (roleName == null || roleName.isEmpty()) {
+                if (StringUtils.isEmpty(roleName)) {
                     LOG.error("Illegal role name: " + roleName);
                     continue;
                 }
@@ -233,15 +236,17 @@ public class TransformHelper {
         if (collections != null || value instanceof ContentWithFileNameWritable) {
             if (collections != null) {
                 for (int i = 0; i < collections.length; i++) {
-                    if (i != 0)
+                    if (i != 0) {
                         sb.append(",");
+                    }
                     sb.append(collections[i].trim());
                 }
             } 
                 
             if (value instanceof ContentWithFileNameWritable) {
-                if(collections != null)
+                if (collections != null) {
                     sb.append(",");
+                }
                 sb.append(((ContentWithFileNameWritable) value).getFileName());
             }
             
@@ -263,7 +268,6 @@ public class TransformHelper {
      * Get transform and insert query for MarkLogicDocumentWithMeta, 
      * used in importing archive, copy
      * @param conf
-     * @param session
      * @param moduleUri
      * @param functionNs
      * @param functionName
@@ -281,7 +285,7 @@ public class TransformHelper {
         String uri, DatabaseDocumentWithMeta doc,
         ContentCreateOptions cOptions) throws InterruptedIOException,
         UnsupportedEncodingException {
-        HashMap<String, String> optionsMap = new HashMap<String, String>();
+        Map<String, String> optionsMap = new HashMap<>();
 
         query.setNewStringVariable("URI", uri);
         ContentType contentType = doc.getContentType();
@@ -325,7 +329,7 @@ public class TransformHelper {
         if (perms != null && perms.length > 0) {
             for (ContentPermission cp : perms) {
                 String roleName = cp.getRole();
-                if (roleName == null || roleName.isEmpty()) {
+                if (StringUtils.isEmpty(roleName)) {
                     LOG.error("Illegal role name: " + roleName);
                     continue;
                 }
@@ -362,8 +366,9 @@ public class TransformHelper {
         if (collections != null) {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < collections.length; i++) {
-                if (i != 0)
+                if (i != 0) {
                     sb.append(",");
+                }
                 sb.append(collections[i].trim());
             }
             optionsMap.put("collections", sb.toString());
@@ -380,7 +385,7 @@ public class TransformHelper {
         return query;
     }
 
-    private static String mapToElement(HashMap<String, String> map) {
+    private static String mapToElement(Map<String, String> map) {
         StringBuilder sb = new StringBuilder();
         sb.append(MAP_ELEM_START_TAG);
         Set<String> keys = map.keySet();

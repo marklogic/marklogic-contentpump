@@ -59,6 +59,7 @@ public class LinkCountHDFS {
         private final static IntWritable one = new IntWritable(1);
         private Text refURI = new Text();
 
+        @Override
         public void map(IntWritable key, Text value, Context context) 
         throws IOException, InterruptedException {
             refURI.set(value);
@@ -70,6 +71,7 @@ public class LinkCountHDFS {
     extends Reducer<Text, IntWritable, Text, IntWritable> {
         private IntWritable result = new IntWritable();
         
+        @Override
         public void reduce(Text key, Iterable<IntWritable> values, 
             Context context) throws IOException, InterruptedException {
             int sum = 0;
@@ -109,6 +111,7 @@ public class LinkCountHDFS {
 
 class HDFSInputFormat extends FileInputFormat<IntWritable, Text> {
     
+    @Override
     protected boolean isSplitable(JobContext context, Path filename) {
         return false;
     }
@@ -192,7 +195,7 @@ class LinkRecordReader extends RecordReader<IntWritable, Text> {
                     "http://www.mediawiki.org/xml/export-0.4/");
             XPathSelector selector = xpath.compile(PATH_EXPRESSION).load();
             selector.setContextItem(xdmDoc);
-            items = new ArrayList<XdmItem>();
+            items = new ArrayList<>();
             for (XdmItem item : selector) {
                 items.add(item);
             }
