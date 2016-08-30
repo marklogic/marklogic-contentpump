@@ -280,7 +280,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             Set<String> keys = nameSpaces.keySet();
             for (String k : keys) {
                 String v = nameSpaces.get(k).peek();
-                if (DEFAULT_NS.equals(k)) {
+                if (DEFAULT_NS == k) {
                     sb.append(" xmlns=\"" + v + "\"");
                 } else {
                     sb.append(" xmlns:" + k + "=\"" + v + "\"");
@@ -300,7 +300,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(nsDeclPrefix + ":" + nsDeclUri);
                     }
-                    if (DEFAULT_NS.equals(nsDeclPrefix)) {
+                    if (DEFAULT_NS == nsDeclPrefix) {
                         sb.append(" xmlns=\"" + nsDeclUri + "\"");
                     } else {
                         sb.append(" xmlns:" + nsDeclPrefix + "=\"" + nsDeclUri
