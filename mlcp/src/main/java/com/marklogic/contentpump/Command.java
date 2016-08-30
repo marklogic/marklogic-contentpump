@@ -29,6 +29,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobContext;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -346,12 +347,25 @@ public enum Command implements ConfigConstants {
             
             // construct a job
             Job job = Job.getInstance(conf);
-            job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
-            job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
+
+            Class<?> inputFormatClass =
+                    conf.getClass(JobContext.INPUT_FORMAT_CLASS_ATTR, null);
+            if (inputFormatClass == null) {
+                job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
+            }
+            Class<?> outputFormatClass =
+                    conf.getClass(JobContext.OUTPUT_FORMAT_CLASS_ATTR, null);
+            if (outputFormatClass == null) {
+                job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
+            }
 
             // set mapper class
-            setMapperClass(job, conf, cmdline);
-            
+            Class<?> mapperClass =
+                    conf.getClass(JobContext.MAP_CLASS_ATTR, null);
+            if (mapperClass == null) {
+                setMapperClass(job, conf, cmdline);
+            }
+ 
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(INPUT_FILE_PATH);
                 FileInputFormat.setInputPaths(job, path);
@@ -905,14 +919,39 @@ public enum Command implements ConfigConstants {
             // construct a job
             Job job = Job.getInstance(conf);
             job.setJarByClass(this.getClass());
-            job.setInputFormatClass(outputType.getInputFormatClass());
+            
+            Class<?> inputFormatClass =
+                    conf.getClass(JobContext.INPUT_FORMAT_CLASS_ATTR, null);
+            if (inputFormatClass == null) {
+                job.setInputFormatClass(outputType.getInputFormatClass());
+            }
+            Class<?> mapperClass =
+                    conf.getClass(JobContext.MAP_CLASS_ATTR, null);
+            if (mapperClass == null) {
+                setMapperClass(job, conf, cmdline);
+            }
+            Class<?> mapOutputKeyClass =
+                    conf.getClass(JobContext.MAP_OUTPUT_KEY_CLASS, null);
+            if (mapOutputKeyClass == null) {
+                job.setMapOutputKeyClass(DocumentURI.class);
+            }
+            Class<?> mapOutputValueClass =
+                    conf.getClass(JobContext.MAP_OUTPUT_VALUE_CLASS, null);
+            if (mapOutputValueClass == null) {
+                job.setMapOutputValueClass(MarkLogicDocument.class);
+            }
+            Class<?> outputFormatClass =
+                    conf.getClass(JobContext.OUTPUT_FORMAT_CLASS_ATTR, null);
+            if (outputFormatClass == null) {
+                job.setOutputFormatClass(
+                             outputType.getOutputFormatClass(cmdline));
+            }
+            Class<?> outputKeyClass =
+                    conf.getClass(JobContext.OUTPUT_KEY_CLASS, null);
+            if (outputKeyClass == null) {
+                job.setOutputKeyClass(DocumentURI.class);
+            }
 
-            setMapperClass(job, conf, cmdline);
-            job.setMapOutputKeyClass(DocumentURI.class);
-            job.setMapOutputValueClass(MarkLogicDocument.class);
-            job.setOutputFormatClass(
-                            outputType.getOutputFormatClass(cmdline));
-            job.setOutputKeyClass(DocumentURI.class);
             return job;
         }
 
@@ -1118,16 +1157,43 @@ public enum Command implements ConfigConstants {
             }
             Job job = Job.getInstance(conf);
             job.setJarByClass(this.getClass());
-            job.setInputFormatClass(DatabaseContentInputFormat.class);
-            job.setMapperClass(DocumentMapper.class);
-            job.setMapOutputKeyClass(DocumentURI.class);
-            job.setMapOutputValueClass(MarkLogicDocument.class);
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
-                job.setOutputFormatClass(DatabaseTransformOutputFormat.class);
-            } else {
-                job.setOutputFormatClass(DatabaseContentOutputFormat.class);
+            Class<?> inputFormatClass =
+                    conf.getClass(JobContext.INPUT_FORMAT_CLASS_ATTR, null);
+            if (inputFormatClass == null) {
+                job.setInputFormatClass(DatabaseContentInputFormat.class);
             }
-            job.setOutputKeyClass(DocumentURI.class);
+            Class<?> mapperClass =
+                    conf.getClass(JobContext.MAP_CLASS_ATTR, null);
+            if (mapperClass == null) {
+                job.setMapperClass(DocumentMapper.class);
+            }
+            Class<?> mapOutputKeyClass =
+                    conf.getClass(JobContext.MAP_OUTPUT_KEY_CLASS, null);
+            if (mapOutputKeyClass == null) {
+                job.setMapOutputKeyClass(DocumentURI.class);
+            }
+            Class<?> mapOutputValueClass =
+                    conf.getClass(JobContext.MAP_OUTPUT_VALUE_CLASS, null);
+            if (mapOutputValueClass == null) {
+                job.setMapOutputValueClass(MarkLogicDocument.class);
+            }
+            Class<?> outputFormatClass =
+                    conf.getClass(JobContext.OUTPUT_FORMAT_CLASS_ATTR, null);
+            if (outputFormatClass == null) {
+                if(cmdline.hasOption(TRANSFORM_MODULE)) {
+                    job.setOutputFormatClass(
+                            DatabaseTransformOutputFormat.class);
+                } else {
+                    job.setOutputFormatClass(
+                            DatabaseContentOutputFormat.class);
+                }
+             }
+            Class<?> outputKeyClass =
+                    conf.getClass(JobContext.OUTPUT_KEY_CLASS, null);
+            if (outputKeyClass == null) {
+                job.setOutputKeyClass(DocumentURI.class);
+            }
+
             return job;
         }
 
