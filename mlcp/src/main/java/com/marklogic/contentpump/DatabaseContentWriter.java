@@ -92,28 +92,40 @@ public class DatabaseContentWriter<VALUE> extends
             DocumentMetadata meta) {
         ContentCreateOptions opt = (ContentCreateOptions)options.clone();
         if (meta != null) {
-            if (opt.getQuality() == 0) {
+            if (isCopyQuality && opt.getQuality() == 0) {
                 opt.setQuality(meta.quality);
             }
-            HashSet<String> colSet = new HashSet<String>(meta.collectionsList);
-            if (opt.getCollections() != null) {
-                // union copy_collection and output_collection
-                for (String s : opt.getCollections()) {
-                    colSet.add(s);
+            if (isCopyColls) {
+                if (opt.getCollections() != null) {
+                    HashSet<String> colSet = 
+                            new HashSet<String>(meta.collectionsList);
+                    // union copy_collection and output_collection
+                    for (String s : opt.getCollections()) {
+                        colSet.add(s);
+                    }
+                    opt.setCollections(
+                            colSet.toArray(new String[colSet.size()]));
+                } else {
+                    opt.setCollections(meta.getCollections());
+                }
+            }      
+            if (isCopyPerms) {
+                if (opt.getPermissions() != null) {
+                    HashSet<ContentPermission> pSet = 
+                         new HashSet<ContentPermission>(meta.permissionsList);
+                    // union of output_permission & copy_permission
+                    for (ContentPermission p : opt.getPermissions()) {
+                        pSet.add(p);
+                    }
+                    opt.setPermissions(
+                            pSet.toArray(new ContentPermission[pSet.size()]));
+                } else {
+                    opt.setPermissions(meta.getPermissions());
                 }
             }
-            opt.setCollections(colSet.toArray(new String[colSet.size()]));
-            HashSet<ContentPermission> pSet = new HashSet<ContentPermission>(
-                    meta.permissionsList);
-            if (opt.getPermissions() != null) {
-                // union of output_permission & copy_permission
-                for (ContentPermission p : opt.getPermissions()) {
-                    pSet.add(p);
-                }
+            if (isCopyMeta) {
+                opt.setMetadata(meta.meta);
             }
-            opt.setPermissions(
-                    pSet.toArray(new ContentPermission[pSet.size()]));
-            opt.setMetadata(meta.meta);
         }       
         return opt;
     }
