@@ -708,7 +708,7 @@ public class CompressedTreeDecoder {
             LOG.error("nbytes=" + nbytes + ", nwords=" + nwords);
         }
         rep.binaryData = new int[nwords];
-        decoder.decode(rep.binaryData, 1, nwords);
+        decoder.decode(rep.binaryData, nwords);
     }
 
     private void assignOrdinals(ExpandedTree rep) {

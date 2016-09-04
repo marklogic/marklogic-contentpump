@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Map;
 
 import org.apache.commons.modeler.util.DomUtil;
 import org.apache.hadoop.conf.Configuration;
@@ -561,7 +562,13 @@ public class FCheck {
             	ExpandedTree tree = new CompressedTreeDecoder().decode(buf,j);
             	// TODO: count and verify bytes read
 //            	int computed = computeChecksum(docid, in, datWords);
-                System.out.println(tree.getDocumentURI());
+                System.out.println("URI=" + tree.getDocumentURI());
+                if (verbose) {
+                    String[] cols = tree.getCollections();
+                    for (String col : cols) {
+                        System.out.println("collection: " + col);
+                    }
+                }
        
                 byte kind = tree.rootNodeKind();
                 if (kind == NodeKind.BINARY) {
@@ -577,7 +584,7 @@ public class FCheck {
                     Node root = tree.node(0);
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     DomUtil.writeXml(root, bos);
-                    System.out.println(bos.toString());
+                    //System.out.println(bos.toString());
                 }           
             }
             catch (Exception e) {
