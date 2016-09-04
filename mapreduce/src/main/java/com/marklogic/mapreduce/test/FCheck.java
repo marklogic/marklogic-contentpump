@@ -547,7 +547,7 @@ public class FCheck {
             	ExpandedTree tree = new CompressedTreeDecoder().decode(buf,j);
             	// TODO: count and verify bytes read
 //            	int computed = computeChecksum(docid, in, datWords);
-                System.out.println(tree.getDocumentURI());
+                System.out.println("URI=" + tree.getDocumentURI());
                 if (verbose) {
                     String[] cols = tree.getCollections();
                     for (String col : cols) {
@@ -581,7 +581,7 @@ public class FCheck {
                     Node root = tree.node(0);
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     DomUtil.writeXml(root, bos);
-                    System.out.println(bos.toString());
+                    //System.out.println(bos.toString());
                 }           
             }
             catch (Exception e) {
