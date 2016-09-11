@@ -109,6 +109,7 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
     }
     
     static class WordsFunction extends Words {
+        @Override
         public String[] getUserDefinedOptions() {
             String[] options =
                 {"document","concurrent"};

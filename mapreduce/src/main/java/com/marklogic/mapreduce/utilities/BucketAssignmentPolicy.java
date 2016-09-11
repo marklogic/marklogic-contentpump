@@ -95,6 +95,7 @@ public class BucketAssignmentPolicy extends AssignmentPolicy {
      * @param uri
      * @return index in the list of updatable forests
      */
+    @Override
     public int getPlacementForestIndex(DocumentURI uri) {
         return getBucketPlacementId(uri, buckets, NUM_BUCKET, forests.length,
             uForests.size());

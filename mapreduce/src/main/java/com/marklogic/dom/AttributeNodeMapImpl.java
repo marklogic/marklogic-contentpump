@@ -39,6 +39,7 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         this.element = element;
     }
 
+    @Override
     public int getLength() {
         if (LOG.isTraceEnabled()) {
             LOG.trace(element.getNodeName() + "@NumAttr:" + getNumAttr()
@@ -55,6 +56,7 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         return num >= 0 ? num : 0;
     }
 
+    @Override
     public Node getNamedItem(String name) {
         if (LOG.isTraceEnabled()) {
             LOG.trace(this.getClass().getSimpleName() + ".getNamedItem("
@@ -68,6 +70,7 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
         return null;
     }
 
+    @Override
     public Node getNamedItemNS(String namespaceURI, String localName)
         throws DOMException {
         if (LOG.isTraceEnabled()) {
@@ -106,6 +109,7 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
      * is a namespace declaration, it is represented as an attribute whose owner
      * document is a document containing the attribute only.
      */
+    @Override
     public Node item(int index) {
         try {
             return item(index, null);
@@ -172,22 +176,26 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
     }
 
     /** Unsupported. */
+    @Override
     public Node removeNamedItem(String name) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Node removeNamedItemNS(String namespaceURI, String localName)
         throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Node setNamedItem(Node arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Node setNamedItemNS(Node arg) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

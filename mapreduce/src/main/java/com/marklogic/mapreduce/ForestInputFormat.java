@@ -75,6 +75,7 @@ implements MarkLogicConstants {
         return new ForestReader<VALUE>();
     }
 
+    @Override
     protected List<FileStatus> listStatus(JobContext job) throws IOException {
         List<FileStatus> result = super.listStatus(job);
         for (Iterator<FileStatus> it = result.iterator(); it.hasNext();) {

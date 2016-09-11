@@ -74,6 +74,7 @@ public class HelloWorld {
         private final static IntWritable one = new IntWritable(1);
         private Text firstWord = new Text();
         
+        @Override
         public void map(DocumentURI key, DatabaseDocument value, Context context) 
         throws IOException, InterruptedException {
         	if (key != null && value != null && value.getContentSize() != 0) {
@@ -100,6 +101,7 @@ public class HelloWorld {
             new DocumentURI("HelloWorld.txt");
         private String allWords = new String();
         
+        @Override
         public void reduce(IntWritable key, Iterable<Text> values, 
                 Context context
                 ) throws IOException, InterruptedException {        

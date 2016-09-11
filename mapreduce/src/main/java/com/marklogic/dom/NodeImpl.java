@@ -48,10 +48,12 @@ public abstract class NodeImpl implements Node {
 
     private static final NodeList emptyNodeList = new NodeList() {
 
+        @Override
         public int getLength() {
             return 0;
         }
 
+        @Override
         public Node item(int index) {
             return null;
         }
@@ -74,6 +76,7 @@ public abstract class NodeImpl implements Node {
     }
 
     /** Unsupported. */
+    @Override
     public Node appendChild(Node newChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
@@ -84,6 +87,7 @@ public abstract class NodeImpl implements Node {
      * {@inheritDoc}
      * 
      */
+    @Override
     public Node cloneNode(boolean deep) {
         throw new UnsupportedOperationException();
     }
@@ -104,6 +108,7 @@ public abstract class NodeImpl implements Node {
     /**
      * {@inheritDoc}
      */
+    @Override
     public short compareDocumentPosition(Node other) throws DOMException {
         if (other instanceof NodeImpl) {
             NodeImpl otherNode = (NodeImpl) other;
@@ -138,40 +143,48 @@ public abstract class NodeImpl implements Node {
     }
 
     /** {@inheritDoc} */
+    @Override
     public NamedNodeMap getAttributes() {
         return null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getBaseURI() {
         return tree.getDocumentURI();
     }
     /** {@inheritDoc} */
+    @Override
     public NodeList getChildNodes() {
         return emptyNodeList;
     }
 
     /** Unsupported. */
+    @Override
     public Object getFeature(String feature, String version) {
         assert (false);
         return this;
     }
 
     /** {@inheritDoc} */
+    @Override
     public Node getFirstChild() {
         return null;
     }
     /** {@inheritDoc} */
+    @Override
     public Node getLastChild() {
         return null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getLocalName() {
         return null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getNamespaceURI() {
         return null;
     }
@@ -181,20 +194,24 @@ public abstract class NodeImpl implements Node {
     }
 
     /** {@inheritDoc} */
+    @Override
     public Node getNextSibling() {
         NodeImpl p = (NodeImpl) getParentNode();
         return (p == null ? null : p.getNextChild(node));
     }
 
     /** {@inheritDoc} */
+    @Override
     public abstract String getNodeName();
 
     /** {@inheritDoc} */
+    @Override
     public short getNodeType() {
         return NodeKind.domType(tree.nodeKind[node]);
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getNodeValue() throws DOMException {
         return null; // overridden in some subclasses
     }
@@ -205,11 +222,13 @@ public abstract class NodeImpl implements Node {
      * OwnerDocument of namespace attribute is created artificially, 
      * which only contains the attribute only.
      */
+    @Override
     public Document getOwnerDocument() {
         return (DocumentImpl) (this.tree.node(0));
     }
 
     /** {@inheritDoc} */
+    @Override
     public Node getParentNode() {
         // assume no linkNodeKind
         return tree.node(tree.nodeParentNodeRepID[node]);
@@ -220,6 +239,7 @@ public abstract class NodeImpl implements Node {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getPrefix() {
         return null;
     }
@@ -228,6 +248,7 @@ public abstract class NodeImpl implements Node {
         return null;
     }
 
+    @Override
     public Node getPreviousSibling() {
         NodeImpl p = (NodeImpl) getParentNode();
         return (p == null ? null : p.getPreviousChild(node));
@@ -244,6 +265,7 @@ public abstract class NodeImpl implements Node {
      * 
      *  Overwritten by TextImpl, CommentImpl and ProcessingInstructionImpl
      */
+    @Override
     public String getTextContent() throws DOMException {
         StringBuilder sb = new StringBuilder();
         getTextContent(sb);
@@ -262,21 +284,25 @@ public abstract class NodeImpl implements Node {
     }
 
     /** Unsupported. */
+    @Override
     public Object getUserData(String key) {
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR, null);
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean hasAttributes() {
         return false;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean hasChildNodes() {
         return false;
     }
 
     /** Unsupported. */
+    @Override
     public Node insertBefore(Node newChild, Node refChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
@@ -288,6 +314,7 @@ public abstract class NodeImpl implements Node {
      * ElementImpl
      * </p>
      */
+    @Override
     public boolean isDefaultNamespace(String namespaceURI) {
         int type = getNodeType();
         if (type == NodeKind.ATTR) {
@@ -306,6 +333,7 @@ public abstract class NodeImpl implements Node {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isEqualNode(Node other) {
 
         // Note that normalization can affect equality; to avoid this,
@@ -348,6 +376,7 @@ public abstract class NodeImpl implements Node {
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean isSameNode(Node other) {
         return (other instanceof NodeImpl)
             && (((NodeImpl) other).tree == tree)
@@ -357,6 +386,7 @@ public abstract class NodeImpl implements Node {
     // TODO: Consider implementing Traversal
     // TODO - override in subclasses?
 
+    @Override
     public boolean isSupported(String feature, String version) {
         if (feature.equalsIgnoreCase("Core"))
             return true;
@@ -413,31 +443,37 @@ public abstract class NodeImpl implements Node {
 
     /** {@inheritDoc} */
     // http://www.w3.org/TR/DOM-Level-3-Core/namespaces-algorithms.html#lookupNamespacePrefixAlgo
+    @Override
     public String lookupNamespaceURI(String prefix) {
         return null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String lookupPrefix(String namespaceURI) {
         return null;
     }
 
     /** Unsupported. */
+    @Override
     public void normalize() {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Node removeChild(Node oldChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Node replaceChild(Node newChild, Node oldChild) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setNodeValue(String nodeValue) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
@@ -448,11 +484,13 @@ public abstract class NodeImpl implements Node {
     }
 
     /** Unsupported. */
+    @Override
     public void setTextContent(String textContent) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Object setUserData(String key, Object data, UserDataHandler handler) {
         throw new DOMException(DOMException.NOT_SUPPORTED_ERR, null);
     }
@@ -503,11 +541,13 @@ public abstract class NodeImpl implements Node {
 				done = true;
 			}
 			
+            @Override
 			public int getLength() {
 				init();
 				return elementList.size();
 			}
 
+            @Override
             public Node item(int index) {
                 init();
                 return (index < getLength()) ? elementList.get(index) : null;

@@ -60,6 +60,7 @@ public class ContentReader {
     extends Mapper<DocumentURI, DatabaseDocument, DocumentURI, DatabaseDocument> {
         public static final Log LOG =
             LogFactory.getLog(DocMapper.class);
+        @Override
         public void map(DocumentURI key, DatabaseDocument value, Context context) 
         throws IOException, InterruptedException {
             if (key != null && value != null) {
@@ -120,16 +121,19 @@ public class ContentReader {
             TrustManager[] trustManagers = null;
             // Trust anyone.
             trustManagers = new TrustManager[] { new X509TrustManager() {
+                @Override
                 public void checkClientTrusted(X509Certificate[] x509Certificates, String s)
                         throws CertificateException {
                     // nothing to do
                 }
 
+                @Override
                 public void checkServerTrusted(X509Certificate[] x509Certificates, String s)
                         throws CertificateException {
                     // nothing to do
                 }
 
+                @Override
                 public X509Certificate[] getAcceptedIssuers() {
                     return null;
                 }

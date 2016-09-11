@@ -48,6 +48,7 @@ public class AttrImpl extends NodeImpl implements Attr {
         super(tree, node);
     }
 
+    @Override
     protected Node cloneNode(Document doc, boolean deep) {
         Attr attr = doc.createAttributeNS(getNamespaceURI(), getLocalName());
         attr.setValue(getValue());
@@ -66,6 +67,7 @@ public class AttrImpl extends NodeImpl implements Attr {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getName() {
         String prefix = getPrefix();
         return prefix == null || prefix.equals("") ? getLocalName() : prefix
@@ -111,6 +113,7 @@ public class AttrImpl extends NodeImpl implements Attr {
      * {@inheritDoc}
      * OwnerElement for a namespace attribute is null.
      */
+    @Override
     public Element getOwnerElement() {
         return (Element) tree.node(tree.nodeParentNodeRepID[node]);
     }
@@ -155,22 +158,26 @@ public class AttrImpl extends NodeImpl implements Attr {
         return (ns >= 0) ? tree.atomString(ns) : null;
     }
 
-    /** Unsupported. */
+    /** Unsupported.
+     * @return  */
     public TypeInfo getSchemaTypeInfo() {
         return null;
     }
 
     /** {@inheritDoc} */
+    @Override
     public boolean getSpecified() {
         return true;
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getValue() {
         return tree.getText(tree.attrNodeTextRepID[tree.nodeRepID[node]]);
     }
 
     /** Unsupported. */
+    @Override
     public boolean isId() {
         return false;
     }
@@ -187,7 +194,8 @@ public class AttrImpl extends NodeImpl implements Attr {
         return getOwnerElement().lookupPrefix(namespaceURI);
     }
 
-    /** Unsupported. */
+    /** Unsupported.
+     * @param value */
     public void setValue(String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

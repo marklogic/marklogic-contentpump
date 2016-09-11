@@ -41,6 +41,7 @@ public class CommentImpl extends CharacterDataImpl implements Comment {
         super(tree, node);
     }
 
+    @Override
     protected Node cloneNode(Document doc, boolean deep) {
         return doc.createComment(getData());
     }

@@ -112,6 +112,7 @@ public class StatisticalAssignmentPolicy extends AssignmentPolicy {
             this.frmtCount = frmtCount;
         }
 
+        @Override
         public int compareTo(Stats o) {
             if (frmtCount > o.frmtCount)
                 return 1;
@@ -121,6 +122,7 @@ public class StatisticalAssignmentPolicy extends AssignmentPolicy {
                 return 0;
         }
 
+        @Override
         public boolean equals(Object obj) {
             if (obj == null)
                 return false;

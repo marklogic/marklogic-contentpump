@@ -55,6 +55,7 @@ public class ElementImpl extends NodeImpl implements Element {
         numNSDecl = -1;
     }
 
+    @Override
     protected Node cloneNode(Document doc, boolean deep) {
         Element elem = doc.createElementNS(getNamespaceURI(), getTagName());
         elem.setPrefix(getPrefix());
@@ -87,23 +88,27 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getAttribute(String name) {
     	Attr attr = getAttributeNode(name);
         return attr==null?"":attr.getValue();
     }
 
     /** {@inheritDoc} */
+    @Override
     public Attr getAttributeNode(String name) {
         return (attributes==null)?null:(Attr)(attributes.getNamedItem(name));
     }
 
     /** {@inheritDoc} */
+    @Override
     public Attr getAttributeNodeNS(String namespaceURI, String localName){
         return (attributes==null)?null:(AttrImpl)getAttributes().getNamedItemNS(namespaceURI,
             localName);
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getAttributeNS(String namespaceURI, String localName) {
     	if (attributes==null) return "";
     	AttrImpl attr = 
@@ -127,10 +132,12 @@ public class ElementImpl extends NodeImpl implements Element {
     @Override
     public NodeList getChildNodes() {
         return new NodeList() {
+            @Override
             public int getLength() {
                 return tree.elemNodeNumChildren[tree.nodeRepID[node]];
             }
 
+            @Override
             public Node item(int index) {
                 return (index < getLength()) ? tree
                     .node(tree.elemNodeChildNodeRepID[tree.nodeRepID[node]]
@@ -175,11 +182,13 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     /** {@inheritDoc} */
+    @Override
     public NodeList getElementsByTagNameNS(String namespaceURI, String name) {
         return getElementsByTagNameNSOrNodeName(namespaceURI, name, false);
     }
 
     /** {@inheritDoc} */
+    @Override
     public NodeList getElementsByTagName(String localName) {
         return getElementsByTagNameNSOrNodeName(null, localName, true);
     }
@@ -192,6 +201,7 @@ public class ElementImpl extends NodeImpl implements Element {
         return tree.elemNodeChildNodeRepID[tree.nodeRepID[node]];
     }
 
+    @Override
     public Node getFirstChild() {
         return tree.node(getFirstChildIndex());
     }
@@ -227,6 +237,7 @@ public class ElementImpl extends NodeImpl implements Element {
             + getTagName();
     }
 
+    @Override
     protected int getPrefixID(int uriAtom) {
         int a = -1;
         boolean useDefaultNS = true;
@@ -289,24 +300,29 @@ public class ElementImpl extends NodeImpl implements Element {
             .node(child - 1) : null;
     }
 
+    @Override
     public TypeInfo getSchemaTypeInfo() {
         return null;
     }
 
+    @Override
     public String getTagName() {
         return tree
             .atomString(tree.nodeNameNameAtom[tree.elemNodeNodeNameRepID[tree.nodeRepID[node]]]);
     }
 
+    @Override
     public boolean hasAttribute(String name) {
         return (getAttributes().getNamedItem(name) != null);
     }
 
+    @Override
     public boolean hasAttributeNS(String namespaceURI, String localName)
         throws DOMException {
         return (getAttributes().getNamedItemNS(namespaceURI, localName) != null);
     }
 
+    @Override
     public boolean hasAttributes() {
         return getAttributes().getLength() > 0;
     }
@@ -358,32 +374,38 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     /** Unsupported. */
+    @Override
     public void removeAttribute(String name) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Attr removeAttributeNode(Attr oldAttr) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void removeAttributeNS(String namespaceURI, String localName)
         throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setAttribute(String name, String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Attr setAttributeNode(Attr newAttr) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Attr setAttributeNodeNS(Attr newAttr) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
@@ -395,17 +417,20 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     /** Unsupported. */
+    @Override
     public void setIdAttribute(String name, boolean isId) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setIdAttributeNode(Attr idAttr, boolean isId)
         throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public void setIdAttributeNS(String namespaceURI, String localName,
         boolean isId) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
