@@ -138,6 +138,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
     }
 
+    @Override
     protected Session getSession(String forestId) {
         TransactionMode mode = TransactionMode.AUTO;
         if (txnSize > 1) {

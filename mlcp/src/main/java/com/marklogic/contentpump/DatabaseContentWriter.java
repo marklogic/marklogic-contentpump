@@ -244,6 +244,7 @@ public class DatabaseContentWriter<VALUE> extends
         }
     }
 
+    @Override
     protected Session getSession(String forestId, TransactionMode mode) {
         Session session = null;
         ContentSource cs = forestSourceMap.get(forestId);

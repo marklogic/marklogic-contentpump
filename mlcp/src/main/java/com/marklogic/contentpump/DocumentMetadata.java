@@ -305,6 +305,7 @@ public class DocumentMetadata {
         }
     }
     
+    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;

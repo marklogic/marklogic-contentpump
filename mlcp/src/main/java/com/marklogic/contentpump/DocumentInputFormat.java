@@ -44,6 +44,7 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
     boolean mlcpStartEventEnabled = false;
     boolean mlcpFinishEventEnabled = false;
     
+    @Override
     protected void appendCustom(StringBuilder buf) {
         buf.append("\"AUDIT\",\n");
         buf.append("let $group-id := xdmp:group()\n");
@@ -53,6 +54,7 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
         buf.append("return ($mlcp-start-enabled, $mlcp-finish-enabled)");
     }
     
+    @Override
     protected void getForestSplits(JobContext jobContext,
             ResultSequence result, 
             List<ForestSplit> forestSplits,

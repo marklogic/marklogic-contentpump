@@ -153,6 +153,7 @@ public enum InputType implements ConfigConstants {
             return ArchiveInputFormat.class;
         }
         
+        @Override
         public Class<? extends OutputFormat> getOutputFormatClass(
                         CommandLine cmdline, Configuration conf) {
             if(cmdline.hasOption(TRANSFORM_MODULE)) {
