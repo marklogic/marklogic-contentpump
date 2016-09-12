@@ -17,7 +17,7 @@
   <properties>
     <skipTests>false</skipTests>
     <test.excludes>**/*TestDistributed*</test.excludes>
-    <hadoopConnectorVersion>2.2</hadoopConnectorVersion>
+    <hadoopConnectorVersion>2.2-EA3</hadoopConnectorVersion>
     <hadoopConnectorBaseDir>${basedir}/../mapreduce</hadoopConnectorBaseDir>
     <xccVersion>9.0</xccVersion>
     <versionString>9.0</versionString>
