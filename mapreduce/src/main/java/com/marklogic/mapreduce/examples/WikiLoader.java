@@ -61,6 +61,7 @@ public class WikiLoader {
         
         private DocumentURI uri = new DocumentURI();
         
+        @Override
         public void map(Text path, Text page, Context context) 
         throws IOException, InterruptedException {
             uri.setUri(path.toString());

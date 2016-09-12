@@ -292,6 +292,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             return true;
         }
 
+        @Override
         public K1 getCurrentKey() {
             return key;
         }

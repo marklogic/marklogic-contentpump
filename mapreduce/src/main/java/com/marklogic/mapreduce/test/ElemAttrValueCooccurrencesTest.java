@@ -21,6 +21,7 @@ public class ElemAttrValueCooccurrencesTest {
     public static class ElemAttrCooccurrencesMapper 
     extends Mapper<LongWritable, Text, LongWritable, Text> {
         
+        @Override
         public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
             context.write(key, value);

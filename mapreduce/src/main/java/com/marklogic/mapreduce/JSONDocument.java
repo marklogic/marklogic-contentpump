@@ -96,6 +96,7 @@ public class JSONDocument extends ForestDocument {
         tree.write(out);
     }
     
+    @Override
     public String toString() {
         return str;
     }

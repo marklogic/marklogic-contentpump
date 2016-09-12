@@ -52,6 +52,7 @@ public class CustomQuery {
         private final static IntWritable one = new IntWritable(1);
         private Text docStr = new Text();
         
+        @Override
         public void map (NodePath key, MarkLogicNode value, Context context)
         throws IOException, InterruptedException {
             if (key != null && value != null && value.get() != null){
@@ -82,6 +83,7 @@ public class CustomQuery {
         private Text uri = new Text();
         private Text content = new Text();
         
+        @Override
         public void reduce(IntWritable key, Iterable<Text> values, Context context)
         throws IOException, InterruptedException {
             StringBuilder buf = new StringBuilder();

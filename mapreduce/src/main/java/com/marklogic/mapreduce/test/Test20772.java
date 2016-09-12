@@ -21,6 +21,7 @@ public class Test20772 {
         public static final Log LOG =
             LogFactory.getLog(MyMapper.class);
         
+        @Override
         public void map(NodePath key, MarkLogicNode value, Context context) 
         throws IOException, InterruptedException {
             if (value != null) {
@@ -35,6 +36,7 @@ public class Test20772 {
     public static class MyReducer
     extends Reducer<NodePath, MarkLogicNode, NodePath, MarkLogicNode> {
         
+        @Override
         public void reduce(NodePath key, Iterable<MarkLogicNode> nodes, 
             Context context) throws IOException, InterruptedException {        
             for (MarkLogicNode val : nodes) {

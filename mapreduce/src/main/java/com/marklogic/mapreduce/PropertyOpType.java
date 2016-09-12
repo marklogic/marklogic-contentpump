@@ -45,11 +45,13 @@ import org.apache.hadoop.conf.Configuration;
 
 public enum PropertyOpType {
     SET_PROPERTY {
+        @Override
         public String getFunctionName() {
             return "xdmp:document-set-property";
         }
     },
     ADD_PROPERTY {
+        @Override
         public String getFunctionName() {
             return "xdmp:document-add-properties";
         }

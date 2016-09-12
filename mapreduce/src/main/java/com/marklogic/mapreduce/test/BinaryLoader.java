@@ -27,6 +27,7 @@ public class BinaryLoader {
         
         private DocumentURI uri = new DocumentURI();
         
+        @Override
         public void map(Text fileName, BytesWritable fileContent, Context context) 
         throws IOException, InterruptedException {
             uri.setUri(fileName.toString());

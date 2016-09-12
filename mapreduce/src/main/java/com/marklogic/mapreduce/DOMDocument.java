@@ -114,6 +114,7 @@ public class DOMDocument extends ForestDocument {
         return bos;
     }
 
+    @Override
     public String toString() {
         if (rootNodeKind == NodeKind.TEXT) {
             TextImpl textNode = (TextImpl) doc.getFirstChild();

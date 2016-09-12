@@ -62,10 +62,12 @@ public abstract class ElementAttributeValueMatch extends
      */
     public abstract String[] getAttributeNames();
     
+    @Override
     void appendFunctionName(StringBuilder buf) {
         buf.append("cts:element-attribute-value-match");
     }
     
+    @Override
     void appendNamesParams(StringBuilder buf) {
         // element names
         buf.append("(");

@@ -20,6 +20,7 @@ import com.marklogic.mapreduce.functions.ElemValueCooccurrences;
 public class ElemValueCooccurrencesTest {
     public static class ElemCooccurrencesMapper 
     extends Mapper<LongWritable, Text, LongWritable, Text> {
+        @Override
         public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
             context.write(key, value);

@@ -20,6 +20,7 @@ import com.marklogic.mapreduce.functions.ElementValues;
 public class ElementValuesTest {
     public static class ElementValueMapper 
     extends Mapper<LongWritable, Text, LongWritable, Text> {
+        @Override
         public void map(LongWritable key, Text value, Context context)
         throws IOException, InterruptedException {
             context.write(key, value);

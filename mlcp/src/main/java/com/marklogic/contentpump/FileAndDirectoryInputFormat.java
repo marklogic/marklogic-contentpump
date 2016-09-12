@@ -54,6 +54,7 @@ FileInputFormat<K, V> {
     // add my own hiddenFileFilter since the one defined in FileInputFormat
     // is not accessible.
     public static final PathFilter hiddenFileFilter = new PathFilter() {
+        @Override
         public boolean accept(Path p) {
             String name = p.getName();
             return !name.startsWith("_") && !name.startsWith(".");
@@ -178,6 +179,7 @@ FileInputFormat<K, V> {
             this.filters = filters;
         }
 
+        @Override
         public boolean accept(Path path) {
             for (PathFilter filter : filters) {
                 if (!filter.accept(path)) {
@@ -188,6 +190,7 @@ FileInputFormat<K, V> {
         }
     }
 
+    @Override
     protected List<FileStatus> listStatus(JobContext job
             ) throws IOException {
         Path[] dirs = getInputPaths(job);

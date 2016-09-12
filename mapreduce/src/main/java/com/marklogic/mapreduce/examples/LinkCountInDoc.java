@@ -53,6 +53,7 @@ public class LinkCountInDoc {
         private final static IntWritable one = new IntWritable(1);
         private Text refURI = new Text();
         
+        @Override
         public void map(NodePath key, MarkLogicNode value, Context context) 
         throws IOException, InterruptedException {
             if (value != null && value.get() != null) {
@@ -76,6 +77,7 @@ public class LinkCountInDoc {
         private MarkLogicNode result;
         private String baseUri;
         
+        @Override
         protected void setup(Context context) 
         throws IOException, InterruptedException {
             try {
@@ -97,6 +99,7 @@ public class LinkCountInDoc {
             }
         }
         
+        @Override
         public void reduce(Text key, Iterable<IntWritable> values, 
                 Context context
                 ) throws IOException, InterruptedException {        

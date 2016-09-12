@@ -31,6 +31,7 @@ public class MapTreeReduceTree extends Configured implements Tool {
     DocumentURIWithSourceInfo, DOMDocument> {
         public static final Log LOG = LogFactory.getLog(MyMapper.class);
         
+        @Override
         public void map(DocumentURIWithSourceInfo key, ForestDocument value, 
                 Context context) 
         throws IOException, InterruptedException {

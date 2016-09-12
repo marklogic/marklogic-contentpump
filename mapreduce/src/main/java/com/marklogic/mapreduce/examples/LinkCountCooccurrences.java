@@ -46,6 +46,7 @@ public class LinkCountCooccurrences {
         private final static IntWritable one = new IntWritable(1);
         private Text refURI = new Text();
 
+        @Override
         public void map(Text key, Text value, Context context) 
         throws IOException, InterruptedException {
             String keyStr = key.toString();
@@ -64,6 +65,7 @@ public class LinkCountCooccurrences {
     extends Reducer<Text, IntWritable, Text, IntWritable> {
         private IntWritable result = new IntWritable();
         
+        @Override
         public void reduce(Text key, Iterable<IntWritable> values, 
                 Context context
                 ) throws IOException, InterruptedException {        

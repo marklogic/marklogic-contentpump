@@ -73,6 +73,7 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
             ConfigConstants.CONF_SPLIT_INPUT, false);
     }
 
+    @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
         boolean delimSplit = isSplitInput(job.getConfiguration());
         //if delimSplit is true, size of each split is determined by 

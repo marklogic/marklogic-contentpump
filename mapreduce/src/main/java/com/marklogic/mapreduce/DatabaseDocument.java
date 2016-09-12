@@ -49,6 +49,7 @@ public class DatabaseDocument implements MarkLogicDocument {
     /* (non-Javadoc)
      * @see com.marklogic.mapreduce.MarkLogicDocument#getContentType()
      */
+    @Override
     public ContentType getContentType() {
         return contentType;
     }
@@ -56,6 +57,7 @@ public class DatabaseDocument implements MarkLogicDocument {
     /* (non-Javadoc)
      * @see com.marklogic.mapreduce.MarkLogicDocument#getContentAsText()
      */
+    @Override
     public Text getContentAsText() {
         if (contentType == ContentType.XML || 
             contentType == ContentType.JSON ||
@@ -69,6 +71,7 @@ public class DatabaseDocument implements MarkLogicDocument {
     /* (non-Javadoc)
      * @see com.marklogic.mapreduce.MarkLogicDocument#getContentAsByteArray()
      */
+    @Override
     public byte[] getContentAsByteArray() {
         return content;
     }
@@ -81,6 +84,7 @@ public class DatabaseDocument implements MarkLogicDocument {
     /* (non-Javadoc)
      * @see com.marklogic.mapreduce.MarkLogicDocument#getContentAsMarkLogicNode()
      */
+    @Override
     public MarkLogicNode getContentAsMarkLogicNode() {
         if (contentType == ContentType.XML || 
             contentType == ContentType.TEXT) {
@@ -91,6 +95,7 @@ public class DatabaseDocument implements MarkLogicDocument {
             "Cannot convert JSON or binary data to MarkLogicNode.");        
     }
     
+    @Override
     public String getContentAsString() throws UnsupportedEncodingException {
         if (contentType == ContentType.XML || 
             contentType == ContentType.JSON ||

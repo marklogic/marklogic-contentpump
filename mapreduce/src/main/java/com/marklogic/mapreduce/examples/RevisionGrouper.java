@@ -42,6 +42,7 @@ public class RevisionGrouper {
         private Text uri = new Text();
         private Text year = new Text();
 
+        @Override
         public void map(NodePath key, MarkLogicNode value, Context context) 
         throws IOException, InterruptedException {
             if (value != null && value.get() != null) {

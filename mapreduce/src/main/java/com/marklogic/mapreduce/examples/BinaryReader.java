@@ -44,6 +44,7 @@ public class BinaryReader {
     extends Mapper<DocumentURI, BytesWritable, DocumentURI, BytesWritable> {
         public static final Log LOG =
             LogFactory.getLog(DocMapper.class);
+        @Override
         public void map(DocumentURI key, BytesWritable value, Context context) 
         throws IOException, InterruptedException {
             if (key != null && value != null) {

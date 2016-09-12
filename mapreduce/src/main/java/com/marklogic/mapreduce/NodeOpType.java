@@ -45,21 +45,25 @@ package com.marklogic.mapreduce;
  */
 public enum NodeOpType {
     INSERT_BEFORE {
+        @Override
         public String getFunctionName() {
             return "xdmp:node-insert-before";
         }
     },
     INSERT_AFTER {
+        @Override
         public String getFunctionName() {
             return "xdmp:node-insert-after";
         }
     },
     INSERT_CHILD {
+        @Override
         public String getFunctionName() {
             return "xdmp:node-insert-child";
         }
     },
     REPLACE {
+        @Override
         public String getFunctionName() {
             return "xdmp:node-replace";
         }

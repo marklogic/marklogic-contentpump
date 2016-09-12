@@ -48,12 +48,17 @@ public class ArchiveOutputFormat extends
     OutputCommitter getOutputCommitter(TaskAttemptContext context
                                        ) throws IOException {
         return new OutputCommitter() {
+            @Override
             public void abortTask(TaskAttemptContext taskContext) { }
+            @Override
             public void commitTask(TaskAttemptContext taskContext) { }
+            @Override
             public boolean needsTaskCommit(TaskAttemptContext taskContext) {
               return false;
             }
+            @Override
             public void setupJob(JobContext jobContext) { }
+            @Override
             public void setupTask(TaskAttemptContext taskContext) { }
           };
     } 

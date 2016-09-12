@@ -44,6 +44,7 @@ public class LinkCount {
         private final static IntWritable one = new IntWritable(1);
         private Text refURI = new Text();
 
+        @Override
         public void map(LongWritable key, Text value, Context context) 
         throws IOException, InterruptedException {
             refURI.set(value);
@@ -55,6 +56,7 @@ public class LinkCount {
     extends Reducer<Text, IntWritable, Text, IntWritable> {
         private IntWritable result = new IntWritable();
         
+        @Override
         public void reduce(Text key, Iterable<IntWritable> values, 
                 Context context
                 ) throws IOException, InterruptedException {        

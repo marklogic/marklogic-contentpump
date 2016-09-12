@@ -46,6 +46,7 @@ public class ContentLoader {
         
         private DocumentURI uri = new DocumentURI();
         
+        @Override
         public void map(Text fileName, Text fileContent, Context context) 
         throws IOException, InterruptedException {
             uri.setUri(fileName.toString());

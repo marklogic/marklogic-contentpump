@@ -61,10 +61,12 @@ public abstract class ElementAttributeValues extends ValuesOrWordsFunction {
      */
     public abstract String[] getAttributeNames();
     
+    @Override
     void appendFunctionName(StringBuilder buf) {
         buf.append("cts:element-attribute-values");
     }
     
+    @Override
     void appendNamesParams(StringBuilder buf) {
         // element names
         buf.append("(");

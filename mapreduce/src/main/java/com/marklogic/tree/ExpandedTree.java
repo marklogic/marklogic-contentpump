@@ -583,6 +583,7 @@ public class ExpandedTree implements Writable {
 
     }    
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         putNode(0,sb);

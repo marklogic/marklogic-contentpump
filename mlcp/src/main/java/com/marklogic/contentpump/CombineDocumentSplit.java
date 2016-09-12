@@ -93,6 +93,7 @@ public class CombineDocumentSplit extends InputSplit implements Writable {
         }    
     }
 
+    @Override
     public void readFields(DataInput in) throws IOException {
         // splits
         int splitSize = in.readInt();
@@ -110,6 +111,7 @@ public class CombineDocumentSplit extends InputSplit implements Writable {
         locations = new HashSet<String>();
     }
     
+    @Override
     public void write(DataOutput out) throws IOException {
         // splits
         out.writeInt(splits.size());

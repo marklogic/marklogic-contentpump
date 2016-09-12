@@ -42,11 +42,13 @@ public class ProcessingInstructionImpl extends NodeImpl implements
         super(tree, node);
     }
 
+    @Override
     protected Node cloneNode(Document doc, boolean deep) {
         return doc.createProcessingInstruction(getTarget(), getData());
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getData() {
         return tree.getText(tree.piNodeTextRepID[tree.nodeRepID[node]]);
     }
@@ -64,6 +66,7 @@ public class ProcessingInstructionImpl extends NodeImpl implements
     }
 
     /** {@inheritDoc} */
+    @Override
     public String getTarget() {
         return tree.atomString(tree.piNodeTargetAtom[tree.nodeRepID[node]]);
     }
@@ -75,6 +78,7 @@ public class ProcessingInstructionImpl extends NodeImpl implements
     }
 
     /** Unsupported. */
+    @Override
     public void setData(String data) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

@@ -41,6 +41,7 @@ public class TextImpl extends CharacterDataImpl implements Text {
         super(tree, node);
     }
 
+    @Override
     protected Node cloneNode(Document doc, boolean deep) {
         return doc.createTextNode(getNodeValue());
     }
@@ -56,21 +57,25 @@ public class TextImpl extends CharacterDataImpl implements Text {
     }
 
     /** Unsupported. */
+    @Override
     public String getWholeText() {
         return null;
     }
 
     /** Unsupported. */
+    @Override
     public boolean isElementContentWhitespace() {
         return false;
     }
 
     /** Unsupported. */
+    @Override
     public Text replaceWholeText(String content) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 
     /** Unsupported. */
+    @Override
     public Text splitText(int offset) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

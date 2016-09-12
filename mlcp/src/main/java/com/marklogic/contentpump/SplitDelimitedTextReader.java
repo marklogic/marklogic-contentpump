@@ -229,6 +229,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         return null;
     }
 
+    @Override
     protected String convertToLine(String[] values) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < values.length; i++) {

@@ -50,12 +50,14 @@ public class ForestInfo implements Writable {
         return updatable;
     }
 
+    @Override
     public void readFields(DataInput in) throws IOException {
         hostName = Text.readString(in);
         frangmentCount = in.readLong();
         updatable = in.readBoolean();
     }
 
+    @Override
     public void write(DataOutput out) throws IOException {
         Text.writeString(out, hostName);
         out.writeLong(frangmentCount);

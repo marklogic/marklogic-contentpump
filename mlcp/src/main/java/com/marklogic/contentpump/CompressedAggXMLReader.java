@@ -80,6 +80,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
         initStreamReader(inSplit);
     }
 
+    @Override
     protected void initStreamReader(InputSplit inSplit) throws IOException,
     InterruptedException {
         setFile(((FileSplit) inSplit).getPath());

@@ -151,6 +151,7 @@ public class DatabaseTransformWriter<VALUE> extends
         }
     }
 
+    @Override
     protected Session getSession(String forestId) {
         TransactionMode mode = TransactionMode.AUTO;
         if (txnSize > 1) {
