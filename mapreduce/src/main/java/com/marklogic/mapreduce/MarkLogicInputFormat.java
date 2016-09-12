@@ -260,7 +260,6 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         
         // fetch data from server
         List<ForestSplit> forestSplits = new ArrayList<ForestSplit>();
-        Session session = null;
         ResultSequence result = null;            
         
         if (LOG.isDebugEnabled()) {
@@ -269,32 +268,32 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));        
         try {
             ContentSource cs = InternalUtilities.getInputContentSource(jobConf);
-            session = cs.newSession();
-            RequestOptions options = new RequestOptions();
-            options.setCacheResult(false);
-            
-            if (localMode && advancedMode) {
-                AdhocQuery hostQuery = session.newAdhocQuery(
-                    "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
-                hostQuery.setOptions(options);
-                result = session.submitRequest(hostQuery);
-                if(result.hasNext()) {
-                    ResultItem item = result.next();
-                    localHost = item.asString();
+            try (Session session = cs.newSession()) {
+                RequestOptions options = new RequestOptions();
+                options.setCacheResult(false);
+
+                if (localMode && advancedMode) {
+                    AdhocQuery hostQuery = session.newAdhocQuery(
+                        "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
+                    hostQuery.setOptions(options);
+                    result = session.submitRequest(hostQuery);
+                    if(result.hasNext()) {
+                        ResultItem item = result.next();
+                        localHost = item.asString();
+                    }
+                    if (result != null) {
+                        result.close();
+                    }
                 }
-                if (result != null) {
-                    result.close();
+
+                AdhocQuery query = session.newAdhocQuery(splitQuery);
+                if (queryLanguage != null) {
+                    InternalUtilities.checkQueryLanguage(queryLanguage);
+                    options.setQueryLanguage(queryLanguage);
                 }
+                query.setOptions(options);
+                result = session.submitRequest(query);
             }
-            
-            AdhocQuery query = session.newAdhocQuery(splitQuery);
-            if (queryLanguage != null) {
-                InternalUtilities.checkQueryLanguage(queryLanguage);
-                options.setQueryLanguage(queryLanguage);
-            }
-            query.setOptions(options);
-            result = session.submitRequest(query);
-            
             if (!advancedMode && result.hasNext()) {
                 ResultItem item = result.next();
                 localHost = item.asString();
@@ -319,9 +318,6 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         } finally {
             if (result != null) {
                 result.close();
-            }
-            if (session != null) {
-                session.close();
             }
         }
         

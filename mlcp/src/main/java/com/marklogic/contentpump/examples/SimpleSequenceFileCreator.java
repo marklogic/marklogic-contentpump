@@ -39,27 +39,23 @@ public class SimpleSequenceFileCreator {
         Configuration conf = new Configuration();
         FileSystem fs = FileSystem.get(URI.create(uri), conf);
         Path path = new Path(uri);
-        SequenceFile.Writer writer = null;
+
         SimpleSequenceFileKey key = new SimpleSequenceFileKey();
 
-        BufferedReader buffer = new BufferedReader(new FileReader(filePath));
-        String line = null;
-
-        SimpleSequenceFileValue<Text> value = new SimpleSequenceFileValue<Text>();
-        try {
-            writer = SequenceFile.createWriter(fs, conf, path, key.getClass(),
-                value.getClass());
-            while ((line = buffer.readLine()) != null) {
-                key.setDocumentURI(new DocumentURI(line));
-                if ((line = buffer.readLine()) == null) {
-                    break;
+        try (BufferedReader buffer = new BufferedReader(new FileReader(filePath))) {
+            String line = null;
+            SimpleSequenceFileValue<Text> value = new SimpleSequenceFileValue<Text>();
+            try (SequenceFile.Writer writer = SequenceFile.createWriter(fs, conf, path, key.getClass(),
+                        value.getClass())) {
+                while ((line = buffer.readLine()) != null) {
+                    key.setDocumentURI(new DocumentURI(line));
+                    if ((line = buffer.readLine()) == null) {
+                        break;
+                    }
+                    value.setValue(new Text(line));
+                    writer.append(key, value);
                 }
-                value.setValue(new Text(line));
-                writer.append(key, value);
             }
-        } finally {
-            IOUtils.closeStream(writer);
-            buffer.close();
         }
     }
 }

@@ -75,32 +75,32 @@ public class PermissionUtil {
     
     public static List<ContentPermission> getDefaultPermissions(Configuration conf, LinkedMapWritable roleMap) throws IOException {
         ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
-        Session session = null;
         ResultSequence result = null;
         ContentSource cs;
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
                 conf.get(MarkLogicConstants.OUTPUT_HOST));
 
-            session = cs.newSession();
-            RequestOptions options = new RequestOptions();
-            options.setDefaultXQueryVersion("1.0-ml");
+            try (Session session = cs.newSession()) {
+                RequestOptions options = new RequestOptions();
+                options.setDefaultXQueryVersion("1.0-ml");
 
-            AdhocQuery query = session.newAdhocQuery(DEFAULT_PERM_QUERY);
-            query.setOptions(options);
-            result = session.submitRequest(query);
-            if (!result.hasNext() || roleMap == null)
-                return null;
-            while (result.hasNext()) {
-                Text roleid = new Text(result.next().asString());
-                if (!result.hasNext()) {
-                    throw new IOException("Invalid role,capability pair");
+                AdhocQuery query = session.newAdhocQuery(DEFAULT_PERM_QUERY);
+                query.setOptions(options);
+                result = session.submitRequest(query);
+                if (!result.hasNext() || roleMap == null)
+                    return null;
+                while (result.hasNext()) {
+                    Text roleid = new Text(result.next().asString());
+                    if (!result.hasNext()) {
+                        throw new IOException("Invalid role,capability pair");
+                    }
+                    String roleName = roleMap.get(roleid).toString();
+                    String cap = result.next().asString();
+                    ContentCapability capability = PermissionUtil
+                        .getCapbility(cap);
+                    perms.add(new ContentPermission(capability, roleName));
                 }
-                String roleName = roleMap.get(roleid).toString();
-                String cap = result.next().asString();
-                ContentCapability capability = PermissionUtil
-                    .getCapbility(cap);
-                perms.add(new ContentPermission(capability, roleName));
             }
         } catch (XccConfigException e) {
             throw new IOException(e);
@@ -109,9 +109,6 @@ public class PermissionUtil {
         } finally {
             if (result != null) {
                 result.close();
-            }
-            if (session != null) {
-                session.close();
             }
         }
         return perms;

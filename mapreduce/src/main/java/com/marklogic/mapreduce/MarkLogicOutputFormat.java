@@ -153,10 +153,9 @@ implements MarkLogicConstants, Configurable {
     protected TextArrayWritable queryHosts(ContentSource cs, String matchHost,
     		String replaceHost)
         throws IOException {
-        Session session = null;
+
         ResultSequence result = null;
-        try {
-            session = cs.newSession();
+        try (Session session = cs.newSession()){
             AdhocQuery query = session.newAdhocQuery(HOSTS_QUERY);
             // query hosts
             RequestOptions options = new RequestOptions();
@@ -181,9 +180,6 @@ implements MarkLogicConstants, Configurable {
         } finally {
             if (result != null) {
                 result.close();
-            }
-            if (session != null) {
-                session.close();
             }
         }
     }

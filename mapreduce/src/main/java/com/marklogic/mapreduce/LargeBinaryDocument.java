@@ -115,11 +115,9 @@ public class LargeBinaryDocument extends BinaryDocument {
         return getContentAsByteArray(0, (int)size);  
     }
     
-    public byte[] getContentAsByteArray(int offset, int len) {
-        FileSystem fs;
-        FSDataInputStream is = null;
-        try {
-            fs = path.getFileSystem(conf);
+    public byte[] getContentAsByteArray(int offset, int len) {   
+        try (FileSystem fs = path.getFileSystem(conf);
+                FSDataInputStream is = fs.open(path);){
             if (!fs.exists(path)) {
                 throw new RuntimeException("File not found: " + path);
             }
@@ -128,7 +126,7 @@ public class LargeBinaryDocument extends BinaryDocument {
                 throw new RuntimeException("Reached end of file: " + path);
             }
             byte[] buf = new byte[len];
-            is = fs.open(path);
+            
             for (int toSkip = offset, skipped = 0; 
                  toSkip < offset; 
                  toSkip -= skipped) {
@@ -140,13 +138,6 @@ public class LargeBinaryDocument extends BinaryDocument {
             return buf;
         } catch (IOException e) {
             throw new RuntimeException("Error accessing file: " + path, e);
-        } finally {
-            if (is != null) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                }
-            }
         }
     }
 

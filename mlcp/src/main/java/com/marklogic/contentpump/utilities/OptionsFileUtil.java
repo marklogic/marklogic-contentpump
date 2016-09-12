@@ -61,10 +61,9 @@ public class OptionsFileUtil implements ConfigConstants {
 
                 String fileName = args[++i];
                 File optionsFile = new File(fileName);
-                BufferedReader reader = null;
+
                 StringBuilder buffer = new StringBuilder();
-                try {
-                    reader = new BufferedReader(new FileReader(optionsFile));
+                try (BufferedReader reader  = new BufferedReader(new FileReader(optionsFile))) {
                     String nextLine = null;
                     while ((nextLine = reader.readLine()) != null) {
                         nextLine = nextLine.trim();
@@ -97,15 +96,7 @@ public class OptionsFileUtil implements ConfigConstants {
                     }
                 } catch (IOException ex) {
                     throw new Exception("Unable to read options file: " + fileName, ex);
-                } finally {
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        } catch (IOException ex) {
-                            LOG.info("Exception while closing reader", ex);
-                        }
-                    }
-                }
+                } 
             } else {
                 // Regular option. Parse it and put it on the appropriate list
                 options.add(args[i]);
