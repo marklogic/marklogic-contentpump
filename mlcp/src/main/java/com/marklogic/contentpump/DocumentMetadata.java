@@ -47,9 +47,9 @@ public class DocumentMetadata {
     public static String NAKED = ".naked";
     protected DocumentFormat format = DocumentFormat.XML;
 
-    protected List<String> collectionsList = new Vector<String>();
+    protected List<String> collectionsList = new Vector<>();
 
-    protected List<ContentPermission> permissionsList = new Vector<ContentPermission>();
+    protected List<ContentPermission> permissionsList = new Vector<>();
     protected String permString = null;
     protected int quality = 0;
     protected Map<String, String> meta = null;

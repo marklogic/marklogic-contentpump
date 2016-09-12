@@ -48,7 +48,7 @@ public class CompressedRDFInputFormat extends RDFInputFormat {
         } catch (IOException e) {
             throw new IOException("Error creating CompressedRecordReader:" + e.getMessage());
         }
-        return new CompressedRDFReader<Text>(version, roleMap);
+        return new CompressedRDFReader<>(version, roleMap);
     }
 
     @Override

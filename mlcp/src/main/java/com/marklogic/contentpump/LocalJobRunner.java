@@ -158,12 +158,12 @@ public class LocalJobRunner implements ConfigConstants {
         }
         Monitor monitor = new Monitor();
         monitor.start();
-        List<Future<Object>> taskList = new ArrayList<Future<Object>>();
+        List<Future<Object>> taskList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {        
             InputSplit split = array[i];
             if (pool != null) {
                 LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE> task = 
-                    new LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE>(
+                    new LocalMapTask<>(
                         inputFormat, outputFormat, conf, i, split, reporter,
                         progress[i]);
                 availableThreads = assignThreads(i, array.length);

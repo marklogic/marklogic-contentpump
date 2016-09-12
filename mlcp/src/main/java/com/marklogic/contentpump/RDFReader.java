@@ -76,6 +76,7 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import java.util.Map;
 
 /**
  * Reader for RDF quads/triples. Uses Jena library to parse RDF and sends triples
@@ -109,8 +110,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected PipedRDFStream rdfInputStream;
     protected Lang lang;
 
-    protected Hashtable<String, Vector> collectionHash = 
-            new Hashtable<String, Vector> ();
+    protected Map<String, Vector> collectionHash = new Hashtable<> ();
     protected int collectionCount = 0;
     private static final int MAX_COLLECTIONS = 100;
     protected boolean ignoreCollectionQuad = false;
@@ -137,7 +137,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected long ingestedTriples = 0;
     /* new graphs identified within a RDFReader */
     protected HashSet<String> newGraphs;
-    protected HashMap<String,ContentPermission[]> existingMapPerms;
+    protected Map<String,ContentPermission[]> existingMapPerms;
     protected Iterator<String> graphItr;
     /* server version */
     protected String version;
@@ -160,8 +160,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         this.roleMap = roleMap;
         roleMapExists = roleMap!=null && roleMap.size()>0 ;
         graphQry = new StringBuilder();
-        existingMapPerms = new HashMap<String,ContentPermission[]>();
-        newGraphs = new HashSet<String>();
+        existingMapPerms = new HashMap<>();
+        newGraphs = new HashSet<>();
     }
 
     @Override
@@ -355,12 +355,12 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected void loadModel(final String fsname, final InputStream in) throws IOException {
         if (dataset == null) {
             if (lang == Lang.NQUADS || lang == Lang.TRIG) {
-                rdfIter = new PipedRDFIterator<Quad>();
+                rdfIter = new PipedRDFIterator<>();
                 @SuppressWarnings("unchecked")
                 PipedQuadsStream stream = new PipedQuadsStream(rdfIter);
                 rdfInputStream = stream;
             } else {
-                rdfIter = new PipedRDFIterator<Triple>();
+                rdfIter = new PipedRDFIterator<>();
                 @SuppressWarnings("unchecked")
                 PipedTriplesStream stream = new PipedTriplesStream(rdfIter);
                 rdfInputStream = stream;
@@ -577,7 +577,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             while (result.hasNext()) {
                 String uri = result.next().asString();
                 String tmp = result.next().asString();
-                ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+                List<ContentPermission> perms = new ArrayList<>();
                 while(!tmp.equals("0")) {
                     Text roleid = new Text(tmp);
                     if (!result.hasNext()) {
@@ -614,7 +614,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
      * return ContentPermission[] for the graph
      */
     public ContentPermission[] insertGraphDoc(String graph) throws IOException {
-        ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+        List<ContentPermission> perms = new ArrayList<>();
             ContentPermission[] permissions = defaultPerms;
             StringBuilder sb = graphQry;
             if (countPerBatch >= MAXGRAPHSPERREQUEST) {

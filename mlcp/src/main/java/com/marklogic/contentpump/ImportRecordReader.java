@@ -179,7 +179,7 @@ implements ConfigConstants {
                 ((ContentWithFileNameWritable<VALUEIN>) value)
                     .setFileName(file.getName());
             } else {
-                Writable cvalue = new ContentWithFileNameWritable<VALUEIN>(
+                Writable cvalue = new ContentWithFileNameWritable<>(
                     (VALUEIN) value, file.getName());
                 value = (VALUEIN) cvalue;
             }

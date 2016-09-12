@@ -72,7 +72,7 @@ implements MarkLogicConstants {
     public RecordReader<DocumentURIWithSourceInfo, VALUE> createRecordReader(
             InputSplit split, TaskAttemptContext context) throws IOException,
             InterruptedException {
-        return new ForestReader<VALUE>();
+        return new ForestReader<>();
     }
 
     protected List<FileStatus> listStatus(JobContext job) throws IOException {
@@ -101,7 +101,7 @@ implements MarkLogicConstants {
         long maxSize = getMaxSplitSize(job);
         
         // generate splits
-        List<InputSplit> splits = new ArrayList<InputSplit>();
+        List<InputSplit> splits = new ArrayList<>();
         List<FileStatus> files = listStatus(job);
         for (FileStatus file : files) { // stand directories
             Path path = file.getPath();

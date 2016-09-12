@@ -42,6 +42,6 @@ extends MarkLogicInputFormat<DocumentURI, VALUEIN> {
     public RecordReader<DocumentURI, VALUEIN> createRecordReader(
             InputSplit split, TaskAttemptContext context) throws IOException,
             InterruptedException {
-        return new DocumentReader<VALUEIN>(context.getConfiguration());
+        return new DocumentReader<>(context.getConfiguration());
     }
 }

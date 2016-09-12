@@ -30,6 +30,7 @@ import org.w3c.dom.TypeInfo;
 
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
+import java.util.List;
 
 /**
  * A read-only W3C DOM Node implementation of MarkLogic's internal
@@ -230,7 +231,7 @@ public class ElementImpl extends NodeImpl implements Element {
     protected int getPrefixID(int uriAtom) {
         int a = -1;
         boolean useDefaultNS = true;
-        ArrayList<Integer> ubp = new ArrayList<Integer>();
+        List<Integer> ubp = new ArrayList<>();
         long minOrdinal = 0;
         for (int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0; ns = nextNSNodeID(
             ns, minOrdinal)) {

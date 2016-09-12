@@ -190,7 +190,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         try {
 	        List<Future<?>> taskList = null;
 	        if (threadPool != null) {
-            	taskList = new ArrayList<Future<?>>();
+            	taskList = new ArrayList<>();
                 synchronized (threadPool) {
                     for (int i = 0; i < numberOfThreads; ++i) {
                         MapRunner runner = new MapRunner();
@@ -218,7 +218,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                     f.get();
                 }
 	        } else {
-	            runners = new ArrayList<MapRunner>(numberOfThreads);
+	            runners = new ArrayList<>(numberOfThreads);
                 for (int i = 0; i < numberOfThreads; ++i) {
                     MapRunner thread;
                     thread = new MapRunner();

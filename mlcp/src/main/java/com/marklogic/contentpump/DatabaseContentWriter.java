@@ -43,6 +43,7 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
+import java.util.Set;
 
 /**
  * MarkLogicRecordWriter that can 
@@ -97,8 +98,7 @@ public class DatabaseContentWriter<VALUE> extends
             }
             if (isCopyColls) {
                 if (opt.getCollections() != null) {
-                    HashSet<String> colSet = 
-                            new HashSet<String>(meta.collectionsList);
+                    Set<String> colSet = new HashSet<>(meta.collectionsList);
                     // union copy_collection and output_collection
                     for (String s : opt.getCollections()) {
                         colSet.add(s);
@@ -111,8 +111,7 @@ public class DatabaseContentWriter<VALUE> extends
             }      
             if (isCopyPerms) {
                 if (opt.getPermissions() != null) {
-                    HashSet<ContentPermission> pSet = 
-                         new HashSet<ContentPermission>(meta.permissionsList);
+                    Set<ContentPermission> pSet =  new HashSet<>(meta.permissionsList);
                     // union of output_permission & copy_permission
                     for (ContentPermission p : opt.getPermissions()) {
                         pSet.add(p);

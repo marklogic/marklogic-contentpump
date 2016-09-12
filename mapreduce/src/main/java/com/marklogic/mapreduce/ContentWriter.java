@@ -99,7 +99,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     /**
      * URIs of the documents in a batch.
      */
-    protected HashMap<Content, DocumentURI>[] pendingUris;
+    protected Map<Content, DocumentURI>[] pendingUris;
     
     /**
      * URIs of the documents to be committed.
@@ -148,7 +148,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     /** role-id -> role-name mapping **/
     protected LinkedMapWritable roleMap;
     
-    protected HashMap<String,ContentPermission[]> permsMap;
+    protected Map<String,ContentPermission[]> permsMap;
     
     protected int succeeded = 0;
     
@@ -181,7 +181,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         requestOptions = new RequestOptions();
         requestOptions.setMaxAutoRetry(0);
         
-        permsMap = new HashMap<String,ContentPermission[]>();
+        permsMap = new HashMap<>();
         
         int srcMapSize = forestSourceMap.size();
         forestIds = new String[srcMapSize];
@@ -200,7 +200,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         pendingUris = new HashMap[arraySize];
         for (int i = 0; i < arraySize; i++) {
-            pendingUris[i] = new HashMap<Content, DocumentURI>();
+            pendingUris[i] = new HashMap<>();
         }
 
         if (fastLoad
@@ -246,7 +246,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 if (capability != null) {
                     if (permissions == null) {
-                        permissions = new ArrayList<ContentPermission>();
+                        permissions = new ArrayList<>();
                     }
                     permissions.add(new ContentPermission(capability, roleName));
                 }
@@ -304,7 +304,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (needCommit) {
             commitUris = new ArrayList[arraySize];
             for (int i = 0; i < arraySize; i++) {
-                commitUris[i] = new ArrayList<DocumentURI>(txnSize*batchSize);
+                commitUris[i] = new ArrayList<>(txnSize*batchSize);
             }
         }
         
