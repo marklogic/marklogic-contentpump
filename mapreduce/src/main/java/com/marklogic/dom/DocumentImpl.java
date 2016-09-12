@@ -92,6 +92,7 @@ public class DocumentImpl extends NodeImpl implements Document {
      * 
      * 
      */
+    @Override
     public Node cloneNode(boolean deep) {
         try {
             if (isXMLDoc == UNKNOWN_TYPE) isXMLDoc = getDocumentType();
@@ -217,6 +218,7 @@ public class DocumentImpl extends NodeImpl implements Document {
         }
     }
 
+    @Override
     protected Node getPreviousChild(int node) {
         if (node != getFirstChildIndex()) {
             return tree.node(node - 1);

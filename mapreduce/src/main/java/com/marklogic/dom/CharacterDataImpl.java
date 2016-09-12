@@ -84,6 +84,7 @@ public abstract class CharacterDataImpl extends NodeImpl implements
 
     /** Unsupported.
      * @param data */
+    @Override
     public void setData(String data) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

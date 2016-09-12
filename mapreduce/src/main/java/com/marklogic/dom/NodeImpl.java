@@ -479,6 +479,7 @@ public abstract class NodeImpl implements Node {
     }
 
     /** Unsupported. */
+    @Override
     public void setPrefix(String prefix) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }

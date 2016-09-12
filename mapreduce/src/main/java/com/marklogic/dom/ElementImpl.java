@@ -411,6 +411,7 @@ public class ElementImpl extends NodeImpl implements Element {
     }
 
     /** Unsupported. */
+    @Override
     public void setAttributeNS(String namespaceURI, String qualifiedName,
         String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);

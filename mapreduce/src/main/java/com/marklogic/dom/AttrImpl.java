@@ -160,6 +160,7 @@ public class AttrImpl extends NodeImpl implements Attr {
 
     /** Unsupported.
      * @return  */
+    @Override
     public TypeInfo getSchemaTypeInfo() {
         return null;
     }
@@ -196,7 +197,8 @@ public class AttrImpl extends NodeImpl implements Attr {
 
     /** Unsupported.
      * @param value */
-    public void setValue(String value) throws DOMException {
+    @Override
+     public void setValue(String value) throws DOMException {
         throw new DOMException(DOMException.NO_MODIFICATION_ALLOWED_ERR, null);
     }
 }
