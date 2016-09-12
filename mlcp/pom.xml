@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>mlcp</artifactId>
-  <version>9.0-EA3</version>
+  <version>9.0</version>
   <name>MarkLogic Content Pump</name>
   <description>MarkLogic Content Pump</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
@@ -176,7 +176,7 @@
           <artifactId>marklogic-mapreduce2</artifactId>
           <version>${hadoopConnectorVersion}</version>
           <scope>system</scope>
-          <systemPath>${hadoopConnectorBaseDir}/target/marklogic-mapreduce2-${hadoopConnectorVersion}.jar</systemPath>
+          <systemPath>${hadoopConnectorBaseDir}/target/marklogic-mapreduce2-${hadoopConnectorVersion}.20160909.jar</systemPath>
         </dependency>
         <dependency>
           <groupId>com.marklogic</groupId>
