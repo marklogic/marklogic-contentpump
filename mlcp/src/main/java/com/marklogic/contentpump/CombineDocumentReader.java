@@ -80,37 +80,36 @@ extends ImportRecordReader<VALUEIN> {
             FileSplit split = iterator.next();
             setFile(split.getPath());
             String uri = makeURIFromPath(file);
-            FileSystem fs = file.getFileSystem(context.getConfiguration());        
-            FSDataInputStream fileIn = fs.open(file);
-            long splitLength = split.getLength();
-            if (splitLength > (long)Integer.MAX_VALUE) {
-                setSkipKey(0, 0, "file size too large: " + splitLength); 
-                return true;
-            }
-            if (setKey(uri, 0, 0, true)) {
-                return true;
-            }
-            byte[] buf = new byte[(int)splitLength];
-            try {
-                fileIn.readFully(buf);
-                if (value instanceof Text) {
-                    ((Text) value).set(new String(buf, encoding));
-                } else {
-                    if (batchSize > 1) {
-                        // Copy data since XCC won't do it when Content is 
-                        // created.
-                        value = (VALUEIN) new BytesWritable(buf);
+            try (FileSystem fs = file.getFileSystem(context.getConfiguration());
+                    FSDataInputStream fileIn = fs.open(file)) {
+                long splitLength = split.getLength();
+                if (splitLength > (long)Integer.MAX_VALUE) {
+                    setSkipKey(0, 0, "file size too large: " + splitLength); 
+                    return true;
+                }
+                if (setKey(uri, 0, 0, true)) {
+                    return true;
+                }
+                byte[] buf = new byte[(int)splitLength];
+                try {
+                    fileIn.readFully(buf);
+                    if (value instanceof Text) {
+                        ((Text) value).set(new String(buf, encoding));
                     } else {
-                        ((BytesWritable) value).set(buf, 0, buf.length);
-                    }
+                        if (batchSize > 1) {
+                            // Copy data since XCC won't do it when Content is 
+                            // created.
+                            value = (VALUEIN) new BytesWritable(buf);
+                        } else {
+                            ((BytesWritable) value).set(buf, 0, buf.length);
+                        }
+                    } 
+                    bytesRead += buf.length;
+                    return true;
+                } catch (IOException e) {
+                    LOG.error(e);
+                    throw e;
                 } 
-                bytesRead += buf.length;
-                return true;
-            } catch (IOException e) {
-                LOG.error(e);
-                throw e;
-            } finally {
-                fileIn.close();
             }
         }
         return false;

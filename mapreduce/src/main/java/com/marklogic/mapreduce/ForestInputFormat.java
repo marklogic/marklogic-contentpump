@@ -154,14 +154,13 @@ implements MarkLogicConstants {
             Path treeDataPath = treeDataStatus.getPath();
             long blockSize = treeDataStatus.getBlockSize();
             long splitSize = computeSplitSize(blockSize, minSize, maxSize);
-            // make splits based on TreeIndex
-            FSDataInputStream is = fs.open(treeIndexStatus.getPath());
-            BiendianDataInputStream in = new BiendianDataInputStream(is);
+            // make splits based on TreeIndex 
             int prevDocid = -1, docid = -1, position = 0;
             long prevOffset = -1L, offset = 0, splitStart = 0;
             BlockLocation[] blkLocations = fs.getFileBlockLocations(
                     treeDataStatus, 0, treeDataSize);
-            try {
+            try (FSDataInputStream is = fs.open(treeIndexStatus.getPath());
+                    BiendianDataInputStream in = new BiendianDataInputStream(is)){
                 for (;; ++position) {
                     try {
                         docid = in.readInt();
@@ -223,8 +222,6 @@ implements MarkLogicConstants {
                         splitStart = prevOffset;
                     }
                 }
-            } finally {
-                in.close();
             }
             if (offset > splitStart) {
                 int blkIndex = getBlockIndex(blkLocations, offset - 1);

@@ -113,10 +113,10 @@ class BinaryWriter extends RecordWriter<DocumentURI, BytesWritable> {
         String pathStr = dir.getName() + uri.getUri();
         Path path = new Path(pathStr);
         FileSystem fs = path.getFileSystem(conf);
-        FSDataOutputStream out = fs.create(path, false);
-        System.out.println("writing to: " + path);
-        out.write(content.getBytes(), 0, content.getLength());
-        out.flush();
-        out.close();
+        try (FSDataOutputStream out = fs.create(path, false)) {
+            System.out.println("writing to: " + path);
+            out.write(content.getBytes(), 0, content.getLength());
+            out.flush();
+        }
     }       
 }

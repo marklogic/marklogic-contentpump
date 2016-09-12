@@ -116,34 +116,34 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
                 String encoding = conf.get(
                     MarkLogicConstants.OUTPUT_CONTENT_ENCODING,
                     MarkLogicConstants.DEFAULT_OUTPUT_CONTENT_ENCODING);
-                InputStreamReader instream = new InputStreamReader(fileIn, encoding);
-                CSVParser parser = new CSVParser(instream, CSVParserFormatter.
-                		getFormat(delimiter, DelimitedTextReader.encapsulator,
-                				true, true));
-                Iterator<CSVRecord> it = parser.iterator();
-                
-                String[] header = null;
-                if (it.hasNext()) {
-                	CSVRecord record = (CSVRecord)it.next();
-                	Iterator<String> recordIterator = record.iterator();
-                    int recordSize = record.size();
-                    header = new String[recordSize];
-                    for (int i = 0; i < recordSize; i++) {
-                    	if (recordIterator.hasNext()) {
-                    		header[i] = (String)recordIterator.next();
-                    	} else {
-                    		throw new IOException("Record size doesn't match the real size");
-                    	}
-                    }
+                try (InputStreamReader instream = new InputStreamReader(fileIn, encoding)) {
+                    CSVParser parser = new CSVParser(instream, CSVParserFormatter.
+                            getFormat(delimiter, DelimitedTextReader.encapsulator,
+                                    true, true));
+                    Iterator<CSVRecord> it = parser.iterator();
                     
-                    EncodingUtil.handleBOMUTF8(header, 0);
-                    
-                    hlist.clear();
-                    for (String s : header) {
-                        hlist.add(new Text(s));
+                    String[] header = null;
+                    if (it.hasNext()) {
+                        CSVRecord record = (CSVRecord)it.next();
+                        Iterator<String> recordIterator = record.iterator();
+                        int recordSize = record.size();
+                        header = new String[recordSize];
+                        for (int i = 0; i < recordSize; i++) {
+                            if (recordIterator.hasNext()) {
+                                header[i] = (String)recordIterator.next();
+                            } else {
+                                throw new IOException("Record size doesn't match the real size");
+                            }
+                        }
+                        
+                        EncodingUtil.handleBOMUTF8(header, 0);
+                        
+                        hlist.clear();
+                        for (String s : header) {
+                            hlist.add(new Text(s));
+                        }
                     }
                 }
-                instream.close();
             }
             
             DelimitedSplit ds = new DelimitedSplit(new TextArrayWritable(

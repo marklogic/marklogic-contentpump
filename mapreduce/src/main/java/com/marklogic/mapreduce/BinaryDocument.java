@@ -39,15 +39,11 @@ public abstract class BinaryDocument extends ForestDocument {
                     copyQuality);
         }
         if (isStreamable()) {
-            InputStream is = null;
-            try {
-                is = getContentAsByteStream();
+           
+            try (InputStream is = getContentAsByteStream()) {
                 return ContentFactory.newUnBufferedContent(uri, is, 
                         options);
             } catch (Exception ex) {
-                if (is != null) {
-                    is.close();
-                } 
                 throw new IOException("Error accessing large binary document "
                         + uri + ", skipping...", ex);
             } 

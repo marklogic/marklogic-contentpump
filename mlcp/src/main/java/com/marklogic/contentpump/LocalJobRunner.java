@@ -210,26 +210,22 @@ public class LocalJobRunner implements ConfigConstants {
                     outputFormat.getRecordWriter(context);
                 OutputCommitter committer = 
                     outputFormat.getOutputCommitter(context);
-                TrackingRecordReader trackingReader = 
-                    new TrackingRecordReader(reader, progress[i]);
-
-                Mapper.Context mapperContext = 
-                    ReflectionUtil.createMapperContext(mapper, conf, 
-                        taskAttemptId, trackingReader, writer, committer, 
-                        reporter, split);
-                
-                trackingReader.initialize(split, mapperContext);
-                
-                // no thread pool (only 1 thread specified)
-                Class<? extends Mapper<?,?,?,?>> mapClass = 
-                        job.getMapperClass();
-                mapperContext.getConfiguration().setClass(
-                   CONF_MAPREDUCE_JOB_MAP_CLASS , mapClass, Mapper.class);
-                mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) 
-                    ReflectionUtils.newInstance(mapClass,
-                        mapperContext.getConfiguration());
-                mapper.run(mapperContext);
-                trackingReader.close();
+                Mapper.Context mapperContext;
+                try (TrackingRecordReader trackingReader = new TrackingRecordReader(reader, progress[i])) {
+                    mapperContext = ReflectionUtil.createMapperContext(mapper, conf, 
+                            taskAttemptId, trackingReader, writer, committer,
+                            reporter, split);
+                    trackingReader.initialize(split, mapperContext);
+                    // no thread pool (only 1 thread specified)
+                    Class<? extends Mapper<?,?,?,?>> mapClass =
+                            job.getMapperClass();
+                    mapperContext.getConfiguration().setClass(
+                            CONF_MAPREDUCE_JOB_MAP_CLASS , mapClass, Mapper.class);
+                    mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>)
+                            ReflectionUtils.newInstance(mapClass,
+                                    mapperContext.getConfiguration());
+                    mapper.run(mapperContext);
+                }
                 writer.close(mapperContext);
                 committer.commitTask(context);
             }
@@ -350,7 +346,6 @@ public class LocalJobRunner implements ConfigConstants {
         public Object call() {
             TaskAttemptContext context = null;
             Mapper.Context mapperContext = null;
-            TrackingRecordReader trackingReader = null;
             RecordWriter<OUTKEY, OUTVALUE> writer = null;
             OutputCommitter committer = null;
             JobID jid = new JobID();
@@ -363,19 +358,20 @@ public class LocalJobRunner implements ConfigConstants {
                     inputFormat.createRecordReader(split, context);
                 writer = outputFormat.getRecordWriter(context);
                 committer = outputFormat.getOutputCommitter(context);
-                trackingReader = 
-                    new TrackingRecordReader(reader, pctProgress);
-                mapper = (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)
-                  ReflectionUtils.newInstance(mapperClass, conf);
-                mapperContext = ReflectionUtil.createMapperContext(mapper, 
-                        conf, taskAttemptId, trackingReader, writer, committer,
-                        reporter, split);
-                trackingReader.initialize(split, mapperContext);
-                if (mapperClass == (Class)MultithreadedMapper.class) {
-                	((MultithreadedMapper)mapper).setThreadCount(threadCount);
-                    ((MultithreadedMapper)mapper).setThreadPool(pool);
+                try (TrackingRecordReader trackingReader = 
+                    new TrackingRecordReader(reader, pctProgress)) {
+                    mapper = (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)
+                      ReflectionUtils.newInstance(mapperClass, conf);
+                    mapperContext = ReflectionUtil.createMapperContext(mapper, 
+                            conf, taskAttemptId, trackingReader, writer, committer,
+                            reporter, split);
+                    trackingReader.initialize(split, mapperContext);
+                    if (mapperClass == (Class)MultithreadedMapper.class) {
+                        ((MultithreadedMapper)mapper).setThreadCount(threadCount);
+                        ((MultithreadedMapper)mapper).setThreadPool(pool);
+                    }
+                    mapper.run(mapperContext);
                 }
-                mapper.run(mapperContext);
             } catch (Throwable t) {
                 LOG.error("Error running task: ", t);
                 try{
@@ -387,9 +383,6 @@ public class LocalJobRunner implements ConfigConstants {
                 }
             } finally {
                 try {
-                    if (trackingReader != null) {
-                        trackingReader.close();
-                    }
                     if (writer != null) {
                         writer.close(mapperContext);
                     }

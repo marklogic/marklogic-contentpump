@@ -73,27 +73,27 @@ public class TransformOutputFormat<VALUEOUT> extends
             return mimetypeMap;
         }
         String host = conf.get(OUTPUT_HOST);
-        Session session = null;
         ResultSequence result = null;
         try {
             ContentSource cs = InternalUtilities.getOutputContentSource(conf,
                 host);
-            session = cs.newSession();
-            AdhocQuery query = session.newAdhocQuery(MIMETYPES_QUERY);
-            RequestOptions options = new RequestOptions();
-            options.setDefaultXQueryVersion("1.0-ml");
-            query.setOptions(options);
-            result = session.submitRequest(query);
-            if (!result.hasNext())
-                throw new IOException("Server-side transform requires MarkLogic 7 or later");
-            mimetypeMap = new LinkedMapWritable();
-            while (result.hasNext()) {
-                String suffs = result.next().asString();
-                Text format = new Text(result.next().asString());
-                // some extensions are in a space separated string
-                for (String s : suffs.split(" ")) {
-                    Text suff = new Text(s);
-                    mimetypeMap.put(suff, format);
+            try (Session session = cs.newSession()) {
+                AdhocQuery query = session.newAdhocQuery(MIMETYPES_QUERY);
+                RequestOptions options = new RequestOptions();
+                options.setDefaultXQueryVersion("1.0-ml");
+                query.setOptions(options);
+                result = session.submitRequest(query);
+                if (!result.hasNext())
+                    throw new IOException("Server-side transform requires MarkLogic 7 or later");
+                mimetypeMap = new LinkedMapWritable();
+                while (result.hasNext()) {
+                    String suffs = result.next().asString();
+                    Text format = new Text(result.next().asString());
+                    // some extensions are in a space separated string
+                    for (String s : suffs.split(" ")) {
+                        Text suff = new Text(s);
+                        mimetypeMap.put(suff, format);
+                    }
                 }
             }
             return mimetypeMap;
@@ -103,9 +103,6 @@ public class TransformOutputFormat<VALUEOUT> extends
         } finally {
             if (result != null) {
                 result.close();
-            }
-            if (session != null) {
-                session.close();
             }
         }
     }

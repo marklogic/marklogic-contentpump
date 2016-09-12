@@ -96,9 +96,7 @@ implements MarkLogicConstants, ConfigConstants {
             ContentType type = content.getContentType();
             if (ContentType.BINARY.equals(type)) {
                 if (content.isStreamable()) {
-                    InputStream is = null;
-                    try {
-                        is = content.getContentAsByteStream();
+                    try (InputStream is = content.getContentAsByteStream()) {
                         long size = content.getContentSize();
                         long bufSize = Math.min(size, 512<<10);
                         byte[] buf = new byte[(int)bufSize];
@@ -114,10 +112,6 @@ implements MarkLogicConstants, ConfigConstants {
                                 break;
                             }
                         }
-                    } finally {
-                       if (is != null) {
-                           is.close();
-                       }
                     }
                 } else {
                     os.write(content.getContentAsByteArray());

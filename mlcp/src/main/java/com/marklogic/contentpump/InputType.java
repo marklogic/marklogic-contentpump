@@ -242,42 +242,43 @@ public enum InputType implements ConfigConstants {
         public void applyConfigOptions(Configuration conf, CommandLine cmdline)
             throws IOException {
             // try getting a connection
-            Session session = null;
+            
             ResultSequence result = null;
             ContentSource cs;
             try {
                 cs = InternalUtilities.getOutputContentSource(conf,
                     conf.get(MarkLogicConstants.OUTPUT_HOST));
-                session = cs.newSession("Security");
-                RequestOptions options = new RequestOptions();
-                options.setDefaultXQueryVersion("1.0-ml");
-                session.setDefaultRequestOptions(options);
-                AdhocQuery query = session.newAdhocQuery(ROLE_QUERY);
-                query.setOptions(options);
-                result = session.submitRequest(query);
-                Text version = new Text(result.next().asString());
-                boolean hasFunc = Boolean.parseBoolean(result.next().asString());
-                LinkedMapWritable roleMap = new LinkedMapWritable();
-                if(hasFunc) {
-                    while (result.hasNext()) {
-                        Text key = new Text(result.next().asString());
-                        if (!result.hasNext()) {
-                            throw new IOException("Invalid role map");
+                try (Session session = cs.newSession("Security")) {
+                    RequestOptions options = new RequestOptions();
+                    options.setDefaultXQueryVersion("1.0-ml");
+                    session.setDefaultRequestOptions(options);
+                    AdhocQuery query = session.newAdhocQuery(ROLE_QUERY);
+                    query.setOptions(options);
+                    result = session.submitRequest(query);
+                    Text version = new Text(result.next().asString());
+                    boolean hasFunc = Boolean.parseBoolean(result.next().asString());
+                    LinkedMapWritable roleMap = new LinkedMapWritable();
+                    if(hasFunc) {
+                        while (result.hasNext()) {
+                            Text key = new Text(result.next().asString());
+                            if (!result.hasNext()) {
+                                throw new IOException("Invalid role map");
+                            }
+                            Text value = new Text(result.next().asString());
+                            roleMap.put(key, value);
                         }
-                        Text value = new Text(result.next().asString());
-                        roleMap.put(key, value);
+
+                        DefaultStringifier.store(conf, roleMap,
+                            ConfigConstants.CONF_ROLE_MAP);
                     }
-    
-                    DefaultStringifier.store(conf, roleMap,
-                        ConfigConstants.CONF_ROLE_MAP);
-                }
-                DefaultStringifier.store(conf, version,
-                    ConfigConstants.CONF_ML_VERSION);
-                if (conf.get(MarkLogicConstants.OUTPUT_DIRECTORY) == null && 
-                    conf.get(MarkLogicConstants.OUTPUT_URI_PREFIX) 
-                        == null) {
-                    conf.set(MarkLogicConstants.OUTPUT_URI_PREFIX, 
-                            "/triplestore/");
+                    DefaultStringifier.store(conf, version,
+                        ConfigConstants.CONF_ML_VERSION);
+                    if (conf.get(MarkLogicConstants.OUTPUT_DIRECTORY) == null && 
+                        conf.get(MarkLogicConstants.OUTPUT_URI_PREFIX) 
+                            == null) {
+                        conf.set(MarkLogicConstants.OUTPUT_URI_PREFIX, 
+                                "/triplestore/");
+                    }
                 }
             } catch (XccConfigException e) {
                 throw new IOException(e);
@@ -286,9 +287,6 @@ public enum InputType implements ConfigConstants {
             } finally {
                 if (result != null) {
                     result.close();
-                }
-                if (session != null) {
-                    session.close();
                 }
             }
         }

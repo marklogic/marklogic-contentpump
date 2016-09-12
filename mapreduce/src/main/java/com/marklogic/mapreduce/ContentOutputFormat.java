@@ -107,10 +107,9 @@ public class ContentOutputFormat<VALUEOUT> extends
     @Override
     public void checkOutputSpecs(Configuration conf, ContentSource cs) 
     throws IOException { 
-        Session session = null;
+
         ResultSequence result = null;
-        try {
-            session = cs.newSession(); 
+        try (Session session = cs.newSession()) { 
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
             session.setDefaultRequestOptions(options);
@@ -208,9 +207,6 @@ public class ContentOutputFormat<VALUEOUT> extends
         } catch (RequestException ex) {
             throw new IOException(ex);
         } finally {
-            if (session != null) {
-                session.close();
-            } 
             if (result != null) {
                 result.close();
             }
@@ -403,10 +399,8 @@ public class ContentOutputFormat<VALUEOUT> extends
      */
     protected LinkedMapWritable queryForestInfo(ContentSource cs) 
     throws IOException {
-        Session session = null;
         ResultSequence result = null;
-        try {
-            session = cs.newSession();   
+        try (Session session = cs.newSession()) {   
             AdhocQuery query = null;
             if (legacy) {             
                 LOG.debug("Legacy assignment is assumed for older MarkLogic" + 
@@ -487,9 +481,6 @@ public class ContentOutputFormat<VALUEOUT> extends
         } finally {
             if (result != null) {
                 result.close();
-            }
-            if (session != null) {
-                session.close();
             }
         }    
     }   

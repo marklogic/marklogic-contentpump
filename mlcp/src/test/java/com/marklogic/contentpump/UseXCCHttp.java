@@ -117,24 +117,23 @@ public class UseXCCHttp{
 
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
                 Utils.getDbXccUri()));
-        Session session = cs.newSession();
-
-        session.setTransactionMode(TransactionMode.UPDATE);
-        Content content = ContentFactory.newContent("nocontent", new byte[0],
-                0, 0, options);
-        session.insertContent(content);
-        
-        System.setProperty("xcc.httpcompliant", "true");
-        
-        byte[] str = "<r>some content</r>".getBytes();
-        ContentCreateOptions options1 = new ContentCreateOptions();
-        options1.setFormatXml();
-        options1.setResolveEntities(true);
-        content = ContentFactory.newContent("hascontent", str, 0, str.length,
-                options1);
-        session.insertContent(content);
-        session.commit();
-        session.close();
+        try (Session session = cs.newSession()) {
+            session.setTransactionMode(TransactionMode.UPDATE);
+            Content content = ContentFactory.newContent("nocontent", new byte[0],
+                    0, 0, options);
+            session.insertContent(content);
+            
+            System.setProperty("xcc.httpcompliant", "true");
+            
+            byte[] str = "<r>some content</r>".getBytes();
+            ContentCreateOptions options1 = new ContentCreateOptions();
+            options1.setFormatXml();
+            options1.setResolveEntities(true);
+            content = ContentFactory.newContent("hascontent", str, 0, str.length,
+                    options1);
+            session.insertContent(content);
+            session.commit();
+        }
     }
     
     //@Test
@@ -185,18 +184,17 @@ public class UseXCCHttp{
 
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
                 "xcc://admin:admin@:5275"));
-        Session session = cs.newSession();
-
-        session.setTransactionMode(TransactionMode.UPDATE);
-        Content content = ContentFactory.newContent("nocontent", new byte[0],
-                0, 0, options);
-        session.insertContent(content);
-        byte[] str = "<r>some content</r>".getBytes();
-        content = ContentFactory.newContent("hascontent", str, 0, str.length,
-                options);
-        session.insertContent(content);
-        session.commit();
-        session.close();
+        try (Session session = cs.newSession()) {
+            session.setTransactionMode(TransactionMode.UPDATE);
+            Content content = ContentFactory.newContent("nocontent", new byte[0],
+                    0, 0, options);
+            session.insertContent(content);
+            byte[] str = "<r>some content</r>".getBytes();
+            content = ContentFactory.newContent("hascontent", str, 0, str.length,
+                    options);
+            session.insertContent(content);
+            session.commit();
+        }
     }
     
     
@@ -210,11 +208,11 @@ public class UseXCCHttp{
 
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
                 "xcc://admin:admin@ali:80"));
-        Session session = cs.newSession();
-        Content content = ContentFactory.newContent("nocontent", new byte[0],
-                0, 0, options);
-        session.insertContent(content);
-        session.close();
+        try (Session session = cs.newSession()) {
+            Content content = ContentFactory.newContent("nocontent", new byte[0],
+                    0, 0, options);
+            session.insertContent(content);
+        }
     }
     //@Test
     public void testHTTPChunkingEncodingProxy() throws Exception {
@@ -226,18 +224,17 @@ public class UseXCCHttp{
 
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
                 "xcc://admin:admin@ali:80"));
-        Session session = cs.newSession();
-
-        session.setTransactionMode(TransactionMode.UPDATE);
-        Content content = ContentFactory.newContent("nocontent", new byte[0],
-                0, 0, options);
-        session.insertContent(content);
-        byte[] str = "<r>some content</r>".getBytes();
-        content = ContentFactory.newContent("hascontent", str, 0, str.length,
-                options);
-        session.insertContent(content);
-        session.commit();
-        session.close();
+        try (Session session = cs.newSession()) {
+            session.setTransactionMode(TransactionMode.UPDATE);
+            Content content = ContentFactory.newContent("nocontent", new byte[0],
+                    0, 0, options);
+            session.insertContent(content);
+            byte[] str = "<r>some content</r>".getBytes();
+            content = ContentFactory.newContent("hascontent", str, 0, str.length,
+                    options);
+            session.insertContent(content);
+            session.commit();
+        }
     }
     
     //@Test
@@ -265,16 +262,15 @@ public class UseXCCHttp{
         
         System.out.println(System.getProperty("xcc.httpcompliant"));
         
-        Session session = cs.newSession();
-
-        session.setTransactionMode(TransactionMode.UPDATE);
-        Content content;
-        byte[] str = getLargeString().getBytes();
-        content = ContentFactory.newContent("hascontent", str, 0, str.length,
-                options);
-        session.insertContent(content);
-        session.commit();
-        session.close();
+        try (Session session = cs.newSession()) {
+            session.setTransactionMode(TransactionMode.UPDATE);
+            Content content;
+            byte[] str = getLargeString().getBytes();
+            content = ContentFactory.newContent("hascontent", str, 0, str.length,
+                    options);
+            session.insertContent(content);
+            session.commit();
+        }
         
         ResultSequence result = Utils.runQuery(
             Utils.getDbXccUri(),
@@ -295,16 +291,15 @@ public class UseXCCHttp{
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
                 "xcc://admin:admin@ali:80"));
         
-        Session session = cs.newSession();
-
-        session.setTransactionMode(TransactionMode.UPDATE);
-        Content content;
-        byte[] str = getLargeString().getBytes();
-        content = ContentFactory.newContent("hascontent", str, 0, str.length,
-                options);
-        session.insertContent(content);
-        session.commit();
-        session.close();
+        try (Session session = cs.newSession()) {
+            session.setTransactionMode(TransactionMode.UPDATE);
+            Content content;
+            byte[] str = getLargeString().getBytes();
+            content = ContentFactory.newContent("hascontent", str, 0, str.length,
+                    options);
+            session.insertContent(content);
+            session.commit();
+        }
         
         ResultSequence result = Utils.runQuery(
             "xcc://admin:admin@ali:80",
@@ -333,18 +328,17 @@ public class UseXCCHttp{
         options.setResolveEntities(true);
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
                 Utils.getDbXccUri()));
-        Session session = cs.newSession();
-
-        session.setTransactionMode(TransactionMode.UPDATE);
-        Content content;/* = ContentFactory.newContent("nocontent", new byte[0],
-                0, 0, options);
-        session.insertContent(content);*/
-        byte[] str = "<r>some content</r>".getBytes();
-        content = ContentFactory.newContent("hascontent", str, 0, str.length,
-                options);
-        session.insertContent(content);
-        session.commit();
-        session.close();
+        try (Session session = cs.newSession()) {
+            session.setTransactionMode(TransactionMode.UPDATE);
+            Content content;/* = ContentFactory.newContent("nocontent", new byte[0],
+            0, 0, options);
+            session.insertContent(content);*/
+            byte[] str = "<r>some content</r>".getBytes();
+            content = ContentFactory.newContent("hascontent", str, 0, str.length,
+                    options);
+            session.insertContent(content);
+            session.commit();
+        }
     }
     
     //@Test
@@ -355,18 +349,17 @@ public class UseXCCHttp{
 
         ContentSource cs = ContentSourceFactory.newContentSource(new URI(
                 Utils.getDbXccUri()));
-        Session session = cs.newSession();
-
-        session.setTransactionMode(TransactionMode.UPDATE);
-        Content content = ContentFactory.newContent("nocontent", new byte[0],
-                0, 0, options);
-        session.insertContent(content);
-        byte[] str = "<r>some content</r>".getBytes();
-        content = ContentFactory.newContent("hascontent", str, 0, str.length,
-                options);
-        session.insertContent(content);
-        session.commit();
-        session.close();
+        try (Session session = cs.newSession()) {
+            session.setTransactionMode(TransactionMode.UPDATE);
+            Content content = ContentFactory.newContent("nocontent", new byte[0],
+                    0, 0, options);
+            session.insertContent(content);
+            byte[] str = "<r>some content</r>".getBytes();
+            content = ContentFactory.newContent("hascontent", str, 0, str.length,
+                    options);
+            session.insertContent(content);
+            session.commit();
+        }
     }
     
 

@@ -177,32 +177,28 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
 
     protected void submitGraphQuery() throws IOException{
-        Session session = null;
         ContentSource cs;
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
                 conf.get(MarkLogicConstants.OUTPUT_HOST));
-            session = cs.newSession();
-            RequestOptions options = new RequestOptions();
-            options.setDefaultXQueryVersion("1.0-ml");
-            session.setDefaultRequestOptions(options);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(graphQry);
+            try (Session session = cs.newSession()) {
+                RequestOptions options = new RequestOptions();
+                options.setDefaultXQueryVersion("1.0-ml");
+                session.setDefaultRequestOptions(options);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(graphQry);
+                }
+                AdhocQuery query = session.newAdhocQuery(graphQry.toString());
+                if(LOG.isDebugEnabled()) {
+                    LOG.debug(graphQry.toString());
+                }
+                query.setOptions(options);
+                session.submitRequest(query);
             }
-            AdhocQuery query = session.newAdhocQuery(graphQry.toString());
-            if(LOG.isDebugEnabled()) {
-                LOG.debug(graphQry.toString());
-            }
-            query.setOptions(options);
-            session.submitRequest(query);
         } catch (RequestException e) {
             throw new IOException(e);
         } catch (XccConfigException e) {
             throw new IOException(e);
-        } finally {
-            if (session != null) {
-                session.close();
-            }
         }
     }
     @Override
@@ -553,13 +549,12 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     }
     
     public void initExistingMapPerms() throws IOException {
-        Session session = null;
         ResultSequence result = null;
         ContentSource cs;
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
                 conf.get(MarkLogicConstants.OUTPUT_HOST));
-            session = cs.newSession();
+            try (Session session  = cs.newSession()) {
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
             session.setDefaultRequestOptions(options);
@@ -594,6 +589,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 existingMapPerms.put(uri, perms.toArray(new ContentPermission[perms.size()]));
                 
             }
+            }
         } catch (XccConfigException e) {
             throw new IOException(e);
         } catch (RequestException e) {
@@ -601,9 +597,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         } finally {
             if (result != null) {
                 result.close();
-            }
-            if (session != null) {
-                session.close();
             }
         }
     }

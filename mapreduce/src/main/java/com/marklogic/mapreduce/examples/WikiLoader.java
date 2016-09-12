@@ -160,66 +160,67 @@ class WikiReader extends RecordReader<Text, Text> {
             throws IOException, InterruptedException {
         Path file = ((FileSplit)inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
-        FSDataInputStream fileIn = fs.open(file);
-        byte[] buf = new byte[BUFFER_SIZE];
-        long bytesTotal = inSplit.getLength();
-        long start = ((FileSplit)inSplit).getStart();
-        fileIn.seek(start);
-        long bytesRead = 0;
-        StringBuilder pages = new StringBuilder();
-        int sindex = -1;
-        while (true) {
-            int length = (int)Math.min(bytesTotal - bytesRead, buf.length);
-            int read = fileIn.read(buf, 0, length);
-            if (read == -1) {
-                System.out.println("Unexpected EOF: bytesTotal=" + bytesTotal +
-                        "bytesRead=" + bytesRead);
-                break;
-            }
-            bytesRead += read;  
-            String temp = new String(new String(buf, 0, read));
-            if (sindex == -1) { // haven't found the start yet    
-                sindex = temp.indexOf(BEGIN_PAGE_TAG);
-                if (sindex > -1) {
-                    pages.append(temp.substring(sindex));
+        StringBuilder pages;
+        try (FSDataInputStream fileIn = fs.open(file)) {
+            byte[] buf = new byte[BUFFER_SIZE];
+            long bytesTotal = inSplit.getLength();
+            long start = ((FileSplit)inSplit).getStart();
+            fileIn.seek(start);
+            long bytesRead = 0;
+            pages = new StringBuilder();
+            int sindex = -1;
+            while (true) {
+                int length = (int)Math.min(bytesTotal - bytesRead, buf.length);
+                int read = fileIn.read(buf, 0, length);
+                if (read == -1) {
+                    System.out.println("Unexpected EOF: bytesTotal=" + bytesTotal +
+                            "bytesRead=" + bytesRead);
+                    break;
                 }
-            } else if (bytesRead < bytesTotal) { // haven't completed the split
-                pages.append(temp);
-            } else { // reached the end of this split
-                // look for end
-                int eindex = 0;
-                if (temp.contains(END_DOC_TAG) || // reached the end of doc
-                    temp.endsWith(END_PAGE_TAG)) {
-                    eindex = temp.lastIndexOf(END_PAGE_TAG);
-                    pages.append(temp.substring(0, 
-                        eindex + END_PAGE_TAG.length()));   
-                    System.out.println("Found end of doc.");
-                } else { // need to read ahead to look for end of page
-                    while (true) {
-                        read = fileIn.read(buf, 0, READ_AHEAD_SIZE);
-                        if (read == -1) { // no more to read
-                            System.out.println("Unexpected EOF: bytesTotal=" + bytesTotal +
-                                    "bytesRead=" + bytesRead);
-                            System.out.println(temp);
-                            break;
-                        }
-                        bytesRead += read;
-                        // look for end
-                        temp = new String(buf, 0, read);
-                        eindex = temp.indexOf(END_PAGE_TAG);
-                        if (eindex > -1) {
-                            pages.append(temp.substring(0, 
-                                    eindex + END_PAGE_TAG.length()));
-                            break;
-                        } else {
-                            pages.append(temp);
+                bytesRead += read;
+                String temp = new String(new String(buf, 0, read));
+                if (sindex == -1) { // haven't found the start yet
+                    sindex = temp.indexOf(BEGIN_PAGE_TAG);
+                    if (sindex > -1) {
+                        pages.append(temp.substring(sindex));
+                    }
+                } else if (bytesRead < bytesTotal) { // haven't completed the split
+                    pages.append(temp);
+                } else { // reached the end of this split
+                    // look for end
+                    int eindex = 0;
+                    if (temp.contains(END_DOC_TAG) || // reached the end of doc
+                            temp.endsWith(END_PAGE_TAG)) {
+                        eindex = temp.lastIndexOf(END_PAGE_TAG);
+                        pages.append(temp.substring(0,
+                                eindex + END_PAGE_TAG.length()));
+                        System.out.println("Found end of doc.");
+                    } else { // need to read ahead to look for end of page
+                        while (true) {
+                            read = fileIn.read(buf, 0, READ_AHEAD_SIZE);
+                            if (read == -1) { // no more to read
+                                System.out.println("Unexpected EOF: bytesTotal=" + bytesTotal +
+                                        "bytesRead=" + bytesRead);
+                                System.out.println(temp);
+                                break;
+                            }
+                            bytesRead += read;
+                            // look for end
+                            temp = new String(buf, 0, read);
+                            eindex = temp.indexOf(END_PAGE_TAG);
+                            if (eindex > -1) {
+                                pages.append(temp.substring(0,
+                                        eindex + END_PAGE_TAG.length()));
+                                break;
+                            } else {
+                                pages.append(temp);
+                            }
                         }
                     }
+                    break;
                 }
-                break;
             }
         }
-        fileIn.close();
         articles = WikiModelProcessor.process(pages);
     }
 
