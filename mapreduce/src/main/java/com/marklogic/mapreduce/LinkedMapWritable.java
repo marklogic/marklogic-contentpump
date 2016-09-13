@@ -38,7 +38,7 @@ implements Map<Writable, Writable> {
     
     public LinkedMapWritable() {
         super();
-        this.instance = new LinkedHashMap<Writable, Writable>();
+        this.instance = new LinkedHashMap<>();
     }
 
     /** {@inheritDoc} */

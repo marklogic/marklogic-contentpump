@@ -42,14 +42,14 @@ public class CombineDocumentSplit extends InputSplit implements Writable {
     private Set<String> locations;
     
     public CombineDocumentSplit() {
-        splits = new ArrayList<FileSplit>();
-        locations = new HashSet<String>();
+        splits = new ArrayList<>();
+        locations = new HashSet<>();
     }
     
     public CombineDocumentSplit(List<FileSplit> splits) 
     throws IOException, InterruptedException {
         this.splits = splits;
-        locations = new HashSet<String>();
+        locations = new HashSet<>();
         for (InputSplit split : splits) {
             length += split.getLength();
             for (String loc : split.getLocations()) {
@@ -96,7 +96,7 @@ public class CombineDocumentSplit extends InputSplit implements Writable {
     public void readFields(DataInput in) throws IOException {
         // splits
         int splitSize = in.readInt();
-        splits = new ArrayList<FileSplit>();
+        splits = new ArrayList<>();
         for (int i = 0; i < splitSize; i++) {
             Path path = new Path(Text.readString(in));
             long start = in.readLong();
@@ -107,7 +107,7 @@ public class CombineDocumentSplit extends InputSplit implements Writable {
         // length
         length = in.readLong();
         // locations
-        locations = new HashSet<String>();
+        locations = new HashSet<>();
     }
     
     public void write(DataOutput out) throws IOException {

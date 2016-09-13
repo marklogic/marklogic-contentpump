@@ -70,7 +70,7 @@ public abstract class ValueMatch extends ValueOrWordMatchFunction {
     
     public static void main(String[] args) {
         ValueMatch matchFunc = new ValueMatchFunction();
-        Collection<String> nsbindings = new ArrayList<String>();
+        Collection<String> nsbindings = new ArrayList<>();
         for (int i = 0; i < args.length; i++) {
             nsbindings.add(args[i]);
         }

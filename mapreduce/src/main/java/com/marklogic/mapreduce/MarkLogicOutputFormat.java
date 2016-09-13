@@ -39,6 +39,7 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import java.util.List;
 
 /**
  * MarkLogic-based OutputFormat superclass. Use the provided subclasses, such
@@ -164,7 +165,7 @@ implements MarkLogicConstants, Configurable {
             query.setOptions(options);
             result = session.submitRequest(query);
 
-            ArrayList<Text> hosts = new ArrayList<Text>();
+            List<Text> hosts = new ArrayList<>();
             while (result.hasNext()) {
                 ResultItem item = result.next();
                 String host = item.asString();

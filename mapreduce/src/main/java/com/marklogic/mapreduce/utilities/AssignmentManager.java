@@ -50,8 +50,8 @@ public class AssignmentManager {
             return;
         else
             initialized = true;
-        LinkedHashSet<String> forests = new LinkedHashSet<String>();
-        LinkedHashSet<String> updatableForests = new LinkedHashSet<String>();
+        LinkedHashSet<String> forests = new LinkedHashSet<>();
+        LinkedHashSet<String> updatableForests = new LinkedHashSet<>();
         for (Writable f : map.keySet()) {
             String fId = ((Text) f).toString();
             ForestInfo fs = (ForestInfo) map.get(f);

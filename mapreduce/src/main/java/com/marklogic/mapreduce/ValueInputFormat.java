@@ -55,7 +55,7 @@ implements MarkLogicConstants {
     public RecordReader<LongWritable, VALUEIN> createRecordReader(
             InputSplit split, TaskAttemptContext context)
     throws IOException, InterruptedException {
-        return new ValueReader<VALUEIN>(context.getConfiguration());
+        return new ValueReader<>(context.getConfiguration());
     }
 
 }

@@ -35,6 +35,7 @@ import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCreateOptions;
+import java.util.Set;
 
 /**
  * A {@link MarkLogicDocument} retrieved from a MarkLogic forest through 
@@ -122,7 +123,7 @@ public abstract class ForestDocument implements MarkLogicDocument {
         int numMetadata = in.readInt();
         if (numMetadata > 0) {
             String[] metaStrings = WritableUtils.readStringArray(in);
-            metadata = new HashMap<String, String>(numMetadata);
+            metadata = new HashMap<>(numMetadata);
             for (int i = 0; i < metaStrings.length - 1; i++) {
                 metadata.put(metaStrings[i], metaStrings[i + 1]);
             }
@@ -186,7 +187,7 @@ public abstract class ForestDocument implements MarkLogicDocument {
             if (cols == null || cols.length == 0) {
                 options.setCollections(collections);
             } else { // merge
-                HashSet<String> colsSet = new HashSet<String>();
+                Set<String> colsSet = new HashSet<>();
                 if (cols != null) {
                     for (String col : cols) {
                         colsSet.add(col);

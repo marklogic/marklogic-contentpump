@@ -54,7 +54,7 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
 	        return (RecordReader<DocumentURIWithSourceInfo, VALUE>) 
 	            new CompressedStreamingReader();
 	    } else {
-	        return new CompressedDocumentReader<VALUE>();
+	        return new CompressedDocumentReader<>();
 	    }
 	}
 

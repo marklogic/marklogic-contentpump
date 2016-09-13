@@ -39,6 +39,7 @@ import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.types.ValueType;
+import java.util.Map;
 
 /**
  * Helper class for server-side transform
@@ -117,7 +118,7 @@ public class TransformHelper {
         String functionName, String functionParam, String uri,
         Object value, String type, ContentCreateOptions cOptions)
         throws InterruptedIOException, UnsupportedEncodingException {
-        HashMap<String, String> optionsMap = new HashMap<String, String>();
+        Map<String, String> optionsMap = new HashMap<>();
 
         query.setNewStringVariable("URI", uri);
         ContentType contentType = ContentType.valueOf(type);
@@ -281,7 +282,7 @@ public class TransformHelper {
         String uri, DatabaseDocumentWithMeta doc,
         ContentCreateOptions cOptions) throws InterruptedIOException,
         UnsupportedEncodingException {
-        HashMap<String, String> optionsMap = new HashMap<String, String>();
+        Map<String, String> optionsMap = new HashMap<>();
 
         query.setNewStringVariable("URI", uri);
         ContentType contentType = doc.getContentType();
@@ -380,7 +381,7 @@ public class TransformHelper {
         return query;
     }
 
-    private static String mapToElement(HashMap<String, String> map) {
+    private static String mapToElement(Map<String, String> map) {
         StringBuilder sb = new StringBuilder();
         sb.append(MAP_ELEM_START_TAG);
         Set<String> keys = map.keySet();

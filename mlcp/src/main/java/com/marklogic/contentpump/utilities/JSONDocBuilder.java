@@ -105,7 +105,7 @@ public class JSONDocBuilder extends DocBuilder {
             throw new IOException("Fields not defined");
         }
         
-        datatypeMap = new HashMap<String,ColumnDataType>();
+        datatypeMap = new HashMap<>();
         for (String s: fields) {
             datatypeMap.put(s, ColumnDataType.STRING);
         }

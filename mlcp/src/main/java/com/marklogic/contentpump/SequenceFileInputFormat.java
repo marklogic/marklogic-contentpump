@@ -36,7 +36,7 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
     public RecordReader<DocumentURIWithSourceInfo, VALUE> createRecordReader(
         InputSplit arg0, TaskAttemptContext arg1) throws IOException,
         InterruptedException {
-        return new SequenceFileReader<VALUE>();
+        return new SequenceFileReader<>();
     }
     
 }

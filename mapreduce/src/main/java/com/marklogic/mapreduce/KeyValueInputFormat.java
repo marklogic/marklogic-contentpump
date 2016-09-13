@@ -49,7 +49,7 @@ implements MarkLogicConstants {
     public RecordReader<KEYIN, VALUEIN> createRecordReader(InputSplit split,
             TaskAttemptContext context) 
     throws IOException, InterruptedException {
-        return new KeyValueReader<KEYIN, VALUEIN>(context.getConfiguration());
+        return new KeyValueReader<>(context.getConfiguration());
     }
 
 }

@@ -27,6 +27,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.TypeInfo;
 
 import com.marklogic.tree.ExpandedTree;
+import java.util.List;
 
 /**
  * A read-only W3C DOM Node implementation of MarkLogic's internal
@@ -120,7 +121,7 @@ public class AttrImpl extends NodeImpl implements Attr {
         int parentNodeRepID = tree.nodeParentNodeRepID[node];
         if (parentNodeRepID == -1)
             parentNodeRepID = node;
-        ArrayList<Integer> ubp = new ArrayList<Integer>();
+        List<Integer> ubp = new ArrayList<>();
         long sum_ordinal = tree.ordinal + tree.nodeOrdinal[parentNodeRepID];
         for (int ns = getNSNodeID(sum_ordinal); ns >= 0; ns = nextNSNodeID(ns,
             0)) {

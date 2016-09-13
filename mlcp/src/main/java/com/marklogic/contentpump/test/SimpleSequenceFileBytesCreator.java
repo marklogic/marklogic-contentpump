@@ -24,7 +24,7 @@ public class SimpleSequenceFileBytesCreator {
         Path path = new Path(uri);
         SequenceFile.Writer writer = null;
         SimpleSequenceFileKey key = new SimpleSequenceFileKey();
-        SimpleSequenceFileValue<BytesWritable> value = new SimpleSequenceFileValue<BytesWritable>();
+        SimpleSequenceFileValue<BytesWritable> value = new SimpleSequenceFileValue<>();
         try {
             BytesWritable bw = new BytesWritable();
             byte byteArray[] = {2,3,4};

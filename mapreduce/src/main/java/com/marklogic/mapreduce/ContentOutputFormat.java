@@ -221,12 +221,12 @@ public class ContentOutputFormat<VALUEOUT> extends
     		TaskAttemptContext context) throws IOException{
         Configuration conf = context.getConfiguration();
         Map<String, ContentSource> sourceMap = 
-            new LinkedHashMap<String, ContentSource>();
+            new LinkedHashMap<>();
         if (fastLoad) {
             LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
             // get host->contentSource mapping
             Map<String, ContentSource> hostSourceMap = 
-                new HashMap<String, ContentSource>();
+                new HashMap<>();
             for (Writable v : forestStatusMap.values()) {
                 ForestInfo fs = (ForestInfo)v;
                 //unupdatable forests
@@ -274,7 +274,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the ContentWriter
-        return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
+        return new ContentWriter<>(conf, sourceMap, fastLoad, am);
     }
     
     // forest host map is saved when checkOutputSpecs() is called.  In certain 

@@ -30,7 +30,7 @@ public class StatisticalAssignmentPolicy extends AssignmentPolicy {
         policy = AssignmentPolicy.Kind.STATISTICAL;
         frmtCount = new long[stats.length];
         this.batch = batch;
-        pq = new PriorityBlockingQueue<Stats>(stats.length);
+        pq = new PriorityBlockingQueue<>(stats.length);
 
         for (int i = 0; i < stats.length; i++) {
             pq.add(new Stats(i, stats[i]));

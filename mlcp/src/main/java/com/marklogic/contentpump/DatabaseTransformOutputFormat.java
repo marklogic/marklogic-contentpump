@@ -41,7 +41,7 @@ public class DatabaseTransformOutputFormat extends DatabaseContentOutputFormat {
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the DatabaseTransformContentWriter
-        return new DatabaseTransformWriter<DatabaseDocumentWithMeta>(conf,
+        return new DatabaseTransformWriter<>(conf,
             sourceMap, fastLoad, am);
     }
 }

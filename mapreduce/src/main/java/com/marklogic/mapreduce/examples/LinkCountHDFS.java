@@ -192,7 +192,7 @@ class LinkRecordReader extends RecordReader<IntWritable, Text> {
                     "http://www.mediawiki.org/xml/export-0.4/");
             XPathSelector selector = xpath.compile(PATH_EXPRESSION).load();
             selector.setContextItem(xdmDoc);
-            items = new ArrayList<XdmItem>();
+            items = new ArrayList<>();
             for (XdmItem item : selector) {
                 items.add(item);
             }

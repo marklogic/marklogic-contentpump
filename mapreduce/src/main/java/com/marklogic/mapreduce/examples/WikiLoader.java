@@ -353,7 +353,7 @@ class WikiReader extends RecordReader<Text, Text> {
         IOException {
             // transform to final output
             int event;
-            path = new LinkedList<String>();
+            path = new LinkedList<>();
             article = null;
             title = null;
 
@@ -530,7 +530,7 @@ class WikiReader extends RecordReader<Text, Text> {
             String path = language + "wiki/"
             + (encodeTitle ? uri.toString() : title);
             if (articles == null) {
-                articles = new ArrayList<Article>();
+                articles = new ArrayList<>();
             }
             articles.add(new Article(path, article));
            

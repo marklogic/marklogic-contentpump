@@ -29,6 +29,7 @@ import org.w3c.dom.UserDataHandler;
 
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
+import java.util.List;
 
 /**
  * A read-only W3C DOM Node implementation of MarkLogic's internal
@@ -464,12 +465,12 @@ public abstract class NodeImpl implements Node {
 		final Node thisNode = this;
 		
 		return new NodeList() {
-			protected ArrayList<Node> elementList = new ArrayList<Node>();
+			protected List<Node> elementList = new ArrayList<>();
 			protected boolean done = false;
 			
 			protected void init() {
 				if (done) return;
-				Stack<Node> childrenStack = new Stack<Node>();
+				Stack<Node> childrenStack = new Stack<>();
 				childrenStack.push(thisNode);
 				boolean root = true;
 				while ( !childrenStack.isEmpty()) {

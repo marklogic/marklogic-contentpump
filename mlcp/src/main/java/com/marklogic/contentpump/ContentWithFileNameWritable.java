@@ -106,7 +106,7 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
             LOG.error("Error parsing file name as URI " + fileName, e);
         }
         if (collections != null) {
-            List<String> optionList = new ArrayList<String>();
+            List<String> optionList = new ArrayList<>();
             Collections.addAll(optionList, collections);
             if (collectionUri != null) {
                 optionList.add(collectionUri);

@@ -105,7 +105,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             //text document failed in parsing as DOM
             if (doc == null) continue;
             expected.append("\n").append(uri).append("\n");
-        	Queue<NodeList> q = new LinkedList<NodeList>();
+        	Queue<NodeList> q = new LinkedList<>();
         	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
         	while (!q.isEmpty()) {
         		NodeList nl = q.poll();
@@ -267,7 +267,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
         	NodeList elementsExpected = rootExpected.getElementsByTagName(tags[s]);
         	expected.append("#NUM##").append(elementsExpected.getLength()).
         			append("#").append("\n");
-        	ArrayList<Node> esort = new ArrayList<Node>();
+        	List<Node> esort = new ArrayList<>();
         	for (int j = 0; j < elementsExpected.getLength(); j++) {
         		esort.add(elementsExpected.item(j));
         	}
@@ -285,7 +285,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
         	NodeList elementsActual = rootActual.getElementsByTagName(tags[s]);
         	actual.append("#NUM##").append(elementsActual.getLength()).
 			 	append("#").append("\n");
-        	ArrayList<Node> asort = new ArrayList<Node>();
+        	List<Node> asort = new ArrayList<>();
         	for (int j = 0; j < elementsActual.getLength(); j++) {
         		asort.add(elementsActual.item(j));
         	}
@@ -337,7 +337,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             	NodeList elementsExpected = doc.getElementsByTagName(tags[s]);
             	expected.append("#NUM##").append(elementsExpected.getLength()).
             			append("#").append("\n");
-            	ArrayList<Node> esort = new ArrayList<Node>();
+            	List<Node> esort = new ArrayList<>();
             	for (int j = 0; j < elementsExpected.getLength(); j++) {
             		esort.add(elementsExpected.item(j));
             	}
@@ -355,7 +355,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             	NodeList elementsActual = d.getElementsByTagName(tags[s]);
             	actual.append("#NUM##").append(elementsActual.getLength()).
     			 	append("#").append("\n");
-            	ArrayList<Node> asort = new ArrayList<Node>();
+            	List<Node> asort = new ArrayList<>();
             	for (int j = 0; j < elementsActual.getLength(); j++) {
             		asort.add(elementsActual.item(j));
             	}
@@ -411,7 +411,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             	NodeList elementsExpected = rootExpected.getElementsByTagNameNS(nss[n],tags[s]);
             	expected.append("#NUM##").append(elementsExpected.getLength()).
             			append("#").append("\n");
-            	ArrayList<Node> esort = new ArrayList<Node>();
+            	List<Node> esort = new ArrayList<>();
             	for (int j = 0; j < elementsExpected.getLength(); j++) {
             		esort.add(elementsExpected.item(j));
             	}
@@ -429,7 +429,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             	NodeList elementsActual = rootActual.getElementsByTagNameNS(nss[n],tags[s]);
             	actual.append("#NUM##").append(elementsActual.getLength()).
     			 	append("#").append("\n");
-            	ArrayList<Node> asort = new ArrayList<Node>();
+            	List<Node> asort = new ArrayList<>();
             	for (int j = 0; j < elementsActual.getLength(); j++) {
             		asort.add(elementsActual.item(j));
             	}
@@ -540,7 +540,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
                 //text document failed in parsing as DOM
                 if (doc == null) continue;        	
                 expected.append("\n").append(uri).append("\n");
-            	Queue<NodeList> q = new LinkedList<NodeList>();
+            	Queue<NodeList> q = new LinkedList<>();
             	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
             	while (!q.isEmpty()) {
             		NodeList nl = q.poll();
@@ -624,7 +624,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
                 //text document failed in parsing as DOM
                 if (doc == null) continue;	
                 expected.append("\n").append(uri).append("\n");
-            	Queue<NodeList> q = new LinkedList<NodeList>();
+            	Queue<NodeList> q = new LinkedList<>();
             	if (doc.hasChildNodes()) q.add(doc.getChildNodes());
             	while (!q.isEmpty()) {
             		NodeList nl = q.poll();
@@ -850,8 +850,8 @@ public class TestDocumentImplClone extends AbstractTestCase {
                 		+ forest, stand), false);
             assertEquals(num, trees.size());
 
-        Set<String> expectedAttrSet = new HashSet<String>();
-        Set<String> actualAttrSet = new HashSet<String>();
+        Set<String> expectedAttrSet = new HashSet<>();
+        Set<String> actualAttrSet = new HashSet<>();
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();

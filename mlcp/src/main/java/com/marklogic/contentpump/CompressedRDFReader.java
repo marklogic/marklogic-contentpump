@@ -135,12 +135,12 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         throws IOException {
         if (dataset == null) {
             if (lang == Lang.NQUADS || lang == Lang.TRIG) {
-                rdfIter = new PipedRDFIterator<Quad>();
+                rdfIter = new PipedRDFIterator<>();
                 @SuppressWarnings("unchecked")
                 PipedQuadsStream stream = new PipedQuadsStream(rdfIter);
                 rdfInputStream = stream;
             } else {
-                rdfIter = new PipedRDFIterator<Triple>();
+                rdfIter = new PipedRDFIterator<>();
                 @SuppressWarnings("unchecked")
                 PipedTriplesStream stream = new PipedTriplesStream(rdfIter);
                 rdfInputStream = stream;
