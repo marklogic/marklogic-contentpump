@@ -115,8 +115,7 @@ public class ArchiveRecordReader extends
             subId = zipEntry.getName();
             long length = zipEntry.getSize();
             if (subId.endsWith(DocumentMetadata.NAKED)) {
-                ((DatabaseDocumentWithMeta) value)
-                    .setMeta(getMetadataFromStream(length));
+                value.setMeta(getMetadataFromStream(length));
                 String uri = subId.substring(0, subId.length()
                         - DocumentMetadata.NAKED.length());
                 setKey(uri, 0, 0, false);
@@ -125,8 +124,7 @@ public class ArchiveRecordReader extends
                 return true;
             }
             if (count % 2 == 0 && subId.endsWith(DocumentMetadata.EXTENSION)) {
-                ((DatabaseDocumentWithMeta) value)
-                    .setMeta(getMetadataFromStream(length));
+                value.setMeta(getMetadataFromStream(length));
                 count++;
                 continue;
             }
@@ -136,7 +134,7 @@ public class ArchiveRecordReader extends
                 return true;
             } else {
                 setKey(subId, 0, 0, false);
-                readDocFromStream(length, (DatabaseDocument) value);
+                readDocFromStream(length, value);
                 count++;
                 return true;
             }

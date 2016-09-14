@@ -55,6 +55,7 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.exceptions.RetryableQueryException;
 import com.marklogic.xcc.exceptions.XQueryException;
+import org.apache.hadoop.io.BinaryComparable;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -324,8 +325,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
             options.setEncoding(DEFAULT_OUTPUT_CONTENT_ENCODING);
             content = ContentFactory.newContent(uri, 
-                    ((Text) value).getBytes(), 0, 
-                    ((Text)value).getLength(), options);
+                    ((BinaryComparable) value).getBytes(), 0, 
+                    ((BinaryComparable)value).getLength(), options);
         } else if (value instanceof MarkLogicNode) {
             if (formatNeeded) {
                 options.setFormat(DocumentFormat.XML);
@@ -346,8 +347,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 formatNeeded = false;
             }
             content = ContentFactory.newContent(uri, 
-                    ((BytesWritable) value).getBytes(), 0, 
-                    ((BytesWritable) value).getLength(), options);               
+                    ((BinaryComparable) value).getBytes(), 0, 
+                    ((BinaryComparable) value).getLength(), options);               
         } else if (value instanceof CustomContent) { 
             ContentCreateOptions newOptions = options;
             if (batchSize > 1) {

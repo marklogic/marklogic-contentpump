@@ -22,7 +22,6 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 
 import com.marklogic.contentpump.utilities.TransformHelper;
-import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.ContentWriter;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
@@ -33,6 +32,7 @@ import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
+import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.exceptions.XQueryException;
@@ -104,7 +104,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         } catch (RequestServerException e) {
             // log error and continue on RequestServerException
             if (e instanceof XQueryException) {
-                LOG.error(((XQueryException) e).getFormatString());
+                LOG.error(((QueryException) e).getFormatString());
             } else {
                 LOG.error(e.getMessage());
             }

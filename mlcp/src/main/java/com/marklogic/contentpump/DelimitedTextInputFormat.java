@@ -124,13 +124,13 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
                 
                 String[] header = null;
                 if (it.hasNext()) {
-                	CSVRecord record = (CSVRecord)it.next();
+                	CSVRecord record = it.next();
                 	Iterator<String> recordIterator = record.iterator();
                     int recordSize = record.size();
                     header = new String[recordSize];
                     for (int i = 0; i < recordSize; i++) {
                     	if (recordIterator.hasNext()) {
-                    		header[i] = (String)recordIterator.next();
+                    		header[i] = recordIterator.next();
                     	} else {
                     		throw new IOException("Record size doesn't match the real size");
                     	}

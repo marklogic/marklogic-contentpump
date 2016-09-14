@@ -219,7 +219,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         if (version == null)
             throw new IOException("Server Version is null");
         String majorVersion = version.substring(0, version.indexOf('.'));
-        graphSupported = Integer.valueOf(majorVersion) >= 8;
+        graphSupported = Integer.parseInt(majorVersion) >= 8;
         conf = context.getConfiguration();
 
         String rdfopt = conf.get(ConfigConstants.RDF_STREAMING_MEMORY_THRESHOLD);
@@ -420,7 +420,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected String resource(Node rsrc) {
         if (rsrc.isBlank()) {
             return "http://marklogic.com/semantics/blank/" + Long.toHexString(
-                        fuse(scramble((long)rsrc.hashCode()),fuse(scramble(milliSecs),randomValue)));
+                        fuse(scramble(rsrc.hashCode()),fuse(scramble(milliSecs),randomValue)));
         } else {
             return escapeXml(rsrc.toString());
         }
@@ -434,7 +434,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private String resource(Resource rsrc) {
         if (rsrc.isAnon()) {
             return "http://marklogic.com/semantics/blank/" + Long.toHexString(
-                    fuse(scramble((long)rsrc.hashCode()),fuse(scramble(milliSecs),randomValue)));
+                    fuse(scramble(rsrc.hashCode()),fuse(scramble(milliSecs),randomValue)));
         } else {
             return escapeXml(rsrc.toString());
         }
@@ -485,7 +485,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             return "<sem:object" + type + lang + ">" + escapeXml(text) + "</sem:object>";
         } else if (node.isBlank()) {
             return "<sem:object>http://marklogic.com/semantics/blank/" + Long.toHexString(
-                    fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
+                    fuse(scramble(node.hashCode()),fuse(scramble(milliSecs),randomValue)))
                     +"</sem:object>";
         } else {
             return "<sem:object>" + escapeXml(node.toString()) + "</sem:object>";
@@ -517,7 +517,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             return "<sem:object" + type + lang + ">" + escapeXml(text) + "</sem:object>";
         } else if (node.isAnon()) {
             return "<sem:object>http://marklogic.com/semantics/blank/" + Long.toHexString(
-                    fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
+                    fuse(scramble(node.hashCode()),fuse(scramble(milliSecs),randomValue)))
                     +"</sem:object>";
         } else {
             return "<sem:object>" + escapeXml(node.toString()) + "</sem:object>";

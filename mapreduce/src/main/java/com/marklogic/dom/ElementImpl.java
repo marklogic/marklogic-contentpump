@@ -62,7 +62,7 @@ public class ElementImpl extends NodeImpl implements Element {
         for (int i = 0; i < attributes.getLength(); i++) {
             Attr attr = (Attr) attributes.item(i);
             if (attr instanceof AttrImpl) {
-                elem.setAttributeNode((Attr) ((AttrImpl) attr).cloneNode(doc,
+                elem.setAttributeNode((Attr) ((NodeImpl) attr).cloneNode(doc,
                     deep));
             } else {
                 // ns decl, stored as Java DOM Attr
@@ -99,7 +99,7 @@ public class ElementImpl extends NodeImpl implements Element {
 
     /** {@inheritDoc} */
     public Attr getAttributeNodeNS(String namespaceURI, String localName){
-        return (attributes==null)?null:(AttrImpl)getAttributes().getNamedItemNS(namespaceURI,
+        return (attributes==null)?null:(Attr)getAttributes().getNamedItemNS(namespaceURI,
             localName);
     }
 

@@ -83,7 +83,7 @@ extends ImportRecordReader<VALUEIN> {
             FileSystem fs = file.getFileSystem(context.getConfiguration());        
             FSDataInputStream fileIn = fs.open(file);
             long splitLength = split.getLength();
-            if (splitLength > (long)Integer.MAX_VALUE) {
+            if (splitLength > Integer.MAX_VALUE) {
                 setSkipKey(0, 0, "file size too large: " + splitLength); 
                 return true;
             }

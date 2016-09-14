@@ -54,10 +54,9 @@ public class ReflectionUtil {
             Constructor contextCtr = contextImplClass.getConstructor(types);
             return (TaskAttemptContext)contextCtr.newInstance(params);
         } else {           
-            Constructor<TaskAttemptContext> contextCtr = 
-                (Constructor<TaskAttemptContext>) 
+            Constructor<TaskAttemptContext> contextCtr =  
                 contextClass.getConstructor(types); 
-            return (TaskAttemptContext) contextCtr.newInstance(params);
+            return contextCtr.newInstance(params);
         }
     }
     

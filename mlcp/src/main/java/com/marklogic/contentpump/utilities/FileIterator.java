@@ -88,7 +88,7 @@ public class FileIterator implements Iterator<FileSplit> {
             try {
                 if (iterator.hasNext()) {
                     FileSplit split = iterator.next();
-                    Path file = ((FileSplit) split).getPath();
+                    Path file = split.getPath();
 
                     FileSystem fs = file.getFileSystem(conf);
 
@@ -105,7 +105,7 @@ public class FileIterator implements Iterator<FileSplit> {
                         return split;
 
                 } else if (!fileDirSplits.isEmpty()) {
-                    FileSplit split = (FileSplit) fileDirSplits.remove(0);
+                    FileSplit split = fileDirSplits.remove(0);
                     Path file = split.getPath();
                     FileSystem fs = file.getFileSystem(conf);
                     FileStatus status = fs.getFileStatus(file);
