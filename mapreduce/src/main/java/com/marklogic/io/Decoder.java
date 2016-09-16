@@ -101,20 +101,22 @@ public class Decoder {
         }
     }
     
-    public void decode(int[] array, int i, int count) throws IOException {
+    public void decode(int[] array, int count) throws IOException {
         if (count <= 4) {
-            for (; i < count; i++) {
+            for (int i = 0; i < count; i++) {
                 array[i] = decode32bits();
             }
         } else {
+            int i = 0;
             realign();
             if (numBitsInReg==32) {
-                array[i++] = (int)reg;
+                ++i;
+                array[0] = (int)reg;
                 reg = 0;
                 numBitsInReg = 0;
             }
-            for (; i<count; ++i) {
-                if (load32(array, i)) break;
+            for ( ; i<count; ++i) {
+                if (!load32(array, i)) break;
             }
         }
     }

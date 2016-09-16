@@ -35,6 +35,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.InternalConstants;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.utilities.URIUtil;
@@ -47,7 +48,7 @@ import com.marklogic.mapreduce.utilities.URIUtil;
  */
 public class SingleDocumentWriter 
 extends RecordWriter<DocumentURI, MarkLogicDocument> 
-implements MarkLogicConstants, ConfigConstants {
+implements MarkLogicConstants, ConfigConstants, InternalConstants {
     public static final Log LOG = 
         LogFactory.getLog(SingleDocumentWriter.class);
     
@@ -100,7 +101,7 @@ implements MarkLogicConstants, ConfigConstants {
                     try {
                         is = content.getContentAsByteStream();
                         long size = content.getContentSize();
-                        long bufSize = Math.min(size, 512<<10);
+                        long bufSize = Math.min(size, MAX_BUFFER_SIZE);
                         byte[] buf = new byte[(int)bufSize];
                         for (long toRead = size, read = 0; 
                              toRead > 0; 
@@ -109,8 +110,10 @@ implements MarkLogicConstants, ConfigConstants {
                             if (read > 0) {
                                 os.write(buf, 0, (int)read);
                             } else {
-                                LOG.error("Premature EOF: uri=" + uri +
+                                if (size != Integer.MAX_VALUE) {
+                                    LOG.error("Premature EOF: uri=" + uri +
                                         ",toRead=" + toRead);
+                                }
                                 break;
                             }
                         }

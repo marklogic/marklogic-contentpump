@@ -234,8 +234,8 @@ implements MarkLogicConstants {
         }
         key.setSkipReason(reason);
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Set key: " + key);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Set key: " + key);
         }
     }
 

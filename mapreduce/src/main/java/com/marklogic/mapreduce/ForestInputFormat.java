@@ -66,7 +66,6 @@ public class ForestInputFormat<VALUE>
 extends FileInputFormat<DocumentURIWithSourceInfo, VALUE> 
 implements MarkLogicConstants {
     public static final Log LOG = LogFactory.getLog(ForestInputFormat.class);
-    static final int STREAM_BUFFER_SIZE = 1 << 24;
 
     @Override
     public RecordReader<DocumentURIWithSourceInfo, VALUE> createRecordReader(
