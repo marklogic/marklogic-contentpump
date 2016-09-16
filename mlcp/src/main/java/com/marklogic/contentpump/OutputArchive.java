@@ -34,14 +34,16 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.LocalFileSystem;
 
+import com.marklogic.mapreduce.InternalConstants;
+
 /**
  * Archive for export, create zip file(s).
  * @author ali
  *
  */
-public class OutputArchive {
+public class OutputArchive implements InternalConstants {
     public static final Log LOG = LogFactory.getLog(OutputArchive.class);
-    public static String EXTENSION = ".zip";
+    public static final String EXTENSION = ".zip";
     private long currentFileBytes = 0;
     private ZipOutputStream outputStream;
     private String basePath;
@@ -133,17 +135,19 @@ public class OutputArchive {
         }        
         try {
             outputStream.putNextEntry(entry);
-            long bufSize = Math.min(size, 512<<10);
+            long bufSize = Math.min(size, MAX_BUFFER_SIZE);
             byte[] buf = new byte[(int)bufSize];
             for (long toRead = size, read = 0; toRead > 0; toRead -= read) {
                 read = is.read(buf, 0, (int)bufSize);
                 if (read > 0) {
                     outputStream.write(buf, 0, (int)read);
                 } else {
-                    LOG.warn("Premature EOF: uri=" + uri +
+                    if (size != Integer.MAX_VALUE) {
+                        LOG.warn("Premature EOF: uri=" + uri +
                             ",toRead=" + toRead);
+                    }
                     break;
-                }   
+                } 
             }
             outputStream.closeEntry();
         } catch (ZipException e) {
