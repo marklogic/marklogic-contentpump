@@ -1706,7 +1706,7 @@ public enum Command implements ConfigConstants {
             .create(TRANSFORM_FUNCTION);
         options.addOption(func);
         Option param = OptionBuilder.withArgName("String").hasArg()
-            .withDescription("Name of the transform function")
+            .withDescription("Parameters of the transform function")
             .create(TRANSFORM_PARAM);
         options.addOption(param);
     }
