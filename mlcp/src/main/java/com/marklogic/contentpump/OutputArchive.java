@@ -15,6 +15,7 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -92,10 +93,11 @@ public class OutputArchive {
                 f.createNewFile();
             }
             FileOutputStream fos = new FileOutputStream(f, false);
-            outputStream = new ZipOutputStream(fos);
+            outputStream = new ZipOutputStream(new BufferedOutputStream(fos));
         } else {
             FSDataOutputStream fsout = fs.create(zpath, false);
-            outputStream = new ZipOutputStream(fsout);
+            outputStream = 
+                    new ZipOutputStream(new BufferedOutputStream(fsout));
         }
     }
 
