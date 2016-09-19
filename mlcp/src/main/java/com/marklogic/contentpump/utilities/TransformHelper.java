@@ -254,7 +254,9 @@ public class TransformHelper {
         }
 
         String temporalCollection = cOptions.getTemporalCollection();
-        optionsMap.put("temporal-collection", temporalCollection);
+        if (temporalCollection != null) {
+            optionsMap.put("temporal-collection", temporalCollection);
+        }
 
         String optionElem = mapToElement(optionsMap);
         query.setNewVariable("INSERT-OPTIONS", ValueType.ELEMENT, optionElem);
