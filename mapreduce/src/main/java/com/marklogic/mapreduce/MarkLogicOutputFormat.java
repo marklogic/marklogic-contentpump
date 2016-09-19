@@ -174,6 +174,10 @@ implements MarkLogicConstants, Configurable {
                     hosts.add(new Text(host));
                 }
             }
+            if (hosts.isEmpty()) {
+                throw new IOException("Target database has no forests attached: "
+                        + "check forests in database");
+            }
             return new TextArrayWritable(hosts.toArray(new Text[hosts.size()]));
         } catch (RequestException e) {
             LOG.error(e.getMessage(), e);
