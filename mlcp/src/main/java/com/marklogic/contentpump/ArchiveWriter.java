@@ -141,10 +141,9 @@ implements MarkLogicConstants, ConfigConstants {
             if (content.isStreamable()) {
                 InputStream is = null;
                 try {
-                    is = content.getContentAsByteStream();
                     long size = content.getContentSize();
-                    binaryArchive.write(zipEntryName, 
-                            content.getContentAsByteStream(), size);
+                    is = content.getContentAsByteStream();
+                    binaryArchive.write(zipEntryName, is, size);
                 } finally {
                     if (is != null) {
                         is.close();
