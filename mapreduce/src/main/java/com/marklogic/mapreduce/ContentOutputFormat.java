@@ -476,7 +476,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                 }
             }
             if (forestStatusMap.size() == 0) {
-                throw new IOException("Number of forests is 0: "
+                throw new IOException("Target database has no forests attached: "
                     + "check forests in database");
             }
             am.initialize(policy, forestStatusMap, conf.getInt(BATCH_SIZE,10));
