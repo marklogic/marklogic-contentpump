@@ -274,9 +274,9 @@ public enum InputType implements ConfigConstants {
                 DefaultStringifier.store(conf, version,
                     ConfigConstants.CONF_ML_VERSION);
                 if (conf.get(MarkLogicConstants.OUTPUT_DIRECTORY) == null && 
-                    conf.get(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX) 
+                    conf.get(MarkLogicConstants.OUTPUT_URI_PREFIX) 
                         == null) {
-                    conf.set(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX, 
+                    conf.set(MarkLogicConstants.OUTPUT_URI_PREFIX, 
                             "/triplestore/");
                 }
             } catch (XccConfigException e) {

@@ -433,7 +433,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
         }        
         
-        LOG.info("Made " + splitList.size() + " splits.");
+        LOG.info("Made " + splitList.size() + " split(s).");
         if (LOG.isDebugEnabled()) {
             for (InputSplit split : splitList) {
                 LOG.debug(split);

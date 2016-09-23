@@ -47,11 +47,13 @@ import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.DocumentFormat;
 import com.marklogic.xcc.DocumentRepairLevel;
+import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.ContentInsertException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
+import com.marklogic.xcc.exceptions.RetryableQueryException;
 import com.marklogic.xcc.exceptions.XQueryException;
 
 /**
@@ -134,6 +136,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     
     private boolean tolerateErrors;
 
+    private RequestOptions requestOptions;
+
     protected AssignmentManager am;
     
     //fIdx cached for statistical policy
@@ -154,6 +158,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     
     protected int hostId = 0;
     
+    protected boolean isCopyColls;
+    protected boolean isCopyQuality;
+    protected boolean isCopyMeta;
+    
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         this(conf, forestSourceMap, fastLoad, null);
@@ -169,6 +177,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         this.forestSourceMap = forestSourceMap;
         
         this.am = am;
+
+        requestOptions = new RequestOptions();
+        requestOptions.setMaxAutoRetry(0);
         
         permsMap = new HashMap<String,ContentPermission[]>();
         
@@ -194,7 +205,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
 
         if (fastLoad
             && (am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.STATISTICAL
-            || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE)) {
+            || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE
+            || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.QUERY)) {
             countBased = true;
             if (batchSize > 1) {           
                 forestContents = new Content[1][batchSize];
@@ -281,7 +293,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         streaming = conf.getBoolean(OUTPUT_STREAMING, false);
         tolerateErrors = conf.getBoolean(OUTPUT_TOLERATE_ERRORS, false);
         
-        String encoding = conf.get(MarkLogicConstants.OUTPUT_CONTENT_ENCODING);
+        String encoding = conf.get(OUTPUT_CONTENT_ENCODING);
         if (encoding != null) {
             options.setEncoding(encoding);
         }
@@ -295,6 +307,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 commitUris[i] = new ArrayList<DocumentURI>(txnSize*batchSize);
             }
         }
+        
+        isCopyColls = conf.getBoolean(COPY_COLLECTIONS, true);
+        isCopyQuality = conf.getBoolean(COPY_QUALITY, true);
+        isCopyMeta = conf.getBoolean(COPY_METADATA, true);
     }
 
     protected Content createContent(DocumentURI key, VALUEOUT value) 
@@ -317,33 +333,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
             content = ContentFactory.newContent(uri, 
                     ((MarkLogicNode)value).get(), options);
-        } else if (value instanceof DOMDocument) {
-            content = ContentFactory.newContent(uri, 
-                    ((DOMDocument) value).getContentAsMarkLogicNode().get(), 
-                    options);
-        } else if (value instanceof JSONDocument) {
-            JSONDocument doc = (JSONDocument)value;
-            content = ContentFactory.newContent(uri, 
-                    doc.getContentAsByteArray(), options);
-        } else if (value instanceof BinaryDocument) {
-            BinaryDocument doc = (BinaryDocument)value;
-            if (doc.isStreamable()) {
-                InputStream is = null;
-                try {
-                    is = doc.getContentAsByteStream();
-                    content = ContentFactory.newUnBufferedContent(uri, is, 
-                            options);
-                } catch (Exception ex) {
-                    if (is != null) {
-                        is.close();
-                    } 
-                    LOG.error("Error accessing large binary document " + 
-                            key + ", skipping...", ex);
-                } 
-            } else {
-                content = ContentFactory.newContent(uri, 
-                        doc.getContentAsByteArray(), options);
+        } else if (value instanceof ForestDocument) {
+            ContentCreateOptions newOptions = options;
+            if (isCopyColls || isCopyMeta || isCopyQuality) {
+                newOptions = (ContentCreateOptions)options.clone();
             }
+            content = ((ForestDocument)value).createContent(uri, newOptions,
+                    isCopyColls, isCopyMeta, isCopyQuality);
         } else if (value instanceof BytesWritable) {
             if (formatNeeded) {
                 options.setFormat(DocumentFormat.BINARY);
@@ -422,64 +418,95 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      */
     protected void insertBatch(Content[] batch, int id) 
     throws IOException {
-        try {
-            List<RequestException> errors = 
+        int t = 0;
+        final int maxRetries = 64;
+        int sleepTime = 100;
+        final int maxSleepTime = 60000;
+        while (t++ < maxRetries) {
+            try {
+                List<RequestException> errors = 
                     sessions[id].insertContentCollectErrors(batch);
-            if (errors != null) {
-                for (RequestException ex : errors) {
-                    Throwable cause = ex.getCause();
-                    if (cause != null) {
-                        if (cause instanceof XQueryException) {
-                            LOG.error(
-                                ((XQueryException)cause).getFormatString());
-                        } else {
-                            LOG.error(cause.getMessage());
+                if (errors != null) {
+                    for (RequestException ex : errors) {
+                        Throwable cause = ex.getCause();
+                        if (cause != null) {
+                            if (cause instanceof XQueryException) {
+                                LOG.error(
+                                    ((XQueryException)cause).getFormatString());
+                            } else {
+                                LOG.error(cause.getMessage());
+                            }
                         }
-                    }
-                    if (ex instanceof ContentInsertException) {
-                        Content content = 
-                                ((ContentInsertException)ex).getContent();
-                        if (!needCommit &&
-                            batch[batch.length-1] == content) {
-                            failed += batch.length;   
-                            // remove the failed content from pendingUris
-                            for (Content fc : batch) {
+                        if (ex instanceof ContentInsertException) {
+                            Content content = 
+                                    ((ContentInsertException)ex).getContent();
+                            if (!needCommit &&
+                                batch[batch.length-1] == content) {
+                                // remove the failed content from pendingUris
+                                for (Content fc : batch) {
+                                    DocumentURI failedUri = 
+                                            pendingUris[id].remove(fc);
+                                    if (failedUri != null) {
+                                        failed++;
+                                        LOG.warn("Failed document " + failedUri);
+                                    }
+                                }
+                            } else {
                                 DocumentURI failedUri = 
-                                        pendingUris[id].remove(fc);
+                                        pendingUris[id].remove(content);
+                                failed++;
                                 LOG.warn("Failed document " + failedUri);
                             }
-                        } else {
-                            DocumentURI failedUri = 
-                                    pendingUris[id].remove(content);
-                            failed++;
-                            LOG.warn("Failed document " + failedUri);
                         }
                     }
                 }
+            } catch (RetryableQueryException e) {
+                // log error and continue on RequestServerException
+                LOG.error(e.getFormatString());
+
+                if (t < maxRetries) {
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (Exception e2) {
+                    }
+                    sleepTime = sleepTime * 2;
+                    if (sleepTime > maxSleepTime) 
+                        sleepTime = maxSleepTime;
+                    continue;
+                } else {
+                    failed += batch.length;
+                    // remove the failed content from pendingUris
+                    for (Content fc : batch) {
+                        DocumentURI failedUri = pendingUris[id].remove(fc);
+                        LOG.warn("Failed document " + failedUri);
+                    }
+                }
+            } catch (RequestServerException e) {
+                // log error and continue on RequestServerException
+                if (e instanceof XQueryException) {
+                    LOG.error(((XQueryException)e).getFormatString());
+                } else {
+                    LOG.error(e.getMessage());
+                }
+                failed += batch.length;   
+                // remove the failed content from pendingUris
+                for (Content fc : batch) {
+                    DocumentURI failedUri = pendingUris[id].remove(fc);
+                    LOG.warn("Failed document " + failedUri);
+                }
+            } catch (RequestException e) {
+                if (sessions[id] != null) {
+                    sessions[id].close();
+                }
+                if (countBased) {
+                    rollbackCount(id);
+                }
+                pendingUris[id].clear();
+                throw new IOException(e);
             }
-        } catch (RequestServerException e) {
-            // log error and continue on RequestServerException
-            if (e instanceof XQueryException) {
-                LOG.error(((XQueryException)e).getFormatString());
-            } else {
-                LOG.error(e.getMessage());
-            }
-            failed += batch.length;   
-            // remove the failed content from pendingUris
-            for (Content fc : batch) {
-                DocumentURI failedUri = pendingUris[id].remove(fc);
-                LOG.warn("Failed document " + failedUri);
-            }
-        } catch (RequestException e) {
-            if (sessions[id] != null) {
-                sessions[id].close();
-            }
-            if (countBased) {
-                rollbackCount(id);
-            }
-            pendingUris[id].clear();
-            throw new IOException(e);
+            break;
         }
+
         if (needCommit) {
             // move uris from pending to commit
             for (DocumentURI uri : pendingUris[id].values()) {
@@ -640,6 +667,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         }      
         session.setTransactionMode(mode);
+        session.setDefaultRequestOptions(requestOptions);
         return session;
     }
     
@@ -723,7 +751,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         Counter failedCounter = context.getCounter(
                 MarkLogicCounter.OUTPUT_RECORDS_FAILED);
         synchronized(failedCounter) {
-            committedCounter.increment(failed);
+            failedCounter.increment(failed);
         }
     }
     

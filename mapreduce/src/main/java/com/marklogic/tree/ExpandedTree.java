@@ -19,6 +19,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,11 +99,11 @@ public class ExpandedTree implements Writable {
 	public Capability permNodeCapability[];
 	public long permNodeRoleId[];
 	
-        public int arrayNodeTextRepID[]; // unsigned ArrayNodeRep.testRepID
-        public int arrayNodeChildNodeRepID[]; // unsigned ArrayNodeRep.childNodeRepID
-        public int arrayNodeNumChildren[]; // unsigned ArrayNodeRep.numChildren
+	public int arrayNodeTextRepID[]; // unsigned ArrayNodeRep.testRepID
+	public int arrayNodeChildNodeRepID[]; // unsigned ArrayNodeRep.childNodeRepID
+	public int arrayNodeNumChildren[]; // unsigned ArrayNodeRep.numChildren
 
-        public double doubles[]; 
+	public double doubles[]; 
 
 	public long binaryKey; // uint64_t BinaryNodeRep.binaryKey
 	public long binaryOffset; // uint64_t BinaryNodeRep.offset
@@ -121,10 +123,15 @@ public class ExpandedTree implements Writable {
 	public int numLinkNodeReps; // unsigned
 	public int uriTextRepID; // unsigned
 	public int colsTextRepID; // unsigned
+	public int[] metaKeys; // unsigned*
+	public int[] metaVals; // unsigned*
 	public int schemaRepUID; // unsigned
 	public long schemaTimestamp; // uint64_t
+	
+	public int numMetadata; // unsigned
 
 	private long fragmentOrdinal;
+	private int quality;
 
 	public boolean atomEquals(int atom, byte value[]) {
 		int p = 0;
@@ -186,6 +193,15 @@ public class ExpandedTree implements Writable {
             cols[i] = atomString(textReps[index++]);
         }
         return cols;
+    }
+    
+    public Map<String, String> getMetadata() {
+        if (numMetadata == 0) return null;
+        Map<String, String> metaMap = new HashMap<String, String>(numMetadata);
+        for (int i = 0; i < numMetadata; i++) {
+            metaMap.put(atomString(metaKeys[i]), getText(metaVals[i]));
+        }
+        return metaMap;
     }
 	
 	public byte rootNodeKind() {
@@ -260,6 +276,14 @@ public class ExpandedTree implements Writable {
 
     public void setFragmentOrdinal(long fragmentOrdinal) {
         this.fragmentOrdinal = fragmentOrdinal;
+    }
+
+    public int getQuality() {
+        return quality;
+    }
+
+    public void setQuality(int quality) {
+        this.quality = quality;
     }
 
     @Override

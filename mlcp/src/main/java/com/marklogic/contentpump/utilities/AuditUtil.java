@@ -35,8 +35,11 @@ import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
+import com.marklogic.xcc.ValueFactory;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.ValueType;
+import com.marklogic.xcc.types.impl.XsBooleanImpl;
 
 /**
  * @author mattsun
@@ -51,7 +54,7 @@ public class AuditUtil {
      */
     public static void prepareAuditMlcpFinish(Configuration conf, int ruleCount) {
         StringBuilder buf = new StringBuilder();
-        buf.append("(Redaction Counters) Rule applied=");
+        buf.append("(Redaction Counters) Applicable rules found=");
         buf.append(ruleCount);
         conf.set(ConfigConstants.CONF_AUDIT_MLCPFINISH_MESSAGE, buf.toString());
     }
@@ -63,6 +66,7 @@ public class AuditUtil {
      */
     public static void auditMlcpFinish(Configuration conf, String jobName, 
             Counters counters) throws IOException {
+        boolean success = false;
         if (!conf.getBoolean(ConfigConstants.CONF_AUDIT_MLCPFINISH_ENABLED, false)) {
             return;
         }
@@ -70,36 +74,40 @@ public class AuditUtil {
         StringBuilder auditBuf = new StringBuilder();
         auditBuf.append("job=");
         auditBuf.append(jobName);
-        auditBuf.append(";");        
         
-        Iterator<CounterGroup> groupIt = counters.iterator();
-        int groupCounter = 0;
-        while (groupIt.hasNext()) {
-            CounterGroup group = groupIt.next();
-            if (groupCounter != 0) {
-                auditBuf.append("; ");
-            } else {
-                auditBuf.append(" ");
-            }
-            
-            auditBuf.append('(');
-            auditBuf.append(group.getDisplayName());
-            auditBuf.append(") ");
-
-            Iterator<Counter> counterIt = group.iterator();
-            int counterCount = 0;
-            while (counterIt.hasNext()) {
-                if (counterCount != 0) {
-                    auditBuf.append(", ");
+        if (counters.countCounters() > 0) {
+            auditBuf.append(";");
+            Iterator<CounterGroup> groupIt = counters.iterator();
+            int groupCounter = 0;
+            while (groupIt.hasNext()) {
+                CounterGroup group = groupIt.next();
+                if (groupCounter != 0) {
+                    auditBuf.append("; ");
+                } else {
+                    auditBuf.append(" ");
                 }
-                Counter counter = counterIt.next();                    
-                auditBuf.append(counter.getDisplayName());
-                auditBuf.append('=');
-                auditBuf.append(counter.getValue());
-                counterCount++;
+                
+                auditBuf.append('(');
+                auditBuf.append(group.getDisplayName());
+                auditBuf.append(") ");
+
+                Iterator<Counter> counterIt = group.iterator();
+                int counterCount = 0;
+                while (counterIt.hasNext()) {
+                    if (counterCount != 0) {
+                        auditBuf.append(", ");
+                    }
+                    Counter counter = counterIt.next();                    
+                    auditBuf.append(counter.getDisplayName());
+                    auditBuf.append('=');
+                    auditBuf.append(counter.getValue());
+                    counterCount++;
+                }
+                groupCounter++;
             }
-            groupCounter++;
+            success = true;
         }
+        
         String ruleCounter = conf.get(ConfigConstants.CONF_AUDIT_MLCPFINISH_MESSAGE);
         if (ruleCounter != null) {
             auditBuf.append("; ");
@@ -109,9 +117,13 @@ public class AuditUtil {
         
         auditBuf = new StringBuilder();
         auditBuf.append("xquery version \"1.0-ml\";\n");
-        auditBuf.append("xdmp:audit(\"mlcpfinish\",\"");
+        auditBuf.append("declare variable $success as xs:boolean external;\n");
+        auditBuf.append("xdmp:audit(\"");
+        auditBuf.append(ConfigConstants.AUDIT_MLCPFINISH_CODE);
+        auditBuf.append("\",\"");
         auditBuf.append(auditMessage);
-        auditBuf.append("\", xdmp:get-current-user())");
+        auditBuf.append("\", ");
+        auditBuf.append("xdmp:get-current-user(), $success)");
         String auditQueryStr = auditBuf.toString();
         
         Session auditSession = null;
@@ -124,6 +136,8 @@ public class AuditUtil {
 
             AdhocQuery auditQuery = auditSession.newAdhocQuery(auditQueryStr);
             auditQuery.setOptions(options);
+            auditQuery.setNewVariable("success", ValueType.XS_BOOLEAN, 
+                    new Boolean(success));
             auditSession.submitRequest(auditQuery);
         } catch (XccConfigException e) {
             LOG.error(e);
@@ -153,7 +167,7 @@ public class AuditUtil {
         for (int i = 0; i < options.length; i++) {
             String name = options[i].getOpt();
             // Hide password from command
-            if ("password".equalsIgnoreCase(name)) {
+            if (name.matches(".*password")) {
                 continue;
             }
             if (i != 0) {
@@ -192,7 +206,9 @@ public class AuditUtil {
         
         if (auditMessage != null) {                
             auditBuf.append("xquery version \"1.0-ml\";\n");
-            auditBuf.append("xdmp:audit(\"mlcpstart\",\"");
+            auditBuf.append("xdmp:audit(\"");
+            auditBuf.append(ConfigConstants.AUDIT_MLCPSTART_CODE);
+            auditBuf.append("\",\"");
             auditBuf.append(auditMessage);
             auditBuf.append("\", xdmp:get-current-user())");
             String auditQueryStr = auditBuf.toString();

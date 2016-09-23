@@ -80,10 +80,12 @@ public interface ConfigConstants {
     static final String COPY_PERMISSIONS = "copy_permissions";
     static final String COPY_PROPERTIES = "copy_properties";
     static final String COPY_QUALITY = "copy_quality";
+    static final String COPY_METADATA = "copy_metadata";
     static final String DEFAULT_COPY_COLLECTIONS = "true";
     static final String DEFAULT_COPY_PERMISSIONS = "true";
     static final String DEFAULT_COPY_PROPERTIES = "true";
     static final String DEFAULT_COPY_QUALITY = "true";
+    static final String DEFAULT_COPY_METADATA = "true";
     static final String COLLECTION_FILTER = "collection_filter";
     static final String DIRECTORY_FILTER = "directory_filter";
     static final String QUERY_FILTER = "query_filter";
@@ -167,13 +169,10 @@ public interface ConfigConstants {
     static final String CONF_INPUT_SEQUENCEFILE_VALUE_TYPE = 
         "mapreduce.marklogic.input.sequencefile.valuetype";
     static final String CONF_OUTPUT_TYPE = "mapreduce.marklogic.output.type";
-    static final String CONF_COPY_COLLECTIONS = 
-        "mapreduce.marklogic.copycollections";
     static final String CONF_COPY_PERMISSIONS = 
         "mapreduce.marklogic.copypermissions";
     static final String CONF_COPY_PROPERTIES = 
         "mapreduce.marklogic.copyproperties";
-    static final String CONF_COPY_QUALITY = "mapreduce.marklogic.copyquality";
     static final String CONF_INPUT_ARCHIVE_METADATA_OPTIONAL = 
         "mapreduce.marklogic.input.archive.metadataoptional";
     static final String CONF_THREADS_PER_SPLIT = 
@@ -225,4 +224,15 @@ public interface ConfigConstants {
     static final String CONF_ML_VERSION = "mapreduce.marklogic.serverversion";
     static final int MAX_BATCH_SIZE = 200;
     static final int MAX_TXN_SIZE = 4000;
+    /**
+     * Auditing constants
+     */
+    static final String AUDIT_MLCPSTART_EVENT = 
+            "mlcp-copy-export-start";
+    static final String AUDIT_MLCPFINISH_EVENT = 
+            "mlcp-copy-export-finish";
+    static final String AUDIT_MLCPSTART_CODE =
+            "mlcpcopyexportstart";
+    static final String AUDIT_MLCPFINISH_CODE = 
+            "mlcpcopyexportfinish";
 }

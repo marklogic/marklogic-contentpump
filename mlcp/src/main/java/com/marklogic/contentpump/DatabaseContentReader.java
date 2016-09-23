@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,6 +31,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
@@ -44,9 +46,11 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.JsonItem;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XdmElement;
+import com.marklogic.xcc.types.XdmItem;
 
 /**
  * A MarkLogicRecordReader that fetches data from MarkLogic server and generates 
@@ -60,7 +64,8 @@ import com.marklogic.xcc.types.XdmElement;
 //changed, can't simply change query body
 
 public class DatabaseContentReader extends
-    MarkLogicRecordReader<DocumentURI, MarkLogicDocument> {
+    MarkLogicRecordReader<DocumentURI, MarkLogicDocument> implements
+    ConfigConstants {
     static final float DOCUMENT_TO_FRAGMENT_RATIO = 1;
     public static final Log LOG = LogFactory
         .getLog(DatabaseContentReader.class);
@@ -68,6 +73,7 @@ public class DatabaseContentReader extends
     protected boolean copyPermission;
     protected boolean copyProperties;
     protected boolean copyQuality;
+    protected boolean copyMetadata;
     protected HashMap<String, DocumentMetadata> metadataMap;
     protected String ctsQuery = null;
     protected boolean nakedDone = false;
@@ -82,14 +88,12 @@ public class DatabaseContentReader extends
 
     public DatabaseContentReader(Configuration conf) {
         super(conf);
-        copyCollection = conf.getBoolean(
-            ConfigConstants.CONF_COPY_COLLECTIONS, false);
-        copyPermission = conf.getBoolean(
-            ConfigConstants.CONF_COPY_PERMISSIONS, false);
-        copyProperties = conf.getBoolean(ConfigConstants.CONF_COPY_PROPERTIES,
-            false);
-        copyQuality = conf
-            .getBoolean(ConfigConstants.CONF_COPY_QUALITY, false);
+        copyCollection = conf.getBoolean(MarkLogicConstants.COPY_COLLECTIONS, 
+                true);
+        copyPermission = conf.getBoolean(CONF_COPY_PERMISSIONS, true);
+        copyProperties = conf.getBoolean(CONF_COPY_PROPERTIES,true);
+        copyQuality = conf.getBoolean(MarkLogicConstants.COPY_QUALITY, true);
+        copyMetadata = conf.getBoolean(MarkLogicConstants.COPY_METADATA, true);
         currentKey = new DocumentURI();
         metadataMap = new HashMap<String, DocumentMetadata>();
     }
@@ -121,14 +125,15 @@ public class DatabaseContentReader extends
             + mlSplit.getLength() - 1;
 
         String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR);
-        redactionRuleCol = conf.getStrings(REDACTION_RULE_COLLECTION, null);
+        redactionRuleCol = conf.getStrings(REDACTION_RULE_COLLECTION);
         Collection<String> nsCol = null;
         if (src != null) {
-            nsCol = conf.getStringCollection(PATH_NAMESPACE);
+            nsCol = conf.getStringCollection(
+                    MarkLogicConstants.PATH_NAMESPACE);
         } else {
             src = "fn:collection()";
         }
-        ctsQuery = conf.get(QUERY_FILTER);
+        ctsQuery = conf.get(MarkLogicConstants.QUERY_FILTER);
         StringBuilder buf = new StringBuilder();
         if (ctsQuery != null) {
             buildSearchQuery(src, ctsQuery, nsCol, buf);
@@ -177,11 +182,15 @@ public class DatabaseContentReader extends
             } else {
                 buf.append("0,");
             }
+            // if copy-metadata
+            if (copyMetadata) {
+                buf.append(
+                    "(let $f := fn:function-lookup(xs:QName('xdmp:document-get-metadata'),1)\n"
+                    + "return if (exists($f)) then $f($uri) else ()),\n");
+            }
             // if copy-properties, else + (),\n
             if (copyProperties) {
                 buf.append("xdmp:document-properties($uri)/prop:properties,\n");
-            } else {
-                buf.append("(),\n");
             }
         } else {
             buf.append(",0,"); // quality
@@ -285,6 +294,11 @@ public class DatabaseContentReader extends
         } else {
             buf.append("0,");
         }
+        // copy-metadata
+        if (copyMetadata) {
+            buf.append("(let $f := fn:function-lookup(xs:QName('xdmp:document-get-metadata'),1)\n"
+                    + "return if (exists($f)) then $f($uri) else ()),\n");
+        }
         buf.append("$doc/prop:properties, \n");
 
         // end-of-record marker
@@ -384,7 +398,7 @@ public class DatabaseContentReader extends
             try {
                 readPermission((XdmElement) item.getItem(), metadata, buf);
             } catch (Exception e) {
-                e.printStackTrace();
+                throw new IOException(e);
             }
             item = result.next();
         }
@@ -393,10 +407,27 @@ public class DatabaseContentReader extends
         
         // handle quality, always present even if not requested (barrier)
         metadata.setQuality((XSInteger) item.getItem());
+        
+        // handle metadata
         item = result.next();
+        if (copyMetadata) {
+            XdmItem metaItem  = item.getItem();
+            if (metaItem instanceof JsonItem) {
+                JsonNode node = ((JsonItem)metaItem).asJsonNode();
+                metadata.meta = new HashMap<String, String>(node.size());
+                for (Iterator<String> names = node.fieldNames(); 
+                     names.hasNext();) {
+                    String key = names.next();
+                    JsonNode nodeVal = node.get(key);
+                    metadata.meta.put(key, nodeVal.asText());
+                }
+                item = result.next();
+            }
+        }
 
         // handle prop:properties node, optional
         // if not present, there will be a 0 as a marker
+    
         if (copyProperties && ValueType.ELEMENT == item.getItemType()) {
             String pString = item.asString();
             if (pString != null) {

@@ -108,7 +108,8 @@ implements MarkLogicConstants {
             FileSystem fs = path.getFileSystem(job.getConfiguration());
             FileStatus children[] = fs.listStatus(path);
             FileStatus treeIndexStatus = null, treeDataStatus = null, 
-                    ordinalsStatus = null, timestampsStatus = null;
+                    ordinalsStatus = null, timestampsStatus = null, 
+                    qualStatus = null;
             boolean obsolete = false;
             for (FileStatus child : children) {
                 String fileName = child.getPath().getName();
@@ -123,6 +124,8 @@ implements MarkLogicConstants {
                 } else if (fileName.equals("Obsolete")) {
                     obsolete = true;
                     break;
+                } else if (fileName.equals("Qualities")) {
+                    qualStatus = child;
                 }
             }
             if (obsolete) {
@@ -139,6 +142,8 @@ implements MarkLogicConstants {
                 throw new RuntimeException("Ordinals file not found.");
             } else if (timestampsStatus == null) {
                 throw new RuntimeException("Timestamps file not found.");
+            } else if (qualStatus == null) {
+                LOG.warn("Qualities file is not found.");
             }
             long treeDataSize = treeDataStatus.getLen();
             if (treeDataSize == 0) {

@@ -46,11 +46,27 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
     
     protected void appendCustom(StringBuilder buf) {
         buf.append("\"AUDIT\",\n");
-        buf.append("let $group-id := xdmp:group()\n");
-        buf.append("let $enabled-event := xdmp:group-get-audit-event-type-enabled($group-id,(\"mlcp-start\", \"mlcp-finish\"))\n");
-        buf.append("let $mlcp-start-enabled := if ($enabled-event[1]) then \"mlcp-start\" else ()\n");
-        buf.append("let $mlcp-finish-enabled := if ($enabled-event[2]) then \"mlcp-finish\" else ()\n");
-        buf.append("return ($mlcp-start-enabled, $mlcp-finish-enabled)");
+        buf.append("let $f := \n");
+        buf.append("    fn:function-lookup(xs:QName('xdmp:group-get-audit-event-type-enabled'), 2)\n");
+        buf.append("return \n");
+        buf.append("    if (not(exists($f)))\n");
+        buf.append("    then ()\n");
+        buf.append("    else\n");
+        buf.append("        let $group-id := xdmp:group()\n");
+        buf.append("        let $enabled-event := $f($group-id,(\"");
+        buf.append(ConfigConstants.AUDIT_MLCPSTART_EVENT);
+        buf.append("\", \"");
+        buf.append(ConfigConstants.AUDIT_MLCPFINISH_EVENT);
+        buf.append("\"))\n");
+        buf.append("        let $mlcp-start-enabled := \n");
+        buf.append("                if ($enabled-event[1]) then \"");
+        buf.append(ConfigConstants.AUDIT_MLCPSTART_EVENT);
+        buf.append("\" else ()\n");
+        buf.append("        let $mlcp-finish-enabled := \n");
+        buf.append("                if ($enabled-event[2]) then \"");
+        buf.append(ConfigConstants.AUDIT_MLCPFINISH_EVENT);
+        buf.append("\" else ()\n");
+        buf.append("        return ($mlcp-start-enabled, $mlcp-finish-enabled)");
     }
     
     protected void getForestSplits(JobContext jobContext,
@@ -68,9 +84,11 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
             String itemStr = ((XSString)item.getItem()).asString();
             if ("AUDIT".equals(itemStr)) {
                 continue;
-            } else if ("mlcp-start".equals(itemStr)) {
+            } else if (ConfigConstants.AUDIT_MLCPSTART_EVENT.
+                    equalsIgnoreCase(itemStr)) {
                 mlcpStartEventEnabled = true;
-            } else if ("mlcp-finish".equalsIgnoreCase(itemStr)) {
+            } else if (ConfigConstants.AUDIT_MLCPFINISH_EVENT.
+                    equalsIgnoreCase(itemStr)) {
                 mlcpFinishEventEnabled = true;
             } else {
                 throw new IOException("Unrecognized audit event " + itemStr);

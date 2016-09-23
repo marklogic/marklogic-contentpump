@@ -67,16 +67,15 @@
     <dependencySet>
       <scope>runtime</scope>
       <outputDirectory>/lib</outputDirectory>
-	  <includes>
+      <includes>
 		<include>org.apache.commons:commons-csv:jar:*</include>
         <include>commons-httpclient:commons-httpclient:jar:*</include>
         <include>commons-io:commons-io:jar:*</include>
-        <include>org.htrace:htrace-core:jar:*</include>
+        <include>org.apache.htrace:htrace-core:jar:*</include>
         <include>org.codehaus.jackson:jackson-xc:jar:*</include>
         <include>org.codehaus.jackson:jackson-jaxrs:jar:*</include>
         <include>com.sun.jersey:jersey-core:jar:*</include>
         <include>com.sun.jersey:jersey-client:jar:*</include>
-        <include>org.apache.hadoop:hadoop-yarn-client:jar:*</include>
         <include>commons-collections:commons-collections:jar:*</include>
         <include>com.marklogic:*:*:*</include>                 
         <include>org.apache.avro:avro:jar:*</include>
@@ -87,20 +86,22 @@
         <include>commons-logging:commons-logging:jar:*</include>
         <include>commons-modeler:commons-modeler:jar:*</include>
         <include>com.google.guava:guava:jar:*</include>
-        <include>org.apache.hadoop:hadoop-annotations:jar:*</include>
-        <include>org.apache.hadoop:hadoop-auth:jar:*</include>
-        <include>org.apache.hadoop:hadoop-common:jar:*</include>
-        <include>org.apache.hadoop:hadoop-hdfs:jar:*</include>
-        <include>org.apache.hadoop:hadoop-mapreduce-client-common:jar:*</include>
-        <include>org.apache.hadoop:hadoop-mapreduce-client-core:jar:*</include>
-        <include>org.apache.hadoop:hadoop-mapreduce-client-jobclient:jar:*</include>
-        <include>org.apache.hadoop:hadoop-yarn-api:jar:*</include>
-        <include>org.apache.hadoop:hadoop-yarn-common:jar:*</include>
+        <include>org.apache.hadoop:hadoop-annotations:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-auth:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-common:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-hdfs:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-mapreduce-client-common:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-mapreduce-client-core:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-mapreduce-client-jobclient:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-yarn-api:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-yarn-common:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-yarn-client:jar:*mapr*</include>
+        <include>org.apache.hadoop:hadoop-mapreduce-client-contrib:jar:*mapr*</include> 
+        <include>org.apache.zookeeper:zookeeper:jar:*</include>
+        <include>org.json:json:jar:*</include>
+        <include>com.mapr.hadoop:maprfs:jar:*</include>
         <include>org.codehaus.jackson:jackson-core-asl:jar:*</include>
         <include>org.codehaus.jackson:jackson-mapper-asl:jar:*</include>
-        <include>com.fasterxml.jackson.core:jackson-core:jar:*</include>
-        <include>com.fasterxml.jackson.core:jackson-databind:jar:*</include>
-        <include>com.fasterxml.jackson.core:jackson-annotations:jar:*</include>
         <include>log4j:log4j:jar:*</include>
         <include>com.google.protobuf:protobuf-java:jar:*</include>
         <include>org.slf4j:slf4j-api:jar:*</include>

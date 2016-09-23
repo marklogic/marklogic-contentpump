@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.Reader;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import com.marklogic.xcc.ContentCapability;
@@ -51,10 +52,12 @@ public class DocumentMetadata {
     protected List<ContentPermission> permissionsList = new Vector<ContentPermission>();
     protected String permString = null;
     protected int quality = 0;
+    protected Map<String, String> meta = null;
 
     protected String properties = null;
 
     protected boolean isNakedProps;
+    
     public boolean isNakedProps() {
         return isNakedProps;
     }
@@ -134,6 +137,15 @@ public class DocumentMetadata {
         buf.append("]");
         return buf.toString();
     }
+    
+    public Map<String, String> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, String> meta) {
+        this.meta = meta;
+    }
+    
     /**
      * @return
      */
@@ -301,12 +313,13 @@ public class DocumentMetadata {
             return false;
         }
 
-        DocumentMetadata meta = (DocumentMetadata) obj;
-        boolean result = compareCollections(meta.getCollections())
-            && getFormatName().equals(meta.getFormatName())
-            && comparePermissions(meta.getPermissions())
-            && compareProperties(meta.getProperties())
-            && getQuality() == meta.getQuality();
+        DocumentMetadata metadata = (DocumentMetadata) obj;
+        boolean result = compareCollections(metadata.getCollections())
+            && getFormatName().equals(metadata.getFormatName())
+            && comparePermissions(metadata.getPermissions())
+            && compareProperties(metadata.getProperties())
+            && getQuality() == metadata.getQuality()
+            && meta.equals(metadata.getMeta());
 
         return result;
     }

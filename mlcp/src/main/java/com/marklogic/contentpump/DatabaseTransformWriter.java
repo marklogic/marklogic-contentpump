@@ -21,7 +21,6 @@ import java.util.Map;
 import org.apache.hadoop.conf.Configuration;
 
 import com.marklogic.contentpump.utilities.TransformHelper;
-import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
@@ -135,7 +134,7 @@ public class DatabaseTransformWriter<VALUE> extends
                     isCopyPerms&&naked?meta.getPermString():null,
                     isCopyColls&&naked?meta.getCollectionString():null,
                     isCopyQuality&&naked?meta.getQualityString():null, 
-                    sessions[sid]);
+                    isCopyMeta&&naked?meta.getMeta():null, sessions[sid]);
             stmtCounts[sid]++;
         }
         boolean committed = false;

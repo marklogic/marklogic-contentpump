@@ -1655,6 +1655,13 @@ public enum Command implements ConfigConstants {
                    + " to destination")
             .create(COPY_QUALITY);
         options.addOption(cpqt);
+        Option cpmeta = OptionBuilder
+            .withArgName("true,false")
+            .hasOptionalArg()
+            .withDescription("Whether to copy document metadata from source"
+                    + " to destination")
+            .create(COPY_METADATA);
+            options.addOption(cpmeta);
     }
 
     static void configBatchTxn(Options options) {
@@ -1778,16 +1785,17 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(COPY_COLLECTIONS)) {
             String arg = cmdline.getOptionValue(COPY_COLLECTIONS);
             if (arg == null || arg.equalsIgnoreCase("true")) {
-                conf.setBoolean(CONF_COPY_COLLECTIONS, true);
+                conf.setBoolean(MarkLogicConstants.COPY_COLLECTIONS, true);
             } else if (arg.equalsIgnoreCase("false")) {
-                conf.setBoolean(CONF_COPY_COLLECTIONS, false);
+                conf.setBoolean(MarkLogicConstants.COPY_COLLECTIONS, false);
             } else {
                 throw new IllegalArgumentException(
                         "Unrecognized option argument for " + COPY_COLLECTIONS
                                 + ": " + arg);
             }
         } else {
-            conf.set(CONF_COPY_COLLECTIONS, DEFAULT_COPY_COLLECTIONS);
+            conf.set(MarkLogicConstants.COPY_COLLECTIONS, 
+                    DEFAULT_COPY_COLLECTIONS);
         }
         if (cmdline.hasOption(COPY_PERMISSIONS)) {
             String arg = cmdline.getOptionValue(COPY_PERMISSIONS);
@@ -1816,16 +1824,30 @@ public enum Command implements ConfigConstants {
         if (cmdline.hasOption(COPY_QUALITY)) {
             String arg = cmdline.getOptionValue(COPY_QUALITY);
             if (arg == null || arg.equalsIgnoreCase("true")) {
-                conf.setBoolean(CONF_COPY_QUALITY, true);
+                conf.setBoolean(MarkLogicConstants.COPY_QUALITY, true);
             } else if (arg.equalsIgnoreCase("false")) {
-                conf.setBoolean(CONF_COPY_QUALITY, false);
+                conf.setBoolean(MarkLogicConstants.COPY_QUALITY, false);
             } else {
                 throw new IllegalArgumentException(
                         "Unrecognized option argument for " + COPY_QUALITY
                                 + ": " + arg);
             }
         } else {
-            conf.set(CONF_COPY_QUALITY, DEFAULT_COPY_QUALITY);
+            conf.set(MarkLogicConstants.COPY_QUALITY, DEFAULT_COPY_QUALITY);
+        }
+        if (cmdline.hasOption(COPY_METADATA)) {
+            String arg = cmdline.getOptionValue(COPY_METADATA);
+            if (arg == null || arg.equalsIgnoreCase("true")) {
+                conf.setBoolean(MarkLogicConstants.COPY_METADATA, true);
+            } else if (arg.equalsIgnoreCase("false")) {
+                conf.setBoolean(MarkLogicConstants.COPY_METADATA, false);
+            } else {
+                throw new IllegalArgumentException(
+                        "Unrecognized option argument for " + COPY_METADATA
+                                + ": " + arg);
+            }
+        } else {
+            conf.set(MarkLogicConstants.COPY_METADATA, DEFAULT_COPY_METADATA);
         }
     }
 
@@ -1993,17 +2015,17 @@ public enum Command implements ConfigConstants {
                                 + OUTPUT_URI_REPLACE + " :" + uriReplace);
                     }
                 }
-                conf.setStrings(MarkLogicConstants.CONF_OUTPUT_URI_REPLACE, 
+                conf.setStrings(MarkLogicConstants.OUTPUT_URI_REPLACE, 
                         uriReplace);
             }
         }
         if (cmdline.hasOption(OUTPUT_URI_PREFIX)) {
             String outPrefix = cmdline.getOptionValue(OUTPUT_URI_PREFIX);
-            conf.set(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX, outPrefix);
+            conf.set(MarkLogicConstants.OUTPUT_URI_PREFIX, outPrefix);
         }
         if (cmdline.hasOption(OUTPUT_URI_SUFFIX)) {
             String outSuffix = cmdline.getOptionValue(OUTPUT_URI_SUFFIX);
-            conf.set(MarkLogicConstants.CONF_OUTPUT_URI_SUFFIX, outSuffix);
+            conf.set(MarkLogicConstants.OUTPUT_URI_SUFFIX, outSuffix);
         }
         if (cmdline.hasOption(OUTPUT_COLLECTIONS)) {
             String collectionsString = cmdline.getOptionValue(
