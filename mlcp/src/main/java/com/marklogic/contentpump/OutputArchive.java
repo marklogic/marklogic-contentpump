@@ -125,22 +125,28 @@ public class OutputArchive implements InternalConstants {
         return path;
     }
     
-    public void write(String uri, InputStream is, long size) 
+    public void write(String uri, InputStream is, long size, 
+            boolean isExportDoc) 
     throws IOException {
         ZipEntry entry = new ZipEntry(uri);
         if (outputStream == null || 
             (currentFileBytes + size > Integer.MAX_VALUE) &&
              currentFileBytes > 0) {
-            newOutputStream();
-        }        
+            if (currentEntries % 2 == 0 && !isExportDoc) {
+                //the file overflowed is metadata, create new zip
+                newOutputStream();
+            }
+        }     
+        long totalRead = 0;
         try {
             outputStream.putNextEntry(entry);
             long bufSize = Math.min(size, MAX_BUFFER_SIZE);
-            byte[] buf = new byte[(int)bufSize];
+            byte[] buf = new byte[(int)bufSize];       
             for (long toRead = size, read = 0; toRead > 0; toRead -= read) {
                 read = is.read(buf, 0, (int)bufSize);
                 if (read > 0) {
                     outputStream.write(buf, 0, (int)read);
+                    totalRead += read;
                 } else {
                     if (size != Integer.MAX_VALUE) {
                         LOG.warn("Premature EOF: uri=" + uri +
@@ -153,11 +159,12 @@ public class OutputArchive implements InternalConstants {
         } catch (ZipException e) {
             LOG.warn("Exception caught: " + e.getMessage() + entry.getName());
         }
-        currentFileBytes += size;
+        currentFileBytes += totalRead;
         currentEntries++;
     }
 
-    public long write(String outputPath, byte[] bytes) throws IOException {
+    public long write(String outputPath, byte[] bytes, boolean isExportDoc)
+    throws IOException {
 
         if (null == outputPath) {
             throw new NullPointerException("null path");
@@ -175,7 +182,7 @@ public class OutputArchive implements InternalConstants {
 
         if (currentFileBytes > 0
             && currentFileBytes + total > Integer.MAX_VALUE) {
-            if (currentEntries % 2 ==0) {
+            if (currentEntries % 2 ==0 && !isExportDoc) {
             	//the file overflowed is metadata, create new zip
                 newOutputStream();
             } else {

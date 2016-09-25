@@ -130,20 +130,20 @@ implements MarkLogicConstants, ConfigConstants {
             return;
         }
         if (ContentType.BINARY.equals(type)) {
-            if(binaryArchive == null) {
+            if (binaryArchive == null) {
                 binaryArchive = new OutputArchive(dst, conf);
             }
             if (!isExportDoc) {
                 binaryArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
                     ((DatabaseDocumentWithMeta) content).getMeta().toXML()
-                        .getBytes(encoding));
+                        .getBytes(encoding), false);
             }
             if (content.isStreamable()) {
                 InputStream is = null;
                 try {
                     long size = content.getContentSize();
                     is = content.getContentAsByteStream();
-                    binaryArchive.write(zipEntryName, is, size);
+                    binaryArchive.write(zipEntryName, is, size, isExportDoc);
                 } finally {
                     if (is != null) {
                         is.close();
@@ -151,7 +151,7 @@ implements MarkLogicConstants, ConfigConstants {
                 }
             } else {
                 binaryArchive.write(zipEntryName, 
-                        content.getContentAsByteArray());
+                        content.getContentAsByteArray(), isExportDoc);
             }
         } else if (ContentType.TEXT.equals(type)) {
             if(txtArchive == null) {
@@ -160,10 +160,11 @@ implements MarkLogicConstants, ConfigConstants {
             if (!isExportDoc) {
                 txtArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
                     ((DatabaseDocumentWithMeta) content).getMeta().toXML()
-                        .getBytes(encoding));
+                        .getBytes(encoding), false);
             }
             String text = content.getContentAsString();
-            txtArchive.write(zipEntryName, text.getBytes(encoding));
+            txtArchive.write(zipEntryName, text.getBytes(encoding), 
+                    isExportDoc);
         } else if (ContentType.XML.equals(type)) {
             if(xmlArchive == null) {
                 xmlArchive = new OutputArchive(dst, conf);
@@ -172,14 +173,15 @@ implements MarkLogicConstants, ConfigConstants {
                 if (((DatabaseDocumentWithMeta) content).getMeta().isNakedProps) {
                     xmlArchive.write(zipEntryName + DocumentMetadata.NAKED,
                         ((DatabaseDocumentWithMeta) content).getMeta()
-                            .toXML().getBytes(encoding));
+                            .toXML().getBytes(encoding), false);
                 } else {
                     xmlArchive.write(
                         zipEntryName + DocumentMetadata.EXTENSION,
                         ((DatabaseDocumentWithMeta) content).getMeta()
-                            .toXML().getBytes(encoding));
+                            .toXML().getBytes(encoding), isExportDoc);
                     xmlArchive.write(zipEntryName, 
-                            content.getContentAsString().getBytes(encoding));
+                        content.getContentAsString().getBytes(encoding), 
+                        isExportDoc);
                 }
             } else {
                 String doc = content.getContentAsString();
@@ -187,7 +189,8 @@ implements MarkLogicConstants, ConfigConstants {
                     LOG.error("Empty document for " + zipEntryName);
                     return;
                 }
-                xmlArchive.write(zipEntryName, doc.getBytes(encoding));
+                xmlArchive.write(zipEntryName, doc.getBytes(encoding), 
+                        isExportDoc);
             }
         } else if (ContentType.JSON.equals(type)) {
             if (jsonArchive == null) {
@@ -195,17 +198,19 @@ implements MarkLogicConstants, ConfigConstants {
             }
             if (!isExportDoc) {
                 jsonArchive.write(zipEntryName + DocumentMetadata.EXTENSION,
-                        ((DatabaseDocumentWithMeta) content).getMeta()
-                            .toXML().getBytes(encoding));
+                    ((DatabaseDocumentWithMeta) content).getMeta()
+                        .toXML().getBytes(encoding), isExportDoc);
                 jsonArchive.write(zipEntryName, 
-                            content.getContentAsString().getBytes(encoding));
+                    content.getContentAsString().getBytes(encoding), 
+                    isExportDoc);
             } else {
                 String doc = content.getContentAsString();
                 if (doc == null) {
                     LOG.error("Empty document for " + zipEntryName);
                     return;
                 }
-                jsonArchive.write(zipEntryName, doc.getBytes(encoding));
+                jsonArchive.write(zipEntryName, doc.getBytes(encoding), 
+                    isExportDoc);
             }
         } else {
             LOG.error("Skipping " + uri + ".  Unsupported content type: "
