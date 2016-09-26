@@ -350,7 +350,6 @@ implements MarkLogicConstants {
                 if (deleted != -1L) deletedCnt++;
                 ordIs.skipBytes(8);
                 tsIs.skipBytes(8 * 2);
-                qualIs.skipBytes(4);
                 return null;
             }
         } catch (EOFException e) {
