@@ -311,6 +311,10 @@ public class FCheck {
 		try {
 			for (;; ++position) {
 				ordinal = in.readLong();
+				if (verbose) {
+				    System.out.println("position=" + position + ", ordinal="
+				        + ordinal);
+				}
 			}
 		} catch (EOFException e) {
 		}
