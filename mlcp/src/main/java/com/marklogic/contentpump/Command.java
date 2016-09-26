@@ -378,7 +378,8 @@ public enum Command implements ConfigConstants {
             return job;
         }
 
-        void applyUriId(Configuration conf, InputType inputType, CommandLine cmdline) {
+        void applyUriId(Configuration conf, InputType inputType,
+                CommandLine cmdline, boolean splitInput) {
             String uriId = null;
             if (cmdline.hasOption(DELIMITED_URI_ID)) {
                 LOG.warn(DELIMITED_URI_ID + " has been depracated, use " + URI_ID);
@@ -424,6 +425,11 @@ public enum Command implements ConfigConstants {
             } else {
                 if (InputType.DELIMITED_TEXT == inputType) {
                     if ("true".equalsIgnoreCase(generate)) {
+                        if (splitInput) {
+                            LOG.warn("Using split_input and generate_uri combination "
+                                    + "may result in duplicate documents from "
+                                    + "the same row");
+                        }
                         conf.setBoolean(CONF_INPUT_GENERATE_URI, true);
                     }
                 } else if (InputType.DELIMITED_JSON == inputType) {
@@ -452,7 +458,31 @@ public enum Command implements ConfigConstants {
                 throw new IllegalArgumentException("The setting for " + DOCUMENT_TYPE + "is not applicable to " + inputType);
             }
             
-            applyUriId(conf, inputType, cmdline);
+            boolean splitInput = false;
+            if (cmdline.hasOption(SPLIT_INPUT)) {
+                String arg = cmdline.getOptionValue(SPLIT_INPUT);
+                if (arg == null || arg.equalsIgnoreCase("true")) {
+                    if (isInputCompressed(cmdline)) {
+                        LOG.warn(INPUT_COMPRESSED + " disables " + SPLIT_INPUT);
+                        conf.setBoolean(CONF_SPLIT_INPUT, false);
+                    }
+                    if (inputType != InputType.DELIMITED_TEXT) {
+                        throw new IllegalArgumentException("The setting for " +
+                            SPLIT_INPUT + " option is not supported for " +
+                            inputType);
+                    }
+                    conf.setBoolean(CONF_SPLIT_INPUT, true);
+                    splitInput = true;
+                } else if (arg.equalsIgnoreCase("false")) {
+                    conf.setBoolean(CONF_SPLIT_INPUT, false);
+                } else {
+                    throw new IllegalArgumentException(
+                        "Unrecognized option argument for " + SPLIT_INPUT
+                            + ": " + arg);
+                }
+            }
+
+            applyUriId(conf, inputType, cmdline, splitInput);
             
             if (cmdline.hasOption(DOCUMENT_TYPE)
                     && InputType.DOCUMENTS != inputType
@@ -745,27 +775,6 @@ public enum Command implements ConfigConstants {
             
             applyModuleConfigOptions(conf, cmdline);
             
-            if (cmdline.hasOption(SPLIT_INPUT)) {
-                String arg = cmdline.getOptionValue(SPLIT_INPUT);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
-                    if (isInputCompressed(cmdline)) {
-                        LOG.warn(INPUT_COMPRESSED + " disables " + SPLIT_INPUT);
-                        conf.setBoolean(CONF_SPLIT_INPUT, false);
-                    }
-                    if (inputType != InputType.DELIMITED_TEXT) {
-                        throw new IllegalArgumentException("The setting for " +
-                            SPLIT_INPUT + " option is not supported for " + 
-                            inputType);
-                    }
-                    conf.setBoolean(CONF_SPLIT_INPUT, true);
-                } else if (arg.equalsIgnoreCase("false")) {
-                    conf.setBoolean(CONF_SPLIT_INPUT, false);
-                } else {
-                    throw new IllegalArgumentException(
-                        "Unrecognized option argument for " + SPLIT_INPUT
-                            + ": " + arg);
-                }
-            }
             if (cmdline.hasOption(COLLECTION_FILTER)) {
                 if (inputType == InputType.FOREST) {
                     String colFilter = 
