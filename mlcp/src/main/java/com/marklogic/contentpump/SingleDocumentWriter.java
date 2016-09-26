@@ -15,6 +15,7 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -89,9 +90,9 @@ implements MarkLogicConstants, ConfigConstants, InternalConstants {
                     f.getParentFile().mkdirs();
                     f.createNewFile();
                 }
-                os = new FileOutputStream(f, false);
+                os = new BufferedOutputStream(new FileOutputStream(f, false));
             } else {
-                os = fs.create(path, false);
+                os = new BufferedOutputStream(fs.create(path, false));
             }
 
             ContentType type = content.getContentType();
