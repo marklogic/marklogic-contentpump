@@ -99,7 +99,6 @@
         <include>org.apache.hadoop:hadoop-mapreduce-client-contrib:jar:*mapr*</include> 
         <include>org.apache.zookeeper:zookeeper:jar:*</include>
         <include>org.json:json:jar:*</include>
-        <include>com.mapr.hadoop:maprfs:jar:*</include>
         <include>org.codehaus.jackson:jackson-core-asl:jar:*</include>
         <include>org.codehaus.jackson:jackson-mapper-asl:jar:*</include>
         <include>log4j:log4j:jar:*</include>
