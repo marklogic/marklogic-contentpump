@@ -19,6 +19,17 @@ The Hadoop Connector is an extension to Hadoop’s MapReduce framework that allo
 * Access MarkLogic text, geospatial, scalar, and document structure indexes to send only the most relevant data to Hadoop for processing
 * Write results from MapReduce jobs to MarkLogic in parallel
 
+## Release Note
+
+### What's New in mlcp and Hadoop Connector 8.0-6
+
+- mlcp distributed mode supports MapR 5.1, HDP 2.4 and CDH 5.8
+- significant performance improvement in archive export
+- mlcp honors user-specified InputFormat, OutputFormat and Mapper classes when creating jobs for import, export and copy
+- mlcp export now streams out binary documents
+- mlcp import now streams reading zip entries in compressed delimited texts, delimited JSON and aggregate XMLs
+- bug fixes
+
 ## Getting Started
 
 - [Getting Started with mlcp](http://docs.marklogic.com/guide/mlcp/getting-started)
@@ -55,7 +66,7 @@ The build writes to the respective **deliverable** directories under the top-lev
 
 Alternatively, you can build mlcp and the Hadoop Connector independently from each component’s root directory (i.e. `./mlcp/` and `./mapreduce/`) with the above command. *Note that mlcp depends on the Hadoop Connector*, so a successful build of the Hadoop Connector is required to build mlcp.
 
-For information on contributing to this project see [CONTRIBUTING.md](https://github.com/marklogic/marklogic-contentpump/blob/8.0-master/CONTRIBUTING.md). For information on working on development of this project see [project wiki page](https://github.com/marklogic/marklogic-contentpump/wiki).
+For information on contributing to this project see [CONTRIBUTING.md](https://github.com/marklogic/marklogic-contentpump/blob/8.0-develop/CONTRIBUTING.md). For information on working on development of this project see [project wiki page](https://github.com/marklogic/marklogic-contentpump/wiki).
 
 ## Tests
 
@@ -73,4 +84,4 @@ If you have questions about mlcp or the Hadoop Connector, ask on [StackOverflow]
 
 ## Support
 
-mlcp and the Hadoop Connector are maintained by MarkLogic Engineering and distributed under the [Apache 2.0 license](https://github.com/marklogic/marklogic-contentpump/blob/8.0-master/LICENSE). They are designed for use in production applications with MarkLogic Server. Everyone is encouraged [to file bug reports, feature requests, and pull requests through GitHub](https://github.com/marklogic/marklogic-contentpump/issues/new). This input is critical and will be carefully considered. However, we can’t promise a specific resolution or timeframe for any request. In addition, MarkLogic provides technical support for [release tags](https://github.com/marklogic/marklogic-contentpump/releases) of mlcp and the Hadoop Connector to licensed customers under the terms outlined in the [Support Handbook](http://www.marklogic.com/files/Mark_Logic_Support_Handbook.pdf). For more information or to sign up for support, visit [help.marklogic.com](http://help.marklogic.com).
+mlcp and the Hadoop Connector are maintained by MarkLogic Engineering and distributed under the [Apache 2.0 license](https://github.com/marklogic/marklogic-contentpump/blob/8.0-develop/LICENSE). They are designed for use in production applications with MarkLogic Server. Everyone is encouraged [to file bug reports, feature requests, and pull requests through GitHub](https://github.com/marklogic/marklogic-contentpump/issues/new). This input is critical and will be carefully considered. However, we can’t promise a specific resolution or timeframe for any request. In addition, MarkLogic provides technical support for [release tags](https://github.com/marklogic/marklogic-contentpump/releases) of mlcp and the Hadoop Connector to licensed customers under the terms outlined in the [Support Handbook](http://www.marklogic.com/files/Mark_Logic_Support_Handbook.pdf). For more information or to sign up for support, visit [help.marklogic.com](http://help.marklogic.com).

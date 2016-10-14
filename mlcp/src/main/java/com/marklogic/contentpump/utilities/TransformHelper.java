@@ -64,7 +64,8 @@ public class TransformHelper {
                 "declare variable $INSERT-OPTIONS as element() external;\n")
             .append("hadoop:transform-and-insert(\"").append(moduleUri)
             .append("\",\"").append(functionNs).append("\",\"")
-            .append(functionName).append("\",\"").append(functionParam)
+            .append(functionName).append("\",\"")
+            .append(functionParam.replace("\"", "\"\""))
             .append("\", $URI, $CONTENT, $INSERT-OPTIONS)");
         return q.toString();
     }
@@ -250,6 +251,11 @@ public class TransformHelper {
         DocumentRepairLevel repairLevel = cOptions.getRepairLevel();
         if (!DocumentRepairLevel.DEFAULT.equals(repairLevel)) {
             optionsMap.put("xml-repair-level", "repair-" + repairLevel);
+        }
+
+        String temporalCollection = cOptions.getTemporalCollection();
+        if (temporalCollection != null) {
+            optionsMap.put("temporal-collection", temporalCollection);
         }
 
         String optionElem = mapToElement(optionsMap);

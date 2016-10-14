@@ -228,8 +228,8 @@ implements MarkLogicConstants {
         }
         key.setSkipReason(reason);
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Set key: " + key);
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Set key: " + key);
         }
     }
 
@@ -344,10 +344,16 @@ implements MarkLogicConstants {
             }
             
             if (nascent == 0L || deleted != -1L) { // skip
-                position++;
                 bytesRead += dataIs.skipBytes(j);
                 if (nascent == 0L) nascentCnt++;
                 if (deleted != -1L) deletedCnt++;
+                ordIs.skipBytes(8);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Skipped a " + 
+                        (nascent == 0L ? "nascent" : "deleted") + 
+                        " document at position " + position);
+                }
+                position++;
                 return null;
             }
         } catch (EOFException e) {

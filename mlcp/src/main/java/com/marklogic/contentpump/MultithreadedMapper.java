@@ -282,10 +282,14 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                 .getClass(), outer.getConfiguration());
             key = ReflectionUtils.copy(outer.getConfiguration(),
                 outer.getCurrentKey(), key);
-            value = (V1) ReflectionUtils.newInstance(outer.getCurrentValue()
-                .getClass(), outer.getConfiguration());
-            value = ReflectionUtils.copy(outer.getConfiguration(),
-                outer.getCurrentValue(), value);
+            V1 outerVal = outer.getCurrentValue();
+            if (outerVal != null) {
+                value = (V1)ReflectionUtils.newInstance(
+                    outer.getCurrentValue().getClass(), 
+                    outer.getConfiguration());
+                value = ReflectionUtils.copy(outer.getConfiguration(),
+                    outer.getCurrentValue(), value);
+            }
             return true;
         }
 

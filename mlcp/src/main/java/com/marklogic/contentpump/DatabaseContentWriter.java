@@ -97,27 +97,37 @@ public class DatabaseContentWriter<VALUE> extends
             DocumentMetadata meta) {
         ContentCreateOptions opt = (ContentCreateOptions)options.clone();
         if (meta != null) {
-            if (opt.getQuality() == 0) {
+            if (isCopyQuality && opt.getQuality() == 0) {
                 opt.setQuality(meta.quality);
             }
-            HashSet<String> colSet = new HashSet<String>(meta.collectionsList);
-            if (opt.getCollections() != null) {
-                // union copy_collection and output_collection
-                for (String s : opt.getCollections()) {
-                    colSet.add(s);
+            if (isCopyColls) {
+                if (opt.getCollections() != null) {
+                    HashSet<String> colSet = 
+                            new HashSet<String>(meta.collectionsList);
+                    // union copy_collection and output_collection
+                    for (String s : opt.getCollections()) {
+                        colSet.add(s);
+                    }
+                    opt.setCollections(
+                            colSet.toArray(new String[colSet.size()]));
+                } else {
+                    opt.setCollections(meta.getCollections());
+                }
+            }      
+            if (isCopyPerms) {
+                if (opt.getPermissions() != null) {
+                    HashSet<ContentPermission> pSet = 
+                         new HashSet<ContentPermission>(meta.permissionsList);
+                    // union of output_permission & copy_permission
+                    for (ContentPermission p : opt.getPermissions()) {
+                        pSet.add(p);
+                    }
+                    opt.setPermissions(
+                            pSet.toArray(new ContentPermission[pSet.size()]));
+                } else {
+                    opt.setPermissions(meta.getPermissions());
                 }
             }
-            opt.setCollections(colSet.toArray(new String[colSet.size()]));
-            HashSet<ContentPermission> pSet = new HashSet<ContentPermission>(
-                    meta.permissionsList);
-            if (opt.getPermissions() != null) {
-                // union of output_permission & copy_permission
-                for (ContentPermission p : opt.getPermissions()) {
-                    pSet.add(p);
-                }
-            }
-            opt.setPermissions(
-                    pSet.toArray(new ContentPermission[pSet.size()]));
         }       
         return opt;
     }
@@ -282,29 +292,27 @@ public class DatabaseContentWriter<VALUE> extends
                 len = fastLoad ? forestIds.length : 1;
                 sid = 0;
             }
-            if (isCopyProps) {
-                for (int i = 0; i < len; i++, sid++) {
-                    if (counts[i] > 0) {
-                        Content[] remainder = new Content[counts[i]];
-                        System.arraycopy(forestContents[i], 0, remainder, 0,
-                                counts[i]);
-                        if (sessions[sid] == null) {
-                            String forestId = forestIds[i];
-                            sessions[sid] = getSession(forestId);
-                        }
-                        insertBatch(remainder, sid);
-                        stmtCounts[sid]++;
-                        if (!isCopyProps) {
-                            continue;
-                        }
-                        for (int j = 0; j < counts[i]; j++) {
-                            DocumentMetadata m = metadatas[i][j].getMeta();
-                            String u = metadatas[i][j].getUri();
-                            if (m != null && m.getProperties() != null) {
-                                setDocumentProperties(u, m.getProperties(),
-                                        null, null, null, sessions[sid]);
-                                stmtCounts[sid]++;
-                            }
+            for (int i = 0; i < len; i++, sid++) {
+                if (counts[i] > 0) {
+                    Content[] remainder = new Content[counts[i]];
+                    System.arraycopy(forestContents[i], 0, remainder, 0,
+                            counts[i]);
+                    if (sessions[sid] == null) {
+                        String forestId = forestIds[i];
+                        sessions[sid] = getSession(forestId);
+                    }
+                    insertBatch(remainder, sid);
+                    stmtCounts[sid]++;
+                    if (!isCopyProps) {
+                        continue;
+                    }
+                    for (int j = 0; j < counts[i]; j++) {
+                        DocumentMetadata m = metadatas[i][j].getMeta();
+                        String u = metadatas[i][j].getUri();
+                        if (m != null && m.getProperties() != null) {
+                            setDocumentProperties(u, m.getProperties(),
+                                    null, null, null, sessions[sid]);
+                            stmtCounts[sid]++;
                         }
                     }
                 }

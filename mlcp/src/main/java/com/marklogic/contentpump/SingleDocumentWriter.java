@@ -15,6 +15,7 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -28,13 +29,15 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
+//import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.apache.hadoop.fs.LocalFileSystem;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.InternalConstants;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.utilities.URIUtil;
@@ -47,7 +50,7 @@ import com.marklogic.mapreduce.utilities.URIUtil;
  */
 public class SingleDocumentWriter 
 extends RecordWriter<DocumentURI, MarkLogicDocument> 
-implements MarkLogicConstants, ConfigConstants {
+implements MarkLogicConstants, ConfigConstants, InternalConstants {
     public static final Log LOG = 
         LogFactory.getLog(SingleDocumentWriter.class);
     
@@ -82,15 +85,15 @@ implements MarkLogicConstants, ConfigConstants {
                 path = new Path(dir, childPath);
             }
             FileSystem fs = path.getFileSystem(conf);
-            if (fs instanceof DistributedFileSystem) {
-                os = fs.create(path, false);
-            } else {
+            if (fs instanceof LocalFileSystem) {
                 File f = new File(path.toUri().getPath());
                 if (!f.exists()) {
                     f.getParentFile().mkdirs();
                     f.createNewFile();
                 }
-                os = new FileOutputStream(f, false);
+                os = new BufferedOutputStream(new FileOutputStream(f, false));
+            } else {
+                os = new BufferedOutputStream(fs.create(path, false));
             }
 
             ContentType type = content.getContentType();
@@ -100,7 +103,7 @@ implements MarkLogicConstants, ConfigConstants {
                     try {
                         is = content.getContentAsByteStream();
                         long size = content.getContentSize();
-                        long bufSize = Math.min(size, 512<<10);
+                        long bufSize = Math.min(size, MAX_BUFFER_SIZE);
                         byte[] buf = new byte[(int)bufSize];
                         for (long toRead = size, read = 0; 
                              toRead > 0; 
@@ -109,8 +112,10 @@ implements MarkLogicConstants, ConfigConstants {
                             if (read > 0) {
                                 os.write(buf, 0, (int)read);
                             } else {
-                                LOG.error("Premature EOF: uri=" + uri +
+                                if (size != Integer.MAX_VALUE) {
+                                    LOG.error("Premature EOF: uri=" + uri +
                                         ",toRead=" + toRead);
+                                }
                                 break;
                             }
                         }

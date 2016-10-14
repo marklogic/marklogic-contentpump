@@ -275,7 +275,7 @@ implements MarkLogicConstants {
                 }
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Input query: " + query);
+                LOG.debug("Input query: " + query.toString());
             }
             query.setOptions(options);       
             result = session.submitRequest(query);
