@@ -89,10 +89,19 @@ public class ContentOutputFormat<VALUEOUT> extends
         "declare variable $policy as xs:string external;\n" +
         "declare variable $partition-name as xs:string external;\n" + 
         "hadoop:get-forest-host($policy,$partition-name)";
+    public static final String FOREST_REPLICA_HOST_QUERY =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "declare variable $policy as xs:string external;\n" +
+        "declare variable $partition-name as xs:string external;\n" + 
+        "hadoop:get-forest-replica-host($policy,$partition-name)";
     public static final String INIT_QUERY =
         "import module namespace hadoop = "
         + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
         + "xdmp:host-name(xdmp:host()), \n"
+        + "let $repf := "
+        + "  fn:function-lookup(xs:QName('hadoop:get-forest-replica-host'),2)\n"
+        + "return exists($repf),"
         + "let $f := "
         + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
         + "return if (exists($f)) then $f() else ()";
@@ -103,6 +112,7 @@ public class ContentOutputFormat<VALUEOUT> extends
     protected boolean allowFastLoad = true;
     protected AssignmentPolicy.Kind policy;
     protected boolean legacy = false;
+    protected boolean failover = false;
     protected String initHostName;
     @Override
     public void checkOutputSpecs(Configuration conf, ContentSource cs) 
@@ -335,6 +345,8 @@ public class ContentOutputFormat<VALUEOUT> extends
 
         ResultItem item = result.next();
         initHostName = item.asString();
+        item = result.next();
+        failover = item.asString().equals("true");
         if (result.hasNext()) {
             item = result.next();
             String policyStr = item.asString();
@@ -413,7 +425,11 @@ public class ContentOutputFormat<VALUEOUT> extends
                           " Server.");
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
             } else {
-                query = session.newAdhocQuery(FOREST_HOST_QUERY);
+                if (failover) {
+                  query = session.newAdhocQuery(FOREST_REPLICA_HOST_QUERY);
+                } else {
+                  query = session.newAdhocQuery(FOREST_HOST_QUERY);
+                }
                 if (policy == AssignmentPolicy.Kind.RANGE ||
                     policy == AssignmentPolicy.Kind.QUERY) {
                     String pName = conf.get(OUTPUT_PARTITION);
@@ -436,6 +452,7 @@ public class ContentOutputFormat<VALUEOUT> extends
 
             LinkedMapWritable forestStatusMap = new LinkedMapWritable();
             Text forest = null;
+            Text master = null;
             String outputHost = conf.get(OUTPUT_HOST);
             boolean local = MODE_LOCAL.equals(conf.get(EXECUTION_MODE));
             
@@ -451,28 +468,30 @@ public class ContentOutputFormat<VALUEOUT> extends
                         hostName.equals(initHostName)) {
                     	hostName = outputHost;
                     }
+                    boolean updatable = true;
+                    long dc = -1;
                     if (!legacy) {
                         if (policy == AssignmentPolicy.Kind.BUCKET) {
                             item = result.next();
-                            boolean updatable = Boolean.parseBoolean(item
+                            updatable = Boolean.parseBoolean(item
                                 .asString());
-                            forestStatusMap.put(forest, new ForestInfo(
-                                hostName, -1, updatable));
-                        } else if (policy == AssignmentPolicy.Kind.LEGACY) {
-                            forestStatusMap.put(forest, new ForestInfo(
-                                hostName, -1, true));
-                        } else {
+                        } else if (policy == AssignmentPolicy.Kind.RANGE ||
+                                   policy == AssignmentPolicy.Kind.QUERY ) {
                             // range or statistical
                             item = result.next();
-                            long dc = Long.parseLong(item.asString());
-                            forestStatusMap.put(forest, new ForestInfo(
-                                hostName, dc, true));
+                            dc = Long.parseLong(item.asString());
                         }
+                    } 
+                    if (failover) {
+                        item = result.next();
+                        master = new Text(item.asString());
                     } else {
-                        forestStatusMap.put(forest, new ForestInfo(hostName,
-                            -1, true));
+                        master = forest;
                     }
+                    forestStatusMap.put(forest, new ForestInfo(
+                        hostName, dc, updatable, master.toString()));
                     forest = null;
+                    master = null;
                 }
             }
             if (forestStatusMap.size() == 0) {
