@@ -126,6 +126,9 @@ public interface ConfigConstants {
     static final String TRANSFORM_PARAM = "transform_param";
     static final String TEMPORAL_COLLECTION = "temporal_collection";
     static final String REDACTION = "redaction";
+    static final String SSL = "ssl";
+    static final String INPUT_SSL = "input_ssl";
+    static final String OUTPUT_SSL = "output_ssl";
 
     static final String RDF_STREAMING_MEMORY_THRESHOLD  = 
             "rdf_streaming_memory_threshold";

@@ -17,8 +17,15 @@
 package com.marklogic.mapreduce.utilities;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,7 +43,6 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.LinkedMapWritable;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.DatabaseDocument;
 import com.marklogic.mapreduce.MarkLogicNode;
@@ -70,25 +76,11 @@ public class InternalUtilities implements MarkLogicConstants {
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-forest-host-map()";
-    
-    static URI getServerUri(String user, String password, String hostName, 
-            String port, boolean useSsl) throws URISyntaxException {        
-        StringBuilder buf = new StringBuilder();
-        if (useSsl) {
-            buf.append("xccs://");
-        } else {
-            buf.append("xcc://");
-        }
-        buf.append(user);
-        buf.append(":");
-        buf.append(password);
-        buf.append("@");
-        buf.append(hostName);
-        buf.append(":");
-        buf.append(port);
-        
-        return new URI(buf.toString());
-    }
+
+    private static SslConfigOptions inputSslOptions;
+    private static SslConfigOptions outputSslOptions;
+
+    private static Object sslOptionsMutex = new Object();
     
     /**
      * Get content source for input server.
@@ -128,23 +120,103 @@ public class InternalUtilities implements MarkLogicConstants {
         int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
         if (useSsl) {
-            Class<? extends SslConfigOptions> sslOptionClass = 
-                conf.getClass(INPUT_SSL_OPTIONS_CLASS, 
-                null, SslConfigOptions.class);
-            if (sslOptionClass != null) {
-                SslConfigOptions sslOptions = 
-                    (SslConfigOptions)ReflectionUtils.newInstance(
-                            sslOptionClass, conf);
-                
-                // construct content source
-                return getSecureContentSource(host, portInt, user, password, 
-                        db, sslOptions);
-            }
+            return getSecureContentSource(host, portInt, user, password, 
+                        db, getInputSslOptions(conf));
         }
         return ContentSourceFactory.newContentSource(host, portInt, 
                 user, password, db);
     }
     
+    private static SslConfigOptions getInputSslOptions(Configuration conf) {
+        if (null != inputSslOptions) {
+            return inputSslOptions;
+        }
+        synchronized (sslOptionsMutex) {
+            if (null != inputSslOptions) {
+                return inputSslOptions;
+            }
+            Class<? extends SslConfigOptions> sslOptionClass = 
+                    conf.getClass(INPUT_SSL_OPTIONS_CLASS, 
+                    null, SslConfigOptions.class);
+            if (sslOptionClass != null) {
+                inputSslOptions = 
+                        (SslConfigOptions)ReflectionUtils.newInstance(
+                                sslOptionClass, conf);
+            } else {
+                inputSslOptions = newTrustAnyoneOptions();
+            }
+            return inputSslOptions;
+        }
+    }
+    
+    private static SslConfigOptions getOutputSslOptions(Configuration conf) {
+        if (null != outputSslOptions) {
+            return outputSslOptions;
+        }
+        synchronized (sslOptionsMutex) {
+            if (null != outputSslOptions) {
+                return outputSslOptions;
+            }
+            Class<? extends SslConfigOptions> sslOptionClass = 
+                    conf.getClass(OUTPUT_SSL_OPTIONS_CLASS, 
+                    null, SslConfigOptions.class);
+            if (sslOptionClass != null) {
+                outputSslOptions = 
+                        (SslConfigOptions)ReflectionUtils.newInstance(
+                                sslOptionClass, conf);
+            } else {
+                outputSslOptions = newTrustAnyoneOptions();
+            }
+            return outputSslOptions;
+        }
+    }
+
+    private static SslConfigOptions newTrustAnyoneOptions() {
+        return new SslConfigOptions() {
+
+            @Override
+            public SSLContext getSslContext() 
+                    throws NoSuchAlgorithmException, KeyManagementException {
+                TrustManager[] trust = new TrustManager[] { new X509TrustManager() {
+                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[0];
+                    }
+                    /**
+                     * @throws CertificateException
+                     */
+                    public void checkClientTrusted(
+                            java.security.cert.X509Certificate[] certs,
+                            String authType) throws CertificateException {
+                        // no exception means it's okay
+                    }
+                    /**
+                     * @throws CertificateException
+                     */
+                    public void checkServerTrusted(
+                            java.security.cert.X509Certificate[] certs,
+                            String authType) throws CertificateException {
+                        // no exception means it's okay
+                    }
+                } };
+                SSLContext sslContext = SSLContext.getInstance("SSLv3");
+                sslContext.init(null, trust, null);
+                
+                return sslContext;
+            }
+
+            @Override
+            public String[] getEnabledProtocols() {
+                return null;
+            }
+
+            @Override
+            public String[] getEnabledCipherSuites() {
+                return null;
+            }
+            
+        };
+    }
+
     static ContentSource getSecureContentSource(String host, int port,
             String user, String password, String db, 
             SslConfigOptions sslOptions) 
@@ -152,8 +224,13 @@ public class InternalUtilities implements MarkLogicConstants {
         ContentSource contentSource = null;
       
         // construct XCC SecurityOptions
-        SecurityOptions options = 
-            new SecurityOptions(sslOptions.getSslContext());
+        SecurityOptions options;
+        try {
+            options = new SecurityOptions(sslOptions.getSslContext());
+        } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            throw new XccConfigException("Error constructing SecurityOptions",
+                    e);
+        }
         options.setEnabledCipherSuites(sslOptions.getEnabledCipherSuites());
         options.setEnabledProtocols(sslOptions.getEnabledProtocols());
   
@@ -253,18 +330,8 @@ public class InternalUtilities implements MarkLogicConstants {
         int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
         if (useSsl) {
-            Class<? extends SslConfigOptions> sslOptionClass = 
-                conf.getClass(OUTPUT_SSL_OPTIONS_CLASS, 
-                null, SslConfigOptions.class);
-            if (sslOptionClass != null) {
-                SslConfigOptions sslOptions = 
-                    (SslConfigOptions)ReflectionUtils.newInstance(
-                            sslOptionClass, conf);
-                
-                // construct content source
-                return getSecureContentSource(hostName, portInt, user, password,
-                        db, sslOptions);
-            }
+            return getSecureContentSource(hostName, portInt, user, password,
+                        db, getOutputSslOptions(conf));
         }
         return ContentSourceFactory.newContentSource(hostName, portInt, 
                 user, password, db);

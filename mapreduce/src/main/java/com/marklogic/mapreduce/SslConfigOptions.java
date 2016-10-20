@@ -15,6 +15,9 @@
  */
 package com.marklogic.mapreduce;
 
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+
 import javax.net.ssl.SSLContext;
 
 /**
@@ -37,9 +40,10 @@ import javax.net.ssl.SSLContext;
  * 
  * @author jchen
  */
-public abstract interface SslConfigOptions {
+public interface SslConfigOptions {
     
-    public SSLContext getSslContext();
+    public SSLContext getSslContext() 
+        throws NoSuchAlgorithmException, KeyManagementException;
     
     public String[] getEnabledProtocols();
     
