@@ -66,6 +66,8 @@ public class ContentWriter<VALUEOUT>
 extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstants {
     public static final Log LOG = LogFactory.getLog(ContentWriter.class);
     
+    public static final String ID_PREFIX = "#";
+
     /**
      * Directory of the output documents.
      */
@@ -90,6 +92,16 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * An array of forest/host ids
      */
     protected String[] forestIds;
+
+    /**
+     * An array of current replica
+     */
+    protected int[] curReplica;
+
+    /**
+     * An array of blacklist host 
+     */
+    protected boolean[] blacklist;
     
     /** 
      * Counts of documents per forest.
@@ -183,11 +195,28 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         permsMap = new HashMap<String,ContentPermission[]>();
         
-        int srcMapSize = forestSourceMap.size();
-        forestIds = new String[srcMapSize];
         // key order in key set is guaranteed by LinkedHashMap,
         // i.e., the order keys are inserted
-        forestIds = forestSourceMap.keySet().toArray(forestIds);
+
+        int srcMapSize;
+
+        if (fastLoad) {
+            forestIds = am.getMasterIds().clone();
+            srcMapSize = forestIds.length;
+            curReplica = new int[srcMapSize];
+            for (int i = 0; i < srcMapSize; i++) {
+               curReplica[i] = 0;
+            }
+        } else {
+            srcMapSize = forestSourceMap.size();
+            forestIds = new String[srcMapSize];
+            forestIds = forestSourceMap.keySet().toArray(forestIds);
+            blacklist = new boolean[srcMapSize];
+            for (int i = 0; i < srcMapSize; i++) {
+               blacklist[i] = false;
+            }
+        }
+
         hostId = (int)(Math.random() * srcMapSize);
         
         // arraySize is the number of forests in fast load mode; 1 otherwise.
@@ -414,16 +443,19 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * Insert batch, log errors and update stats.
      * 
      * @param batch batch of content to insert
-     * @param fId forest Id
+     * @param id forest Id
      */
     protected void insertBatch(Content[] batch, int id) 
     throws IOException {
         int t = 0;
-        final int maxRetries = 64;
+        final int maxRetries = 15;
         int sleepTime = 100;
         final int maxSleepTime = 60000;
         while (t++ < maxRetries) {
             try {
+                if (t > 1) { 
+                    LOG.info("Retrying insertBatch " + t);
+                }
                 List<RequestException> errors = 
                     sessions[id].insertContentCollectErrors(batch);
                 if (errors != null) {
@@ -464,7 +496,14 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 // log error and continue on RequestServerException
                 LOG.error(e.getFormatString());
 
+                if (needCommit && !commitUris[id].isEmpty()) {
+                    rollback(id);
+                }
+
                 if (t < maxRetries) {
+                    if (sessions[id] != null) {
+                       sessions[id].close();
+                    }
                     try {
                         Thread.sleep(sleepTime);
                     } catch (Exception e2) {
@@ -472,6 +511,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     sleepTime = sleepTime * 2;
                     if (sleepTime > maxSleepTime) 
                         sleepTime = maxSleepTime;
+
+                    String csKey = getCSKey(id);
+                    sessions[id] = getSession(csKey);
                     continue;
                 } else {
                     failed += batch.length;
@@ -488,16 +530,28 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 } else {
                     LOG.error(e.getMessage());
                 }
+
                 failed += batch.length;   
                 // remove the failed content from pendingUris
                 for (Content fc : batch) {
                     DocumentURI failedUri = pendingUris[id].remove(fc);
                     LOG.warn("Failed document " + failedUri);
                 }
+
             } catch (RequestException e) {
-                if (sessions[id] != null) {
-                    sessions[id].close();
+                if (needCommit && !commitUris[id].isEmpty()) {
+                    failed += commitUris[id].size();
+                    for (DocumentURI failedUri : commitUris[id]) {
+                        LOG.warn("Failed document: " + failedUri);
+                    }
+                    commitUris[id].clear();
                 }
+                if (t < maxRetries) {
+                    String csKey = getNextCSKey(id);
+                    sessions[id] = getSession(csKey);
+                    continue;
+                }
+
                 if (countBased) {
                     rollbackCount(id);
                 }
@@ -517,7 +571,35 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         pendingUris[id].clear();
     }
-    
+
+    protected void rollback(int id) throws IOException {
+        try {
+            sessions[id].rollback();
+            failed += commitUris[id].size();
+            for (DocumentURI failedUri : commitUris[id]) {
+                LOG.warn("Failed document: " + failedUri);
+            }
+            commitUris[id].clear();
+        } catch (RequestServerException e) {
+            LOG.error("Error rollback transaction", e);
+            failed += commitUris[id].size();
+            for (DocumentURI failedUri : commitUris[id]) {
+                LOG.warn("Failed document: " + failedUri);
+            }
+            commitUris[id].clear();
+        } catch (RequestException e) {
+            if (sessions[id] != null) {
+                sessions[id].close();
+            }
+            if (countBased) {
+                rollbackCount(id);
+            }
+            failed += commitUris[id].size();
+            commitUris[id].clear();
+            throw new IOException(e);
+        }
+    }
+
     protected void insertContent(Content content, int id) 
     throws IOException {
         try {
@@ -589,10 +671,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 fId = sfId;
             }
-            csKey = forestIds[fId];
-        } else {
-            csKey = forestIds[hostId];
-        }
+        } 
+        csKey = getCSKey(fId);
         int sid = fId;
         Content content = createContent(key,value); 
         if (content == null) {
@@ -641,10 +721,57 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
             // rotate to next host and reset session
-            hostId = (hostId + 1)%forestIds.length;
+            int oldHostId = hostId;
+            for (;;) {
+                hostId = (hostId + 1)%forestIds.length;
+                if (!blacklist[hostId]) {
+                  break;
+                }
+                if (hostId == oldHostId) {
+                    for (int i = 0; i < blacklist.length; i++) {
+                        blacklist[i] = false;
+                    }
+                }
+            }
             sessions[0] = null;
         }
     }
+
+    protected String getCSKey(int fId) {
+        String csKey;
+        if (fastLoad) {
+            ArrayList<String> replicas = am.getReplicas(forestIds[fId]);
+            csKey = replicas.get(curReplica[fId]);
+        } else {
+            csKey = forestIds[hostId];
+        }
+        return csKey;
+    }
+
+    protected String getNextCSKey(int fId) {
+        String csKey;
+        if (fastLoad) {
+            ArrayList<String> replicas = am.getReplicas(forestIds[fId]);
+            curReplica[fId] = (curReplica[fId] + 1)%replicas.size();
+            csKey = replicas.get(curReplica[fId]);
+        } else {
+            blacklist[hostId] = true;
+            int oldHostId = hostId;
+            for (;;) {
+                hostId = (hostId + 1)%forestIds.length;
+                if (!blacklist[hostId])
+                     break;
+                if (hostId == oldHostId) {
+                    for (int i = 0; i < blacklist.length; i++) {
+                        blacklist[i] = false;
+                    }
+                }
+            }
+            csKey = forestIds[hostId];
+        }
+        return csKey;
+    }
+
 
     protected void rollbackCount(int fId) {
         ((StatisticalAssignmentPolicy)am.getPolicy()).updateStats(fId, 
@@ -653,14 +780,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     
     protected Session getSession(String forestId, TransactionMode mode) {
         Session session = null;
-        ContentSource cs = forestSourceMap.get(forestId);
         if (fastLoad) {
-            session = cs.newSession(forestId);
+            ContentSource cs = forestSourceMap.get(ID_PREFIX + forestId);
+            session = cs.newSession(ID_PREFIX + forestId);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to forest " + forestId + " on "
                     + session.getConnectionUri().getHost());
             }
         } else {
+            ContentSource cs = forestSourceMap.get(forestId);
             session = cs.newSession();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to " + session.getConnectionUri().getHost());
@@ -697,7 +825,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     System.arraycopy(forestContents[i], 0, remainder, 0, 
                             counts[i]);
                     if (sessions[sid] == null) {
-                        String forestId = forestIds[sid];
+                        String forestId = getCSKey(sid);
                         sessions[sid] = getSession(forestId);
                     }
                     insertBatch(remainder, sid);   

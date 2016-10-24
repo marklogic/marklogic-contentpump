@@ -128,6 +128,9 @@ public interface ConfigConstants {
     static final String RESTRICT_HOSTS = "restrict_hosts";
     static final String RESTRICT_INPUT_HOSTS = "restrict_input_hosts";
     static final String RESTRICT_OUTPUT_HOSTS = "restrict_output_hosts";
+    static final String SSL = "ssl";
+    static final String INPUT_SSL = "input_ssl";
+    static final String OUTPUT_SSL = "output_ssl";
 
     static final String RDF_STREAMING_MEMORY_THRESHOLD  = 
             "rdf_streaming_memory_threshold";

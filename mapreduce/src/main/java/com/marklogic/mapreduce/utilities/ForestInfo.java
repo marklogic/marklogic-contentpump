@@ -26,16 +26,18 @@ public class ForestInfo implements Writable {
     private String hostName;
     private long frangmentCount;
     private boolean updatable;
+    private String masterId;
 
     public ForestInfo() {
     }
 
     public ForestInfo(String hostName, long fmCount,
-        boolean updatable) {
+        boolean updatable, String masterId) {
         super();
         this.hostName = hostName;
         this.frangmentCount = fmCount;
         this.updatable = updatable;
+        this.masterId = masterId;
     }
 
     public long getFragmentCount() {
@@ -50,16 +52,22 @@ public class ForestInfo implements Writable {
         return updatable;
     }
 
+    public String getMasterId() {
+        return masterId;
+    }
+
     public void readFields(DataInput in) throws IOException {
         hostName = Text.readString(in);
         frangmentCount = in.readLong();
         updatable = in.readBoolean();
+        masterId = Text.readString(in);
     }
 
     public void write(DataOutput out) throws IOException {
         Text.writeString(out, hostName);
         out.writeLong(frangmentCount);
         out.writeBoolean(updatable);
+        Text.writeString(out, masterId);
     }
 
 }

@@ -258,14 +258,15 @@ public class DatabaseContentWriter<VALUE> extends
 
     protected Session getSession(String forestId, TransactionMode mode) {
         Session session = null;
-        ContentSource cs = forestSourceMap.get(forestId);
         if (fastLoad) {
-            session = cs.newSession(forestId);
+            ContentSource cs = forestSourceMap.get(ID_PREFIX + forestId);
+            session = cs.newSession(ID_PREFIX + forestId);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to forest " + forestId + " on "
                     + session.getConnectionUri().getHost());
             }
         } else {
+            ContentSource cs = forestSourceMap.get(forestId);
             session = cs.newSession();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to " + session.getConnectionUri().getHost());

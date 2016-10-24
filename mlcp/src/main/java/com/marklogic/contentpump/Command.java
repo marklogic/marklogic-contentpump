@@ -665,6 +665,16 @@ public enum Command implements ConfigConstants {
                 String db = cmdline.getOptionValue(DATABASE);
                 conf.set(MarkLogicConstants.OUTPUT_DATABASE_NAME, db);
             }
+            if (cmdline.hasOption(SSL)) {
+                String arg = cmdline.getOptionValue(SSL);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL
+                            + ": " + arg);
+                }
+            }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
                 conf.set(MarkLogicConstants.TEMPORAL_COLLECTION, tempColl);
@@ -1035,6 +1045,16 @@ public enum Command implements ConfigConstants {
                 String db = cmdline.getOptionValue(DATABASE);
                 conf.set(MarkLogicConstants.INPUT_DATABASE_NAME, db);
             }
+            if (cmdline.hasOption(SSL)) {
+                String arg = cmdline.getOptionValue(SSL);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL
+                            + ": " + arg);
+                } 
+            }
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
                 conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
@@ -1114,6 +1134,13 @@ public enum Command implements ConfigConstants {
                 .withDescription("Whether to restrict input hosts mlcp connecot to")
                 .create(RESTRICT_INPUT_HOSTS);
             options.addOption(restrictInputHosts);
+            Option inputSSL = OptionBuilder
+                 .withArgName("ssl")
+                 .hasOptionalArg()
+                 .withDescription(
+                 "Use ssl to encrypt communication with input MarkLogic Server")
+                 .create(INPUT_SSL);
+            options.addOption(inputSSL);
             Option outputUsername = OptionBuilder
                 .withArgName("username")
                 .hasArg()
@@ -1152,6 +1179,13 @@ public enum Command implements ConfigConstants {
                 .withDescription("Whether to restrict output hosts mlcp connect to")
                 .create(RESTRICT_OUTPUT_HOSTS);
             options.addOption(restrictOutputHosts);
+            Option outputSSL = OptionBuilder
+                .withArgName("ssl")
+                .hasOptionalArg()
+                .withDescription(
+                "Use ssl to encryt communication with the output MarkLogic Server")
+                .create(OUTPUT_SSL);
+            options.addOption(outputSSL);
             Option tcf = OptionBuilder
                 .withArgName("String")
                 .hasArg()
@@ -1288,7 +1322,16 @@ public enum Command implements ConfigConstants {
                                     RESTRICT_OUTPUT_HOSTS + ": " + restrict);
                 }
             }
-
+            if (cmdline.hasOption(OUTPUT_SSL)) {
+                String arg = cmdline.getOptionValue(OUTPUT_SSL);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + OUTPUT_SSL
+                            + ": " + arg);
+                }
+            }
             if (cmdline.hasOption(INPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(INPUT_USERNAME);
                 conf.set(MarkLogicConstants.INPUT_USERNAME, username);
@@ -1317,6 +1360,14 @@ public enum Command implements ConfigConstants {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + 
                                     RESTRICT_INPUT_HOSTS + ": " + restrict);
+            if (cmdline.hasOption(INPUT_SSL)) {
+                String arg = cmdline.getOptionValue(INPUT_SSL);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + INPUT_SSL
+                            + ": " + arg);
                 }
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
@@ -1758,6 +1809,12 @@ public enum Command implements ConfigConstants {
             .withDescription("Whether to restrict the hosts mlcp connect to")
             .create(RESTRICT_HOSTS);
         options.addOption(restricHosts);
+        Option ssl = OptionBuilder
+            .withArgName(SSL)
+            .hasOptionalArg()
+            .withDescription("Use SSL for encryted communication")
+            .create(SSL);
+        options.addOption(ssl);
     }
 
     static void configCopyOptions(Options options) {

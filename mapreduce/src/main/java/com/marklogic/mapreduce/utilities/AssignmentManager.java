@@ -16,6 +16,8 @@
 package com.marklogic.mapreduce.utilities;
 
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
+import java.util.ArrayList;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -32,6 +34,15 @@ public class AssignmentManager {
 
     private static final AssignmentManager instance = new AssignmentManager();
     private boolean initialized;
+    /* 
+     * a list of master forest ids
+     */
+    private String[] masterIds;
+    /* 
+     * mapping from master forest to a list of replica forests
+     */
+    private LinkedHashMap<String, ArrayList<String> > replicaMap;
+
     private AssignmentManager() {
         initialized = false;
     }
@@ -46,21 +57,35 @@ public class AssignmentManager {
 
     public synchronized void initialize(AssignmentPolicy.Kind kind,
         LinkedMapWritable map, int batchSize) {
-        if (initialized)
+        if (initialized) 
             return;
         else
             initialized = true;
         LinkedHashSet<String> forests = new LinkedHashSet<String>();
         LinkedHashSet<String> updatableForests = new LinkedHashSet<String>();
+        replicaMap = new LinkedHashMap<String, ArrayList<String> >();
         for (Writable f : map.keySet()) {
             String fId = ((Text) f).toString();
             ForestInfo fs = (ForestInfo) map.get(f);
+            String masterId = fs.getMasterId();
+            ArrayList<String> replicas = replicaMap.get(masterId);
+            if (replicas == null) {
+              replicas = new ArrayList<String>();
+              replicas.add(fId);
+              replicaMap.put(masterId,replicas);
+            } else {
+              replicas.add(fId);
+            }
+            if (!fId.equals(fs.getMasterId())) {
+              continue;
+            }
             if (fs.getUpdatable()) {
                 // updatable
                 updatableForests.add(fId);
             }
             forests.add(fId);
         }
+        masterIds = forests.toArray(new String[forests.size()]);
         switch (kind) {
         case BUCKET:
             initBucketPolicy(forests.toArray(new String[forests.size()]),
@@ -128,6 +153,14 @@ public class AssignmentManager {
 
     public int getPlacementForestIndex(DocumentURI uri) {
         return policy.getPlacementForestIndex(uri);
+    }
+
+    public String[] getMasterIds() {
+        return masterIds;
+    }
+
+    public ArrayList<String> getReplicas(String id) {
+        return replicaMap.get(id);
     }
     
     /**
