@@ -647,6 +647,16 @@ public enum Command implements ConfigConstants {
                 String host = cmdline.getOptionValue(HOST);
                 conf.set(MarkLogicConstants.OUTPUT_HOST, host);
             }
+            if (cmdline.hasOption(RESTRICT_OUTPUT_HOSTS)) {
+                String restrict = cmdline.getOptionValue(RESTRICT_OUTPUT_HOSTS);
+                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
+                } else if (!"false".equalsIgnoreCase(restrict)) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                                    RESTRICT_OUTPUT_HOSTS + ": " + restrict);
+                }
+            }
             if (cmdline.hasOption(PORT)) {
                 String port = cmdline.getOptionValue(PORT);
                 conf.set(MarkLogicConstants.OUTPUT_PORT, port);
@@ -999,6 +1009,16 @@ public enum Command implements ConfigConstants {
                 String host = cmdline.getOptionValue(HOST);
                 conf.set(MarkLogicConstants.INPUT_HOST, host);
             }
+            if (cmdline.hasOption(RESTRICT_INPUT_HOSTS)) {
+                String restrict = cmdline.getOptionValue(RESTRICT_INPUT_HOSTS);
+                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                    conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
+                } else if (!"false".equalsIgnoreCase(restrict)) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                                    RESTRICT_INPUT_HOSTS + ": " + restrict);
+                }
+            }
             if (cmdline.hasOption(PORT)) {
                 String port = cmdline.getOptionValue(PORT);
                 conf.set(MarkLogicConstants.INPUT_PORT, port);
@@ -1071,7 +1091,8 @@ public enum Command implements ConfigConstants {
             Option inputHost = OptionBuilder
                 .withArgName("host")
                 .hasArg()
-                .withDescription("Host of the input MarkLogic Server")
+                .withDescription("Comma-separated list of hosts of the input "
+                        + "MarkLogic Server")
                 .create(INPUT_HOST);
             inputHost.setRequired(true);
             options.addOption(inputHost);
@@ -1087,6 +1108,12 @@ public enum Command implements ConfigConstants {
                 .withDescription("Database of the input MarkLogic Server")
                 .create(INPUT_DATABASE);
             options.addOption(inputDB);
+            Option restrictInputHosts = OptionBuilder
+                .withArgName("restrict hosts")
+                .hasOptionalArg()
+                .withDescription("Whether to restrict input hosts mlcp connecot to")
+                .create(RESTRICT_INPUT_HOSTS);
+            options.addOption(restrictInputHosts);
             Option outputUsername = OptionBuilder
                 .withArgName("username")
                 .hasArg()
@@ -1102,7 +1129,8 @@ public enum Command implements ConfigConstants {
             Option outputHost = OptionBuilder
                 .withArgName("host")
                 .hasArg()
-                .withDescription("Host of the output MarkLogic Server")
+                .withDescription("Comma-separated list of hosts of the output "
+                        + "MarkLogic Server")
                 .create(OUTPUT_HOST);
             outputHost.setRequired(true);
             options.addOption(outputHost);
@@ -1118,6 +1146,12 @@ public enum Command implements ConfigConstants {
                 .withDescription("Database of the output MarkLogic Server")
                 .create(OUTPUT_DATABASE);
             options.addOption(outputDB);
+            Option restrictOutputHosts = OptionBuilder
+                .withArgName("restrict hosts")
+                .hasOptionalArg()
+                .withDescription("Whether to restrict output hosts mlcp connect to")
+                .create(RESTRICT_OUTPUT_HOSTS);
+            options.addOption(restrictOutputHosts);
             Option tcf = OptionBuilder
                 .withArgName("String")
                 .hasArg()
@@ -1244,6 +1278,16 @@ public enum Command implements ConfigConstants {
                 String db = cmdline.getOptionValue(OUTPUT_DATABASE);
                 conf.set(MarkLogicConstants.OUTPUT_DATABASE_NAME, db);
             }
+            if (cmdline.hasOption(RESTRICT_OUTPUT_HOSTS)) {
+                String restrict = cmdline.getOptionValue(RESTRICT_OUTPUT_HOSTS);
+                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
+                } else if (!"false".equalsIgnoreCase(restrict)) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                                    RESTRICT_OUTPUT_HOSTS + ": " + restrict);
+                }
+            }
 
             if (cmdline.hasOption(INPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(INPUT_USERNAME);
@@ -1264,6 +1308,16 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(INPUT_DATABASE)) {
                 String db = cmdline.getOptionValue(INPUT_DATABASE);
                 conf.set(MarkLogicConstants.INPUT_DATABASE_NAME, db);
+            }
+            if (cmdline.hasOption(RESTRICT_INPUT_HOSTS)) {
+                String restrict = cmdline.getOptionValue(RESTRICT_INPUT_HOSTS);
+                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                    conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
+                } else if (!"false".equalsIgnoreCase(restrict)) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                                    RESTRICT_INPUT_HOSTS + ": " + restrict);
+                }
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
@@ -1620,6 +1674,7 @@ public enum Command implements ConfigConstants {
             .create(OUTPUT_OVERRIDE_GRAPH);
         options.addOption(outputOverrideGraph);
     }
+    
     static void configCommonOutputOptions(Options options) {
         Option outputUriReplace = OptionBuilder
             .withArgName("list")
@@ -1681,7 +1736,7 @@ public enum Command implements ConfigConstants {
         Option host = OptionBuilder
             .withArgName(HOST)
             .hasArg()
-            .withDescription("Host of MarkLogic Server")
+            .withDescription("Comma-separated list of hosts of MarkLogic Server")
             .create(HOST);
         host.setRequired(true);
         options.addOption(host);
@@ -1697,6 +1752,12 @@ public enum Command implements ConfigConstants {
             .withDescription("Database of MarkLogic Server")
             .create(DATABASE);
         options.addOption(db);
+        Option restricHosts = OptionBuilder
+            .withArgName(RESTRICT_HOSTS)
+            .hasOptionalArg()
+            .withDescription("Whether to restrict the hosts mlcp connect to")
+            .create(RESTRICT_HOSTS);
+        options.addOption(restricHosts);
     }
 
     static void configCopyOptions(Options options) {

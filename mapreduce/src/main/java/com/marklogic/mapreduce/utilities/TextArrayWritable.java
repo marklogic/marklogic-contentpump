@@ -15,6 +15,8 @@
  */
 package com.marklogic.mapreduce.utilities;
 
+import java.util.ArrayList;
+
 import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.Text;
 

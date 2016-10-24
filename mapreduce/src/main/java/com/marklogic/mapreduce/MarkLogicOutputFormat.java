@@ -131,11 +131,24 @@ implements MarkLogicConstants, Configurable {
             return hosts;
         } else {
             try {
-                // try getting a connection
-                ContentSource cs = InternalUtilities.getOutputContentSource(
-                    conf, conf.get(OUTPUT_HOST));
-                // query hosts
-                return queryHosts(cs);
+                String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+                Boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
+                if (restrictHosts) {
+                    ArrayList<Text> texts = new ArrayList<Text>();
+                    for (String s : outputHosts) {
+                        texts.add(new Text(s));
+                    }
+                    return new TextArrayWritable(
+                            texts.toArray(new Text[texts.size()]));
+                } else {
+                    String outputHost = outputHosts.length>0?null:outputHosts[0];
+                    // try getting a connection
+                    ContentSource cs = InternalUtilities.getOutputContentSource(
+                            conf, outputHost);
+                    // query hosts
+                    return queryHosts(cs);
+                }
+                
             } catch (Exception ex) {
                 throw new IOException(ex);
             }

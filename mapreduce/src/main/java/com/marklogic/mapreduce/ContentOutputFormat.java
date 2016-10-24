@@ -16,6 +16,7 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -169,14 +170,25 @@ public class ContentOutputFormat<VALUEOUT> extends
                             "Failed to query directory creation mode.");
                 }
             } else {
-                TextArrayWritable hostArray; 
-                // 23798: replace hostname in forest config with 
-                // user-specified output host
-                String outputHost = conf.get(OUTPUT_HOST);
-                if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
-                	hostArray = queryHosts(cs, initHostName, outputHost);
+                TextArrayWritable hostArray = null;
+                String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+                Boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
+                if (restrictHosts) {
+                    ArrayList<Text> texts = new ArrayList<Text>();
+                    for (String s : outputHosts) {
+                        texts.add(new Text(s));
+                    }
+                    hostArray = new TextArrayWritable(
+                            texts.toArray(new Text[texts.size()]));
                 } else {
-                	hostArray = queryHosts(cs);
+                    String outputHost = outputHosts.length>0?null:outputHosts[0];
+                    // 23798: replace hostname in forest config with 
+                    // user-specified output host
+                    if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
+                        hostArray = queryHosts(cs, initHostName, outputHost);
+                    } else {
+                        hostArray = queryHosts(cs);
+                    }
                 }
                 DefaultStringifier.store(conf, hostArray, OUTPUT_FOREST_HOST);
             }
