@@ -79,8 +79,8 @@ implements MarkLogicConstants, Configurable {
     @Override
     public void checkOutputSpecs(JobContext context) throws IOException,
             InterruptedException {
-        String host = conf.get(OUTPUT_HOST);
-        if (host == null || host.isEmpty()) {
+        String[] hosts = conf.getStrings(OUTPUT_HOST);
+        if (hosts == null || hosts.length == 0) {
             throw new IllegalStateException(OUTPUT_HOST +
                     " is not specified.");
         }                     
@@ -88,7 +88,7 @@ implements MarkLogicConstants, Configurable {
         try {
             // try getting a connection
             ContentSource cs = InternalUtilities.getOutputContentSource(conf,
-                host);
+                hosts[0]);
             checkOutputSpecs(conf, cs);
         } 
         catch (Exception ex) {
@@ -132,16 +132,11 @@ implements MarkLogicConstants, Configurable {
         } else {
             try {
                 String[] outputHosts = conf.getStrings(OUTPUT_HOST);
-                Boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
+                boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
                 if (restrictHosts) {
-                    ArrayList<Text> texts = new ArrayList<Text>();
-                    for (String s : outputHosts) {
-                        texts.add(new Text(s));
-                    }
-                    return new TextArrayWritable(
-                            texts.toArray(new Text[texts.size()]));
+                    return new TextArrayWritable(outputHosts);
                 } else {
-                    String outputHost = outputHosts.length>0?null:outputHosts[0];
+                    String outputHost = outputHosts.length>0?outputHosts[0]:null;
                     // try getting a connection
                     ContentSource cs = InternalUtilities.getOutputContentSource(
                             conf, outputHost);

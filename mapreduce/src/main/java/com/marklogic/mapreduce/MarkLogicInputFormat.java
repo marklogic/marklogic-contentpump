@@ -37,6 +37,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.functions.LexiconFunction;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.RestrictedHostsUtil;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
@@ -149,8 +150,12 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     protected void getForestSplits(JobContext jobContext,            
             ResultSequence result, 
             List<ForestSplit> forestSplits,
-            List<String> ruleUris) throws IOException {
+            List<String> ruleUris,
+            String[] inputHosts) throws IOException {
         int count = 0;
+        boolean restrictHosts = jobConf.getBoolean(INPUT_RESTRICT_HOSTS, false);
+        RestrictedHostsUtil rhUtil = restrictHosts?new RestrictedHostsUtil(inputHosts):null;
+        
         // First while loop: splits info
         while (result.hasNext()) {
             ResultItem item = result.next();
@@ -171,13 +176,17 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 forestSplits.get(forestSplits.size() - 1).recordCount = 
                     ((XSInteger)item.getItem()).asLong();
             } else if (index == 2) {
-                String hn = ((XSString) item.getItem()).asString();
-                if (localMode && hn.equals(localHost)) {
-                    String inputHost = jobConf.get(INPUT_HOST);
-                    forestSplits.get(forestSplits.size() - 1).hostName = inputHost;
+                String forestHost = ((XSString) item.getItem()).asString();
+                if (restrictHosts) {
+                    forestSplits.get(forestSplits.size() - 1).hostName = rhUtil.getNextHost(forestHost);
                 } else {
-                    forestSplits.get(forestSplits.size() - 1).hostName = hn;
+                    if (localMode && forestHost.equals(localHost)) {
+                        forestSplits.get(forestSplits.size() - 1).hostName = inputHosts[0];
+                    } else {
+                        forestSplits.get(forestSplits.size() - 1).hostName = forestHost;
+                    }
                 }
+                
             }
             count++;
         }
@@ -219,6 +228,10 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         String splitQuery;
         String queryLanguage = null;
         String[] redactionRuleCol = jobConf.getStrings(REDACTION_RULE_COLLECTION);
+        String[] inputHosts = jobConf.getStrings(INPUT_HOST);
+        if (inputHosts == null || inputHosts.length == 0) {
+            throw new IllegalStateException(INPUT_HOST + " is not specified.");
+        }
         
         if (advancedMode) {
             queryLanguage = jobConf.get(INPUT_QUERY_LANGUAGE);
@@ -268,7 +281,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
         localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));        
         try {
-            ContentSource cs = InternalUtilities.getInputContentSource(jobConf);
+            ContentSource cs = InternalUtilities.getInputContentSource(jobConf, inputHosts[0]);
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
@@ -303,7 +316,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             if (redactionRuleCol != null) {
                 ruleUris = new ArrayList<String>();
             }
-            getForestSplits(jobContext, result, forestSplits, ruleUris);            
+            getForestSplits(jobContext, result, forestSplits, ruleUris, inputHosts);            
             LOG.info("Fetched " + forestSplits.size() + 
                     " forest splits.");            
         } catch (XccConfigException e) {
@@ -312,9 +325,6 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         } catch (RequestException e) {
             LOG.error(e);
             LOG.error("Query: " + splitQuery);
-            throw new IOException(e);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
             throw new IOException(e);
         } finally {
             if (result != null) {

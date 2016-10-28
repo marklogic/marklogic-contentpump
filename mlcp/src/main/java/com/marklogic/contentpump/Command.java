@@ -647,7 +647,7 @@ public enum Command implements ConfigConstants {
                 String host = cmdline.getOptionValue(HOST);
                 conf.set(MarkLogicConstants.OUTPUT_HOST, host);
             }
-            if (cmdline.hasOption(RESTRICT_OUTPUT_HOSTS)) {
+            if (cmdline.hasOption(RESTRICT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_OUTPUT_HOSTS);
                 if (restrict == null || "true".equalsIgnoreCase(restrict)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
@@ -1019,7 +1019,7 @@ public enum Command implements ConfigConstants {
                 String host = cmdline.getOptionValue(HOST);
                 conf.set(MarkLogicConstants.INPUT_HOST, host);
             }
-            if (cmdline.hasOption(RESTRICT_INPUT_HOSTS)) {
+            if (cmdline.hasOption(RESTRICT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_INPUT_HOSTS);
                 if (restrict == null || "true".equalsIgnoreCase(restrict)) {
                     conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
@@ -1131,7 +1131,7 @@ public enum Command implements ConfigConstants {
             Option restrictInputHosts = OptionBuilder
                 .withArgName("restrict hosts")
                 .hasOptionalArg()
-                .withDescription("Whether to restrict input hosts mlcp connecot to")
+                .withDescription("Whether to restrict the input hosts mlcp connects to")
                 .create(RESTRICT_INPUT_HOSTS);
             options.addOption(restrictInputHosts);
             Option inputSSL = OptionBuilder
@@ -1176,7 +1176,7 @@ public enum Command implements ConfigConstants {
             Option restrictOutputHosts = OptionBuilder
                 .withArgName("restrict hosts")
                 .hasOptionalArg()
-                .withDescription("Whether to restrict output hosts mlcp connect to")
+                .withDescription("Whether to the restrict output hosts mlcp connects to")
                 .create(RESTRICT_OUTPUT_HOSTS);
             options.addOption(restrictOutputHosts);
             Option outputSSL = OptionBuilder
@@ -1360,6 +1360,8 @@ public enum Command implements ConfigConstants {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + 
                                     RESTRICT_INPUT_HOSTS + ": " + restrict);
+                }
+            }
             if (cmdline.hasOption(INPUT_SSL)) {
                 String arg = cmdline.getOptionValue(INPUT_SSL);
                 if (arg == null || arg.equalsIgnoreCase("true")){
@@ -1806,7 +1808,7 @@ public enum Command implements ConfigConstants {
         Option restricHosts = OptionBuilder
             .withArgName(RESTRICT_HOSTS)
             .hasOptionalArg()
-            .withDescription("Whether to restrict the hosts mlcp connect to")
+            .withDescription("Whether to restrict the hosts mlcp connects to")
             .create(RESTRICT_HOSTS);
         options.addOption(restricHosts);
         Option ssl = OptionBuilder
