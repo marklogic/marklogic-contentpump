@@ -15,7 +15,7 @@ import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
-public class TestImportDocs {
+public class ImportDocsIT {
     
     @After
     public void tearDown() {

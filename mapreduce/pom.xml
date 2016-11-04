@@ -14,6 +14,11 @@
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+  <parent>
+    <groupId>com.marklogic</groupId>
+    <artifactId>marklogic-contentpump</artifactId>
+    <version>9.0</version>
+  </parent>
   <properties>
     <!-- Global definitions -->
     <mapreduce.product.name>MarkLogic Connector for Hadoop</mapreduce.product.name>
@@ -22,7 +27,6 @@
     <jar.version.number.string>${version.number.string}</jar.version.number.string>
     <date-string>${maven.build.timestamp}</date-string>
     <libdir>${basedir}/src/lib</libdir>
-    <skipTests>true</skipTests>
     <xccVersion>9.0</xccVersion>
     <deliverableName>Connector-for-Hadoop2</deliverableName>
     <!-- Static definitions of where things are relative to the root -->
@@ -38,15 +42,15 @@
     <compile.debug.symbols.flag>true</compile.debug.symbols.flag>
   </properties>
   <profiles>
-      <profile>
-          <id>disable-java8-doclint</id>
-          <activation>
-              <jdk>[1.8,)</jdk>
-          </activation>
-          <properties>
-              <additionalparam>-Xdoclint:none</additionalparam>
-          </properties>
-      </profile>
+    <profile>
+      <id>disable-java8-doclint</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <properties>
+        <additionalparam>-Xdoclint:none</additionalparam>
+      </properties>
+    </profile>
   </profiles>
   <build>
     <plugins>
@@ -80,7 +84,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.5.1</version>
         <configuration>
           <compilerArgs>
             <arg>-Xlint</arg>
@@ -92,6 +96,21 @@
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>${skipTests}</skipTests>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -121,13 +140,13 @@
           </bottom>
         </configuration>
         <executions>
-            <execution>
-                <id>attach-javadocs</id>
-                <phase>compile</phase>
-                <goals>
-                    <goal>javadoc</goal>
-                </goals>
-            </execution>
+          <execution>
+            <id>attach-javadocs</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>javadoc</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -153,19 +172,19 @@
           </archive>
         </configuration> 
         <executions>
-            <execution>
-                <id>test</id>
-                <goals>
-                    <goal>jar</goal>
-                </goals>
-                <phase>package</phase>
-                <configuration>
-                    <classifier>test</classifier>
-                    <includes>
-                      <include>com/marklogic/mapreduce/test/**</include>
-                    </includes>
-                </configuration>
-            </execution>
+          <execution>
+            <id>test</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+              <classifier>test</classifier>
+              <includes>
+                <include>com/marklogic/mapreduce/test/**</include>
+              </includes>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
       <plugin>
@@ -224,15 +243,15 @@
             <phase>compile</phase>
             <configuration>
               <tasks>
-               <mkdir dir="${mapreduce.javadoc.examples.dir}" /> 
-               <copy todir="${mapreduce.javadoc.examples.dir}" overwrite="true">
-                <fileset dir="${mapreduce.examples.dir}" includes="*.java" />
-               </copy>
-               <move todir="${mapreduce.javadoc.examples.dir}">
-                 <fileset dir="${mapreduce.javadoc.examples.dir}" includes="*.java"/>
-                 <mapper type="glob" from="*" to="*.txt"/>
-               </move>
-               <echo file="${javadocdir}/default.xqy">xdmp:redirect-response("index.html")</echo>
+                <mkdir dir="${mapreduce.javadoc.examples.dir}" /> 
+                <copy todir="${mapreduce.javadoc.examples.dir}" overwrite="true">
+                  <fileset dir="${mapreduce.examples.dir}" includes="*.java" />
+                </copy>
+                <move todir="${mapreduce.javadoc.examples.dir}">
+                  <fileset dir="${mapreduce.javadoc.examples.dir}" includes="*.java"/>
+                  <mapper type="glob" from="*" to="*.txt"/>
+                </move>
+                <echo file="${javadocdir}/default.xqy">xdmp:redirect-response("index.html")</echo>
               </tasks>
             </configuration>
             <goals>
@@ -246,10 +265,10 @@
               <tasks>
                 <mkdir dir="deliverable" />
                 <copy todir="deliverable" overwrite="true">
-                 <fileset dir="${project.build.directory}">
-                   <include name="*.zip" />
-                   <exclude name="*apidocs.zip" />
-                 </fileset>
+                  <fileset dir="${project.build.directory}">
+                    <include name="*.zip" />
+                    <exclude name="*apidocs.zip" />
+                  </fileset>
                 </copy>
               </tasks>
             </configuration>
@@ -259,20 +278,11 @@
           </execution>
         </executions>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.12.3</version>
-        <configuration>
-          <test>TestAll</test>
-          <skipTests>${skipTests}</skipTests>
-        </configuration>
-      </plugin>
     </plugins>
     <resources>
       <resource>
         <directory>src/main/resources</directory>
-          <filtering>true</filtering>
+        <filtering>true</filtering>
       </resource>
     </resources>
   </build>
@@ -325,7 +335,6 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>

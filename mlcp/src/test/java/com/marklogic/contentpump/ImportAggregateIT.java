@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
 
-public class TestImportAggregate {
+public class ImportAggregateIT {
 
     @After
     public void tearDown() {

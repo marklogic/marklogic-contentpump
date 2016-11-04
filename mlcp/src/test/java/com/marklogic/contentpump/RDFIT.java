@@ -15,10 +15,10 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 
 @RunWith(value = Parameterized.class)
-public class TestRDF {
+public class RDFIT {
     private long threshold = 0;
 
-    public TestRDF(long threshold) {
+    public RDFIT(long threshold) {
         this.threshold = threshold;
     }
 

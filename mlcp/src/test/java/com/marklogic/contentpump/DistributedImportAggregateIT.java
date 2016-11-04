@@ -12,7 +12,8 @@ import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
-public class TestDistributedImportAggregate {
+
+public class DistributedImportAggregateIT {
     @Before
     public void setup() {
         assertNotNull("No HADOOP_CONF_DIR found!", Constants.HADOOP_CONF_DIR);

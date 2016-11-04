@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
 
-public class TestExport {
+public class ExportIT {
     @After
     public void tearDown() {
         Utils.closeSession();

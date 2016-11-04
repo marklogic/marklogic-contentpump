@@ -8,12 +8,11 @@ import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.xcc.ResultSequence;
-
 /**
  * @author mattsun
  *
  */
-public class TestImportDelimitedJson {
+public class ImportDelimitedJsonIT {
 
     @After
     public void tearDown() {

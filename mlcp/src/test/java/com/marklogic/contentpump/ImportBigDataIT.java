@@ -26,12 +26,12 @@ import com.google.common.util.concurrent.SimpleTimeLimiter;
  * @author mattsun
  *
  */
-public class TestImportBigData {
+public class ImportBigDataIT {
 
     /**
      * 
      */
-    public TestImportBigData() {
+    public ImportBigDataIT() {
         // TODO Auto-generated constructor stub
     }
     

@@ -12,6 +12,8 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.w3c.dom.Document;
@@ -26,7 +28,8 @@ import com.marklogic.tree.NodeKind;
 @RunWith(value = Parameterized.class)
 public class TestDocumentImplClone extends AbstractTestCase {
     public static final Log LOG = LogFactory.getLog(TestDocumentImplClone.class);
-	public TestDocumentImplClone(ForestData fd) {
+
+    public TestDocumentImplClone(ForestData fd) {
         super(fd);
     }
 
