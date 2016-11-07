@@ -174,6 +174,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected boolean isCopyQuality;
     protected boolean isCopyMeta;
     
+    protected long effectiveVersion;
+    
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
         this(conf, forestSourceMap, fastLoad, null);
@@ -182,7 +184,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     public ContentWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad,
         AssignmentManager am) {
+        this(conf, forestSourceMap, fastLoad, am, 0L);
+    }
+
+    public ContentWriter(Configuration conf,
+            Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+            AssignmentManager am, long effectiveVersion) {
         super(conf, null);
+        
+        this.effectiveVersion = effectiveVersion;
         
         this.fastLoad = fastLoad;
         
@@ -270,6 +280,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     capability = ContentCapability.INSERT;
                 } else if (perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
                     capability = ContentCapability.UPDATE;
+                } else if (perm.equalsIgnoreCase(ContentCapability.NODE_UPDATE.toString())) {
+                    capability = ContentCapability.NODE_UPDATE;
                 } else {
                     LOG.error("Illegal permission: " + perm);
                 }

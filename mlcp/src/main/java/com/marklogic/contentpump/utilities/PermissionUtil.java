@@ -43,7 +43,7 @@ public class PermissionUtil {
         "for $p in xdmp:default-permissions() " +
         "return ($p/*:role-id/text(),$p/*:capability/text())";
     /**
-     * Get a list of ContentPermission fron given string
+     * Get a list of ContentPermission from given string
      * @param perms a string of role-name,capability pais, separated by commna
      * @return
      */
@@ -130,6 +130,9 @@ public class PermissionUtil {
         } else if (cap.equalsIgnoreCase(ContentCapability.UPDATE
             .toString())) {
             capability = ContentCapability.UPDATE;
+        } else if (cap.equalsIgnoreCase(ContentCapability.NODE_UPDATE
+            .toString())) {
+            capability = ContentCapability.NODE_UPDATE;
         } else {
             LOG.error("Illegal permission: " + cap);
         }

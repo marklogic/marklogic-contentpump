@@ -528,13 +528,17 @@ public class DatabaseContentReader extends
             .getElementsByTagName("sec:capability");
         NodeList roles = permissionW3cElement
             .getElementsByTagName("sec:role-name");
+        NodeList ids = permissionW3cElement
+            .getElementsByTagName("sec:role-id");
         Node role;
         Node capability;
+        Node id;
         if (0 < roles.getLength() && 0 < capabilities.getLength()) {
             role = roles.item(0);
             capability = capabilities.item(0);
+            id = ids.item(0);
             metadata.addPermission(capability.getTextContent(),
-                role.getTextContent());
+                role.getTextContent(), id.getTextContent());
             if (roles.getLength() > 1) {
                 LOG.warn("input permission: " + permissionW3cElement + ": "
                     + roles.getLength() + " roles, using only 1");
@@ -542,6 +546,10 @@ public class DatabaseContentReader extends
             if (capabilities.getLength() > 1) {
                 LOG.warn("input permission: " + permissionW3cElement + ": "
                     + capabilities.getLength() + " capabilities, using only 1");
+            }
+            if (capabilities.getLength() > 1) {
+                LOG.warn("input permission: " + permissionW3cElement + ": "
+                    + ids.getLength() + " ids, using only 1");
             }
         } else {
             // warn and skip

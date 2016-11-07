@@ -49,16 +49,16 @@ public class DatabaseTransformWriter<VALUE> extends
     private AdhocQuery[] queries;
     
     public DatabaseTransformWriter(Configuration conf,
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad,
-        AssignmentManager am) {
-        super(conf, forestSourceMap, fastLoad, am);
-        moduleUri = conf.get(ConfigConstants.CONF_TRANSFORM_MODULE);
-        functionNs = conf.get(ConfigConstants.CONF_TRANSFORM_NAMESPACE, "");
-        functionName = conf.get(ConfigConstants.CONF_TRANSFORM_FUNCTION,
-            "transform");
-        functionParam = conf.get(ConfigConstants.CONF_TRANSFORM_PARAM, "");
-        queries = new AdhocQuery[sessions.length];
-    }
+            Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+            AssignmentManager am, long effectiveVersion) {
+            super(conf, forestSourceMap, fastLoad, am, effectiveVersion);
+            moduleUri = conf.get(ConfigConstants.CONF_TRANSFORM_MODULE);
+            functionNs = conf.get(ConfigConstants.CONF_TRANSFORM_NAMESPACE, "");
+            functionName = conf.get(ConfigConstants.CONF_TRANSFORM_FUNCTION,
+                "transform");
+            functionParam = conf.get(ConfigConstants.CONF_TRANSFORM_PARAM, "");
+            queries = new AdhocQuery[sessions.length];
+        }
 
     @Override
     public void write(DocumentURI key, VALUE value) throws IOException,

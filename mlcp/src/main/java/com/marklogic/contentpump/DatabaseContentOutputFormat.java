@@ -43,7 +43,7 @@ public class DatabaseContentOutputFormat extends
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the DatabaseContentWriter
         return new DatabaseContentWriter<DatabaseDocumentWithMeta>(conf,
-            sourceMap, fastLoad, am);
+            sourceMap, fastLoad, am, effectiveVersion);
 
     }
 }

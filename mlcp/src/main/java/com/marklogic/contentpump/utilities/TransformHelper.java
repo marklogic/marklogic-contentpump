@@ -192,6 +192,7 @@ public class TransformHelper {
         StringBuilder rolesExeList = new StringBuilder();
         StringBuilder rolesUpdateList = new StringBuilder();
         StringBuilder rolesInsertList = new StringBuilder();
+        StringBuilder rolesNodeUpdateList = new StringBuilder();
         if (perms != null && perms.length > 0) {
             for (ContentPermission cp : perms) {
                 String roleName = cp.getRole();
@@ -220,6 +221,11 @@ public class TransformHelper {
                         rolesUpdateList.append(",");
                     }
                     rolesUpdateList.append(roleName);
+                } else if (cc.equals(ContentCapability.NODE_UPDATE)) {
+                    if (rolesNodeUpdateList.length() != 0) {
+                        rolesNodeUpdateList.append(",");
+                    }
+                    rolesNodeUpdateList.append(roleName);
                 }
             }
         }
@@ -227,6 +233,7 @@ public class TransformHelper {
         optionsMap.put("roles-execute", rolesExeList.toString());
         optionsMap.put("roles-update", rolesUpdateList.toString());
         optionsMap.put("roles-insert", rolesInsertList.toString());
+        optionsMap.put("roles-node-update", rolesNodeUpdateList.toString());
 
         String[] collections = cOptions.getCollections();
         StringBuilder sb = new StringBuilder();
@@ -327,6 +334,7 @@ public class TransformHelper {
         StringBuilder rolesExeList = new StringBuilder();
         StringBuilder rolesUpdateList = new StringBuilder();
         StringBuilder rolesInsertList = new StringBuilder();
+        StringBuilder rolesNodeUpdateList = new StringBuilder();
         if (perms != null && perms.length > 0) {
             for (ContentPermission cp : perms) {
                 String roleName = cp.getRole();
@@ -355,6 +363,11 @@ public class TransformHelper {
                         rolesUpdateList.append(",");
                     }
                     rolesUpdateList.append(roleName);
+                } else if (cc.equals(ContentCapability.NODE_UPDATE)) {
+                    if (rolesNodeUpdateList.length() != 0) {
+                        rolesNodeUpdateList.append(",");
+                    }
+                    rolesNodeUpdateList.append(roleName);
                 }
             }
         }
@@ -362,6 +375,7 @@ public class TransformHelper {
         optionsMap.put("roles-execute", rolesExeList.toString());
         optionsMap.put("roles-update", rolesUpdateList.toString());
         optionsMap.put("roles-insert", rolesInsertList.toString());
+        optionsMap.put("roles-node-update", rolesNodeUpdateList.toString());
 
         String[] collections = cOptions.getCollections();
         if (collections != null) {

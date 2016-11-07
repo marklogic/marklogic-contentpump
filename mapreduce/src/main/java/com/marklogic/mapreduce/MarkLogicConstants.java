@@ -904,4 +904,9 @@ public interface MarkLogicConstants {
      */
     static final String OUTPUT_RESTRICT_HOSTS =
             "mapreduce.marklogic.output.restricthosts";
+    /**
+     * Minimum MarkLogic version to accept node-update permissions.
+     */
+    static final long MIN_NODEUPDATE_VERSION =
+            9000040L;
 }

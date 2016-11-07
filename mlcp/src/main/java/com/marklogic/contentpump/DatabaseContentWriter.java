@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +27,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.ContentWriter;
@@ -73,7 +75,13 @@ public class DatabaseContentWriter<VALUE> extends
     public DatabaseContentWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad,
         AssignmentManager am) {
-        super(conf, forestSourceMap, fastLoad, am);
+        this(conf, forestSourceMap, fastLoad, am, 0L);
+    }
+    
+    public DatabaseContentWriter(Configuration conf,
+            Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+            AssignmentManager am, long effectiveVersion) {
+        super(conf, forestSourceMap, fastLoad, am, effectiveVersion);
 
         if (countBased) {
             metadatas = new URIMetadata[1][batchSize];
@@ -110,6 +118,24 @@ public class DatabaseContentWriter<VALUE> extends
                 }
             }      
             if (isCopyPerms) {
+                if (effectiveVersion < MarkLogicConstants.MIN_NODEUPDATE_VERSION &&
+                        meta.isNakedProps()) {
+                    boolean reset = false;
+                    Vector<ContentPermission> perms = new Vector<>();
+                    for (ContentPermission perm : meta.permissionsList) {
+                        if (!perm.getCapability().toString().equals(
+                                ContentPermission.NODE_UPDATE.toString())) {
+                            perms.add(perm);
+                        } else {
+                            reset = true;
+                        }
+                    }
+                    if (reset) {
+                        meta.clearPermissions();
+                        meta.addPermissions(perms);
+                        meta.setPermString(null);
+                    }
+                }
                 if (opt.getPermissions() != null) {
                     HashSet<ContentPermission> pSet = 
                          new HashSet<ContentPermission>(meta.permissionsList);

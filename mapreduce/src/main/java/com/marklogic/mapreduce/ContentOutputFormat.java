@@ -46,6 +46,7 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.XSBoolean;
+import com.marklogic.xcc.types.XSInteger;
 
 /**
  * MarkLogicOutputFormat for Content.
@@ -101,6 +102,9 @@ public class ContentOutputFormat<VALUEOUT> extends
         "import module namespace hadoop = "
         + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
         + "xdmp:host-name(xdmp:host()), \n"
+        + "let $versionf := "
+        + "  fn:function-lookup(xs:QName('xdmp:effective-version'),0)\n"
+        + "return if (exists($versionf)) then $versionf() else 0, \n"
         + "let $repf := "
         + "  fn:function-lookup(xs:QName('hadoop:get-forest-replica-host'),2)\n"
         + "return exists($repf),"
@@ -116,6 +120,7 @@ public class ContentOutputFormat<VALUEOUT> extends
     protected boolean legacy = false;
     protected boolean failover = false;
     protected String initHostName;
+    protected long effectiveVersion;
     @Override
     public void checkOutputSpecs(Configuration conf, ContentSource cs)
     throws IOException { 
@@ -217,7 +222,8 @@ public class ContentOutputFormat<VALUEOUT> extends
                     if (!perm.equalsIgnoreCase(ContentCapability.READ.toString()) &&
                         !perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString()) &&
                         !perm.equalsIgnoreCase(ContentCapability.INSERT.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
+                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.NODE_UPDATE.toString())) {
                         throw new IllegalStateException("Illegal capability: " + perm);
                     }
                     i++;
@@ -301,7 +307,8 @@ public class ContentOutputFormat<VALUEOUT> extends
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the ContentWriter
-        return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
+        return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, 
+                am, effectiveVersion);
     }
     
     // forest host map is saved when checkOutputSpecs() is called.  In certain 
@@ -368,6 +375,8 @@ public class ContentOutputFormat<VALUEOUT> extends
 
         ResultItem item = result.next();
         initHostName = item.asString();
+        item = result.next();
+        effectiveVersion = ((XSInteger)item.getItem()).asLong();
         item = result.next();
         failover = !restrictHosts && item.asString().equals("true");
         if (result.hasNext()) {
