@@ -26,23 +26,23 @@ public class TestImportSequenceFile {
             + " -sequencefile_key_class com.marklogic.contentpump.examples.SimpleSequenceFileKey"
             + " -sequencefile_value_class com.marklogic.contentpump.examples.SimpleSequenceFileValue"
             + " -sequencefile_value_type Text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getOnlyDocs(Utils.getDbXccUri());
+        result = Utils.getOnlyDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());

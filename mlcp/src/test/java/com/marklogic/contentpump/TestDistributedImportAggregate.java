@@ -34,12 +34,12 @@ public class TestDistributedImportAggregate {
                 + " -input_file_type documents"
                 + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR
                 + " -output_uri_replace " + Path.getPathWithoutSchemeAndAuthority(Constants.TEST_PATH) + "/agg,''"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
@@ -49,7 +49,7 @@ public class TestDistributedImportAggregate {
                 + " -output_file_path /sample-agg"
                 + " -output_type document"
                 + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         args = cmd.split(" ");
         assertFalse(args.length == 0);
@@ -62,18 +62,18 @@ public class TestDistributedImportAggregate {
             + " admin -input_file_path " + "/sample-agg/agg3.xml"
             + " -input_file_type aggregates"
             + " -hadoop_conf_dir " + Constants.HADOOP_CONF_DIR
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString()); 
         Utils.closeSession();

@@ -23,23 +23,23 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample1.quote.csv"
             + " -fastload"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -58,23 +58,23 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -delimited_uri_id first"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -94,23 +94,23 @@ public class TestImportDelimitedText{
             + " -generate_uri"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -131,18 +131,18 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -delimited_root_name rot"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(/rot)");
+            Utils.getTestDbXccUri(), "fn:count(/rot)");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
@@ -150,30 +150,30 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedText() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -transform_module /lc.xqy"
             + " -delimited_uri_id first"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -188,7 +188,7 @@ public class TestImportDelimitedText{
     
     @Test
     public void testImportTransformDelimitedTextFileNameAsCollection() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -transform_namespace http://marklogic.com/module_invoke"
@@ -197,27 +197,27 @@ public class TestImportDelimitedText{
             + " -delimited_uri_id first"
             + " -thread_count 1"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(cts:collections())");
+            Utils.getTestDbXccUri(), "fn:count(cts:collections())");
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -232,7 +232,7 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformOne2ManyDelimitedText() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/one-many.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/one-many.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -transform_namespace http://marklogic.com/module_invoke"
@@ -240,18 +240,18 @@ public class TestImportDelimitedText{
             + " -delimited_uri_id first"
             + " -transform_param -param-up"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("14", result.next().asString());
         Utils.closeSession();
@@ -275,7 +275,7 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedTextLanNs() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -delimited_uri_id first"
@@ -284,18 +284,18 @@ public class TestImportDelimitedText{
             + " -namespace test"
             + " -transform_module /lc.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
@@ -318,18 +318,18 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -generate_uri -delimiter |"
             + " -input_file_type delimited_text -input_file_pattern .*\\.tpch -thread_count 1"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
         Utils.closeSession();
@@ -344,18 +344,18 @@ public class TestImportDelimitedText{
             + " -split_input true"
             + " -max_split_size 200"
             + " -input_file_type delimited_text -input_file_pattern .*\\.tpch -thread_count 1"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
@@ -370,18 +370,18 @@ public class TestImportDelimitedText{
             + " -generate_uri"
             + " -max_split_size 300"
             + " -input_file_type delimited_text -input_file_pattern .*\\.tpch -thread_count 1"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
         Utils.closeSession();
@@ -393,18 +393,18 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -delimited_uri_id NAME -delimiter \t"
             + " -input_file_type delimited_text -input_file_pattern .*\\.tab -thread_count 1"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
@@ -418,18 +418,18 @@ public class TestImportDelimitedText{
             + " -output_uri_prefix /incoming/site-catalyst/total/"
             + " -output_uri_replace /home/marklogic/mlcp/marklogic-contentpump-1.0.3/data,''"
             + " -input_file_type delimited_text -thread_count 1"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
@@ -440,18 +440,18 @@ public class TestImportDelimitedText{
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.bad"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
         Utils.closeSession();
@@ -462,23 +462,23 @@ public class TestImportDelimitedText{
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.ename"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -498,23 +498,23 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.ename"
             + " -split_input -max_split_size 50"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -533,18 +533,18 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample.quote.csv"
             + " -delimited_uri_id first"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
@@ -556,23 +556,23 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.hard"
             + " -delimited_uri_id first"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -592,23 +592,23 @@ public class TestImportDelimitedText{
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv/sample3.csv.hard.zip"
             + " -delimited_uri_id first -input_compressed"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -630,23 +630,23 @@ public class TestImportDelimitedText{
             + " -delimited_uri_id first"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -669,23 +669,23 @@ public class TestImportDelimitedText{
             + " -delimited_uri_id first "
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -707,23 +707,23 @@ public class TestImportDelimitedText{
             + " -delimited_uri_id first -input_compressed"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -745,23 +745,23 @@ public class TestImportDelimitedText{
             + " -delimited_uri_id first"
             + " -input_compressed -input_compression_codec zip"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             String s = result.next().asString();
@@ -783,23 +783,23 @@ public class TestImportDelimitedText{
             + " -input_compressed -input_compression_codec zip"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             String s = result.next().asString();
@@ -814,7 +814,7 @@ public class TestImportDelimitedText{
     
     @Test
     public void testImportTransformDelimitedTextZip() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = 
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
@@ -823,23 +823,23 @@ public class TestImportDelimitedText{
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -input_compressed -input_compression_codec zip"
             + " -input_file_type delimited_text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             String s = result.next().asString();
@@ -859,23 +859,23 @@ public class TestImportDelimitedText{
                 + "/csv"
                 + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
                 + " -document_type json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                         "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
     }
@@ -889,28 +889,28 @@ public class TestImportDelimitedText{
                 + " -input_file_type delimited_text -input_file_pattern sample.+\\.csv"
                 + " -document_type json -delimited_root_name doc"
                 + " -delimited_uri_id first -split_input true"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                         "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -933,23 +933,23 @@ public class TestImportDelimitedText{
                 + "/csv/sample4.txt"
                 + " -input_file_type delimited_text -data_type zipcode,String,score,number"
                 + " -document_type json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                         "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -971,23 +971,23 @@ public class TestImportDelimitedText{
                 + "/csv/1.input"
                 + " -input_file_type delimited_text -data_type soldOut,Boolean,price,Number -uri_id name"
                 + " -document_type json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                         "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -1011,23 +1011,23 @@ public class TestImportDelimitedText{
             + " -split_input -max_split_size 50"
             + " -input_file_type delimited_text"
             + " -input_file_pattern .*\\.csv"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {

@@ -39,12 +39,12 @@ public class TestCopy{
 
 		String[] args = cmd.split(" ");
 
-		Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+		Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 		ContentCreateOptions options = new ContentCreateOptions();
 		options.setFormatXml();
 
 		ContentSource cs = ContentSourceFactory.newContentSource(new URI(
-				Utils.getDbXccUri()));
+				Utils.getTestDbXccUri()));
 		Session session = cs.newSession();
 
 		session.setTransactionMode(TransactionMode.UPDATE);
@@ -58,14 +58,14 @@ public class TestCopy{
 		session.commit();
 		session.close();
 
-		Utils.clearDB(Utils.getDbXccUri(), Constants.copyDst);
+		Utils.clearDB(Utils.getTestDbXccUri(), Constants.copyDst);
 
 		String[] expandedArgs = null;
 		expandedArgs = OptionsFileUtil.expandArguments(args);
 		ContentPump.runCommand(expandedArgs);
 		
 		ResultSequence result = Utils
-				.runQuery(Utils.getDbXccUri(),
+				.runQuery(Utils.getTestDbXccUri(),
 						"fn:count(fn:collection())");
 		assertTrue(result.hasNext());
 		assertEquals("2", result.next().asString());
@@ -82,20 +82,20 @@ public class TestCopy{
             + " -input_file_type delimited_text"
             + " -output_uri_suffix .xml"
             + " -output_uri_prefix test/"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
             
         
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
-        Utils.clearDB(Utils.getDbXccUri(), Constants.copyDst);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.copyDst);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
@@ -114,13 +114,13 @@ public class TestCopy{
         ContentPump.runCommand(expandedArgs);
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
         
         result = Utils.runQueryAgainstDb(
-                Utils.getDbXccUri(), "fn:doc()", Constants.copyDst);
+                Utils.getTestDbXccUri(), "fn:doc()", Constants.copyDst);
         while (result.hasNext()) {
             ResultItem item = result.next();
             String uri = item.getDocumentURI();
@@ -140,19 +140,19 @@ public class TestCopy{
             + " -input_file_type delimited_text"
             + " -output_uri_suffix .xml"
             + " -output_uri_prefix test/"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
-        Utils.clearDB(Utils.getDbXccUri(), Constants.copyDst);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.copyDst);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
@@ -173,13 +173,13 @@ public class TestCopy{
         ContentPump.runCommand(expandedArgs);
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
         
         result = Utils.runQueryAgainstDb(
-                Utils.getDbXccUri(), "fn:doc()", Constants.copyDst);
+                Utils.getTestDbXccUri(), "fn:doc()", Constants.copyDst);
         while (result.hasNext()) {
             ResultItem item = result.next();
             String uri = item.getDocumentURI();
@@ -191,7 +191,7 @@ public class TestCopy{
     
     @Test
     public void testCopyTransform() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = 
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
@@ -200,19 +200,19 @@ public class TestCopy{
             + " -input_file_type delimited_text"
             + " -output_uri_suffix .xml -output_collections import"
             + " -output_uri_prefix test/"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
-        Utils.clearDB(Utils.getDbXccUri(), Constants.copyDst);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.copyDst);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
@@ -233,13 +233,13 @@ public class TestCopy{
         ContentPump.runCommand(expandedArgs);
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
         
         result = Utils.runQueryAgainstDb(
-                Utils.getDbXccUri(), "fn:doc()", Constants.copyDst);
+                Utils.getTestDbXccUri(), "fn:doc()", Constants.copyDst);
         while (result.hasNext()) {
             ResultItem item = result.next();
             String uri = item.getDocumentURI();
@@ -251,7 +251,7 @@ public class TestCopy{
     
     @Test
     public void testCopyTransformFast() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = 
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
@@ -260,19 +260,19 @@ public class TestCopy{
             + " -input_file_type delimited_text"
             + " -output_uri_suffix .xml -output_collections import"
             + " -output_uri_prefix test/"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
-        Utils.clearDB(Utils.getDbXccUri(), Constants.copyDst);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.copyDst);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
@@ -294,13 +294,13 @@ public class TestCopy{
         ContentPump.runCommand(expandedArgs);
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
         
         result = Utils.runQueryAgainstDb(
-                Utils.getDbXccUri(), "fn:doc()", Constants.copyDst);
+                Utils.getTestDbXccUri(), "fn:doc()", Constants.copyDst);
         while (result.hasNext()) {
             ResultItem item = result.next();
             String uri = item.getDocumentURI();
@@ -322,19 +322,19 @@ public class TestCopy{
             + " -input_file_type delimited_text"
             + " -output_uri_suffix .xml"
             + " -output_uri_prefix test/"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
-        Utils.clearDB(Utils.getDbXccUri(), Constants.copyDst);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.copyDst);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
@@ -355,13 +355,13 @@ public class TestCopy{
         ContentPump.runCommand(expandedArgs);
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
         
         result = Utils.runQueryAgainstDb(
-                Utils.getDbXccUri(), "fn:doc()", Constants.copyDst);
+                Utils.getTestDbXccUri(), "fn:doc()", Constants.copyDst);
         while (result.hasNext()) {
             ResultItem item = result.next();
             String uri = item.getDocumentURI();
@@ -378,23 +378,23 @@ public class TestCopy{
             + " -output_uri_prefix test/"
             + " -output_collections test,ML"
             + " -output_uri_replace wiki,'wiki1'"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"ML\"))");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
         Utils.closeSession();
-        Utils.clearDB(Utils.getDbXccUri(), Constants.copyDst);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.copyDst);
         
         //copy
         cmd = "COPY -input_host localhost"
@@ -409,7 +409,7 @@ public class TestCopy{
         ContentPump.runCommand(expandedArgs);
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
 
@@ -423,23 +423,23 @@ public class TestCopy{
             + "/mixnakedzip"
             + " -batch_size 1"
             + " -input_file_type archive"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
-        Utils.setDirectoryCreation(Utils.getDbXccUri(), "automatic");
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        Utils.setDirectoryCreation(Utils.getTestDbXccUri(), "automatic");
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
         Utils.closeSession();
-        Utils.clearDB(Utils.getDbXccUri(), Constants.copyDst);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.copyDst);
         
         //copy
         cmd = "COPY -input_host localhost"
@@ -455,7 +455,7 @@ public class TestCopy{
         ContentPump.runCommand(expandedArgs);
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), 
+            Utils.getTestDbXccUri(), 
             "fn:count(" +
             "for $i in cts:search(xdmp:document-properties(),cts:not-query(cts:document-fragment-query(cts:and-query( () )))) \n" +
             "where fn:contains(fn:base-uri($i),\"\\.naked\") eq fn:false() \n" +
@@ -465,7 +465,7 @@ public class TestCopy{
         assertEquals("6", result.next().asString());
         Utils.closeSession();
         
-        Utils.setDirectoryCreation(Utils.getDbXccUri(), "manual");
+        Utils.setDirectoryCreation(Utils.getTestDbXccUri(), "manual");
         Utils.closeSession();
     }
     
@@ -474,12 +474,12 @@ public class TestCopy{
         String cmd1 = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/temporal"
             + " -fastload false"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args1 = cmd1.split(" ");
         assertFalse(args1.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
-        Utils.clearDB(Utils.getDbXccUri(), Constants.copyDst);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.copyDst);
         
         String[] expandedArgs1 = null;
         expandedArgs1 = OptionsFileUtil.expandArguments(args1);
@@ -500,7 +500,7 @@ public class TestCopy{
         ContentPump.runCommand(expandedArgs2);
         
         ResultSequence result = Utils.runQueryAgainstDb(
-          Utils.getDbXccUri(),
+          Utils.getTestDbXccUri(),
           "fn:count(fn:collection(\"mycollection\"))", Constants.copyDst);
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());        

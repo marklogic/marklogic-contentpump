@@ -53,11 +53,19 @@ public class Constants {
     }
     /**
      * Port of MarkLogic Server to communicate to.
-     * Default: 8000
+     * Default: 5276
      */
     public static String port;
     static {
-        port = System.getProperty("PORT", "8000");
+        port = System.getProperty("TEST_DB_PORT", "5276");
+    }
+    /**
+     * App server port of Copy database
+     * Default: 6276
+     */
+    public static String copyDbPort;
+    static {
+        copyDbPort = System.getProperty("COPY_DB_PORT", "6276");
     }
     /**
      * Destination database of COPY operations.
@@ -65,7 +73,7 @@ public class Constants {
      */
     public static String copyDst;
     static {
-        copyDst = System.getProperty("COPY_DST", "CopyDst");
+        copyDst = System.getProperty("COPY_DB", "mlcp-unittest-copy-db");
     }
     /**
      * Database used in tests. 
@@ -73,7 +81,7 @@ public class Constants {
      */
     public static String testDb;
     static {
-        testDb = System.getProperty("TEST_DB", "Documents");
+        testDb = System.getProperty("TEST_DB", "mlcp-unittest-db");
     }
     /**
      * Static setup for all tests
@@ -91,12 +99,12 @@ public class Constants {
         buf.append("var testDbName = \"");
         buf.append(Constants.testDb);
         buf.append("\"\n");
-        buf.append("var copyDstName = \"");
+        buf.append("var copyDbName = \"");
         buf.append(Constants.copyDst);
         buf.append("\"\n");
         buf.append(createIdxQry);
         try {
-            Utils.runQuery(Utils.getDbXccUri(), buf.toString(), "javascript");
+            Utils.runQuery(Utils.getInitDbXccUri(), buf.toString(), "javascript");
         } catch (XccConfigException | RequestException | URISyntaxException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -113,7 +121,7 @@ public class Constants {
         buf = new StringBuilder();
         buf.append(createAxisQry);
         try {
-            Utils.runQuery(Utils.getDbXccUri(), buf.toString(), "javascript");
+            Utils.runQuery(Utils.getTestDbXccUri(), buf.toString(), "javascript");
         } catch (XccConfigException | RequestException | URISyntaxException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

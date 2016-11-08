@@ -24,9 +24,10 @@
     <!-- Settings related to unit test -->
     <contentpumpHome>${project.build.directory}/mlcp-${versionString}-lib</contentpumpHome>
     <testOutputPath>/tmp/mlcpout</testOutputPath>
-    <testPort>8000</testPort>
-    <testDb>Documents</testDb>
-    <testCopyDst>CopyDst</testCopyDst>
+    <testDbPort>5276</testDbPort>
+    <copyDbPort>6276</copyDbPort>
+    <testDb>mlcp-unittest-db</testDb>
+    <copyDb>mlcp-unittest-copy-db</copyDb>
   </properties>
   <profiles>
     <profile>
@@ -439,7 +440,7 @@
             <additionalClasspathElement>${basedir}/src/conf</additionalClasspathElement>
           </additionalClasspathElements>
           <skipTests>${skipTests}</skipTests>
-          <argline>-DCONTENTPUMP_HOME=${contentpumpHome} -DOUTPUT_PATH=${testOutputPath} -DPORT=${testPort} -DTEST_DB=${testDb} -DCOPY_DST=${testCopyDst}</argline>
+          <argline>-DCONTENTPUMP_HOME=${contentpumpHome} -DOUTPUT_PATH=${testOutputPath} -DTEST_DB_PORT=${testDbPort} -DCOPY_DB_PORT=${copyDbPort} -DTEST_DB=${testDb} -DCOPY_DB=${copyDb}</argline>
           <excludes>
             <exclude>${test.excludes}</exclude>
           </excludes>

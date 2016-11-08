@@ -42,17 +42,17 @@ public class TestEDSeparation {
     public void testEDNonfastNonrestrict() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost,fake.host.com"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AndorrA.xml"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
@@ -63,18 +63,18 @@ public class TestEDSeparation {
     public void testEDNonfastRestrict() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AndorrA.xml"
-                + " -port " + Constants.port + " -database Documents"
+                + " -port " + Constants.port + " -database " + Constants.testDb 
                 + " -restrict_hosts";
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
@@ -85,18 +85,18 @@ public class TestEDSeparation {
     public void testEDFastNonrestrict2() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost,fake.host.com"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AndorrA.xml"
-                + " -port " + Constants.port + " -database Documents"
+                + " -port " + Constants.port + " -database " + Constants.testDb 
                 + " -fastload";
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
@@ -107,18 +107,18 @@ public class TestEDSeparation {
     public void testEDFastRestrict() throws Exception {
         String cmd = "IMPORT -password admin -username admin -host localhost"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AndorrA.xml"
-                + " -port " + Constants.port + " -database Documents"
+                + " -port " + Constants.port + " -database " + Constants.testDb 
                 + " -fastload -restrict_hosts";
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
@@ -127,13 +127,14 @@ public class TestEDSeparation {
 
     @Test
     public void testEDExport() throws Exception {
+        Utils.deleteDirectory(new File(Constants.OUT_PATH.toUri().getPath()));
         // Prepare resources
         String cmd = "IMPORT -password admin -username admin -host localhost"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AndorrA.xml"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
@@ -141,7 +142,7 @@ public class TestEDSeparation {
         String cmdEx = "EXPORT -password admin -username admin -host localhost"
                 + " -output_file_path " + Constants.OUT_PATH.toUri()
                 + " -output_type archive"
-                + " -port " + Constants.port + " -database Documents"
+                + " -port " + Constants.port + " -database " + Constants.testDb 
                 + " -restrict_hosts";
         String[] argsEx = cmdEx.split(" +");
         assertFalse(argsEx.length == 0);
@@ -150,18 +151,18 @@ public class TestEDSeparation {
         expandedArgsEx = OptionsFileUtil.expandArguments(argsEx);
         ContentPump.runCommand(expandedArgsEx);
         // Import it back
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         cmd = "import -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.OUT_PATH.toUri()
             + " -input_file_type archive"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         args = cmd.split(" ");
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
@@ -174,18 +175,18 @@ public class TestEDSeparation {
         // Prepare resources
         String cmd = "IMPORT -password admin -username admin -host localhost"
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AndorrA.xml"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
-        // Export
+        // Copy
         String cmdEx = "COPY -input_password admin -input_username admin -input_port " + Constants.port 
                 + " -output_password admin -output_username admin -output_port " + Constants.port
                 + " -input_host localhost -output_host localhost"
-                + " -input_database Documents -output_database Documents"
+                + " -input_database " + Constants.testDb + " -output_database " + Constants.copyDst
                 + " -output_collections copycollection"
                 + " -restrict_input_hosts -restrict_output_hosts";
         String[] argsEx = cmdEx.split(" +");
@@ -196,7 +197,7 @@ public class TestEDSeparation {
         ContentPump.runCommand(expandedArgsEx);
         
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection('copycollection'))");
+            Utils.getCopyDbXccUri(), "fn:count(fn:collection('copycollection'))");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();

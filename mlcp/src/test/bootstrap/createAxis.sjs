@@ -1,5 +1,6 @@
 var admin = require("/MarkLogic/admin.xqy");
 var temporal = require("/MarkLogic/temporal.xqy");
+warnings = [];
 
 try {
 	var validResult = temporal.axisCreate(
