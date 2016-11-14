@@ -26,7 +26,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -312,7 +312,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         for (int i = 0; i < attrCount; i++) {
             String aPrefix = xmlSR.getAttributePrefix(i);
             String aName = xmlSR.getAttributeLocalName(i);
-            String aValue = StringEscapeUtils.escapeXml(xmlSR
+            String aValue = StringEscapeUtils.escapeXml10(xmlSR
                 .getAttributeValue(i));
             sb.append(" " + (null == aPrefix ? "" : (aPrefix + ":")) + aName
                 + "=\"" + aValue + "\"");
@@ -336,7 +336,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     + " is not a simple node: at" + xmlSR.getLocation());
             }
             do {
-                String idStr = StringEscapeUtils.escapeXml(xmlSR.getText());
+                String idStr = StringEscapeUtils.escapeXml10(xmlSR.getText());
                 if (currentId == null) {
                     currentId = "";
                 }
@@ -478,7 +478,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     processStartElement();
                     break;
                 case XMLStreamConstants.CHARACTERS:
-                    write(StringEscapeUtils.escapeXml(xmlSR.getText()));
+                    write(StringEscapeUtils.escapeXml10(xmlSR.getText()));
                     break;
                 case XMLStreamConstants.CDATA:
                     write("<![CDATA[");
