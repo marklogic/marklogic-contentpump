@@ -251,6 +251,11 @@
           <artifactId>hadoop-yarn-client</artifactId>
           <version>2.7.0-mapr-1602</version>
         </dependency>
+        <dependency>
+           <groupId>org.apache.commons</groupId>
+           <artifactId>commons-lang3</artifactId>
+           <version>3.5</version>
+        </dependency>
       </dependencies>
     </profile>
     <profile>
@@ -406,6 +411,11 @@
           <version>${xccVersion}</version>
           <scope>system</scope>
           <systemPath>${hadoopConnectorBaseDir}/src/lib/marklogic-xcc-${xccVersion}.jar</systemPath>
+        </dependency>
+        <dependency>
+           <groupId>org.apache.commons</groupId>
+           <artifactId>commons-lang3</artifactId>
+           <version>3.5</version>
         </dependency>
       </dependencies>
     </profile>
