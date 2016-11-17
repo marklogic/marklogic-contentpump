@@ -509,6 +509,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                             updatable = Boolean.parseBoolean(item
                                 .asString());
                         } else if (policy == AssignmentPolicy.Kind.RANGE ||
+                                   policy == AssignmentPolicy.Kind.STATISTICAL ||
                                    policy == AssignmentPolicy.Kind.QUERY ) {
                             // range or statistical
                             item = result.next();
