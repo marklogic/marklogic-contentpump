@@ -614,32 +614,80 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
 
     protected void insertContent(Content content, int id) 
     throws IOException {
-        try {
-            sessions[id].insertContent(content);
-            if (!needCommit) {
-                succeeded++;
+        int t = 0;
+        final int maxRetries = 15;
+        int sleepTime = 100;
+        final int maxSleepTime = 60000;
+        while (t++ < maxRetries) {
+            try {
+                if (t > 1) {
+                    LOG.info("Retrying insertContent " + t);
+                }
+                sessions[id].insertContent(content);
+                if (!needCommit) {
+                    succeeded++;
+                    pendingUris[id].clear();
+                }
+            } catch (RetryableQueryException e) {
+                // log error and continue on RequestServerException
+                LOG.error(e.getFormatString());
+
+                if (needCommit && !commitUris[id].isEmpty()) {
+                    rollback(id);
+                }
+
+                if (t < maxRetries) {
+                    if (sessions[id] != null) {
+                       sessions[id].close();
+                    }
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (Exception e2) {
+                    }
+                    sleepTime = sleepTime * 2;
+                    if (sleepTime > maxSleepTime)
+                        sleepTime = maxSleepTime;
+
+                    String csKey = getCSKey(id);
+                    sessions[id] = getSession(csKey);
+                    continue;
+                } else {
+                    failed++;
+                    // remove the failed content from pendingUris
+                    DocumentURI failedUri = pendingUris[id].remove(content.getUri());
+                    LOG.warn("Failed document " + failedUri);
+                }
+            } catch (RequestServerException e) {
+                if (e instanceof XQueryException) {
+                    LOG.error(((XQueryException)e).getFormatString());
+                } else {
+                    LOG.error(e.getMessage());
+                }
+                failed++;   
+                // remove the failed content from pendingUris
+                DocumentURI failedUri = pendingUris[id].remove(content.getUri());
+                LOG.warn("Failed document " + failedUri);
+            } catch (RequestException e) {
+                if (needCommit && !commitUris[id].isEmpty()) {
+                    failed += commitUris[id].size();
+                    for (DocumentURI failedUri : commitUris[id]) {
+                        LOG.warn("Failed document: " + failedUri);
+                    }
+                    commitUris[id].clear();
+                }
+                if (t < maxRetries) {
+                    String csKey = getNextCSKey(id);
+                    sessions[id] = getSession(csKey);
+                    continue;
+                }
+
+                if (countBased) {
+                    rollbackCount(id);
+                }
                 pendingUris[id].clear();
+                throw new IOException(e);
             }
-        } catch (RequestServerException e) {
-            if (e instanceof XQueryException) {
-                LOG.error(((XQueryException)e).getFormatString());
-            } else {
-                LOG.error(e.getMessage());
-            }
-            failed++;   
-            // remove the failed content from pendingUris
-            DocumentURI failedUri = pendingUris[id].remove(content.getUri());
-            LOG.warn("Failed document " + failedUri);
-        } catch (RequestException e) {
-            if (sessions[id] != null) {
-                sessions[id].close();
-            }
-            if (countBased) {
-                rollbackCount(id);
-            }
-            failed++;
-            pendingUris[id].clear();
-            throw new IOException(e);
+            break;
         }
     }
     
