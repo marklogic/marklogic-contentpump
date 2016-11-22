@@ -400,7 +400,7 @@ public class DatabaseContentWriter<VALUE> extends
             + "else xdmp:document-set-collections($URI,json:array-values(xdmp:from-json($COLL-STRING)))\n"
             + ", if('' eq ($QUALITY-STRING)) then () else xdmp:document-set-quality($URI,xs:integer($QUALITY-STRING))\n"
             + (meta == null ?
-                    "" : ", (let $f := fn:function-lookup(xs:QName('xdmp:document-set-metadata'),1)\n"
+                    "" : ", (let $f := fn:function-lookup(xs:QName('xdmp:document-set-metadata'),2)\n"
                     + "return if (exists($f)) then $f($URI,$META) else ())\n");
         if (LOG.isDebugEnabled()) {
             LOG.debug(query);
