@@ -723,7 +723,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         Counter failedCounter = context.getCounter(
                 MarkLogicCounter.OUTPUT_RECORDS_FAILED);
         synchronized(failedCounter) {
-            committedCounter.increment(failed);
+            failedCounter.increment(failed);
         }
     }
     
