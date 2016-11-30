@@ -44,6 +44,7 @@ public class TestImportAggregate {
     
     @Test
     public void testImportTransformMedlineFilenameAsCollection() throws Exception {
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = "IMPORT -host localhost -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.xml"

@@ -255,33 +255,27 @@ public class ContentOutputFormat<VALUEOUT> extends
             // because initialize() is only called once in LocalJobRunner
             boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
             RestrictedHostsUtil rhUtil = restrictHosts?new RestrictedHostsUtil(outputHosts):null;
-            
-            // get host->contentSource mapping
+            // construct forest->contentSource map
             Map<String, ContentSource> hostSourceMap = 
-                new HashMap<String, ContentSource>();
-            for (Writable v : forestStatusMap.values()) {
-                ForestInfo fs = (ForestInfo)v;
-                //unupdatable forests
-                if(fs.getUpdatable() == false) continue;
-                if (hostSourceMap.get(fs.getHostName()) == null) {
+                    new HashMap<String, ContentSource>();
+            for (Writable forestId : forestStatusMap.keySet()) {
+                ForestInfo fs = (ForestInfo)forestStatusMap.get(forestId);
+                String forestIdStr = ((Text)forestId).toString();
+                String forestHost = fs.getHostName();
+                String targetHost = restrictHosts?
+                        rhUtil.getNextHost(forestHost):forestHost;
+                if (fs.getUpdatable() &&
+                        hostSourceMap.get(targetHost) == null) {
                     try {
-                        String hostName = fs.getHostName().toString();
                         ContentSource cs = InternalUtilities.getOutputContentSource(
-                            conf, restrictHosts?rhUtil.getNextHost(hostName):hostName);
-                        hostSourceMap.put(fs.getHostName(), cs);
+                                conf, targetHost);
+                        hostSourceMap.put(targetHost, cs);
                     } catch (XccConfigException e) {
                         throw new IOException(e);
-                    } 
+                    }
                 }
-            }
-            
-            // consolidate forest->host map and host-contentSource map to 
-            // forest-contentSource map
-            for (Writable forestId : forestStatusMap.keySet()) {
-                String forest = ((Text)forestId).toString();
-                String hostName = ((ForestInfo)forestStatusMap.get(forestId)).getHostName();
-                ContentSource cs = hostSourceMap.get(hostName);
-                sourceMap.put(ID_PREFIX + forest, cs);
+                sourceMap.put(ID_PREFIX + forestIdStr,
+                        hostSourceMap.get(targetHost));
             }
         } else {
             TextArrayWritable hosts = getHosts(conf);
