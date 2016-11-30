@@ -220,6 +220,8 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 ResultItem item = result.next();
                 localHost = item.asString();
             }
+            boolean restrictHosts = jobConf.getBoolean(INPUT_RESTRICT_HOSTS, false);
+            RestrictedHostsUtil rhUtil = restrictHosts?new RestrictedHostsUtil(inputHosts):null;
             int count = 0;
             while (result.hasNext()) {
                 ResultItem item = result.next();
@@ -235,15 +237,25 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     forestSplits.get(forestSplits.size() - 1).recordCount = 
                         ((XSInteger)item.getItem()).asLong();
                 } else if (index == 2) {
-                    String hn = ((XSString) item.getItem()).asString();
-                    if (localMode && hn.equals(localHost)) {
-                        String inputHost = jobConf.get(INPUT_HOST);
-                        forestSplits.get(forestSplits.size() - 1).hostName = inputHost;
+                    String forestHost = ((XSString) item.getItem()).asString();
+                    if (restrictHosts) {
+                        rhUtil.addForestHost(forestHost);
+                        forestSplits.get(forestSplits.size() - 1).hostName = forestHost;
                     } else {
-                        forestSplits.get(forestSplits.size() - 1).hostName = hn;
+                        if (localMode && forestHost.equals(localHost)) {
+                            forestSplits.get(forestSplits.size() - 1).hostName = inputHosts[0];
+                        } else {
+                            forestSplits.get(forestSplits.size() - 1).hostName = forestHost;
+                        }
                     }
                 }
                 count++;
+            }
+            // Replace the target host if not in restricted host list
+            if (restrictHosts) {
+                for (ForestSplit split : forestSplits) {
+                    split.hostName = rhUtil.getNextHost(split.hostName);
+                }
             }
             LOG.info("Fetched " + 
                     (forestSplits == null ? 0 : forestSplits.size()) + 
