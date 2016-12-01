@@ -174,7 +174,20 @@
         <configuration>
         </configuration>
         <executions>
-          <execution> 
+          <execution>
+            <id>make-assembly-example-doc</id>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+            <configuration>
+              <descriptors>
+                <descriptor>src/assemble/exampledist.xml</descriptor>
+                <descriptor>src/assemble/docdist.xml</descriptor>
+              </descriptors>
+            </configuration>
+          </execution>
+          <execution>
             <id>make-assembly-bin</id>
             <phase>package</phase>
             <goals>
@@ -198,19 +211,6 @@
               <finalName>${deliverableName}-${version.number.string}</finalName>
               <descriptors>
                 <descriptor>src/assemble/srcdist.xml</descriptor>
-              </descriptors>
-            </configuration>
-          </execution>
-          <execution>
-            <id>make-assembly</id>
-            <phase>package</phase>
-            <goals>
-              <goal>single</goal>
-            </goals>
-            <configuration>
-              <descriptors>
-                <descriptor>src/assemble/exampledist.xml</descriptor>
-                <descriptor>src/assemble/docdist.xml</descriptor>
               </descriptors>
             </configuration>
           </execution>
