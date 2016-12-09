@@ -178,7 +178,8 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             } else if (index == 2) {
                 String forestHost = ((XSString) item.getItem()).asString();
                 if (restrictHosts) {
-                    forestSplits.get(forestSplits.size() - 1).hostName = rhUtil.getNextHost(forestHost);
+                    rhUtil.addForestHost(forestHost);
+                    forestSplits.get(forestSplits.size() - 1).hostName = forestHost;
                 } else {
                     if (localMode && forestHost.equals(localHost)) {
                         forestSplits.get(forestSplits.size() - 1).hostName = inputHosts[0];
@@ -189,6 +190,12 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 
             }
             count++;
+        }
+        // Replace the target host if not in restricted host list
+        if (restrictHosts) {
+            for (ForestSplit split : forestSplits) {
+                split.hostName = rhUtil.getNextHost(split.hostName);
+            }
         }
         
         // Second while loop: redaction rules

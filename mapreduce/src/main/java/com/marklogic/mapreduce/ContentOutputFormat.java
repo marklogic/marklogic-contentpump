@@ -254,10 +254,18 @@ public class ContentOutputFormat<VALUEOUT> extends
             // MultiThreadedMapper. It can't be saved as instance member 
             // because initialize() is only called once in LocalJobRunner
             boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
-            RestrictedHostsUtil rhUtil = restrictHosts?new RestrictedHostsUtil(outputHosts):null;
+            RestrictedHostsUtil rhUtil = null;
             // construct forest->contentSource map
             Map<String, ContentSource> hostSourceMap = 
                     new HashMap<String, ContentSource>();
+            if (restrictHosts) {
+                rhUtil = new RestrictedHostsUtil(outputHosts);
+                for (Writable forestId : forestStatusMap.keySet()) {
+                    String forestHost = ((ForestInfo)forestStatusMap.get(forestId))
+                            .getHostName();
+                    rhUtil.addForestHost(forestHost);
+                }
+            }
             for (Writable forestId : forestStatusMap.keySet()) {
                 ForestInfo fs = (ForestInfo)forestStatusMap.get(forestId);
                 String forestIdStr = ((Text)forestId).toString();
