@@ -68,7 +68,7 @@ public class RestrictedHostsUtil {
         } else {
             String targetHost = q.poll();
             mp.get(targetHost).assignmentCount++;
-            q.offer(targetHost);
+            q.add(targetHost);
             return targetHost;
         }
     }
