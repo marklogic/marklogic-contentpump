@@ -17,9 +17,11 @@
 package com.marklogic.mapreduce.utilities;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,42 +35,63 @@ import org.apache.commons.logging.LogFactory;
  */
 public class RestrictedHostsUtil {
     public static final Log LOG = LogFactory.getLog(RestrictedHostsUtil.class);
-    protected Map<String,Integer> hostForestCount = new HashMap<>();
-    protected List<String> hosts;
-    protected int next;
-    protected int count;
+    protected Map<String, HostAssignment> mp;
+    protected PriorityQueue<String> q;
+    protected List<String> restrictHosts;
+    
     /**
      * 
      * @param hosts
      */
-    public RestrictedHostsUtil(String[] hosts) {
-        this.hosts = Arrays.asList(hosts);
-        for (String host: hosts) {
-            hostForestCount.put(host, 0);
+    public RestrictedHostsUtil(String[] restrictHosts) {
+        this.restrictHosts = Arrays.asList(restrictHosts);
+        mp = new HashMap<>();
+        q = new PriorityQueue<>(restrictHosts.length,
+                new HostAssginmentComparator());
+        for (int i = 0; i < restrictHosts.length; i++) {
+            mp.put(restrictHosts[i], new HostAssignment(i));
+            q.add(restrictHosts[i]);
         }
-        next = 0;
-        count = 0;
     }
-    
+
+    public void addForestHost(String hostname) {
+        if (restrictHosts.contains(hostname)) {
+            mp.get(hostname).assignmentCount++;
+            q.remove(hostname);
+            q.add(hostname);
+        }
+    }
+
     public String getNextHost(String hostName) {
-        if (hosts.contains(hostName)) {
-            hostForestCount.put(hostName, 
-                    hostForestCount.get(hostName).intValue()+1);
+        if (restrictHosts.contains(hostName)) {
             return hostName;
         } else {
-            while (hostForestCount.get(hosts.get(next)) > count) {
-                // The host is in E-node lists and has been 
-                // assigned more than other D-node hosts
-                next = ((next+1)%hosts.size());
-            }
-            String currentHost = hosts.get(next);
-            int newCount = hostForestCount.get(currentHost).intValue()+1;
-            hostForestCount.put(currentHost, newCount);
-            if (newCount >= count) {
-                count = newCount;
-                next = ((next+1)%hosts.size());
-            }
-            return currentHost;
+            String targetHost = q.poll();
+            mp.get(targetHost).assignmentCount++;
+            q.offer(targetHost);
+            return targetHost;
         }
+    }
+
+    protected class HostAssignment {
+        public int index = 0;
+        public int assignmentCount = 0;
+        HostAssignment(int index) {
+            this.index = index;
+        }
+    }
+
+    protected class HostAssginmentComparator implements Comparator<String> {
+        @Override
+        public int compare(String o1, String o2) {
+            HostAssignment h1 = mp.get(o1);
+            HostAssignment h2 = mp.get(o2);
+            if (h1.assignmentCount != h2.assignmentCount) {
+                return h1.assignmentCount - h2.assignmentCount;
+            } else {
+                return h1.index - h2.index;
+            }
+        }
+        
     }
 }
