@@ -8,7 +8,7 @@
   <fileSets>
     <fileSet>
         <directory>${basedir}/../mapreduce/target</directory>
-        <outputDirectory>/lib</outputDirectory>
+        <outputDirectory>${file.separator}lib</outputDirectory>
         <includes>
           <include>marklogic-mapreduce*.jar</include>
         </includes>
@@ -19,14 +19,14 @@
     </fileSet>
     <fileSet>
         <directory>${basedir}/../mapreduce/src/lib</directory>
-        <outputDirectory>/lib</outputDirectory>
+        <outputDirectory>${file.separator}lib</outputDirectory>
         <includes>
           <include>marklogic-xcc*.jar</include>
         </includes>
     </fileSet>
     <fileSet>
       <directory>src/main</directory>
-      <outputDirectory>/bin</outputDirectory>
+      <outputDirectory>${file.separator}bin</outputDirectory>
       <fileMode>0755</fileMode>
       <includes>
         <include>*.sh</include>
@@ -37,7 +37,7 @@
     </fileSet>
     <fileSet>
       <directory>src/conf</directory>
-      <outputDirectory>/conf</outputDirectory>
+      <outputDirectory>${file.separator}conf</outputDirectory>
       <fileMode>0755</fileMode>
       <includes>
         <include>log4j.properties</include>
@@ -45,7 +45,7 @@
     </fileSet>
     <fileSet>
       <directory>src/lib</directory>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>${file.separator}lib</outputDirectory>
       <fileMode>0755</fileMode>
       <includes>
         <include>*/*</include>
@@ -60,13 +60,13 @@
   <files>
     <file>
       <source>${basedir}/../LICENSE.txt</source>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>${file.separator}</outputDirectory>
     </file>
   </files>
   <dependencySets>
     <dependencySet>
       <scope>runtime</scope>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>${file.separator}lib</outputDirectory>
       <includes>
 		<include>org.apache.commons:commons-csv:jar:*</include>
         <include>commons-httpclient:commons-httpclient:jar:*</include>
