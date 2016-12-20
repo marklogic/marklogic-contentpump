@@ -9,7 +9,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <hadoopVersion>2.6.5</hadoopVersion>
+    <hadoopVersion>2.6.0</hadoopVersion>
   </properties>
 
   <modules>
