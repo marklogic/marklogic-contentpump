@@ -308,6 +308,7 @@ public class TestCopy{
             assertTrue(uri.startsWith("prefix/test/"));
         }
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     
@@ -369,6 +370,7 @@ public class TestCopy{
             assertTrue(uri.startsWith("prefix/test/"));
         }
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test
