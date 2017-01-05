@@ -169,6 +169,16 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 return 1;
             }
         } else { // running in local mode
+            String bundleVersion = 
+                    System.getProperty(CONTENTPUMP_BUNDLE_ARTIFACT);
+            if (bundleVersion != null && 
+                    "mapr".equals(bundleVersion)) {
+                String cpHome = 
+                        System.getProperty(CONTENTPUMP_HOME_PROPERTY_NAME);
+                if (cpHome != null) {
+                    System.setProperty("java.security.auth.login.config", cpHome + "mapr.conf");
+                }
+            }
             // Tell Hadoop that we are running in local mode.  This is useful
             // when the user has Hadoop home or their Hadoop conf dir in their
             // classpath but want to run in local mode.

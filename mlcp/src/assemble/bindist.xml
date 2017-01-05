@@ -62,6 +62,10 @@
       <source>${basedir}/../LICENSE.txt</source>
       <outputDirectory>${file.separator}</outputDirectory>
     </file>
+    <file>
+      <source>${project.build.directory}/BUNDLE_ARTIFACT</source>
+      <outputDirectory>${file.separator}</outputDirectory>
+    </file>
   </files>
   <dependencySets>
     <dependencySet>

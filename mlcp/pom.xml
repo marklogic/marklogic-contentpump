@@ -29,6 +29,7 @@
     <hadoopConnectorBaseDir>${basedir}/../mapreduce</hadoopConnectorBaseDir>
     <xccVersion>9.0</xccVersion>
     <versionString>9.0</versionString>
+    <bundleArtifact>apache</bundleArtifact>
 
     <!-- Settings related to unit test -->
     <contentpumpHome>${project.build.directory}/mlcp-${versionString}-lib</contentpumpHome>
@@ -122,6 +123,18 @@
               <goal>run</goal>
             </goals>
           </execution>
+          <execution>
+            <id>bundle_artifact</id>
+            <phase>prepare-package</phase>
+            <configuration>
+              <target>
+                <echo file="${project.build.directory}/BUNDLE_ARTIFACT">${bundleArtifact}</echo>
+              </target>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -149,6 +162,9 @@
     </profile>
     <profile>
       <id>mapr</id>
+      <properties>
+        <bundleArtifact>mapr</bundleArtifact>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -246,7 +262,7 @@
         <dependency>
           <groupId>org.apache.htrace</groupId>
           <artifactId>htrace-core</artifactId>
-          <version>4.0.0-incubating</version>
+          <version>3.2.0-incubating</version>
         </dependency>	
         <dependency>
           <groupId>com.marklogic</groupId>
@@ -429,12 +445,12 @@
     <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
-      <version>1.19.3</version>
+      <version>1.9</version>
     </dependency>
     <dependency>
       <groupId>org.apache.htrace</groupId>
       <artifactId>htrace-core</artifactId>
-      <version>4.0.0-incubating</version>
+      <version>3.2.0-incubating</version>
     </dependency>	
     <dependency>
       <groupId>com.marklogic</groupId>
