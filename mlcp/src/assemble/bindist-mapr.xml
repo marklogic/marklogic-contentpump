@@ -48,6 +48,7 @@
       <outputDirectory>/lib</outputDirectory>
       <fileMode>0755</fileMode>
       <includes>
+        <include>*</include>
         <include>*/*</include>
       </includes>
     </fileSet>
@@ -60,6 +61,10 @@
   <files>
     <file>
       <source>${basedir}/../LICENSE.txt</source>
+      <outputDirectory>/</outputDirectory>
+    </file>
+    <file>
+      <source>${project.build.directory}/BUNDLE_ARTIFACT</source>
       <outputDirectory>/</outputDirectory>
     </file>
   </files>
