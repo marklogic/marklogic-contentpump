@@ -551,6 +551,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
         } catch (XMLStreamException e) {
             LOG.error("Parsing error", e);
+            close();
+            xmlSR = null;
             throw new IOException("Parsing error", e);
         }
 
