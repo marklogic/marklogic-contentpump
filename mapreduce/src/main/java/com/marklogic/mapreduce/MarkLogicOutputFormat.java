@@ -130,23 +130,7 @@ implements MarkLogicConstants, Configurable {
                 OUTPUT_FOREST_HOST, TextArrayWritable.class);
             return hosts;
         } else {
-            try {
-                String[] outputHosts = conf.getStrings(OUTPUT_HOST);
-                boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
-                if (restrictHosts) {
-                    return new TextArrayWritable(outputHosts);
-                } else {
-                    String outputHost = outputHosts.length>0?outputHosts[0]:null;
-                    // try getting a connection
-                    ContentSource cs = InternalUtilities.getOutputContentSource(
-                            conf, outputHost);
-                    // query hosts
-                    return queryHosts(cs);
-                }
-                
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
+            throw new IOException("Forest host map not found");
         }
     }
     
