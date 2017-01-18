@@ -192,7 +192,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                 if (restrictHosts) {
                     hostArray = new TextArrayWritable(outputHosts);
                 } else {
-                    String outputHost = outputHosts.length>0?outputHosts[0]:null;
+                    String outputHost = cs.getConnectionProvider().getHostName();
                     // 23798: replace hostname in forest config with 
                     // user-specified output host
                     if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
