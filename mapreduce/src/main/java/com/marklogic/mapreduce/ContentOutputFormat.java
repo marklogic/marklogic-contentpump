@@ -186,13 +186,13 @@ public class ContentOutputFormat<VALUEOUT> extends
                     throw new IllegalStateException(
                             "Failed to query directory creation mode.");
                 }
-            } else {
-                String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+            } else {                
                 TextArrayWritable hostArray = null;
                 if (restrictHosts) {
+                    String[] outputHosts = conf.getStrings(OUTPUT_HOST);
                     hostArray = new TextArrayWritable(outputHosts);
                 } else {
-                    String outputHost = outputHosts.length>0?outputHosts[0]:null;
+                    String outputHost = cs.getConnectionProvider().getHostName();
                     // 23798: replace hostname in forest config with 
                     // user-specified output host
                     if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
@@ -464,8 +464,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             LinkedMapWritable forestStatusMap = new LinkedMapWritable();
             Text forest = null;
             Text master = null;
-            String[] outputHosts = conf.getStrings(OUTPUT_HOST);
-            String outputHost = outputHosts[0];
+            String outputHost = cs.getConnectionProvider().getHostName();
             boolean local = MODE_LOCAL.equals(conf.get(EXECUTION_MODE));
             
             while (result.hasNext()) {
