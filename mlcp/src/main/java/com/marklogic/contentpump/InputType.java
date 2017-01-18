@@ -18,6 +18,8 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.DefaultStringifier;
@@ -37,6 +39,7 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.ServerConnectionException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 
 /**
@@ -245,52 +248,65 @@ public enum InputType implements ConfigConstants {
             Session session = null;
             ResultSequence result = null;
             ContentSource cs;
-            try {
-                cs = InternalUtilities.getOutputContentSource(conf,
-                    conf.get(MarkLogicConstants.OUTPUT_HOST));
-                session = cs.newSession("Security");
-                RequestOptions options = new RequestOptions();
-                options.setDefaultXQueryVersion("1.0-ml");
-                session.setDefaultRequestOptions(options);
-                AdhocQuery query = session.newAdhocQuery(ROLE_QUERY);
-                query.setOptions(options);
-                result = session.submitRequest(query);
-                Text version = new Text(result.next().asString());
-                boolean hasFunc = Boolean.parseBoolean(result.next().asString());
-                LinkedMapWritable roleMap = new LinkedMapWritable();
-                if(hasFunc) {
-                    while (result.hasNext()) {
-                        Text key = new Text(result.next().asString());
-                        if (!result.hasNext()) {
-                            throw new IOException("Invalid role map");
+            String[] outputHosts =
+                    conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
+            int hostIdx = 0;
+            while (hostIdx < outputHosts.length) {
+                try {
+                    cs = InternalUtilities.getOutputContentSource(conf,
+                        conf.get(MarkLogicConstants.OUTPUT_HOST));
+                    session = cs.newSession("Security");
+                    RequestOptions options = new RequestOptions();
+                    options.setDefaultXQueryVersion("1.0-ml");
+                    session.setDefaultRequestOptions(options);
+                    AdhocQuery query = session.newAdhocQuery(ROLE_QUERY);
+                    query.setOptions(options);
+                    result = session.submitRequest(query);
+                    Text version = new Text(result.next().asString());
+                    boolean hasFunc = Boolean.parseBoolean(result.next().asString());
+                    LinkedMapWritable roleMap = new LinkedMapWritable();
+                    if(hasFunc) {
+                        while (result.hasNext()) {
+                            Text key = new Text(result.next().asString());
+                            if (!result.hasNext()) {
+                                throw new IOException("Invalid role map");
+                            }
+                            Text value = new Text(result.next().asString());
+                            roleMap.put(key, value);
                         }
-                        Text value = new Text(result.next().asString());
-                        roleMap.put(key, value);
+        
+                        DefaultStringifier.store(conf, roleMap,
+                            ConfigConstants.CONF_ROLE_MAP);
                     }
-    
-                    DefaultStringifier.store(conf, roleMap,
-                        ConfigConstants.CONF_ROLE_MAP);
-                }
-                DefaultStringifier.store(conf, version,
-                    ConfigConstants.CONF_ML_VERSION);
-                if (conf.get(MarkLogicConstants.OUTPUT_DIRECTORY) == null && 
-                    conf.get(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX) 
-                        == null) {
-                    conf.set(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX, 
-                            "/triplestore/");
-                }
-            } catch (XccConfigException e) {
-                throw new IOException(e);
-            } catch (RequestException e) {
-                throw new IOException(e);
-            } finally {
-                if (result != null) {
-                    result.close();
-                }
-                if (session != null) {
-                    session.close();
+                    DefaultStringifier.store(conf, version,
+                        ConfigConstants.CONF_ML_VERSION);
+                    if (conf.get(MarkLogicConstants.OUTPUT_DIRECTORY) == null && 
+                        conf.get(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX) 
+                            == null) {
+                        conf.set(MarkLogicConstants.CONF_OUTPUT_URI_PREFIX, 
+                                "/triplestore/");
+                    }
+                    return;
+                } catch (ServerConnectionException e) {
+                    LOG.warn("Unable to connect to " + outputHosts[hostIdx]
+                            + " to query destination information");
+                    hostIdx++;
+                } catch (XccConfigException e) {
+                    throw new IOException(e);
+                } catch (RequestException e) {
+                    throw new IOException(e);
+                } finally {
+                    if (result != null) {
+                        result.close();
+                    }
+                    if (session != null) {
+                        session.close();
+                    }
                 }
             }
+            //  No usable output hostname found at this point
+            throw new IOException("Unable to query destination information,"
+                    + " no usable hostname found");
         }
     },
     FOREST {
@@ -353,6 +369,8 @@ public enum InputType implements ConfigConstants {
         }
         
     };
+    
+    public static final Log LOG = LogFactory.getLog(InputType.class);
 
     public static InputType forName(String type) {
         if (type.equalsIgnoreCase(DOCUMENTS.name())) {

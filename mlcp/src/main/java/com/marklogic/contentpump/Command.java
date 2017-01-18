@@ -610,9 +610,15 @@ public enum Command implements ConfigConstants {
                 String password = cmdline.getOptionValue(PASSWORD);
                 conf.set(MarkLogicConstants.OUTPUT_PASSWORD, password);
             }
+            String port = null;
+            if (cmdline.hasOption(PORT)) {
+                port = cmdline.getOptionValue(PORT);
+                conf.set(MarkLogicConstants.OUTPUT_PORT, port);
+            }
             if (cmdline.hasOption(HOST)) {
-                String host = cmdline.getOptionValue(HOST);
-                conf.set(MarkLogicConstants.OUTPUT_HOST, host);
+                String hosts = cmdline.getOptionValue(HOST);
+                InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
+                conf.set(MarkLogicConstants.OUTPUT_HOST, hosts);
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_OUTPUT_HOSTS);
@@ -623,10 +629,6 @@ public enum Command implements ConfigConstants {
                             "Unrecognized option argument for " + 
                                     RESTRICT_OUTPUT_HOSTS + ": " + restrict);
                 }
-            }
-            if (cmdline.hasOption(PORT)) {
-                String port = cmdline.getOptionValue(PORT);
-                conf.set(MarkLogicConstants.OUTPUT_PORT, port);
             }
             if (cmdline.hasOption(DATABASE)) {
                 String db = cmdline.getOptionValue(DATABASE);
@@ -977,9 +979,15 @@ public enum Command implements ConfigConstants {
                 Indentation indent = Indentation.forName(isIndented);
                 conf.set(MarkLogicConstants.INDENTED, indent.name());
             }
+            String port = null;
+            if (cmdline.hasOption(PORT)) {
+                port = cmdline.getOptionValue(PORT);
+                conf.set(MarkLogicConstants.INPUT_PORT, port);
+            }
             if (cmdline.hasOption(HOST)) {
-                String host = cmdline.getOptionValue(HOST);
-                conf.set(MarkLogicConstants.INPUT_HOST, host);
+                String hosts = cmdline.getOptionValue(HOST);
+                InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
+                conf.set(MarkLogicConstants.INPUT_HOST, hosts);
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_INPUT_HOSTS);
@@ -990,10 +998,6 @@ public enum Command implements ConfigConstants {
                             "Unrecognized option argument for " + 
                                     RESTRICT_INPUT_HOSTS + ": " + restrict);
                 }
-            }
-            if (cmdline.hasOption(PORT)) {
-                String port = cmdline.getOptionValue(PORT);
-                conf.set(MarkLogicConstants.INPUT_PORT, port);
             }
             if (cmdline.hasOption(USERNAME)) {
                 String user = cmdline.getOptionValue(USERNAME);
@@ -1222,13 +1226,16 @@ public enum Command implements ConfigConstants {
                 String password = cmdline.getOptionValue(OUTPUT_PASSWORD);
                 conf.set(MarkLogicConstants.OUTPUT_PASSWORD, password);
             }
-            if (cmdline.hasOption(OUTPUT_HOST)) {
-                String host = cmdline.getOptionValue(OUTPUT_HOST);
-                conf.set(MarkLogicConstants.OUTPUT_HOST, host);
-            }
+            String outputPort = null;
             if (cmdline.hasOption(OUTPUT_PORT)) {
-                String port = cmdline.getOptionValue(OUTPUT_PORT);
-                conf.set(MarkLogicConstants.OUTPUT_PORT, port);
+                outputPort = cmdline.getOptionValue(OUTPUT_PORT);
+                conf.set(MarkLogicConstants.OUTPUT_PORT, outputPort);
+            }
+            if (cmdline.hasOption(OUTPUT_HOST)) {
+                String outputHosts = cmdline.getOptionValue(OUTPUT_HOST);
+                InternalUtilities.verifyHosts(
+                        outputHosts, outputPort==null?"8000":outputPort);
+                conf.set(MarkLogicConstants.OUTPUT_HOST, outputHosts);
             }
             if (cmdline.hasOption(OUTPUT_DATABASE)) {
                 String db = cmdline.getOptionValue(OUTPUT_DATABASE);
@@ -1253,13 +1260,16 @@ public enum Command implements ConfigConstants {
                 String password = cmdline.getOptionValue(INPUT_PASSWORD);
                 conf.set(MarkLogicConstants.INPUT_PASSWORD, password);
             }
-            if (cmdline.hasOption(INPUT_HOST)) {
-                String host = cmdline.getOptionValue(INPUT_HOST);
-                conf.set(MarkLogicConstants.INPUT_HOST, host);
-            }
+            String inputPort = null;
             if (cmdline.hasOption(INPUT_PORT)) {
-                String port = cmdline.getOptionValue(INPUT_PORT);
-                conf.set(MarkLogicConstants.INPUT_PORT, port);
+                inputPort = cmdline.getOptionValue(INPUT_PORT);
+                conf.set(MarkLogicConstants.INPUT_PORT, inputPort);
+            }
+            if (cmdline.hasOption(INPUT_HOST)) {
+                String inputHosts = cmdline.getOptionValue(INPUT_HOST);
+                InternalUtilities.verifyHosts(
+                        inputHosts, inputPort==null?"8000":inputPort);
+                conf.set(MarkLogicConstants.INPUT_HOST, inputHosts);
             }
             if (cmdline.hasOption(INPUT_DATABASE)) {
                 String db = cmdline.getOptionValue(INPUT_DATABASE);
