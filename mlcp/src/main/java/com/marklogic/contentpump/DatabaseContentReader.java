@@ -77,6 +77,7 @@ public class DatabaseContentReader extends
     protected HashMap<String, DocumentMetadata> metadataMap;
     protected String ctsQuery = null;
     protected boolean nakedDone = false;
+    protected boolean docDone = false;
     /**
      * Current key.
      */
@@ -85,6 +86,8 @@ public class DatabaseContentReader extends
      * Current value.
      */
     protected DatabaseDocumentWithMeta currentValue;
+
+    protected int nakedCount;
 
     public DatabaseContentReader(Configuration conf) {
         super(conf);
@@ -103,7 +106,26 @@ public class DatabaseContentReader extends
         throws IOException, InterruptedException {
         mlSplit = (MarkLogicInputSplit) inSplit;
         count = 0;
+        nakedCount = 0;
+        retry = 0;
+        sleepTime = 100;
 
+        replicas = mlSplit.getReplicas();
+        curForest = -1;
+        if (replicas != null) {
+            for (int i = 0; i < replicas.size(); i++) {
+                if (replicas.get(i).getForest().equals(mlSplit.getForestId().toString())) {
+                   curForest = i;
+                   break;
+                }
+            }
+        }
+        init();
+    }
+
+    /* in case of failover, use init() instead of initialize() for retry */
+    private void init()
+        throws IOException, InterruptedException {
         // construct the server URI
         String[] hostNames = mlSplit.getLocations();
         if (hostNames == null || hostNames.length < 1) {
@@ -112,6 +134,7 @@ public class DatabaseContentReader extends
         if (LOG.isDebugEnabled()) {
             LOG.debug("split location: " + hostNames[0]);
         }
+        nakedDone = false;
 
         // initialize the total length
         float recToFragRatio = conf.getFloat(RECORD_TO_FRAGMENT_RATIO,
@@ -120,7 +143,7 @@ public class DatabaseContentReader extends
 
         // generate the query
         String queryText;
-        long start = mlSplit.getStart() + 1;
+        long start = mlSplit.getStart() + 1 + count;
         long end = mlSplit.isLastSplit() ? Long.MAX_VALUE : start
             + mlSplit.getLength() - 1;
 
@@ -208,10 +231,26 @@ public class DatabaseContentReader extends
         }
 
         // set up a connection to the server
+        while (retry++ < maxRetries) {
         try {
+            String curForestName = "";
+            String curHostName = "";
+            if (curForest == -1) {
+                curForestName = mlSplit.getForestId().toString();
+                curHostName = hostNames[0];
+            } else {
+                curForestName = replicas.get(curForest).getForest();
+                curHostName = replicas.get(curForest).getHostName();
+            }
             ContentSource cs = InternalUtilities.getInputContentSource(conf,
-                hostNames[0]);
-            session = cs.newSession("#" + mlSplit.getForestId().toString());
+                    curHostName);
+            session = cs.newSession("#"+curForestName);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Connect to forest "
+                    + curForestName + " on "
+                    + session.getConnectionUri().getHost());
+            }
+
             AdhocQuery aquery = session.newAdhocQuery(queryText);
             aquery.setNewIntegerVariable(MR_NAMESPACE, SPLIT_START_VARNAME,
                 start);
@@ -233,13 +272,26 @@ public class DatabaseContentReader extends
             LOG.error(e);
             throw new IOException(e);
         } catch (RequestException e) {
+            if (curForest != -1 && retry < maxRetries) {
+                // failover
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (Exception e2) {
+                }
+                sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+
+                curForest = (curForest+1)%replicas.size();
+                continue;
+            }
             LOG.error("Query: " + queryText);
             LOG.error(e);
             throw new IOException(e);
         }
+        break;
+        }
     }
      
-    protected void queryNakedProperties() throws IOException {
+    protected void queryNakedProperties() throws RequestException {
         StringBuilder buf = new StringBuilder();
         buf.append("xquery version \"1.0-ml\"; \n");
         buf.append("import module namespace hadoop = ");
@@ -311,25 +363,19 @@ public class DatabaseContentReader extends
         }
         
         // set up a connection to the server
-        try {
-            AdhocQuery aquery = session.newAdhocQuery(queryText);
-            RequestOptions options = new RequestOptions();
-            options.setCacheResult(false);
-            String ts = conf.get(INPUT_QUERY_TIMESTAMP);
-            if (ts != null) {
-                options.setEffectivePointInTime(new BigInteger(ts));
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Query timestamp: " + ts);
-                }
-            } 
-            aquery.setOptions(options);
-            result = session.submitRequest(aquery);
-            nakedDone = true;
-        } catch (RequestException e) {
-            LOG.error("Query: " + queryText);
-            LOG.error(e);
-            throw new IOException(e);
-        }
+        AdhocQuery aquery = session.newAdhocQuery(queryText);
+        RequestOptions options = new RequestOptions();
+        options.setCacheResult(false);
+        String ts = conf.get(INPUT_QUERY_TIMESTAMP);
+        if (ts != null) {
+            options.setEffectivePointInTime(new BigInteger(ts));
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Query timestamp: " + ts);
+            }
+        } 
+        aquery.setOptions(options);
+        result = session.submitRequest(aquery);
+        nakedDone = true;
     }
 
     private void initMetadataMap() throws IOException {
@@ -445,64 +491,134 @@ public class DatabaseContentReader extends
    
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (result == null || (!result.hasNext())) {
-            if (!nakedDone && copyProperties && mlSplit.getStart() == 0) {
-                queryNakedProperties();
-                if (!result.hasNext()) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-        ResultItem currItem = null;
-        currItem = result.next();
+        if (!docDone) {
+            retry = 0;
+            sleepTime = 100;
+            while (retry++ < maxRetries) {
+                try {
+                    if (result != null && (result.hasNext())) {
+                        ResultItem currItem = null;
+                        currItem = result.next();
+        
+                        // docs
+                        String uri = null;
+                        uri = currItem.getDocumentURI();
+                        if (uri == null) {
+                            count++;
+                            throw new IOException("Missing document URI for result "
+                                + currItem.toString());
+                        }
+                        currentValue = new DatabaseDocumentWithMeta();
+                        DocumentMetadata metadata = metadataMap.get(uri);
+                        uri = URIUtil.applyUriReplace(uri, conf);
+                        uri = URIUtil.applyPrefixSuffix(uri, conf);
+                        currentKey.setUri(uri);
+                        if (metadata != null) {
+                            currentValue.setMeta(metadata);
+                            currentValue.set(currItem);
+                        } else {
+                            LOG.error("no meta for " + uri);
+                        }
 
-        if (!nakedDone) {
-            count++;
-            // docs
-            String uri = null;
-            uri = currItem.getDocumentURI();
-            if (uri == null) {
-                throw new IOException("Missing document URI for result "
-                    + currItem.toString());
-            }
-            currentValue = new DatabaseDocumentWithMeta();
-            DocumentMetadata metadata = metadataMap.get(uri);
-            uri = URIUtil.applyUriReplace(uri, conf);
-            uri = URIUtil.applyPrefixSuffix(uri, conf);
-            currentKey.setUri(uri);
-            if (metadata != null) {
-                currentValue.setMeta(metadata);
-                currentValue.set(currItem);
-            } else {
-                LOG.error("no meta for " + uri);
-            }
-            return true;
-        } else { // naked properties
-            currentValue = new DatabaseDocumentWithMeta();
-            ResultItem item = currItem;
-            String type = null;
-            if (item != null && item.getItemType() == ValueType.XS_STRING) {
-                type = item.asString();
-            } else {
-                throw new IOException("incorrect format:" + item.getItem()
-                    + "\n" + result.asString());
-            }
-            if ("META".equals(type)) {
-                DocumentMetadata metadata = new DocumentMetadata();
-                String uri = parseMetadata(metadata);
-                metadata.setNakedProps(true);
-                uri = URIUtil.applyUriReplace(uri, conf);
-                uri = URIUtil.applyPrefixSuffix(uri, conf);
-                currentKey.setUri(uri);
-                currentValue.setMeta(metadata);
-                currentValue.setContentType(ContentType.XML);
-            } else {
-                throw new IOException("incorrect type");
-            }
+                        count++;
+                        return true;
+                    }
+                } catch (RuntimeException e) {
+                    if (curForest != -1 && retry < maxRetries) {
+                        try {
+                            Thread.sleep(sleepTime);
+                        } catch (Exception e2) {
+                        }
+                        sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+
+                        curForest = (curForest+1)%replicas.size();
+                        init();
+                        continue;
+                    }
+                    throw e;
+                }
+                break;
+            } // while
+            docDone = true;
         }
-        return true;
+
+        if (copyProperties && mlSplit.getStart() == 0) {
+            retry = 0;
+            sleepTime = 100;
+            while (retry++ < maxRetries) {
+                try {
+                    if (!nakedDone) {
+                        queryNakedProperties();
+                        int curCount = 0;
+                        while (curCount < nakedCount) {
+                            if (result.hasNext()) {
+                                result.next();
+                                curCount++;
+                            } else { 
+                                return false;
+                            }
+                        }
+                    }
+               
+                    if (result.hasNext()) {
+                        ResultItem currItem = null;
+                        currItem = result.next();
+
+                        currentValue = new DatabaseDocumentWithMeta();
+                        ResultItem item = currItem;
+                        String type = null;
+                        if (item != null && item.getItemType() == ValueType.XS_STRING) {
+                            type = item.asString();
+                        } else {
+                            throw new IOException("incorrect format:" + item.getItem()
+                                + "\n" + result.asString());
+                        }
+                        if ("META".equals(type)) {
+                            DocumentMetadata metadata = new DocumentMetadata();
+                            String uri = parseMetadata(metadata);
+                            metadata.setNakedProps(true);
+                            uri = URIUtil.applyUriReplace(uri, conf);
+                            uri = URIUtil.applyPrefixSuffix(uri, conf);
+                            currentKey.setUri(uri);
+                            currentValue.setMeta(metadata);
+                            currentValue.setContentType(ContentType.XML);
+                        } else {
+                            throw new IOException("incorrect type");
+                        }
+                        nakedCount++;
+                        return true;
+                    }
+                } catch (RequestException e) {
+                    if (curForest != -1 && retry < maxRetries) {
+                        try {
+                            Thread.sleep(sleepTime);
+                        } catch (Exception e2) {
+                        }
+                        sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+
+                        curForest = (curForest+1)%replicas.size();
+                        init();
+                        continue;
+                    }
+                    throw new IOException(e);
+                } catch (RuntimeException e) {
+                    if (curForest != -1 && retry < maxRetries) {
+                        try {
+                            Thread.sleep(sleepTime);
+                        } catch (Exception e2) {
+                        }
+                        sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+
+                        curForest = (curForest+1)%replicas.size();
+                        init();
+                        continue;
+                    }
+                    throw e;
+                }
+                break;
+            } // while
+        }
+        return false;
     }
 
     @Override
