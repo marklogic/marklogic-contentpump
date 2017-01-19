@@ -192,7 +192,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                 if (restrictHosts) {
                     hostArray = new TextArrayWritable(outputHosts);
                 } else {
-                    String outputHost = outputHosts.length>0?outputHosts[0]:null;
+                    String outputHost = cs.getConnectionProvider().getHostName();
                     // 23798: replace hostname in forest config with 
                     // user-specified output host
                     if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
@@ -312,13 +312,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, 
                 am, effectiveVersion);
     }
-    
-    // forest host map is saved when checkOutputSpecs() is called.  In certain 
-    // versions of Hadoop, the config is not persisted as part of the job hence
-    // will be lost.  See MAPREDUCE-3377 for details.  When this entry cannot
-    // be found from the config, re-query the database to get this info.  It is
-    // possible that each task gets a different version of the map if the 
-    // forest config changes while the job runs.
+
     protected LinkedMapWritable getForestStatusMap(Configuration conf) 
     throws IOException {
         String forestHost = conf.get(OUTPUT_FOREST_HOST);
@@ -338,24 +332,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             }
             return fhmap;
         } else {
-            try {
-                String[] outputHosts = conf.getStrings(OUTPUT_HOST);
-                boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
-                if (outputHosts == null || outputHosts.length == 0) {
-                    throw new IllegalStateException(OUTPUT_HOST +
-                            " is not specified.");
-                }
-                // try getting a connection
-                ContentSource cs = 
-                    InternalUtilities.getOutputContentSource(conf, 
-                            outputHosts[0]);
-                //get policy
-                initialize(cs.newSession(), restrictHosts);
-                // query forest status mapping
-                return queryForestInfo(cs);
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
+            throw new IOException("Forest host map not found");
         }
     }
     
@@ -454,7 +431,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         try {
             session = cs.newSession();   
             AdhocQuery query = null;
-            if (legacy) {             
+            if (legacy) {
                 LOG.debug("Legacy assignment is assumed for older MarkLogic" + 
                           " Server.");
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);

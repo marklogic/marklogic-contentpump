@@ -18,6 +18,7 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +40,7 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.ServerConnectionException;
 
 /**
  * MarkLogic-based OutputFormat superclass. Use the provided subclasses, such
@@ -84,16 +86,26 @@ implements MarkLogicConstants, Configurable {
             throw new IllegalStateException(OUTPUT_HOST +
                     " is not specified.");
         }                     
-
-        try {
-            // try getting a connection
-            ContentSource cs = InternalUtilities.getOutputContentSource(conf,
-                hosts[0]);
-            checkOutputSpecs(conf, cs);
-        } 
-        catch (Exception ex) {
-            throw new IOException(ex);
+        
+        for (int i = 0; i < hosts.length; i++) {
+            try {
+                ContentSource cs = InternalUtilities.getOutputContentSource(conf,
+                        hosts[i]);
+                checkOutputSpecs(conf, cs);
+                return;
+            }
+            catch (Exception ex) {
+                if (ex.getCause() instanceof ServerConnectionException ||
+                        ex instanceof IllegalArgumentException) {
+                    LOG.warn("Unable to do initial query using " + hosts[i]
+                            + ": "+ ex.getMessage());
+                    continue;
+                } else {
+                    throw new IOException(ex);
+                }
+            }
         }
+        throw new IOException("No usable hostname found");
     }
 
     @Override
@@ -130,23 +142,7 @@ implements MarkLogicConstants, Configurable {
                 OUTPUT_FOREST_HOST, TextArrayWritable.class);
             return hosts;
         } else {
-            try {
-                String[] outputHosts = conf.getStrings(OUTPUT_HOST);
-                boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
-                if (restrictHosts) {
-                    return new TextArrayWritable(outputHosts);
-                } else {
-                    String outputHost = outputHosts.length>0?outputHosts[0]:null;
-                    // try getting a connection
-                    ContentSource cs = InternalUtilities.getOutputContentSource(
-                            conf, outputHost);
-                    // query hosts
-                    return queryHosts(cs);
-                }
-                
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
+            throw new IOException("Forest host map not found");
         }
     }
     
