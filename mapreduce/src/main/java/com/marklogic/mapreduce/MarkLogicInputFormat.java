@@ -18,7 +18,6 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,6 +44,7 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.ServerConnectionException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.ItemType;
 import com.marklogic.xcc.types.XSInteger;
@@ -277,7 +277,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 "Max split size is required to be positive. It is set to " +
                 maxSplitSize);
         }
-        
+
         // fetch data from server
         List<ForestSplit> forestSplits = new ArrayList<ForestSplit>();
         Session session = null;
@@ -286,60 +286,73 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Split query: " + splitQuery);
         }
-        localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));        
-        try {
-            ContentSource cs = InternalUtilities.getInputContentSource(jobConf, inputHosts[0]);
-            session = cs.newSession();
-            RequestOptions options = new RequestOptions();
-            options.setCacheResult(false);
-            
-            if (localMode && advancedMode) {
-                AdhocQuery hostQuery = session.newAdhocQuery(
-                    "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
-                hostQuery.setOptions(options);
-                result = session.submitRequest(hostQuery);
-                if(result.hasNext()) {
+        localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));
+        int hostIdx = 0;
+        while (hostIdx < inputHosts.length) {
+            try {
+                ContentSource cs = InternalUtilities.getInputContentSource(jobConf,
+                        inputHosts[hostIdx]);
+                session = cs.newSession();
+                RequestOptions options = new RequestOptions();
+                options.setCacheResult(false);
+
+                if (localMode && advancedMode) {
+                    AdhocQuery hostQuery = session.newAdhocQuery(
+                        "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
+                    hostQuery.setOptions(options);
+                    result = session.submitRequest(hostQuery);
+                    if(result.hasNext()) {
+                        ResultItem item = result.next();
+                        localHost = item.asString();
+                    }
+                    if (result != null) {
+                        result.close();
+                    }
+                }
+
+                AdhocQuery query = session.newAdhocQuery(splitQuery);
+                if (queryLanguage != null) {
+                    InternalUtilities.checkQueryLanguage(queryLanguage);
+                    options.setQueryLanguage(queryLanguage);
+                }
+                query.setOptions(options);
+                result = session.submitRequest(query);
+                
+                if (!advancedMode && result.hasNext()) {
                     ResultItem item = result.next();
                     localHost = item.asString();
                 }
+                List<String> ruleUris = null;
+                if (redactionRuleCol != null) {
+                    ruleUris = new ArrayList<String>();
+                }
+                getForestSplits(jobContext, result, forestSplits,
+                        ruleUris, inputHosts);
+                LOG.info("Fetched " + forestSplits.size() +
+                        " forest splits.");
+                break;
+            } catch (XccConfigException e) {
+                LOG.error(e);
+                throw new IOException(e);
+            } catch (ServerConnectionException | IllegalArgumentException e) {
+                LOG.warn("Unable to do split query using " +
+                        inputHosts[hostIdx] + ": " + e.getMessage());
+                hostIdx++;
+            } catch (RequestException e) {
+                LOG.error(e);
+                LOG.error("Query: " + splitQuery);
+                throw new IOException(e);
+            } finally {
                 if (result != null) {
                     result.close();
                 }
+                if (session != null) {
+                    session.close();
+                }
             }
-            
-            AdhocQuery query = session.newAdhocQuery(splitQuery);
-            if (queryLanguage != null) {
-                InternalUtilities.checkQueryLanguage(queryLanguage);
-                options.setQueryLanguage(queryLanguage);
-            }
-            query.setOptions(options);
-            result = session.submitRequest(query);
-            
-            if (!advancedMode && result.hasNext()) {
-                ResultItem item = result.next();
-                localHost = item.asString();
-            }
-            List<String> ruleUris = null;
-            if (redactionRuleCol != null) {
-                ruleUris = new ArrayList<String>();
-            }
-            getForestSplits(jobContext, result, forestSplits, ruleUris, inputHosts);            
-            LOG.info("Fetched " + forestSplits.size() + 
-                    " forest splits.");            
-        } catch (XccConfigException e) {
-            LOG.error(e);
-            throw new IOException(e);
-        } catch (RequestException e) {
-            LOG.error(e);
-            LOG.error("Query: " + splitQuery);
-            throw new IOException(e);
-        } finally {
-            if (result != null) {
-                result.close();
-            }
-            if (session != null) {
-                session.close();
-            }
+        }
+        if (hostIdx == inputHosts.length) {
+            throw new IOException("No usable input hostname found");
         }
         
         // create a split list per forest per host

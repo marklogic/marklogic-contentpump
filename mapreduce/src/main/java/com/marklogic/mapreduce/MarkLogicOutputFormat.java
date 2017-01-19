@@ -18,7 +18,6 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -105,7 +104,7 @@ implements MarkLogicConstants, Configurable {
                 }
             }
         }
-        throw new IOException("No usable hostname found");
+        throw new IOException("No usable output hostname found");
     }
 
     @Override
