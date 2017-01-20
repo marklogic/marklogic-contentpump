@@ -16,7 +16,6 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -186,10 +185,10 @@ public class ContentOutputFormat<VALUEOUT> extends
                     throw new IllegalStateException(
                             "Failed to query directory creation mode.");
                 }
-            } else {
-                String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+            } else {                
                 TextArrayWritable hostArray = null;
                 if (restrictHosts) {
+                    String[] outputHosts = conf.getStrings(OUTPUT_HOST);
                     hostArray = new TextArrayWritable(outputHosts);
                 } else {
                     String outputHost = cs.getConnectionProvider().getHostName();
@@ -464,8 +463,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             LinkedMapWritable forestStatusMap = new LinkedMapWritable();
             Text forest = null;
             Text master = null;
-            String[] outputHosts = conf.getStrings(OUTPUT_HOST);
-            String outputHost = outputHosts[0];
+            String outputHost = cs.getConnectionProvider().getHostName();
             boolean local = MODE_LOCAL.equals(conf.get(EXECUTION_MODE));
             
             while (result.hasNext()) {

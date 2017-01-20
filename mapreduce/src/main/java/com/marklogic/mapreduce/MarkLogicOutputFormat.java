@@ -105,7 +105,7 @@ implements MarkLogicConstants, Configurable {
                 }
             }
         }
-        throw new IOException("No usable hostname found");
+        throw new IOException("No usable output hostname found");
     }
 
     @Override
