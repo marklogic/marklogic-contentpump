@@ -17,6 +17,7 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -30,6 +31,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.functions.LexiconFunction;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.ForestHost;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
@@ -81,7 +83,25 @@ implements MarkLogicConstants {
      * Redaction rule collection names.
      */
     protected String[] redactionRuleCol;
-    
+    /**
+     * list of forests for failover
+     */   
+    protected List<ForestHost> replicas;
+    /**
+     * Current Forest to connect for failover 
+     */
+    protected int curForest;
+    /**
+     * for failover retry
+     */
+    protected int retry;
+
+    protected final int maxRetries = 15;
+
+    protected int sleepTime;
+
+    protected final int maxSleepTime = 60000;
+
     public MarkLogicRecordReader(Configuration conf) {
         this.conf = conf;
     }
@@ -195,7 +215,25 @@ implements MarkLogicConstants {
             throws IOException, InterruptedException {
         mlSplit = (MarkLogicInputSplit)split;
         count = 0;
+
+        replicas = mlSplit.getReplicas();
+        curForest = -1;
+        if (replicas != null) {
+            for (int i = 0; i < replicas.size(); i++) {
+                if (replicas.get(i).getForest().equals(mlSplit.getForestId().toString())) {
+                   curForest = i;
+                   break;
+                }
+            }
+        }
+        retry = 0;
+        sleepTime = 100;
+        init();
+    }
         
+    /* in case of failover, use init() instead of initialize() for retry */
+    private void init() 
+            throws IOException, InterruptedException {
         // check hostnames
         String[] hostNames = mlSplit.getLocations();
         if (hostNames == null || hostNames.length < 1) {
@@ -218,7 +256,7 @@ implements MarkLogicConstants {
         // generate the query
         String queryLanguage = null;
         String queryText = null;
-        long start = mlSplit.getStart() + 1;
+        long start = mlSplit.getStart() + 1 + count;
         long end = mlSplit.isLastSplit() ? 
                    Long.MAX_VALUE : start + mlSplit.getLength() - 1;
         if (!advancedMode) { 
@@ -282,15 +320,26 @@ implements MarkLogicConstants {
         if (LOG.isDebugEnabled()) {
             LOG.debug(queryText);
         }
-        
+
+
         // set up a connection to the server
+        while (retry++ < maxRetries) {
         try {
+            String curForestName = "";
+            String curHostName = "";
+            if (curForest == -1) {
+                curForestName = mlSplit.getForestId().toString();
+                curHostName = hostNames[0];
+            } else {
+                curForestName = replicas.get(curForest).getForest();
+                curHostName = replicas.get(curForest).getHostName();
+            }
             ContentSource cs = InternalUtilities.getInputContentSource(conf, 
-                    hostNames[0]);
-            session = cs.newSession("#"+mlSplit.getForestId().toString());
+                    curHostName);
+            session = cs.newSession("#"+curForestName);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to forest "
-                    + mlSplit.getForestId().toString() + " on "
+                    + curForestName + " on "
                     + session.getConnectionUri().getHost());
             }
             AdhocQuery query = session.newAdhocQuery(queryText);
@@ -337,22 +386,58 @@ implements MarkLogicConstants {
             LOG.error(e);
             throw new IOException(e);
         } catch (RequestException e) {
+            if (curForest != -1 && retry < maxRetries) {
+                // failover
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (Exception e2) {
+                }
+                sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+
+                curForest = (curForest+1)%replicas.size();
+                continue;
+            }
             LOG.error("Query: " + queryText);
             LOG.error(e);
             throw new IOException(e);
         }
+        break;
+        } // retry
     }
 
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (result != null && result.hasNext()) {
-            ResultItem item = result.next();
-            count++;
-            return nextResult(item);
-        } else {
-            endOfResult();
-            return false;
+        retry = 0;
+        sleepTime = 100;
+        while (retry++ < maxRetries) {
+            try {
+                if (result != null && result.hasNext()) {
+                    ResultItem item = result.next();
+                    boolean ret = nextResult(item);
+                    // need to increment the count after nextResult is successful
+                    count++;
+                    return ret;
+                } else {
+                    endOfResult();
+                    return false;
+                }
+            } catch (RuntimeException e) {
+                if (curForest != -1 && retry < maxRetries) {
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (Exception e2) {
+                    }
+                    sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+
+                    curForest = (curForest+1)%replicas.size();
+                    init();
+                    continue;
+                }
+                throw e;
+            }
         }
+        endOfResult();
+        return false;
     }
 
     abstract protected void endOfResult();
