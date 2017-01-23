@@ -181,7 +181,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         ContentSource cs;
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
-                conf.get(MarkLogicConstants.OUTPUT_HOST));
+                conf.getStrings(MarkLogicConstants.OUTPUT_HOST)[0]);
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
@@ -558,7 +558,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         ContentSource cs;
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
-                conf.get(MarkLogicConstants.OUTPUT_HOST));
+                conf.getStrings(MarkLogicConstants.OUTPUT_HOST)[0]);
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
