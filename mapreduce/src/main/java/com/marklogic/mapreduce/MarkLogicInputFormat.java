@@ -287,6 +287,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             LOG.debug("Split query: " + splitQuery);
         }
         localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));
+
         int hostIdx = 0;
         while (hostIdx < inputHosts.length) {
             try {
@@ -331,13 +332,13 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 LOG.info("Fetched " + forestSplits.size() +
                         " forest splits.");
                 break;
+            } catch (ServerConnectionException e) {
+                LOG.warn("Failed to use host " + inputHosts[hostIdx] 
+                        + " to query source information");
+                hostIdx++;
             } catch (XccConfigException e) {
                 LOG.error(e);
                 throw new IOException(e);
-            } catch (ServerConnectionException | IllegalArgumentException e) {
-                LOG.warn("Unable to do split query using " +
-                        inputHosts[hostIdx] + ": " + e.getMessage());
-                hostIdx++;
             } catch (RequestException e) {
                 LOG.error(e);
                 LOG.error("Query: " + splitQuery);
@@ -352,7 +353,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
         }
         if (hostIdx == inputHosts.length) {
-            throw new IOException("No usable input hostname found");
+            // No usable input hostname found at this point
+            throw new IOException("Failed to query source information,"
+                    + " no usable hostname found");
         }
         
         // create a split list per forest per host
