@@ -19,7 +19,7 @@
     <test.excludes>**/*TestDistributed*</test.excludes>
     <hadoopConnectorVersion>2.1.6</hadoopConnectorVersion>
     <hadoopConnectorBaseDir>${basedir}/../mapreduce</hadoopConnectorBaseDir>
-    <xccVersion>8.0.6</xccVersion>
+    <xccVersion>8.0.6.2</xccVersion>
     <versionString>8.0.6</versionString>
     <bundleArtifact>apache</bundleArtifact>
     <!-- Settings related to unit test -->
@@ -398,28 +398,8 @@
           <version>${xccVersion}</version>
           <scope>system</scope>
           <systemPath>${hadoopConnectorBaseDir}/src/lib/marklogic-xcc-${xccVersion}.jar</systemPath>
-<<<<<<< HEAD
-        </dependency>
-      </dependencies>
-    </profile>
-  </profiles>
-  <repositories>
-    <repository>
-      <id>mapr-releases</id>
-      <url>http://repository.mapr.com/maven/</url>
-      <snapshots><enabled>false</enabled></snapshots>
-      <releases><enabled>true</enabled></releases>
-    </repository>
-  </repositories>
-=======
-      </dependency>
-      <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-lang3</artifactId>
-          <version>3.5</version>
       </dependency>
   </dependencies>
->>>>>>> 300ec56... bug:43901 run mlcp mapr bundle without maprfs jar
   <build>
     <plugins>
       <plugin>
