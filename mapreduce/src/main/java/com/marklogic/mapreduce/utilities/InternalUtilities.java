@@ -17,6 +17,7 @@
 package com.marklogic.mapreduce.utilities;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -92,7 +93,7 @@ public class InternalUtilities implements MarkLogicConstants {
      */
     public static ContentSource getInputContentSource(Configuration conf) 
     throws URISyntaxException, XccConfigException, IOException {
-        String host = conf.get(INPUT_HOST);
+        String host = conf.getStrings(INPUT_HOST)[0];
         if (host == null || host.isEmpty()) {
             throw new IllegalArgumentException(INPUT_HOST + 
                     " is not specified.");
@@ -437,5 +438,30 @@ public class InternalUtilities implements MarkLogicConstants {
         if (!(s.equalsIgnoreCase("xquery") || s.equalsIgnoreCase("javascript"))) {
             throw new IllegalArgumentException("Invalid output query language:" + s);
         }
+    }
+
+    public static String verifyHosts(String hostList, String portStr) {
+        String[] hosts = hostList.split(",");
+        int port = Integer.parseInt(portStr);
+        for (int i = 0; i < hosts.length; i++) {
+            String host = hosts[i];
+            InetSocketAddress address = new InetSocketAddress(host, port);
+            if (address.isUnresolved()) {
+                LOG.warn("Not a usable net address: " + address);
+                hosts[i] = null;
+            }
+        }
+        StringBuilder buf = null;
+        for (int i = 0; i < hosts.length; i++) {
+            if (hosts[i] != null) {
+                if (buf == null) {
+                    buf = new StringBuilder();
+                } else {
+                    buf.append(",");
+                }
+                buf.append(hosts[i]);
+            }
+        }
+        return buf==null?null:buf.toString();
     }
 }

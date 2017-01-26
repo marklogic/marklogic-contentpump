@@ -146,6 +146,11 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         }
         conf.set(EXECUTION_MODE, distributed ? MODE_DISTRIBUTED : MODE_LOCAL);
         
+        if (conf.getBoolean(RESTRICT_INPUT_HOSTS, true) ||
+                conf.getBoolean(RESTRICT_OUTPUT_HOSTS, true)) {
+            System.setProperty("xcc.httpcompliant", "true");
+        }
+
         if (distributed) {
             if (!cmdline.hasOption(SPLIT_INPUT)
                 && Command.getInputType(cmdline).equals(

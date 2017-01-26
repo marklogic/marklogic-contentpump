@@ -88,8 +88,7 @@ implements MarkLogicConstants, Configurable {
         if (hosts == null || hosts.length == 0) {
             throw new IllegalStateException(OUTPUT_HOST +
                     " is not specified.");
-        }                     
-        
+        }
         for (int i = 0; i < hosts.length; i++) {
             try {
                 ContentSource cs = InternalUtilities.getOutputContentSource(conf,
@@ -98,17 +97,18 @@ implements MarkLogicConstants, Configurable {
                 return;
             }
             catch (Exception ex) {
-                if (ex.getCause() instanceof ServerConnectionException ||
-                        ex instanceof IllegalArgumentException) {
-                    LOG.warn("Unable to do initial query using " + hosts[i]
-                            + ": "+ ex.getMessage());
+                if (ex.getCause() instanceof ServerConnectionException) {
+                    LOG.warn("Failed to use host " + hosts[i] 
+                            + " to query destination information");
                     continue;
                 } else {
                     throw new IOException(ex);
                 }
             }
         }
-        throw new IOException("No usable output hostname found");
+        // No usable output hostname found at this point
+        throw new IOException("Failed to query destination information,"
+                + " no usable hostname found");
     }
 
     @Override
