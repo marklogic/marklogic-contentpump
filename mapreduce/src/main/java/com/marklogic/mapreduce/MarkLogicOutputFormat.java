@@ -70,7 +70,10 @@ implements MarkLogicConstants, Configurable {
         + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
         + "let $f := "
         + "  fn:function-lookup(xs:QName('hadoop:get-host-names'),0)\n"
-        + "return  if(exists($f)) then $f() else\n"
+        + "let $f2 := "
+        + "  fn:function-lookup(xs:QName('hadoop:get-replica-host-names'),0)\n"
+        + "return  if (exists($f2)) then $f2() else \n"
+        + "   if(exists($f)) then $f() else\n"
         + "   for $i at $p in hadoop:get-forest-host-map()"
         + "   where $p mod 2 eq 0 "
         + "   return $i";

@@ -260,7 +260,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
 
             for (ForestSplit split : forestSplits) {
-                 master = forestToMaster.get(split.forestId.toString());
+                master = forestToMaster.get(split.forestId.toString());
                 split.replicas = forestHostMap.get(master);
             }
         }

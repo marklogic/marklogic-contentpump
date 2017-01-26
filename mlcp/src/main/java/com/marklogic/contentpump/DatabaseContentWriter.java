@@ -211,7 +211,7 @@ public class DatabaseContentWriter<VALUE> extends
                 metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
             } else if (isCopyProps) { // naked properties
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(csKey);
+                    sessions[sid] = getSession(sid, csKey);
                 }
                 setDocumentProperties(uri, meta.getProperties(),
                         isCopyPerms?meta.getPermString():null,
@@ -222,7 +222,7 @@ public class DatabaseContentWriter<VALUE> extends
             }
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(csKey);
+                    sessions[sid] = getSession(sid, csKey);
                 }    
                 insertBatch(forestContents[fId], sid);     
                 stmtCounts[sid]++;
@@ -247,7 +247,7 @@ public class DatabaseContentWriter<VALUE> extends
             }
         } else { // batchSize <= 1
             if (sessions[sid] == null) {
-                sessions[sid] = getSession(csKey);
+                sessions[sid] = getSession(sid, csKey);
             }
             if (content != null) {
                 insertContent(content, sid);
@@ -282,26 +282,6 @@ public class DatabaseContentWriter<VALUE> extends
         }
     }
 
-    protected Session getSession(String forestId, TransactionMode mode) {
-        Session session = null;
-        if (fastLoad) {
-            ContentSource cs = forestSourceMap.get(ID_PREFIX + forestId);
-            session = cs.newSession(ID_PREFIX + forestId);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Connect to forest " + forestId + " on "
-                    + session.getConnectionUri().getHost());
-            }
-        } else {
-            ContentSource cs = forestSourceMap.get(forestId);
-            session = cs.newSession();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Connect to " + session.getConnectionUri().getHost());
-            }
-        }   
-        session.setTransactionMode(mode);
-        return session;
-    }
-
     @Override
     public void close(TaskAttemptContext context) throws IOException,
         InterruptedException {
@@ -321,7 +301,7 @@ public class DatabaseContentWriter<VALUE> extends
                             counts[i]);
                     if (sessions[sid] == null) {
                         String forestId = forestIds[i];
-                        sessions[sid] = getSession(forestId);
+                        sessions[sid] = getSession(i, forestId);
                     }
                     insertBatch(remainder, sid);
                     stmtCounts[sid]++;

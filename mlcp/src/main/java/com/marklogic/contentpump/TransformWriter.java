@@ -89,7 +89,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
         int sid = fId;
         if (sessions[sid] == null) {
-            sessions[sid] = getSession(csKey);
+            sessions[sid] = getSession(sid, csKey);
             queries[sid] = getAdhocQuery(sid);
         } 
         TransformHelper.getTransformInsertQry(conf,
@@ -138,12 +138,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
     }
 
-    protected Session getSession(String forestId) {
+    protected Session getSession(int fId, String forestId) {
         TransactionMode mode = TransactionMode.AUTO;
         if (txnSize > 1) {
             mode = TransactionMode.UPDATE;
         }
-        return getSession(forestId, mode);
+        return getSession(fId, forestId, mode);
     }
     
     protected AdhocQuery getAdhocQuery(int sid) {

@@ -88,7 +88,7 @@ public class DatabaseTransformWriter<VALUE> extends
         meta = doc.getMeta();
         ContentCreateOptions opt = newContentCreateOptions(meta);
         if (sessions[sid] == null) {
-            sessions[sid] = getSession(csKey);
+            sessions[sid] = getSession(sid, csKey);
             queries[sid] = getAdhocQuery(sid);
         }
         if (!meta.isNakedProps()) {
@@ -151,12 +151,12 @@ public class DatabaseTransformWriter<VALUE> extends
         }
     }
 
-    protected Session getSession(String forestId) {
+    protected Session getSession(int fId, String forestId) {
         TransactionMode mode = TransactionMode.AUTO;
         if (txnSize > 1) {
             mode = TransactionMode.UPDATE;
         }
-        return getSession(forestId, mode);
+        return getSession(fId, forestId, mode);
     }
     
     protected AdhocQuery getAdhocQuery(int sid) {

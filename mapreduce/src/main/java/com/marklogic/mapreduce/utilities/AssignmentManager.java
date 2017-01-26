@@ -17,13 +17,14 @@ package com.marklogic.mapreduce.utilities;
 
 import java.util.LinkedHashSet;
 import java.util.LinkedHashMap;
-import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.LinkedMapWritable;
+import com.marklogic.mapreduce.utilities.ForestHost;
 
 /**
  * Assignment Manager, which is a singleton
@@ -41,7 +42,7 @@ public class AssignmentManager {
     /* 
      * mapping from master forest to a list of replica forests
      */
-    private LinkedHashMap<String, ArrayList<String> > replicaMap;
+    private LinkedHashMap<String, List<ForestHost> > replicaMap;
 
     private AssignmentManager() {
         initialized = false;
@@ -64,22 +65,11 @@ public class AssignmentManager {
         }
         LinkedHashSet<String> forests = new LinkedHashSet<String>();
         LinkedHashSet<String> updatableForests = new LinkedHashSet<String>();
-        replicaMap = new LinkedHashMap<String, ArrayList<String> >();
+        replicaMap = new LinkedHashMap<String, List<ForestHost> >();
         for (Writable f : map.keySet()) {
             String fId = ((Text) f).toString();
             ForestInfo fs = (ForestInfo) map.get(f);
-            String masterId = fs.getMasterId();
-            ArrayList<String> replicas = replicaMap.get(masterId);
-            if (replicas == null) {
-              replicas = new ArrayList<String>();
-              replicas.add(fId);
-              replicaMap.put(masterId,replicas);
-            } else {
-              replicas.add(fId);
-            }
-            if (!fId.equals(fs.getMasterId())) {
-              continue;
-            }
+            replicaMap.put(fId, fs.getReplicas());
             if (fs.getUpdatable()) {
                 // updatable
                 updatableForests.add(fId);
@@ -160,7 +150,7 @@ public class AssignmentManager {
         return masterIds;
     }
 
-    public ArrayList<String> getReplicas(String id) {
+    public List<ForestHost> getReplicas(String id) {
         return replicaMap.get(id);
     }
     

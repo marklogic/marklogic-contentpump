@@ -16,8 +16,10 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -32,6 +34,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
 import com.marklogic.mapreduce.utilities.ForestInfo;
+import com.marklogic.mapreduce.utilities.ForestHost;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.RestrictedHostsUtil;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
@@ -44,6 +47,7 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.ItemType;
 import com.marklogic.xcc.types.XSBoolean;
 import com.marklogic.xcc.types.XSInteger;
 
@@ -96,7 +100,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "declare variable $policy as xs:string external;\n" +
         "declare variable $partition-name as xs:string external;\n" + 
-        "hadoop:get-forest-replica-host($policy,$partition-name)";
+        "hadoop:get-forest-replica-hosts($policy,$partition-name)";
     public static final String INIT_QUERY =
         "import module namespace hadoop = "
         + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
@@ -105,7 +109,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         + "  fn:function-lookup(xs:QName('xdmp:effective-version'),0)\n"
         + "return if (exists($versionf)) then $versionf() else 0, \n"
         + "let $repf := "
-        + "  fn:function-lookup(xs:QName('hadoop:get-forest-replica-host'),2)\n"
+        + "  fn:function-lookup(xs:QName('hadoop:get-forest-replica-hosts'),2)\n"
         + "return exists($repf),"
         + "let $f := "
         + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
@@ -267,22 +271,26 @@ public class ContentOutputFormat<VALUEOUT> extends
             }
             for (Writable forestId : forestStatusMap.keySet()) {
                 ForestInfo fs = (ForestInfo)forestStatusMap.get(forestId);
-                String forestIdStr = ((Text)forestId).toString();
-                String forestHost = fs.getHostName();
-                String targetHost = restrictHosts?
-                        rhUtil.getNextHost(forestHost):forestHost;
-                if (fs.getUpdatable() &&
-                        hostSourceMap.get(targetHost) == null) {
-                    try {
-                        ContentSource cs = InternalUtilities.getOutputContentSource(
-                                conf, targetHost);
-                        hostSourceMap.put(targetHost, cs);
-                    } catch (XccConfigException e) {
-                        throw new IOException(e);
+                List<ForestHost> forestHostList = fs.getReplicas();
+                for (int i = 0; i < forestHostList.size(); i++) {
+                    ForestHost fh = forestHostList.get(i);
+                    String forestIdStr = fh.getForest();
+                    String forestHost = fh.getHostName();
+                    String targetHost = restrictHosts?
+                            rhUtil.getNextHost(forestHost):forestHost;
+                    if (fs.getUpdatable() &&
+                            hostSourceMap.get(targetHost) == null) {
+                        try {
+                            ContentSource cs = InternalUtilities.getOutputContentSource(
+                                    conf, targetHost);
+                            hostSourceMap.put(targetHost, cs);
+                        } catch (XccConfigException e) {
+                            throw new IOException(e);
+                        }
                     }
+                    sourceMap.put(ID_PREFIX + forestIdStr + "_" + i,
+                            hostSourceMap.get(targetHost));
                 }
-                sourceMap.put(ID_PREFIX + forestIdStr,
-                        hostSourceMap.get(targetHost));
             }
         } else {
             TextArrayWritable hosts = getHosts(conf);
@@ -435,6 +443,10 @@ public class ContentOutputFormat<VALUEOUT> extends
                           " Server.");
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
             } else {
+                /* 
+                 * failover if restrict host is not set and the server is 9.0 
+                 * we need the failover forests and hosts for failover
+                 */
                 if (failover) {
                   query = session.newAdhocQuery(FOREST_REPLICA_HOST_QUERY);
                 } else {
@@ -462,7 +474,7 @@ public class ContentOutputFormat<VALUEOUT> extends
 
             LinkedMapWritable forestStatusMap = new LinkedMapWritable();
             Text forest = null;
-            Text master = null;
+            List<ForestHost> replicas = new ArrayList<ForestHost>();
             String outputHost = cs.getConnectionProvider().getHostName();
             boolean local = MODE_LOCAL.equals(conf.get(EXECUTION_MODE));
             
@@ -494,15 +506,34 @@ public class ContentOutputFormat<VALUEOUT> extends
                         }
                     } 
                     if (failover) {
-                        item = result.next();
-                        master = new Text(item.asString());
+                        String curForest = "";
+                        String curHost = "";
+                        int count = 0;
+                        while (result.hasNext()) {
+                            item = result.next();
+                            if (ItemType.XS_INTEGER == item.getItemType()) {
+                                if (((XSInteger)item.getItem()).asPrimitiveInt() == 0) {
+                                    break;
+                                }
+                            }
+                            int index = count % 2;
+                            if (index == 0) {
+                                curForest = item.asString();
+                            } else if (index == 1) {
+                                curHost = item.asString();
+                                ForestHost info = new ForestHost(curForest, curHost);
+                                replicas.add(info);
+                            }
+                            count++;
+                        } 
                     } else {
-                        master = forest;
+                        ForestHost info = new ForestHost(forest.toString(), hostName);
+                        replicas.add(info);
                     }
                     forestStatusMap.put(forest, new ForestInfo(
-                        hostName, dc, updatable, master.toString()));
+                        hostName, dc, updatable, replicas));
                     forest = null;
-                    master = null;
+                    replicas.clear();
                 }
             }
             if (forestStatusMap.size() == 0) {

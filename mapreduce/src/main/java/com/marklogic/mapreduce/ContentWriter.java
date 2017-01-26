@@ -37,6 +37,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
+import com.marklogic.mapreduce.utilities.ForestHost;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.StatisticalAssignmentPolicy;
 import com.marklogic.xcc.Content;
@@ -79,7 +80,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected ContentCreateOptions options;
     
     /**
-     * A map from a forest id to a ContentSource. 
+     * A map from a forest id and replica idx to a ContentSource. 
      */
     protected Map<String, ContentSource> forestSourceMap;
     
@@ -525,7 +526,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         sleepTime = maxSleepTime;
 
                     String csKey = getCSKey(id);
-                    sessions[id] = getSession(csKey);
+                    sessions[id] = getSession(id, csKey);
                     continue;
                 } else {
                     failed += batch.length;
@@ -560,7 +561,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 if (t < maxRetries) {
                     String csKey = getNextCSKey(id);
-                    sessions[id] = getSession(csKey);
+                    sessions[id] = getSession(id, csKey);
                     continue;
                 }
 
@@ -649,7 +650,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         sleepTime = maxSleepTime;
 
                     String csKey = getCSKey(id);
-                    sessions[id] = getSession(csKey);
+                    sessions[id] = getSession(id, csKey);
                     continue;
                 } else {
                     failed++;
@@ -677,7 +678,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 if (t < maxRetries) {
                     String csKey = getNextCSKey(id);
-                    sessions[id] = getSession(csKey);
+                    sessions[id] = getSession(id, csKey);
                     continue;
                 }
 
@@ -748,7 +749,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             forestContents[fId][counts[fId]++] = content;
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(csKey);
+                    sessions[sid] = getSession(sid, csKey);
                 }  
                 insertBatch(forestContents[fId], sid); 
                 stmtCounts[sid]++;
@@ -762,7 +763,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         } else { // batchSize == 1
             if (sessions[sid] == null) {
-                sessions[sid] = getSession(csKey);
+                sessions[sid] = getSession(sid, csKey);
             }
             insertContent(content, sid);   
             stmtCounts[sid]++;
@@ -800,8 +801,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected String getCSKey(int fId) {
         String csKey;
         if (fastLoad) {
-            ArrayList<String> replicas = am.getReplicas(forestIds[fId]);
-            csKey = replicas.get(curReplica[fId]);
+            List<ForestHost> replicas = am.getReplicas(forestIds[fId]);
+            csKey = replicas.get(curReplica[fId]).getForest();
         } else {
             csKey = forestIds[hostId];
         }
@@ -811,9 +812,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected String getNextCSKey(int fId) {
         String csKey;
         if (fastLoad) {
-            ArrayList<String> replicas = am.getReplicas(forestIds[fId]);
+            List<ForestHost> replicas = am.getReplicas(forestIds[fId]);
             curReplica[fId] = (curReplica[fId] + 1)%replicas.size();
-            csKey = replicas.get(curReplica[fId]);
+            csKey = replicas.get(curReplica[fId]).getForest();
         } else {
             blacklist[hostId] = true;
             int oldHostId = hostId;
@@ -838,10 +839,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 -batchSize);
     }
     
-    protected Session getSession(String forestId, TransactionMode mode) {
+    protected Session getSession(int fId, String forestId, TransactionMode mode) {
         Session session = null;
         if (fastLoad) {
-            ContentSource cs = forestSourceMap.get(ID_PREFIX + forestId);
+            ContentSource cs = forestSourceMap.get(ID_PREFIX + forestId + "_" + curReplica[fId]);
             session = cs.newSession(ID_PREFIX + forestId);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to forest " + forestId + " on "
@@ -859,12 +860,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         return session;
     }
     
-    protected Session getSession(String forestId) {
+    protected Session getSession(int fId, String forestId) {
         TransactionMode mode = TransactionMode.AUTO;
         if (needCommit) {
             mode = TransactionMode.UPDATE;
         }
-        return getSession(forestId, mode);
+        return getSession(fId, forestId, mode);
     }
 
     @Override
@@ -886,7 +887,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                             counts[i]);
                     if (sessions[sid] == null) {
                         String forestId = getCSKey(sid);
-                        sessions[sid] = getSession(forestId);
+                        sessions[sid] = getSession(sid, forestId);
                     }
                     insertBatch(remainder, sid);   
                     stmtCounts[sid]++;
