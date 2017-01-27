@@ -68,20 +68,20 @@ public class DatabaseContentWriter<VALUE> extends
             "xquery version \"1.0-ml\";\n";
 
     public DatabaseContentWriter(Configuration conf,
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
-        this(conf, forestSourceMap, fastLoad, null); 
+        Map<String, ContentSource> hostSourceMap, boolean fastLoad) {
+        this(conf, hostSourceMap, fastLoad, null); 
     }
     
     public DatabaseContentWriter(Configuration conf,
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+        Map<String, ContentSource> hostSourceMap, boolean fastLoad,
         AssignmentManager am) {
-        this(conf, forestSourceMap, fastLoad, am, 0L);
+        this(conf, hostSourceMap, fastLoad, am, 0L);
     }
     
     public DatabaseContentWriter(Configuration conf,
-            Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+            Map<String, ContentSource> hostSourceMap, boolean fastLoad,
             AssignmentManager am, long effectiveVersion) {
-        super(conf, forestSourceMap, fastLoad, am, effectiveVersion);
+        super(conf, hostSourceMap, fastLoad, am, effectiveVersion);
 
         if (countBased) {
             metadatas = new URIMetadata[1][batchSize];
@@ -160,7 +160,6 @@ public class DatabaseContentWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {       
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String csKey;
         int fId = 0;
         if (fastLoad) {
             if(!countBased) {
@@ -173,10 +172,7 @@ public class DatabaseContentWriter<VALUE> extends
                 }
                 fId = sfId;
             }
-            csKey = forestIds[fId];
-        } else {
-            csKey = forestIds[hostId];
-        }
+        } 
         int sid = fId;
         
         Content content = null;
@@ -211,7 +207,7 @@ public class DatabaseContentWriter<VALUE> extends
                 metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
             } else if (isCopyProps) { // naked properties
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(sid, csKey);
+                    sessions[sid] = getSession(sid, false);
                 }
                 setDocumentProperties(uri, meta.getProperties(),
                         isCopyPerms?meta.getPermString():null,
@@ -222,7 +218,7 @@ public class DatabaseContentWriter<VALUE> extends
             }
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(sid, csKey);
+                    sessions[sid] = getSession(sid, false);
                 }    
                 insertBatch(forestContents[fId], sid);     
                 stmtCounts[sid]++;
@@ -247,7 +243,7 @@ public class DatabaseContentWriter<VALUE> extends
             }
         } else { // batchSize <= 1
             if (sessions[sid] == null) {
-                sessions[sid] = getSession(sid, csKey);
+                sessions[sid] = getSession(sid, false);
             }
             if (content != null) {
                 insertContent(content, sid);
@@ -300,8 +296,7 @@ public class DatabaseContentWriter<VALUE> extends
                     System.arraycopy(forestContents[i], 0, remainder, 0,
                             counts[i]);
                     if (sessions[sid] == null) {
-                        String forestId = forestIds[i];
-                        sessions[sid] = getSession(i, forestId);
+                        sessions[sid] = getSession(i, false);
                     }
                     insertBatch(remainder, sid);
                     stmtCounts[sid]++;

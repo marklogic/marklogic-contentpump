@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestImportArchive {
@@ -108,6 +109,7 @@ public class TestImportArchive {
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test
@@ -145,6 +147,7 @@ public class TestImportArchive {
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test

@@ -52,9 +52,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     private AdhocQuery[] queries;
 
     public TransformWriter(Configuration conf,
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+        Map<String, ContentSource> hostSourceMap, boolean fastLoad,
         AssignmentManager am) {
-        super(conf, forestSourceMap, fastLoad, am);
+        super(conf, hostSourceMap, fastLoad, am);
 
         moduleUri = conf.get(ConfigConstants.CONF_TRANSFORM_MODULE);
         functionNs = conf.get(ConfigConstants.CONF_TRANSFORM_NAMESPACE, "");
@@ -71,7 +71,6 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         InterruptedException {
         int fId = 0;
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String csKey;  
         if (fastLoad) {
             if (!countBased) {
                 // placement for legacy or bucket
@@ -83,13 +82,10 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 }
                 fId = sfId;
             }
-            csKey = forestIds[fId];
-        } else {
-            csKey = forestIds[hostId];
         }
         int sid = fId;
         if (sessions[sid] == null) {
-            sessions[sid] = getSession(sid, csKey);
+            sessions[sid] = getSession(sid, false);
             queries[sid] = getAdhocQuery(sid);
         } 
         TransformHelper.getTransformInsertQry(conf,
@@ -138,12 +134,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
     }
 
-    protected Session getSession(int fId, String forestId) {
+    protected Session getSession(int fId, boolean nextReplica) {
         TransactionMode mode = TransactionMode.AUTO;
         if (txnSize > 1) {
             mode = TransactionMode.UPDATE;
         }
-        return getSession(fId, forestId, mode);
+        return getSession(fId, nextReplica, mode);
     }
     
     protected AdhocQuery getAdhocQuery(int sid) {

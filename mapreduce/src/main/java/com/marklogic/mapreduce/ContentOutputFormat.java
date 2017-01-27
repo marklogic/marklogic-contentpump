@@ -258,9 +258,6 @@ public class ContentOutputFormat<VALUEOUT> extends
             // because initialize() is only called once in LocalJobRunner
             boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
             RestrictedHostsUtil rhUtil = null;
-            // construct forest->contentSource map
-            Map<String, ContentSource> hostSourceMap = 
-                    new HashMap<String, ContentSource>();
             if (restrictHosts) {
                 rhUtil = new RestrictedHostsUtil(outputHosts);
                 for (Writable forestId : forestStatusMap.keySet()) {
@@ -278,18 +275,21 @@ public class ContentOutputFormat<VALUEOUT> extends
                     String forestHost = fh.getHostName();
                     String targetHost = restrictHosts?
                             rhUtil.getNextHost(forestHost):forestHost;
-                    if (fs.getUpdatable() &&
-                            hostSourceMap.get(targetHost) == null) {
+                    if (fs.getUpdatable()) {
                         try {
-                            ContentSource cs = InternalUtilities.getOutputContentSource(
-                                    conf, targetHost);
-                            hostSourceMap.put(targetHost, cs);
+                            ContentSource cs = sourceMap.get(targetHost);
+                            if (cs == null) {
+                              cs = InternalUtilities.getOutputContentSource(
+                                conf, targetHost);
+                              sourceMap.put(targetHost, cs);
+                            }
+                            if (restrictHosts) {
+                              sourceMap.put(forestHost, cs);
+                            }
                         } catch (XccConfigException e) {
                             throw new IOException(e);
                         }
                     }
-                    sourceMap.put(ID_PREFIX + forestIdStr + "_" + i,
-                            hostSourceMap.get(targetHost));
                 }
             }
         } else {

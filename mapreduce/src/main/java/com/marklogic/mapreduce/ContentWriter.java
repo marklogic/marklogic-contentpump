@@ -80,9 +80,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected ContentCreateOptions options;
     
     /**
-     * A map from a forest id and replica idx to a ContentSource. 
+     * A map from a host to a ContentSource. 
      */
-    protected Map<String, ContentSource> forestSourceMap;
+    protected Map<String, ContentSource> hostSourceMap;
     
     /**
      * Content lists for each forest.
@@ -178,18 +178,18 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected long effectiveVersion;
     
     public ContentWriter(Configuration conf, 
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
-        this(conf, forestSourceMap, fastLoad, null);
+        Map<String, ContentSource> hostSourceMap, boolean fastLoad) {
+        this(conf, hostSourceMap, fastLoad, null);
     }
     
     public ContentWriter(Configuration conf,
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+        Map<String, ContentSource> hostSourceMap, boolean fastLoad,
         AssignmentManager am) {
-        this(conf, forestSourceMap, fastLoad, am, 0L);
+        this(conf, hostSourceMap, fastLoad, am, 0L);
     }
 
     public ContentWriter(Configuration conf,
-            Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+            Map<String, ContentSource> hostSourceMap, boolean fastLoad,
             AssignmentManager am, long effectiveVersion) {
         super(conf, null);
         
@@ -197,7 +197,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         this.fastLoad = fastLoad;
         
-        this.forestSourceMap = forestSourceMap;
+        this.hostSourceMap = hostSourceMap;
         
         this.am = am;
 
@@ -219,9 +219,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                curReplica[i] = 0;
             }
         } else {
-            srcMapSize = forestSourceMap.size();
+            srcMapSize = hostSourceMap.size();
             forestIds = new String[srcMapSize];
-            forestIds = forestSourceMap.keySet().toArray(forestIds);
+            forestIds = hostSourceMap.keySet().toArray(forestIds);
             blacklist = new boolean[srcMapSize];
             for (int i = 0; i < srcMapSize; i++) {
                blacklist[i] = false;
@@ -525,8 +525,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     if (sleepTime > maxSleepTime) 
                         sleepTime = maxSleepTime;
 
-                    String csKey = getCSKey(id);
-                    sessions[id] = getSession(id, csKey);
+                    sessions[id] = getSession(id, false);
                     continue;
                 } else {
                     failed += batch.length;
@@ -560,8 +559,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     commitUris[id].clear();
                 }
                 if (t < maxRetries) {
-                    String csKey = getNextCSKey(id);
-                    sessions[id] = getSession(id, csKey);
+                    sessions[id] = getSession(id, true);
                     continue;
                 }
 
@@ -649,8 +647,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     if (sleepTime > maxSleepTime)
                         sleepTime = maxSleepTime;
 
-                    String csKey = getCSKey(id);
-                    sessions[id] = getSession(id, csKey);
+                    sessions[id] = getSession(id, false);
                     continue;
                 } else {
                     failed++;
@@ -677,8 +674,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     commitUris[id].clear();
                 }
                 if (t < maxRetries) {
-                    String csKey = getNextCSKey(id);
-                    sessions[id] = getSession(id, csKey);
+                    sessions[id] = getSession(id, true);
                     continue;
                 }
 
@@ -719,7 +715,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
         InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String csKey; 
         int fId = 0;
         if (fastLoad) {
             if(!countBased) {
@@ -733,7 +728,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 fId = sfId;
             }
         } 
-        csKey = getCSKey(fId);
         int sid = fId;
         Content content = createContent(key,value); 
         if (content == null) {
@@ -749,7 +743,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             forestContents[fId][counts[fId]++] = content;
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(sid, csKey);
+                    sessions[sid] = getSession(sid, false);
                 }  
                 insertBatch(forestContents[fId], sid); 
                 stmtCounts[sid]++;
@@ -763,7 +757,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         } else { // batchSize == 1
             if (sessions[sid] == null) {
-                sessions[sid] = getSession(sid, csKey);
+                sessions[sid] = getSession(sid, false);
             }
             insertContent(content, sid);   
             stmtCounts[sid]++;
@@ -798,58 +792,44 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
     }
 
-    protected String getCSKey(int fId) {
-        String csKey;
-        if (fastLoad) {
-            List<ForestHost> replicas = am.getReplicas(forestIds[fId]);
-            csKey = replicas.get(curReplica[fId]).getForest();
-        } else {
-            csKey = forestIds[hostId];
-        }
-        return csKey;
-    }
-
-    protected String getNextCSKey(int fId) {
-        String csKey;
-        if (fastLoad) {
-            List<ForestHost> replicas = am.getReplicas(forestIds[fId]);
-            curReplica[fId] = (curReplica[fId] + 1)%replicas.size();
-            csKey = replicas.get(curReplica[fId]).getForest();
-        } else {
-            blacklist[hostId] = true;
-            int oldHostId = hostId;
-            for (;;) {
-                hostId = (hostId + 1)%forestIds.length;
-                if (!blacklist[hostId])
-                     break;
-                if (hostId == oldHostId) {
-                    for (int i = 0; i < blacklist.length; i++) {
-                        blacklist[i] = false;
-                    }
-                }
-            }
-            csKey = forestIds[hostId];
-        }
-        return csKey;
-    }
-
-
     protected void rollbackCount(int fId) {
         ((StatisticalAssignmentPolicy)am.getPolicy()).updateStats(fId, 
                 -batchSize);
     }
     
-    protected Session getSession(int fId, String forestId, TransactionMode mode) {
+    protected Session getSession(int fId, boolean nextReplica, TransactionMode mode) {
         Session session = null;
         if (fastLoad) {
-            ContentSource cs = forestSourceMap.get(ID_PREFIX + forestId + "_" + curReplica[fId]);
+            List<ForestHost> replicas = am.getReplicas(forestIds[fId]);
+
+            if (nextReplica) {
+                curReplica[fId] = (curReplica[fId] + 1)%replicas.size();
+            }
+
+            ContentSource cs = hostSourceMap.get(replicas.get(curReplica[fId]).getHostName());
+            String forestId = replicas.get(curReplica[fId]).getForest();
             session = cs.newSession(ID_PREFIX + forestId);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to forest " + forestId + " on "
                     + session.getConnectionUri().getHost());
             }
         } else {
-            ContentSource cs = forestSourceMap.get(forestId);
+            if (nextReplica) {
+                blacklist[hostId] = true;
+                int oldHostId = hostId;
+                for (;;) {
+                    hostId = (hostId + 1)%forestIds.length;
+                    if (!blacklist[hostId])
+                        break;
+                    if (hostId == oldHostId) {
+                        for (int i = 0; i < blacklist.length; i++) {
+                            blacklist[i] = false;
+                        }
+                    }
+                }
+            }
+            String forestId = forestIds[hostId];
+            ContentSource cs = hostSourceMap.get(forestId);
             session = cs.newSession();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to " + session.getConnectionUri().getHost());
@@ -860,12 +840,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         return session;
     }
     
-    protected Session getSession(int fId, String forestId) {
+    protected Session getSession(int fId, boolean nextReplica) {
         TransactionMode mode = TransactionMode.AUTO;
         if (needCommit) {
             mode = TransactionMode.UPDATE;
         }
-        return getSession(fId, forestId, mode);
+        return getSession(fId, nextReplica, mode);
     }
 
     @Override
@@ -886,8 +866,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     System.arraycopy(forestContents[i], 0, remainder, 0, 
                             counts[i]);
                     if (sessions[sid] == null) {
-                        String forestId = getCSKey(sid);
-                        sessions[sid] = getSession(sid, forestId);
+                        sessions[sid] = getSession(sid, false);
                     }
                     insertBatch(remainder, sid);   
                     stmtCounts[sid]++;

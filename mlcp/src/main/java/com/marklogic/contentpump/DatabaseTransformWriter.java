@@ -49,9 +49,9 @@ public class DatabaseTransformWriter<VALUE> extends
     private AdhocQuery[] queries;
     
     public DatabaseTransformWriter(Configuration conf,
-            Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+            Map<String, ContentSource> hostSourceMap, boolean fastLoad,
             AssignmentManager am, long effectiveVersion) {
-            super(conf, forestSourceMap, fastLoad, am, effectiveVersion);
+            super(conf, hostSourceMap, fastLoad, am, effectiveVersion);
             moduleUri = conf.get(ConfigConstants.CONF_TRANSFORM_MODULE);
             functionNs = conf.get(ConfigConstants.CONF_TRANSFORM_NAMESPACE, "");
             functionName = conf.get(ConfigConstants.CONF_TRANSFORM_FUNCTION,
@@ -65,7 +65,6 @@ public class DatabaseTransformWriter<VALUE> extends
         InterruptedException {
         int fId = 0;
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String csKey;
         if (fastLoad) {
             if(!countBased) {
                 // placement for legacy or bucket
@@ -77,9 +76,6 @@ public class DatabaseTransformWriter<VALUE> extends
                 }
                 fId = sfId;
             }
-            csKey = forestIds[fId];
-        } else {
-            csKey = forestIds[hostId];
         }
         int sid = fId;
 
@@ -88,7 +84,7 @@ public class DatabaseTransformWriter<VALUE> extends
         meta = doc.getMeta();
         ContentCreateOptions opt = newContentCreateOptions(meta);
         if (sessions[sid] == null) {
-            sessions[sid] = getSession(sid, csKey);
+            sessions[sid] = getSession(sid, false);
             queries[sid] = getAdhocQuery(sid);
         }
         if (!meta.isNakedProps()) {
@@ -151,12 +147,12 @@ public class DatabaseTransformWriter<VALUE> extends
         }
     }
 
-    protected Session getSession(int fId, String forestId) {
+    protected Session getSession(int fId, boolean nextReplica) {
         TransactionMode mode = TransactionMode.AUTO;
         if (txnSize > 1) {
             mode = TransactionMode.UPDATE;
         }
-        return getSession(fId, forestId, mode);
+        return getSession(fId, nextReplica, mode);
     }
     
     protected AdhocQuery getAdhocQuery(int sid) {

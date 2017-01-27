@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
@@ -101,6 +102,7 @@ public class TestEDSeparation {
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
 
     @Test
@@ -123,6 +125,7 @@ public class TestEDSeparation {
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
 
     @Test
