@@ -19,6 +19,15 @@ The Hadoop Connector is an extension to Hadoop’s MapReduce framework that allo
 * Access MarkLogic text, geospatial, scalar, and document structure indexes to send only the most relevant data to Hadoop for processing
 * Write results from MapReduce jobs to MarkLogic in parallel
 
+## Release Note
+
+### What's New in mlcp and Hadoop Connector 9.0-EA4
+
+- SSL Support
+- server local-disk failover support on import
+- new option to restrict mlcp to only connect to user-specified list of hosts
+- bug fixes
+
 ## Getting Started
 
 - [Getting Started with mlcp](http://docs.marklogic.com/guide/mlcp/getting-started)
