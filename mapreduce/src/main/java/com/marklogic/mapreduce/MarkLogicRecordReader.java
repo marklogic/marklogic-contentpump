@@ -92,6 +92,10 @@ implements MarkLogicConstants {
      */
     protected int curForest;
     /**
+     * Hostnames from the input split
+     */
+    protected String[] hostNames;
+    /**
      * for failover retry
      */
     protected int retry;
@@ -216,11 +220,20 @@ implements MarkLogicConstants {
         mlSplit = (MarkLogicInputSplit)split;
         count = 0;
 
+        // check hostnames
+        hostNames = mlSplit.getLocations();
+        if (hostNames == null || hostNames.length < 1) {
+            throw new IllegalStateException("Empty split locations.");
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("split location: " + hostNames[0]);
+        }
+
         replicas = mlSplit.getReplicas();
         curForest = -1;
         if (replicas != null) {
             for (int i = 0; i < replicas.size(); i++) {
-                if (replicas.get(i).getForest().equals(mlSplit.getForestId().toString())) {
+                if (replicas.get(i).getHostName().equals(hostNames[0])) {
                    curForest = i;
                    break;
                 }
@@ -234,14 +247,6 @@ implements MarkLogicConstants {
     /* in case of failover, use init() instead of initialize() for retry */
     private void init() 
             throws IOException, InterruptedException {
-        // check hostnames
-        String[] hostNames = mlSplit.getLocations();
-        if (hostNames == null || hostNames.length < 1) {
-            throw new IllegalStateException("Empty split locations.");
-        }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("split location: " + hostNames[0]);
-        }
         
         // get job config properties
         boolean advancedMode = 

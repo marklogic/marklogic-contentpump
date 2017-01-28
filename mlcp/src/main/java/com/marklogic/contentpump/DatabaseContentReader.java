@@ -110,11 +110,20 @@ public class DatabaseContentReader extends
         retry = 0;
         sleepTime = 100;
 
+        // construct the server URI
+        hostNames = mlSplit.getLocations();
+        if (hostNames == null || hostNames.length < 1) {
+            throw new IllegalStateException("Empty split locations.");
+        }
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("split location: " + hostNames[0]);
+        }
+
         replicas = mlSplit.getReplicas();
         curForest = -1;
         if (replicas != null) {
             for (int i = 0; i < replicas.size(); i++) {
-                if (replicas.get(i).getForest().equals(mlSplit.getForestId().toString())) {
+                if (replicas.get(i).getHostName().equals(hostNames[0])) {
                    curForest = i;
                    break;
                 }
@@ -126,14 +135,6 @@ public class DatabaseContentReader extends
     /* in case of failover, use init() instead of initialize() for retry */
     private void init()
         throws IOException, InterruptedException {
-        // construct the server URI
-        String[] hostNames = mlSplit.getLocations();
-        if (hostNames == null || hostNames.length < 1) {
-            throw new IllegalStateException("Empty split locations.");
-        }
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("split location: " + hostNames[0]);
-        }
         nakedDone = false;
 
         // initialize the total length

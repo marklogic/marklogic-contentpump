@@ -222,14 +222,12 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             ruleUris.add(itemStr);
         }
 
+        // forest with failover hosts
         if (!restrictHosts) {
-            count = 0;
             String forest = "";
-            String master = "";
             String hostName = "";
-            HashMap<String, String> forestToMaster = new HashMap<String, String>();
-            HashMap<String, ArrayList<ForestHost> > 
-                forestHostMap = new HashMap<String, ArrayList<ForestHost> >();
+            HashMap<String, List<ForestHost> > 
+                forestHostMap = new HashMap<String, List<ForestHost> >();
             while (result.hasNext()) {
                 ResultItem item = result.next();
                 if (ItemType.XS_INTEGER == item.getItemType()) {
@@ -237,31 +235,35 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                         break;
                     }
                 }
-                int index = count % 3;
-                if (index == 0) {
-                    forest = item.asString();
-                } else if (index == 1) {
-                    master = item.asString();
-                } else if (index == 2) {
+                forest = item.asString();
+
+                if (result.hasNext()) {
+                    item = result.next();
                     hostName = item.asString();
 
-                    forestToMaster.put(forest,master);
-                    ForestHost info = new ForestHost(forest, hostName);
-                    ArrayList<ForestHost> replicas = forestHostMap.get(master);
-                    if (replicas == null) {
-                      replicas = new ArrayList<ForestHost>();
-                      replicas.add(info);
-                      forestHostMap.put(master,replicas);
-                    } else {
-                      replicas.add(info);
+                    List<ForestHost> replicas = new ArrayList<ForestHost>();
+                    String replicaForest = "";
+                    String replicaHost = "";
+                    while (result.hasNext()) {
+                        item = result.next();
+                        if (ItemType.XS_INTEGER == item.getItemType()) {
+                            if (((XSInteger)item.getItem()).asPrimitiveInt() == 0) {
+                                break;
+                            }
+                        }
+                        replicaForest = item.asString();
+                        if (result.hasNext()) {
+                            item = result.next();
+                            replicaHost = item.asString();
+                            ForestHost info = new ForestHost(replicaForest, replicaHost);
+                            replicas.add(info);
+                        }
                     }
+                    forestHostMap.put(forest,replicas);
                 }
-                count++;
             }
-
             for (ForestSplit split : forestSplits) {
-                master = forestToMaster.get(split.forestId.toString());
-                split.replicas = forestHostMap.get(master);
+                split.replicas = forestHostMap.get(split.forestId.toString());
             }
         }
     }
@@ -540,7 +542,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         BigInteger forestId;
         String hostName;
         long recordCount;
-        ArrayList<ForestHost> replicas;
+        List<ForestHost> replicas;
     }
 
 }
