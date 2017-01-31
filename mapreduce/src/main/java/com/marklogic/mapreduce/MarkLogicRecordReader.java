@@ -330,6 +330,9 @@ implements MarkLogicConstants {
         // set up a connection to the server
         while (retry++ < maxRetries) {
         try {
+            if (retry > 1) {
+                LOG.info("Retrying connect " + retry);
+            }
             String curForestName = "";
             String curHostName = "";
             if (curForest == -1) {
