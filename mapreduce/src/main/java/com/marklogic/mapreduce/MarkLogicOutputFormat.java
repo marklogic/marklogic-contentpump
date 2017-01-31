@@ -98,7 +98,7 @@ implements MarkLogicConstants, Configurable {
             }
             catch (Exception ex) {
                 if (ex.getCause() instanceof ServerConnectionException) {
-                    LOG.warn("Failed to use host " + hosts[i] 
+                    LOG.warn("Unable to connect to " + hosts[i]
                             + " to query destination information");
                     continue;
                 } else {
@@ -107,7 +107,7 @@ implements MarkLogicConstants, Configurable {
             }
         }
         // No usable output hostname found at this point
-        throw new IOException("Failed to query destination information,"
+        throw new IOException("Unable to query destination information,"
                 + " no usable hostname found");
     }
 

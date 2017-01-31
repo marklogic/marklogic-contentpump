@@ -391,7 +391,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                         " forest splits.");
                 break;
             } catch (ServerConnectionException e) {
-                LOG.warn("Failed to use host " + inputHosts[hostIdx] 
+                LOG.warn("Unable to connect to " + inputHosts[hostIdx]
                         + " to query source information");
                 hostIdx++;
             } catch (XccConfigException e) {
@@ -412,7 +412,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
         if (hostIdx == inputHosts.length) {
             // No usable input hostname found at this point
-            throw new IOException("Failed to query source information,"
+            throw new IOException("Unable to query source information,"
                     + " no usable hostname found");
         }
         
