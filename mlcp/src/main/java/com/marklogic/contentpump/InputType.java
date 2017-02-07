@@ -287,7 +287,7 @@ public enum InputType implements ConfigConstants {
                     }
                     return;
                 } catch (ServerConnectionException e) {
-                    LOG.warn("Failed to use host " + outputHosts[hostIdx] 
+                    LOG.warn("Unable to connect to " + outputHosts[hostIdx]
                             + " to query destination information");
                     hostIdx++;
                 } catch (XccConfigException e) {
@@ -304,7 +304,7 @@ public enum InputType implements ConfigConstants {
                 }
             }
             //  No usable output hostname found at this point
-            throw new IOException("Failed to query destination information,"
+            throw new IOException("Unable to query destination information,"
                     + " no usable hostname found");
         }
     },

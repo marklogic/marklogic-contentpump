@@ -440,28 +440,15 @@ public class InternalUtilities implements MarkLogicConstants {
         }
     }
 
-    public static String verifyHosts(String hostList, String portStr) {
+    public static void verifyHosts(String hostList, String portStr) {
         String[] hosts = hostList.split(",");
         int port = Integer.parseInt(portStr);
         for (int i = 0; i < hosts.length; i++) {
             String host = hosts[i];
             InetSocketAddress address = new InetSocketAddress(host, port);
             if (address.isUnresolved()) {
-                LOG.warn("Not a usable net address: " + address);
-                hosts[i] = null;
+                throw new IllegalArgumentException("host " + host + " is not resolvable");
             }
         }
-        StringBuilder buf = null;
-        for (int i = 0; i < hosts.length; i++) {
-            if (hosts[i] != null) {
-                if (buf == null) {
-                    buf = new StringBuilder();
-                } else {
-                    buf.append(",");
-                }
-                buf.append(hosts[i]);
-            }
-        }
-        return buf==null?null:buf.toString();
     }
 }

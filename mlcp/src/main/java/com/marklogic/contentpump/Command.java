@@ -650,11 +650,8 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(HOST)) {
                 String hosts = cmdline.getOptionValue(HOST);
-                String validHosts = InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
-                if (validHosts == null) {
-                    throw new IllegalArgumentException("No usable hostname found for output: " + hosts);
-                }
-                conf.set(MarkLogicConstants.OUTPUT_HOST, validHosts);
+                InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
+                conf.set(MarkLogicConstants.OUTPUT_HOST, hosts);
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_OUTPUT_HOSTS);
@@ -1027,11 +1024,8 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(HOST)) {
                 String hosts = cmdline.getOptionValue(HOST);
-                String validHosts = InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
-                if (validHosts == null) {
-                    throw new IllegalArgumentException("No usable hostname found for input: " + hosts);
-                }
-                conf.set(MarkLogicConstants.INPUT_HOST, validHosts);
+                InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
+                conf.set(MarkLogicConstants.INPUT_HOST, hosts);
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_INPUT_HOSTS);
@@ -1317,13 +1311,9 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(OUTPUT_HOST)) {
                 String outputHosts = cmdline.getOptionValue(OUTPUT_HOST);
-                String validOutputHosts = InternalUtilities.verifyHosts(
+                InternalUtilities.verifyHosts(
                         outputHosts, outputPort==null?"8000":outputPort);
-                if (validOutputHosts == null) {
-                    throw new IllegalArgumentException(
-                            "No usable hostname found for output: "+ outputHosts);
-                }
-                conf.set(MarkLogicConstants.OUTPUT_HOST, validOutputHosts);
+                conf.set(MarkLogicConstants.OUTPUT_HOST, outputHosts);
             }
             if (cmdline.hasOption(OUTPUT_DATABASE)) {
                 String db = cmdline.getOptionValue(OUTPUT_DATABASE);
@@ -1364,13 +1354,9 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(INPUT_HOST)) {
                 String inputHosts = cmdline.getOptionValue(INPUT_HOST);
-                String validInputHosts = InternalUtilities.verifyHosts(
+                InternalUtilities.verifyHosts(
                         inputHosts, inputPort==null?"8000":inputPort);
-                if (validInputHosts == null) {
-                    throw new IllegalArgumentException(
-                            "No usable hostname found for output: "+ inputHosts);
-                }
-                conf.set(MarkLogicConstants.INPUT_HOST, validInputHosts);
+                conf.set(MarkLogicConstants.INPUT_HOST, inputHosts);
             }
             if (cmdline.hasOption(INPUT_DATABASE)) {
                 String db = cmdline.getOptionValue(INPUT_DATABASE);
