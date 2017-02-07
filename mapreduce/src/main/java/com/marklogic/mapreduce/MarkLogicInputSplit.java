@@ -20,6 +20,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.hadoop.io.Text;
@@ -132,6 +133,7 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
         hostName[0] = Text.readString(in);
         isLastSplit = in.readBoolean();
         int replicaSize = in.readInt();
+        replicas = new ArrayList<ForestHost>();
         for (int i=0; i < replicaSize; i++) {
             String curForest = Text.readString(in);
             String curHost = Text.readString(in);
