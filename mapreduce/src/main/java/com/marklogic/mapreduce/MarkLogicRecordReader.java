@@ -263,7 +263,7 @@ implements MarkLogicConstants {
         String queryText = null;
         long start = mlSplit.getStart() + 1 + count;
         long end = mlSplit.isLastSplit() ? 
-                   Long.MAX_VALUE : start + mlSplit.getLength() - 1;
+                   Long.MAX_VALUE : start + mlSplit.getLength() - count - 1;
         if (!advancedMode) { 
             StringBuilder buf = new StringBuilder();      
             buf.append("xquery version \"1.0-ml\"; \n");
