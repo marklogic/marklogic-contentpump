@@ -146,7 +146,7 @@ public class DatabaseContentReader extends
         String queryText;
         long start = mlSplit.getStart() + 1 + count;
         long end = mlSplit.isLastSplit() ? Long.MAX_VALUE : start
-            + mlSplit.getLength() - 1;
+            + mlSplit.getLength() - count - 1;
 
         String src = conf.get(MarkLogicConstants.DOCUMENT_SELECTOR);
         redactionRuleCol = conf.getStrings(REDACTION_RULE_COLLECTION);
