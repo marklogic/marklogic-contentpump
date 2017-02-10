@@ -202,10 +202,24 @@ public class SplitDelimitedTextReader<VALUEIN> extends
 
         // skip first line:
         // 1st split, skip header; other splits, skip partial line
-        if (parserIterator.hasNext()) {
-            String[] values = getLine();
-            start += getBytesCountFromLine(values);
-            pos = start;
+        try {
+            if (parserIterator.hasNext()) {
+                String[] values = getLine();
+                start += getBytesCountFromLine(values);
+                pos = start;
+            }
+        } catch (RuntimeException e) {
+            if (e.getMessage().
+                    contains("invalid char between encapsulated "
+                            + "token and delimiter")) {
+                if (parserIterator.hasNext()) {
+                    String[] values = getLine();
+                    start += getBytesCountFromLine(values);
+                    pos = start;
+                }
+            } else {
+                throw new IOException(e);
+            }
         }
     }
 
