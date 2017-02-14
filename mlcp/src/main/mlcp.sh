@@ -1,7 +1,7 @@
 #!/bin/bash
 unset CLASSPATH
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../
-VMARGS="-Dfile.encoding=UTF-8 -Dxcc.txn.compatible=true -Djavax.security.auth.useSubjectCredsOnly=false"
+VMARGS="-Dfile.encoding=UTF-8 -Dxcc.txn.compatible=true"
 LIB_HOME=$DIR/lib
 BUNDLE_ARTIFACT="apache"
 
