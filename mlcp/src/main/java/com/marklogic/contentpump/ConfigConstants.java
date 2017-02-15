@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ public interface ConfigConstants {
     static final String HADOOP_CONFDIR_ENV_NAME = "HADOOP_CONF_DIR";
     static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
     static final String CONTENTPUMP_JAR_PREFIX = "mlcp";
+    static final String CONTENTPUMP_BUNDLE_ARTIFACT = "BUNDLE_ARTIFACT";
 
     // common
     static final String MODE = "mode";
