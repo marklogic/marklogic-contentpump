@@ -125,13 +125,19 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         
         // check running mode and hadoop conf dir configuration 
         String mode = cmdline.getOptionValue(MODE);
+        if (!MODE_DISTRIBUTED.equalsIgnoreCase(mode) &&
+                !MODE_LOCAL.equalsIgnoreCase(mode)) {
+            LOG.error("Unrecognized option argument for " +
+                MODE + ": " + mode);
+            return 1;
+        }
         String hadoopConfDir = System.getenv(HADOOP_CONFDIR_ENV_NAME);
         if (cmdline.hasOption(HADOOP_CONF_DIR)) {
             hadoopConfDir = cmdline.getOptionValue(HADOOP_CONF_DIR);
         }
         
         boolean distributed = hadoopConfDir != null && (mode == null ||
-                mode.equals(MODE_DISTRIBUTED));
+                mode.equalsIgnoreCase(MODE_DISTRIBUTED));
         if (MODE_DISTRIBUTED.equalsIgnoreCase(mode) && !distributed) {
             LOG.error("Cannot run in distributed mode.  HADOOP_CONF_DIR is "
                     + "not configured.");

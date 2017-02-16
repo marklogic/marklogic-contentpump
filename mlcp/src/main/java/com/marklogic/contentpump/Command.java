@@ -654,7 +654,7 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.OUTPUT_HOST, hosts);
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
-                String restrict = cmdline.getOptionValue(RESTRICT_OUTPUT_HOSTS);
+                String restrict = cmdline.getOptionValue(RESTRICT_HOSTS);
                 if (restrict == null || "true".equalsIgnoreCase(restrict)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
@@ -1028,7 +1028,7 @@ public enum Command implements ConfigConstants {
                 conf.set(MarkLogicConstants.INPUT_HOST, hosts);
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
-                String restrict = cmdline.getOptionValue(RESTRICT_INPUT_HOSTS);
+                String restrict = cmdline.getOptionValue(RESTRICT_HOSTS);
                 if (restrict == null || "true".equalsIgnoreCase(restrict)) {
                     conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
@@ -1816,7 +1816,7 @@ public enum Command implements ConfigConstants {
             .create(DATABASE);
         options.addOption(db);
         Option restricHosts = OptionBuilder
-            .withArgName(RESTRICT_HOSTS)
+            .withArgName("true,false")
             .hasOptionalArg()
             .withDescription("Whether to restrict the hosts mlcp connects to")
             .create(RESTRICT_HOSTS);
