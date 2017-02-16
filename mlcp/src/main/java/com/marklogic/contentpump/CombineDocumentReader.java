@@ -78,6 +78,9 @@ extends ImportRecordReader<VALUEIN> {
     public boolean nextKeyValue() throws IOException, InterruptedException {
         while (iterator.hasNext()) {
             FileSplit split = iterator.next();
+            if (split == null) {
+                continue;
+            }
             setFile(split.getPath());
             String uri = makeURIFromPath(file);
             FileSystem fs = file.getFileSystem(context.getConfiguration());        
