@@ -380,7 +380,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             try {
                 parser.parse();
             } catch (Throwable e) {
-                LOG.error("Parse error in RDF document; processing partial document:"
+                LOG.error("Parse error in RDF document(please check intactness and encoding); processing partial document:"
                     + fsname + " " + e.getMessage());
             }
             in.close();
@@ -1083,7 +1083,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 parser.parse();
             } catch (Exception ex) {
                 failed = true;
-                LOG.error("Parse error in RDF document; processing partial document:"
+                LOG.error("Parse error in RDF document(please check intactness and encoding); processing partial document:"
                     + origFn + " " + ex.getMessage());
             }
         }
