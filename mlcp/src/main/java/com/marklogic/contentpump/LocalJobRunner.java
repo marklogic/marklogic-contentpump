@@ -173,8 +173,7 @@ public class LocalJobRunner implements ConfigConstants {
                     availableThreads != threadsPerSplit) { 
                 	// possible runtime adjustment
                     if (runtimeMapperClass != (Class)MultithreadedMapper.class) {
-                	    runtimeMapperClass = (Class<? extends 
-                	        Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>>)
+                	    runtimeMapperClass = 
                 	        cmd.getRuntimeMapperClass(job, mapperClass, 
                 		        threadsPerSplit, availableThreads);
                     }   
@@ -477,7 +476,7 @@ public class LocalJobRunner implements ConfigConstants {
 
     public double computeProgress() {
         if (progress.length == 0) {
-            return (double)1;
+            return 1;
         }
         long result = 0;
         for (AtomicInteger pct : progress) {

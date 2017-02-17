@@ -36,6 +36,8 @@ import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.xcc.Content;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentFactory;
+import org.apache.hadoop.io.BinaryComparable;
+import org.apache.hadoop.io.Writable;
 /**
  * Custom content that has stored its own file name.
  * @author ali
@@ -131,8 +133,8 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
                 ((MarkLogicNode) value).get(), options);
         } else if (value instanceof BytesWritable) {
             content = ContentFactory.newContent(uri,
-                ((BytesWritable) value).getBytes(), 0,
-                ((BytesWritable) value).getLength(), options);
+                ((BinaryComparable) value).getBytes(), 0,
+                ((BinaryComparable) value).getLength(), options);
         }
         return content;
     }
@@ -146,15 +148,15 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
         switch (valueType) {
         case 0:
             value = (VALUE) new Text();
-            ((Text) value).readFields(in);
+            ((Writable) value).readFields(in);
             break;
         case 1:
             value = (VALUE) new MarkLogicNode();
-            ((MarkLogicNode) value).readFields(in);
+            ((Writable) value).readFields(in);
             break;
         case 2:
             value = (VALUE) new BytesWritable();
-            ((BytesWritable) value).readFields(in);
+            ((Writable) value).readFields(in);
             break;
         default:
             throw new IOException("incorrect type");
@@ -166,12 +168,10 @@ public class ContentWithFileNameWritable<VALUE> implements CustomContent {
     public void write(DataOutput out) throws IOException {
         Text.writeString(out, fileName);
         out.writeByte(type);
-        if (value instanceof Text) {
-            ((Text) value).write(out);
-        } else if (value instanceof MarkLogicNode) {
-            ((MarkLogicNode) value).write(out);
-        } else if (value instanceof BytesWritable) {
-            ((BytesWritable) value).write(out);
+        if (value instanceof Text || 
+                value instanceof MarkLogicNode || 
+                value instanceof BytesWritable) {
+            ((Writable) value).write(out);
         }
     }
     

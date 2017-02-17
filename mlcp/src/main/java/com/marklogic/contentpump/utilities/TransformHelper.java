@@ -39,6 +39,7 @@ import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.types.ValueType;
+import org.apache.hadoop.io.BinaryComparable;
 
 /**
  * Helper class for server-side transform
@@ -129,8 +130,8 @@ public class TransformHelper {
         switch (contentType) {
         case BINARY:
             query.setNewVariable("CONTENT", ValueType.XS_BASE64_BINARY, Base64
-                .encodeBytes(((BytesWritable) value).getBytes(), 0,
-                    ((BytesWritable) value).getLength()));
+                .encodeBytes(((BinaryComparable) value).getBytes(), 0,
+                    ((BinaryComparable) value).getLength()));
             optionsMap
                 .put("value-type", ValueType.XS_BASE64_BINARY.toString());
             break;
@@ -140,8 +141,8 @@ public class TransformHelper {
                 // in MIXED type, value is byteswritable
                 String encoding = cOptions.getEncoding();
                 query.setNewStringVariable("CONTENT", new String(
-                    ((BytesWritable) value).getBytes(), 0,
-                    ((BytesWritable) value).getLength(), encoding));
+                    ((BinaryComparable) value).getBytes(), 0,
+                    ((BinaryComparable) value).getLength(), encoding));
             } else {
                 // must be text or xml
                 query.setNewStringVariable("CONTENT",
@@ -155,8 +156,8 @@ public class TransformHelper {
                 // in MIXED type, value is byteswritable
                 String encoding = cOptions.getEncoding();
                 query.setNewStringVariable("CONTENT", new String(
-                    ((BytesWritable) value).getBytes(), 0,
-                    ((BytesWritable) value).getLength(), encoding));
+                    ((BinaryComparable) value).getBytes(), 0,
+                    ((BinaryComparable) value).getLength(), encoding));
             } else if (value instanceof RDFWritable) {
                 //RDFWritable's value is Text
                 query.setNewStringVariable("CONTENT",

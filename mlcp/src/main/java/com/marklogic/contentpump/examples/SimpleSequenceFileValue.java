@@ -54,15 +54,15 @@ public class SimpleSequenceFileValue<T> implements SequenceFileValue<T>,
         switch (valueType) {
         case 0:
             value = (T) new Text();
-            ((Text) value).readFields(in);
+            ((Writable) value).readFields(in);
             break;
         case 1:
             value = (T) new MarkLogicNode();
-            ((MarkLogicNode) value).readFields(in);
+            ((Writable) value).readFields(in);
             break;
         case 2:
             value = (T) new BytesWritable();
-            ((BytesWritable) value).readFields(in);
+            ((Writable) value).readFields(in);
             break;
         default:
             throw new IOException("incorrect type");
@@ -73,12 +73,10 @@ public class SimpleSequenceFileValue<T> implements SequenceFileValue<T>,
     @Override
     public void write(DataOutput out) throws IOException {
         out.writeByte(type);
-        if (value instanceof Text) {
-            ((Text) value).write(out);
-        } else if (value instanceof MarkLogicNode) {
-            ((MarkLogicNode) value).write(out);
-        } else if (value instanceof BytesWritable) {
-            ((BytesWritable) value).write(out);
+        if (value instanceof Text || 
+                value instanceof MarkLogicNode || 
+                value instanceof BytesWritable) {
+            ((Writable) value).write(out);
         }
     }
 

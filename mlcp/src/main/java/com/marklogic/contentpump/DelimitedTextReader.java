@@ -138,13 +138,13 @@ public class DelimitedTextReader<VALUEIN> extends
     }
 
     protected String[] getLine() throws IOException{
-    	CSVRecord record = (CSVRecord)parserIterator.next();
+    	CSVRecord record = parserIterator.next();
         Iterator<String> recordIterator = record.iterator();
         int recordSize = record.size();
         String[] values = new String[recordSize];
         for (int i = 0; i < recordSize; i++) {
         	if (recordIterator.hasNext()) {
-        		values[i] = (String)recordIterator.next();
+        		values[i] = recordIterator.next();
         	} else {
         		throw new IOException("Record size doesn't match the real size");
         	}

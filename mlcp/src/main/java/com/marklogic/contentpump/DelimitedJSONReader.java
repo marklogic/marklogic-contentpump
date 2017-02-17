@@ -182,7 +182,7 @@ public class DelimitedJSONReader<VALUEIN> extends
                         value).getValue()).set(line);
             } 
         }
-        bytesRead += (long)line.getBytes().length;
+        bytesRead += line.getBytes().length;
         return true;  
     }
     
@@ -200,7 +200,7 @@ public class DelimitedJSONReader<VALUEIN> extends
         while (!q.isEmpty()) {
             Object current = q.remove();
             if (current instanceof ArrayList) {
-                for (Object element : (ArrayList<Object>)current) {
+                for (Object element : (Iterable<? extends Object>)current) {
                     if (element instanceof Map || 
                         element instanceof ArrayList) {
                         q.add(element);

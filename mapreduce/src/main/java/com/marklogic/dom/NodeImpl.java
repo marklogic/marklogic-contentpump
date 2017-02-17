@@ -206,7 +206,7 @@ public abstract class NodeImpl implements Node {
      * which only contains the attribute only.
      */
     public Document getOwnerDocument() {
-        return (DocumentImpl) (this.tree.node(0));
+        return (Document) (this.tree.node(0));
     }
 
     /** {@inheritDoc} */
