@@ -46,7 +46,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
     public static final Log LOG = LogFactory
         .getLog(SplitDelimitedTextReader.class);
     private long start;
-    private long pos;
     private long end;
     private String lineSeparator;
 
@@ -66,7 +65,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
     @SuppressWarnings("unchecked")
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (parser == null || pos >= end || parserIterator == null) {
+        if (parser == null || parserIterator == null) {
             return false;
         }
         try {
@@ -79,8 +78,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                 return false;
             }
             String[] values = getLine(record);
-
-            pos += getBytesCountFromLine(values);
             if (values.length != fields.length) {
                 setSkipKey(0, 0, 
                         "number of fields does not match number of columns");
@@ -130,15 +127,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
             }
         }
         return true;
-    }
-
-    /**
-     * Get the length in bytes for the given line
-     */
-    private int getBytesCountFromLine(String[] values)
-        throws UnsupportedEncodingException {
-        String line = convertToLine(values);
-        return line.getBytes(encoding).length;
     }
 
     @Override
@@ -211,8 +199,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         try {
             if (parserIterator.hasNext()) {
                 String[] values = getLine();
-                start += getBytesCountFromLine(values);
-                pos = start;
             }
         } catch (RuntimeException e) {
             if (e.getMessage().
@@ -220,8 +206,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                             + "token and delimiter")) {
                 if (parserIterator.hasNext()) {
                     String[] values = getLine();
-                    start += getBytesCountFromLine(values);
-                    pos = start;
                 }
             } else {
                 throw new IOException(e);
