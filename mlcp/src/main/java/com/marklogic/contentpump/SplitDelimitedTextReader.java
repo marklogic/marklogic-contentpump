@@ -20,6 +20,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -73,7 +74,12 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         		bytesRead = fileLen;
                 return false;
             }
-            String[] values = getLine();
+            CSVRecord record = getRecordLine();
+            if (record.getCharacterPosition() >= end) {
+                return false;
+            }
+            String[] values = getLine(record);
+
             pos += getBytesCountFromLine(values);
             if (values.length != fields.length) {
                 setSkipKey(0, 0, 
@@ -196,8 +202,8 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         // keep leading and trailing whitespaces to ensure accuracy of pos
         // do not skip empty line just in case the split boundary is \n
         parser = new CSVParser(instream, CSVParserFormatter.
-        		getFormat(delimiter, encapsulator, false,
-        				false));
+                getFormat(delimiter, encapsulator, false,false),
+                start,0L);
         parserIterator = parser.iterator();
 
         // skip first line:
