@@ -125,7 +125,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         
         // check running mode and hadoop conf dir configuration 
         String mode = cmdline.getOptionValue(MODE);
-        if (!MODE_DISTRIBUTED.equalsIgnoreCase(mode) &&
+        if (mode != null &&
+                !MODE_DISTRIBUTED.equalsIgnoreCase(mode) &&
                 !MODE_LOCAL.equalsIgnoreCase(mode)) {
             LOG.error("Unrecognized option argument for " +
                 MODE + ": " + mode);
