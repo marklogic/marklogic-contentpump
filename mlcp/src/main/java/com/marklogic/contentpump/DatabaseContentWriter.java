@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -178,6 +178,7 @@ public class DatabaseContentWriter<VALUE> extends
         Content content = null;
         DocumentMetadata meta = null;
         if (value instanceof DatabaseDocumentWithMeta) {
+            try {
             meta = ((DatabaseDocumentWithMeta) value).getMeta();
             ContentCreateOptions opt = newContentCreateOptions(meta);
             MarkLogicDocument doc = (MarkLogicDocument)value;
@@ -190,6 +191,11 @@ public class DatabaseContentWriter<VALUE> extends
                     content = ContentFactory.newContent(uri, 
                             doc.getContentAsText().toString(), opt);
                 }
+            }
+            } catch (Exception e) {
+                failed++;
+                LOG.warn("Failed document: " + uri);
+                return;
             }
         } else {
             throw new UnsupportedOperationException(value.getClass()
