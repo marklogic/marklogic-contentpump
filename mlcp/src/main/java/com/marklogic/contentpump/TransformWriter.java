@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +50,8 @@ import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.RequestOptions;
+import com.marklogic.xcc.ResultItem;
+import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.ValueFactory;
@@ -102,7 +105,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         
         pendingURIs = new ArrayList[sessions.length];
         for (int i = 0; i < sessions.length; i++) {
-            pendingURIs[i] = new ArrayList<DocumentURI>();
+            pendingURIs[i] = new ArrayList<DocumentURI>(batchSize);
         }
         uris = new XdmValue[counts.length][batchSize];
         values = new XdmValue[counts.length][batchSize];
@@ -170,42 +173,21 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 sessions[sid] = getSession(sid, false);
                 queries[sid] = getAdhocQuery(sid);
             } 
-            try {
-                queries[sid].setNewVariables(uriName, uris[sid]);
-                queries[sid].setNewVariables(contentName, values[sid]);
-                queries[sid].setNewVariables(optionsName, optionsVals[sid]);
-                sessions[sid].submitRequest(queries[sid]);
-                stmtCounts[sid]++;
-                if (countBased) {
-                    sfId = -1;
-                }  
-                if (needCommit) {
-                    commitUris[sid].addAll(pendingURIs[sid]);
-                } else {
-                    succeeded += batchSize;
-                }
-            } catch (RequestServerException e) {
-                // log error and continue on RequestServerException
-                if (e instanceof XQueryException) {
-                    LOG.error(((XQueryException) e).getFormatString());
-                } else {
-                    LOG.error(e.getMessage());
-                }
-                LOG.warn("Failed document " + key);
-                failed += pendingURIs[sid].size();
-                pendingURIs[sid].clear();
-            } catch (RequestException e) {
-                if (sessions[sid] != null) {
-                    sessions[sid].close();
-                }
-                if (countBased) {
-                    rollbackCount(sid);
-                }
-                throw new IOException(e);
-            } finally {
-                pendingURIs[sid].clear();
-                counts[sid] = 0;
+            queries[sid].setNewVariables(uriName, uris[sid]);
+            queries[sid].setNewVariables(contentName, values[sid]);
+            queries[sid].setNewVariables(optionsName, optionsVals[sid]);
+            insertBatch(sid);
+            stmtCounts[sid]++;
+            if (countBased) {
+                sfId = -1;
+            }  
+            if (needCommit) {
+                commitUris[sid].addAll(pendingURIs[sid]);
+            } else {
+                succeeded += pendingURIs[sid].size();
             }
+            pendingURIs[sid].clear();
+            
             boolean committed = false;
             if (stmtCounts[sid] == txnSize && needCommit) {
                 commit(sid);
@@ -419,54 +401,70 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         return q;
     }
     
+    protected void insertBatch(int id) throws IOException
+    {
+        try {
+            ResultSequence rs = sessions[id].submitRequest(queries[id]);
+            while (rs.hasNext()) { // batch mode
+                String uri = rs.next().asString();
+                LOG.warn("Failed document " + uri);
+                failed++;
+                pendingURIs[id].remove(new DocumentURI(uri));
+                if (rs.hasNext()) {
+                    String err = rs.next().asString();
+                    LOG.warn(err);
+                } else break;   
+            }
+        } catch (RequestServerException e) {
+            // compatible mode: log error and continue
+            if (e instanceof XQueryException) {
+                LOG.error(((XQueryException) e).getFormatString());
+            } else {
+                LOG.error(e.getMessage());
+            }
+            LOG.warn("Failed document " + pendingURIs[id].get(0));
+            failed++;
+        } catch (RequestException e) {
+            if (sessions[id] != null) {
+                sessions[id].close();
+            }
+            if (countBased) {
+                rollbackCount(id);
+            }
+            throw new IOException(e);
+        } finally {
+            counts[id] = 0;
+        }
+    }
+    
     @Override
     public void close(TaskAttemptContext context) throws IOException,
     InterruptedException {
         for (int i = 0; i < sessions.length; i++) {
-            try {
-                if (counts[i] > 0) {
-                    if (sessions[i] == null) {
-                        sessions[i] = getSession(i,false);
-                    }
-                    if (queries[i] == null) {
-                        queries[i] = getAdhocQuery(i);
-                    }
-                    XdmValue[] urisLeft = new XdmValue[counts[i]];
-                    System.arraycopy(uris[i], 0, urisLeft, 0, counts[i]);
-                    queries[i].setNewVariables(uriName, urisLeft);
-                    XdmValue[] valuesLeft = new XdmValue[counts[i]];
-                    System.arraycopy(values[i], 0, valuesLeft, 0, counts[i]);
-                    queries[i].setNewVariables(contentName, valuesLeft);
-                    XdmValue[] optionsLeft = new XdmValue[counts[i]];
-                    System.arraycopy(optionsVals[i], 0, optionsLeft, 0, counts[i]);
-                    queries[i].setNewVariables(optionsName, optionsLeft);
-                    sessions[i].submitRequest(queries[i]); 
-                    if (!needCommit) {
-                        succeeded += counts[i]; 
-                    } else {
-                        stmtCounts[i]++;
-                        commitUris[i].addAll(pendingURIs[i]);
-                    }
+            if (counts[i] > 0) {
+                if (sessions[i] == null) {
+                    sessions[i] = getSession(i,false);
                 }
-            } catch (RequestServerException e) {
-                // log error and continue on RequestServerException
-                LOG.error("Error commiting transaction", e);
-                failed += commitUris[i].size();   
-                for (DocumentURI failedUri : commitUris[i]) {
-                    LOG.warn("Failed document " + failedUri);
+                if (queries[i] == null) {
+                    queries[i] = getAdhocQuery(i);
                 }
-                commitUris[i].clear();
-            } catch (RequestException e) {
-                if (sessions[i] != null) {
-                    sessions[i].close();
+                XdmValue[] urisLeft = new XdmValue[counts[i]];
+                System.arraycopy(uris[i], 0, urisLeft, 0, counts[i]);
+                queries[i].setNewVariables(uriName, urisLeft);
+                XdmValue[] valuesLeft = new XdmValue[counts[i]];
+                System.arraycopy(values[i], 0, valuesLeft, 0, counts[i]);
+                queries[i].setNewVariables(contentName, valuesLeft);
+                XdmValue[] optionsLeft = new XdmValue[counts[i]];
+                System.arraycopy(optionsVals[i], 0, optionsLeft, 0, counts[i]);
+                queries[i].setNewVariables(optionsName, optionsLeft);
+                insertBatch(i); 
+                if (!needCommit) {
+                    succeeded += pendingURIs[i].size(); 
+                } else {
+                    stmtCounts[i]++;
+                    commitUris[i].addAll(pendingURIs[i]);
                 }
-                if (countBased) {
-                    rollbackCount(i);
-                }
-                failed += commitUris[i].size();
-                commitUris[i].clear();
-                throw new IOException(e);
-            } 
+            }
             if (stmtCounts[i] > 0 && needCommit) {  
                 commit(i);
                 succeeded += commitUris[i].size();
