@@ -85,7 +85,8 @@ public class TransformOutputFormat<VALUEOUT> extends
             query.setOptions(options);
             result = session.submitRequest(query);
             if (!result.hasNext())
-                throw new IOException("Server-side transform requires MarkLogic 7 or later");
+                throw new IOException(
+                    "Server-side transform requires MarkLogic 7 or later");
             mimetypeMap = new LinkedMapWritable();
             while (result.hasNext()) {
                 String suffs = result.next().asString();
@@ -118,7 +119,8 @@ public class TransformOutputFormat<VALUEOUT> extends
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         getMimetypesMap();
         // construct the ContentWriter
-        return new TransformWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
+        return new TransformWriter<VALUEOUT>(conf, sourceMap, fastLoad, am, 
+                effectiveVersion);
     }
 
     @Override

@@ -137,7 +137,6 @@ public class DatabaseTransformWriter<VALUE> extends
         if (stmtCounts[sid] >= txnSize && needCommit) {
             commit(sid);
             stmtCounts[sid] = 0;
-            commitUris[sid].clear();
             committed = true;
         }
         if ((!fastLoad) && ((!needCommit) || committed)) { 

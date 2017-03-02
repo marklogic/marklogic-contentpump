@@ -1416,6 +1416,7 @@ public enum Command implements ConfigConstants {
             applyPartitionConfigOptions(conf, cmdline);
             
             applyModuleConfigOptions(conf, cmdline);
+            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
         }
 
         @Override
@@ -1942,7 +1943,6 @@ public enum Command implements ConfigConstants {
     static void applyModuleConfigOptions(Configuration conf,
         CommandLine cmdline) {
         if (cmdline.hasOption(TRANSFORM_MODULE)) {
-            applyBatchTxn(conf, cmdline, 1);
             if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false) == true) {
                 throw new UnsupportedOperationException(
                     "Server-side transformation can't work with streaming");
@@ -1962,8 +1962,6 @@ public enum Command implements ConfigConstants {
                 arg = cmdline.getOptionValue(TRANSFORM_PARAM);
                 conf.set(CONF_TRANSFORM_PARAM, arg);
             }
-        } else {
-            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
         }
     }
     

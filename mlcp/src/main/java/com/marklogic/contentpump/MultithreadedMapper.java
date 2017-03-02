@@ -357,8 +357,10 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 			OutputFormat<K2, V2> outputFormat = (OutputFormat<K2, V2>) 
 			    ReflectionUtils.newInstance(outer.getOutputFormatClass(),
                 outer.getConfiguration());
-            writer = outputFormat.getRecordWriter(outer);
             try {
+                // initialize outputFormat through checkOutputSpec
+                outputFormat.checkOutputSpecs(outer);
+                writer = outputFormat.getRecordWriter(outer);
                 subcontext = (Context)ReflectionUtil.createMapperContext(
                     mapper, outer.getConfiguration(), outer.getTaskAttemptID(),                 
                     new SubMapRecordReader(), writer,

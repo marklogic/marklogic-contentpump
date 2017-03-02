@@ -42,7 +42,6 @@ import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
-import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
 
@@ -274,7 +273,6 @@ public class DatabaseContentWriter<VALUE> extends
         if (stmtCounts[sid] == txnSize && needCommit) {
             commit(sid);
             stmtCounts[sid] = 0;
-            commitUris[sid].clear();
             committed = true;
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
