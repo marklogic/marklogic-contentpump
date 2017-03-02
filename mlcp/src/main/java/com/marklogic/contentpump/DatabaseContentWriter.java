@@ -72,15 +72,9 @@ public class DatabaseContentWriter<VALUE> extends
     }
     
     public DatabaseContentWriter(Configuration conf,
-        Map<String, ContentSource> hostSourceMap, boolean fastLoad,
-        AssignmentManager am) {
-        this(conf, hostSourceMap, fastLoad, am, 0L);
-    }
-    
-    public DatabaseContentWriter(Configuration conf,
             Map<String, ContentSource> hostSourceMap, boolean fastLoad,
-            AssignmentManager am, long effectiveVersion) {
-        super(conf, hostSourceMap, fastLoad, am, effectiveVersion);
+            AssignmentManager am) {
+        super(conf, hostSourceMap, fastLoad, am);
 
         if (countBased) {
             metadatas = new URIMetadata[1][batchSize];

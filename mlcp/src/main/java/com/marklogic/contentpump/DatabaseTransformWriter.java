@@ -50,8 +50,8 @@ public class DatabaseTransformWriter<VALUE> extends
     
     public DatabaseTransformWriter(Configuration conf,
             Map<String, ContentSource> hostSourceMap, boolean fastLoad,
-            AssignmentManager am, long effectiveVersion) {
-            super(conf, hostSourceMap, fastLoad, am, effectiveVersion);
+            AssignmentManager am) {
+            super(conf, hostSourceMap, fastLoad, am);
             moduleUri = conf.get(ConfigConstants.CONF_TRANSFORM_MODULE);
             functionNs = conf.get(ConfigConstants.CONF_TRANSFORM_NAMESPACE, "");
             functionName = conf.get(ConfigConstants.CONF_TRANSFORM_FUNCTION,

@@ -42,6 +42,6 @@ public class DatabaseTransformOutputFormat extends DatabaseContentOutputFormat {
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the DatabaseTransformContentWriter
         return new DatabaseTransformWriter<DatabaseDocumentWithMeta>(conf,
-            sourceMap, fastLoad, am, effectiveVersion);
+            sourceMap, fastLoad, am);
     }
 }

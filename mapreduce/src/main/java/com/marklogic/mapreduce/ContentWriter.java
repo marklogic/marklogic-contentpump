@@ -185,15 +185,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     public ContentWriter(Configuration conf,
         Map<String, ContentSource> hostSourceMap, boolean fastLoad,
         AssignmentManager am) {
-        this(conf, hostSourceMap, fastLoad, am, 0L);
-    }
-
-    public ContentWriter(Configuration conf,
-            Map<String, ContentSource> hostSourceMap, boolean fastLoad,
-            AssignmentManager am, long effectiveVersion) {
         super(conf, null);
         
-        this.effectiveVersion = effectiveVersion;
+        this.effectiveVersion = am.getEffectiveVersion();
         
         this.fastLoad = fastLoad;
         

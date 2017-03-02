@@ -66,7 +66,7 @@ import com.marklogic.xcc.types.XdmValue;
  * @param <VALUEOUT>
  */
 public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
-    public static final Log LOG = LogFactory.getLog(ContentWriter.class);
+    public static final Log LOG = LogFactory.getLog(TransformWriter.class);
     static final long BATCH_MIN_VERSION = 9000030;
     protected String moduleUri;
     protected String functionNs;
@@ -86,8 +86,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
 
     public TransformWriter(Configuration conf,
         Map<String, ContentSource> hostSourceMap, boolean fastLoad,
-        AssignmentManager am, long effectiveVersion) {
-        super(conf, hostSourceMap, fastLoad, am, effectiveVersion);
+        AssignmentManager am) {
+        super(conf, hostSourceMap, fastLoad, am);
 
         batchSize = effectiveVersion >= BATCH_MIN_VERSION ? batchSize : 1;
         moduleUri = conf.get(ConfigConstants.CONF_TRANSFORM_MODULE);

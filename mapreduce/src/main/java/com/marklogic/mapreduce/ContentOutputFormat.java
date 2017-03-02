@@ -123,7 +123,7 @@ public class ContentOutputFormat<VALUEOUT> extends
     protected boolean legacy = false;
     protected boolean failover = false;
     protected String initHostName;
-    protected long effectiveVersion;
+
     @Override
     public void checkOutputSpecs(Configuration conf, ContentSource cs)
     throws IOException { 
@@ -317,7 +317,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the ContentWriter
         return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, 
-                am, effectiveVersion);
+                am);
     }
 
     protected LinkedMapWritable getForestStatusMap(Configuration conf) 
@@ -362,7 +362,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         ResultItem item = result.next();
         initHostName = item.asString();
         item = result.next();
-        effectiveVersion = ((XSInteger)item.getItem()).asLong();
+        am.setEffectiveVersion(((XSInteger)item.getItem()).asLong());
         item = result.next();
         failover = !restrictHosts && item.asString().equals("true");
         if (result.hasNext()) {
