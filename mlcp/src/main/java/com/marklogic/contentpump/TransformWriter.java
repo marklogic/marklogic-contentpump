@@ -112,6 +112,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         for (int i = 0; i < sessions.length; i++) {
             pendingURIs[i] = new ArrayList<DocumentURI>(batchSize);
         }
+        if (counts == null) {
+            counts = new int[1];
+        }
         uris = new XdmValue[counts.length][batchSize];
         values = new XdmValue[counts.length][batchSize];
         optionsVals = new XdmValue[counts.length][batchSize];
