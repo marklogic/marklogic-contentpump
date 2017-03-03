@@ -114,7 +114,11 @@ public class DatabaseTransformWriter<VALUE> extends
                     isCopyMeta&&naked?meta.getMeta():null, sessions[sid]);
             stmtCounts[sid]++;
             if (suc && naked) {
-                commitUris[sid].add(key);
+                if (needCommit) {
+                    commitUris[sid].add(key);
+                } else {
+                    succeeded++;
+                }
             } else if (!suc && naked) {
                 failed++;
             }
