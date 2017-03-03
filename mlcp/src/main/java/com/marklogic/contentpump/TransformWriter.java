@@ -17,7 +17,6 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,24 +32,26 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.marklogic.contentpump.utilities.TransformHelper;
 import com.marklogic.io.Base64;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.ContentWriter;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicCounter;
+import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.ZipEntryInputStream;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCapability;
+import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
+import com.marklogic.xcc.DocumentFormat;
 import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.RequestOptions;
-import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
@@ -71,6 +72,10 @@ import com.marklogic.xcc.types.XdmValue;
 public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public static final Log LOG = LogFactory.getLog(TransformWriter.class);
     static final long BATCH_MIN_VERSION = 9000030;
+    static final String MAP_ELEM_START_TAG = 
+        "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
+        + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
+        + "//marklogic.com/xdmp/map\">";
     protected String moduleUri;
     protected String functionNs;
     protected String functionName;
@@ -166,7 +171,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             }
         }
         int sid = fId;
-        addValue(uri, value, sid);
+        addValue(uri, value, sid, options);
         pendingURIs[sid].add(key);
         if (++counts[sid] == batchSize) {
             if (sessions[sid] == null) {
@@ -218,21 +223,54 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
     }
 
-    private void addValue(String uri, VALUEOUT value, int id) 
-            throws UnsupportedEncodingException {
+    public static ObjectNode mapToNode(HashMap<String, String> optionsMap) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
+        for (Map.Entry<String, String> entry : optionsMap.entrySet()) {
+            node.put(entry.getKey(), entry.getValue());
+        }
+        return node;
+    }
+
+    public static String mapToElement(HashMap<String, String> map) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(MAP_ELEM_START_TAG);
+        Set<String> keys = map.keySet();
+        for (String k : keys) {
+            addKeyValue(sb, k, map.get(k));
+        }
+        sb.append("</map:map>");
+        return sb.toString();
+    }
+
+    private static void addKeyValue(StringBuilder sb, String key, String value) {
+        sb.append("<map:entry key=\"").append(key)
+            .append("\"><map:value xsi:type=\"xs:string\">").append(value)
+            .append("</map:value></map:entry>");
+    }
+    
+    protected void addValue(String uri, VALUEOUT value, int id, 
+        ContentCreateOptions options) throws UnsupportedEncodingException {
         uris[id][counts[id]] = ValueFactory.newValue(ValueType.XS_STRING,uri);
         ContentType docContentType = contentType;
-        if (contentType == ContentType.MIXED) {
+        if (options.getFormat() != DocumentFormat.NONE) {
+            docContentType = ContentType.fromFormat(options.getFormat());
+        } else if (contentType == ContentType.MIXED) {
             // get type from mimetype map
             docContentType = ContentType.forName(getTypeFromMap(uri));
         }
 
         switch (docContentType) {
         case BINARY:
+            byte[] bytes;
+            if (value instanceof MarkLogicDocument) {
+                bytes = ((MarkLogicDocument)value).getContentAsByteArray();
+            } else {
+                bytes = ((BytesWritable)value).getBytes();
+            }
             values[id][counts[id]] = 
                 ValueFactory.newValue(ValueType.XS_BASE64_BINARY, 
-                    Base64.encodeBytes(((BytesWritable) value).getBytes(), 0,
-                        ((BytesWritable) value).getLength()));
+                    Base64.encodeBytes(bytes, 0,bytes.length));
             optionsMap.put("value-type", 
                     ValueType.XS_BASE64_BINARY.toString());
             break;
@@ -245,6 +283,10 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     ValueFactory.newValue(ValueType.XS_STRING, 
                         new String(((BytesWritable) value).getBytes(), 0,
                             ((BytesWritable) value).getLength(), encoding));
+            } else if (value instanceof MarkLogicDocument) {
+                values[id][counts[id]] = 
+                        ValueFactory.newValue(ValueType.XS_STRING, 
+                            ((MarkLogicDocument)value).getContentAsString());
             } else {
                 // must be text or xml
                 values[id][counts[id]] = 
@@ -271,8 +313,11 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 values[id][counts[id]] = 
                     ValueFactory.newValue(ValueType.XS_STRING, 
                     ((ContentWithFileNameWritable)value).getValue().toString());
-            }
-            else {
+            } else if (value instanceof MarkLogicDocument) {
+                values[id][counts[id]] = 
+                    ValueFactory.newValue(ValueType.XS_STRING, 
+                            ((MarkLogicDocument)value).getContentAsString());
+            } else {
                 // must be text or xml
                 values[id][counts[id]] = 
                     ValueFactory.newValue(ValueType.XS_STRING,
@@ -374,11 +419,11 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             optionsMap.put("temporal-collection", temporalCollection);
         }
         if (effectiveVersion < BATCH_MIN_VERSION) {
-            String optionElem = TransformHelper.mapToElement(optionsMap);
+            String optionElem = mapToElement(optionsMap);
             optionsVals[id][counts[id]] = 
                     ValueFactory.newValue(ValueType.ELEMENT, optionElem);
         } else {
-            ObjectNode optionsNode = TransformHelper.mapToNode(optionsMap);
+            ObjectNode optionsNode = mapToNode(optionsMap);
             optionsVals[id][counts[id]] = 
                     ValueFactory.newValue(ValueType.JS_OBJECT, optionsNode);
         }
