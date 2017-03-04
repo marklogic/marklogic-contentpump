@@ -265,15 +265,17 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
 
         switch (docContentType) {
         case BINARY:
-            byte[] bytes;
             if (value instanceof MarkLogicDocument) {
-                bytes = ((MarkLogicDocument)value).getContentAsByteArray();
+                values[id][counts[id]] = 
+                    ValueFactory.newValue(ValueType.XS_BASE64_BINARY, 
+                        Base64.encodeBytes(
+                          ((MarkLogicDocument)value).getContentAsByteArray()));
             } else {
-                bytes = ((BytesWritable)value).getBytes();
+                values[id][counts[id]] = 
+                    ValueFactory.newValue(ValueType.XS_BASE64_BINARY, 
+                        Base64.encodeBytes(((BytesWritable)value).getBytes(),
+                            0, ((BytesWritable)value).getLength()));
             }
-            values[id][counts[id]] = 
-                ValueFactory.newValue(ValueType.XS_BASE64_BINARY, 
-                    Base64.encodeBytes(bytes, 0,bytes.length));
             optionsMap.put("value-type", 
                     ValueType.XS_BASE64_BINARY.toString());
             break;
