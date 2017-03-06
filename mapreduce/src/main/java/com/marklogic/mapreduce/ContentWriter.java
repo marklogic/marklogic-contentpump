@@ -540,6 +540,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 } else {
                     LOG.error(e.getMessage());
                 }
+                if (needCommit && !commitUris[id].isEmpty()) {
+                    failed += commitUris[id].size();
+                    for (DocumentURI failedUri : commitUris[id]) {
+                        LOG.warn("Failed document: " + failedUri);
+                    }
+                    commitUris[id].clear();
+                }
+                if (t < maxRetries) {
+                    sessions[id] = getSession(id, true);
+                    continue;
+                }
 
                 failed += batch.length;   
                 // remove the failed content from pendingUris
@@ -707,7 +718,18 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             failed += commitUris[id].size();
             commitUris[id].clear();
             throw new IOException(e);
-        } 
+        } catch (Exception e) {
+            LOG.error("Error commiting transaction ", e);
+            if (sessions[id] != null) {
+                sessions[id].close();
+                sessions[id] = getSession(id, true);
+            }
+            failed += commitUris[id].size();
+            for (DocumentURI failedUri : commitUris[id]) {
+                LOG.warn("Failed document: " + failedUri);
+            }
+            commitUris[id].clear();
+        }
     }
     
     @Override
