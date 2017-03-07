@@ -86,7 +86,7 @@ public class DatabaseTransformWriter<VALUE> extends
         if (!naked) {
             opt.setFormat(doc.getContentType().getDocumentFormat());
             addValue(uri, value, sid, opt);
-            pendingURIs[sid].add(key);
+            pendingURIs[sid].add((DocumentURI)key.clone());
             if (++counts[sid] == batchSize) {
                 queries[sid].setNewVariables(uriName, uris[sid]);
                 queries[sid].setNewVariables(contentName, values[sid]);

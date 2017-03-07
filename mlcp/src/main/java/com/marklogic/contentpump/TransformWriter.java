@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,7 +83,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     protected String functionParam;
     protected ContentType contentType;
     protected AdhocQuery[] queries;
-    protected List<DocumentURI>[] pendingURIs;
+    protected Set<DocumentURI>[] pendingURIs;
     protected XdmValue[][] uris;
     protected XdmValue[][] values;
     protected XdmValue[][] optionsVals;
@@ -108,9 +109,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         contentType = ContentType.valueOf(contentTypeStr);
         queries = new AdhocQuery[sessions.length];
         
-        pendingURIs = new ArrayList[sessions.length];
+        pendingURIs = new HashSet[sessions.length];
         for (int i = 0; i < sessions.length; i++) {
-            pendingURIs[i] = new ArrayList<DocumentURI>(batchSize);
+            pendingURIs[i] = new HashSet<DocumentURI>(batchSize);
         }
         if (counts == null) {
             counts = new int[1];
@@ -175,11 +176,14 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
         int sid = fId;
         addValue(uri, value, sid, options);
-        pendingURIs[sid].add(key);
+        pendingURIs[sid].add((DocumentURI)key.clone());
         if (++counts[sid] == batchSize) {
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
                 queries[sid] = getAdhocQuery(sid);
+                if (queries[sid].getSession() != sessions[sid]) {
+                    throw new RuntimeException("queryid = " + sid);
+                }
             } 
             queries[sid].setNewVariables(uriName, uris[sid]);
             queries[sid].setNewVariables(contentName, values[sid]);
@@ -206,6 +210,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 // rotate to next host and reset session
                 hostId = (hostId + 1)%forestIds.length;
                 sessions[0] = null;
+                queries[0] = null;
             }
         }
     }
@@ -454,6 +459,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     protected void insertBatch(int id) throws IOException
     {
         try {
+            if (queries[id].getSession() != sessions[id]) {
+                throw new RuntimeException("queryid = " + id);
+            }
             ResultSequence rs = sessions[id].submitRequest(queries[id]);
             while (rs.hasNext()) { // batch mode
                 String uri = rs.next().asString();
@@ -472,7 +480,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             } else {
                 LOG.error(e.getMessage());
             }
-            LOG.warn("Failed document " + pendingURIs[id].get(0));
+            // get the only document from the set
+            LOG.warn("Failed document " + pendingURIs[id].iterator().next());
             failed++;
         } catch (RequestException e) {
             if (sessions[id] != null) {
@@ -497,6 +506,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 }
                 if (queries[i] == null) {
                     queries[i] = getAdhocQuery(i);
+                    if (queries[i].getSession() != sessions[i]) {
+                        throw new RuntimeException("queryid = " + i);
+                    }
                 }
                 XdmValue[] urisLeft = new XdmValue[counts[i]];
                 System.arraycopy(uris[i], 0, urisLeft, 0, counts[i]);
