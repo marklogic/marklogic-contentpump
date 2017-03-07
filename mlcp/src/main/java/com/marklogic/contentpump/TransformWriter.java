@@ -181,9 +181,6 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
                 queries[sid] = getAdhocQuery(sid);
-                if (queries[sid].getSession() != sessions[sid]) {
-                    throw new RuntimeException("queryid = " + sid);
-                }
             } 
             queries[sid].setNewVariables(uriName, uris[sid]);
             queries[sid].setNewVariables(contentName, values[sid]);
@@ -459,9 +456,6 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     protected void insertBatch(int id) throws IOException
     {
         try {
-            if (queries[id].getSession() != sessions[id]) {
-                throw new RuntimeException("queryid = " + id);
-            }
             ResultSequence rs = sessions[id].submitRequest(queries[id]);
             while (rs.hasNext()) { // batch mode
                 String uri = rs.next().asString();
@@ -506,9 +500,6 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 }
                 if (queries[i] == null) {
                     queries[i] = getAdhocQuery(i);
-                    if (queries[i].getSession() != sessions[i]) {
-                        throw new RuntimeException("queryid = " + i);
-                    }
                 }
                 XdmValue[] urisLeft = new XdmValue[counts[i]];
                 System.arraycopy(uris[i], 0, urisLeft, 0, counts[i]);
