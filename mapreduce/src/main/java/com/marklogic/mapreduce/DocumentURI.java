@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -118,6 +118,19 @@ implements WritableComparable<DocumentURI>, Cloneable {
                 throw new IllegalStateException("Invalid URI Format: " + uri);
             }
         }
+    }
+    
+    @Override
+    public boolean equals(Object uri) {
+        if (uri instanceof DocumentURI) {
+            return this.uri.equals(((DocumentURI)uri).getUri());
+        } 
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return uri.hashCode();
     }
     
     public static void main(String[] args) throws URISyntaxException {

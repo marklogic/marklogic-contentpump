@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -152,7 +152,7 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
             Text.writeString(out, hostName[0]);
         }
         out.writeBoolean(isLastSplit);
-        int replicaSize = replicas.size();
+        int replicaSize = (replicas != null) ? replicas.size() : 0;
         out.writeInt(replicaSize);
         for (int i=0; i < replicaSize; i++) {
             Text.writeString(out, replicas.get(i).getForest());

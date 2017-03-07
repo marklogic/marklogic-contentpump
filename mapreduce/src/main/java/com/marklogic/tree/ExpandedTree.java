@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -158,7 +158,12 @@ public class ExpandedTree implements Writable {
 			value = atomString[i];
 		}
 		if (value == null) {
-            int aidx = atomIndex[i] + (atomData[atomIndex[i]]>>>7) + 1;
+            int aidx;
+            if (atomData[atomIndex[i]]>=0) {
+                aidx = atomIndex[i] + 1;
+            } else {
+                aidx = atomIndex[i] + 2;
+            }
 			value = atomString[i] = new String(atomData, aidx,
 					atomIndex[i + 1] - aidx - 1, UTF8);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,9 @@ extends ImportRecordReader<VALUEIN> {
     public boolean nextKeyValue() throws IOException, InterruptedException {
         while (iterator.hasNext()) {
             FileSplit split = iterator.next();
+            if (split == null) {
+                continue;
+            }
             setFile(split.getPath());
             String uri = makeURIFromPath(file);
             FileSystem fs = file.getFileSystem(context.getConfiguration());        

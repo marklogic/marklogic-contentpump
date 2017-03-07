@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -185,15 +185,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     public ContentWriter(Configuration conf,
         Map<String, ContentSource> hostSourceMap, boolean fastLoad,
         AssignmentManager am) {
-        this(conf, hostSourceMap, fastLoad, am, 0L);
-    }
-
-    public ContentWriter(Configuration conf,
-            Map<String, ContentSource> hostSourceMap, boolean fastLoad,
-            AssignmentManager am, long effectiveVersion) {
         super(conf, null);
         
-        this.effectiveVersion = effectiveVersion;
+        this.effectiveVersion = am.getEffectiveVersion();
         
         this.fastLoad = fastLoad;
         
@@ -342,7 +336,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         options.setTemporalCollection(conf.get(TEMPORAL_COLLECTION));
         
-        needCommit = txnSize > 1 || (batchSize > 1 && tolerateErrors);
+        needCommit = needCommit();
         if (needCommit) {
             commitUris = new ArrayList[arraySize];
             for (int i = 0; i < arraySize; i++) {
@@ -353,6 +347,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         isCopyColls = conf.getBoolean(COPY_COLLECTIONS, true);
         isCopyQuality = conf.getBoolean(COPY_QUALITY, true);
         isCopyMeta = conf.getBoolean(COPY_METADATA, true);
+    }
+    
+    protected boolean needCommit() {
+        return txnSize > 1 || (batchSize > 1 && tolerateErrors);
     }
 
     protected Content createContent(DocumentURI key, VALUEOUT value) 
@@ -542,6 +540,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 } else {
                     LOG.error(e.getMessage());
                 }
+                if (needCommit && !commitUris[id].isEmpty()) {
+                    failed += commitUris[id].size();
+                    for (DocumentURI failedUri : commitUris[id]) {
+                        LOG.warn("Failed document: " + failedUri);
+                    }
+                    commitUris[id].clear();
+                }
+                if (t < maxRetries) {
+                    sessions[id] = getSession(id, true);
+                    continue;
+                }
 
                 failed += batch.length;   
                 // remove the failed content from pendingUris
@@ -692,6 +701,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         try {
             sessions[id].commit();
             succeeded += commitUris[id].size();
+            commitUris[id].clear();
         } catch (RequestServerException e) {
             LOG.error("Error commiting transaction", e);
             failed += commitUris[id].size();   
@@ -708,7 +718,18 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             failed += commitUris[id].size();
             commitUris[id].clear();
             throw new IOException(e);
-        } 
+        } catch (Exception e) {
+            LOG.error("Error commiting transaction ", e);
+            if (sessions[id] != null) {
+                sessions[id].close();
+                sessions[id] = getSession(id, true);
+            }
+            failed += commitUris[id].size();
+            for (DocumentURI failedUri : commitUris[id]) {
+                LOG.warn("Failed document: " + failedUri);
+            }
+            commitUris[id].clear();
+        }
     }
     
     @Override
@@ -734,7 +755,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             failed++;
             return;
         }
-        if(countBased) {
+        if (countBased) {
             fId = 0;
         }
         pendingUris[sid].put(content, (DocumentURI)key.clone());
@@ -771,7 +792,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (needCommit && stmtCounts[sid] == txnSize) {
             commit(sid);  
             stmtCounts[sid] = 0;         
-            commitUris[sid].clear();
             committed = true;
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,8 @@ public class TransformOutputFormat<VALUEOUT> extends
             query.setOptions(options);
             result = session.submitRequest(query);
             if (!result.hasNext())
-                throw new IOException("Server-side transform requires MarkLogic 7 or later");
+                throw new IOException(
+                    "Server-side transform requires MarkLogic 7 or later");
             mimetypeMap = new LinkedMapWritable();
             while (result.hasNext()) {
                 String suffs = result.next().asString();

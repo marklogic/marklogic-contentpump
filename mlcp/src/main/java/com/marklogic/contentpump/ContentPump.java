@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         
         // check running mode and hadoop conf dir configuration 
         String mode = cmdline.getOptionValue(MODE);
-        if (!MODE_DISTRIBUTED.equalsIgnoreCase(mode) &&
+        if (mode != null &&
+                !MODE_DISTRIBUTED.equalsIgnoreCase(mode) &&
                 !MODE_LOCAL.equalsIgnoreCase(mode)) {
             LOG.error("Unrecognized option argument for " +
                 MODE + ": " + mode);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ import com.marklogic.mapreduce.utilities.ForestHost;
 public class AssignmentManager {
     static final String ID_PREFIX = "#";
     protected AssignmentPolicy policy;
+    // This is here to leverage the fact that AssignmentManager is a singleton
+    // and only needs to be initialized once.
+    protected long effectiveVersion;
 
     private static final AssignmentManager instance = new AssignmentManager();
     private boolean initialized;
@@ -160,5 +163,13 @@ public class AssignmentManager {
      */
     public void setInitialized(boolean val) {
         initialized = val;
+    }
+
+    public long getEffectiveVersion() {
+        return effectiveVersion;
+    }
+
+    public void setEffectiveVersion(long effectiveVersion) {
+        this.effectiveVersion = effectiveVersion;
     }
 }

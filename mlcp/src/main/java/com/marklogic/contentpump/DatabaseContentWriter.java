@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,6 @@ import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
-import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
 
@@ -73,15 +72,9 @@ public class DatabaseContentWriter<VALUE> extends
     }
     
     public DatabaseContentWriter(Configuration conf,
-        Map<String, ContentSource> hostSourceMap, boolean fastLoad,
-        AssignmentManager am) {
-        this(conf, hostSourceMap, fastLoad, am, 0L);
-    }
-    
-    public DatabaseContentWriter(Configuration conf,
             Map<String, ContentSource> hostSourceMap, boolean fastLoad,
-            AssignmentManager am, long effectiveVersion) {
-        super(conf, hostSourceMap, fastLoad, am, effectiveVersion);
+            AssignmentManager am) {
+        super(conf, hostSourceMap, fastLoad, am);
 
         if (countBased) {
             metadatas = new URIMetadata[1][batchSize];
@@ -96,8 +89,10 @@ public class DatabaseContentWriter<VALUE> extends
      * fetch the options information from conf and metadata, set to the field
      * "options"
      */
-    protected ContentCreateOptions newContentCreateOptions(
-            DocumentMetadata meta) {
+    protected static ContentCreateOptions newContentCreateOptions(
+            DocumentMetadata meta, ContentCreateOptions options, 
+            boolean isCopyColls, boolean isCopyQuality, boolean isCopyMeta,
+            boolean isCopyPerms, long effectiveVersion) {
         ContentCreateOptions opt = (ContentCreateOptions)options.clone();
         if (meta != null) {
             if (isCopyQuality && opt.getQuality() == 0) {
@@ -178,8 +173,11 @@ public class DatabaseContentWriter<VALUE> extends
         Content content = null;
         DocumentMetadata meta = null;
         if (value instanceof DatabaseDocumentWithMeta) {
+            try {
             meta = ((DatabaseDocumentWithMeta) value).getMeta();
-            ContentCreateOptions opt = newContentCreateOptions(meta);
+            ContentCreateOptions opt = newContentCreateOptions(meta, options,
+                isCopyColls, isCopyQuality, isCopyMeta, isCopyPerms, 
+                effectiveVersion);
             MarkLogicDocument doc = (MarkLogicDocument)value;
             if (!meta.isNakedProps()) {
                 opt.setFormat(doc.getContentType().getDocumentFormat());
@@ -190,6 +188,11 @@ public class DatabaseContentWriter<VALUE> extends
                     content = ContentFactory.newContent(uri, 
                             doc.getContentAsText().toString(), opt);
                 }
+            }
+            } catch (Exception e) {
+                failed++;
+                LOG.warn("Failed document: " + uri);
+                return;
             }
         } else {
             throw new UnsupportedOperationException(value.getClass()
@@ -209,12 +212,17 @@ public class DatabaseContentWriter<VALUE> extends
                 if (sessions[sid] == null) {
                     sessions[sid] = getSession(sid, false);
                 }
-                setDocumentProperties(uri, meta.getProperties(),
+                boolean suc = setDocumentProperties(uri, meta.getProperties(),
                         isCopyPerms?meta.getPermString():null,
                         isCopyColls?meta.getCollectionString():null,
                         isCopyQuality?meta.getQualityString():null, 
                         isCopyMeta?meta.getMeta():null, sessions[sid]);
                 stmtCounts[sid]++;
+                if (suc) { 
+                    commitUris[sid].add(key);
+                } else {
+                    failed++;
+                }
             }
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
@@ -268,7 +276,6 @@ public class DatabaseContentWriter<VALUE> extends
         if (stmtCounts[sid] == txnSize && needCommit) {
             commit(sid);
             stmtCounts[sid] = 0;
-            commitUris[sid].clear();
             committed = true;
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
@@ -352,8 +359,8 @@ public class DatabaseContentWriter<VALUE> extends
      * @param forestId
      * @throws RequestException
      */
-    protected void setDocumentProperties(String uri, String xmlString,
-        String permString, String collString, String quality, 
+    protected static boolean setDocumentProperties(String uri, 
+        String xmlString, String permString, String collString, String quality,
         Map<String, String> meta, Session s) {
         String query = XQUERY_VERSION_1_0_ML
             + "declare variable $URI as xs:string external;\n"
@@ -400,8 +407,11 @@ public class DatabaseContentWriter<VALUE> extends
         
         try {
             s.submitRequest(req);
+            return true;
         } catch (RequestException ex) {
-            LOG.error("Error setting document properties for " + uri, ex);
+            LOG.error("Error setting document properties for " + uri + ": " +
+                ex.getMessage());
+            return false;
         }
     }
 }

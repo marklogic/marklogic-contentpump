@@ -50,13 +50,11 @@ public class TestEDSeparation {
         Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        ContentPump.runCommand(expandedArgs);
-        
-        ResultSequence result = Utils.runQuery(
-                Utils.getTestDbXccUri(),
-                "fn:count(fn:collection())");
-        assertTrue(result.hasNext());
-        assertEquals("1", result.next().asString());
+        try {
+          ContentPump.runCommand(expandedArgs);
+        } catch (Exception e) {
+          assertEquals(e.getMessage(),"host fake.host.com is not resolvable"); 
+        }
         Utils.closeSession();
     }
 
@@ -94,13 +92,11 @@ public class TestEDSeparation {
         Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
-        ContentPump.runCommand(expandedArgs);
-        
-        ResultSequence result = Utils.runQuery(
-                Utils.getTestDbXccUri(),
-                "fn:count(fn:collection())");
-        assertTrue(result.hasNext());
-        assertEquals("1", result.next().asString());
+        try {
+          ContentPump.runCommand(expandedArgs);
+        } catch (Exception e) {
+          assertEquals(e.getMessage(),"host fake.host.com is not resolvable"); 
+        }
         Utils.closeSession();
         AssignmentManager.getInstance().setInitialized(false);
     }

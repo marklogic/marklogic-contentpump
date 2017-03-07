@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,20 +138,28 @@ public class DelimitedTextReader<VALUEIN> extends
     }
 
     protected String[] getLine() throws IOException{
-    	CSVRecord record = (CSVRecord)parserIterator.next();
+    	return getLine(getRecordLine());
+    }
+
+    protected String[] getLine(CSVRecord record)
+            throws IOException {
         Iterator<String> recordIterator = record.iterator();
         int recordSize = record.size();
         String[] values = new String[recordSize];
         for (int i = 0; i < recordSize; i++) {
-        	if (recordIterator.hasNext()) {
-        		values[i] = (String)recordIterator.next();
-        	} else {
-        		throw new IOException("Record size doesn't match the real size");
-        	}
+            if (recordIterator.hasNext()) {
+                values[i] = (String)recordIterator.next();
+            } else {
+                throw new IOException("Record size doesn't match the real size");
+            }
         }
         return values;
     }
-    
+
+    protected CSVRecord getRecordLine() {
+        return (CSVRecord)parserIterator.next();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {

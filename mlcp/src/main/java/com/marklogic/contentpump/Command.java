@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -381,8 +381,7 @@ public enum Command implements ConfigConstants {
             return job;
         }
 
-        void applyUriId(Configuration conf, InputType inputType,
-                CommandLine cmdline, boolean splitInput) {
+        void applyUriId(Configuration conf, InputType inputType, CommandLine cmdline) {
             String uriId = null;
             if (cmdline.hasOption(DELIMITED_URI_ID)) {
                 LOG.warn(DELIMITED_URI_ID + " has been depracated, use " + URI_ID);
@@ -428,11 +427,6 @@ public enum Command implements ConfigConstants {
             } else {
                 if (InputType.DELIMITED_TEXT == inputType) {
                     if ("true".equalsIgnoreCase(generate)) {
-                        if (splitInput) {
-                            LOG.warn("Using split_input and generate_uri combination "
-                                    + "may result in duplicate documents from "
-                                    + "the same row");
-                        }
                         conf.setBoolean(CONF_INPUT_GENERATE_URI, true);
                     }
                 } else if (InputType.DELIMITED_JSON == inputType) {
@@ -461,31 +455,7 @@ public enum Command implements ConfigConstants {
                 throw new IllegalArgumentException("The setting for " + DOCUMENT_TYPE + "is not applicable to " + inputType);
             }
             
-            boolean splitInput = false;
-            if (cmdline.hasOption(SPLIT_INPUT)) {
-                String arg = cmdline.getOptionValue(SPLIT_INPUT);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
-                    if (isInputCompressed(cmdline)) {
-                        LOG.warn(INPUT_COMPRESSED + " disables " + SPLIT_INPUT);
-                        conf.setBoolean(CONF_SPLIT_INPUT, false);
-                    }
-                    if (inputType != InputType.DELIMITED_TEXT) {
-                        throw new IllegalArgumentException("The setting for " +
-                            SPLIT_INPUT + " option is not supported for " +
-                            inputType);
-                    }
-                    conf.setBoolean(CONF_SPLIT_INPUT, true);
-                    splitInput = true;
-                } else if (arg.equalsIgnoreCase("false")) {
-                    conf.setBoolean(CONF_SPLIT_INPUT, false);
-                } else {
-                    throw new IllegalArgumentException(
-                        "Unrecognized option argument for " + SPLIT_INPUT
-                            + ": " + arg);
-                }
-            }
-
-            applyUriId(conf, inputType, cmdline, splitInput);
+            applyUriId(conf, inputType, cmdline);
             
             if (cmdline.hasOption(DOCUMENT_TYPE)
                     && InputType.DOCUMENTS != inputType
@@ -778,10 +748,6 @@ public enum Command implements ConfigConstants {
                     throw new IllegalArgumentException(
                         "Cannot ingest RDF into temporal collection");
                 }
-            	if (contentType != null && ContentType.BINARY == contentType) {
-                    throw new IllegalArgumentException(
-                        "Cannot ingest BINARY into temporal collection");
-                }
             }
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
@@ -797,9 +763,31 @@ public enum Command implements ConfigConstants {
             }
             
             applyPartitionConfigOptions(conf, cmdline);
-            
+        
             applyModuleConfigOptions(conf, cmdline);
+            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
             
+            if (cmdline.hasOption(SPLIT_INPUT)) {
+                String arg = cmdline.getOptionValue(SPLIT_INPUT);
+                if (arg == null || arg.equalsIgnoreCase("true")) {
+                    if (isInputCompressed(cmdline)) {
+                        LOG.warn(INPUT_COMPRESSED + " disables " + SPLIT_INPUT);
+                        conf.setBoolean(CONF_SPLIT_INPUT, false);
+                    }
+                    if (inputType != InputType.DELIMITED_TEXT) {
+                        throw new IllegalArgumentException("The setting for " +
+                            SPLIT_INPUT + " option is not supported for " + 
+                            inputType);
+                    }
+                    conf.setBoolean(CONF_SPLIT_INPUT, true);
+                } else if (arg.equalsIgnoreCase("false")) {
+                    conf.setBoolean(CONF_SPLIT_INPUT, false);
+                } else {
+                    throw new IllegalArgumentException(
+                        "Unrecognized option argument for " + SPLIT_INPUT
+                            + ": " + arg);
+                }
+            }
             if (cmdline.hasOption(COLLECTION_FILTER)) {
                 if (inputType == InputType.FOREST) {
                     String colFilter = 
@@ -1425,6 +1413,7 @@ public enum Command implements ConfigConstants {
             applyPartitionConfigOptions(conf, cmdline);
             
             applyModuleConfigOptions(conf, cmdline);
+            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
         }
 
         @Override
@@ -1951,7 +1940,6 @@ public enum Command implements ConfigConstants {
     static void applyModuleConfigOptions(Configuration conf,
         CommandLine cmdline) {
         if (cmdline.hasOption(TRANSFORM_MODULE)) {
-            applyBatchTxn(conf, cmdline, 1);
             if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false) == true) {
                 throw new UnsupportedOperationException(
                     "Server-side transformation can't work with streaming");
@@ -1971,8 +1959,6 @@ public enum Command implements ConfigConstants {
                 arg = cmdline.getOptionValue(TRANSFORM_PARAM);
                 conf.set(CONF_TRANSFORM_PARAM, arg);
             }
-        } else {
-            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
         }
     }
     
@@ -2143,8 +2129,7 @@ public enum Command implements ConfigConstants {
     static void applyBatchTxn(Configuration conf, CommandLine cmdline, 
             int maxBatch) {
         String batchSize = cmdline.getOptionValue(BATCH_SIZE);
-        int batch = MarkLogicConstants.DEFAULT_BATCH_SIZE > maxBatch ?
-                maxBatch : MarkLogicConstants.DEFAULT_BATCH_SIZE;
+        int batch;
         if (batchSize != null) {
             batch = Integer.decode(batchSize);
             if (batch > maxBatch) {
@@ -2152,8 +2137,11 @@ public enum Command implements ConfigConstants {
                         " is changed to " + maxBatch);
                 batch = maxBatch;
             }
-            conf.setInt(MarkLogicConstants.BATCH_SIZE, batch);
+        } else {
+            batch = MarkLogicConstants.DEFAULT_BATCH_SIZE > maxBatch ?
+                    maxBatch : MarkLogicConstants.DEFAULT_BATCH_SIZE;
         }
+        conf.setInt(MarkLogicConstants.BATCH_SIZE, batch);
 
         String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
         if (txnSize != null) {

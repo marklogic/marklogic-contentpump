@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,14 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
@@ -45,7 +48,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
     public static final Log LOG = LogFactory
         .getLog(SplitDelimitedTextReader.class);
     private long start;
-    private long pos;
     private long end;
     private String lineSeparator;
 
@@ -65,7 +67,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
     @SuppressWarnings("unchecked")
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
-        if (parser == null || pos >= end || parserIterator == null) {
+        if (parser == null || parserIterator == null) {
             return false;
         }
         try {
@@ -73,8 +75,12 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         		bytesRead = fileLen;
                 return false;
             }
-            String[] values = getLine();
-            pos += getBytesCountFromLine(values);
+            CSVRecord record = getRecordLine();
+            if (record.getCharacterPosition() >= end) {
+                System.out.println("Go beyond boundary!!!");
+                return false;
+            }
+            String[] values = getLine(record);
             if (values.length != fields.length) {
                 setSkipKey(0, 0, 
                         "number of fields does not match number of columns");
@@ -126,15 +132,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         return true;
     }
 
-    /**
-     * Get the length in bytes for the given line
-     */
-    private int getBytesCountFromLine(String[] values)
-        throws UnsupportedEncodingException {
-        String line = convertToLine(values);
-        return line.getBytes(encoding).length;
-    }
-
     @Override
     protected void initParser(InputSplit inSplit) throws IOException,
         InterruptedException {
@@ -161,6 +158,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         }
 
         fileIn.seek(start);
+        readLine(fileIn);
 
         instream = new InputStreamReader(fileIn, encoding);
 
@@ -196,31 +194,27 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         // keep leading and trailing whitespaces to ensure accuracy of pos
         // do not skip empty line just in case the split boundary is \n
         parser = new CSVParser(instream, CSVParserFormatter.
-        		getFormat(delimiter, encapsulator, false,
-        				false));
+                getFormat(delimiter, encapsulator, false,false),
+                start,0L);
         parserIterator = parser.iterator();
 
         // skip first line:
         // 1st split, skip header; other splits, skip partial line
-        try {
-            if (parserIterator.hasNext()) {
-                String[] values = getLine();
-                start += getBytesCountFromLine(values);
-                pos = start;
-            }
-        } catch (RuntimeException e) {
-            if (e.getMessage().
-                    contains("invalid char between encapsulated "
-                            + "token and delimiter")) {
-                if (parserIterator.hasNext()) {
-                    String[] values = getLine();
-                    start += getBytesCountFromLine(values);
-                    pos = start;
-                }
-            } else {
-                throw new IOException(e);
-            }
-        }
+//        try {
+//            if (parserIterator.hasNext()) {
+//                String[] values = getLine();
+//            }
+//        } catch (RuntimeException e) {
+//            if (e.getMessage().
+//                    contains("invalid char between encapsulated "
+//                            + "token and delimiter")) {
+//                if (parserIterator.hasNext()) {
+//                    String[] values = getLine();
+//                }
+//            } else {
+//                throw new IOException(e);
+//            }
+//        }
     }
 
     private String retrieveLineSeparator(FSDataInputStream fis)
@@ -241,6 +235,26 @@ public class SplitDelimitedTextReader<VALUEIN> extends
             }
         }
         return null;
+    }
+    
+    private void readLine(FSDataInputStream fis) throws IOException {
+        char current;
+        while (fis.available() > 0) {
+            current = (char) fis.read();
+            if (current == '\n') {
+                return;
+            } else if (current == '\r' && lineSeparator == "\r\n") {
+                if (fis.available() > 0) {
+                    current = (char) fis.read();
+                    if (current != '\n') {
+                        LOG.warn("Unexpected line separator " + current);
+                        return;
+                    }
+                }
+            } else if (current == '\r') {
+                return;
+            }
+        }
     }
 
     protected String convertToLine(String[] values) {
