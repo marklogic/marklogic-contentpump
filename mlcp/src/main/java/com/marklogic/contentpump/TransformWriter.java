@@ -113,8 +113,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         for (int i = 0; i < sessions.length; i++) {
             pendingURIs[i] = new HashSet<DocumentURI>(batchSize);
         }
+        // counts is only initialized by ContentWriter when batchSize > 1
         if (counts == null) {
-            counts = new int[1];
+            counts = new int[sessions.length];
         }
         uris = new XdmValue[counts.length][batchSize];
         values = new XdmValue[counts.length][batchSize];
