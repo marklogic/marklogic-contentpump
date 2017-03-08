@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.Before;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestDistributedImportDocs {
@@ -49,6 +50,7 @@ public class TestDistributedImportDocs {
         
         assertEquals("93", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test

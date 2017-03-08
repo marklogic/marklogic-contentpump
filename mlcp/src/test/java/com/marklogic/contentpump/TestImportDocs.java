@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
@@ -120,6 +121,7 @@ public class TestImportDocs {
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test
@@ -183,6 +185,7 @@ public class TestImportDocs {
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test
@@ -385,6 +388,7 @@ public class TestImportDocs {
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test
@@ -987,6 +991,7 @@ public class TestImportDocs {
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test

@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestImportAggregate {
@@ -412,6 +413,7 @@ public class TestImportAggregate {
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test

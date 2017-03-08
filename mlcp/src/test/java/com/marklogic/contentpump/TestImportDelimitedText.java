@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.ResultSequence;
 
 public class TestImportDelimitedText{
@@ -47,6 +48,7 @@ public class TestImportDelimitedText{
             sb.append(s);
         }
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
 //        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
 //            + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
 //        assertTrue(sb.toString().equals(key));
