@@ -70,7 +70,7 @@ import com.marklogic.xcc.types.XdmValue;
  */
 public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public static final Log LOG = LogFactory.getLog(TransformWriter.class);
-    static final long BATCH_MIN_VERSION = 9000030;
+    static final long BATCH_MIN_VERSION = 8000700;
     static final String MAP_ELEM_START_TAG = 
         "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
         + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
@@ -476,6 +476,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             // get the only document from the set
             LOG.warn("Failed document " + pendingURIs[id].iterator().next());
             failed++;
+            pendingURIs[id].clear();
+            
         } catch (RequestException e) {
             if (sessions[id] != null) {
                 sessions[id].close();
