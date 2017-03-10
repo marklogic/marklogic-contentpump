@@ -50,6 +50,7 @@ import com.marklogic.xcc.DocumentFormat;
 import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
+import com.marklogic.xcc.impl.SessionImpl;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.ContentInsertException;
 import com.marklogic.xcc.exceptions.RequestException;
@@ -177,6 +178,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     
     protected long effectiveVersion;
     
+    protected boolean isTxnCompatible = false;
+    
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> hostSourceMap, boolean fastLoad) {
         this(conf, hostSourceMap, fastLoad, null);
@@ -187,7 +190,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         AssignmentManager am) {
         super(conf, null);
         
-        this.effectiveVersion = am.getEffectiveVersion();
+        effectiveVersion = am.getEffectiveVersion();
+        isTxnCompatible = effectiveVersion == 0;
         
         this.fastLoad = fastLoad;
         
@@ -465,7 +469,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         while (t++ < maxRetries) {
             try {
                 if (t > 1) { 
-                    LOG.info("Retrying insertBatch " + t);
+                    LOG.info("Retrying document insert " + t);
                 }
                 List<RequestException> errors = 
                     sessions[id].insertContentCollectErrors(batch);
@@ -498,7 +502,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                                 DocumentURI failedUri = 
                                         pendingUris[id].remove(content);
                                 failed++;
-                                LOG.warn("Failed document " + failedUri);
+                                if (failedUri != null) {
+                                    LOG.warn("Failed document " + failedUri);
+                                }
                             }
                         }
                     }
@@ -629,7 +635,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         while (t++ < maxRetries) {
             try {
                 if (t > 1) {
-                    LOG.info("Retrying insertContent " + t);
+                    LOG.info("Retrying document insert " + t);
                 }
                 sessions[id].insertContent(content);
                 if (!needCommit) {
@@ -857,6 +863,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }      
         session.setTransactionMode(mode);
         session.setDefaultRequestOptions(requestOptions);
+        ((SessionImpl)session).setCompatibleMode(isTxnCompatible);
         return session;
     }
     
@@ -896,33 +903,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         for (int i = 0; i < sessions.length; i++) {
             if (sessions[i] != null) {
                 if (stmtCounts[i] > 0 && needCommit) {
-                    try {
-                        sessions[i].commit();
-                        succeeded += commitUris[i].size();
-                    } catch (RequestServerException e) {
-                        // log error and continue on RequestServerException
-                        LOG.error("Error commiting transaction", e);
-                        failed += commitUris[i].size();   
-                        for (DocumentURI failedUri : commitUris[i]) {
-                            LOG.warn("Failed document " + failedUri);
-                        }
-                        commitUris[i].clear();
-                    } catch (RequestException e) {
-                        if (sessions[i] != null) {
-                            sessions[i].close();
-                        }
-                        if (countBased) {
-                            rollbackCount(i);
-                        }
-                        failed += commitUris[i].size();
-                        commitUris[i].clear();
-                        throw new IOException(e);
-                    } finally {
-                        sessions[i].close();
-                    }
-                } else {
-                    sessions[i].close();
+                    commit(i);
                 }
+                sessions[i].close();
             }
         }
         if (is != null) {
