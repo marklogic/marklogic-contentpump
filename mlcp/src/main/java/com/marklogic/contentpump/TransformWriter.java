@@ -57,6 +57,7 @@ import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.ValueFactory;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
+import com.marklogic.xcc.exceptions.RetryableQueryException;
 import com.marklogic.xcc.exceptions.XQueryException;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XName;
@@ -184,7 +185,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             queries[sid].setNewVariables(uriName, uris[sid]);
             queries[sid].setNewVariables(contentName, values[sid]);
             queries[sid].setNewVariables(optionsName, optionsVals[sid]);
-            insertBatch(sid);
+            insertBatch(sid, uris[sid], values[sid], optionsVals[sid]);
             stmtCounts[sid]++;
             if (countBased) {
                 sfId = -1;
@@ -452,9 +453,18 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         return q;
     }
     
-    protected void insertBatch(int id) throws IOException
+    protected void insertBatch(int id, XdmValue[] uriList, XdmValue[] valueList,
+        XdmValue[] optionsValList) throws IOException
     {
+        int t = 0;
+        final int maxRetries = 15;
+        int sleepTime = 100;
+        final int maxSleepTime = 60000;
+        while (t++ < maxRetries) {
         try {
+            if (t > 1) {
+                LOG.info("Retrying insert document " + t);
+            }
             ResultSequence rs = sessions[id].submitRequest(queries[id]);
             while (rs.hasNext()) { // batch mode
                 String uri = rs.next().asString();
@@ -466,26 +476,79 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     LOG.warn(err);
                 } else break;   
             }
+            break;
         } catch (RequestServerException e) {
             // compatible mode: log error and continue
             if (e instanceof XQueryException) {
-                LOG.error(((XQueryException) e).getFormatString());
+                LOG.error("XQueryException:" + ((XQueryException) e).getFormatString());
             } else {
-                LOG.error(e.getMessage());
+                LOG.error("RequestServerException:" + e.getMessage());
             }
+            for ( DocumentURI failedUri: commitUris[id] ) {
+               LOG.warn("Failed document commit1 " + failedUri);
+               failed++;
+            }
+            commitUris[id].clear();
+            if (t < maxRetries) {
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (Exception e2) {
+                }
+                sleepTime = sleepTime * 2;
+                if (sleepTime > maxSleepTime)
+                    sleepTime = maxSleepTime;
+
+                sessions[id] = getSession(id, true);
+                queries[id] = getAdhocQuery(id);
+                queries[id].setNewVariables(uriName, uriList);
+                queries[id].setNewVariables(contentName, valueList);
+                queries[id].setNewVariables(optionsName, optionsValList);
+                continue;
+            } 
             // get the only document from the set
-            LOG.warn("Failed document " + pendingURIs[id].iterator().next());
-            failed++;
+            for ( DocumentURI failedUri: pendingURIs[id] ) {
+               LOG.warn("Failed document pending1 " + failedUri);
+               failed++;
+            }
+            pendingURIs[id].clear();
+            counts[id] = 0;
         } catch (RequestException e) {
+            LOG.error("RequestException:" + e.getMessage());
             if (sessions[id] != null) {
                 sessions[id].close();
+            }
+            for ( DocumentURI failedUri: commitUris[id] ) {
+               LOG.warn("Failed document commit2 " + failedUri);
+               failed++;
+            }
+            commitUris[id].clear();
+            if (t < maxRetries) {
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (Exception e2) {
+                }
+                sleepTime = sleepTime * 2;
+                if (sleepTime > maxSleepTime)
+                    sleepTime = maxSleepTime;
+
+                sessions[id] = getSession(id, true);
+                queries[id] = getAdhocQuery(id);
+                queries[id].setNewVariables(uriName, uriList);
+                queries[id].setNewVariables(contentName, valueList);
+                queries[id].setNewVariables(optionsName, optionsValList);
+                continue;
             }
             if (countBased) {
                 rollbackCount(id);
             }
-            throw new IOException(e);
-        } finally {
+            for ( DocumentURI failedUri: pendingURIs[id] ) {
+               LOG.warn("Failed document pending2 " + failedUri);
+               failed++;
+            }
+            pendingURIs[id].clear();
             counts[id] = 0;
+            throw new IOException(e);
+        } 
         }
     }
     
@@ -509,7 +572,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 XdmValue[] optionsLeft = new XdmValue[counts[i]];
                 System.arraycopy(optionsVals[i], 0, optionsLeft, 0, counts[i]);
                 queries[i].setNewVariables(optionsName, optionsLeft);
-                insertBatch(i); 
+                insertBatch(i, urisLeft, valuesLeft, optionsLeft); 
                 if (!needCommit) {
                     succeeded += pendingURIs[i].size(); 
                 } else {
