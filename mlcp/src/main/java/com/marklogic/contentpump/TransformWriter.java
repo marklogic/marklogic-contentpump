@@ -476,6 +476,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     LOG.warn(err);
                 } else break;   
             }
+            counts[id] = 0;
             break;
         } catch (RequestServerException e) {
             // compatible mode: log error and continue
