@@ -485,34 +485,13 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             } else {
                 LOG.error("RequestServerException:" + e.getMessage());
             }
-            for ( DocumentURI failedUri: commitUris[id] ) {
-               LOG.warn("Failed document commit1 " + failedUri);
-               failed++;
-            }
-            commitUris[id].clear();
-            if (t < maxRetries) {
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (Exception e2) {
-                }
-                sleepTime = sleepTime * 2;
-                if (sleepTime > maxSleepTime)
-                    sleepTime = maxSleepTime;
-
-                sessions[id] = getSession(id, true);
-                queries[id] = getAdhocQuery(id);
-                queries[id].setNewVariables(uriName, uriList);
-                queries[id].setNewVariables(contentName, valueList);
-                queries[id].setNewVariables(optionsName, optionsValList);
-                continue;
-            } 
-            // get the only document from the set
             for ( DocumentURI failedUri: pendingURIs[id] ) {
                LOG.warn("Failed document pending1 " + failedUri);
                failed++;
             }
             pendingURIs[id].clear();
             counts[id] = 0;
+            break;
         } catch (RequestException e) {
             LOG.error("RequestException:" + e.getMessage());
             if (sessions[id] != null) {
