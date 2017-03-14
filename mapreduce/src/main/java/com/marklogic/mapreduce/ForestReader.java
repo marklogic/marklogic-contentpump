@@ -223,6 +223,9 @@ implements MarkLogicConstants {
      * otherwise.
      */
     protected void setSkipKey(String sub, int line, int col, String reason) {
+        if (srcId == null) {
+            srcId = split.getPath().toString();
+        }
         if (key == null) {
             key = new DocumentURIWithSourceInfo("", srcId, sub, line, col);
         } else {
