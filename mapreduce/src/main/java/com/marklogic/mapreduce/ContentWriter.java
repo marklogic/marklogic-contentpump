@@ -189,6 +189,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         Map<String, ContentSource> hostSourceMap, boolean fastLoad,
         AssignmentManager am) {
         super(conf, null);
+
         
         effectiveVersion = am.getEffectiveVersion();
         isTxnCompatible = effectiveVersion == 0;
@@ -709,10 +710,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             succeeded += commitUris[id].size();
             commitUris[id].clear();
         } catch (RequestServerException e) {
-            LOG.error("Error commiting transaction", e);
+            LOG.error("Error commiting transaction ", e);
             failed += commitUris[id].size();   
             for (DocumentURI failedUri : commitUris[id]) {
                 LOG.warn("Failed document: " + failedUri);
+            }
+            commitUris[id].clear();
+            if (sessions[id] != null) {
+                sessions[id].close();
+                sessions[id] = null;
             }
         } catch (RequestException e) {
             if (sessions[id] != null) {
@@ -772,7 +778,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 if (sessions[sid] == null) {
                     sessions[sid] = getSession(sid, false);
                 }  
-                insertBatch(forestContents[fId], sid); 
+                insertBatch(forestContents[fId], sid);
                 stmtCounts[sid]++;
                 
                 //reset forest index for statistical
@@ -895,7 +901,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     if (sessions[sid] == null) {
                         sessions[sid] = getSession(sid, false);
                     }
-                    insertBatch(remainder, sid);   
+                    try {
+                        insertBatch(remainder, sid);
+                    } catch (Exception e) {
+                    }
                     stmtCounts[sid]++;
                 }
             }
@@ -903,7 +912,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         for (int i = 0; i < sessions.length; i++) {
             if (sessions[i] != null) {
                 if (stmtCounts[i] > 0 && needCommit) {
-                    commit(i);
+                    try {
+                        commit(i);
+                    } catch (Exception e) {
+                    }
                 }
                 sessions[i].close();
             }

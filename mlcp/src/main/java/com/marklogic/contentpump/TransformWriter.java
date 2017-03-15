@@ -552,7 +552,10 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 XdmValue[] optionsLeft = new XdmValue[counts[i]];
                 System.arraycopy(optionsVals[i], 0, optionsLeft, 0, counts[i]);
                 queries[i].setNewVariables(optionsName, optionsLeft);
-                insertBatch(i, urisLeft, valuesLeft, optionsLeft); 
+                try {
+                    insertBatch(i, urisLeft, valuesLeft, optionsLeft);
+                } catch (Exception e) {
+                }
                 if (!needCommit) {
                     succeeded += pendingURIs[i].size(); 
                 } else {
@@ -561,7 +564,10 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 }
             }
             if (stmtCounts[i] > 0 && needCommit) {  
-                commit(i);
+                try {
+                    commit(i);
+                } catch (Exception e) {
+                }
                 succeeded += commitUris[i].size();
             }
         }
