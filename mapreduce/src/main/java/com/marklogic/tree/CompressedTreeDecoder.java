@@ -562,7 +562,8 @@ public class CompressedTreeDecoder {
             }
             case NodeKind.LINK: {
                 long key = decoder.decode64bits();
-                int linkNodeRep = (int)(key % rep.numLinkNodeReps);
+                int linkNodeRep = (int)Long.remainderUnsigned(key,
+                        rep.numLinkNodeReps);
                 while (true) {
                     if (rep.linkNodeKey[linkNodeRep] == 0) {
                         rep.nodeRepID[i] = linkNodeRep;

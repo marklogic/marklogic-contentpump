@@ -212,11 +212,15 @@ implements MarkLogicConstants {
      * @param uri Source string of document URI.
      * @param line Line number in the source if applicable; -1 otherwise.
      * @param col Column number in the source if applicable; -1 otherwise.
+     * @param reason Reason for skipping.
      * 
      * @return true if key indicates the record is to be skipped; false 
      * otherwise.
      */
     protected void setSkipKey(String sub, int line, int col, String reason) {
+        if (srcId == null) {
+            srcId = split.getPath().toString();
+        }
         if (key == null) {
             key = new DocumentURIWithSourceInfo("", srcId, sub, line, col);
         } else {
