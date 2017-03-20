@@ -167,7 +167,6 @@ public class ExpandedTree implements Writable {
 			value = atomString[i] = new String(atomData, aidx,
 					atomIndex[i + 1] - aidx - 1, UTF8);
 		}
-		if (value.isEmpty()) return null;
 		return value;
 	}
 	
