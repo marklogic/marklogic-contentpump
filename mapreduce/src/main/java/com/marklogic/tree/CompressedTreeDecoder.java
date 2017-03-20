@@ -16,8 +16,8 @@
 package com.marklogic.tree;
 
 import java.io.ByteArrayInputStream;
-import java.io.DataInput;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.zip.Inflater;
 
@@ -562,7 +562,7 @@ public class CompressedTreeDecoder {
             }
             case NodeKind.LINK: {
                 long key = decoder.decode64bits();
-                int linkNodeRep = (int)Long.remainderUnsigned(key,
+                int linkNodeRep = (int)remainderUnsigned(key,
                         rep.numLinkNodeReps);
                 while (true) {
                     if (rep.linkNodeKey[linkNodeRep] == 0) {
@@ -700,6 +700,29 @@ public class CompressedTreeDecoder {
             assignOrdinals(rep);
         }
         return rep;
+    }
+
+    static long remainderUnsigned(long dividend, int divisor) {
+        if (dividend > 0 && divisor > 0) { // signed comparisons
+            return dividend % divisor;
+        }
+        if (Long.compare(dividend + Long.MIN_VALUE, divisor + Long.MIN_VALUE)
+                < 0) {
+            return dividend;
+        }
+        return toUnsignedBigInteger(dividend).
+            remainder(toUnsignedBigInteger(divisor)).longValue();
+    }
+
+    static BigInteger toUnsignedBigInteger(long i) {
+        if (i >= 0L) {
+            return BigInteger.valueOf(i);
+        }
+        int upper = (int) (i >>> 32);
+        int lower = (int) i;
+        // return (upper << 32) + lower
+        return (BigInteger.valueOf(((long)upper) & 0xffffffffL)).shiftLeft(32).
+                add(BigInteger.valueOf(((long)lower) & 0xffffffffL));
     }
 
     private void decodeBinary(Decoder decoder, ExpandedTree rep, int nbytes) 
