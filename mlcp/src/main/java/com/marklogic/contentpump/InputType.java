@@ -411,7 +411,7 @@ public enum InputType implements ConfigConstants {
     public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
     getMapperClass(CommandLine cmdline, Configuration conf) {
         return (Class<? extends BaseMapper<K1, V1, K2, V2>>) (Class)
-        ImportDocumentMapper.class;
+        DocumentMapper.class;
     }
     
     public abstract Class<? extends OutputFormat> getOutputFormatClass(
