@@ -113,7 +113,7 @@ public abstract class ForestDocument implements MarkLogicDocument {
         int i = 0;
         for (String col : cols) {
             if (col.isEmpty()) { // Java URI does allow empty string.
-                LOG.warn("Empty collection URI is removed for document "
+                LOG.info("Empty collection URI is removed for document "
                         + docURI);
                 continue;
             }
