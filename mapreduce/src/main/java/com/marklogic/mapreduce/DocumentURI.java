@@ -120,6 +120,19 @@ implements WritableComparable<DocumentURI>, Cloneable {
         }
     }
     
+    @Override
+    public boolean equals(Object uri) {
+        if (uri instanceof DocumentURI) {
+            return this.uri.equals(((DocumentURI)uri).getUri());
+        } 
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        return uri.hashCode();
+    }
+    
     public static void main(String[] args) throws URISyntaxException {
         HashMap<String, DocumentURI> map = new HashMap<String, DocumentURI>();
         for (String arg : args) {

@@ -44,6 +44,7 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.XSBoolean;
+import com.marklogic.xcc.types.XSInteger;
 
 /**
  * MarkLogicOutputFormat for Content.
@@ -90,13 +91,16 @@ public class ContentOutputFormat<VALUEOUT> extends
         "declare variable $partition-name as xs:string external;\n" + 
         "hadoop:get-forest-host($policy,$partition-name)";
     public static final String INIT_QUERY =
-        "import module namespace hadoop = "
-        + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
-        + "xdmp:host-name(xdmp:host()), \n"
-        + "let $f := "
-        + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
-        + "return if (exists($f)) then $f() else ()";
-    
+            "import module namespace hadoop = "
+          + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
+          + "xdmp:host-name(xdmp:host()), \n"
+          + "let $versionf := "
+          + "  fn:function-lookup(xs:QName('xdmp:effective-version'),0)\n"
+          + "return if (exists($versionf)) then $versionf() else 0, \n"
+          + "let $f := "
+          + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
+          + "return if (exists($f)) then $f() else ()";
+
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;
     /** whether stats-based policy allows fastload **/
@@ -104,6 +108,7 @@ public class ContentOutputFormat<VALUEOUT> extends
     protected AssignmentPolicy.Kind policy;
     protected boolean legacy = false;
     protected String initHostName;
+    
     @Override
     public void checkOutputSpecs(Configuration conf, ContentSource cs) 
     throws IOException { 
@@ -335,6 +340,8 @@ public class ContentOutputFormat<VALUEOUT> extends
 
         ResultItem item = result.next();
         initHostName = item.asString();
+        item = result.next();
+        am.setEffectiveVersion(((XSInteger)item.getItem()).asLong());
         if (result.hasNext()) {
             item = result.next();
             String policyStr = item.asString();

@@ -122,19 +122,31 @@ public enum ContentType {
     }
 
     public static ContentType valueOf(int ordinal) {
-        if (ordinal == 0) {
-            return XML;
-        } else if (ordinal == 1) {
-            return JSON;
-        } else if (ordinal == 2) {
-            return TEXT;
-        } else if (ordinal == 3) {
-            return BINARY;
-        } else if (ordinal == 4) {
-            return UNKNOWN;
-        } else if (ordinal == 5) {
-            return MIXED;
+        switch (ordinal) {
+            case 0: return XML;
+            case 1: return JSON;
+            case 2: return TEXT;
+            case 3: return BINARY;
+            case 4: return UNKNOWN;
+            case 5: return MIXED;
         }
         return null;
+    }
+    
+    public static ContentType fromFormat(DocumentFormat format) {
+        if (format == DocumentFormat.BINARY) {
+            return BINARY;
+        } else if (format == DocumentFormat.JSON) {
+            return JSON;
+        } else if (format == DocumentFormat.NONE) {
+            return UNKNOWN;
+        } else if (format == DocumentFormat.TEXT) {
+            return TEXT;
+        } else if (format == DocumentFormat.XML) {
+            return XML;
+        } else {
+            throw new IllegalArgumentException("Unknown document format: " + 
+                    format);
+        }
     }
 }

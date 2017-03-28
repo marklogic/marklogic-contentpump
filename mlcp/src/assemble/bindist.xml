@@ -103,6 +103,9 @@
         <include>org.apache.hadoop:hadoop-yarn-common:jar:*</include>
         <include>org.codehaus.jackson:jackson-core-asl:jar:*</include>
         <include>org.codehaus.jackson:jackson-mapper-asl:jar:*</include>
+        <include>com.fasterxml.jackson.core:jackson-core:jar:*</include>
+        <include>com.fasterxml.jackson.core:jackson-databind:jar:*</include>
+        <include>com.fasterxml.jackson.core:jackson-annotations:jar:*</include>
         <include>log4j:log4j:jar:*</include>
         <include>com.google.protobuf:protobuf-java:jar:*</include>
         <include>org.slf4j:slf4j-api:jar:*</include>
