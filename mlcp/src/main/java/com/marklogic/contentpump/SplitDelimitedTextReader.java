@@ -188,29 +188,32 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         }
 
         // keep leading and trailing whitespaces to ensure accuracy of pos
-        // do not skip empty line just in case the split boundary is \n
+        // do not skip empty line just in case the split boundary is \n.
+        // Set encapsulator to null so that it will ignore quotes
+        // while parsing the first line in the split
         parser = new CSVParser(instream, CSVParserFormatter.
-                getFormat(delimiter, encapsulator, false,false),
+                getFormat(delimiter, null, false,false),
                 start,0L);
         parserIterator = parser.iterator();
 
-        // skip first line:
-        // 1st split, skip header; other splits, skip partial line
-        try {
+        if (parserIterator.hasNext()) {
+            // skip first line:
+            // 1st split, skip header; other splits, skip partial line
+            getLine();
+            // Read next record and get the beginning position,
+            // which will be used to initialize the parser
             if (parserIterator.hasNext()) {
-                String[] values = getLine();
+                CSVRecord record = getRecordLine();
+                long pos = record.getCharacterPosition();                
+                fileIn.seek(pos);
+                instream = new InputStreamReader(fileIn, encoding);
+                parser = new CSVParser(instream, CSVParserFormatter.
+                        getFormat(delimiter, encapsulator, false,false),
+                        pos,0L);
+                parserIterator = parser.iterator();
             }
-        } catch (RuntimeException e) {
-            if (e.getMessage().
-                    contains("invalid char between encapsulated "
-                            + "token and delimiter")) {
-                if (parserIterator.hasNext()) {
-                    String[] values = getLine();
-                }
-            } else {
-                throw new IOException(e);
-            }
-        }
+            
+        }        
     }
 
     private String retrieveLineSeparator(FSDataInputStream fis)

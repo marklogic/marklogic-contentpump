@@ -33,7 +33,7 @@ public class CSVParserFormatter {
 	 * @return
 	 */
 	public static CSVFormat getFormat(char delimiter,
-			char encapsulator,
+			Character encapsulator,
 			boolean ignoreSurroundingSpaces, 
 			boolean ignoreEmptyLines) {
 		CSVFormat format = CSVFormat.newFormat(delimiter);
