@@ -753,7 +753,7 @@ public enum Command implements ConfigConstants {
                     throw new IllegalArgumentException(
                         "Cannot ingest RDF into temporal collection");
                 }
-            	if (contentType != null && ContentType.BINARY == contentType) {
+                if (contentType != null && ContentType.BINARY == contentType) {
                     throw new IllegalArgumentException(
                         "Cannot ingest BINARY into temporal collection");
                 }
@@ -772,8 +772,9 @@ public enum Command implements ConfigConstants {
             }
             
             applyPartitionConfigOptions(conf, cmdline);
-            
+        
             applyModuleConfigOptions(conf, cmdline);
+            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
             
             if (cmdline.hasOption(COLLECTION_FILTER)) {
                 if (inputType == InputType.FOREST) {
@@ -1272,6 +1273,7 @@ public enum Command implements ConfigConstants {
             applyPartitionConfigOptions(conf, cmdline);
             
             applyModuleConfigOptions(conf, cmdline);
+            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
         }
 
 	@Override
@@ -1765,7 +1767,6 @@ public enum Command implements ConfigConstants {
     static void applyModuleConfigOptions(Configuration conf,
         CommandLine cmdline) {
         if (cmdline.hasOption(TRANSFORM_MODULE)) {
-            applyBatchTxn(conf, cmdline, 1);
             if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false) == true) {
                 throw new UnsupportedOperationException(
                     "Server-side transformation can't work with streaming");
@@ -1785,8 +1786,6 @@ public enum Command implements ConfigConstants {
                 arg = cmdline.getOptionValue(TRANSFORM_PARAM);
                 conf.set(CONF_TRANSFORM_PARAM, arg);
             }
-        } else {
-            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
         }
     }
     
@@ -1942,8 +1941,7 @@ public enum Command implements ConfigConstants {
     static void applyBatchTxn(Configuration conf, CommandLine cmdline, 
             int maxBatch) {
         String batchSize = cmdline.getOptionValue(BATCH_SIZE);
-        int batch = MarkLogicConstants.DEFAULT_BATCH_SIZE > maxBatch ?
-                maxBatch : MarkLogicConstants.DEFAULT_BATCH_SIZE;
+        int batch;
         if (batchSize != null) {
             batch = Integer.decode(batchSize);
             if (batch > maxBatch) {
@@ -1951,8 +1949,11 @@ public enum Command implements ConfigConstants {
                         " is changed to " + maxBatch);
                 batch = maxBatch;
             }
-            conf.setInt(MarkLogicConstants.BATCH_SIZE, batch);
+        } else {
+            batch = MarkLogicConstants.DEFAULT_BATCH_SIZE > maxBatch ?
+                    maxBatch : MarkLogicConstants.DEFAULT_BATCH_SIZE;
         }
+        conf.setInt(MarkLogicConstants.BATCH_SIZE, batch);
 
         String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
         if (txnSize != null) {

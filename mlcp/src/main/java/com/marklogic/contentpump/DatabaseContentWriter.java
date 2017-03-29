@@ -93,8 +93,9 @@ public class DatabaseContentWriter<VALUE> extends
      * fetch the options information from conf and metadata, set to the field
      * "options"
      */
-    protected ContentCreateOptions newContentCreateOptions(
-            DocumentMetadata meta) {
+    protected static ContentCreateOptions newContentCreateOptions(
+            DocumentMetadata meta, ContentCreateOptions options, 
+            boolean isCopyColls, boolean isCopyQuality, boolean isCopyPerms) {
         ContentCreateOptions opt = (ContentCreateOptions)options.clone();
         if (meta != null) {
             if (isCopyQuality && opt.getQuality() == 0) {
@@ -159,7 +160,8 @@ public class DatabaseContentWriter<VALUE> extends
         DocumentMetadata meta = null;
         if (value instanceof DatabaseDocumentWithMeta) {
             meta = ((DatabaseDocumentWithMeta) value).getMeta();
-            ContentCreateOptions opt = newContentCreateOptions(meta);
+            ContentCreateOptions opt = newContentCreateOptions(meta, options,
+                isCopyColls, isCopyQuality, isCopyPerms);
             MarkLogicDocument doc = (MarkLogicDocument)value;
             if (!meta.isNakedProps()) {
                 opt.setFormat(doc.getContentType().getDocumentFormat());
@@ -185,18 +187,20 @@ public class DatabaseContentWriter<VALUE> extends
                 // add new content
                 forestContents[fId][counts[fId]] = content;
                 metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
-            } else {
-                // naked properties
-                if (isCopyProps) {
-                    if (sessions[sid] == null) {
-                        sessions[sid] = getSession(csKey);
-                    }
-                    setDocumentProperties(uri, meta.getProperties(),
-                            isCopyPerms?meta.getPermString():null,
-                            isCopyColls?meta.getCollectionString():null,
-                            isCopyQuality?meta.getQualityString():null, 
-                            sessions[sid]);
-                    stmtCounts[sid]++;
+            } else if (isCopyProps) { // naked properties
+                if (sessions[sid] == null) {
+                    sessions[sid] = getSession(csKey);
+                }
+                boolean suc = setDocumentProperties(uri, meta.getProperties(),
+                        isCopyPerms?meta.getPermString():null,
+                        isCopyColls?meta.getCollectionString():null,
+                        isCopyQuality?meta.getQualityString():null, 
+                        sessions[sid]);
+                stmtCounts[sid]++;
+                if (suc) { 
+                    commitUris[sid].add(key);
+                } else {
+                    failed++;
                 }
             }
             if (counts[fId] == batchSize) {
@@ -211,9 +215,15 @@ public class DatabaseContentWriter<VALUE> extends
                         DocumentMetadata m = metadatas[fId][i].getMeta();
                         String u = metadatas[fId][i].getUri();
                         if (m != null && m.getProperties() != null) {
-                            setDocumentProperties(u, m.getProperties(),
-                                    null,null,null,sessions[sid]);
+                            boolean suc = setDocumentProperties(u, 
+                                    m.getProperties(),null,null,null,
+                                    sessions[sid]);
                             stmtCounts[sid]++;
+                            if (suc) { 
+                                commitUris[sid].add(key);
+                            } else {
+                                failed++;
+                            }
                         }
                     }
                 }
@@ -238,12 +248,17 @@ public class DatabaseContentWriter<VALUE> extends
             }     
             if (isCopyProps && meta.getProperties() != null) {
                 boolean naked = content == null;
-                setDocumentProperties(uri, meta.getProperties(),
+                boolean suc = setDocumentProperties(uri, meta.getProperties(),
                         isCopyPerms&&naked?meta.getPermString():null,
                         isCopyColls&&naked?meta.getCollectionString():null,
                         isCopyQuality&&naked?meta.getQualityString():null, 
                         sessions[sid]);
                 stmtCounts[sid]++;
+                if (suc) { 
+                    commitUris[sid].add(key);
+                } else {
+                    failed++;
+                }
             }
             inserted = true;
         }
@@ -251,7 +266,6 @@ public class DatabaseContentWriter<VALUE> extends
         if (stmtCounts[sid] == txnSize && needCommit) {
             commit(sid);
             stmtCounts[sid] = 0;
-            commitUris[sid].clear();
             committed = true;
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
@@ -310,8 +324,8 @@ public class DatabaseContentWriter<VALUE> extends
                         DocumentMetadata m = metadatas[i][j].getMeta();
                         String u = metadatas[i][j].getUri();
                         if (m != null && m.getProperties() != null) {
-                            setDocumentProperties(u, m.getProperties(),
-                                    null, null, null, sessions[sid]);
+                            setDocumentProperties(u, m.getProperties(), 
+                                null, null, null, sessions[sid]);
                             stmtCounts[sid]++;
                         }
                     }
@@ -355,7 +369,7 @@ public class DatabaseContentWriter<VALUE> extends
      * @param forestId
      * @throws RequestException
      */
-    protected void setDocumentProperties(String uri, String xmlString,
+    protected static boolean setDocumentProperties(String uri, String xmlString,
         String permString, String collString, String quality,
         Session s) {
         String query = XQUERY_VERSION_1_0_ML
@@ -387,8 +401,11 @@ public class DatabaseContentWriter<VALUE> extends
                 quality==null?"":quality);
         try {
             s.submitRequest(req);
+            return true;
         } catch (RequestException ex) {
-            LOG.error("Error setting document properties for " + uri, ex);
+            LOG.error("Error setting document properties for " + uri + ": " +
+                ex.getMessage());
+            return false;
         }
     }
 }

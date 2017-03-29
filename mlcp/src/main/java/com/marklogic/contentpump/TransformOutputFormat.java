@@ -84,8 +84,10 @@ public class TransformOutputFormat<VALUEOUT> extends
             options.setDefaultXQueryVersion("1.0-ml");
             query.setOptions(options);
             result = session.submitRequest(query);
-            if (!result.hasNext())
-                throw new IOException("Server-side transform requires MarkLogic 7 or later");
+            if (!result.hasNext()) {
+                throw new IOException(
+                    "Server-side transform requires MarkLogic 7 or later");
+            }
             mimetypeMap = new LinkedMapWritable();
             while (result.hasNext()) {
                 String suffs = result.next().asString();

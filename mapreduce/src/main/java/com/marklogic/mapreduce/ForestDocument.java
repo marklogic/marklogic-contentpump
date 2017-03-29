@@ -20,7 +20,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -100,7 +99,6 @@ public abstract class ForestDocument implements MarkLogicDocument {
     private void setCollections(String docURI, String[] cols) {
         // filter out collections that are illegal
         List<String> colList = new ArrayList<String>(cols.length);
-        int i = 0;
         for (String col : cols) {
             if (col.isEmpty()) { // Java URI does allow empty string.
                 LOG.info("Empty collection URI is removed for document "

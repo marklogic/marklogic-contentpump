@@ -19,7 +19,7 @@
     <test.excludes>**/*TestDistributed*</test.excludes>
     <hadoopConnectorVersion>2.1.6</hadoopConnectorVersion>
     <hadoopConnectorBaseDir>${basedir}/../mapreduce</hadoopConnectorBaseDir>
-    <xccVersion>8.0.6.2</xccVersion>
+    <xccVersion>8.0.6</xccVersion>
     <versionString>8.0.6</versionString>
     <bundleArtifact>apache</bundleArtifact>
     <!-- Settings related to unit test -->

@@ -23,7 +23,7 @@
     <date-string>${maven.build.timestamp}</date-string>
     <libdir>${basedir}/src/lib</libdir>
     <skipTests>false</skipTests>
-    <xccVersion>8.0.6.2</xccVersion>
+    <xccVersion>8.0.6</xccVersion>
     <deliverableName>Connector-for-Hadoop2</deliverableName>
     <!-- Static definitions of where things are relative to the root -->
     <java.source>src/main/java</java.source>
