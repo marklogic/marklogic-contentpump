@@ -189,8 +189,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         Map<String, ContentSource> hostSourceMap, boolean fastLoad,
         AssignmentManager am) {
         super(conf, null);
-
-        
+   
         effectiveVersion = am.getEffectiveVersion();
         isTxnCompatible = effectiveVersion == 0;
         

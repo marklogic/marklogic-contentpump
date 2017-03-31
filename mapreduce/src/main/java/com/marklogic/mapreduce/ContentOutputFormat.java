@@ -102,17 +102,17 @@ public class ContentOutputFormat<VALUEOUT> extends
         "hadoop:get-forest-replica-hosts($policy,$partition-name)";
     public static final String INIT_QUERY =
         "import module namespace hadoop = "
-        + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
-        + "xdmp:host-name(xdmp:host()), \n"
-        + "let $versionf := "
-        + "  fn:function-lookup(xs:QName('xdmp:effective-version'),0)\n"
-        + "return if (exists($versionf)) then $versionf() else 0, \n"
-        + "let $repf := "
-        + "  fn:function-lookup(xs:QName('hadoop:get-forest-replica-hosts'),2)\n"
-        + "return exists($repf),"
-        + "let $f := "
-        + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
-        + "return if (exists($f)) then $f() else ()";
+      + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
+      + "xdmp:host-name(xdmp:host()), \n"
+      + "let $versionf := "
+      + "  fn:function-lookup(xs:QName('xdmp:effective-version'),0)\n"
+      + "return if (exists($versionf)) then $versionf() else 0, \n"
+      + "let $repf := "
+      + "  fn:function-lookup(xs:QName('hadoop:get-forest-replica-hosts'),2)\n"
+      + "return exists($repf),"
+      + "let $f := "
+      + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
+      + "return if (exists($f)) then $f() else ()";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;

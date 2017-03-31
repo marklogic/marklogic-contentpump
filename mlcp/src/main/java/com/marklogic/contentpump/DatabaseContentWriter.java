@@ -236,9 +236,15 @@ public class DatabaseContentWriter<VALUE> extends
                         DocumentMetadata m = metadatas[fId][i].getMeta();
                         String u = metadatas[fId][i].getUri();
                         if (m != null && m.getProperties() != null) {
-                            setDocumentProperties(u, m.getProperties(),
-                                    null,null,null,null,sessions[sid]);
+                            boolean suc = setDocumentProperties(u, 
+                                    m.getProperties(),null,null,null,null,
+                                    sessions[sid]);
                             stmtCounts[sid]++;
+                            if (suc) { 
+                                commitUris[sid].add(key);
+                            } else {
+                                failed++;
+                            }
                         }
                     }
                 }
@@ -263,12 +269,17 @@ public class DatabaseContentWriter<VALUE> extends
             }     
             if (isCopyProps && meta.getProperties() != null) {
                 boolean naked = content == null;
-                setDocumentProperties(uri, meta.getProperties(),
+                boolean suc = setDocumentProperties(uri, meta.getProperties(),
                         isCopyPerms&&naked?meta.getPermString():null,
                         isCopyColls&&naked?meta.getCollectionString():null,
                         isCopyQuality&&naked?meta.getQualityString():null,
                         isCopyMeta&&naked?meta.meta:null, sessions[sid]);
                 stmtCounts[sid]++;
+                if (suc) { 
+                    commitUris[sid].add(key);
+                } else {
+                    failed++;
+                }
             }
             inserted = true;
         }
