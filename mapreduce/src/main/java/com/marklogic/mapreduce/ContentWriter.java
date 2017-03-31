@@ -305,6 +305,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 commitUris[i] = new ArrayList<DocumentURI>(txnSize*batchSize);
             }
         }
+        
+        isCopyColls = conf.getBoolean(COPY_COLLECTIONS, true);
+        isCopyQuality = conf.getBoolean(COPY_QUALITY, true);
     }
     
     protected boolean needCommit() {
