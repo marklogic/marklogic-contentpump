@@ -57,7 +57,6 @@ import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.ValueFactory;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
-import com.marklogic.xcc.exceptions.RetryableQueryException;
 import com.marklogic.xcc.exceptions.XQueryException;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XName;
@@ -71,7 +70,7 @@ import com.marklogic.xcc.types.XdmValue;
  */
 public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public static final Log LOG = LogFactory.getLog(TransformWriter.class);
-    static final long BATCH_MIN_VERSION = 8000700;
+    static final long BATCH_MIN_VERSION = 8000604;
     static final String MAP_ELEM_START_TAG = 
         "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
         + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
@@ -486,7 +485,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 LOG.error("RequestServerException:" + e.getMessage());
             }
             for ( DocumentURI failedUri: pendingURIs[id] ) {
-               LOG.warn("Failed document pending1 " + failedUri);
+               LOG.warn("Failed document " + failedUri);
                failed++;
             }
             pendingURIs[id].clear();
@@ -498,7 +497,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 sessions[id].close();
             }
             for ( DocumentURI failedUri: commitUris[id] ) {
-               LOG.warn("Failed document commit2 " + failedUri);
+               LOG.warn("Failed document " + failedUri);
                failed++;
             }
             commitUris[id].clear();
@@ -522,7 +521,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 rollbackCount(id);
             }
             for ( DocumentURI failedUri: pendingURIs[id] ) {
-               LOG.warn("Failed document pending2 " + failedUri);
+               LOG.warn("Failed document " + failedUri);
                failed++;
             }
             pendingURIs[id].clear();
