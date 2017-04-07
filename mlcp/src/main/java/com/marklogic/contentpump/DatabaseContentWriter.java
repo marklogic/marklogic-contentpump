@@ -179,7 +179,7 @@ public class DatabaseContentWriter<VALUE> extends
                 isCopyColls, isCopyQuality, isCopyMeta, isCopyPerms, 
                 effectiveVersion);
             MarkLogicDocument doc = (MarkLogicDocument)value;
-            if (!meta.isNakedProps()) {
+            if (meta == null || !meta.isNakedProps()) {
                 opt.setFormat(doc.getContentType().getDocumentFormat());
                 if (doc.getContentType() == ContentType.BINARY) {
                     content = ContentFactory.newContent(uri,
@@ -204,7 +204,7 @@ public class DatabaseContentWriter<VALUE> extends
         pendingUris[sid].put(content, new DocumentURI(key));
         boolean inserted = false;
         if (batchSize > 1) {
-            if (!meta.isNakedProps()) {
+            if (meta == null || !meta.isNakedProps()) {
                 // add new content
                 forestContents[fId][counts[fId]] = content;
                 metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
