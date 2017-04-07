@@ -68,10 +68,12 @@ public class DatabaseDocumentWithMeta extends DatabaseDocument {
             contentType = ContentType.valueOf(ordinal);
         }
         int len = in.readInt();
-        byte[] xml = new byte[len];
-        in.readFully(xml, 0, len);
-        StringReader reader = new StringReader(new String(xml));
-        meta = DocumentMetadata.fromXML(reader);
+        if (0 != len) {
+            byte[] xml = new byte[len];
+            in.readFully(xml, 0, len);
+            StringReader reader = new StringReader(new String(xml));
+            meta = DocumentMetadata.fromXML(reader);
+        }        
     }
 
     @Override
@@ -83,9 +85,12 @@ public class DatabaseDocumentWithMeta extends DatabaseDocument {
         } else {
             WritableUtils.writeVInt(out, 0);
         }
-        byte[] xml = meta.toXML().getBytes();
-        out.writeInt(xml.length);
-        out.write(xml);
+        if (meta != null) {
+            byte[] xml = meta.toXML().getBytes();
+            out.writeInt(xml.length);
+            out.write(xml);
+        } else {
+            out.writeInt(0);
+        }
     }
-
 }
