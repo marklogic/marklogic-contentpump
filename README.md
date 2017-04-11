@@ -21,6 +21,11 @@ The Hadoop Connector is an extension to Hadoop’s MapReduce framework that allo
 
 ## Release Note
 
+### What's New in mlcp and Hadoop Connector 8.0.6.4
+
+- mlcp supports batch transform of imported documents with significant performance improvement
+- mlcp allows per-document setting of document permissions, collections, temporal collections and quality through a transform function
+
 ### What's New in mlcp and Hadoop Connector 8.0-6
 
 - mlcp distributed mode supports MapR 5.1, HDP 2.4 and CDH 5.8
