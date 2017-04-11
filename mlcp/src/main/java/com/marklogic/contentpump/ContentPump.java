@@ -30,6 +30,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.VersionInfo;
 
@@ -49,6 +50,10 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 public class ContentPump implements MarkLogicConstants, ConfigConstants {
     
     public static final Log LOG = LogFactory.getLog(ContentPump.class);
+    // A global flag to indicate the job is being aborted.
+    public static volatile boolean shutdown = false;
+    // Job state in local mode
+    static JobStatus.State jobState = JobStatus.State.PREP;
     
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
@@ -213,13 +218,17 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 conf.set(CONF_MAPREDUCE_JOB_WORKING_DIR, System.getProperty("user.dir"));
             }
             job = command.createJob(conf, cmdline);
+            LOG.info("Job name: " + job.getJobName());
         } catch (Exception e) {
             // Print exception message.
             e.printStackTrace();
             return 1;
         }
         
-        LOG.info("Job name: " + job.getJobName());
+        // register a shutdown hook
+        Runtime.getRuntime().addShutdownHook(
+                new ShutdownHook(job, distributed));
+        
         // run job
         try {
             if (distributed) {
@@ -354,5 +363,52 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         System.out.println("Supported MarkLogic versions: " + 
                 Versions.getMinServerVersion() + " - " + 
                 Versions.getMaxServerVersion());
+    }
+    
+    synchronized static void updateJobState(JobStatus.State state) {
+        jobState = state;
+        ContentPump.class.notify();
+    }
+    
+    static class ShutdownHook extends Thread {
+        Job job;
+        boolean distributed;
+        
+        public ShutdownHook(Job job, boolean dist) {
+            this.job = job;
+            distributed = dist;
+        }
+        
+        public void run() {
+            try {
+                if (!shutdown) { 
+                    if (!distributed) {
+                        LOG.info("Aborting job...");
+                        shutdown = true;
+                        synchronized (ContentPump.class) {
+                            for (int i = 0; i < 30; ++i) {
+                                if (jobState == JobStatus.State.RUNNING) {
+                                    if (i > 0) {
+                                        LOG.info("Waiting..." + (30-i));
+                                    }
+                                    ContentPump.class.wait(1000);
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
+                        LOG.info("...aborted job.");
+                    }
+                    JobStatus.State state = 
+                            distributed ? job.getJobState() : jobState;
+                    if (state != JobStatus.State.SUCCEEDED) {
+                        LOG.warn("Job " + job.getJobName() +
+                                " status remains " + job.getJobState()); 
+                    }
+                } 
+            } catch (Exception e) {
+                LOG.error("Error terminating job", e);
+            }
+        }
     }
 }
