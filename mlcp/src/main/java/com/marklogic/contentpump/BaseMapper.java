@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.InputSplit;
 
 /**
@@ -35,22 +37,29 @@ import org.apache.hadoop.mapreduce.InputSplit;
  */
 public class BaseMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     org.apache.hadoop.mapreduce.Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
+    public static final Log LOG = LogFactory.getLog(BaseMapper.class);    
     public void runThreadSafe(Context outerCtx, Context subCtx)
         throws IOException, InterruptedException {
         setup(subCtx);
         KEYIN key = null;
         VALUEIN value = null;
-        while (true) {
-            synchronized (outerCtx) {
-                if (!subCtx.nextKeyValue()) {
-                    break;
+        try {
+            while (!ContentPump.shutdown) {
+                synchronized (outerCtx) {
+                    if (!subCtx.nextKeyValue()) {
+                        break;
+                    }
+                    key = subCtx.getCurrentKey();
+                    value = subCtx.getCurrentValue();
                 }
-                key = subCtx.getCurrentKey();
-                value = subCtx.getCurrentValue();
+                map(key, value, subCtx);
             }
-            map(key, value, subCtx);
+        } finally {
+            if (ContentPump.shutdown && LOG.isDebugEnabled()) {
+                LOG.debug("Aborting task...");
+            }
+            cleanup(subCtx);
         }
-        cleanup(subCtx);
     }
     
     public int getRequiredThreads() {
@@ -60,5 +69,20 @@ public class BaseMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     public List<Future<Object>> submitTasks(ExecutorService threadPool,
             InputSplit inputSplit) {
         return Collections.emptyList();
+    }
+    
+    @Override
+    public void run(Context context) throws IOException, InterruptedException {
+        setup(context);
+        try {
+            while (!ContentPump.shutdown && context.nextKeyValue()) {
+                map(context.getCurrentKey(), context.getCurrentValue(), context);
+            }
+        } finally {
+            if (ContentPump.shutdown && LOG.isDebugEnabled()) {
+                LOG.debug("Aborting task...");
+            }
+            cleanup(context);
+        }
     }
 }

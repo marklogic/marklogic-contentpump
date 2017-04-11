@@ -27,7 +27,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.CommandLine;
@@ -40,6 +39,7 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
+import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -68,7 +68,6 @@ public class LocalJobRunner implements ConfigConstants {
     private Job job;
     private ExecutorService pool;
     private AtomicInteger[] progress;
-    private AtomicBoolean jobComplete;
     private long startTime;
     private int threadsPerSplit = 0;
     private int threadCount;
@@ -102,8 +101,7 @@ public class LocalJobRunner implements ConfigConstants {
         
         Configuration conf = job.getConfiguration();
         minThreads = conf.getInt(CONF_MIN_THREADS, minThreads);
-        
-        jobComplete = new AtomicBoolean();
+
         startTime = System.currentTimeMillis();
     }
 
@@ -156,6 +154,8 @@ public class LocalJobRunner implements ConfigConstants {
         for (int i = 0; i < splits.size(); i++) {
             progress[i] = new AtomicInteger();
         }
+     
+        ContentPump.updateJobState(JobStatus.State.RUNNING);
         Monitor monitor = new Monitor();
         monitor.start();
         List<Future<Object>> taskList = new ArrayList<Future<Object>>();
@@ -228,10 +228,37 @@ public class LocalJobRunner implements ConfigConstants {
                 mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) 
                     ReflectionUtils.newInstance(mapClass,
                         mapperContext.getConfiguration());
-                mapper.run(mapperContext);
-                trackingReader.close();
-                writer.close(mapperContext);
-                committer.commitTask(context);
+                try {
+                    mapper.run(mapperContext);
+                } finally {
+                    try {
+                        trackingReader.close();
+                    } catch (Throwable t) {
+                        LOG.error("Error committing task: " + t.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(t);
+                        }
+                    }
+                    try {
+                        writer.close(mapperContext);
+                    } catch (Throwable t) {
+                        LOG.error("Error committing task: " + t.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(t);
+                        }
+                    } 
+                    try {
+                        committer.commitTask(context);
+                    } catch (Throwable t) {
+                        LOG.error("Error committing task: " + t.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(t);
+                        }
+                    }
+                }
+            }
+            if (ContentPump.shutdown) {
+                break;
             }
         }
         // wait till all tasks are done
@@ -239,10 +266,18 @@ public class LocalJobRunner implements ConfigConstants {
             for (Future<Object> f : taskList) {
                 f.get();
             }
-            pool.shutdown();   
-            while (!pool.awaitTermination(1, TimeUnit.DAYS));
-            jobComplete.set(true);
-        }
+            pool.shutdown(); // Disable new tasks from being submitted
+            try {
+                while (!pool.awaitTermination(1, TimeUnit.DAYS));
+            } catch (InterruptedException ie) {
+                // (Re-)Cancel if current thread also interrupted
+                pool.shutdownNow();
+                // Preserve interrupt status
+                Thread.currentThread().interrupt();
+            }
+        } 
+        ContentPump.updateJobState(JobStatus.State.SUCCEEDED);
+        ContentPump.shutdown = true;
         monitor.interrupt();
         monitor.join(1000);
         
@@ -390,12 +425,29 @@ public class LocalJobRunner implements ConfigConstants {
                     if (trackingReader != null) {
                         trackingReader.close();
                     }
+                } catch (Throwable t) {
+                    LOG.error("Error committing task: " + t.getMessage());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(t);
+                    }
+                } 
+                try {
                     if (writer != null) {
                         writer.close(mapperContext);
                     }
+                } catch (Throwable t) {
+                    LOG.error("Error committing task: " + t.getMessage());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(t);
+                    }
+                } 
+                try {
                     committer.commitTask(context);
                 } catch (Throwable t) {
-                	LOG.error("Error committing task: ", t);
+                    LOG.error("Error committing task: " + t.getMessage());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(t);
+                    }
                 } 
             }
             return null;
@@ -452,8 +504,12 @@ public class LocalJobRunner implements ConfigConstants {
         
         public void run() {
             try {
-                while (!jobComplete.get() && !interrupted()) {
+                while (!ContentPump.shutdown && !interrupted() &&
+                        ContentPump.jobState == JobStatus.State.RUNNING) {
                     Thread.sleep(1000);
+                    if (ContentPump.shutdown) {
+                        break;
+                    }
                     String report = 
                         (" completed " + 
                             StringUtils.formatPercent(computeProgress(), 0));
