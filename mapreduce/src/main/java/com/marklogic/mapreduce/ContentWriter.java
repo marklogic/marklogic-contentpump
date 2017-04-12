@@ -902,7 +902,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     }
                     try {
                         insertBatch(remainder, sid);
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
+                        LOG.error("Error caught inserting documents: ", e);
                     }
                     stmtCounts[sid]++;
                 }
@@ -913,7 +914,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 if (stmtCounts[i] > 0 && needCommit) {
                     try {
                         commit(i);
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
+                        LOG.error("Error committing transaction: ", e);
                     }
                 }
                 sessions[i].close();

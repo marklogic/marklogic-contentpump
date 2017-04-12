@@ -76,6 +76,10 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
     }
 
     public static int runCommand(String[] args) throws IOException {
+        // reset shutdown for JUnit and programs that invoke runCommand
+        shutdown = false;
+        jobState = JobStatus.State.PREP;
+        
         // get command
         String cmd = args[0];
         if (cmd.equalsIgnoreCase("help")) {
