@@ -288,47 +288,30 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             } else {
                 continue;
             }
-            if (fsplit.recordCount < maxSplitSize) {
-                MarkLogicInputSplit split = 
-                    new MarkLogicInputSplit(0, fsplit.recordCount, 
-                            fsplit.forestId, fsplit.hostName);
-                split.setLastSplit(true);
+
+            long splitSize = maxSplitSize;
+            if (this instanceof KeyValueInputFormat<?, ?> &&
+                    (splitSize & 0x1) != 0) {
+                splitSize--;
+            }
+            long remainingCount = fsplit.recordCount;
+            while (remainingCount > 0L) {
+                long start = fsplit.recordCount - remainingCount;
+                MarkLogicInputSplit split;
+                if (remainingCount < splitSize) {
+                    split = new MarkLogicInputSplit(start, remainingCount,
+                                    fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                    split.setLastSplit(true);
+                    remainingCount = 0L;
+                } else {
+                    split = new MarkLogicInputSplit(start, splitSize,
+                                    fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                    remainingCount -= splitSize;
+                }
                 splits.add(split);
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Added split " + split);
-                }    
-            } else {
-                long splitCount = fsplit.recordCount / maxSplitSize;
-                long remainder = fsplit.recordCount % maxSplitSize;
-                if (remainder != 0) {
-                    splitCount++;
-                }
-                long splitSize = fsplit.recordCount / splitCount;
-                remainder = fsplit.recordCount % splitCount;
-                if (remainder != 0) {
-                    splitSize++;
-                }
-                if (this instanceof KeyValueInputFormat<?, ?>) {
-                    // each split size has to be an even number
-                    if ((splitSize & 0x1) != 0) {
-                        splitSize++;
-                    }
-                }
-                long remainingCount = fsplit.recordCount;
-                while (remainingCount > 0) {
-                    long start = fsplit.recordCount - remainingCount; 
-                    long length = splitSize;
-                    MarkLogicInputSplit split = 
-                        new MarkLogicInputSplit(start, length, fsplit.forestId,
-                                fsplit.hostName);
-                    if (remainingCount <= maxSplitSize) {
-                        split.setLastSplit(true);
-                    }
-                    splits.add(split);
-                    remainingCount -= length;
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Added split " + split);
-                    }
                 }
             }
         }
