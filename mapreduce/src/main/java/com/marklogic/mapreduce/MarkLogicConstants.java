@@ -847,4 +847,18 @@ public interface MarkLogicConstants {
      */
     static final String OUTPUT_QUERY_LANGUAGE = 
     		"mapreduce.marklogic.output.querylanguage";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to copy document collections from
+     * source to destination. 
+     */
+    static final String COPY_COLLECTIONS = 
+            "mapreduce.marklogic.copycollections";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to copy document quality from
+     * source to destination. 
+     */
+    static final String COPY_QUALITY = 
+            "mapreduce.marklogic.copyquality";
 }

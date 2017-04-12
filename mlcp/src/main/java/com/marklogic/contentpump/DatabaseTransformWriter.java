@@ -18,22 +18,17 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 
-import com.marklogic.contentpump.utilities.TransformHelper;
-import com.marklogic.mapreduce.ContentOutputFormat;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
-import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentSource;
-import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
-import com.marklogic.xcc.exceptions.RequestException;
-import com.marklogic.xcc.exceptions.RequestServerException;
-import com.marklogic.xcc.exceptions.XQueryException;
 
 /**
  * DatabaseContentWriter that does server-side transform and insert
@@ -42,23 +37,20 @@ import com.marklogic.xcc.exceptions.XQueryException;
  * @param <VALUE>
  */
 public class DatabaseTransformWriter<VALUE> extends
-    DatabaseContentWriter<VALUE> {
-    private String moduleUri;
-    private String functionNs;
-    private String functionName;
-    private String functionParam;
-    private AdhocQuery[] queries;
+    TransformWriter<VALUE> implements ConfigConstants {
+    public static final Log LOG = 
+            LogFactory.getLog(DatabaseTransformWriter.class);
+    
+    protected boolean isCopyProps;
+    protected boolean isCopyPerms;
     
     public DatabaseTransformWriter(Configuration conf,
         Map<String, ContentSource> forestSourceMap, boolean fastLoad,
         AssignmentManager am) {
         super(conf, forestSourceMap, fastLoad, am);
-        moduleUri = conf.get(ConfigConstants.CONF_TRANSFORM_MODULE);
-        functionNs = conf.get(ConfigConstants.CONF_TRANSFORM_NAMESPACE, "");
-        functionName = conf.get(ConfigConstants.CONF_TRANSFORM_FUNCTION,
-            "transform");
-        functionParam = conf.get(ConfigConstants.CONF_TRANSFORM_PARAM, "");
-        queries = new AdhocQuery[sessions.length];
+        
+        isCopyProps = conf.getBoolean(CONF_COPY_PROPERTIES, true);
+        isCopyPerms = conf.getBoolean(CONF_COPY_PERMISSIONS, true);
     }
 
     @Override
@@ -84,60 +76,57 @@ public class DatabaseTransformWriter<VALUE> extends
         }
         int sid = fId;
 
-        DocumentMetadata meta = null;
         DatabaseDocumentWithMeta doc = (DatabaseDocumentWithMeta) value;
-        meta = doc.getMeta();
-        ContentCreateOptions opt = newContentCreateOptions(meta);
+        DocumentMetadata meta = doc.getMeta();
+        ContentCreateOptions opt = 
+            DatabaseContentWriter.newContentCreateOptions(meta, options, 
+                isCopyColls, isCopyQuality, isCopyPerms);
+        boolean naked = meta.isNakedProps();
         if (sessions[sid] == null) {
             sessions[sid] = getSession(csKey);
             queries[sid] = getAdhocQuery(sid);
         }
-        if (!meta.isNakedProps()) {
+        if (!naked) {
             opt.setFormat(doc.getContentType().getDocumentFormat());
-            AdhocQuery qry = 
-                    TransformHelper.getTransformInsertQryMLDocWithMeta(conf, 
-                            queries[sid], moduleUri, functionNs, functionName, 
-                            functionParam, uri, doc, opt);
-            try {
-                sessions[sid].submitRequest(qry);
+            addValue(uri, value, sid, opt);
+            pendingURIs[sid].add((DocumentURI)key.clone());
+            if (++counts[sid] == batchSize) {
+                queries[sid].setNewVariables(uriName, uris[sid]);
+                queries[sid].setNewVariables(contentName, values[sid]);
+                queries[sid].setNewVariables(optionsName, optionsVals[sid]);
+                insertBatch(sid,uris[sid],values[sid],optionsVals[sid]);
                 stmtCounts[sid]++;
                 //reset forest index for statistical
                 if (countBased) {
                     sfId = -1;
                 }
-            } catch (RequestServerException e) {
-                // log error and continue on RequestServerException
-                if (e instanceof XQueryException) {
-                    LOG.error(((XQueryException) e).getFormatString());
+                if (needCommit) {
+                    commitUris[sid].addAll(pendingURIs[sid]);
                 } else {
-                    LOG.error(e.getMessage());
+                    succeeded += pendingURIs[sid].size();
                 }
-                LOG.warn("Failed document " + key);
-                failed++;
-            } catch (RequestException e) {
-                if (sessions[sid] != null) {
-                    sessions[sid].close();
-                }
-                if (countBased) {
-                    rollbackCount(sid);
-                }
-                throw new IOException(e);
+                pendingURIs[sid].clear();
             }
-            if (needCommit) {
-                commitUris[sid].add(key);
-            } else {
-                succeeded++;
-            } 
         }
         if (isCopyProps && meta.getProperties() != null) {
-            boolean naked = meta.isNakedProps();
-            setDocumentProperties(uri, meta.getProperties(),
+            boolean suc = DatabaseContentWriter.setDocumentProperties(uri, 
+                    meta.getProperties(),
                     isCopyPerms&&naked?meta.getPermString():null,
                     isCopyColls&&naked?meta.getCollectionString():null,
                     isCopyQuality&&naked?meta.getQualityString():null, 
                     sessions[sid]);
             stmtCounts[sid]++;
+            if (suc && naked) {
+                if (needCommit) {
+                    commitUris[sid].add(key);
+                } else {
+                    succeeded++;
+                }
+            } else if (!suc && naked) {
+                failed++;
+            }
         }
+        
         boolean committed = false;
         if (stmtCounts[sid] >= txnSize && needCommit) {
             commit(sid);
@@ -159,15 +148,4 @@ public class DatabaseTransformWriter<VALUE> extends
         }
         return getSession(forestId, mode);
     }
-    
-    protected AdhocQuery getAdhocQuery(int sid) {
-        String qs = TransformHelper.constructQryString(moduleUri, functionNs,
-                functionName, functionParam);
-        AdhocQuery q = sessions[sid].newAdhocQuery(qs);
-        RequestOptions rOptions = new RequestOptions();
-        rOptions.setDefaultXQueryVersion("1.0-ml");
-        q.setOptions(rOptions);
-        return q;
-    }
-
 }
