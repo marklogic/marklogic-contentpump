@@ -348,7 +348,7 @@ public enum Command implements ConfigConstants {
             type.applyConfigOptions(conf, cmdline);
             
             // construct a job
-            Job job = Job.getInstance(conf);
+            Job job = LocalJob.getInstance(conf);
             
             Class<?> inputFormatClass = 
                     conf.getClass(JobContext.INPUT_FORMAT_CLASS_ATTR, null);
@@ -940,7 +940,7 @@ public enum Command implements ConfigConstants {
             }
             
             // construct a job
-            Job job = Job.getInstance(conf);
+            Job job = LocalJob.getInstance(conf);
             job.setJarByClass(this.getClass());
             Class<?> inputFormatClass = 
                     conf.getClass(JobContext.INPUT_FORMAT_CLASS_ATTR, null);
@@ -1233,7 +1233,7 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 } 
             }
-            Job job = Job.getInstance(conf);
+            Job job = LocalJob.getInstance(conf);
             job.setJarByClass(this.getClass());
             Class<?> inputFormatClass = 
                     conf.getClass(JobContext.INPUT_FORMAT_CLASS_ATTR, null);
@@ -1514,7 +1514,7 @@ public enum Command implements ConfigConstants {
             applyConfigOptions(conf, cmdline);
             
             // construct a job
-            Job job = Job.getInstance(conf);
+            Job job = LocalJob.getInstance(conf);
             job.setInputFormatClass(ForestInputFormat.class);
             Class<? extends OutputFormat> outputFormatClass = 
                     Command.isOutputCompressed(cmdline) ?
