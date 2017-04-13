@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -50,10 +52,14 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 public class ContentPump implements MarkLogicConstants, ConfigConstants {
     
     public static final Log LOG = LogFactory.getLog(ContentPump.class);
-    // A global flag to indicate the job is being aborted.
+    // A global flag to indicate that JVM is exiting
     public static volatile boolean shutdown = false;
     // Job state in local mode
-    static JobStatus.State jobState = JobStatus.State.PREP;
+    static List<Job> jobs = new LinkedList<Job>();
+    static {
+        // register a shutdown hook
+        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+    }
     
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
@@ -75,11 +81,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         System.exit(rc);
     }
 
-    public static int runCommand(String[] args) throws IOException {
-        // reset shutdown for JUnit and programs that invoke runCommand
-        shutdown = false;
-        jobState = JobStatus.State.PREP;
-        
+    public static int runCommand(String[] args) throws IOException {      
         // get command
         String cmd = args[0];
         if (cmd.equalsIgnoreCase("help")) {
@@ -228,10 +230,9 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             e.printStackTrace();
             return 1;
         }
-        
-        // register a shutdown hook
-        Runtime.getRuntime().addShutdownHook(
-                new ShutdownHook(job, distributed));
+        synchronized (ContentPump.class) {
+            jobs.add(job);
+        }
         
         // run job
         try {
@@ -239,7 +240,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 // submit job
                 submitJob(job);
             } else {                
-                runJobLocally(job, cmdline, command);
+                runJobLocally((LocalJob)job, cmdline, command);
             }
             return 0;
         } catch (Exception e) {
@@ -338,14 +339,24 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             LOG.trace("LIBJARS:" + jars.toString());
         job.waitForCompletion(true);
         AuditUtil.auditMlcpFinish(conf, job.getJobName(), job.getCounters());
+        
+        synchronized(ContentPump.class) {
+            jobs.remove(job);
+            ContentPump.class.notify();
+        }
     }
     
-    private static void runJobLocally(Job job, CommandLine cmdline, Command cmd) 
-    throws Exception {
+    private static void runJobLocally(LocalJob job, CommandLine cmdline, 
+            Command cmd) throws Exception {
         LocalJobRunner runner = new LocalJobRunner(job, cmdline, cmd);
         runner.run();
         AuditUtil.auditMlcpFinish(job.getConfiguration(),
                 job.getJobName(), runner.getReporter().counters);
+        
+        synchronized(ContentPump.class) {
+            jobs.remove(job);
+            ContentPump.class.notify();
+        }
     }
 
     private static void printUsage() {
@@ -369,47 +380,47 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 Versions.getMaxServerVersion());
     }
     
-    synchronized static void updateJobState(JobStatus.State state) {
-        jobState = state;
-        ContentPump.class.notify();
-    }
-    
-    static class ShutdownHook extends Thread {
-        Job job;
-        boolean distributed;
-        
-        public ShutdownHook(Job job, boolean dist) {
-            this.job = job;
-            distributed = dist;
+    static class ShutdownHook extends Thread { 
+        boolean needToWait() {
+            boolean needToWait = false;
+            for (Job job : jobs) {
+                if (job instanceof LocalJob) {
+                    needToWait = true;
+                    break;
+                }
+            } 
+            return needToWait;
         }
         
         public void run() {
+            shutdown = true;
             try {
-                if (!shutdown) { 
-                    if (!distributed) {
-                        LOG.info("Aborting job...");
-                        shutdown = true;
-                        synchronized (ContentPump.class) {
-                            for (int i = 0; i < 30; ++i) {
-                                if (jobState == JobStatus.State.RUNNING) {
-                                    if (i > 0) {
-                                        LOG.info("Waiting..." + (30-i));
-                                    }
-                                    ContentPump.class.wait(1000);
-                                } else {
-                                    break;
-                                }
-                            }
+                synchronized (ContentPump.class) {
+                    boolean needToWait = false;
+                    for (Job job : jobs) {
+                        if (job instanceof LocalJob) {
+                            LOG.info("Aborting job " + job.getJobName());
+                            needToWait = true;
                         }
-                        LOG.info("...aborted job.");
                     }
-                    JobStatus.State state = 
-                            distributed ? job.getJobState() : jobState;
-                    if (state != JobStatus.State.SUCCEEDED) {
+                    if (needToWait) { // wait up to 30 seconds
+                        for (int i = 0; i < 30; ++i) {
+                            if (i > 0) { // check again
+                                needToWait = needToWait();
+                            }
+                            if (needToWait) {
+                                if (i > 0) {
+                                    LOG.info("Waiting..." + (30-i));
+                                }
+                                ContentPump.class.wait(1000);
+                            }  
+                        }
+                    }
+                    for (Job job : jobs) {
                         LOG.warn("Job " + job.getJobName() +
                                 " status remains " + job.getJobState()); 
                     }
-                } 
+                }
             } catch (Exception e) {
                 LOG.error("Error terminating job", e);
             }
