@@ -65,7 +65,7 @@ public class LocalJobRunner implements ConfigConstants {
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
     public static final int DEFAULT_THREAD_COUNT = 4;
     
-    private Job job;
+    private LocalJob job;
     private ExecutorService pool;
     private AtomicInteger[] progress;
     private long startTime;
@@ -77,7 +77,7 @@ public class LocalJobRunner implements ConfigConstants {
     private int minThreads = 1;
     private Command cmd;
     
-    public LocalJobRunner(Job job, CommandLine cmdline, Command cmd) {
+    public LocalJobRunner(LocalJob job, CommandLine cmdline, Command cmd) {
         this.job = job;
         this.cmd = cmd;
         
@@ -154,7 +154,7 @@ public class LocalJobRunner implements ConfigConstants {
             progress[i] = new AtomicInteger();
         }
      
-        ContentPump.updateJobState(JobStatus.State.RUNNING);
+        job.setState(JobStatus.State.RUNNING);
         Monitor monitor = new Monitor();
         monitor.start();
         ContentPumpReporter reporter = new ContentPumpReporter();
@@ -276,8 +276,7 @@ public class LocalJobRunner implements ConfigConstants {
                 Thread.currentThread().interrupt();
             }
         } 
-        ContentPump.updateJobState(JobStatus.State.SUCCEEDED);
-        ContentPump.shutdown = true;
+        job.setState(JobStatus.State.SUCCEEDED);
         monitor.interrupt();
         monitor.join(1000);
         
@@ -505,7 +504,7 @@ public class LocalJobRunner implements ConfigConstants {
         public void run() {
             try {
                 while (!ContentPump.shutdown && !interrupted() &&
-                        ContentPump.jobState == JobStatus.State.RUNNING) {
+                        !job.done()) {
                     Thread.sleep(1000);
                     if (ContentPump.shutdown) {
                         break;
