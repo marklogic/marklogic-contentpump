@@ -22,7 +22,7 @@ public class TestConcurrentJobs {
         String[] args = cmd.split(" +");
         final String[] expandedArgs = OptionsFileUtil.expandArguments(args);
         
-        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
         
         Thread job = new Thread() {
             public void run() {
@@ -40,7 +40,7 @@ public class TestConcurrentJobs {
         job.join(0);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+                Utils.getDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
         Utils.closeSession();
