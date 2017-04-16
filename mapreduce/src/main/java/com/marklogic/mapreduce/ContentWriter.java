@@ -53,10 +53,10 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.impl.SessionImpl;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.ContentInsertException;
+import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.exceptions.RetryableQueryException;
-import com.marklogic.xcc.exceptions.XQueryException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -477,9 +477,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     for (RequestException ex : errors) {
                         Throwable cause = ex.getCause();
                         if (cause != null) {
-                            if (cause instanceof XQueryException) {
+                            if (cause instanceof QueryException) {
                                 LOG.error(
-                                    ((XQueryException)cause).getFormatString());
+                                    ((QueryException)cause).getFormatString());
                             } else {
                                 LOG.error(cause.getMessage());
                             }
@@ -528,7 +528,6 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     sleepTime = sleepTime * 2;
                     if (sleepTime > maxSleepTime) 
                         sleepTime = maxSleepTime;
-
                     sessions[id] = getSession(id, false);
                     continue;
                 } else {
@@ -541,19 +540,16 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
             } catch (RequestServerException e) {
                 // log error and continue on RequestServerException
-                if (e instanceof XQueryException) {
-                    LOG.error(((XQueryException)e).getFormatString());
+                if (e instanceof QueryException) {
+                    LOG.error(((QueryException)e).getFormatString());
                 } else {
                     LOG.error(e.getMessage());
                 }
                 if (needCommit && !commitUris[id].isEmpty()) {
-                    failed += commitUris[id].size();
-                    for (DocumentURI failedUri : commitUris[id]) {
-                        LOG.warn("Failed document: " + failedUri);
-                    }
-                    commitUris[id].clear();
+                    rollback(id);
                 }
                 if (t < maxRetries) {
+                    sessions[id].close();
                     sessions[id] = getSession(id, true);
                     continue;
                 }
@@ -565,21 +561,14 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     LOG.warn("Failed document " + failedUri);
                 }
 
-            } catch (RequestException e) {
+            } catch (Exception e) {
                 if (needCommit && !commitUris[id].isEmpty()) {
-                    failed += commitUris[id].size();
-                    for (DocumentURI failedUri : commitUris[id]) {
-                        LOG.warn("Failed document: " + failedUri);
-                    }
-                    commitUris[id].clear();
+                    rollback(id);
                 }
                 if (t < maxRetries) {
+                    sessions[id].close();
                     sessions[id] = getSession(id, true);
                     continue;
-                }
-
-                if (countBased) {
-                    rollbackCount(id);
                 }
                 pendingUris[id].clear();
                 throw new IOException(e);
@@ -606,16 +595,23 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 LOG.warn("Failed document: " + failedUri);
             }
             commitUris[id].clear();
+            if (countBased) {
+                rollbackCount(id);
+            }
         } catch (RequestServerException e) {
-            LOG.error("Error rollback transaction", e);
+            LOG.error("Error rolling back transaction", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e);
+            }
             failed += commitUris[id].size();
             for (DocumentURI failedUri : commitUris[id]) {
                 LOG.warn("Failed document: " + failedUri);
             }
             commitUris[id].clear();
         } catch (RequestException e) {
-            if (sessions[id] != null) {
-                sessions[id].close();
+            LOG.error("Error rolling back transaction " + e.getMessage());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e);
             }
             if (countBased) {
                 rollbackCount(id);
@@ -659,22 +655,26 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     } catch (Exception e2) {
                     }
                     sleepTime = sleepTime * 2;
-                    if (sleepTime > maxSleepTime)
+                    if (sleepTime > maxSleepTime) {
                         sleepTime = maxSleepTime;
-
+                    }
                     sessions[id] = getSession(id, false);
                     continue;
                 } else {
                     failed++;
                     // remove the failed content from pendingUris
-                    DocumentURI failedUri = pendingUris[id].remove(content.getUri());
+                    DocumentURI failedUri = 
+                            pendingUris[id].remove(content.getUri());
                     LOG.warn("Failed document " + failedUri);
                 }
             } catch (RequestServerException e) {
-                if (e instanceof XQueryException) {
-                    LOG.error(((XQueryException)e).getFormatString());
+                if (e instanceof QueryException) {
+                    LOG.error(((QueryException)e).getFormatString());
                 } else {
                     LOG.error(e.getMessage());
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
                 }
                 failed++;   
                 // remove the failed content from pendingUris
@@ -682,11 +682,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 LOG.warn("Failed document " + failedUri);
             } catch (RequestException e) {
                 if (needCommit && !commitUris[id].isEmpty()) {
-                    failed += commitUris[id].size();
-                    for (DocumentURI failedUri : commitUris[id]) {
-                        LOG.warn("Failed document: " + failedUri);
-                    }
-                    commitUris[id].clear();
+                    rollback(id);
                 }
                 if (t < maxRetries) {
                     sessions[id] = getSession(id, true);
