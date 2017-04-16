@@ -37,7 +37,6 @@ import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -125,13 +124,24 @@ public class LocalJobRunner implements ConfigConstants {
         InputFormat<INKEY,INVALUE> inputFormat = 
             (InputFormat<INKEY, INVALUE>)ReflectionUtils.newInstance(
                 job.getInputFormatClass(), conf);
-        List<InputSplit> splits = inputFormat.getSplits(job);
-        T[] array = (T[])splits.toArray(
-                new org.apache.hadoop.mapreduce.InputSplit[splits.size()]);
-        
-        // sort the splits into order based on size, so that the biggest
-        // goes first
-        Arrays.sort(array, new SplitLengthComparator());
+        List<InputSplit> splits;
+        T[] array;
+        try {
+            splits = inputFormat.getSplits(job);
+            array = (T[])splits.toArray(
+                    new org.apache.hadoop.mapreduce.InputSplit[splits.size()]);
+            // sort the splits into order based on size, so that the biggest
+            // goes first
+            Arrays.sort(array, new SplitLengthComparator());
+        } catch (Exception ex) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error checking output specification: ", ex);
+            } else {
+                LOG.error("Error checking output specification: ");
+                LOG.error(ex.getMessage());
+            }
+            return;
+        }               
         OutputFormat<OUTKEY, OUTVALUE> outputFormat = 
             (OutputFormat<OUTKEY, OUTVALUE>)ReflectionUtils.newInstance(
                 job.getOutputFormatClass(), conf);
@@ -159,7 +169,7 @@ public class LocalJobRunner implements ConfigConstants {
         Monitor monitor = new Monitor();
         monitor.start();
         List<Future<Object>> taskList = new ArrayList<Future<Object>>();
-        for (int i = 0; i < array.length; i++) {        
+        for (int i = 0; i < array.length && !ContentPump.shutdown; i++) {        
             InputSplit split = array[i];
             if (pool != null) {
                 LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE> task = 
@@ -234,7 +244,7 @@ public class LocalJobRunner implements ConfigConstants {
                     try {
                         trackingReader.close();
                     } catch (Throwable t) {
-                        LOG.error("Error committing task: " + t.getMessage());
+                        LOG.error("Error closing reader: " + t.getMessage());
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(t);
                         }
@@ -242,7 +252,7 @@ public class LocalJobRunner implements ConfigConstants {
                     try {
                         writer.close(mapperContext);
                     } catch (Throwable t) {
-                        LOG.error("Error committing task: " + t.getMessage());
+                        LOG.error("Error closing writer: " + t.getMessage());
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(t);
                         }
@@ -256,9 +266,6 @@ public class LocalJobRunner implements ConfigConstants {
                         }
                     }
                 }
-            }
-            if (ContentPump.shutdown) {
-                break;
             }
         }
         // wait till all tasks are done
@@ -411,44 +418,48 @@ public class LocalJobRunner implements ConfigConstants {
                 }
                 mapper.run(mapperContext);
             } catch (Throwable t) {
-                LOG.error("Error running task: ", t);
-                try{
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Error running task: ", t);
+                } else {
+                    LOG.error("Error checking output specification: ");
+                    LOG.error(t.getMessage());
+                }
+                try {
                     synchronized(pool) {
                         pool.notify();
                     }
                 } catch (Throwable t1) {
                     LOG.error(t1);
                 }
-            } finally {
-                try {
-                    if (trackingReader != null) {
-                        trackingReader.close();
-                    }
-                } catch (Throwable t) {
-                    LOG.error("Error committing task: " + t.getMessage());
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(t);
-                    }
-                } 
-                try {
-                    if (writer != null) {
-                        writer.close(mapperContext);
-                    }
-                } catch (Throwable t) {
-                    LOG.error("Error committing task: " + t.getMessage());
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(t);
-                    }
-                } 
-                try {
-                    committer.commitTask(context);
-                } catch (Throwable t) {
-                    LOG.error("Error committing task: " + t.getMessage());
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(t);
-                    }
-                } 
             }
+            try {
+                if (trackingReader != null) {
+                    trackingReader.close();
+                }
+            } catch (Throwable t) {
+                LOG.error("Error closing reader: " + t.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(t);
+                }
+            } 
+            try {
+                if (writer != null) {
+                    writer.close(mapperContext);
+                }
+            } catch (Throwable t) {
+                LOG.error("Error closing writer: " + t.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(t);
+                }
+            } 
+            try {
+                committer.commitTask(context);
+            } catch (Throwable t) {
+                LOG.error("Error committing task: " + t.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(t);
+                }
+            } 
             return null;
         }      
     }
