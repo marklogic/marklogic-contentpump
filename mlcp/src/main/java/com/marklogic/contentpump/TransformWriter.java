@@ -55,9 +55,9 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.ValueFactory;
+import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
-import com.marklogic.xcc.exceptions.XQueryException;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XName;
 import com.marklogic.xcc.types.XdmValue;
@@ -467,8 +467,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             counts[id] = 0;
         } catch (RequestServerException e) {
             // compatible mode: log error and continue
-            if (e instanceof XQueryException) {
-                LOG.error("XQueryException:" + ((XQueryException) e).getFormatString());
+            if (e instanceof QueryException) {
+                LOG.error("QueryException:" + ((QueryException) e).getFormatString());
             } else {
                 LOG.error("RequestServerException:" + e.getMessage());
             }
@@ -478,19 +478,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             }
             pendingURIs[id].clear();
             counts[id] = 0;
-        } catch (RequestException e) {
+        } catch (Exception e) {
             LOG.error("RequestException:" + e.getMessage());
-            if (sessions[id] != null) {
-                sessions[id].close();
-            }
-            for (DocumentURI failedUri: commitUris[id] ) {
-                LOG.warn("Failed document " + failedUri);
-                failed++;
-            }
-            commitUris[id].clear();
-            if (countBased) {
-                rollbackCount(id);
-            }
+            rollback(id);
             for ( DocumentURI failedUri: pendingURIs[id] ) {
                 LOG.warn("Failed document " + failedUri);
                 failed++;

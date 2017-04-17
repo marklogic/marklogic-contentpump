@@ -50,9 +50,9 @@ import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.ContentInsertException;
+import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
-import com.marklogic.xcc.exceptions.XQueryException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -446,9 +446,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 for (RequestException ex : errors) {
                     Throwable cause = ex.getCause();
                     if (cause != null) {
-                        if (cause instanceof XQueryException) {
+                        if (cause instanceof QueryException) {
                             LOG.error(
-                                ((XQueryException)cause).getFormatString());
+                                ((QueryException)cause).getFormatString());
                         } else {
                             LOG.error(cause.getMessage());
                         }
@@ -476,8 +476,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         } catch (RequestServerException e) {
             // log error and continue on RequestServerException
-            if (e instanceof XQueryException) {
-                LOG.error(((XQueryException)e).getFormatString());
+            if (e instanceof QueryException) {
+                LOG.error(((QueryException)e).getFormatString());
             } else {
                 LOG.error(e.getMessage());
             }
@@ -508,6 +508,41 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         pendingUris[id].clear();
     }
     
+    protected void rollback(int id) throws IOException {
+        try {
+            sessions[id].rollback();
+            failed += commitUris[id].size();
+            for (DocumentURI failedUri : commitUris[id]) {
+                LOG.warn("Failed document: " + failedUri);
+            }
+            commitUris[id].clear();
+            if (countBased) {
+                rollbackCount(id);
+            }
+        } catch (RequestServerException e) {
+            LOG.error("Error rolling back transaction", e);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e);
+            }
+            failed += commitUris[id].size();
+            for (DocumentURI failedUri : commitUris[id]) {
+                LOG.warn("Failed document: " + failedUri);
+            }
+            commitUris[id].clear();
+        } catch (RequestException e) {
+            LOG.error("Error rolling back transaction " + e.getMessage());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e);
+            }
+            if (countBased) {
+                rollbackCount(id);
+            }
+            failed += commitUris[id].size();
+            commitUris[id].clear();
+            throw new IOException(e);
+        }
+    }
+    
     protected void insertContent(Content content, int id) 
     throws IOException {
         try {
@@ -517,8 +552,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 pendingUris[id].clear();
             }
         } catch (RequestServerException e) {
-            if (e instanceof XQueryException) {
-                LOG.error(((XQueryException)e).getFormatString());
+            if (e instanceof QueryException) {
+                LOG.error(((QueryException)e).getFormatString());
             } else {
                 LOG.error(e.getMessage());
             }
@@ -545,20 +580,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             succeeded += commitUris[id].size();
             commitUris[id].clear();
         } catch (RequestServerException e) {
-            LOG.error("Error commiting transaction", e);
+            LOG.error("Error commiting transaction" + e.getMessage());
             failed += commitUris[id].size();   
             for (DocumentURI failedUri : commitUris[id]) {
                 LOG.warn("Failed document: " + failedUri);
             }
         } catch (RequestException e) {
-            if (sessions[id] != null) {
-                sessions[id].close();
-            }
-            if (countBased) {
-                rollbackCount(id);
-            }
-            failed += commitUris[id].size();
-            commitUris[id].clear();
+            rollback(id);
             throw new IOException(e);
         } 
     }

@@ -381,12 +381,18 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             try {
                 mapper.runThreadSafe(outer, subcontext);      
             } catch (Throwable ie) {
-                LOG.error(ie.getMessage(), ie);
+                LOG.error("Error running task: " + ie.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(ie);
+                }
             }
             try {
                 writer.close(subcontext);
             } catch (Throwable t) {
-                LOG.error("Error committing task: ", t);
+                LOG.error("Error closing writer: " + t.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(t);
+                }
             }
         }
     }
