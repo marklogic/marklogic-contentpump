@@ -42,7 +42,12 @@ public class LocalJob extends Job implements MarkLogicConstants {
         return state != JobStatus.State.RUNNING; 
     }
     
-    public void setState(JobStatus.State state) {
+    @Override
+    public JobStatus.State getJobState() {
+        return state;
+    }
+    
+    public void setJobState(JobStatus.State state) {
         this.state = state;
     }
     

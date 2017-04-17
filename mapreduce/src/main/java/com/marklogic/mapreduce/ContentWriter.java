@@ -513,13 +513,15 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 // log error and continue on RequestServerException
                 LOG.error(e.getFormatString());
 
+                // necessary to roll back in certain scenarios.
                 if (needCommit && !commitUris[id].isEmpty()) {
                     rollback(id);
                 }
 
                 if (t < maxRetries) {
                     if (sessions[id] != null) {
-                       sessions[id].close();
+                        // necessary to close the session too.
+                        sessions[id].close();
                     }
                     try {
                         Thread.sleep(sleepTime);
@@ -537,9 +539,11 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         DocumentURI failedUri = pendingUris[id].remove(fc);
                         LOG.warn("Failed document " + failedUri);
                     }
+                    // TODO: We think we should throw exception now.
                 }
             } catch (RequestServerException e) {
                 // log error and continue on RequestServerException
+                // not retryable so trying to connect to the replica
                 if (e instanceof QueryException) {
                     LOG.error(((QueryException)e).getFormatString());
                 } else {
@@ -560,7 +564,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     DocumentURI failedUri = pendingUris[id].remove(fc);
                     LOG.warn("Failed document " + failedUri);
                 }
-
+                // TODO: We think we should throw exception now.
             } catch (Exception e) {
                 if (needCommit && !commitUris[id].isEmpty()) {
                     rollback(id);
@@ -705,37 +709,17 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             succeeded += commitUris[id].size();
             commitUris[id].clear();
         } catch (RequestServerException e) {
-            LOG.error("Error commiting transaction ", e);
-            failed += commitUris[id].size();   
-            for (DocumentURI failedUri : commitUris[id]) {
-                LOG.warn("Failed document: " + failedUri);
-            }
-            commitUris[id].clear();
-            if (sessions[id] != null) {
-                sessions[id].close();
-                sessions[id] = null;
-            }
+            rollback(id);
+            sessions[id].close();
+            sessions[id] = null;
         } catch (RequestException e) {
-            if (sessions[id] != null) {
-                sessions[id].close();
-            }
-            if (countBased) {
-                rollbackCount(id);
-            }
-            failed += commitUris[id].size();
-            commitUris[id].clear();
+            rollback(id);
             throw new IOException(e);
         } catch (Exception e) {
-            LOG.error("Error commiting transaction ", e);
-            if (sessions[id] != null) {
-                sessions[id].close();
-                sessions[id] = getSession(id, true);
-            }
-            failed += commitUris[id].size();
-            for (DocumentURI failedUri : commitUris[id]) {
-                LOG.warn("Failed document: " + failedUri);
-            }
-            commitUris[id].clear();
+            LOG.error("Error commiting transaction " + e.getMessage());
+            rollback(id);
+            sessions[id].close();
+            sessions[id] = null;
         }
     }
     
