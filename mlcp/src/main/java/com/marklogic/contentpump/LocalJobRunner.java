@@ -164,7 +164,7 @@ public class LocalJobRunner implements ConfigConstants {
             progress[i] = new AtomicInteger();
         }
      
-        job.setState(JobStatus.State.RUNNING);
+        job.setJobState(JobStatus.State.RUNNING);
         Monitor monitor = new Monitor();
         monitor.start();
         ContentPumpReporter reporter = new ContentPumpReporter();
@@ -283,7 +283,7 @@ public class LocalJobRunner implements ConfigConstants {
                 Thread.currentThread().interrupt();
             }
         } 
-        job.setState(JobStatus.State.SUCCEEDED);
+        job.setJobState(JobStatus.State.SUCCEEDED);
         monitor.interrupt();
         monitor.join(1000);
         
