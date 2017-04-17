@@ -480,7 +480,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         } catch (RequestServerException e) {
             // compatible mode: log error and continue
             if (e instanceof QueryException) {
-                LOG.error("XQueryException:" + ((QueryException) e).getFormatString());
+                LOG.error("QueryException:" + ((QueryException) e).getFormatString());
             } else {
                 LOG.error("RequestServerException:" + e.getMessage());
             }
