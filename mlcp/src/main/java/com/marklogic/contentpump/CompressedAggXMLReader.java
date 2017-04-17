@@ -56,7 +56,10 @@ public class CompressedAggXMLReader<VALUEIN> extends
         super.close();
         //close the zip
         if (zipIn != null) {
-            ((ZipInputStream)zipIn).closeStream();
+            if (zipIn instanceof ZipInputStream) {
+                ((ZipInputStream)zipIn).closeStream();
+            }
+            zipIn.close();
         }
     }
 
