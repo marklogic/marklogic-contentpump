@@ -21,12 +21,13 @@ The Hadoop Connector is an extension to Hadoop’s MapReduce framework that allo
 
 ## Release Note
 
-### What's New in mlcp and Hadoop Connector 9.0-EA4
+### What's New in mlcp and Hadoop Connector 9.0.1
 
-- SSL Support
-- server local-disk failover support on import
-- new option to restrict mlcp to only connect to user-specified list of hosts
-- bug fixes
+- New option to enable SSL communication
+- Survive server node failover events
+- New option to run behind a load balancer or firewall
+- Server-side transform in batches
+- Get and set document permission, collection and metadata in server-side transformation
 
 ## Getting Started
 
