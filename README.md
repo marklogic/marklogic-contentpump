@@ -28,6 +28,7 @@ The Hadoop Connector is an extension to Hadoop’s MapReduce framework that allo
 - Survive server node failover events
 - Server-side transform in batches
 - Get and set document permission, collection and metadata in server-side transformation
+- Performance improvements and bug fixes
 
 ## Getting Started
 
