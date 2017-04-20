@@ -106,6 +106,8 @@ implements MarkLogicConstants {
 
     protected final int maxSleepTime = 60000;
 
+    protected boolean initialized;
+
     public MarkLogicRecordReader(Configuration conf) {
         this.conf = conf;
     }
@@ -241,7 +243,9 @@ implements MarkLogicConstants {
         }
         retry = 0;
         sleepTime = 100;
+        initialized = false;
         init();
+        initialized = true;
     }
         
     /* in case of failover, use init() instead of initialize() for retry */
@@ -394,13 +398,13 @@ implements MarkLogicConstants {
             LOG.error(e);
             throw new IOException(e);
         } catch (RequestException e) {
-            if (curForest != -1 && retry < maxRetries) {
+            if (curForest != -1 && initialized && retry < maxRetries) {
                 // failover
                 try {
                     Thread.sleep(sleepTime);
                 } catch (Exception e2) {
                 }
-                sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+                sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
                 curForest = (curForest+1)%replicas.size();
                 continue;
@@ -435,7 +439,7 @@ implements MarkLogicConstants {
                         Thread.sleep(sleepTime);
                     } catch (Exception e2) {
                     }
-                    sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+                    sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
                     curForest = (curForest+1)%replicas.size();
                     init();
