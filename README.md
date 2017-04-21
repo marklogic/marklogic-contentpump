@@ -8,11 +8,11 @@ MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest w
 * Archive and restore database contents across environments
 * Export data from a database to a file system
 * Copy subsets of data between databases
-* Load documents from HDFS, including Hadoop `SequenceFile`s
+* Load documents from HDFS, including Hadoop SequenceFiles
 
 You can run mlcp across many threads on a single machine or across many nodes in a Hadoop cluster.
 
-The Hadoop Connector is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. mlcp uses the Hadoop Connector internally, but it can also be used to build Hadoop MapReduce jobs that interact with MarkLogic, outside of mlcp, such as in a larger Hadoop application. Core features of the  Hadoop Connector include:
+The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. Use the Hadoop Connector to build Hadoop MapReduce jobs that interact with MarkLogic. The Hadoop Connector is also used by mlcp. Core features of the  Hadoop Connector include:
 
 * Process data in MarkLogic with Hadoop MapReduce for bulk analytics or transformation
 * Persist data from Hadoop to MarkLogic for query and update
@@ -21,12 +21,14 @@ The Hadoop Connector is an extension to Hadoop’s MapReduce framework that allo
 
 ## Release Note
 
-### What's New in mlcp and Hadoop Connector 9.0-EA4
+### What's New in mlcp and Hadoop Connector 9.0
 
-- SSL Support
-- server local-disk failover support on import
-- new option to restrict mlcp to only connect to user-specified list of hosts
-- bug fixes
+- New option to enable SSL communication
+- New option to run behind a load balancer or firewall
+- Survive server node failover events
+- Server-side transform in batches
+- Get and set document permission, collection and metadata in server-side transformation
+- Performance improvements and bug fixes
 
 ## Getting Started
 
@@ -46,7 +48,7 @@ Wiki pages of this project contain useful information when you work on developme
 
 ## Required Software
 
-- [Required Software for the Hadoop Connector](http://pubs.marklogic.com:8011/9.0/guide/mapreduce/quickstart#id_78738)
+- [Required Software for the Hadoop Connector](http://docs.marklogic.com/guide/mapreduce/quickstart#id_78738)
 - [Required Software for mlcp](http://pubs.marklogic.com:8011/9.0/guide/mlcp/install#id_44231)
 - [Apache Maven](https://maven.apache.org/) (version >= 3.03) is required to build mlcp and the Hadoop Connector.
 
@@ -60,7 +62,7 @@ $ cd marklogic-contentpump
 $ mvn clean package -DskipTests=true
 ```
 
-The build writes to the respective **deliverable** directories under the top-level `./mlcp/` and `./mapreduce/` directories.
+The build writes to the respective **deliverable** directory under the top-level `./mlcp/` and `./mapreduce/` directories.
 
 Alternatively, you can build mlcp and the Hadoop Connector independently from each component’s root directory (i.e. `./mlcp/` and `./mapreduce/`) with the above command. *Note that mlcp depends on the Hadoop Connector*, so a successful build of the Hadoop Connector is required to build mlcp.
 
@@ -74,7 +76,7 @@ The unit tests included in this repository are designed to provide illustrative 
 $ mvn test
 ```
 
-For detailed information about running unit tests, see [Guideline to Run Tests](https://github.com/marklogic/marklogic-contentpump/wiki/Guideline-to-Run-Tests).
+For detailed information about running unit tests, see [Guideline to Run Tests](https://github.com/marklogic/marklogic-contentpump/wiki/Guide-to-Running-Tests).
 
 ## Have a question? Need help?
 
