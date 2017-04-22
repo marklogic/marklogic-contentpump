@@ -316,7 +316,10 @@ public class DatabaseContentWriter<VALUE> extends
                     if (sessions[sid] == null) {
                         sessions[sid] = getSession(i, false);
                     }
-                    insertBatch(remainder, sid);
+                    try {
+                        insertBatch(remainder, sid);
+                    } catch (Exception e) {
+                    }
                     stmtCounts[sid]++;
                     if (!isCopyProps) {
                         continue;
