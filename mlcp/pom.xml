@@ -44,13 +44,13 @@
   </parent>
 
   <properties>
+    <versionString>10.0</versionString>
+    <xccVersion>${versionString}</xccVersion>
+    <hadoopConnectorVersion>2.3</hadoopConnectorVersion>
     <skipTests>false</skipTests>
     <testExcludes>**/*TestDistributed*</testExcludes>
-    <hadoopConnectorVersion>2.3</hadoopConnectorVersion>
-    <hadoopConnectorBaseDir>${basedir}/../mapreduce</hadoopConnectorBaseDir>
-    <xccVersion>10.0</xccVersion>
-    <versionString>10.0</versionString>
     <bundleArtifact>apache</bundleArtifact>
+    <hadoopConnectorBaseDir>${basedir}/../mapreduce</hadoopConnectorBaseDir>
 
     <!-- Settings related to unit test -->
     <contentpumpHome>${project.build.directory}/mlcp-${versionString}-lib</contentpumpHome>
@@ -59,6 +59,15 @@
     <copyDbPort>6276</copyDbPort>
     <testDb>mlcp-unittest-db</testDb>
     <copyDb>mlcp-unittest-copy-db</copyDb>
+
+    <!-- Properties related to JavaDoc -->
+    <productName>MarkLogic Content Pump</productName>
+    <productNameShort>MLCP</productNameShort>
+    <dateString>${maven.build.timestamp}</dateString>
+    <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+    <dateString>${maven.build.timestamp}</dateString>
+    <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+    <javadocCopyrightMessage>Copyright &amp;copy; ${dateString} MarkLogic Corporation. All Rights Reserved.</javadocCopyrightMessage>
   </properties>
 
   <repositories>
@@ -72,6 +81,9 @@
 
   <build>
     <plugins>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+      </plugin>
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
       </plugin>
@@ -104,6 +116,9 @@
           <source>1.7</source>
           <target>1.7</target>
         </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-javadoc-plugin</artifactId>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
