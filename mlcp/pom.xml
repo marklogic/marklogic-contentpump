@@ -196,6 +196,15 @@
 
   <profiles>
     <profile>
+      <id>disable-java8-doclint</id>
+      <activation>
+        <jdk>[1.8,)</jdk>
+      </activation>
+      <properties>
+        <additionalparam>-Xdoclint:none</additionalparam>
+      </properties>
+    </profile>
+    <profile>
       <!--  Run tests in distributed mode, which means distributed tests will also be run -->
       <id>distributed</id>
       <properties>
