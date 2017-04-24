@@ -38,6 +38,7 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 /**
@@ -105,8 +106,6 @@ implements MarkLogicConstants {
     protected int sleepTime;
 
     protected final int maxSleepTime = 60000;
-
-    protected boolean initialized;
 
     public MarkLogicRecordReader(Configuration conf) {
         this.conf = conf;
@@ -243,9 +242,7 @@ implements MarkLogicConstants {
         }
         retry = 0;
         sleepTime = 100;
-        initialized = false;
         init();
-        initialized = true;
     }
         
     /* in case of failover, use init() instead of initialize() for retry */
@@ -397,8 +394,12 @@ implements MarkLogicConstants {
         } catch (XccConfigException e) {
             LOG.error(e);
             throw new IOException(e);
+        } catch (QueryException e) {
+            LOG.error(e);
+            throw new IOException(e);
         } catch (RequestException e) {
-            if (curForest != -1 && initialized && retry < maxRetries) {
+            LOG.error("RequestException:" + e);
+            if (curForest != -1 && retry < maxRetries) {
                 // failover
                 try {
                     Thread.sleep(sleepTime);
