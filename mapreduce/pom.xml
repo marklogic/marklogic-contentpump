@@ -4,7 +4,7 @@
   <groupId>com.marklogic</groupId>
   <artifactId>marklogic-mapreduce2</artifactId>
   <version>2.3</version>
-  <name>${mapreduceProductName}</name>
+  <name>${productName}</name>
   <description>MarkLogic Connector for Hadoop MapReduce</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
   <packaging>jar</packaging>
@@ -45,10 +45,10 @@
 
   <properties>
     <!-- Global definitions -->
-    <mapreduceProductName>MarkLogic Connector for Hadoop</mapreduceProductName>
-    <mapreduceProductNameShort>MarkLogic Connector for Hadoop</mapreduceProductNameShort>
-    <versionNumberString>2.3</versionNumberString>
-    <jarVersionNumberString>${versionNumberString}</jarVersionNumberString>
+    <productName>MarkLogic Connector for Hadoop</productName>
+    <productNameShort>MarkLogic Connector for Hadoop</productNameShort>
+    <versionString>2.3</versionString>
+    <jarVersionNumberString>${versionString}</jarVersionNumberString>
     <dateString>${maven.build.timestamp}</dateString>
     <libdir>${basedir}/src/lib</libdir>
     <skipTests>true</skipTests>
@@ -65,17 +65,11 @@
     <mapreduceExamplesDir>${javaSource}/com/marklogic/mapreduce/examples</mapreduceExamplesDir>
     <mapreduceJavadocExamplesDir>${javaDocDir}/com/marklogic/mapreduce/examples/doc-files</mapreduceJavadocExamplesDir>
     <mapreduceJavadocLoggingPropsDir>${javaDocDir}/com/marklogic/mapreduce/doc-files</mapreduceJavadocLoggingPropsDir>
+    <overviewFile>src/main/java/overview.html</overviewFile>
 
     <!-- Configurable flags that will affect how targets run -->
     <compileDebugSymbolsFlag>true</compileDebugSymbolsFlag>
   </properties>
-
-  <!-- repositories>
-    <repository>
-      <id>redhad-ga</id>
-      <url>https://maven.repository.redhat.com/ga/</url>
-    </repository>
-  </repositories -->
 
   <profiles>
     <profile>
@@ -146,7 +140,7 @@
             <manifestEntries>
               <Vendor>MarkLogic Corporation</Vendor>
               <Description>Hadoop Connector for Java</Description>
-              <Build-Version>${versionNumberString}</Build-Version>
+              <Build-Version>${versionString}</Build-Version>
               <Build-Data>${thisdate}</Build-Data>
             </manifestEntries>
           </archive>
@@ -192,7 +186,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>${deliverableName}-${versionNumberString}</finalName>
+              <finalName>${deliverableName}-${versionString}</finalName>
               <appendAssemblyId>false</appendAssemblyId>
               <descriptors>
                 <descriptor>src/assemble/bindist.xml</descriptor>
@@ -206,7 +200,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>${deliverableName}-${versionNumberString}</finalName>
+              <finalName>${deliverableName}-${versionString}</finalName>
               <descriptors>
                 <descriptor>src/assemble/srcdist.xml</descriptor>
               </descriptors>

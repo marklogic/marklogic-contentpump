@@ -68,6 +68,7 @@
     <dateString>${maven.build.timestamp}</dateString>
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
     <javadocCopyrightMessage>Copyright &amp;copy; ${dateString} MarkLogic Corporation. All Rights Reserved.</javadocCopyrightMessage>
+    <overviewFile></overviewFile>
   </properties>
 
   <repositories>
