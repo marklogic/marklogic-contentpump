@@ -505,6 +505,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 if (sleepTime > maxSleepTime)
                     sleepTime = maxSleepTime;
 
+                sessions[id].close();
                 sessions[id] = getSession(id, true);
                 queries[id] = getAdhocQuery(id);
                 queries[id].setNewVariables(uriName, uriList);

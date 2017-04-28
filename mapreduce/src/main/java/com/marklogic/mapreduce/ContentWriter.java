@@ -515,7 +515,7 @@ implements MarkLogicConstants {
                 LOG.error(e.getFormatString());
 
                 // necessary to roll back in certain scenarios.
-                if (needCommit && !commitUris[id].isEmpty()) {
+                if (needCommit) {
                     rollback(id);
                 }
 
@@ -550,7 +550,7 @@ implements MarkLogicConstants {
                 } else {
                     LOG.error(e.getMessage());
                 }
-                if (needCommit && !commitUris[id].isEmpty()) {
+                if (needCommit) {
                     rollback(id);
                 }
                 if (t < maxRetries) {
@@ -567,7 +567,7 @@ implements MarkLogicConstants {
                 }
                 // TODO: We think we should throw exception now.
             } catch (Exception e) {
-                if (needCommit && !commitUris[id].isEmpty()) {
+                if (needCommit) {
                     rollback(id);
                 }
                 if (t < maxRetries) {
@@ -595,35 +595,20 @@ implements MarkLogicConstants {
     protected void rollback(int id) throws IOException {
         try {
             sessions[id].rollback();
-            failed += commitUris[id].size();
-            for (DocumentURI failedUri : commitUris[id]) {
-                LOG.warn("Failed document: " + failedUri);
-            }
-            commitUris[id].clear();
-            if (countBased) {
-                rollbackCount(id);
-            }
-        } catch (RequestServerException e) {
-            LOG.error("Error rolling back transaction", e);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(e);
-            }
-            failed += commitUris[id].size();
-            for (DocumentURI failedUri : commitUris[id]) {
-                LOG.warn("Failed document: " + failedUri);
-            }
-            commitUris[id].clear();
-        } catch (RequestException e) {
+        } catch (Exception e) {
             LOG.error("Error rolling back transaction " + e.getMessage());
             if (LOG.isDebugEnabled()) {
                 LOG.debug(e);
             }
+        } finally {
             if (countBased) {
                 rollbackCount(id);
             }
             failed += commitUris[id].size();
+            for (DocumentURI failedUri : commitUris[id]) {
+                LOG.warn("Failed document: " + failedUri);
+            }
             commitUris[id].clear();
-            throw new IOException(e);
         }
     }
 
@@ -647,7 +632,7 @@ implements MarkLogicConstants {
                 // log error and continue on RequestServerException
                 LOG.error(e.getFormatString());
 
-                if (needCommit && !commitUris[id].isEmpty()) {
+                if (needCommit) {
                     rollback(id);
                 }
 
@@ -686,16 +671,13 @@ implements MarkLogicConstants {
                 DocumentURI failedUri = pendingUris[id].remove(content.getUri());
                 LOG.warn("Failed document " + failedUri);
             } catch (RequestException e) {
-                if (needCommit && !commitUris[id].isEmpty()) {
+                if (needCommit) {
                     rollback(id);
                 }
                 if (t < maxRetries) {
+                    sessions[id].close();
                     sessions[id] = getSession(id, true);
                     continue;
-                }
-
-                if (countBased) {
-                    rollbackCount(id);
                 }
                 pendingUris[id].clear();
                 throw new IOException(e);

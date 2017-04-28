@@ -124,6 +124,54 @@
           <artifactId>maven-antrun-plugin</artifactId>
           <version>1.8</version>
         </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-source-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.10.3</version>
+          <configuration>
+            <header>${productNameShort} ${versionString}</header>
+            <author>false</author>
+            <overview>${overviewFile}</overview>
+            <doctitle>${productName} Version ${versionString}</doctitle>
+            <windowtitle>${productName} v${versionString}</windowtitle>
+            <outputDirectory>${project.build.directory}/javadoc</outputDirectory>
+            <reportOutputDirectory>${project.reporting.outputDirectory}/javadoc</reportOutputDirectory>
+            <sourcePath>src</sourcePath>
+            <bottom><![CDATA[
+              <i>${javadocCopyrightMessage}</i>
+              <p>Complete online documentation for MarkLogic Server,
+                XQuery and related components may be found at
+                <a href="http://developer.marklogic.com/pubs/"
+                  target="mldocs">developer.marklogic.com</a><p>
+                  ]]>
+                </bottom>
+              </configuration>
+              <executions>
+                <execution>
+                  <id>compile-javadocs</id>
+                  <phase>compile</phase>
+                  <goals><goal>javadoc</goal></goals>
+                </execution>
+                <execution>
+                  <id>attach-javadocs</id>
+                  <goals>
+                    <goal>jar</goal>
+                  </goals>
+                </execution>
+              </executions>
+        </plugin>
       </plugins>
     </pluginManagement>
   </build>

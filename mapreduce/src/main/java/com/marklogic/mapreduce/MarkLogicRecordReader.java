@@ -38,6 +38,7 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 /**
@@ -393,14 +394,18 @@ implements MarkLogicConstants {
         } catch (XccConfigException e) {
             LOG.error(e);
             throw new IOException(e);
+        } catch (QueryException e) {
+            LOG.error(e);
+            throw new IOException(e);
         } catch (RequestException e) {
+            LOG.error("RequestException:" + e);
             if (curForest != -1 && retry < maxRetries) {
                 // failover
                 try {
                     InternalUtilities.sleep(sleepTime);
                 } catch (Exception e2) {
                 }
-                sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+                sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
                 curForest = (curForest+1)%replicas.size();
                 continue;
@@ -435,7 +440,7 @@ implements MarkLogicConstants {
                         InternalUtilities.sleep(sleepTime);
                     } catch (Exception e2) {
                     }
-                    sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+                    sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
                     curForest = (curForest+1)%replicas.size();
                     init();

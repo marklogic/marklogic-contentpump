@@ -44,6 +44,7 @@ import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultItem;
+import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.JsonItem;
@@ -272,6 +273,9 @@ public class DatabaseContentReader extends
         } catch (XccConfigException e) {
             LOG.error(e);
             throw new IOException(e);
+        } catch (QueryException e) {
+            LOG.error(e);
+            throw new IOException(e);
         } catch (RequestException e) {
             if (curForest != -1 && retry < maxRetries) {
                 // failover
@@ -279,7 +283,7 @@ public class DatabaseContentReader extends
                     Thread.sleep(sleepTime);
                 } catch (Exception e2) {
                 }
-                sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+                sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
                 curForest = (curForest+1)%replicas.size();
                 continue;
@@ -530,7 +534,7 @@ public class DatabaseContentReader extends
                             Thread.sleep(sleepTime);
                         } catch (Exception e2) {
                         }
-                        sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+                        sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
                         curForest = (curForest+1)%replicas.size();
                         init();
@@ -595,7 +599,7 @@ public class DatabaseContentReader extends
                             Thread.sleep(sleepTime);
                         } catch (Exception e2) {
                         }
-                        sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+                        sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
                         curForest = (curForest+1)%replicas.size();
                         init();
@@ -608,7 +612,7 @@ public class DatabaseContentReader extends
                             Thread.sleep(sleepTime);
                         } catch (Exception e2) {
                         }
-                        sleepTime = Math.max(sleepTime * 2,maxSleepTime);
+                        sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
                         curForest = (curForest+1)%replicas.size();
                         init();
