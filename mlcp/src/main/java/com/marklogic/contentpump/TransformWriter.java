@@ -452,8 +452,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         return q;
     }
     
-    protected void insertBatch(int id, XdmValue[] uriList, XdmValue[] valueList,
-        XdmValue[] optionsValList) throws IOException
+    protected void insertBatch(int id, XdmValue[] uriList, 
+            XdmValue[] valueList, XdmValue[] optionsValList) 
+    throws IOException
     {
         int t = 0;
         final int maxRetries = 15;
@@ -480,7 +481,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         } catch (RequestServerException e) {
             // compatible mode: log error and continue
             if (e instanceof QueryException) {
-                LOG.error("QueryException:" + ((QueryException) e).getFormatString());
+                LOG.error("QueryException:" + 
+                        ((QueryException) e).getFormatString());
             } else {
                 LOG.error("RequestServerException:" + e.getMessage());
             }
@@ -496,7 +498,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             rollback(id);
             if (t < maxRetries) {
                 try {
-                    Thread.sleep(sleepTime);
+                    InternalUtilities.sleep(sleepTime);
                 } catch (Exception e2) {
                 }
                 sleepTime = sleepTime * 2;

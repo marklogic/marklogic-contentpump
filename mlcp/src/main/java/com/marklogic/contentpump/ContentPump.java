@@ -393,6 +393,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         
         public void run() {
             shutdown = true;
+            // set system property for hadoop connector classes
+            System.setProperty("mlcp.shutdown", "1");
             try {
                 synchronized (ContentPump.class) {
                     boolean needToWait = false;
