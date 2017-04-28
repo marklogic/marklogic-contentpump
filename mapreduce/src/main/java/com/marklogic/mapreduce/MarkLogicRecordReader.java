@@ -402,7 +402,7 @@ implements MarkLogicConstants {
             if (curForest != -1 && retry < maxRetries) {
                 // failover
                 try {
-                    Thread.sleep(sleepTime);
+                    InternalUtilities.sleep(sleepTime);
                 } catch (Exception e2) {
                 }
                 sleepTime = Math.min(sleepTime * 2,maxSleepTime);
@@ -437,7 +437,7 @@ implements MarkLogicConstants {
             } catch (RuntimeException e) {
                 if (curForest != -1 && retry < maxRetries) {
                     try {
-                        Thread.sleep(sleepTime);
+                        InternalUtilities.sleep(sleepTime);
                     } catch (Exception e2) {
                     }
                     sleepTime = Math.min(sleepTime * 2,maxSleepTime);
