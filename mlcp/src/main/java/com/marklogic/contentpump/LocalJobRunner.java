@@ -273,15 +273,8 @@ public class LocalJobRunner implements ConfigConstants {
             for (Future<Object> f : taskList) {
                 f.get();
             }
-            pool.shutdown(); // Disable new tasks from being submitted
-            try {
-                while (!pool.awaitTermination(1, TimeUnit.DAYS));
-            } catch (InterruptedException ie) {
-                // (Re-)Cancel if current thread also interrupted
-                pool.shutdownNow();
-                // Preserve interrupt status
-                Thread.currentThread().interrupt();
-            }
+            pool.shutdown();
+            while (!pool.awaitTermination(1, TimeUnit.DAYS));
         } 
         job.setJobState(JobStatus.State.SUCCEEDED);
         monitor.interrupt();
