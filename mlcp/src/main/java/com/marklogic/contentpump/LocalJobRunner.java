@@ -270,11 +270,8 @@ public class LocalJobRunner implements ConfigConstants {
         }
         // wait till all tasks are done
         if (pool != null) {
-            for (Future<Object> f : taskList) {
-                f.get();
-            }
             pool.shutdown();
-            while (!pool.awaitTermination(1, TimeUnit.DAYS));
+            while (!pool.awaitTermination(1, TimeUnit.HOURS));
         } 
         job.setJobState(JobStatus.State.SUCCEEDED);
         monitor.interrupt();
