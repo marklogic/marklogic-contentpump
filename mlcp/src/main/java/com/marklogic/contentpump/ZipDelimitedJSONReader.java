@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
  */
 package com.marklogic.contentpump;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -94,20 +93,8 @@ public class ZipDelimitedJSONReader extends DelimitedJSONReader<Text> {
                 continue;
             }
             subId = currZipEntry.getName();
-            long size = currZipEntry.getSize();
-            if (size == -1) {
-                byteArrayOStream = new ByteArrayOutputStream();
-            } else {
-                byteArrayOStream = new ByteArrayOutputStream((int) size);
-            }
-            int numOfBytes = -1;
-            while ((numOfBytes = zipIStream.read(buf, 0, buf.length)) != -1) {
-                byteArrayOStream.write(buf, 0, numOfBytes);
-            }
             configFileNameAsCollection(conf, file);
-            instream = new InputStreamReader(
-                    new ByteArrayInputStream(byteArrayOStream.toByteArray()), encoding);
-            byteArrayOStream.close();
+            instream = new InputStreamReader(zipIStream, encoding);
             reader = new LineNumberReader(instream);        
             return true;
         }   

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobContext;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -347,13 +348,27 @@ public enum Command implements ConfigConstants {
             type.applyConfigOptions(conf, cmdline);
             
             // construct a job
-            Job job = Job.getInstance(conf);
-            job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
-            job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
+            Job job = LocalJob.getInstance(conf);
+            
+            Class<?> inputFormatClass = 
+                    conf.getClass(JobContext.INPUT_FORMAT_CLASS_ATTR, null);
+            if (inputFormatClass == null) {
+                job.setInputFormatClass(type.getInputFormatClass(cmdline, conf));
+            }
+            Class<?> outputFormatClass = 
+                    conf.getClass(JobContext.OUTPUT_FORMAT_CLASS_ATTR, null);
+            if (outputFormatClass == null) {
+                job.setOutputFormatClass(type.getOutputFormatClass(cmdline, conf));
+            }
+            
             job.setJobName(getNewJobName(conf));
 
             // set mapper class
-            setMapperClass(job, conf, cmdline);
+            Class<?> mapperClass = 
+                    conf.getClass(JobContext.MAP_CLASS_ATTR, null);
+            if (mapperClass == null) { 
+                setMapperClass(job, conf, cmdline);
+            }
             
             if (cmdline.hasOption(INPUT_FILE_PATH)) {
                 String path = cmdline.getOptionValue(INPUT_FILE_PATH);
@@ -598,17 +613,39 @@ public enum Command implements ConfigConstants {
                 String password = cmdline.getOptionValue(PASSWORD);
                 conf.set(MarkLogicConstants.OUTPUT_PASSWORD, password);
             }
-            if (cmdline.hasOption(HOST)) {
-                String host = cmdline.getOptionValue(HOST);
-                conf.set(MarkLogicConstants.OUTPUT_HOST, host);
-            }
+            String port = null;
             if (cmdline.hasOption(PORT)) {
-                String port = cmdline.getOptionValue(PORT);
+                port = cmdline.getOptionValue(PORT);
                 conf.set(MarkLogicConstants.OUTPUT_PORT, port);
+            }
+            if (cmdline.hasOption(HOST)) {
+                String hosts = cmdline.getOptionValue(HOST);
+                InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
+                conf.set(MarkLogicConstants.OUTPUT_HOST, hosts);
+            }
+            if (cmdline.hasOption(RESTRICT_HOSTS)) {
+                String restrict = cmdline.getOptionValue(RESTRICT_HOSTS);
+                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
+                } else if (!"false".equalsIgnoreCase(restrict)) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                                    RESTRICT_OUTPUT_HOSTS + ": " + restrict);
+                }
             }
             if (cmdline.hasOption(DATABASE)) {
                 String db = cmdline.getOptionValue(DATABASE);
                 conf.set(MarkLogicConstants.OUTPUT_DATABASE_NAME, db);
+            }
+            if (cmdline.hasOption(SSL)) {
+                String arg = cmdline.getOptionValue(SSL);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL
+                            + ": " + arg);
+                }
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
@@ -711,10 +748,6 @@ public enum Command implements ConfigConstants {
                     throw new IllegalArgumentException(
                         "Cannot ingest RDF into temporal collection");
                 }
-            	if (contentType != null && ContentType.BINARY == contentType) {
-                    throw new IllegalArgumentException(
-                        "Cannot ingest BINARY into temporal collection");
-                }
             }
             if (cmdline.hasOption(TOLERATE_ERRORS)) {
                 String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
@@ -730,8 +763,9 @@ public enum Command implements ConfigConstants {
             }
             
             applyPartitionConfigOptions(conf, cmdline);
-            
+        
             applyModuleConfigOptions(conf, cmdline);
+            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
             
             if (cmdline.hasOption(SPLIT_INPUT)) {
                 String arg = cmdline.getOptionValue(SPLIT_INPUT);
@@ -906,16 +940,39 @@ public enum Command implements ConfigConstants {
             }
             
             // construct a job
-            Job job = Job.getInstance(conf);
+            Job job = LocalJob.getInstance(conf);
             job.setJarByClass(this.getClass());
-            job.setInputFormatClass(outputType.getInputFormatClass());
-
-            setMapperClass(job, conf, cmdline);
-            job.setMapOutputKeyClass(DocumentURI.class);
-            job.setMapOutputValueClass(MarkLogicDocument.class);
-            job.setOutputFormatClass(
+            Class<?> inputFormatClass = 
+                    conf.getClass(JobContext.INPUT_FORMAT_CLASS_ATTR, null);
+            if (inputFormatClass == null) {
+                job.setInputFormatClass(outputType.getInputFormatClass());
+            }
+            Class<?> mapperClass = 
+                    conf.getClass(JobContext.MAP_CLASS_ATTR, null);
+            if (mapperClass == null) {
+                setMapperClass(job, conf, cmdline);
+            }
+            Class<?> mapOutputKeyClass = 
+                    conf.getClass(JobContext.MAP_OUTPUT_KEY_CLASS, null);
+            if (mapOutputKeyClass == null) {
+                job.setMapOutputKeyClass(DocumentURI.class);
+            }
+            Class<?> mapOutputValueClass = 
+                    conf.getClass(JobContext.MAP_OUTPUT_VALUE_CLASS, null);
+            if (mapOutputValueClass == null) {
+                job.setMapOutputValueClass(MarkLogicDocument.class);
+            }
+            Class<?> outputFormatClass = 
+                    conf.getClass(JobContext.OUTPUT_FORMAT_CLASS_ATTR, null);
+            if (outputFormatClass == null) {
+                job.setOutputFormatClass(
                             outputType.getOutputFormatClass(cmdline));
-            job.setOutputKeyClass(DocumentURI.class);
+            }
+            Class<?> outputKeyClass = 
+                    conf.getClass(JobContext.OUTPUT_KEY_CLASS, null);
+            if (outputKeyClass == null) {
+                job.setOutputKeyClass(DocumentURI.class);
+            }
             job.setJobName(getNewJobName(conf));
 
             AuditUtil.prepareAuditMlcpStart(job, this.name(), cmdline);
@@ -948,13 +1005,25 @@ public enum Command implements ConfigConstants {
                     conf.set(MarkLogicConstants.INDENTED, indent.name());
                 }                
             }
-            if (cmdline.hasOption(HOST)) {
-                String host = cmdline.getOptionValue(HOST);
-                conf.set(MarkLogicConstants.INPUT_HOST, host);
-            }
+            String port = null;
             if (cmdline.hasOption(PORT)) {
-                String port = cmdline.getOptionValue(PORT);
+                port = cmdline.getOptionValue(PORT);
                 conf.set(MarkLogicConstants.INPUT_PORT, port);
+            }
+            if (cmdline.hasOption(HOST)) {
+                String hosts = cmdline.getOptionValue(HOST);
+                InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
+                conf.set(MarkLogicConstants.INPUT_HOST, hosts);
+            }
+            if (cmdline.hasOption(RESTRICT_HOSTS)) {
+                String restrict = cmdline.getOptionValue(RESTRICT_HOSTS);
+                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                    conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
+                } else if (!"false".equalsIgnoreCase(restrict)) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                                    RESTRICT_INPUT_HOSTS + ": " + restrict);
+                }
             }
             if (cmdline.hasOption(USERNAME)) {
                 String user = cmdline.getOptionValue(USERNAME);
@@ -967,6 +1036,16 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(DATABASE)) {
                 String db = cmdline.getOptionValue(DATABASE);
                 conf.set(MarkLogicConstants.INPUT_DATABASE_NAME, db);
+            }
+            if (cmdline.hasOption(SSL)) {
+                String arg = cmdline.getOptionValue(SSL);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL
+                            + ": " + arg);
+                } 
             }
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
@@ -1024,7 +1103,8 @@ public enum Command implements ConfigConstants {
             Option inputHost = OptionBuilder
                 .withArgName("host")
                 .hasArg()
-                .withDescription("Host of the input MarkLogic Server")
+                .withDescription("Comma-separated list of hosts of the input "
+                        + "MarkLogic Server")
                 .create(INPUT_HOST);
             inputHost.setRequired(true);
             options.addOption(inputHost);
@@ -1040,6 +1120,19 @@ public enum Command implements ConfigConstants {
                 .withDescription("Database of the input MarkLogic Server")
                 .create(INPUT_DATABASE);
             options.addOption(inputDB);
+            Option restrictInputHosts = OptionBuilder
+                .withArgName("restrict hosts")
+                .hasOptionalArg()
+                .withDescription("Whether to restrict the input hosts mlcp connects to")
+                .create(RESTRICT_INPUT_HOSTS);
+            options.addOption(restrictInputHosts);
+            Option inputSSL = OptionBuilder
+                 .withArgName("ssl")
+                 .hasOptionalArg()
+                 .withDescription(
+                 "Use ssl to encrypt communication with input MarkLogic Server")
+                 .create(INPUT_SSL);
+            options.addOption(inputSSL);
             Option outputUsername = OptionBuilder
                 .withArgName("username")
                 .hasArg()
@@ -1055,7 +1148,8 @@ public enum Command implements ConfigConstants {
             Option outputHost = OptionBuilder
                 .withArgName("host")
                 .hasArg()
-                .withDescription("Host of the output MarkLogic Server")
+                .withDescription("Comma-separated list of hosts of the output "
+                        + "MarkLogic Server")
                 .create(OUTPUT_HOST);
             outputHost.setRequired(true);
             options.addOption(outputHost);
@@ -1071,6 +1165,19 @@ public enum Command implements ConfigConstants {
                 .withDescription("Database of the output MarkLogic Server")
                 .create(OUTPUT_DATABASE);
             options.addOption(outputDB);
+            Option restrictOutputHosts = OptionBuilder
+                .withArgName("restrict hosts")
+                .hasOptionalArg()
+                .withDescription("Whether to the restrict output hosts mlcp connects to")
+                .create(RESTRICT_OUTPUT_HOSTS);
+            options.addOption(restrictOutputHosts);
+            Option outputSSL = OptionBuilder
+                .withArgName("ssl")
+                .hasOptionalArg()
+                .withDescription(
+                "Use ssl to encryt communication with the output MarkLogic Server")
+                .create(OUTPUT_SSL);
+            options.addOption(outputSSL);
             Option tcf = OptionBuilder
                 .withArgName("String")
                 .hasArg()
@@ -1126,18 +1233,44 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 } 
             }
-            Job job = Job.getInstance(conf);
+            Job job = LocalJob.getInstance(conf);
             job.setJarByClass(this.getClass());
-            job.setInputFormatClass(DatabaseContentInputFormat.class);
-            job.setMapperClass(DocumentMapper.class);
-            job.setMapOutputKeyClass(DocumentURI.class);
-            job.setMapOutputValueClass(MarkLogicDocument.class);
-            if(cmdline.hasOption(TRANSFORM_MODULE)) {
-                job.setOutputFormatClass(DatabaseTransformOutputFormat.class);
-            } else {
-                job.setOutputFormatClass(DatabaseContentOutputFormat.class);
+            Class<?> inputFormatClass = 
+                    conf.getClass(JobContext.INPUT_FORMAT_CLASS_ATTR, null);
+            if (inputFormatClass == null) {
+                job.setInputFormatClass(DatabaseContentInputFormat.class);
             }
-            job.setOutputKeyClass(DocumentURI.class);
+            Class<?> mapperClass = 
+                    conf.getClass(JobContext.MAP_CLASS_ATTR, null);
+            if (mapperClass == null) {  
+                job.setMapperClass(DocumentMapper.class);
+            }
+            Class<?> mapOutputKeyClass = 
+                    conf.getClass(JobContext.MAP_OUTPUT_KEY_CLASS, null);
+            if (mapOutputKeyClass == null) {
+                job.setMapOutputKeyClass(DocumentURI.class);
+            }
+            Class<?> mapOutputValueClass = 
+                    conf.getClass(JobContext.MAP_OUTPUT_VALUE_CLASS, null);
+            if (mapOutputValueClass == null) {
+                job.setMapOutputValueClass(MarkLogicDocument.class);
+            }
+            Class<?> outputFormatClass = 
+                    conf.getClass(JobContext.OUTPUT_FORMAT_CLASS_ATTR, null);
+            if (outputFormatClass == null) {
+                if(cmdline.hasOption(TRANSFORM_MODULE)) {
+                    job.setOutputFormatClass(
+                            DatabaseTransformOutputFormat.class);
+                } else {
+                    job.setOutputFormatClass(
+                            DatabaseContentOutputFormat.class);
+                }
+            }
+            Class<?> outputKeyClass = 
+                    conf.getClass(JobContext.OUTPUT_KEY_CLASS, null);
+            if (outputKeyClass == null) {
+                job.setOutputKeyClass(DocumentURI.class);
+            }           
             job.setJobName(getNewJobName(conf));
 
             AuditUtil.prepareAuditMlcpStart(job, this.name(), cmdline);
@@ -1159,19 +1292,41 @@ public enum Command implements ConfigConstants {
                 String password = cmdline.getOptionValue(OUTPUT_PASSWORD);
                 conf.set(MarkLogicConstants.OUTPUT_PASSWORD, password);
             }
-            if (cmdline.hasOption(OUTPUT_HOST)) {
-                String host = cmdline.getOptionValue(OUTPUT_HOST);
-                conf.set(MarkLogicConstants.OUTPUT_HOST, host);
-            }
+            String outputPort = null;
             if (cmdline.hasOption(OUTPUT_PORT)) {
-                String port = cmdline.getOptionValue(OUTPUT_PORT);
-                conf.set(MarkLogicConstants.OUTPUT_PORT, port);
+                outputPort = cmdline.getOptionValue(OUTPUT_PORT);
+                conf.set(MarkLogicConstants.OUTPUT_PORT, outputPort);
+            }
+            if (cmdline.hasOption(OUTPUT_HOST)) {
+                String outputHosts = cmdline.getOptionValue(OUTPUT_HOST);
+                InternalUtilities.verifyHosts(
+                        outputHosts, outputPort==null?"8000":outputPort);
+                conf.set(MarkLogicConstants.OUTPUT_HOST, outputHosts);
             }
             if (cmdline.hasOption(OUTPUT_DATABASE)) {
                 String db = cmdline.getOptionValue(OUTPUT_DATABASE);
                 conf.set(MarkLogicConstants.OUTPUT_DATABASE_NAME, db);
             }
-
+            if (cmdline.hasOption(RESTRICT_OUTPUT_HOSTS)) {
+                String restrict = cmdline.getOptionValue(RESTRICT_OUTPUT_HOSTS);
+                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
+                } else if (!"false".equalsIgnoreCase(restrict)) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                                    RESTRICT_OUTPUT_HOSTS + ": " + restrict);
+                }
+            }
+            if (cmdline.hasOption(OUTPUT_SSL)) {
+                String arg = cmdline.getOptionValue(OUTPUT_SSL);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + OUTPUT_SSL
+                            + ": " + arg);
+                }
+            }
             if (cmdline.hasOption(INPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(INPUT_USERNAME);
                 conf.set(MarkLogicConstants.INPUT_USERNAME, username);
@@ -1180,17 +1335,40 @@ public enum Command implements ConfigConstants {
                 String password = cmdline.getOptionValue(INPUT_PASSWORD);
                 conf.set(MarkLogicConstants.INPUT_PASSWORD, password);
             }
-            if (cmdline.hasOption(INPUT_HOST)) {
-                String host = cmdline.getOptionValue(INPUT_HOST);
-                conf.set(MarkLogicConstants.INPUT_HOST, host);
-            }
+            String inputPort = null;
             if (cmdline.hasOption(INPUT_PORT)) {
-                String port = cmdline.getOptionValue(INPUT_PORT);
-                conf.set(MarkLogicConstants.INPUT_PORT, port);
+                inputPort = cmdline.getOptionValue(INPUT_PORT);
+                conf.set(MarkLogicConstants.INPUT_PORT, inputPort);
+            }
+            if (cmdline.hasOption(INPUT_HOST)) {
+                String inputHosts = cmdline.getOptionValue(INPUT_HOST);
+                InternalUtilities.verifyHosts(
+                        inputHosts, inputPort==null?"8000":inputPort);
+                conf.set(MarkLogicConstants.INPUT_HOST, inputHosts);
             }
             if (cmdline.hasOption(INPUT_DATABASE)) {
                 String db = cmdline.getOptionValue(INPUT_DATABASE);
                 conf.set(MarkLogicConstants.INPUT_DATABASE_NAME, db);
+            }
+            if (cmdline.hasOption(RESTRICT_INPUT_HOSTS)) {
+                String restrict = cmdline.getOptionValue(RESTRICT_INPUT_HOSTS);
+                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                    conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
+                } else if (!"false".equalsIgnoreCase(restrict)) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                                    RESTRICT_INPUT_HOSTS + ": " + restrict);
+                }
+            }
+            if (cmdline.hasOption(INPUT_SSL)) {
+                String arg = cmdline.getOptionValue(INPUT_SSL);
+                if (arg == null || arg.equalsIgnoreCase("true")){
+                    conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
+                } else if (!arg.equalsIgnoreCase("false")) {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + INPUT_SSL
+                            + ": " + arg);
+                }
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
@@ -1235,6 +1413,7 @@ public enum Command implements ConfigConstants {
             applyPartitionConfigOptions(conf, cmdline);
             
             applyModuleConfigOptions(conf, cmdline);
+            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
         }
 
         @Override
@@ -1335,7 +1514,7 @@ public enum Command implements ConfigConstants {
             applyConfigOptions(conf, cmdline);
             
             // construct a job
-            Job job = Job.getInstance(conf);
+            Job job = LocalJob.getInstance(conf);
             job.setInputFormatClass(ForestInputFormat.class);
             Class<? extends OutputFormat> outputFormatClass = 
                     Command.isOutputCompressed(cmdline) ?
@@ -1547,6 +1726,7 @@ public enum Command implements ConfigConstants {
             .create(OUTPUT_OVERRIDE_GRAPH);
         options.addOption(outputOverrideGraph);
     }
+    
     static void configCommonOutputOptions(Options options) {
         Option outputUriReplace = OptionBuilder
             .withArgName("list")
@@ -1608,7 +1788,7 @@ public enum Command implements ConfigConstants {
         Option host = OptionBuilder
             .withArgName(HOST)
             .hasArg()
-            .withDescription("Host of MarkLogic Server")
+            .withDescription("Comma-separated list of hosts of MarkLogic Server")
             .create(HOST);
         host.setRequired(true);
         options.addOption(host);
@@ -1624,6 +1804,18 @@ public enum Command implements ConfigConstants {
             .withDescription("Database of MarkLogic Server")
             .create(DATABASE);
         options.addOption(db);
+        Option restricHosts = OptionBuilder
+            .withArgName("true,false")
+            .hasOptionalArg()
+            .withDescription("Whether to restrict the hosts mlcp connects to")
+            .create(RESTRICT_HOSTS);
+        options.addOption(restricHosts);
+        Option ssl = OptionBuilder
+            .withArgName(SSL)
+            .hasOptionalArg()
+            .withDescription("Use SSL for encryted communication")
+            .create(SSL);
+        options.addOption(ssl);
     }
 
     static void configCopyOptions(Options options) {
@@ -1698,7 +1890,7 @@ public enum Command implements ConfigConstants {
             .create(TRANSFORM_FUNCTION);
         options.addOption(func);
         Option param = OptionBuilder.withArgName("String").hasArg()
-            .withDescription("Name of the transform function")
+            .withDescription("Parameters of the transform function")
             .create(TRANSFORM_PARAM);
         options.addOption(param);
     }
@@ -1748,7 +1940,6 @@ public enum Command implements ConfigConstants {
     static void applyModuleConfigOptions(Configuration conf,
         CommandLine cmdline) {
         if (cmdline.hasOption(TRANSFORM_MODULE)) {
-            applyBatchTxn(conf, cmdline, 1);
             if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false) == true) {
                 throw new UnsupportedOperationException(
                     "Server-side transformation can't work with streaming");
@@ -1768,8 +1959,6 @@ public enum Command implements ConfigConstants {
                 arg = cmdline.getOptionValue(TRANSFORM_PARAM);
                 conf.set(CONF_TRANSFORM_PARAM, arg);
             }
-        } else {
-            applyBatchTxn(conf, cmdline, MAX_BATCH_SIZE);
         }
     }
     
@@ -1940,8 +2129,7 @@ public enum Command implements ConfigConstants {
     static void applyBatchTxn(Configuration conf, CommandLine cmdline, 
             int maxBatch) {
         String batchSize = cmdline.getOptionValue(BATCH_SIZE);
-        int batch = MarkLogicConstants.DEFAULT_BATCH_SIZE > maxBatch ?
-                maxBatch : MarkLogicConstants.DEFAULT_BATCH_SIZE;
+        int batch;
         if (batchSize != null) {
             batch = Integer.decode(batchSize);
             if (batch > maxBatch) {
@@ -1949,8 +2137,11 @@ public enum Command implements ConfigConstants {
                         " is changed to " + maxBatch);
                 batch = maxBatch;
             }
-            conf.setInt(MarkLogicConstants.BATCH_SIZE, batch);
+        } else {
+            batch = MarkLogicConstants.DEFAULT_BATCH_SIZE > maxBatch ?
+                    maxBatch : MarkLogicConstants.DEFAULT_BATCH_SIZE;
         }
+        conf.setInt(MarkLogicConstants.BATCH_SIZE, batch);
 
         String txnSize = cmdline.getOptionValue(TRANSACTION_SIZE);
         if (txnSize != null) {

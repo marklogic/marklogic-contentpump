@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Test;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
+import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 
@@ -30,24 +31,24 @@ public class TestImportDocs {
             + " -output_collections test,ML"
             + " -fastload false"
             + " -output_uri_replace wiki,'wiki1'"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"ML\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.runQuery(Utils.getDbXccUri(),
+        result = Utils.runQuery(Utils.getTestDbXccUri(),
             "xdmp:directory(\"test/\", \"infinity\")");
         int count = 0;
         while (result.hasNext()) {
@@ -67,24 +68,24 @@ public class TestImportDocs {
             + " -output_uri_prefix test/"
             + " -output_collections test,ML  "
             + " -output_uri_replace wiki,'wiki1'"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"ML\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.runQuery(Utils.getDbXccUri(),
+        result = Utils.runQuery(Utils.getTestDbXccUri(),
             "xdmp:directory(\"test/\", \"infinity\")");
         int count = 0;
         while (result.hasNext()) {
@@ -105,21 +106,22 @@ public class TestImportDocs {
             + " -thread_count 1 -output_uri_prefix ABC"
             + " -fastload"
             + " -output_collections test,ML -document_type text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test
@@ -129,18 +131,18 @@ public class TestImportDocs {
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
             + " -thread_count 1 -output_uri_prefix ABC"
             + " -output_collections test,ML -document_type binary"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
@@ -149,7 +151,7 @@ public class TestImportDocs {
      
     @Test
     public void testImportTransformMixed() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"///AbacuS.xml"
@@ -164,30 +166,31 @@ public class TestImportDocs {
             + " -transform_function transform"
             + " -transform_module /lc.xqy"
             + " -transaction_size 10"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:doc()/node()[xdmp:node-kind(.) eq \"element\"])");
+            Utils.getTestDbXccUri(), "fn:count(fn:doc()/node()[xdmp:node-kind(.) eq \"element\"])");
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test
     public void testImportTransformBinary() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/2012-06-13_16-26-58_431.jpg"
@@ -199,18 +202,18 @@ public class TestImportDocs {
             + " -namespace test"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -transform_module /lc.xqy"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
@@ -218,24 +221,24 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransform25444() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/trans.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/trans.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/foo.0"
             + " -transform_namespace dmc"
             + " -transform_module /trans.xqy"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
@@ -243,7 +246,7 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransformText() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
@@ -256,18 +259,18 @@ public class TestImportDocs {
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -transform_param myparam"
             + " -transform_module /lc.xqy"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
@@ -281,18 +284,18 @@ public class TestImportDocs {
             + " -thread_count 1 -output_uri_prefix ABC"
             + " -output_collections test,ML -document_type XML"
             + " -input_file_pattern ^A.*"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("89", result.next().asString());
         Utils.closeSession();
@@ -316,18 +319,18 @@ public class TestImportDocs {
             + " -document_type XML"
             + " -output_directory /test -fastload false"
             + " -input_file_pattern ^A.*"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("89", result.next().asString());
         Utils.closeSession();
@@ -342,18 +345,18 @@ public class TestImportDocs {
             + " -thread_count 4 "
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
@@ -368,23 +371,24 @@ public class TestImportDocs {
             + " -thread_count 4 -fastload"
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         System.out.println(cmd);
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test
@@ -396,18 +400,18 @@ public class TestImportDocs {
             + " -thread_count 4 "
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
@@ -428,19 +432,19 @@ public class TestImportDocs {
             + " -thread_count 2 "
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         System.out.println(cmd);
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("186", result.next().asString());
@@ -461,18 +465,18 @@ public class TestImportDocs {
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML" 
             + " -thread_count_per_split 2"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("186", result.next().asString());
@@ -494,18 +498,18 @@ public class TestImportDocs {
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML" 
             + " -thread_count_per_split 1"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("186", result.next().asString());
@@ -526,18 +530,18 @@ public class TestImportDocs {
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML" 
             + " -thread_count_per_split 2"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("186", result.next().asString());
@@ -554,24 +558,24 @@ public class TestImportDocs {
             + " -input_compressed -input_compression_codec zip"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());
@@ -591,23 +595,23 @@ public class TestImportDocs {
             + " -thread_count 1 -content_encoding UTF-16LE"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML -document_type text"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getOnlyDocs(Utils.getDbXccUri());
+        result = Utils.getOnlyDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());
@@ -628,23 +632,23 @@ public class TestImportDocs {
             + " -thread_count 1 -content_encoding UTF-16LE"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getOnlyDocs(Utils.getDbXccUri());
+        result = Utils.getOnlyDocs(Utils.getTestDbXccUri());
 
         assertTrue(result.hasNext());
         InputStream is = result.next().asInputStream();
@@ -665,23 +669,23 @@ public class TestImportDocs {
             + " -thread_count 1 "
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getOnlyDocs(Utils.getDbXccUri());
+        result = Utils.getOnlyDocs(Utils.getTestDbXccUri());
 
         assertTrue(result.hasNext());
         InputStream is = result.next().asInputStream();
@@ -703,23 +707,23 @@ public class TestImportDocs {
             + " -thread_count 1 -document_type TEXT"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getOnlyDocs(Utils.getDbXccUri());
+        result = Utils.getOnlyDocs(Utils.getTestDbXccUri());
 
         assertTrue(result.hasNext());
         InputStream is = result.next().asInputStream();
@@ -778,23 +782,23 @@ public class TestImportDocs {
             + " -thread_count 1 "
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getOnlyDocs(Utils.getDbXccUri());
+        result = Utils.getOnlyDocs(Utils.getTestDbXccUri());
 
         assertTrue(result.hasNext());
         InputStream is = result.next().asInputStream();
@@ -831,23 +835,23 @@ public class TestImportDocs {
             + " -input_file_pattern doc108.*"
             + " -thread_count 1 -content_encoding UTF-8LE"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getOnlyDocs(Utils.getDbXccUri());
+        result = Utils.getOnlyDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());
@@ -868,23 +872,23 @@ public class TestImportDocs {
             + " -thread_count 1 -content_encoding UTF-16LE"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "fn:count(fn:collection())");
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
         
-        result = Utils.getOnlyDocs(Utils.getDbXccUri());
+        result = Utils.getOnlyDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
             sb.append(result.next().asString());
@@ -903,18 +907,18 @@ public class TestImportDocs {
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/temporal"
             + " -fastload false"
             + " -temporal_collection mycollection"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
         ResultSequence result = Utils.runQuery(
-          Utils.getDbXccUri(),
+          Utils.getTestDbXccUri(),
           "fn:count(fn:collection(\"mycollection\"))");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());        
@@ -924,7 +928,7 @@ public class TestImportDocs {
  
     @Test
     public void testBug38160() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/38160/dummy-trans.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/38160/dummy-trans.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin "
                 + "-input_file_path " + Constants.TEST_PATH.toUri() 
                 + "/wiki/AynRand "
@@ -935,12 +939,12 @@ public class TestImportDocs {
                 + "admin,insert,admin-builtins,insert,admin-module-internal,insert,"
                 + "admin,update,admin-builtins,update,admin-module-internal,update,"
                 + "admin,execute,admin-builtins,execute,admin-module-internal,execute"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
@@ -952,7 +956,7 @@ public class TestImportDocs {
                 + "fn:count($perms/sec:capability[text()='insert']), "
                 + "fn:count($perms/sec:capability[text()='execute']))";
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), permQry);
+                Utils.getTestDbXccUri(), permQry);
         
         for (int i = 0; i < 4; i++) {
             assertTrue(result.hasNext());
@@ -962,7 +966,7 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransformMixedDocs() throws Exception {
-        Utils.prepareModule(Utils.getDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
             + " -output_uri_replace wiki,'wiki1'"
@@ -971,22 +975,23 @@ public class TestImportDocs {
             + " -fastload true"
             + " -transform_module /lc.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"ML\"))");
         assertTrue(result.hasNext());
         assertEquals("93", result.next().asString());
         Utils.closeSession();
+        AssignmentManager.getInstance().setInitialized(false);
     }
     
     @Test
@@ -997,18 +1002,18 @@ public class TestImportDocs {
             + " -thread_count_per_split 3"
             + " -input_compressed -input_compression_codec zip"
             + " -output_collections test,ML"
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(),
+            Utils.getTestDbXccUri(),
             "fn:count(fn:collection(\"test\"))");
         assertTrue(result.hasNext());
         assertEquals("186", result.next().asString());

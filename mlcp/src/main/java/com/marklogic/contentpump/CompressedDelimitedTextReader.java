@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package com.marklogic.contentpump;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -158,7 +156,6 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
     }
     
     private boolean nextKeyValueInZip() throws IOException, InterruptedException{
-        ByteArrayOutputStream baos;
         ZipInputStream zis = (ZipInputStream) zipIn;
         while (true) {
             currZipEntry = zis.getNextEntry();
@@ -172,24 +169,11 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
                 continue;
             }
             subId = currZipEntry.getName();
-            long size = currZipEntry.getSize();
-            if (size == -1) {
-                baos = new ByteArrayOutputStream();
-            } else {
-                baos = new ByteArrayOutputStream((int) size);
-            }
-            int nb;
-            while ((nb = zis.read(buf, 0, buf.length)) != -1) {
-                baos.write(buf, 0, nb);
-            }
             if (encoding == null) {
-                instream = new InputStreamReader(
-                    new ByteArrayInputStream(baos.toByteArray()));
+                instream = new InputStreamReader(zis);
             } else {
-                instream = new InputStreamReader(
-                    new ByteArrayInputStream(baos.toByteArray()), encoding);
+                instream = new InputStreamReader(zis, encoding);
             }
-            baos.close();
             parser = new CSVParser(instream, CSVParserFormatter.
         		getFormat(delimiter, encapsulator, true,
         				true));

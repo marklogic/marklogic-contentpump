@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.marklogic.mapreduce;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableUtils;
 
+import com.marklogic.io.IOHelper;
 import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XdmBinary;
@@ -38,10 +40,12 @@ import com.marklogic.xcc.types.XdmBinary;
  * @author jchen
  *
  */
-public class DatabaseDocument implements MarkLogicDocument {
+public class DatabaseDocument implements MarkLogicDocument,
+InternalConstants {
     public static final Log LOG = LogFactory.getLog(
             DatabaseDocument.class);
     protected byte[] content;
+    protected InputStream is; // streaming binary
     protected ContentType contentType;
     
     public DatabaseDocument(){}
@@ -70,11 +74,23 @@ public class DatabaseDocument implements MarkLogicDocument {
      * @see com.marklogic.mapreduce.MarkLogicDocument#getContentAsByteArray()
      */
     public byte[] getContentAsByteArray() {
+        if (content == null) {
+            try {
+                content = IOHelper.byteArrayFromStream(is);
+            } catch (IOException e) {
+                throw new RuntimeException("IOException buffering binary data",
+                        e);
+            }
+            is = null;
+        }
         return content;
     }
     
     @Override
     public InputStream getContentAsByteStream() {
+        if (is != null) {
+            return is;
+        }
         return new ByteArrayInputStream(getContentAsByteArray());
     }
     
@@ -116,7 +132,11 @@ public class DatabaseDocument implements MarkLogicDocument {
                 content = item.asString().getBytes("UTF-8");
                 contentType = ContentType.TEXT;
             } else if (item.getValueType() == ValueType.BINARY) {
-                content = ((XdmBinary) item.getItem()).asBinaryData();
+                if (item.isCached()) {
+                    content = ((XdmBinary) item.getItem()).asBinaryData();
+                } else {
+                    is = item.asInputStream();
+                }
                 contentType = ContentType.BINARY;
             } else if (item.getValueType() == ValueType.ARRAY_NODE ||
                 item.getValueType() == ValueType.BOOLEAN_NODE ||
@@ -155,6 +175,10 @@ public class DatabaseDocument implements MarkLogicDocument {
         int ordinal = in.readInt();
         contentType = ContentType.valueOf(ordinal);
         int length = WritableUtils.readVInt(in);
+        if (length > MAX_BUFFER_SIZE) {
+            is = (DataInputStream)in;
+            return;
+        }
         content = new byte[length];
         in.readFully(content, 0, length);
     }
@@ -165,17 +189,32 @@ public class DatabaseDocument implements MarkLogicDocument {
     @Override
     public void write(DataOutput out) throws IOException {
         out.writeInt(contentType.ordinal());
-        WritableUtils.writeVInt(out, content.length);
-        out.write(content, 0, content.length);
+        if (content != null) {
+            WritableUtils.writeVInt(out, content.length);
+            out.write(content, 0, content.length);
+        } else if (is != null) {
+            content = new byte[MAX_BUFFER_SIZE];
+            int len = 0;
+            while ((len = is.read(content)) > 0) {
+                out.write(content, 0, len);
+            }
+        }      
     }
 
     @Override
     public long getContentSize() {
-        return content.length;
+        if (content != null) {
+            return content.length;
+        } else {
+            return Integer.MAX_VALUE;
+        }
     }
     
     @Override
     public boolean isStreamable() {
+        if (content == null) {
+            return true;
+        }
         return false;
     }
 }

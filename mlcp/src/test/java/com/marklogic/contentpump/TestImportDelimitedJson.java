@@ -26,29 +26,29 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/sample1.txt"
                 + " -uri_id name -generate_uri false"
                 + " -input_file_type delimited_json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -67,29 +67,29 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson"
                 + " -uri_id name -generate_uri false -input_file_pattern sample.*\\.txt"
                 + " -input_file_type delimited_json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -108,29 +108,29 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson"
                 + " -generate_uri true -input_file_pattern sample.*\\.txt"
                 + " -input_file_type delimited_json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
         String keys[] = {"src/test/resources/delimitedJson/sample1.txt-0-1</uri>",
                 "src/test/resources/delimitedJson/sample1.txt-0-2</uri>",
                 "src/test/resources/delimitedJson/sample1.txt-0-3</uri>",
@@ -150,23 +150,23 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/testUri.txt"
                 + " -uri_id name -generate_uri false"
                 + " -input_file_type delimited_json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.getNonEmptyDocsURIs(Utils.getDbXccUri());
+        result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
         String key = "<uri>rose</uri>";
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals(key));
@@ -179,29 +179,29 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/zip/sample.zip"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec zip"
                 + " -input_file_type delimited_json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -220,29 +220,29 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/zip"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec zip"
                 + " -input_file_type delimited_json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -261,29 +261,29 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/gzip/sample.gz"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec gzip"
                 + " -input_file_type delimited_json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -302,29 +302,29 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/gzip"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec gzip"
                 + " -input_file_type delimited_json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -343,29 +343,29 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/zip/sample.zip"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec zip"
                 + " -input_file_type delimited_json -filename_as_collection true"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.runQuery(Utils.getDbXccUri(),"fn:collection(\"sample.zip_sample1.txt\");");
+        result = Utils.runQuery(Utils.getTestDbXccUri(),"fn:collection(\"sample.zip_sample1.txt\");");
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -379,7 +379,7 @@ public class TestImportDelimitedJson {
         
         Utils.closeSession();
         
-        result = Utils.runQuery(Utils.getDbXccUri(),"fn:collection(\"sample.zip_sample2.txt\");");
+        result = Utils.runQuery(Utils.getTestDbXccUri(),"fn:collection(\"sample.zip_sample2.txt\");");
         sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -398,29 +398,29 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/gzip/sample.gz"
                 + " -uri_id name -generate_uri false -input_compressed true -input_compression_codec gzip"
                 + " -input_file_type delimited_json -filename_as_collection true"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.assertDocsFormat(Utils.getDbXccUri(),"JSON");
+        result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         
         Utils.closeSession();
         
-        result = Utils.runQuery(Utils.getDbXccUri(),"fn:collection(\"sample.gz\");");
+        result = Utils.runQuery(Utils.getTestDbXccUri(),"fn:collection(\"sample.gz\");");
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();
@@ -439,23 +439,23 @@ public class TestImportDelimitedJson {
                 + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedJson/testUri2"
                 + " -uri_id val -generate_uri false"
                 + " -input_file_type delimited_json"
-                + " -port " + Constants.port + " -database Documents";
+                + " -port " + Constants.port + " -database " + Constants.testDb;
         
         String[] args = cmd.split(" ");
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
         
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
         
-        ResultSequence result = Utils.runQuery(Utils.getDbXccUri(),
+        ResultSequence result = Utils.runQuery(Utils.getTestDbXccUri(),
                 "fn:count(fn:doc())");
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
         
         Utils.closeSession();
         
-        result = Utils.getAllDocs(Utils.getDbXccUri());
+        result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
             String s = result.next().asString();

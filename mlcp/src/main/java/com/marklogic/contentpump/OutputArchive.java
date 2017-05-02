@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -33,14 +34,16 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.LocalFileSystem;
 
+import com.marklogic.mapreduce.InternalConstants;
+
 /**
  * Archive for export, create zip file(s).
  * @author ali
  *
  */
-public class OutputArchive {
+public class OutputArchive implements InternalConstants {
     public static final Log LOG = LogFactory.getLog(OutputArchive.class);
-    public static String EXTENSION = ".zip";
+    public static final String EXTENSION = ".zip";
     private long currentFileBytes = 0;
     private ZipOutputStream outputStream;
     private String basePath;
@@ -92,10 +95,11 @@ public class OutputArchive {
                 f.createNewFile();
             }
             FileOutputStream fos = new FileOutputStream(f, false);
-            outputStream = new ZipOutputStream(fos);
+            outputStream = new ZipOutputStream(new BufferedOutputStream(fos));
         } else {
             FSDataOutputStream fsout = fs.create(zpath, false);
-            outputStream = new ZipOutputStream(fsout);
+            outputStream = 
+                    new ZipOutputStream(new BufferedOutputStream(fsout));
         }
     }
 
@@ -121,37 +125,46 @@ public class OutputArchive {
         return path;
     }
     
-    public void write(String uri, InputStream is, long size) 
+    public void write(String uri, InputStream is, long size, 
+            boolean isExportDoc) 
     throws IOException {
         ZipEntry entry = new ZipEntry(uri);
         if (outputStream == null || 
             (currentFileBytes + size > Integer.MAX_VALUE) &&
              currentFileBytes > 0) {
-            newOutputStream();
-        }        
+            if (currentEntries % 2 == 0 && !isExportDoc) {
+                //the file overflowed is metadata, create new zip
+                newOutputStream();
+            }
+        }     
+        long totalRead = 0;
         try {
             outputStream.putNextEntry(entry);
-            long bufSize = Math.min(size, 512<<10);
-            byte[] buf = new byte[(int)bufSize];
+            long bufSize = Math.min(size, MAX_BUFFER_SIZE);
+            byte[] buf = new byte[(int)bufSize];       
             for (long toRead = size, read = 0; toRead > 0; toRead -= read) {
                 read = is.read(buf, 0, (int)bufSize);
                 if (read > 0) {
                     outputStream.write(buf, 0, (int)read);
+                    totalRead += read;
                 } else {
-                    LOG.warn("Premature EOF: uri=" + uri +
+                    if (size != Integer.MAX_VALUE) {
+                        LOG.warn("Premature EOF: uri=" + uri +
                             ",toRead=" + toRead);
+                    }
                     break;
-                }   
+                } 
             }
             outputStream.closeEntry();
         } catch (ZipException e) {
             LOG.warn("Exception caught: " + e.getMessage() + entry.getName());
         }
-        currentFileBytes += size;
+        currentFileBytes += totalRead;
         currentEntries++;
     }
 
-    public long write(String outputPath, byte[] bytes) throws IOException {
+    public long write(String outputPath, byte[] bytes, boolean isExportDoc)
+    throws IOException {
 
         if (null == outputPath) {
             throw new NullPointerException("null path");
@@ -169,7 +182,7 @@ public class OutputArchive {
 
         if (currentFileBytes > 0
             && currentFileBytes + total > Integer.MAX_VALUE) {
-            if (currentEntries % 2 ==0) {
+            if (currentEntries % 2 ==0 && !isExportDoc) {
             	//the file overflowed is metadata, create new zip
                 newOutputStream();
             } else {

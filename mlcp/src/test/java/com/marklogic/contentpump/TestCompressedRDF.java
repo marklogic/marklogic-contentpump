@@ -38,38 +38,38 @@ public class TestCompressedRDF {
             + " -input_compressed true -input_compression_codec gzip"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/c-semantics.rdf.gz"
             + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("454", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
 
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         
@@ -90,11 +90,11 @@ public class TestCompressedRDF {
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/34887.zip"
             + " -thread_count 1"
             + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-            + " -port " + Constants.port + " -database Documents";
+            + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
@@ -102,7 +102,7 @@ public class TestCompressedRDF {
 
         ResultSequence result = Utils
             .runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         int tmp = Integer.parseInt(result.next().asString());
@@ -110,7 +110,7 @@ public class TestCompressedRDF {
 
         result = Utils
             .runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         tmp = Integer.parseInt(result.next().asString());
@@ -118,7 +118,7 @@ public class TestCompressedRDF {
 
         result = Utils
             .runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
         assertTrue(result.hasNext());
         tmp = Integer.parseInt(result.next().asString());
@@ -126,7 +126,7 @@ public class TestCompressedRDF {
 
         result = Utils
             .runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/semantics#default-graph\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
@@ -141,28 +141,28 @@ public class TestCompressedRDF {
                         + " -input_compressed true -input_compression_codec zip"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/c-semantics.zip"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("491", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("16528", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
 
@@ -177,38 +177,38 @@ public class TestCompressedRDF {
                         + " -thread_count 2"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/mixZip"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("454", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
 
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
 
@@ -223,11 +223,11 @@ public class TestCompressedRDF {
                         + " -thread_count 2"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/mixZip"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
@@ -235,21 +235,21 @@ public class TestCompressedRDF {
 
         ResultSequence result = Utils
             .runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("491", result.next().asString());
 
         result = Utils
             .runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("16528", result.next().asString());
 
         result = Utils
             .runQuery(
-                Utils.getDbXccUri(),
+                Utils.getTestDbXccUri(),
                 "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
@@ -265,28 +265,28 @@ public class TestCompressedRDF {
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/c-semantics.zip"
                         + " -output_collections http://marklogic.com/collection/1"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("169", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("16528", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
         assertTrue(result.hasNext());
         assertEquals("6", result.next().asString());
 
@@ -301,38 +301,38 @@ public class TestCompressedRDF {
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/semanticszip"
                         + " -output_collections http://marklogic.com/collection/1"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("338", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("33056", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://www.daml.org/2001/12/factbook/vi#A113963\"])");
         assertTrue(result.hasNext());
         assertEquals("12", result.next().asString());
 
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/collection/1\"))");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/collection/1\"))");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         
@@ -346,43 +346,43 @@ public class TestCompressedRDF {
                         + " -input_compressed true -input_compression_codec gzip"
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/c-semantics.nq.gz"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("342", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("1999", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/collection/1\"))");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/collection/1\"))");
         assertTrue(result.hasNext());
         assertEquals("0", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Ani_DiFranco?oldid=490340130#absolute-line=1\"))");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Ani_DiFranco?oldid=490340130#absolute-line=1\"))");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
 
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/semantics#graphs\"))");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/semantics#graphs\"))");
         assertTrue(result.hasNext());
         assertEquals("342", result.next().asString());        
         
@@ -397,48 +397,48 @@ public class TestCompressedRDF {
                         + " -input_file_path " + Constants.TEST_PATH.toUri() + "/c-semantics.nq.gz"
                         + " -output_collections http://marklogic.com/collection/1"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("20", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("1999", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/collection/1\"))");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://marklogic.com/collection/1\"))");
         assertTrue(result.hasNext());
         assertEquals("21", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Ani_DiFranco?oldid=490340130#absolute-line=1\"))");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Ani_DiFranco?oldid=490340130#absolute-line=1\"))");
         assertTrue(result.hasNext());
         assertEquals("0", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/collection/1\"))");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/collection/1\"))");
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
 
@@ -453,39 +453,39 @@ public class TestCompressedRDF {
                         + " -output_graph http://mydefaultgraph.com"
                         + " -input_compressed true"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("343", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2001", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
 
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://mydefaultgraph.com\")//sem:triple)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://mydefaultgraph.com\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
 
@@ -501,39 +501,39 @@ public class TestCompressedRDF {
                         + " -output_collections a,b,c"
                         + " -input_compressed true"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("343", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2001", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
 
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://mydefaultgraph.com\")//sem:triple)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://mydefaultgraph.com\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
 
@@ -549,39 +549,39 @@ public class TestCompressedRDF {
 //                        + " -output_graph xyz" //negative test
                         + " -input_compressed true"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("21", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2001", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
 
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("0", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://myOverrideGraph.com\")//sem:triple)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://myOverrideGraph.com\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2001", result.next().asString());
 
@@ -597,43 +597,43 @@ public class TestCompressedRDF {
                         + " -output_collections a,b,c" 
                         + " -input_compressed true"
                         + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
-                        + " -port " + Constants.port + " -database Documents";
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
 
         String[] args = cmd.split(" ");
 
-        Utils.clearDB(Utils.getDbXccUri(), Constants.testDb);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
 
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
 
         ResultSequence result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
         assertTrue(result.hasNext());
         assertEquals("21", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2001", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples/sem:triple[sem:subject = \"http://dbpedia.org/resource/Animal_Farm\"])");
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
 
         result = Utils.runQuery(
-                Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://en.wikipedia.org/wiki/Autism?oldid=495234324#absolute-line=9\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("0", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://myOverrideGraph.com\")//sem:triple)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"http://myOverrideGraph.com\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2001", result.next().asString());
         
         result = Utils.runQuery(
-            Utils.getDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"b\")//sem:triple)");
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:collection(\"b\")//sem:triple)");
         assertTrue(result.hasNext());
         assertEquals("2001", result.next().asString());
 

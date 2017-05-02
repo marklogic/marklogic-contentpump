@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -181,7 +181,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         ContentSource cs;
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
-                conf.get(MarkLogicConstants.OUTPUT_HOST));
+                conf.getStrings(MarkLogicConstants.OUTPUT_HOST)[0]);
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
@@ -348,7 +348,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         try {
             loadModel(fsname, fs.open(file));
         } catch (Exception e) {
-            LOG.error("Failed to parse: " + origFn);
+            LOG.error("Failed to parse(please check intactness and encoding): " + origFn);
         }
     }
 
@@ -380,7 +380,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             try {
                 parser.parse();
             } catch (Throwable e) {
-                LOG.error("Parse error in RDF document; processing partial document:"
+                LOG.error("Parse error in RDF document(please check intactness and encoding); processing partial document:"
                     + fsname + " " + e.getMessage());
             }
             in.close();
@@ -558,7 +558,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         ContentSource cs;
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
-                conf.get(MarkLogicConstants.OUTPUT_HOST));
+                conf.getStrings(MarkLogicConstants.OUTPUT_HOST)[0]);
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
@@ -1069,7 +1069,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                         rdfInputStream);
             } catch (Exception ex) {
                 // Yikes something went horribly wrong, bad encoding maybe?
-                LOG.error("Failed to parse: " + origFn, ex);
+                LOG.error("Failed to parse(please check intactness and encoding): " + origFn, ex);
 
                 byte[] b = new byte[0] ;
                 InputStream emptyBAIS = new ByteArrayInputStream(b) ;
@@ -1083,7 +1083,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 parser.parse();
             } catch (Exception ex) {
                 failed = true;
-                LOG.error("Parse error in RDF document; processing partial document:"
+                LOG.error("Parse error in RDF document(please check intactness and encoding); processing partial document:"
                     + origFn + " " + ex.getMessage());
             }
         }

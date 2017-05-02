@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -311,6 +311,10 @@ public class FCheck {
 		try {
 			for (;; ++position) {
 				ordinal = in.readLong();
+				if (verbose) {
+				    System.out.println("position=" + position + ", ordinal="
+				        + ordinal);
+				}
 			}
 		} catch (EOFException e) {
 		}

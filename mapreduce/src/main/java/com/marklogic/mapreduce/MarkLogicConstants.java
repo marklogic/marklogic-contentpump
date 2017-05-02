@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -890,4 +890,23 @@ public interface MarkLogicConstants {
      */
     static final String COPY_METADATA = 
             "mapreduce.marklogic.copymetadata";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to restrict input hosts that
+     * mlcp will connect to.
+     */
+    static final String INPUT_RESTRICT_HOSTS = 
+            "mapreduce.marklogic.input.restricthosts";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to restrict output hosts that
+     * mlcp will connecot to.
+     */
+    static final String OUTPUT_RESTRICT_HOSTS =
+            "mapreduce.marklogic.output.restricthosts";
+    /**
+     * Minimum MarkLogic version to accept node-update permissions.
+     */
+    static final long MIN_NODEUPDATE_VERSION =
+            9000040L;
 }

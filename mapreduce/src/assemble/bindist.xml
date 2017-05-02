@@ -9,7 +9,7 @@
     <!-- source code -->
     <fileSet>
       <directory>src</directory>
-      <outputDirectory>/src</outputDirectory>
+      <outputDirectory>${file.separator}src</outputDirectory>
       <includes>
         <include>main/java/com/marklogic/mapreduce/examples/**</include>
       </includes>
@@ -17,26 +17,29 @@
     <!-- sample data -->
     <fileSet>
       <directory>src/main/resources/sample-data</directory>
-      <outputDirectory>/sample-data</outputDirectory>
+      <outputDirectory>${file.separator}sample-data</outputDirectory>
     </fileSet>
     <!-- conf directory -->
     <fileSet>
       <directory>src/conf</directory>
-      <outputDirectory>/conf</outputDirectory>
+      <outputDirectory>${file.separator}conf</outputDirectory>
     </fileSet>
     <!-- marklogic-mapreduce-examples-*.jar -->
     <!-- marklogic-mapreduce2-*.jar -->
     <fileSet>
       <directory>${project.build.directory}</directory>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>${file.separator}lib</outputDirectory>
       <includes>
         <include>*.jar</include>
       </includes>
+      <excludes>
+        <exclude>*test.jar</exclude>
+      </excludes>
     </fileSet>
     <!-- javadoc -->
     <fileSet>
       <directory>target/site/javadoc</directory>
-      <outputDirectory>/docs</outputDirectory>
+      <outputDirectory>${file.separator}docs</outputDirectory>
       <excludes>
         <exclude>**/class-use/**</exclude>
       </excludes>
@@ -45,21 +48,21 @@
   <files>
     <file>
       <source>LEGALNOTICES.txt</source>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>${file.separator}</outputDirectory>
     </file>
     <file>
       <source>src/lib/commons-license.txt</source>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>${file.separator}lib</outputDirectory>
     </file>
     <file>
       <source>${basedir}/../LICENSE.txt</source>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>${file.separator}</outputDirectory>
     </file>
   </files>
   <dependencySets>
     <dependencySet>
       <scope>runtime</scope>
-      <outputDirectory>/lib</outputDirectory>
+      <outputDirectory>${file.separator}lib</outputDirectory>
       <includes>
         <include>commons-modeler:commons-modeler:jar:*</include>
       </includes>

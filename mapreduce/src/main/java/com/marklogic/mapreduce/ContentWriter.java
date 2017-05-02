@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
+import com.marklogic.mapreduce.utilities.ForestHost;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.StatisticalAssignmentPolicy;
 import com.marklogic.xcc.Content;
@@ -49,12 +50,13 @@ import com.marklogic.xcc.DocumentFormat;
 import com.marklogic.xcc.DocumentRepairLevel;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
+import com.marklogic.xcc.impl.SessionImpl;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.ContentInsertException;
+import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.exceptions.RetryableQueryException;
-import com.marklogic.xcc.exceptions.XQueryException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -63,9 +65,12 @@ import com.marklogic.xcc.exceptions.XQueryException;
  *
  */
 public class ContentWriter<VALUEOUT> 
-extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstants {
+extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> 
+implements MarkLogicConstants {
     public static final Log LOG = LogFactory.getLog(ContentWriter.class);
     
+    public static final String ID_PREFIX = "#";
+
     /**
      * Directory of the output documents.
      */
@@ -77,9 +82,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected ContentCreateOptions options;
     
     /**
-     * A map from a forest id to a ContentSource. 
+     * A map from a host to a ContentSource. 
      */
-    protected Map<String, ContentSource> forestSourceMap;
+    protected Map<String, ContentSource> hostSourceMap;
     
     /**
      * Content lists for each forest.
@@ -90,6 +95,16 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * An array of forest/host ids
      */
     protected String[] forestIds;
+
+    /**
+     * An array of current replica
+     */
+    protected int[] curReplica;
+
+    /**
+     * An array of blacklist host 
+     */
+    protected boolean[] blacklist;
     
     /** 
      * Counts of documents per forest.
@@ -162,19 +177,26 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
     protected boolean isCopyQuality;
     protected boolean isCopyMeta;
     
+    protected long effectiveVersion;
+    
+    protected boolean isTxnCompatible = false;
+    
     public ContentWriter(Configuration conf, 
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
-        this(conf, forestSourceMap, fastLoad, null);
+        Map<String, ContentSource> hostSourceMap, boolean fastLoad) {
+        this(conf, hostSourceMap, fastLoad, null);
     }
     
     public ContentWriter(Configuration conf,
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad,
+        Map<String, ContentSource> hostSourceMap, boolean fastLoad,
         AssignmentManager am) {
         super(conf, null);
+   
+        effectiveVersion = am.getEffectiveVersion();
+        isTxnCompatible = effectiveVersion == 0;
         
         this.fastLoad = fastLoad;
         
-        this.forestSourceMap = forestSourceMap;
+        this.hostSourceMap = hostSourceMap;
         
         this.am = am;
 
@@ -183,11 +205,28 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         permsMap = new HashMap<String,ContentPermission[]>();
         
-        int srcMapSize = forestSourceMap.size();
-        forestIds = new String[srcMapSize];
         // key order in key set is guaranteed by LinkedHashMap,
         // i.e., the order keys are inserted
-        forestIds = forestSourceMap.keySet().toArray(forestIds);
+
+        int srcMapSize;
+
+        if (fastLoad) {
+            forestIds = am.getMasterIds().clone();
+            srcMapSize = forestIds.length;
+            curReplica = new int[srcMapSize];
+            for (int i = 0; i < srcMapSize; i++) {
+               curReplica[i] = 0;
+            }
+        } else {
+            srcMapSize = hostSourceMap.size();
+            forestIds = new String[srcMapSize];
+            forestIds = hostSourceMap.keySet().toArray(forestIds);
+            blacklist = new boolean[srcMapSize];
+            for (int i = 0; i < srcMapSize; i++) {
+               blacklist[i] = false;
+            }
+        }
+
         hostId = (int)(Math.random() * srcMapSize);
         
         // arraySize is the number of forests in fast load mode; 1 otherwise.
@@ -241,6 +280,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     capability = ContentCapability.INSERT;
                 } else if (perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
                     capability = ContentCapability.UPDATE;
+                } else if (perm.equalsIgnoreCase(ContentCapability.NODE_UPDATE.toString())) {
+                    capability = ContentCapability.NODE_UPDATE;
                 } else {
                     LOG.error("Illegal permission: " + perm);
                 }
@@ -300,7 +341,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         
         options.setTemporalCollection(conf.get(TEMPORAL_COLLECTION));
         
-        needCommit = txnSize > 1 || (batchSize > 1 && tolerateErrors);
+        needCommit = needCommit();
         if (needCommit) {
             commitUris = new ArrayList[arraySize];
             for (int i = 0; i < arraySize; i++) {
@@ -311,6 +352,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         isCopyColls = conf.getBoolean(COPY_COLLECTIONS, true);
         isCopyQuality = conf.getBoolean(COPY_QUALITY, true);
         isCopyMeta = conf.getBoolean(COPY_METADATA, true);
+    }
+    
+    protected boolean needCommit() {
+        return txnSize > 1 || (batchSize > 1 && tolerateErrors);
     }
 
     protected Content createContent(DocumentURI key, VALUEOUT value) 
@@ -414,25 +459,28 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
      * Insert batch, log errors and update stats.
      * 
      * @param batch batch of content to insert
-     * @param fId forest Id
+     * @param id forest Id
      */
     protected void insertBatch(Content[] batch, int id) 
     throws IOException {
         int t = 0;
-        final int maxRetries = 64;
+        final int maxRetries = 15;
         int sleepTime = 100;
         final int maxSleepTime = 60000;
         while (t++ < maxRetries) {
             try {
+                if (t > 1) { 
+                    LOG.info("Retrying document insert " + t);
+                }
                 List<RequestException> errors = 
                     sessions[id].insertContentCollectErrors(batch);
                 if (errors != null) {
                     for (RequestException ex : errors) {
                         Throwable cause = ex.getCause();
                         if (cause != null) {
-                            if (cause instanceof XQueryException) {
+                            if (cause instanceof QueryException) {
                                 LOG.error(
-                                    ((XQueryException)cause).getFormatString());
+                                    ((QueryException)cause).getFormatString());
                             } else {
                                 LOG.error(cause.getMessage());
                             }
@@ -455,7 +503,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                                 DocumentURI failedUri = 
                                         pendingUris[id].remove(content);
                                 failed++;
-                                LOG.warn("Failed document " + failedUri);
+                                if (failedUri != null) {
+                                    LOG.warn("Failed document " + failedUri);
+                                }
                             }
                         }
                     }
@@ -464,14 +514,24 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 // log error and continue on RequestServerException
                 LOG.error(e.getFormatString());
 
+                // necessary to roll back in certain scenarios.
+                if (needCommit) {
+                    rollback(id);
+                }
+
                 if (t < maxRetries) {
+                    if (sessions[id] != null) {
+                        // necessary to close the session too.
+                        sessions[id].close();
+                    }
                     try {
-                        Thread.sleep(sleepTime);
+                        InternalUtilities.sleep(sleepTime);
                     } catch (Exception e2) {
                     }
                     sleepTime = sleepTime * 2;
                     if (sleepTime > maxSleepTime) 
                         sleepTime = maxSleepTime;
+                    sessions[id] = getSession(id, false);
                     continue;
                 } else {
                     failed += batch.length;
@@ -480,26 +540,40 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         DocumentURI failedUri = pendingUris[id].remove(fc);
                         LOG.warn("Failed document " + failedUri);
                     }
+                    // TODO: We think we should throw exception now.
                 }
             } catch (RequestServerException e) {
                 // log error and continue on RequestServerException
-                if (e instanceof XQueryException) {
-                    LOG.error(((XQueryException)e).getFormatString());
+                // not retryable so trying to connect to the replica
+                if (e instanceof QueryException) {
+                    LOG.error(((QueryException)e).getFormatString());
                 } else {
                     LOG.error(e.getMessage());
                 }
+                if (needCommit) {
+                    rollback(id);
+                }
+                if (t < maxRetries) {
+                    sessions[id].close();
+                    sessions[id] = getSession(id, true);
+                    continue;
+                }
+
                 failed += batch.length;   
                 // remove the failed content from pendingUris
                 for (Content fc : batch) {
                     DocumentURI failedUri = pendingUris[id].remove(fc);
                     LOG.warn("Failed document " + failedUri);
                 }
-            } catch (RequestException e) {
-                if (sessions[id] != null) {
-                    sessions[id].close();
+                // TODO: We think we should throw exception now.
+            } catch (Exception e) {
+                if (needCommit) {
+                    rollback(id);
                 }
-                if (countBased) {
-                    rollbackCount(id);
+                if (t < maxRetries) {
+                    sessions[id].close();
+                    sessions[id] = getSession(id, true);
+                    continue;
                 }
                 pendingUris[id].clear();
                 throw new IOException(e);
@@ -517,35 +591,98 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }
         pendingUris[id].clear();
     }
-    
-    protected void insertContent(Content content, int id) 
-    throws IOException {
+
+    protected void rollback(int id) throws IOException {
         try {
-            sessions[id].insertContent(content);
-            if (!needCommit) {
-                succeeded++;
-                pendingUris[id].clear();
+            sessions[id].rollback();
+        } catch (Exception e) {
+            LOG.error("Error rolling back transaction " + e.getMessage());
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(e);
             }
-        } catch (RequestServerException e) {
-            if (e instanceof XQueryException) {
-                LOG.error(((XQueryException)e).getFormatString());
-            } else {
-                LOG.error(e.getMessage());
-            }
-            failed++;   
-            // remove the failed content from pendingUris
-            DocumentURI failedUri = pendingUris[id].remove(content.getUri());
-            LOG.warn("Failed document " + failedUri);
-        } catch (RequestException e) {
-            if (sessions[id] != null) {
-                sessions[id].close();
-            }
+        } finally {
             if (countBased) {
                 rollbackCount(id);
             }
-            failed++;
-            pendingUris[id].clear();
-            throw new IOException(e);
+            failed += commitUris[id].size();
+            for (DocumentURI failedUri : commitUris[id]) {
+                LOG.warn("Failed document: " + failedUri);
+            }
+            commitUris[id].clear();
+        }
+    }
+
+    protected void insertContent(Content content, int id) 
+    throws IOException {
+        int t = 0;
+        final int maxRetries = 15;
+        int sleepTime = 100;
+        final int maxSleepTime = 60000;
+        while (t++ < maxRetries) {
+            try {
+                if (t > 1) {
+                    LOG.info("Retrying document insert " + t);
+                }
+                sessions[id].insertContent(content);
+                if (!needCommit) {
+                    succeeded++;
+                    pendingUris[id].clear();
+                }
+            } catch (RetryableQueryException e) {
+                // log error and continue on RequestServerException
+                LOG.error(e.getFormatString());
+
+                if (needCommit) {
+                    rollback(id);
+                }
+
+                if (t < maxRetries) {
+                    if (sessions[id] != null) {
+                       sessions[id].close();
+                    }
+                    try {
+                        InternalUtilities.sleep(sleepTime);
+                    } catch (Exception e2) {
+                    }
+                    sleepTime = sleepTime * 2;
+                    if (sleepTime > maxSleepTime) {
+                        sleepTime = maxSleepTime;
+                    }
+                    sessions[id] = getSession(id, false);
+                    continue;
+                } else {
+                    failed++;
+                    // remove the failed content from pendingUris
+                    DocumentURI failedUri = 
+                            pendingUris[id].remove(content.getUri());
+                    LOG.warn("Failed document " + failedUri);
+                }
+            } catch (RequestServerException e) {
+                if (e instanceof QueryException) {
+                    LOG.error(((QueryException)e).getFormatString());
+                } else {
+                    LOG.error(e.getMessage());
+                }
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(e);
+                }
+                failed++;   
+                // remove the failed content from pendingUris
+                DocumentURI failedUri = pendingUris[id].remove(content.getUri());
+                LOG.warn("Failed document " + failedUri);
+            } catch (RequestException e) {
+                if (needCommit) {
+                    rollback(id);
+                }
+                if (t < maxRetries) {
+                    sessions[id].close();
+                    sessions[id] = getSession(id, true);
+                    continue;
+                }
+                pendingUris[id].clear();
+                throw new IOException(e);
+            }
+            break;
         }
     }
     
@@ -553,30 +690,26 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         try {
             sessions[id].commit();
             succeeded += commitUris[id].size();
-        } catch (RequestServerException e) {
-            LOG.error("Error commiting transaction", e);
-            failed += commitUris[id].size();   
-            for (DocumentURI failedUri : commitUris[id]) {
-                LOG.warn("Failed document: " + failedUri);
-            }
-        } catch (RequestException e) {
-            if (sessions[id] != null) {
-                sessions[id].close();
-            }
-            if (countBased) {
-                rollbackCount(id);
-            }
-            failed += commitUris[id].size();
             commitUris[id].clear();
+        } catch (RequestServerException e) {
+            rollback(id);
+            sessions[id].close();
+            sessions[id] = null;
+        } catch (RequestException e) {
+            rollback(id);
             throw new IOException(e);
-        } 
+        } catch (Exception e) {
+            LOG.error("Error commiting transaction " + e.getMessage());
+            rollback(id);
+            sessions[id].close();
+            sessions[id] = null;
+        }
     }
     
     @Override
     public void write(DocumentURI key, VALUEOUT value) 
     throws IOException, InterruptedException {
         InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String csKey; 
         int fId = 0;
         if (fastLoad) {
             if(!countBased) {
@@ -589,17 +722,14 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 }
                 fId = sfId;
             }
-            csKey = forestIds[fId];
-        } else {
-            csKey = forestIds[hostId];
-        }
+        } 
         int sid = fId;
         Content content = createContent(key,value); 
         if (content == null) {
             failed++;
             return;
         }
-        if(countBased) {
+        if (countBased) {
             fId = 0;
         }
         pendingUris[sid].put(content, (DocumentURI)key.clone());
@@ -608,9 +738,9 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             forestContents[fId][counts[fId]++] = content;
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(csKey);
+                    sessions[sid] = getSession(sid, false);
                 }  
-                insertBatch(forestContents[fId], sid); 
+                insertBatch(forestContents[fId], sid);
                 stmtCounts[sid]++;
                 
                 //reset forest index for statistical
@@ -622,7 +752,7 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             }
         } else { // batchSize == 1
             if (sessions[sid] == null) {
-                sessions[sid] = getSession(csKey);
+                sessions[sid] = getSession(sid, false);
             }
             insertContent(content, sid);   
             stmtCounts[sid]++;
@@ -636,12 +766,22 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         if (needCommit && stmtCounts[sid] == txnSize) {
             commit(sid);  
             stmtCounts[sid] = 0;         
-            commitUris[sid].clear();
             committed = true;
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
             // rotate to next host and reset session
-            hostId = (hostId + 1)%forestIds.length;
+            int oldHostId = hostId;
+            for (;;) {
+                hostId = (hostId + 1)%forestIds.length;
+                if (!blacklist[hostId]) {
+                  break;
+                }
+                if (hostId == oldHostId) {
+                    for (int i = 0; i < blacklist.length; i++) {
+                        blacklist[i] = false;
+                    }
+                }
+            }
             sessions[0] = null;
         }
     }
@@ -651,16 +791,39 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                 -batchSize);
     }
     
-    protected Session getSession(String forestId, TransactionMode mode) {
+    protected Session getSession(int fId, boolean nextReplica, TransactionMode mode) {
         Session session = null;
-        ContentSource cs = forestSourceMap.get(forestId);
         if (fastLoad) {
-            session = cs.newSession(forestId);
+            List<ForestHost> replicas = am.getReplicas(forestIds[fId]);
+
+            if (nextReplica) {
+                curReplica[fId] = (curReplica[fId] + 1)%replicas.size();
+            }
+
+            ContentSource cs = hostSourceMap.get(replicas.get(curReplica[fId]).getHostName());
+            String forestId = replicas.get(curReplica[fId]).getForest();
+            session = cs.newSession(ID_PREFIX + forestId);
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to forest " + forestId + " on "
                     + session.getConnectionUri().getHost());
             }
         } else {
+            if (nextReplica) {
+                blacklist[hostId] = true;
+                int oldHostId = hostId;
+                for (;;) {
+                    hostId = (hostId + 1)%forestIds.length;
+                    if (!blacklist[hostId])
+                        break;
+                    if (hostId == oldHostId) {
+                        for (int i = 0; i < blacklist.length; i++) {
+                            blacklist[i] = false;
+                        }
+                    }
+                }
+            }
+            String forestId = forestIds[hostId];
+            ContentSource cs = hostSourceMap.get(forestId);
             session = cs.newSession();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Connect to " + session.getConnectionUri().getHost());
@@ -668,15 +831,16 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
         }      
         session.setTransactionMode(mode);
         session.setDefaultRequestOptions(requestOptions);
+        ((SessionImpl)session).setCompatibleMode(isTxnCompatible);
         return session;
     }
     
-    protected Session getSession(String forestId) {
+    protected Session getSession(int fId, boolean nextReplica) {
         TransactionMode mode = TransactionMode.AUTO;
         if (needCommit) {
             mode = TransactionMode.UPDATE;
         }
-        return getSession(forestId, mode);
+        return getSession(fId, nextReplica, mode);
     }
 
     @Override
@@ -697,10 +861,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     System.arraycopy(forestContents[i], 0, remainder, 0, 
                             counts[i]);
                     if (sessions[sid] == null) {
-                        String forestId = forestIds[sid];
-                        sessions[sid] = getSession(forestId);
+                        sessions[sid] = getSession(sid, false);
                     }
-                    insertBatch(remainder, sid);   
+                    try {
+                        insertBatch(remainder, sid);
+                    } catch (Throwable e) {
+                        LOG.error("Error caught inserting documents: ", e);
+                    }
                     stmtCounts[sid]++;
                 }
             }
@@ -709,32 +876,12 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
             if (sessions[i] != null) {
                 if (stmtCounts[i] > 0 && needCommit) {
                     try {
-                        sessions[i].commit();
-                        succeeded += commitUris[i].size();
-                    } catch (RequestServerException e) {
-                        // log error and continue on RequestServerException
-                        LOG.error("Error commiting transaction", e);
-                        failed += commitUris[i].size();   
-                        for (DocumentURI failedUri : commitUris[i]) {
-                            LOG.warn("Failed document " + failedUri);
-                        }
-                        commitUris[i].clear();
-                    } catch (RequestException e) {
-                        if (sessions[i] != null) {
-                            sessions[i].close();
-                        }
-                        if (countBased) {
-                            rollbackCount(i);
-                        }
-                        failed += commitUris[i].size();
-                        commitUris[i].clear();
-                        throw new IOException(e);
-                    } finally {
-                        sessions[i].close();
+                        commit(i);
+                    } catch (Throwable e) {
+                        LOG.error("Error committing transaction: ", e);
                     }
-                } else {
-                    sessions[i].close();
                 }
+                sessions[i].close();
             }
         }
         if (is != null) {

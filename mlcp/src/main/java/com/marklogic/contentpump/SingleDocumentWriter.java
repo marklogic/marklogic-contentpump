@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.marklogic.contentpump;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -35,6 +36,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
+import com.marklogic.mapreduce.InternalConstants;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.utilities.URIUtil;
@@ -47,7 +49,7 @@ import com.marklogic.mapreduce.utilities.URIUtil;
  */
 public class SingleDocumentWriter 
 extends RecordWriter<DocumentURI, MarkLogicDocument> 
-implements MarkLogicConstants, ConfigConstants {
+implements MarkLogicConstants, ConfigConstants, InternalConstants {
     public static final Log LOG = 
         LogFactory.getLog(SingleDocumentWriter.class);
     
@@ -88,9 +90,9 @@ implements MarkLogicConstants, ConfigConstants {
                     f.getParentFile().mkdirs();
                     f.createNewFile();
                 }
-                os = new FileOutputStream(f, false);
+                os = new BufferedOutputStream(new FileOutputStream(f, false));
             } else {
-                os = fs.create(path, false);
+                os = new BufferedOutputStream(fs.create(path, false));
             }
 
             ContentType type = content.getContentType();
@@ -100,7 +102,7 @@ implements MarkLogicConstants, ConfigConstants {
                     try {
                         is = content.getContentAsByteStream();
                         long size = content.getContentSize();
-                        long bufSize = Math.min(size, 512<<10);
+                        long bufSize = Math.min(size, MAX_BUFFER_SIZE);
                         byte[] buf = new byte[(int)bufSize];
                         for (long toRead = size, read = 0; 
                              toRead > 0; 
@@ -109,8 +111,10 @@ implements MarkLogicConstants, ConfigConstants {
                             if (read > 0) {
                                 os.write(buf, 0, (int)read);
                             } else {
-                                LOG.error("Premature EOF: uri=" + uri +
+                                if (size != Integer.MAX_VALUE) {
+                                    LOG.error("Premature EOF: uri=" + uri +
                                         ",toRead=" + toRead);
+                                }
                                 break;
                             }
                         }

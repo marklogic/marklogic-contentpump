@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -72,9 +72,10 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
     protected void getForestSplits(JobContext jobContext,
             ResultSequence result, 
             List<ForestSplit> forestSplits,
-            List<String> ruleUris) throws IOException {
+            List<String> ruleUris,
+            String[] inputHosts) throws IOException {
         Configuration jobConf = jobContext.getConfiguration();
-        super.getForestSplits(jobContext, result, forestSplits, ruleUris);
+        super.getForestSplits(jobContext, result, forestSplits, ruleUris, inputHosts);
         // Third while loop: audit settings
         while (result.hasNext()) {
             ResultItem item = result.next();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,6 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +36,8 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.functions.LexiconFunction;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.RestrictedHostsUtil;
+import com.marklogic.mapreduce.utilities.ForestHost;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
@@ -44,6 +45,7 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.ServerConnectionException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.ItemType;
 import com.marklogic.xcc.types.XSInteger;
@@ -145,12 +147,22 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             buf.append("))");
         }        
     }
+
+    private void appendReplicaQuery(StringBuilder buf) {
+        buf.append("let $repf := fn:function-lookup(");
+        buf.append("xs:QName('hadoop:get-splits-with-replica'),0)\n");
+        buf.append("return if (exists($repf)) then $repf() else ()\n");
+    }
     
     protected void getForestSplits(JobContext jobContext,            
             ResultSequence result, 
             List<ForestSplit> forestSplits,
-            List<String> ruleUris) throws IOException {
+            List<String> ruleUris,
+            String[] inputHosts) throws IOException {
         int count = 0;
+        boolean restrictHosts = jobConf.getBoolean(INPUT_RESTRICT_HOSTS, false);
+        RestrictedHostsUtil rhUtil = restrictHosts?new RestrictedHostsUtil(inputHosts):null;
+        
         // First while loop: splits info
         while (result.hasNext()) {
             ResultItem item = result.next();
@@ -171,15 +183,26 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 forestSplits.get(forestSplits.size() - 1).recordCount = 
                     ((XSInteger)item.getItem()).asLong();
             } else if (index == 2) {
-                String hn = ((XSString) item.getItem()).asString();
-                if (localMode && hn.equals(localHost)) {
-                    String inputHost = jobConf.get(INPUT_HOST);
-                    forestSplits.get(forestSplits.size() - 1).hostName = inputHost;
+                String forestHost = ((XSString) item.getItem()).asString();
+                if (restrictHosts) {
+                    rhUtil.addForestHost(forestHost);
+                    forestSplits.get(forestSplits.size() - 1).hostName = forestHost;
                 } else {
-                    forestSplits.get(forestSplits.size() - 1).hostName = hn;
+                    if (localMode && forestHost.equals(localHost)) {
+                        forestSplits.get(forestSplits.size() - 1).hostName = inputHosts[0];
+                    } else {
+                        forestSplits.get(forestSplits.size() - 1).hostName = forestHost;
+                    }
                 }
+                
             }
             count++;
+        }
+        // Replace the target host if not in restricted host list
+        if (restrictHosts) {
+            for (ForestSplit split : forestSplits) {
+                split.hostName = rhUtil.getNextHost(split.hostName);
+            }
         }
         
         // Second while loop: redaction rules
@@ -196,6 +219,51 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             }
             String itemStr = ((XSString)item.getItem()).asString();
             ruleUris.add(itemStr);
+        }
+
+        // forest with failover hosts
+        if (!restrictHosts) {
+            String forest = "";
+            String hostName = "";
+            HashMap<String, List<ForestHost> > 
+                forestHostMap = new HashMap<String, List<ForestHost> >();
+            while (result.hasNext()) {
+                ResultItem item = result.next();
+                if (ItemType.XS_INTEGER == item.getItemType()) {
+                    if (((XSInteger)item.getItem()).asPrimitiveInt() == 0) {
+                        break;
+                    }
+                }
+                forest = item.asString();
+
+                if (result.hasNext()) {
+                    item = result.next();
+                    hostName = item.asString();
+
+                    List<ForestHost> replicas = new ArrayList<ForestHost>();
+                    String replicaForest = "";
+                    String replicaHost = "";
+                    while (result.hasNext()) {
+                        item = result.next();
+                        if (ItemType.XS_INTEGER == item.getItemType()) {
+                            if (((XSInteger)item.getItem()).asPrimitiveInt() == 0) {
+                                break;
+                            }
+                        }
+                        replicaForest = item.asString();
+                        if (result.hasNext()) {
+                            item = result.next();
+                            replicaHost = item.asString();
+                            ForestHost info = new ForestHost(replicaForest, replicaHost);
+                            replicas.add(info);
+                        }
+                    }
+                    forestHostMap.put(forest,replicas);
+                }
+            }
+            for (ForestSplit split : forestSplits) {
+                split.replicas = forestHostMap.get(split.forestId.toString());
+            }
         }
     }
     
@@ -216,9 +284,14 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         jobConf = jobContext.getConfiguration();        
         boolean advancedMode = 
                 jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
+        boolean restrictHosts = jobConf.getBoolean(INPUT_RESTRICT_HOSTS, false);
         String splitQuery;
         String queryLanguage = null;
         String[] redactionRuleCol = jobConf.getStrings(REDACTION_RULE_COLLECTION);
+        String[] inputHosts = jobConf.getStrings(INPUT_HOST);
+        if (inputHosts == null || inputHosts.length == 0) {
+            throw new IllegalStateException(INPUT_HOST + " is not specified.");
+        }
         
         if (advancedMode) {
             queryLanguage = jobConf.get(INPUT_QUERY_LANGUAGE);
@@ -244,6 +317,10 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             buf.append("),\n");
             appendRedactionRuleValidateQuery(buf, redactionRuleCol);
             buf.append(",0,");
+            if (!restrictHosts) {
+                appendReplicaQuery(buf);
+                buf.append(",0,");
+            }
             appendCustom(buf);
             splitQuery = buf.toString();
         } 
@@ -257,7 +334,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 "Max split size is required to be positive. It is set to " +
                 maxSplitSize);
         }
-        
+
         // fetch data from server
         List<ForestSplit> forestSplits = new ArrayList<ForestSplit>();
         Session session = null;
@@ -266,63 +343,76 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Split query: " + splitQuery);
         }
-        localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));        
-        try {
-            ContentSource cs = InternalUtilities.getInputContentSource(jobConf);
-            session = cs.newSession();
-            RequestOptions options = new RequestOptions();
-            options.setCacheResult(false);
-            
-            if (localMode && advancedMode) {
-                AdhocQuery hostQuery = session.newAdhocQuery(
-                    "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
-                hostQuery.setOptions(options);
-                result = session.submitRequest(hostQuery);
-                if(result.hasNext()) {
+        localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));
+
+        int hostIdx = 0;
+        while (hostIdx < inputHosts.length) {
+            try {
+                ContentSource cs = InternalUtilities.getInputContentSource(jobConf,
+                        inputHosts[hostIdx]);
+                session = cs.newSession();
+                RequestOptions options = new RequestOptions();
+                options.setCacheResult(false);
+
+                if (localMode && advancedMode) {
+                    AdhocQuery hostQuery = session.newAdhocQuery(
+                        "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
+                    hostQuery.setOptions(options);
+                    result = session.submitRequest(hostQuery);
+                    if(result.hasNext()) {
+                        ResultItem item = result.next();
+                        localHost = item.asString();
+                    }
+                    if (result != null) {
+                        result.close();
+                    }
+                }
+
+                AdhocQuery query = session.newAdhocQuery(splitQuery);
+                if (queryLanguage != null) {
+                    InternalUtilities.checkQueryLanguage(queryLanguage);
+                    options.setQueryLanguage(queryLanguage);
+                }
+                query.setOptions(options);
+                result = session.submitRequest(query);
+                
+                if (!advancedMode && result.hasNext()) {
                     ResultItem item = result.next();
                     localHost = item.asString();
                 }
+                List<String> ruleUris = null;
+                if (redactionRuleCol != null) {
+                    ruleUris = new ArrayList<String>();
+                }
+                getForestSplits(jobContext, result, forestSplits,
+                        ruleUris, inputHosts);
+                LOG.info("Fetched " + forestSplits.size() +
+                        " forest splits.");
+                break;
+            } catch (ServerConnectionException e) {
+                LOG.warn("Unable to connect to " + inputHosts[hostIdx]
+                        + " to query source information");
+                hostIdx++;
+            } catch (XccConfigException e) {
+                LOG.error(e);
+                throw new IOException(e);
+            } catch (RequestException e) {
+                LOG.error(e);
+                LOG.error("Query: " + splitQuery);
+                throw new IOException(e);
+            } finally {
                 if (result != null) {
                     result.close();
                 }
+                if (session != null) {
+                    session.close();
+                }
             }
-            
-            AdhocQuery query = session.newAdhocQuery(splitQuery);
-            if (queryLanguage != null) {
-                InternalUtilities.checkQueryLanguage(queryLanguage);
-                options.setQueryLanguage(queryLanguage);
-            }
-            query.setOptions(options);
-            result = session.submitRequest(query);
-            
-            if (!advancedMode && result.hasNext()) {
-                ResultItem item = result.next();
-                localHost = item.asString();
-            }
-            List<String> ruleUris = null;
-            if (redactionRuleCol != null) {
-                ruleUris = new ArrayList<String>();
-            }
-            getForestSplits(jobContext, result, forestSplits, ruleUris);            
-            LOG.info("Fetched " + forestSplits.size() + 
-                    " forest splits.");            
-        } catch (XccConfigException e) {
-            LOG.error(e);
-            throw new IOException(e);
-        } catch (RequestException e) {
-            LOG.error(e);
-            LOG.error("Query: " + splitQuery);
-            throw new IOException(e);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-            throw new IOException(e);
-        } finally {
-            if (result != null) {
-                result.close();
-            }
-            if (session != null) {
-                session.close();
-            }
+        }
+        if (hostIdx == inputHosts.length) {
+            // No usable input hostname found at this point
+            throw new IOException("Unable to query source information,"
+                    + " no usable hostname found");
         }
         
         // create a split list per forest per host
@@ -349,47 +439,30 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             } else {
                 continue;
             }
-            if (fsplit.recordCount < maxSplitSize) {
-                MarkLogicInputSplit split = 
-                    new MarkLogicInputSplit(0, fsplit.recordCount, 
-                            fsplit.forestId, fsplit.hostName);
-                split.setLastSplit(true);
+
+            long splitSize = maxSplitSize;
+            if (this instanceof KeyValueInputFormat<?, ?> &&
+                    (splitSize & 0x1) != 0) {
+                splitSize--;
+            }
+            long remainingCount = fsplit.recordCount;
+            while (remainingCount > 0L) {
+                long start = fsplit.recordCount - remainingCount;
+                MarkLogicInputSplit split;
+                if (remainingCount < splitSize) {
+                    split = new MarkLogicInputSplit(start, remainingCount,
+                                    fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                    split.setLastSplit(true);
+                    remainingCount = 0L;
+                } else {
+                    split = new MarkLogicInputSplit(start, splitSize,
+                                    fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                    remainingCount -= splitSize;
+                }
                 splits.add(split);
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Added split " + split);
-                }    
-            } else {
-                long splitCount = fsplit.recordCount / maxSplitSize;
-                long remainder = fsplit.recordCount % maxSplitSize;
-                if (remainder != 0) {
-                    splitCount++;
-                }
-                long splitSize = fsplit.recordCount / splitCount;
-                remainder = fsplit.recordCount % splitCount;
-                if (remainder != 0) {
-                    splitSize++;
-                }
-                if (this instanceof KeyValueInputFormat<?, ?>) {
-                    // each split size has to be an even number
-                    if ((splitSize & 0x1) != 0) {
-                        splitSize++;
-                    }
-                }
-                long remainingCount = fsplit.recordCount;
-                while (remainingCount > 0) {
-                    long start = fsplit.recordCount - remainingCount; 
-                    long length = splitSize;
-                    MarkLogicInputSplit split = 
-                        new MarkLogicInputSplit(start, length, fsplit.forestId,
-                                fsplit.hostName);
-                    if (remainingCount <= maxSplitSize) {
-                        split.setLastSplit(true);
-                    }
-                    splits.add(split);
-                    remainingCount -= length;
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Added split " + split);
-                    }
                 }
             }
         }
@@ -451,5 +524,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         BigInteger forestId;
         String hostName;
         long recordCount;
+        List<ForestHost> replicas;
     }
+
 }

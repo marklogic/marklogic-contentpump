@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -218,11 +218,15 @@ implements MarkLogicConstants {
      * @param uri Source string of document URI.
      * @param line Line number in the source if applicable; -1 otherwise.
      * @param col Column number in the source if applicable; -1 otherwise.
+     * @param reason Reason for skipping.
      * 
      * @return true if key indicates the record is to be skipped; false 
      * otherwise.
      */
     protected void setSkipKey(String sub, int line, int col, String reason) {
+        if (srcId == null) {
+            srcId = split.getPath().toString();
+        }
         if (key == null) {
             key = new DocumentURIWithSourceInfo("", srcId, sub, line, col);
         } else {
@@ -352,10 +356,17 @@ implements MarkLogicConstants {
             }
             
             if (nascent == 0L || deleted != -1L) { // skip
-                position++;
                 bytesRead += dataIs.skipBytes(j);
                 if (nascent == 0L) nascentCnt++;
                 if (deleted != -1L) deletedCnt++;
+                ordIs.skipBytes(8);
+                qualIs.skipBytes(4);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Skipped a " + 
+                        (nascent == 0L ? "nascent" : "deleted") + 
+                        " document at position " + position);
+                }
+                position++;
                 return null;
             }
         } catch (EOFException e) {

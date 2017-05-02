@@ -331,7 +331,15 @@ public class Utils {
         bos.close();
     }
     
-    public static String getDbXccUri() {
+    public static String getInitDbXccUri() {
+        return "xcc://admin:admin@localhost:8000";
+    }
+    
+    public static String getTestDbXccUri() {
         return "xcc://admin:admin@localhost:" + Constants.port;
+    }
+    
+    public static String getCopyDbXccUri() {
+        return "xcc://admin:admin@localhost:" + Constants.copyDbPort;
     }
 }

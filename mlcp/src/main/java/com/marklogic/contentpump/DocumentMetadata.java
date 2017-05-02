@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,25 +247,46 @@ public class DocumentMetadata {
      * @param _capability
      * @param _role
      */
-    public void addPermission(String _capability, String _role) {
+    public void addPermission(String _capability, String _role, String _id) {
         ContentCapability capability;
-        if (ContentPermission.UPDATE.toString().equals(_capability))
+        if (ContentPermission.UPDATE.toString().equals(_capability)) {
             capability = ContentPermission.UPDATE;
-        else if (ContentPermission.INSERT.toString().equals(_capability))
+        } else if (ContentPermission.INSERT.toString().equals(_capability)) {
             capability = ContentPermission.INSERT;
-        else if (ContentPermission.EXECUTE.toString().equals(_capability))
+        } else if (ContentPermission.EXECUTE.toString().equals(_capability)) {
             capability = ContentPermission.EXECUTE;
-        else if (ContentPermission.READ.toString().equals(_capability))
+        } else if (ContentPermission.READ.toString().equals(_capability)) {
             capability = ContentPermission.READ;
-        else
+        } else if (ContentPermission.NODE_UPDATE.toString().equals(_capability)) {
+            capability = ContentPermission.NODE_UPDATE;
+        } else {
             throw new UnimplementedFeatureException(
                     "unknown capability: " + _capability);
+        }            
 
-        addPermission(new ContentPermission(capability, _role));
+        addPermission(new ContentPermission(capability, _role, _id));
     }
 
     public String getPermString() {
-        return permString;
+        if (permString != null) {
+            return permString;
+        } else {
+            StringBuilder buf = new StringBuilder();
+            buf.append("<perms>");
+            for (ContentPermission pm : permissionsList) {
+                buf.append("<sec:permission xmlns:sec=\"http://marklogic.com/xdmp/security\">\n");
+                buf.append("  <sec:capability>");
+                buf.append(pm.getCapability().toString());
+                buf.append("</sec:capability>\n");
+                buf.append("  <sec:role-id>");
+                buf.append(pm.getId());
+                buf.append("</sec:role-id>\n");
+                buf.append("</sec:permission>\n");
+            }
+            buf.append("</perms>");
+            permString = buf.toString();
+            return permString;
+        }
     }
 
     public void setPermString(String permString) {

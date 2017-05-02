@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.mapreduce.Counter;
 import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.DocumentURI;
@@ -31,7 +33,7 @@ import com.marklogic.mapreduce.DocumentURI;
  */
 public class DocumentMapper<VALUE> extends
     BaseMapper<DocumentURI, VALUE, DocumentURI, VALUE> {
-    
+    public static final Log LOG = LogFactory.getLog(DocumentMapper.class);
     protected Counter readCount;
     protected Counter attemptedCount;
     
@@ -42,7 +44,11 @@ public class DocumentMapper<VALUE> extends
         }
         if (uri == null) {
             return;
-        } 
+        } else if (uri.getUri().isEmpty()) {
+            LOG.warn("Skipped record: " + uri);
+            return;
+        }
+        
         synchronized(attemptedCount) {
             attemptedCount.increment(1);
         }

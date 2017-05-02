@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -357,8 +357,10 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 			OutputFormat<K2, V2> outputFormat = (OutputFormat<K2, V2>) 
 			    ReflectionUtils.newInstance(outer.getOutputFormatClass(),
                 outer.getConfiguration());
-            writer = outputFormat.getRecordWriter(outer);
             try {
+                // outputFormat is not initialized.  Relying on everything it 
+                // needs can be obtained from the AssignmentManager singleton.
+                writer = outputFormat.getRecordWriter(outer);
                 subcontext = (Context)ReflectionUtil.createMapperContext(
                     mapper, outer.getConfiguration(), outer.getTaskAttemptID(),                 
                     new SubMapRecordReader(), writer,
@@ -376,10 +378,20 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         @Override
         public void run() {
             try {
-                mapper.runThreadSafe(outer, subcontext);
-                writer.close(subcontext);
+                mapper.runThreadSafe(outer, subcontext);      
             } catch (Throwable ie) {
-                LOG.error(ie.getMessage(), ie);
+                LOG.error("Error running task: " + ie.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(ie);
+                }
+            } 
+            try {
+                writer.close(subcontext);
+            } catch (Throwable t) {
+                LOG.error("Error closing writer: " + t.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(t);
+                }
             }
         }
     }

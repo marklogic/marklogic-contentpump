@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,6 +18,7 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +40,7 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.ServerConnectionException;
 
 /**
  * MarkLogic-based OutputFormat superclass. Use the provided subclasses, such
@@ -68,7 +70,10 @@ implements MarkLogicConstants, Configurable {
         + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
         + "let $f := "
         + "  fn:function-lookup(xs:QName('hadoop:get-host-names'),0)\n"
-        + "return  if(exists($f)) then $f() else\n"
+        + "let $f2 := "
+        + "  fn:function-lookup(xs:QName('hadoop:get-replica-host-names'),0)\n"
+        + "return  if (exists($f2)) then $f2() else \n"
+        + "   if(exists($f)) then $f() else\n"
         + "   for $i at $p in hadoop:get-forest-host-map()"
         + "   where $p mod 2 eq 0 "
         + "   return $i";
@@ -79,21 +84,31 @@ implements MarkLogicConstants, Configurable {
     @Override
     public void checkOutputSpecs(JobContext context) throws IOException,
             InterruptedException {
-        String host = conf.get(OUTPUT_HOST);
-        if (host == null || host.isEmpty()) {
+        String[] hosts = conf.getStrings(OUTPUT_HOST);
+        if (hosts == null || hosts.length == 0) {
             throw new IllegalStateException(OUTPUT_HOST +
                     " is not specified.");
-        }                     
-
-        try {
-            // try getting a connection
-            ContentSource cs = InternalUtilities.getOutputContentSource(conf,
-                host);
-            checkOutputSpecs(conf, cs);
-        } 
-        catch (Exception ex) {
-            throw new IOException(ex);
         }
+        for (int i = 0; i < hosts.length; i++) {
+            try {
+                ContentSource cs = InternalUtilities.getOutputContentSource(conf,
+                        hosts[i]);
+                checkOutputSpecs(conf, cs);
+                return;
+            }
+            catch (Exception ex) {
+                if (ex.getCause() instanceof ServerConnectionException) {
+                    LOG.warn("Unable to connect to " + hosts[i]
+                            + " to query destination information");
+                    continue;
+                } else {
+                    throw new IOException(ex);
+                }
+            }
+        }
+        // No usable output hostname found at this point
+        throw new IOException("Unable to query destination information,"
+                + " no usable hostname found");
     }
 
     @Override
@@ -130,15 +145,7 @@ implements MarkLogicConstants, Configurable {
                 OUTPUT_FOREST_HOST, TextArrayWritable.class);
             return hosts;
         } else {
-            try {
-                // try getting a connection
-                ContentSource cs = InternalUtilities.getOutputContentSource(
-                    conf, conf.get(OUTPUT_HOST));
-                // query hosts
-                return queryHosts(cs);
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
+            throw new IOException("Forest host map not found");
         }
     }
     
@@ -173,6 +180,10 @@ implements MarkLogicConstants, Configurable {
                 } else {
                     hosts.add(new Text(host));
                 }
+            }
+            if (hosts.isEmpty()) {
+                throw new IOException("Target database has no forests attached: "
+                        + "check forests in database");
             }
             return new TextArrayWritable(hosts.toArray(new Text[hosts.size()]));
         } catch (RequestException e) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,9 @@
 package com.marklogic.mapreduce;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -32,7 +33,9 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
 import com.marklogic.mapreduce.utilities.ForestInfo;
+import com.marklogic.mapreduce.utilities.ForestHost;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.RestrictedHostsUtil;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCapability;
@@ -43,7 +46,9 @@ import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.ItemType;
 import com.marklogic.xcc.types.XSBoolean;
+import com.marklogic.xcc.types.XSInteger;
 
 /**
  * MarkLogicOutputFormat for Content.
@@ -89,13 +94,25 @@ public class ContentOutputFormat<VALUEOUT> extends
         "declare variable $policy as xs:string external;\n" +
         "declare variable $partition-name as xs:string external;\n" + 
         "hadoop:get-forest-host($policy,$partition-name)";
+    public static final String FOREST_REPLICA_HOST_QUERY =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "declare variable $policy as xs:string external;\n" +
+        "declare variable $partition-name as xs:string external;\n" + 
+        "hadoop:get-forest-replica-hosts($policy,$partition-name)";
     public static final String INIT_QUERY =
         "import module namespace hadoop = "
-        + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
-        + "xdmp:host-name(xdmp:host()), \n"
-        + "let $f := "
-        + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
-        + "return if (exists($f)) then $f() else ()";
+      + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
+      + "xdmp:host-name(xdmp:host()), \n"
+      + "let $versionf := "
+      + "  fn:function-lookup(xs:QName('xdmp:effective-version'),0)\n"
+      + "return if (exists($versionf)) then $versionf() else 0, \n"
+      + "let $repf := "
+      + "  fn:function-lookup(xs:QName('hadoop:get-forest-replica-hosts'),2)\n"
+      + "return exists($repf),"
+      + "let $f := "
+      + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
+      + "return if (exists($f)) then $f() else ()";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;
@@ -103,9 +120,11 @@ public class ContentOutputFormat<VALUEOUT> extends
     protected boolean allowFastLoad = true;
     protected AssignmentPolicy.Kind policy;
     protected boolean legacy = false;
+    protected boolean failover = false;
     protected String initHostName;
+
     @Override
-    public void checkOutputSpecs(Configuration conf, ContentSource cs) 
+    public void checkOutputSpecs(Configuration conf, ContentSource cs)
     throws IOException { 
         Session session = null;
         ResultSequence result = null;
@@ -143,8 +162,9 @@ public class ContentOutputFormat<VALUEOUT> extends
                     }
                 }
             }
+            boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
             // initialize server host name and assignment policy
-            initialize(session);
+            initialize(session, restrictHosts);
             
             // ensure manual directory creation 
             if (fastLoad) {
@@ -168,15 +188,20 @@ public class ContentOutputFormat<VALUEOUT> extends
                     throw new IllegalStateException(
                             "Failed to query directory creation mode.");
                 }
-            } else {
-                TextArrayWritable hostArray; 
-                // 23798: replace hostname in forest config with 
-                // user-specified output host
-                String outputHost = conf.get(OUTPUT_HOST);
-                if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
-                	hostArray = queryHosts(cs, initHostName, outputHost);
+            } else {                
+                TextArrayWritable hostArray = null;
+                if (restrictHosts) {
+                    String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+                    hostArray = new TextArrayWritable(outputHosts);
                 } else {
-                	hostArray = queryHosts(cs);
+                    String outputHost = cs.getConnectionProvider().getHostName();
+                    // 23798: replace hostname in forest config with 
+                    // user-specified output host
+                    if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
+                        hostArray = queryHosts(cs, initHostName, outputHost);
+                    } else {
+                        hostArray = queryHosts(cs);
+                    }
                 }
                 DefaultStringifier.store(conf, hostArray, OUTPUT_FOREST_HOST);
             }
@@ -199,7 +224,8 @@ public class ContentOutputFormat<VALUEOUT> extends
                     if (!perm.equalsIgnoreCase(ContentCapability.READ.toString()) &&
                         !perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString()) &&
                         !perm.equalsIgnoreCase(ContentCapability.INSERT.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
+                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.NODE_UPDATE.toString())) {
                         throw new IllegalStateException("Illegal capability: " + perm);
                     }
                     i++;
@@ -224,31 +250,46 @@ public class ContentOutputFormat<VALUEOUT> extends
             new LinkedHashMap<String, ContentSource>();
         if (fastLoad) {
             LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
-            // get host->contentSource mapping
-            Map<String, ContentSource> hostSourceMap = 
-                new HashMap<String, ContentSource>();
-            for (Writable v : forestStatusMap.values()) {
-                ForestInfo fs = (ForestInfo)v;
-                //unupdatable forests
-                if(fs.getUpdatable() == false) continue;
-                if (hostSourceMap.get(fs.getHostName()) == null) {
-                    try {
-                        ContentSource cs = InternalUtilities.getOutputContentSource(
-                            conf, fs.getHostName().toString());
-                        hostSourceMap.put(fs.getHostName(), cs);
-                    } catch (XccConfigException e) {
-                        throw new IOException(e);
-                    } 
+            String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+            // Fastload import needs restrictHosts info from conf for 
+            // multiple instances of ContentOutputFormat created by 
+            // MultiThreadedMapper. It can't be saved as instance member 
+            // because initialize() is only called once in LocalJobRunner
+            boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
+            RestrictedHostsUtil rhUtil = null;
+            if (restrictHosts) {
+                rhUtil = new RestrictedHostsUtil(outputHosts);
+                for (Writable forestId : forestStatusMap.keySet()) {
+                    String forestHost = ((ForestInfo)forestStatusMap.get(forestId))
+                            .getHostName();
+                    rhUtil.addForestHost(forestHost);
                 }
             }
-            
-            // consolidate forest->host map and host-contentSource map to 
-            // forest-contentSource map
             for (Writable forestId : forestStatusMap.keySet()) {
-                String forest = ((Text)forestId).toString();
-                String hostName = ((ForestInfo)forestStatusMap.get(forestId)).getHostName();
-                ContentSource cs = hostSourceMap.get(hostName);
-                sourceMap.put(ID_PREFIX + forest, cs);
+                ForestInfo fs = (ForestInfo)forestStatusMap.get(forestId);
+                List<ForestHost> forestHostList = fs.getReplicas();
+                for (int i = 0; i < forestHostList.size(); i++) {
+                    ForestHost fh = forestHostList.get(i);
+                    String forestIdStr = fh.getForest();
+                    String forestHost = fh.getHostName();
+                    String targetHost = restrictHosts?
+                            rhUtil.getNextHost(forestHost):forestHost;
+                    if (fs.getUpdatable()) {
+                        try {
+                            ContentSource cs = sourceMap.get(targetHost);
+                            if (cs == null) {
+                              cs = InternalUtilities.getOutputContentSource(
+                                conf, targetHost);
+                              sourceMap.put(targetHost, cs);
+                            }
+                            if (restrictHosts) {
+                              sourceMap.put(forestHost, cs);
+                            }
+                        } catch (XccConfigException e) {
+                            throw new IOException(e);
+                        }
+                    }
+                }
             }
         } else {
             TextArrayWritable hosts = getHosts(conf);
@@ -274,15 +315,10 @@ public class ContentOutputFormat<VALUEOUT> extends
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the ContentWriter
-        return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
+        return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, 
+                am);
     }
-    
-    // forest host map is saved when checkOutputSpecs() is called.  In certain 
-    // versions of Hadoop, the config is not persisted as part of the job hence
-    // will be lost.  See MAPREDUCE-3377 for details.  When this entry cannot
-    // be found from the config, re-query the database to get this info.  It is
-    // possible that each task gets a different version of the map if the 
-    // forest config changes while the job runs.
+
     protected LinkedMapWritable getForestStatusMap(Configuration conf) 
     throws IOException {
         String forestHost = conf.get(OUTPUT_FOREST_HOST);
@@ -302,18 +338,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             }
             return fhmap;
         } else {
-            try {
-                // try getting a connection
-                ContentSource cs = 
-                    InternalUtilities.getOutputContentSource(conf, 
-                            conf.get(OUTPUT_HOST));
-                //get policy
-                initialize(cs.newSession());
-                // query forest status mapping
-                return queryForestInfo(cs);
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
+            throw new IOException("Forest host map not found");
         }
     }
     
@@ -324,7 +349,7 @@ public class ContentOutputFormat<VALUEOUT> extends
      * @throws IOException
      * @throws RequestException
      */
-    protected void initialize(Session session )
+    protected void initialize(Session session, boolean restrictHosts)
         throws IOException, RequestException {
         AdhocQuery query = session.newAdhocQuery(INIT_QUERY);
         RequestOptions options = new RequestOptions();
@@ -335,6 +360,10 @@ public class ContentOutputFormat<VALUEOUT> extends
 
         ResultItem item = result.next();
         initHostName = item.asString();
+        item = result.next();
+        am.setEffectiveVersion(((XSInteger)item.getItem()).asLong());
+        item = result.next();
+        failover = !restrictHosts && item.asString().equals("true");
         if (result.hasNext()) {
             item = result.next();
             String policyStr = item.asString();
@@ -408,12 +437,20 @@ public class ContentOutputFormat<VALUEOUT> extends
         try {
             session = cs.newSession();   
             AdhocQuery query = null;
-            if (legacy) {             
+            if (legacy) {
                 LOG.debug("Legacy assignment is assumed for older MarkLogic" + 
                           " Server.");
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
             } else {
-                query = session.newAdhocQuery(FOREST_HOST_QUERY);
+                /* 
+                 * failover if restrict host is not set and the server is 9.0 
+                 * we need the failover forests and hosts for failover
+                 */
+                if (failover) {
+                  query = session.newAdhocQuery(FOREST_REPLICA_HOST_QUERY);
+                } else {
+                  query = session.newAdhocQuery(FOREST_HOST_QUERY);
+                }
                 if (policy == AssignmentPolicy.Kind.RANGE ||
                     policy == AssignmentPolicy.Kind.QUERY) {
                     String pName = conf.get(OUTPUT_PARTITION);
@@ -436,7 +473,8 @@ public class ContentOutputFormat<VALUEOUT> extends
 
             LinkedMapWritable forestStatusMap = new LinkedMapWritable();
             Text forest = null;
-            String outputHost = conf.get(OUTPUT_HOST);
+            List<ForestHost> replicas = new ArrayList<ForestHost>();
+            String outputHost = cs.getConnectionProvider().getHostName();
             boolean local = MODE_LOCAL.equals(conf.get(EXECUTION_MODE));
             
             while (result.hasNext()) {
@@ -451,32 +489,54 @@ public class ContentOutputFormat<VALUEOUT> extends
                         hostName.equals(initHostName)) {
                     	hostName = outputHost;
                     }
+                    boolean updatable = true;
+                    long dc = -1;
                     if (!legacy) {
                         if (policy == AssignmentPolicy.Kind.BUCKET) {
                             item = result.next();
-                            boolean updatable = Boolean.parseBoolean(item
+                            updatable = Boolean.parseBoolean(item
                                 .asString());
-                            forestStatusMap.put(forest, new ForestInfo(
-                                hostName, -1, updatable));
-                        } else if (policy == AssignmentPolicy.Kind.LEGACY) {
-                            forestStatusMap.put(forest, new ForestInfo(
-                                hostName, -1, true));
-                        } else {
+                        } else if (policy == AssignmentPolicy.Kind.RANGE ||
+                                   policy == AssignmentPolicy.Kind.STATISTICAL ||
+                                   policy == AssignmentPolicy.Kind.QUERY ) {
                             // range or statistical
                             item = result.next();
-                            long dc = Long.parseLong(item.asString());
-                            forestStatusMap.put(forest, new ForestInfo(
-                                hostName, dc, true));
+                            dc = Long.parseLong(item.asString());
                         }
+                    } 
+                    if (failover) {
+                        String curForest = "";
+                        String curHost = "";
+                        int count = 0;
+                        while (result.hasNext()) {
+                            item = result.next();
+                            if (ItemType.XS_INTEGER == item.getItemType()) {
+                                if (((XSInteger)item.getItem()).asPrimitiveInt() == 0) {
+                                    break;
+                                }
+                            }
+                            int index = count % 2;
+                            if (index == 0) {
+                                curForest = item.asString();
+                            } else if (index == 1) {
+                                curHost = item.asString();
+                                ForestHost info = new ForestHost(curForest, curHost);
+                                replicas.add(info);
+                            }
+                            count++;
+                        } 
                     } else {
-                        forestStatusMap.put(forest, new ForestInfo(hostName,
-                            -1, true));
+                        ForestHost info = new ForestHost(forest.toString(), hostName);
+                        replicas.add(info);
                     }
+                    forestStatusMap.put(forest, new ForestInfo(
+                        hostName, dc, updatable, replicas));
                     forest = null;
+                    replicas.clear();
                 }
             }
             if (forestStatusMap.size() == 0) {
-                throw new IOException("Number of forests is 0: "
+                throw new IOException("Target database has no forests attached: "
                     + "check forests in database");
             }
             am.initialize(policy, forestStatusMap, conf.getInt(BATCH_SIZE,10));

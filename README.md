@@ -19,6 +19,17 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 * Access MarkLogic text, geospatial, scalar, and document structure indexes to send only the most relevant data to Hadoop for processing
 * Write results from MapReduce jobs to MarkLogic in parallel
 
+## Release Note
+
+### What's New in mlcp and Hadoop Connector 9.0.1
+
+- New option to enable SSL communication
+- New option to run behind a load balancer or firewall
+- Survive server node failover events
+- Server-side transform in batches
+- Get and set document permission, collection and metadata in server-side transformation
+- Performance improvements and bug fixes
+
 ## Getting Started
 
 - [Getting Started with mlcp](http://docs.marklogic.com/guide/mlcp/getting-started)
@@ -37,8 +48,8 @@ Wiki pages of this project contain useful information when you work on developme
 
 ## Required Software
 
-- [Required Software for the Hadoop Connector](http://docs.marklogic.com/guide/mapreduce/quickstart#id_78738)
-- [Required Software for mlcp](http://docs.marklogic.com/9.0/guide/mlcp/install#id_44231)
+- [Required Software for the Hadoop Connector](http://docs.marklogic.com/9.0/guide/mapreduce/quickstart#id_78738)
+- [Required Software for mlcp](http://pubs.marklogic.com:8011/9.0/guide/mlcp/install#id_44231)
 - [Apache Maven](https://maven.apache.org/) (version >= 3.03) is required to build mlcp and the Hadoop Connector.
 
 ## Build

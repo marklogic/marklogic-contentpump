@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ public class PermissionUtil {
         "for $p in xdmp:default-permissions() " +
         "return ($p/*:role-id/text(),$p/*:capability/text())";
     /**
-     * Get a list of ContentPermission fron given string
+     * Get a list of ContentPermission from given string
      * @param perms a string of role-name,capability pais, separated by commna
      * @return
      */
@@ -80,7 +80,7 @@ public class PermissionUtil {
         ContentSource cs;
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
-                conf.get(MarkLogicConstants.OUTPUT_HOST));
+                conf.getStrings(MarkLogicConstants.OUTPUT_HOST)[0]);
 
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
@@ -130,6 +130,9 @@ public class PermissionUtil {
         } else if (cap.equalsIgnoreCase(ContentCapability.UPDATE
             .toString())) {
             capability = ContentCapability.UPDATE;
+        } else if (cap.equalsIgnoreCase(ContentCapability.NODE_UPDATE
+            .toString())) {
+            capability = ContentCapability.NODE_UPDATE;
         } else {
             LOG.error("Illegal permission: " + cap);
         }

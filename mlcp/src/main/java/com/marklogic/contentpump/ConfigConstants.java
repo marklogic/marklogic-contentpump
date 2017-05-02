@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ public interface ConfigConstants {
     static final String HADOOP_CONFDIR_ENV_NAME = "HADOOP_CONF_DIR";
     static final String CONTENTPUMP_HOME_PROPERTY_NAME = "CONTENTPUMP_HOME";
     static final String CONTENTPUMP_JAR_PREFIX = "mlcp";
+    static final String CONTENTPUMP_BUNDLE_ARTIFACT = "BUNDLE_ARTIFACT";
 
     // common
     static final String MODE = "mode";
@@ -110,7 +111,6 @@ public interface ConfigConstants {
     static final String OUTPUT_DATABASE = "output_database";
     static final String DELIMITER = "delimiter";
     static final String DEFAULT_DELIMITER = ",";
-    // TODO: merge with "aggregate_uri_id" ??
     static final String DELIMITED_URI_ID = "delimited_uri_id";
     static final String DELIMITED_ROOT_NAME = "delimited_root_name";
     static final String GENERATE_URI = "generate_uri";
@@ -126,6 +126,12 @@ public interface ConfigConstants {
     static final String TRANSFORM_PARAM = "transform_param";
     static final String TEMPORAL_COLLECTION = "temporal_collection";
     static final String REDACTION = "redaction";
+    static final String RESTRICT_HOSTS = "restrict_hosts";
+    static final String RESTRICT_INPUT_HOSTS = "restrict_input_hosts";
+    static final String RESTRICT_OUTPUT_HOSTS = "restrict_output_hosts";
+    static final String SSL = "ssl";
+    static final String INPUT_SSL = "input_ssl";
+    static final String OUTPUT_SSL = "output_ssl";
 
     static final String RDF_STREAMING_MEMORY_THRESHOLD  = 
             "rdf_streaming_memory_threshold";

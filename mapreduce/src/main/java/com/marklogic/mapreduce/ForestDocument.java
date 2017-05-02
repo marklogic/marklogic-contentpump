@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -85,7 +87,8 @@ public abstract class ForestDocument implements MarkLogicDocument {
                 return null;
         }
         doc.setFragmentOrdinal(tree.getFragmentOrdinal());
-        doc.setCollections(tree.getCollections());
+        doc.setCollections(tree.getDocumentURI(), 
+                tree.getCollections());
         doc.setMetadata(tree.getMetadata());
         doc.setQuality(tree.getQuality());
         return doc;
@@ -103,8 +106,22 @@ public abstract class ForestDocument implements MarkLogicDocument {
         return collections;
     }
     
-    private void setCollections(String[] cols) {
-        collections = cols;
+    private void setCollections(String docURI, String[] cols) {
+        // filter out collections that are illegal
+        List<String> colList = new ArrayList<String>(cols.length);
+        for (String col : cols) {
+            if (col.isEmpty()) { // Java URI does allow empty string.
+                LOG.info("Empty collection URI is removed for document "
+                        + docURI);
+                continue;
+            }
+            // We could drop other illegal URIs, but server seems to be more 
+            // lenient than Java URI, so try to preserve the original 
+            // collections.
+            colList.add(col); 
+        }
+        collections = new String[colList.size()];
+        colList.toArray(collections);
     }
     
     public Map<String, String> getMetadata() {

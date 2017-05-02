@@ -8,7 +8,7 @@
   <fileSets>
     <fileSet>
       <directory>${project.build.directory}/classes</directory>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>${file.separator}</outputDirectory>
       <includes>
         <include>com/marklogic/mapreduce/examples/**</include>
       </includes>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +20,14 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
+
+import com.marklogic.mapreduce.utilities.ForestHost;
 
 /**
  * MarkLogic-based InputSplit, used to represent a group of records returned by
@@ -52,17 +56,20 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
      * is the last split in the job
      */
     private boolean isLastSplit;
+
+    private List<ForestHost> replicas;
     
     public MarkLogicInputSplit() {
     }
     
     public MarkLogicInputSplit(long start, long length, BigInteger forestId, 
-            String hostName) {
+            String hostName, List<ForestHost> replicas) {
         this.start = start;
         this.length = length;
         this.forestId = forestId;
         this.hostName = new String[1];
         this.hostName[0] = hostName;
+        this.replicas = replicas;
     }
     
     @Override
@@ -111,6 +118,10 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
         isLastSplit = isLast;
     }
 
+    public List<ForestHost> getReplicas() {
+       return replicas;
+    }
+
     @Override
     public void readFields(DataInput in) throws IOException {
         start = in.readLong();
@@ -121,6 +132,14 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
         hostName = new String[1];
         hostName[0] = Text.readString(in);
         isLastSplit = in.readBoolean();
+        int replicaSize = in.readInt();
+        replicas = new ArrayList<ForestHost>();
+        for (int i=0; i < replicaSize; i++) {
+            String curForest = Text.readString(in);
+            String curHost = Text.readString(in);
+            ForestHost fh = new ForestHost(curForest, curHost);
+            replicas.add(fh);
+        } 
     }
 
     @Override
@@ -133,6 +152,12 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
             Text.writeString(out, hostName[0]);
         }
         out.writeBoolean(isLastSplit);
+        int replicaSize = (replicas != null) ? replicas.size() : 0;
+        out.writeInt(replicaSize);
+        for (int i=0; i < replicaSize; i++) {
+            Text.writeString(out, replicas.get(i).getForest());
+            Text.writeString(out, replicas.get(i).getHostName());
+        } 
     }
 
     @Override
@@ -141,4 +166,5 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
         forestId + ", hostName: " + 
         (hostName != null && hostName.length > 0 ? hostName[0] : "null");
     }
+
 }

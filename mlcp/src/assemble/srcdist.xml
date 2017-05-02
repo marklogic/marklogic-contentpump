@@ -8,7 +8,7 @@
     <fileSets>
       <fileSet>
         <directory>src</directory>
-        <outputDirectory>/src</outputDirectory>
+        <outputDirectory>${file.separator}src</outputDirectory>
         <excludes>
           <exclude>**/test/**</exclude>
           <exclude>**/test.properties</exclude> 
@@ -16,7 +16,7 @@
       </fileSet>
       <fileSet>
         <directory>hadoop-deps</directory>
-        <outputDirectory>/hadoop-deps</outputDirectory>
+        <outputDirectory>${file.separator}hadoop-deps</outputDirectory>
         <includes>
           <include>pom*.xml</include>
         </includes>
@@ -30,11 +30,11 @@
     <files>
       <file>
         <source>${basedir}/../LICENSE.txt</source>
-        <outputDirectory>/</outputDirectory>
+        <outputDirectory>${file.separator}</outputDirectory>
       </file>
       <file>
         <source>pom.xml</source>
-        <outputDirectory>/</outputDirectory>
+        <outputDirectory>${file.separator}</outputDirectory>
       </file>
     </files>
 </assembly>

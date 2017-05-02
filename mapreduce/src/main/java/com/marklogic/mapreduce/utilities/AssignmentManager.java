@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 package com.marklogic.mapreduce.utilities;
 
 import java.util.LinkedHashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
 
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.LinkedMapWritable;
+import com.marklogic.mapreduce.utilities.ForestHost;
 
 /**
  * Assignment Manager, which is a singleton
@@ -29,9 +32,21 @@ import com.marklogic.mapreduce.LinkedMapWritable;
 public class AssignmentManager {
     static final String ID_PREFIX = "#";
     protected AssignmentPolicy policy;
+    // This is here to leverage the fact that AssignmentManager is a singleton
+    // and only needs to be initialized once.
+    protected long effectiveVersion;
 
     private static final AssignmentManager instance = new AssignmentManager();
     private boolean initialized;
+    /* 
+     * a list of master forest ids
+     */
+    private String[] masterIds;
+    /* 
+     * mapping from master forest to a list of replica forests
+     */
+    private LinkedHashMap<String, List<ForestHost> > replicaMap;
+
     private AssignmentManager() {
         initialized = false;
     }
@@ -46,21 +61,25 @@ public class AssignmentManager {
 
     public synchronized void initialize(AssignmentPolicy.Kind kind,
         LinkedMapWritable map, int batchSize) {
-        if (initialized)
+        if (initialized) {
             return;
-        else
+        } else {
             initialized = true;
+        }
         LinkedHashSet<String> forests = new LinkedHashSet<String>();
         LinkedHashSet<String> updatableForests = new LinkedHashSet<String>();
+        replicaMap = new LinkedHashMap<String, List<ForestHost> >();
         for (Writable f : map.keySet()) {
             String fId = ((Text) f).toString();
             ForestInfo fs = (ForestInfo) map.get(f);
+            replicaMap.put(fId, fs.getReplicas());
             if (fs.getUpdatable()) {
                 // updatable
                 updatableForests.add(fId);
             }
             forests.add(fId);
         }
+        masterIds = forests.toArray(new String[forests.size()]);
         switch (kind) {
         case BUCKET:
             initBucketPolicy(forests.toArray(new String[forests.size()]),
@@ -129,6 +148,14 @@ public class AssignmentManager {
     public int getPlacementForestIndex(DocumentURI uri) {
         return policy.getPlacementForestIndex(uri);
     }
+
+    public String[] getMasterIds() {
+        return masterIds;
+    }
+
+    public List<ForestHost> getReplicas(String id) {
+        return replicaMap.get(id);
+    }
     
     /**
      * Used internally for testing
@@ -136,5 +163,13 @@ public class AssignmentManager {
      */
     public void setInitialized(boolean val) {
         initialized = val;
+    }
+
+    public long getEffectiveVersion() {
+        return effectiveVersion;
+    }
+
+    public void setEffectiveVersion(long effectiveVersion) {
+        this.effectiveVersion = effectiveVersion;
     }
 }

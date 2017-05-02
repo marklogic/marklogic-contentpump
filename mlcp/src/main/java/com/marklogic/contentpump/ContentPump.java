@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -49,6 +51,14 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 public class ContentPump implements MarkLogicConstants, ConfigConstants {
     
     public static final Log LOG = LogFactory.getLog(ContentPump.class);
+    // A global flag to indicate that JVM is exiting
+    public static volatile boolean shutdown = false;
+    // Job state in local mode
+    static List<Job> jobs = new LinkedList<Job>();
+    static {
+        // register a shutdown hook
+        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+    }
     
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
@@ -70,7 +80,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         System.exit(rc);
     }
 
-    public static int runCommand(String[] args) throws IOException {
+    public static int runCommand(String[] args) throws IOException {      
         // get command
         String cmd = args[0];
         if (cmd.equalsIgnoreCase("help")) {
@@ -125,13 +135,20 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         
         // check running mode and hadoop conf dir configuration 
         String mode = cmdline.getOptionValue(MODE);
+        if (mode != null &&
+                !MODE_DISTRIBUTED.equalsIgnoreCase(mode) &&
+                !MODE_LOCAL.equalsIgnoreCase(mode)) {
+            LOG.error("Unrecognized option argument for " +
+                MODE + ": " + mode);
+            return 1;
+        }
         String hadoopConfDir = System.getenv(HADOOP_CONFDIR_ENV_NAME);
         if (cmdline.hasOption(HADOOP_CONF_DIR)) {
             hadoopConfDir = cmdline.getOptionValue(HADOOP_CONF_DIR);
         }
         
         boolean distributed = hadoopConfDir != null && (mode == null ||
-                mode.equals(MODE_DISTRIBUTED));
+                mode.equalsIgnoreCase(MODE_DISTRIBUTED));
         if (MODE_DISTRIBUTED.equalsIgnoreCase(mode) && !distributed) {
             LOG.error("Cannot run in distributed mode.  HADOOP_CONF_DIR is "
                     + "not configured.");
@@ -146,6 +163,11 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         }
         conf.set(EXECUTION_MODE, distributed ? MODE_DISTRIBUTED : MODE_LOCAL);
         
+        if (conf.getBoolean(RESTRICT_INPUT_HOSTS, true) ||
+                conf.getBoolean(RESTRICT_OUTPUT_HOSTS, true)) {
+            System.setProperty("xcc.httpcompliant", "true");
+        }
+
         if (distributed) {
             if (!cmdline.hasOption(SPLIT_INPUT)
                 && Command.getInputType(cmdline).equals(
@@ -169,6 +191,16 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 return 1;
             }
         } else { // running in local mode
+            String bundleVersion = 
+                    System.getProperty(CONTENTPUMP_BUNDLE_ARTIFACT);
+            if (bundleVersion != null && 
+                    "mapr".equals(bundleVersion)) {
+                String cpHome = 
+                        System.getProperty(CONTENTPUMP_HOME_PROPERTY_NAME);
+                if (cpHome != null) {
+                    System.setProperty("java.security.auth.login.config", cpHome + "mapr.conf");
+                }
+            }
             // Tell Hadoop that we are running in local mode.  This is useful
             // when the user has Hadoop home or their Hadoop conf dir in their
             // classpath but want to run in local mode.
@@ -191,20 +223,23 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 conf.set(CONF_MAPREDUCE_JOB_WORKING_DIR, System.getProperty("user.dir"));
             }
             job = command.createJob(conf, cmdline);
+            LOG.info("Job name: " + job.getJobName());
         } catch (Exception e) {
             // Print exception message.
             e.printStackTrace();
             return 1;
         }
+        synchronized (ContentPump.class) {
+            jobs.add(job);
+        }
         
-        LOG.info("Job name: " + job.getJobName());
         // run job
         try {
             if (distributed) {
                 // submit job
                 submitJob(job);
             } else {                
-                runJobLocally(job, cmdline, command);
+                runJobLocally((LocalJob)job, cmdline, command);
             }
             return 0;
         } catch (Exception e) {
@@ -303,14 +338,24 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             LOG.trace("LIBJARS:" + jars.toString());
         job.waitForCompletion(true);
         AuditUtil.auditMlcpFinish(conf, job.getJobName(), job.getCounters());
+        
+        synchronized(ContentPump.class) {
+            jobs.remove(job);
+            ContentPump.class.notify();
+        }
     }
     
-    private static void runJobLocally(Job job, CommandLine cmdline, Command cmd) 
-    throws Exception {
+    private static void runJobLocally(LocalJob job, CommandLine cmdline, 
+            Command cmd) throws Exception {
         LocalJobRunner runner = new LocalJobRunner(job, cmdline, cmd);
         runner.run();
         AuditUtil.auditMlcpFinish(job.getConfiguration(),
                 job.getJobName(), runner.getReporter().counters);
+        
+        synchronized(ContentPump.class) {
+            jobs.remove(job);
+            ContentPump.class.notify();
+        }
     }
 
     private static void printUsage() {
@@ -332,5 +377,64 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         System.out.println("Supported MarkLogic versions: " + 
                 Versions.getMinServerVersion() + " - " + 
                 Versions.getMaxServerVersion());
+    }
+    
+    static class ShutdownHook extends Thread { 
+        boolean needToWait() {
+            boolean needToWait = false;
+            for (Job job : jobs) {
+                if (job instanceof LocalJob) {
+                    needToWait = true;
+                    break;
+                }
+            } 
+            return needToWait;
+        }
+        
+        public void run() {
+            shutdown = true;
+            // set system property for hadoop connector classes
+            System.setProperty("mlcp.shutdown", "1");
+            try {
+                synchronized (ContentPump.class) {
+                    boolean needToWait = false;
+                    List<Job> jobList = new LinkedList<Job>();
+                    for (Job job : jobs) {
+                        if (job instanceof LocalJob) {
+                            LOG.info("Aborting job " + job.getJobName());
+                            needToWait = true;
+                            jobList.add(job);
+                        }
+                    }
+                    if (needToWait) { // wait up to 30 seconds
+                        for (int i = 0; i < 30; ++i) {
+                            if (i > 0) { // check again
+                                needToWait = needToWait();
+                            }
+                            if (needToWait) {
+                                if (i > 0) {
+                                    LOG.info("Waiting..." + (30-i));
+                                }
+                                try {
+                                    ContentPump.class.wait(1000);
+                                } catch (InterruptedException e) {
+                                    // go back to wait
+                                }
+                            }  
+                        }
+                    }
+                    for (Job job : jobs) {
+                        LOG.warn("Job " + job.getJobName() +
+                                " status remains " + job.getJobState()); 
+                        jobList.remove(job);
+                    }
+                    for (Job job : jobList) {
+                        LOG.warn("Job " + job.getJobName() + " is aborted");
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Error terminating job", e);
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Vector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -26,6 +27,7 @@ import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.ContentWriter;
@@ -40,7 +42,6 @@ import com.marklogic.xcc.ContentFactory;
 import com.marklogic.xcc.ContentPermission;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.Session;
-import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.types.ValueType;
 
@@ -66,14 +67,14 @@ public class DatabaseContentWriter<VALUE> extends
             "xquery version \"1.0-ml\";\n";
 
     public DatabaseContentWriter(Configuration conf,
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad) {
-        this(conf, forestSourceMap, fastLoad, null); 
+        Map<String, ContentSource> hostSourceMap, boolean fastLoad) {
+        this(conf, hostSourceMap, fastLoad, null); 
     }
     
     public DatabaseContentWriter(Configuration conf,
-        Map<String, ContentSource> forestSourceMap, boolean fastLoad,
-        AssignmentManager am) {
-        super(conf, forestSourceMap, fastLoad, am);
+            Map<String, ContentSource> hostSourceMap, boolean fastLoad,
+            AssignmentManager am) {
+        super(conf, hostSourceMap, fastLoad, am);
 
         if (countBased) {
             metadatas = new URIMetadata[1][batchSize];
@@ -88,32 +89,64 @@ public class DatabaseContentWriter<VALUE> extends
      * fetch the options information from conf and metadata, set to the field
      * "options"
      */
-    protected ContentCreateOptions newContentCreateOptions(
-            DocumentMetadata meta) {
+    protected static ContentCreateOptions newContentCreateOptions(
+            DocumentMetadata meta, ContentCreateOptions options, 
+            boolean isCopyColls, boolean isCopyQuality, boolean isCopyMeta,
+            boolean isCopyPerms, long effectiveVersion) {
         ContentCreateOptions opt = (ContentCreateOptions)options.clone();
         if (meta != null) {
-            if (opt.getQuality() == 0) {
+            if (isCopyQuality && opt.getQuality() == 0) {
                 opt.setQuality(meta.quality);
             }
-            HashSet<String> colSet = new HashSet<String>(meta.collectionsList);
-            if (opt.getCollections() != null) {
-                // union copy_collection and output_collection
-                for (String s : opt.getCollections()) {
-                    colSet.add(s);
+            if (isCopyColls) {
+                if (opt.getCollections() != null) {
+                    HashSet<String> colSet = 
+                            new HashSet<String>(meta.collectionsList);
+                    // union copy_collection and output_collection
+                    for (String s : opt.getCollections()) {
+                        colSet.add(s);
+                    }
+                    opt.setCollections(
+                            colSet.toArray(new String[colSet.size()]));
+                } else {
+                    opt.setCollections(meta.getCollections());
+                }
+            }      
+            if (isCopyPerms) {
+                if (effectiveVersion < MarkLogicConstants.MIN_NODEUPDATE_VERSION &&
+                        meta.isNakedProps()) {
+                    boolean reset = false;
+                    Vector<ContentPermission> perms = new Vector<>();
+                    for (ContentPermission perm : meta.permissionsList) {
+                        if (!perm.getCapability().toString().equals(
+                                ContentPermission.NODE_UPDATE.toString())) {
+                            perms.add(perm);
+                        } else {
+                            reset = true;
+                        }
+                    }
+                    if (reset) {
+                        meta.clearPermissions();
+                        meta.addPermissions(perms);
+                        meta.setPermString(null);
+                    }
+                }
+                if (opt.getPermissions() != null) {
+                    HashSet<ContentPermission> pSet = 
+                         new HashSet<ContentPermission>(meta.permissionsList);
+                    // union of output_permission & copy_permission
+                    for (ContentPermission p : opt.getPermissions()) {
+                        pSet.add(p);
+                    }
+                    opt.setPermissions(
+                            pSet.toArray(new ContentPermission[pSet.size()]));
+                } else {
+                    opt.setPermissions(meta.getPermissions());
                 }
             }
-            opt.setCollections(colSet.toArray(new String[colSet.size()]));
-            HashSet<ContentPermission> pSet = new HashSet<ContentPermission>(
-                    meta.permissionsList);
-            if (opt.getPermissions() != null) {
-                // union of output_permission & copy_permission
-                for (ContentPermission p : opt.getPermissions()) {
-                    pSet.add(p);
-                }
+            if (isCopyMeta) {
+                opt.setMetadata(meta.meta);
             }
-            opt.setPermissions(
-                    pSet.toArray(new ContentPermission[pSet.size()]));
-            opt.setMetadata(meta.meta);
         }       
         return opt;
     }
@@ -122,7 +155,6 @@ public class DatabaseContentWriter<VALUE> extends
     public void write(DocumentURI key, VALUE value) throws IOException,
         InterruptedException {       
         String uri = InternalUtilities.getUriWithOutputDir(key, outputDir);
-        String csKey;
         int fId = 0;
         if (fastLoad) {
             if(!countBased) {
@@ -135,17 +167,17 @@ public class DatabaseContentWriter<VALUE> extends
                 }
                 fId = sfId;
             }
-            csKey = forestIds[fId];
-        } else {
-            csKey = forestIds[hostId];
-        }
+        } 
         int sid = fId;
         
         Content content = null;
         DocumentMetadata meta = null;
         if (value instanceof DatabaseDocumentWithMeta) {
+            try {
             meta = ((DatabaseDocumentWithMeta) value).getMeta();
-            ContentCreateOptions opt = newContentCreateOptions(meta);
+            ContentCreateOptions opt = newContentCreateOptions(meta, options,
+                isCopyColls, isCopyQuality, isCopyMeta, isCopyPerms, 
+                effectiveVersion);
             MarkLogicDocument doc = (MarkLogicDocument)value;
             if (!meta.isNakedProps()) {
                 opt.setFormat(doc.getContentType().getDocumentFormat());
@@ -156,6 +188,11 @@ public class DatabaseContentWriter<VALUE> extends
                     content = ContentFactory.newContent(uri, 
                             doc.getContentAsText().toString(), opt);
                 }
+            }
+            } catch (Exception e) {
+                failed++;
+                LOG.warn("Failed document: " + uri);
+                return;
             }
         } else {
             throw new UnsupportedOperationException(value.getClass()
@@ -173,18 +210,23 @@ public class DatabaseContentWriter<VALUE> extends
                 metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
             } else if (isCopyProps) { // naked properties
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(csKey);
+                    sessions[sid] = getSession(sid, false);
                 }
-                setDocumentProperties(uri, meta.getProperties(),
+                boolean suc = setDocumentProperties(uri, meta.getProperties(),
                         isCopyPerms?meta.getPermString():null,
                         isCopyColls?meta.getCollectionString():null,
                         isCopyQuality?meta.getQualityString():null, 
                         isCopyMeta?meta.getMeta():null, sessions[sid]);
                 stmtCounts[sid]++;
+                if (suc) { 
+                    commitUris[sid].add(key);
+                } else {
+                    failed++;
+                }
             }
             if (counts[fId] == batchSize) {
                 if (sessions[sid] == null) {
-                    sessions[sid] = getSession(csKey);
+                    sessions[sid] = getSession(sid, false);
                 }    
                 insertBatch(forestContents[fId], sid);     
                 stmtCounts[sid]++;
@@ -194,9 +236,15 @@ public class DatabaseContentWriter<VALUE> extends
                         DocumentMetadata m = metadatas[fId][i].getMeta();
                         String u = metadatas[fId][i].getUri();
                         if (m != null && m.getProperties() != null) {
-                            setDocumentProperties(u, m.getProperties(),
-                                    null,null,null,null,sessions[sid]);
+                            boolean suc = setDocumentProperties(u, 
+                                    m.getProperties(),null,null,null,null,
+                                    sessions[sid]);
                             stmtCounts[sid]++;
+                            if (suc) { 
+                                commitUris[sid].add(key);
+                            } else {
+                                failed++;
+                            }
                         }
                     }
                 }
@@ -209,7 +257,7 @@ public class DatabaseContentWriter<VALUE> extends
             }
         } else { // batchSize <= 1
             if (sessions[sid] == null) {
-                sessions[sid] = getSession(csKey);
+                sessions[sid] = getSession(sid, false);
             }
             if (content != null) {
                 insertContent(content, sid);
@@ -221,12 +269,17 @@ public class DatabaseContentWriter<VALUE> extends
             }     
             if (isCopyProps && meta.getProperties() != null) {
                 boolean naked = content == null;
-                setDocumentProperties(uri, meta.getProperties(),
+                boolean suc = setDocumentProperties(uri, meta.getProperties(),
                         isCopyPerms&&naked?meta.getPermString():null,
                         isCopyColls&&naked?meta.getCollectionString():null,
                         isCopyQuality&&naked?meta.getQualityString():null,
                         isCopyMeta&&naked?meta.meta:null, sessions[sid]);
                 stmtCounts[sid]++;
+                if (suc) { 
+                    commitUris[sid].add(key);
+                } else {
+                    failed++;
+                }
             }
             inserted = true;
         }
@@ -234,7 +287,6 @@ public class DatabaseContentWriter<VALUE> extends
         if (stmtCounts[sid] == txnSize && needCommit) {
             commit(sid);
             stmtCounts[sid] = 0;
-            commitUris[sid].clear();
             committed = true;
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
@@ -242,25 +294,6 @@ public class DatabaseContentWriter<VALUE> extends
             hostId = (hostId + 1)%forestIds.length;
             sessions[0] = null;
         }
-    }
-
-    protected Session getSession(String forestId, TransactionMode mode) {
-        Session session = null;
-        ContentSource cs = forestSourceMap.get(forestId);
-        if (fastLoad) {
-            session = cs.newSession(forestId);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Connect to forest " + forestId + " on "
-                    + session.getConnectionUri().getHost());
-            }
-        } else {
-            session = cs.newSession();
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Connect to " + session.getConnectionUri().getHost());
-            }
-        }   
-        session.setTransactionMode(mode);
-        return session;
     }
 
     @Override
@@ -281,10 +314,12 @@ public class DatabaseContentWriter<VALUE> extends
                     System.arraycopy(forestContents[i], 0, remainder, 0,
                             counts[i]);
                     if (sessions[sid] == null) {
-                        String forestId = forestIds[i];
-                        sessions[sid] = getSession(forestId);
+                        sessions[sid] = getSession(i, false);
                     }
-                    insertBatch(remainder, sid);
+                    try {
+                        insertBatch(remainder, sid);
+                    } catch (Exception e) {
+                    }
                     stmtCounts[sid]++;
                     if (!isCopyProps) {
                         continue;
@@ -338,8 +373,8 @@ public class DatabaseContentWriter<VALUE> extends
      * @param forestId
      * @throws RequestException
      */
-    protected void setDocumentProperties(String uri, String xmlString,
-        String permString, String collString, String quality, 
+    protected static boolean setDocumentProperties(String uri, 
+        String xmlString, String permString, String collString, String quality,
         Map<String, String> meta, Session s) {
         String query = XQUERY_VERSION_1_0_ML
             + "declare variable $URI as xs:string external;\n"
@@ -361,7 +396,7 @@ public class DatabaseContentWriter<VALUE> extends
             + "else xdmp:document-set-collections($URI,json:array-values(xdmp:from-json($COLL-STRING)))\n"
             + ", if('' eq ($QUALITY-STRING)) then () else xdmp:document-set-quality($URI,xs:integer($QUALITY-STRING))\n"
             + (meta == null ?
-                    "" : ", (let $f := fn:function-lookup(xs:QName('xdmp:document-set-metadata'),1)\n"
+                    "" : ", (let $f := fn:function-lookup(xs:QName('xdmp:document-set-metadata'),2)\n"
                     + "return if (exists($f)) then $f($URI,$META) else ())\n");
         if (LOG.isDebugEnabled()) {
             LOG.debug(query);
@@ -386,8 +421,11 @@ public class DatabaseContentWriter<VALUE> extends
         
         try {
             s.submitRequest(req);
+            return true;
         } catch (RequestException ex) {
-            LOG.error("Error setting document properties for " + uri, ex);
+            LOG.error("Error setting document properties for " + uri + ": " +
+                ex.getMessage());
+            return false;
         }
     }
 }

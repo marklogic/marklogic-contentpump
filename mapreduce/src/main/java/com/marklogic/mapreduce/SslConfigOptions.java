@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2016 MarkLogic Corporation
+ * Copyright 2003-2017 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 package com.marklogic.mapreduce;
+
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 import javax.net.ssl.SSLContext;
 
@@ -37,9 +40,10 @@ import javax.net.ssl.SSLContext;
  * 
  * @author jchen
  */
-public abstract interface SslConfigOptions {
+public interface SslConfigOptions {
     
-    public SSLContext getSslContext();
+    public SSLContext getSslContext() 
+        throws NoSuchAlgorithmException, KeyManagementException;
     
     public String[] getEnabledProtocols();
     
