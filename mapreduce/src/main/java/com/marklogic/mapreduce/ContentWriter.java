@@ -531,7 +531,7 @@ implements MarkLogicConstants {
                     sleepTime = sleepTime * 2;
                     if (sleepTime > maxSleepTime) 
                         sleepTime = maxSleepTime;
-                    sessions[id] = getSession(id, false);
+                    sessions[id] = getSession(id, true);
                     continue;
                 } else {
                     failed += batch.length;
@@ -648,7 +648,7 @@ implements MarkLogicConstants {
                     if (sleepTime > maxSleepTime) {
                         sleepTime = maxSleepTime;
                     }
-                    sessions[id] = getSession(id, false);
+                    sessions[id] = getSession(id, true);
                     continue;
                 } else {
                     failed++;
