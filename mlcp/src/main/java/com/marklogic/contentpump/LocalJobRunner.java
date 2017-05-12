@@ -133,9 +133,9 @@ public class LocalJobRunner implements ConfigConstants {
             Arrays.sort(array, new SplitLengthComparator());
         } catch (Exception ex) {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Error checking output specification: ", ex);
+                LOG.debug("Error getting input splits: ", ex);
             } else {
-                LOG.error("Error checking output specification: ");
+                LOG.error("Error getting input splits: ");
                 LOG.error(ex.getMessage());
             }
             return;
@@ -411,7 +411,7 @@ public class LocalJobRunner implements ConfigConstants {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Error running task: ", t);
                 } else {
-                    LOG.error("Error checking output specification: ");
+                    LOG.error("Error running task: ");
                     LOG.error(t.getMessage());
                 }
                 try{
