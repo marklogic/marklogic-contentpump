@@ -348,7 +348,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         try {
             loadModel(fsname, fs.open(file));
         } catch (Exception e) {
-            LOG.error("Failed to parse: " + origFn);
+            LOG.error("Failed to parse(please check intactness and encoding): " + origFn);
         }
     }
 
@@ -380,7 +380,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             try {
                 parser.parse();
             } catch (Throwable e) {
-                LOG.error("Parse error in RDF document; processing partial document:"
+                LOG.error("Parse error in RDF document(please check intactness and encoding); processing partial document:"
                     + fsname + " " + e.getMessage());
             }
             in.close();
@@ -1069,7 +1069,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                         rdfInputStream);
             } catch (Exception ex) {
                 // Yikes something went horribly wrong, bad encoding maybe?
-                LOG.error("Failed to parse: " + origFn, ex);
+                LOG.error("Failed to parse(please check intactness and encoding): " + origFn, ex);
 
                 byte[] b = new byte[0] ;
                 InputStream emptyBAIS = new ByteArrayInputStream(b) ;
@@ -1083,7 +1083,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 parser.parse();
             } catch (Exception ex) {
                 failed = true;
-                LOG.error("Parse error in RDF document; processing partial document:"
+                LOG.error("Parse error in RDF document(please check intactness and encoding); processing partial document:"
                     + origFn + " " + ex.getMessage());
             }
         }
