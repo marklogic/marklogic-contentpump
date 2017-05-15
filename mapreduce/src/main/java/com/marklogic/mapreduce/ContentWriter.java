@@ -65,7 +65,8 @@ import com.marklogic.xcc.exceptions.RetryableQueryException;
  *
  */
 public class ContentWriter<VALUEOUT> 
-extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstants {
+extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> 
+implements MarkLogicConstants {
     public static final Log LOG = LogFactory.getLog(ContentWriter.class);
     
     public static final String ID_PREFIX = "#";
@@ -524,13 +525,13 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                         sessions[id].close();
                     }
                     try {
-                        Thread.sleep(sleepTime);
+                        InternalUtilities.sleep(sleepTime);
                     } catch (Exception e2) {
                     }
                     sleepTime = sleepTime * 2;
                     if (sleepTime > maxSleepTime) 
                         sleepTime = maxSleepTime;
-                    sessions[id] = getSession(id, false);
+                    sessions[id] = getSession(id, true);
                     continue;
                 } else {
                     failed += batch.length;
@@ -640,14 +641,14 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                        sessions[id].close();
                     }
                     try {
-                        Thread.sleep(sleepTime);
+                        InternalUtilities.sleep(sleepTime);
                     } catch (Exception e2) {
                     }
                     sleepTime = sleepTime * 2;
                     if (sleepTime > maxSleepTime) {
                         sleepTime = maxSleepTime;
                     }
-                    sessions[id] = getSession(id, false);
+                    sessions[id] = getSession(id, true);
                     continue;
                 } else {
                     failed++;

@@ -393,13 +393,17 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         
         public void run() {
             shutdown = true;
+            // set system property for hadoop connector classes
+            System.setProperty("mlcp.shutdown", "1");
             try {
                 synchronized (ContentPump.class) {
                     boolean needToWait = false;
+                    List<Job> jobList = new LinkedList<Job>();
                     for (Job job : jobs) {
                         if (job instanceof LocalJob) {
                             LOG.info("Aborting job " + job.getJobName());
                             needToWait = true;
+                            jobList.add(job);
                         }
                     }
                     if (needToWait) { // wait up to 30 seconds
@@ -411,13 +415,21 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                                 if (i > 0) {
                                     LOG.info("Waiting..." + (30-i));
                                 }
-                                ContentPump.class.wait(1000);
+                                try {
+                                    ContentPump.class.wait(1000);
+                                } catch (InterruptedException e) {
+                                    // go back to wait
+                                }
                             }  
                         }
                     }
                     for (Job job : jobs) {
                         LOG.warn("Job " + job.getJobName() +
                                 " status remains " + job.getJobState()); 
+                        jobList.remove(job);
+                    }
+                    for (Job job : jobList) {
+                        LOG.warn("Job " + job.getJobName() + " is aborted");
                     }
                 }
             } catch (Exception e) {

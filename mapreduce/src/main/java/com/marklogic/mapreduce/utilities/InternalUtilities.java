@@ -451,4 +451,26 @@ public class InternalUtilities implements MarkLogicConstants {
             }
         }
     }
+    
+    /**
+     * Wake up every 1 second to check whether to abort
+     * @param millis
+     * @throws InterruptedException 
+     */
+    public static void sleep(long millis) throws InterruptedException {
+        while (millis > 0) {
+            // abort if the user kills mlcp in local mode
+            String shutdown = System.getProperty("mlcp.shutdown");
+            if (shutdown != null) {
+                break;
+            }
+            if (millis > 1000) {
+                Thread.sleep(1000);
+                millis -= 1000;
+            } else {
+                Thread.sleep(millis);
+                millis = 0;
+            }
+        }
+    }
 }
