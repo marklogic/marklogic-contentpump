@@ -575,6 +575,12 @@ implements MarkLogicConstants {
                     sessions[id] = getSession(id, true);
                     continue;
                 }
+                failed += batch.length;   
+                // remove the failed content from pendingUris
+                for (Content fc : batch) {
+                    DocumentURI failedUri = pendingUris[id].remove(fc);
+                    LOG.warn("Failed document " + failedUri);
+                }
                 pendingUris[id].clear();
                 throw new IOException(e);
             }
@@ -856,7 +862,7 @@ implements MarkLogicConstants {
             	sid = 0;
             }
             for (int i = 0; i < len; i++, sid++) {             
-                if (counts[i] > 0) {
+                if (pendingUris[sid].size() > 0) {
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0, 
                             counts[i]);
