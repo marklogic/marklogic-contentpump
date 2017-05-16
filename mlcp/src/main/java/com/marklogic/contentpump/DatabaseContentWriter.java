@@ -309,7 +309,7 @@ public class DatabaseContentWriter<VALUE> extends
                 sid = 0;
             }
             for (int i = 0; i < len; i++, sid++) {
-                if (counts[i] > 0) {
+                if (pendingUris[sid].size() > 0) {
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0,
                             counts[i]);

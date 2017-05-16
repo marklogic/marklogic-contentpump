@@ -528,7 +528,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public void close(TaskAttemptContext context) throws IOException,
     InterruptedException {
         for (int i = 0; i < sessions.length; i++) {
-            if (counts[i] > 0) {
+            if (pendingUris[i].size() > 0) {
                 if (sessions[i] == null) {
                     sessions[i] = getSession(i,false);
                 }
