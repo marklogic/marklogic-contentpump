@@ -132,6 +132,8 @@ public interface ConfigConstants {
     static final String SSL = "ssl";
     static final String INPUT_SSL = "input_ssl";
     static final String OUTPUT_SSL = "output_ssl";
+    static final String MODULES = "modules";
+    static final String MODULES_ROOT = "modules_root";
 
     static final String RDF_STREAMING_MEMORY_THRESHOLD  = 
             "rdf_streaming_memory_threshold";
@@ -219,6 +221,11 @@ public interface ConfigConstants {
             "mapreduce.marklogic.audit.mlcpfinish.enabled";
     static final String CONF_AUDIT_MLCPFINISH_MESSAGE = 
             "mapreduce.marklogic.audit.mlcpfinish.message";
+    static final String CONF_INPUT_MODULES_DATABASE =
+            "mapreduce.marklogic.input.modules";
+    static final String CONF_INPUT_MODULES_ROOT =
+            "mapreduce.marklogic.input.modulesroot";
+
     /**
      * <Role-name,Role-id> map for internal use
      */

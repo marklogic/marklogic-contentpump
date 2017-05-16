@@ -71,14 +71,17 @@ import com.marklogic.xcc.types.XdmValue;
 public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public static final Log LOG = LogFactory.getLog(TransformWriter.class);
     static final long BATCH_MIN_VERSION = 8000604;
+    static final long TRANS_OPT_NONCOMPATIBLE_VERSION = 9000100;
     static final String MAP_ELEM_START_TAG = 
         "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
         + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
         + "//marklogic.com/xdmp/map\">";
+    static boolean compatible;
     protected String moduleUri;
     protected String functionNs;
     protected String functionName;
     protected String functionParam;
+    protected XdmValue transOpt;
     protected ContentType contentType;
     protected AdhocQuery[] queries;
     protected Set<DocumentURI>[] pendingURIs;
@@ -89,6 +92,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     protected XName uriName;
     protected XName contentName;
     protected XName optionsName;
+    protected XName transOptName;
     protected String query;
 
     public TransformWriter(Configuration conf,
@@ -115,6 +119,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         if (counts == null) {
             counts = new int[sessions.length];
         }
+        compatible = effectiveVersion > BATCH_MIN_VERSION &&
+                effectiveVersion != TRANS_OPT_NONCOMPATIBLE_VERSION;
         uris = new XdmValue[counts.length][batchSize];
         values = new XdmValue[counts.length][batchSize];
         optionsVals = new XdmValue[counts.length][batchSize];
@@ -124,6 +130,10 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         optionsName = new XName("INSERT-OPTIONS");
         query = constructQryString(moduleUri, functionNs,
                 functionName, functionParam, effectiveVersion);
+        if (compatible) {
+            transOptName = new XName("TRANSFORM-OPTION");
+            transOpt = constructTransformOption(conf);
+        }
         if (LOG.isDebugEnabled()) {
             LOG.debug("query:"+query);
         }
@@ -134,25 +144,48 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         return txnSize > 1;
     }
     
+    private static XdmValue constructTransformOption(Configuration conf) {
+        HashMap<String, String> transMap = new HashMap<>();
+        String modules = conf.get(ConfigConstants.CONF_INPUT_MODULES_DATABASE);
+        String modulesRoot = conf.get(ConfigConstants.CONF_INPUT_MODULES_ROOT);
+        if (modules != null) {
+            transMap.put("modules", modules);
+        }
+        if (modulesRoot != null) {
+            transMap.put("modules-root", modulesRoot);
+        }
+        ObjectNode node = mapToNode(transMap);
+        return ValueFactory.newValue(ValueType.JS_OBJECT, node);
+    }
+    
     private static String constructQryString(String moduleUri, 
             String functionNs, String functionName,
-            String functionParam, long effectiveVersion) {
-        boolean compatibleMode = effectiveVersion < BATCH_MIN_VERSION; 
+            String functionParam, long effectiveVersion) { 
         StringBuilder q = new StringBuilder();
         q.append("xquery version \"1.0-ml\";\n")
         .append("import module namespace hadoop = \"http://marklogic.com")
         .append("/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n")
         .append("declare variable $URI as xs:string* external;\n")
         .append("declare variable $CONTENT as item()* external;\n")
-        .append("declare variable $INSERT-OPTIONS as ")
-        .append(compatibleMode ? 
-            "element() external;\nhadoop:transform-and-insert(\"" :
-            "map:map* external;\nhadoop:transform-insert-batch(\"")
-        .append(moduleUri)
+        .append("declare variable $INSERT-OPTIONS as ");
+        if (effectiveVersion < BATCH_MIN_VERSION) {
+            q.append("element() external;\nhadoop:transform-and-insert(\"");
+        } else {
+            q.append("map:map* external;\n");
+            if (compatible) {
+                q.append("declare variable $TRANSFORM-OPTION as map:map external;\n");
+            }
+            q.append("hadoop:transform-insert-batch(\"");
+        }
+        q.append(moduleUri)
         .append("\",\"").append(functionNs).append("\",\"")
         .append(functionName).append("\",\"")
         .append(functionParam.replace("\"", "\"\""))
-        .append("\", $URI, $CONTENT, $INSERT-OPTIONS)");
+        .append("\", $URI, $CONTENT, $INSERT-OPTIONS");
+        if (compatible) {
+            q.append(", $TRANSFORM-OPTION");
+        }
+        q.append(")");
         return q.toString();
     }
 
@@ -184,6 +217,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             queries[sid].setNewVariables(uriName, uris[sid]);
             queries[sid].setNewVariables(contentName, values[sid]);
             queries[sid].setNewVariables(optionsName, optionsVals[sid]);
+            if (compatible) {
+                queries[sid].setNewVariable(transOptName, transOpt);
+            }
             insertBatch(sid, uris[sid], values[sid], optionsVals[sid]);
             stmtCounts[sid]++;
             if (countBased) {
@@ -544,6 +580,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 XdmValue[] optionsLeft = new XdmValue[counts[i]];
                 System.arraycopy(optionsVals[i], 0, optionsLeft, 0, counts[i]);
                 queries[i].setNewVariables(optionsName, optionsLeft);
+                if (compatible) {
+                    queries[i].setNewVariable(transOptName, transOpt);
+                }
                 try {
                     insertBatch(i, urisLeft, valuesLeft, optionsLeft);
                 } catch (Exception e) {
