@@ -486,6 +486,24 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             } else {
                 LOG.error("RequestServerException:" + e.getMessage());
             }
+            rollback(id);
+            if (t < maxRetries) {
+                try {
+                    InternalUtilities.sleep(sleepTime);
+                } catch (Exception e2) {
+                }
+                sleepTime = sleepTime * 2;
+                if (sleepTime > maxSleepTime)
+                    sleepTime = maxSleepTime;
+
+                sessions[id].close();
+                sessions[id] = getSession(id, true);
+                queries[id] = getAdhocQuery(id);
+                queries[id].setNewVariables(uriName, uriList);
+                queries[id].setNewVariables(contentName, valueList);
+                queries[id].setNewVariables(optionsName, optionsValList);
+                continue;
+            }
             for ( DocumentURI failedUri: pendingURIs[id] ) {
                LOG.warn("Failed document " + failedUri);
                failed++;
@@ -528,7 +546,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public void close(TaskAttemptContext context) throws IOException,
     InterruptedException {
         for (int i = 0; i < sessions.length; i++) {
-            if (pendingUris[i].size() > 0) {
+            if (pendingURIs[i].size() > 0) {
                 if (sessions[i] == null) {
                     sessions[i] = getSession(i,false);
                 }
