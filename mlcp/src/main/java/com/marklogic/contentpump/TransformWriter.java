@@ -217,9 +217,6 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             queries[sid].setNewVariables(uriName, uris[sid]);
             queries[sid].setNewVariables(contentName, values[sid]);
             queries[sid].setNewVariables(optionsName, optionsVals[sid]);
-            if (compatible) {
-                queries[sid].setNewVariable(transOptName, transOpt);
-            }
             insertBatch(sid, uris[sid], values[sid], optionsVals[sid]);
             stmtCounts[sid]++;
             if (countBased) {
@@ -501,6 +498,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             if (t > 1) {
                 LOG.info("Retrying insert document " + t);
             }
+            if (compatible) {
+                queries[id].setNewVariable(transOptName, transOpt);
+            }
             ResultSequence rs = sessions[id].submitRequest(queries[id]);
             while (rs.hasNext()) { // batch mode
                 String uri = rs.next().asString();
@@ -598,9 +598,6 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 XdmValue[] optionsLeft = new XdmValue[counts[i]];
                 System.arraycopy(optionsVals[i], 0, optionsLeft, 0, counts[i]);
                 queries[i].setNewVariables(optionsName, optionsLeft);
-                if (compatible) {
-                    queries[i].setNewVariable(transOptName, transOpt);
-                }
                 try {
                     insertBatch(i, urisLeft, valuesLeft, optionsLeft);
                 } catch (Exception e) {
