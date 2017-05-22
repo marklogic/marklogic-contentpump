@@ -76,7 +76,6 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
         + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
         + "//marklogic.com/xdmp/map\">";
-    static boolean compatible;
     protected String moduleUri;
     protected String functionNs;
     protected String functionName;
@@ -119,7 +118,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         if (counts == null) {
             counts = new int[sessions.length];
         }
-        compatible = effectiveVersion > BATCH_MIN_VERSION &&
+        // Whether the server mlcp talks to has a transformation-option
+        // in transformation-insert-batch signature
+        boolean hasOpt = effectiveVersion > BATCH_MIN_VERSION &&
                 effectiveVersion != TRANS_OPT_NONCOMPATIBLE_VERSION;
         uris = new XdmValue[counts.length][batchSize];
         values = new XdmValue[counts.length][batchSize];
@@ -129,10 +130,11 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         contentName = new XName("CONTENT");
         optionsName = new XName("INSERT-OPTIONS");
         query = constructQryString(moduleUri, functionNs,
-                functionName, functionParam, effectiveVersion);
-        if (compatible) {
+                functionName, functionParam, effectiveVersion, hasOpt);
+        if (hasOpt) {
             transOptName = new XName("TRANSFORM-OPTION");
-            transOpt = constructTransformOption(conf);
+            transOpt = constructTransformOption(conf,
+                    functionParam, functionNs);
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("query:"+query);
@@ -144,7 +146,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         return txnSize > 1;
     }
     
-    private static XdmValue constructTransformOption(Configuration conf) {
+    private static XdmValue constructTransformOption(Configuration conf,
+            String functionParam, String functionNs) {
         HashMap<String, String> transMap = new HashMap<>();
         String modules = conf.get(ConfigConstants.CONF_INPUT_MODULES_DATABASE);
         String modulesRoot = conf.get(ConfigConstants.CONF_INPUT_MODULES_ROOT);
@@ -154,13 +157,23 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         if (modulesRoot != null) {
             transMap.put("modules-root", modulesRoot);
         }
-        ObjectNode node = mapToNode(transMap);
-        return ValueFactory.newValue(ValueType.JS_OBJECT, node);
+        if (!"".equals(functionNs)) {
+            transMap.put("transform-namespace", functionNs);
+        }
+        if (!"".equals(functionParam)) {
+            transMap.put("transform-param", functionParam);
+        }
+        if (transMap.isEmpty()) {
+            return ValueFactory.newValue(ValueType.SEQUENCE, new XdmValue[0]);
+        } else {
+            ObjectNode node = mapToNode(transMap);
+            return ValueFactory.newValue(ValueType.JS_OBJECT, node);
+        }
     }
     
     private static String constructQryString(String moduleUri, 
             String functionNs, String functionName,
-            String functionParam, long effectiveVersion) { 
+            String functionParam, long effectiveVersion, boolean hasOpt) {
         StringBuilder q = new StringBuilder();
         q.append("xquery version \"1.0-ml\";\n")
         .append("import module namespace hadoop = \"http://marklogic.com")
@@ -172,19 +185,24 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             q.append("element() external;\nhadoop:transform-and-insert(\"");
         } else {
             q.append("map:map* external;\n");
-            if (compatible) {
-                q.append("declare variable $TRANSFORM-OPTION as map:map external;\n");
+            if (hasOpt) {
+                q.append("declare variable $TRANSFORM-OPTION as map:map? external;\n");
             }
             q.append("hadoop:transform-insert-batch(\"");
         }
-        q.append(moduleUri)
-        .append("\",\"").append(functionNs).append("\",\"")
-        .append(functionName).append("\",\"")
-        .append(functionParam.replace("\"", "\"\""))
-        .append("\", $URI, $CONTENT, $INSERT-OPTIONS");
-        if (compatible) {
-            q.append(", $TRANSFORM-OPTION");
+        q.append(moduleUri).append("\",\"");
+        if (!hasOpt) {
+            q.append(functionNs).append("\",\"");
         }
+        q.append(functionName).append("\", ");
+        if (!hasOpt) {
+            q.append("\"")
+            .append(functionParam.replace("\"", "\"\""))
+            .append("\", ");
+        } else {
+            q.append("$TRANSFORM-OPTION, ");
+        }
+        q.append("$URI, $CONTENT, $INSERT-OPTIONS");
         q.append(")");
         return q.toString();
     }
@@ -498,7 +516,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             if (t > 1) {
                 LOG.info("Retrying insert document " + t);
             }
-            if (compatible) {
+            if (transOpt != null) {
                 queries[id].setNewVariable(transOptName, transOpt);
             }
             ResultSequence rs = sessions[id].submitRequest(queries[id]);
