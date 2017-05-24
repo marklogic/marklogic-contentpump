@@ -456,21 +456,10 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     if (ex instanceof ContentInsertException) {
                         Content content = 
                                 ((ContentInsertException)ex).getContent();
-                        if (!needCommit &&
-                            batch[batch.length-1] == content) {
-                            failed += batch.length;   
-                            // remove the failed content from pendingUris
-                            for (Content fc : batch) {
-                                DocumentURI failedUri = 
-                                        pendingUris[id].remove(fc);
-                                LOG.warn("Failed document " + failedUri);
-                            }
-                        } else {
-                            DocumentURI failedUri = 
-                                    pendingUris[id].remove(content);
-                            failed++;
-                            LOG.warn("Failed document " + failedUri);
-                        }
+                        DocumentURI failedUri = 
+                                pendingUris[id].remove(content);
+                        failed++;
+                        LOG.warn("Failed document " + failedUri);
                     }
                 }
             }
