@@ -1003,7 +1003,7 @@ public class TestImportDelimitedText{
         assertTrue(sb.toString().equals(key));
     }
 
-  //4 files into 6 delimited splits
+    //4 files into 6 delimited splits
     @Test
     public void testImportDelimitedTextSplit() throws Exception {
         String cmd = 
@@ -1041,5 +1041,74 @@ public class TestImportDelimitedText{
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
         assertTrue(sb.toString().equals(key));
+    }
+    
+    @Test
+    public void testBug44422() throws Exception {
+        String cmd = 
+                "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedText/44422.csv"
+                + " -fastload false -input_file_type delimited_text"
+                + " -split_input true -max_split_size 1000 -uri_id id"
+                + " -port " + Constants.port + " -database " + Constants.testDb;        
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        ResultSequence result = Utils.runQuery(
+                Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("900", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testBug42027() throws Exception {
+        String cmd = 
+                "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedText/42027.csv"
+                + " -fastload false -input_file_type delimited_text -document_type json"
+                + " -split_input true -max_split_size 50 -generate_uri true"
+                + " -port " + Constants.port + " -database " + Constants.testDb;        
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        ResultSequence result = Utils.runQuery(
+                Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1000", result.next().asString());
+        Utils.closeSession();
+    }
+    
+    @Test
+    public void testBug39564() throws Exception {
+        String cmd = 
+                "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedText/39564.csv"
+                + " -fastload false -input_file_type delimited_text"
+                + " -split_input true -max_split_size 300 -generate_uri true"
+                + " -port " + Constants.port + " -database " + Constants.testDb;        
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        
+        ResultSequence result = Utils.runQuery(
+                Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("20", result.next().asString());
+        Utils.closeSession();
     }
 }
