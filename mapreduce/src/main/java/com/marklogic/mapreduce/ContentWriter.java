@@ -488,24 +488,11 @@ implements MarkLogicConstants {
                         if (ex instanceof ContentInsertException) {
                             Content content = 
                                     ((ContentInsertException)ex).getContent();
-                            if (!needCommit &&
-                                batch[batch.length-1] == content) {
-                                // remove the failed content from pendingUris
-                                for (Content fc : batch) {
-                                    DocumentURI failedUri = 
-                                            pendingUris[id].remove(fc);
-                                    if (failedUri != null) {
-                                        failed++;
-                                        LOG.warn("Failed document " + failedUri);
-                                    }
-                                }
-                            } else {
-                                DocumentURI failedUri = 
-                                        pendingUris[id].remove(content);
-                                failed++;
-                                if (failedUri != null) {
-                                    LOG.warn("Failed document " + failedUri);
-                                }
+                            DocumentURI failedUri = 
+                                    pendingUris[id].remove(content);
+                            failed++;
+                            if (failedUri != null) {
+                                LOG.warn("Failed document " + failedUri);
                             }
                         }
                     }
