@@ -276,13 +276,15 @@ public enum Command implements ConfigConstants {
                 .create(THREADS_PER_SPLIT);
             options.addOption(threadsPerSplit);
 
-            Option tolerateErrors = OptionBuilder
+            Option tolerateErrors_opt = OptionBuilder
                 .withArgName("true,false")
                 .hasOptionalArg()
                 .withDescription(
                     "Whether to tolerate insertion errors and make sure all "
                     + "successful inserts are committed")
                 .create(TOLERATE_ERRORS);
+            CommandlineOption tolerateErrors = new CommandlineOption(tolerateErrors_opt);
+            tolerateErrors.setHidden(true);
             options.addOption(tolerateErrors);
 
             Option rdfMemoryThreshold_opt = OptionBuilder
@@ -1198,13 +1200,15 @@ public enum Command implements ConfigConstants {
                 .withDescription("Output directory in MarkLogic.")
                 .create(OUTPUT_DIRECTORY);
             options.addOption(outputDir);
-            Option tolerateErrors = OptionBuilder
+            Option tolerateErrors_opt = OptionBuilder
                 .withArgName("tolerate errors")
                 .hasOptionalArg()
                 .withDescription(
                     "Whether to tolerate insertion errors and make sure all "
                     + "successful inserts are committed")
                 .create(TOLERATE_ERRORS);
+            CommandlineOption tolerateErrors = new CommandlineOption(tolerateErrors_opt);
+            tolerateErrors.setHidden(true);
             options.addOption(tolerateErrors);
             
             configPartition(options);
