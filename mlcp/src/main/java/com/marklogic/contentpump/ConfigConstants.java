@@ -118,7 +118,6 @@ public interface ConfigConstants {
     static final String FAST_LOAD = "fastload";
     static final String CONTENT_ENCODING = "content_encoding";
     static final String THREADS_PER_SPLIT = "thread_count_per_split";
-    static final String TOLERATE_ERRORS = "tolerate_errors";
     static final String OUTPUT_PARTITION = "output_partition";
     static final String TRANSFORM_MODULE = "transform_module";
     static final String TRANSFORM_NAMESPACE = "transform_namespace";

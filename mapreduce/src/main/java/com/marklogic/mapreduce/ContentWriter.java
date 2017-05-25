@@ -149,8 +149,6 @@ implements MarkLogicConstants {
     
     private boolean streaming;
     
-    private boolean tolerateErrors;
-
     private RequestOptions requestOptions;
 
     protected AssignmentManager am;
@@ -332,7 +330,6 @@ implements MarkLogicConstants {
         }
         
         streaming = conf.getBoolean(OUTPUT_STREAMING, false);
-        tolerateErrors = conf.getBoolean(OUTPUT_TOLERATE_ERRORS, false);
         
         String encoding = conf.get(OUTPUT_CONTENT_ENCODING);
         if (encoding != null) {
@@ -355,7 +352,7 @@ implements MarkLogicConstants {
     }
     
     protected boolean needCommit() {
-        return txnSize > 1 || (batchSize > 1 && tolerateErrors);
+        return (txnSize > 1);
     }
 
     protected Content createContent(DocumentURI key, VALUEOUT value) 
