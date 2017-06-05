@@ -86,8 +86,11 @@ extends ImportRecordReader<VALUEIN> {
             FileSystem fs = file.getFileSystem(context.getConfiguration());        
             FSDataInputStream fileIn = fs.open(file);
             long splitLength = split.getLength();
-            if (splitLength > (long)Integer.MAX_VALUE) {
-                setSkipKey(0, 0, "file size too large: " + splitLength); 
+            // See HADOOP-11901 for information on restrictions of BytesWritable
+            if (splitLength > (long)Integer.MAX_VALUE ||
+                    (splitLength * 3L) > (long)Integer.MAX_VALUE) {
+                setSkipKey(0, 0, "file size too large: " + splitLength
+                        + ". Use streaming option.");
                 return true;
             }
             if (setKey(uri, 0, 0, true)) {
