@@ -87,6 +87,7 @@ extends ImportRecordReader<VALUEIN> {
             FSDataInputStream fileIn = fs.open(file);
             long splitLength = split.getLength();
             // See HADOOP-11901 for information on restrictions of BytesWritable
+            // TODO remove this check after hadoop 2.8.0
             if (splitLength > (long)Integer.MAX_VALUE ||
                     (splitLength * 3L) > (long)Integer.MAX_VALUE) {
                 setSkipKey(0, 0, "file size too large: " + splitLength
