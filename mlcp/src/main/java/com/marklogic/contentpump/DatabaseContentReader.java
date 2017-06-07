@@ -236,8 +236,8 @@ public class DatabaseContentReader extends
         // set up a connection to the server
         while (retry < maxRetries) {
         try {
-            if (retry > 0) {
-                LOG.info("Retrying connect " + retry);
+            if (retry == 1) {
+                LOG.info("Retrying connect");
             }
             String curForestName = "";
             String curHostName = "";
@@ -618,7 +618,7 @@ public class DatabaseContentReader extends
                             init();
                             continue;
                         }
-                        LOG.info("Retry limit exceeded");
+                        LOG.info("Exceeded max retry");
                     }
                     throw new IOException(e);
                 } catch (RuntimeException e) {
@@ -635,7 +635,7 @@ public class DatabaseContentReader extends
                             init();
                             continue;
                         }
-                        LOG.info("Retry limit exceeded");
+                        LOG.info("Exceeded max retry");
                     }
                     throw e;
                 }

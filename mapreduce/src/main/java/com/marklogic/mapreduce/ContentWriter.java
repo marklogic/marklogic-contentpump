@@ -469,8 +469,8 @@ implements MarkLogicConstants {
         sleepTime = 500;
         while (retry < maxRetries) {
             try {
-                if (retry > 0) { 
-                    LOG.info("Retrying document insert " + retry);
+                if (retry == 1) { 
+                    LOG.info("Retrying document insert");
                 }
                 List<RequestException> errors = 
                     sessions[id].insertContentCollectErrors(batch);
@@ -498,7 +498,7 @@ implements MarkLogicConstants {
                     }
                 }
                 if (retry > 0) { 
-                    LOG.debug("Retry successful after " + retry);
+                    LOG.debug("Retry successful");
                 }
             } catch (Exception e) {
                 if (e instanceof RetryableQueryException) {
@@ -535,7 +535,7 @@ implements MarkLogicConstants {
                     sessions[id] = getSession(id, true);
                     continue;
                 } 
-                LOG.info("Retry limit exceeded");
+                LOG.info("Exceeded max retry");
                 failed += batch.length;
                 // remove the failed content from pendingUris
                 for (Content fc : batch) {

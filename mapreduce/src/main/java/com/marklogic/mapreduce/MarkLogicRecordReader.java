@@ -331,8 +331,8 @@ implements MarkLogicConstants {
         // set up a connection to the server
         while (retry < maxRetries) {
         try {
-            if (retry > 0) {
-                LOG.info("Retrying connect " + retry);
+            if (retry == 1) {
+                LOG.info("Retrying connect");
             }
             String curForestName = "";
             String curHostName = "";
@@ -411,7 +411,7 @@ implements MarkLogicConstants {
                     curForest = (curForest+1)%replicas.size();
                     continue;
                  }
-                 LOG.info("Retry limit exceeded");
+                 LOG.info("Exceeded max retry");
             }
             LOG.info("Query: " + queryText);
             if (LOG.isDebugEnabled()) {
@@ -453,7 +453,7 @@ implements MarkLogicConstants {
                         init();
                         continue;
                     }
-                    LOG.info("Retry limit exceeded");
+                    LOG.info("Exceeded max retry");
                 }
                 throw e;
             }

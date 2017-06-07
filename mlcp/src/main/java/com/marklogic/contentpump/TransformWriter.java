@@ -558,7 +558,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 queries[id].setNewVariables(optionsName, optionsValList);
                 continue;
             }
-            LOG.info("Retry limit exceeded");
+            LOG.info("Exceeded max retry");
             for ( DocumentURI failedUri: pendingURIs[id] ) {
                LOG.warn("Failed document " + failedUri);
                failed++;
