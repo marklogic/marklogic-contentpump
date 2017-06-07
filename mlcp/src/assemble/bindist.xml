@@ -43,6 +43,7 @@
       <fileMode>0755</fileMode>
       <includes>
         <include>log4j.properties</include>
+        <include>xcc.logging.properties</include>
       </includes>
     </fileSet>
     <fileSet>
