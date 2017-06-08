@@ -54,10 +54,11 @@ public class ZipDelimitedJSONReader extends DelimitedJSONReader<Text> {
     @Override
     protected void initFileStream(InputSplit inSplit) 
             throws IOException, InterruptedException {
-        setFile(((FileSplit) inSplit).getPath());
-        fileIn = fs.open(file);
+        fileIn = openFile(inSplit, false);
+        if (fileIn == null) {
+            return;
+        }
         zipIn = new ZipInputStream(fileIn);
-
     }
     
     @Override
