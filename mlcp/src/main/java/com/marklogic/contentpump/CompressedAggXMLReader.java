@@ -82,8 +82,10 @@ public class CompressedAggXMLReader<VALUEIN> extends
 
     protected void initStreamReader(InputSplit inSplit) throws IOException,
     InterruptedException {
-        setFile(((FileSplit) inSplit).getPath());
-        FSDataInputStream fileIn = fs.open(file);
+        FSDataInputStream fileIn = openFile(inSplit, false);
+        if (fileIn == null) {
+            return;
+        }
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
             CompressionCodec.ZIP.toString());

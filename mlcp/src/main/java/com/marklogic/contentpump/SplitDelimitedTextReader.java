@@ -132,9 +132,10 @@ public class SplitDelimitedTextReader<VALUEIN> extends
     @Override
     protected void initParser(InputSplit inSplit) throws IOException,
         InterruptedException {
-        setFile(((DelimitedSplit) inSplit).getPath());
-        configFileNameAsCollection(conf, file);
-
+        fileIn = openFile(inSplit, true);
+        if (fileIn == null) {
+            return;
+        }
         // get header from the DelimitedSplit
         TextArrayWritable taw = ((DelimitedSplit) inSplit).getHeader();
         fields = taw.toStrings();
@@ -146,7 +147,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
             return;
         }
 
-        fileIn = fs.open(file);
         lineSeparator = retrieveLineSeparator(fileIn);
         if (start != 0) {
             // in case the cut point is \n, back off 1 char to create a partial

@@ -31,6 +31,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -284,11 +285,15 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             initExistingMapPerms();
     }
 
-    protected void initStream(InputSplit inSplit) throws IOException, InterruptedException {
-        setFile(((FileSplit) inSplit).getPath());
+    protected void initStream(InputSplit inSplit)
+            throws IOException, InterruptedException {
+        FSDataInputStream in = openFile(inSplit, false);
+        if (in == null) {
+            return;
+        }
         long size = inSplit.getLength();
         initParser(file.toUri().toASCIIString(), size);
-        parse(file.getName());
+        parse(file.getName(), in);
     }
 
     protected void initParser(String fsname, long size) throws IOException {
@@ -344,9 +349,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
     }
 
-    protected void parse(String fsname) throws IOException {
+    protected void parse(String fsname, FSDataInputStream in)
+            throws IOException {
         try {
-            loadModel(fsname, fs.open(file));
+            loadModel(fsname, in);
         } catch (Exception e) {
             LOG.error("Failed to parse(please check intactness and encoding): " + origFn);
         }
