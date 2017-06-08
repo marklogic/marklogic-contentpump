@@ -105,7 +105,7 @@ implements MarkLogicConstants {
 
     protected int sleepTime;
 
-    protected final int maxSleepTime = 60000;
+    protected final int maxSleepTime = 30000;
 
     public MarkLogicRecordReader(Configuration conf) {
         this.conf = conf;
@@ -241,7 +241,7 @@ implements MarkLogicConstants {
             }
         }
         retry = 0;
-        sleepTime = 100;
+        sleepTime = 500;
         init();
     }
         
@@ -329,10 +329,10 @@ implements MarkLogicConstants {
 
 
         // set up a connection to the server
-        while (retry++ < maxRetries) {
+        while (retry < maxRetries) {
         try {
-            if (retry > 1) {
-                LOG.info("Retrying connect " + retry);
+            if (retry == 1) {
+                LOG.info("Retrying connect");
             }
             String curForestName = "";
             String curHostName = "";
@@ -392,26 +392,31 @@ implements MarkLogicConstants {
             query.setOptions(options);       
             result = session.submitRequest(query);
         } catch (XccConfigException e) {
-            LOG.error(e);
+            LOG.error("XccConfigException:" + e);
             throw new IOException(e);
         } catch (QueryException e) {
-            LOG.error(e);
+            LOG.error("QueryException:" + e);
             throw new IOException(e);
         } catch (RequestException e) {
-            LOG.error("RequestException:" + e);
-            if (curForest != -1 && retry < maxRetries) {
-                // failover
-                try {
-                    InternalUtilities.sleep(sleepTime);
-                } catch (Exception e2) {
-                }
-                sleepTime = Math.min(sleepTime * 2,maxSleepTime);
+            LOG.error("RequestException:" + e.getMessage());
+            if (curForest != -1) {
+                if (++retry < maxRetries) {
+                    // failover
+                    try {
+                        InternalUtilities.sleep(sleepTime);
+                    } catch (Exception e2) {
+                    }
+                    sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
-                curForest = (curForest+1)%replicas.size();
-                continue;
+                    curForest = (curForest+1)%replicas.size();
+                    continue;
+                 }
+                 LOG.info("Exceeded max retry");
             }
-            LOG.error("Query: " + queryText);
-            LOG.error(e);
+            LOG.info("Query: " + queryText);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("RequestException: " + e);
+            }
             throw new IOException(e);
         }
         break;
@@ -421,8 +426,8 @@ implements MarkLogicConstants {
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {
         retry = 0;
-        sleepTime = 100;
-        while (retry++ < maxRetries) {
+        sleepTime = 500;
+        while (retry < maxRetries) {
             try {
                 if (result != null && result.hasNext()) {
                     ResultItem item = result.next();
@@ -435,16 +440,20 @@ implements MarkLogicConstants {
                     return false;
                 }
             } catch (RuntimeException e) {
-                if (curForest != -1 && retry < maxRetries) {
-                    try {
-                        InternalUtilities.sleep(sleepTime);
-                    } catch (Exception e2) {
+                LOG.error("RuntimeException:" + e.getMessage());
+                if (curForest != -1) {
+                    if (++retry < maxRetries) {
+                        try {
+                            InternalUtilities.sleep(sleepTime);
+                        } catch (Exception e2) {
+                        }
+                        sleepTime = Math.min(sleepTime * 2,maxSleepTime);
+    
+                        curForest = (curForest+1)%replicas.size();
+                        init();
+                        continue;
                     }
-                    sleepTime = Math.min(sleepTime * 2,maxSleepTime);
-
-                    curForest = (curForest+1)%replicas.size();
-                    init();
-                    continue;
+                    LOG.info("Exceeded max retry");
                 }
                 throw e;
             }

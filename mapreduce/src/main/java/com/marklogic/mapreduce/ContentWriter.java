@@ -178,6 +178,17 @@ implements MarkLogicConstants {
     protected long effectiveVersion;
     
     protected boolean isTxnCompatible = false;
+
+    /**
+     * for failover retry
+     */
+    protected int retry;
+
+    protected final int maxRetries = 15;
+
+    protected int sleepTime;
+
+    protected final int maxSleepTime = 30000;
     
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> hostSourceMap, boolean fastLoad) {
@@ -245,16 +256,12 @@ implements MarkLogicConstants {
             || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.RANGE
             || am.getPolicy().getPolicyKind() == AssignmentPolicy.Kind.QUERY)) {
             countBased = true;
-            if (batchSize > 1) {           
-                forestContents = new Content[1][batchSize];
-                counts = new int[1];
-            }
+            forestContents = new Content[1][batchSize];
+            counts = new int[1];
             sfId = -1;
         } else {
-            if (batchSize > 1) {           
-                forestContents = new Content[arraySize][batchSize];
-                counts = new int[arraySize];                
-            }
+            forestContents = new Content[arraySize][batchSize];
+            counts = new int[arraySize];                
             sfId = 0;
         }
         
@@ -392,9 +399,7 @@ implements MarkLogicConstants {
                     ((BytesWritable) value).getLength(), options);               
         } else if (value instanceof CustomContent) { 
             ContentCreateOptions newOptions = options;
-            if (batchSize > 1) {
-                newOptions = (ContentCreateOptions)options.clone();
-            }
+            newOptions = (ContentCreateOptions)options.clone();
             content = ((CustomContent) value).getContent(conf, newOptions, 
                     uri);
         } else if (value instanceof DatabaseDocument) {
@@ -460,14 +465,12 @@ implements MarkLogicConstants {
      */
     protected void insertBatch(Content[] batch, int id) 
     throws IOException {
-        int t = 0;
-        final int maxRetries = 15;
-        int sleepTime = 100;
-        final int maxSleepTime = 60000;
-        while (t++ < maxRetries) {
+        retry = 0;
+        sleepTime = 500;
+        while (retry < maxRetries) {
             try {
-                if (t > 1) { 
-                    LOG.info("Retrying document insert " + t);
+                if (retry == 1) { 
+                    LOG.info("Retrying document insert");
                 }
                 List<RequestException> errors = 
                     sessions[id].insertContentCollectErrors(batch);
@@ -494,20 +497,31 @@ implements MarkLogicConstants {
                         }
                     }
                 }
-            } catch (RetryableQueryException e) {
-                // log error and continue on RequestServerException
-                LOG.error(e.getFormatString());
+                if (retry > 0) { 
+                    LOG.debug("Retry successful");
+                }
+            } catch (Exception e) {
+                if (e instanceof RetryableQueryException) {
+                    // log error and continue on RequestServerException
+                    LOG.error("RetryableQueryException:" + ((RetryableQueryException)e).getFormatString());
+                } else if (e instanceof QueryException) {
+                    LOG.error("QueryException:" + ((QueryException)e).getFormatString());
+                } else if (e instanceof RequestServerException) {
+                    // log error and continue on RequestServerException
+                    // not retryable so trying to connect to the replica
+                    LOG.error("RequestServerException:" + e.getMessage());
+                } else {
+                    LOG.error("Exception:" + e.getMessage());
+                }
 
                 // necessary to roll back in certain scenarios.
                 if (needCommit) {
                     rollback(id);
                 }
 
-                if (t < maxRetries) {
-                    if (sessions[id] != null) {
-                        // necessary to close the session too.
-                        sessions[id].close();
-                    }
+                if (++retry < maxRetries) {
+                    // necessary to close the session too.
+                    sessions[id].close();
                     try {
                         InternalUtilities.sleep(sleepTime);
                     } catch (Exception e2) {
@@ -515,59 +529,21 @@ implements MarkLogicConstants {
                     sleepTime = sleepTime * 2;
                     if (sleepTime > maxSleepTime) 
                         sleepTime = maxSleepTime;
+                    
+                    // We need to switch host even for RetryableQueryException
+                    // because it could be "sync replicating" (bug:45785)
                     sessions[id] = getSession(id, true);
                     continue;
-                } else {
-                    failed += batch.length;
-                    // remove the failed content from pendingUris
-                    for (Content fc : batch) {
-                        DocumentURI failedUri = pendingUris[id].remove(fc);
-                        LOG.warn("Failed document " + failedUri);
-                    }
-                    // TODO: We think we should throw exception now.
-                }
-            } catch (RequestServerException e) {
-                // log error and continue on RequestServerException
-                // not retryable so trying to connect to the replica
-                if (e instanceof QueryException) {
-                    LOG.error(((QueryException)e).getFormatString());
-                } else {
-                    LOG.error(e.getMessage());
-                }
-                if (needCommit) {
-                    rollback(id);
-                }
-                if (t < maxRetries) {
-                    sessions[id].close();
-                    sessions[id] = getSession(id, true);
-                    continue;
-                }
-
-                failed += batch.length;   
+                } 
+                LOG.info("Exceeded max retry");
+                failed += batch.length;
                 // remove the failed content from pendingUris
                 for (Content fc : batch) {
                     DocumentURI failedUri = pendingUris[id].remove(fc);
                     LOG.warn("Failed document " + failedUri);
                 }
-                // TODO: We think we should throw exception now.
-            } catch (Exception e) {
-                if (needCommit) {
-                    rollback(id);
-                }
-                if (t < maxRetries) {
-                    sessions[id].close();
-                    sessions[id] = getSession(id, true);
-                    continue;
-                }
-                failed += batch.length;   
-                // remove the failed content from pendingUris
-                for (Content fc : batch) {
-                    DocumentURI failedUri = pendingUris[id].remove(fc);
-                    LOG.warn("Failed document " + failedUri);
-                }
-                pendingUris[id].clear();
                 throw new IOException(e);
-            }
+            } 
             break;
         }
 
@@ -602,90 +578,18 @@ implements MarkLogicConstants {
         }
     }
 
-    protected void insertContent(Content content, int id) 
-    throws IOException {
-        int t = 0;
-        final int maxRetries = 15;
-        int sleepTime = 100;
-        final int maxSleepTime = 60000;
-        while (t++ < maxRetries) {
-            try {
-                if (t > 1) {
-                    LOG.info("Retrying document insert " + t);
-                }
-                sessions[id].insertContent(content);
-                if (!needCommit) {
-                    succeeded++;
-                    pendingUris[id].clear();
-                }
-            } catch (RetryableQueryException e) {
-                // log error and continue on RequestServerException
-                LOG.error(e.getFormatString());
-
-                if (needCommit) {
-                    rollback(id);
-                }
-
-                if (t < maxRetries) {
-                    if (sessions[id] != null) {
-                       sessions[id].close();
-                    }
-                    try {
-                        InternalUtilities.sleep(sleepTime);
-                    } catch (Exception e2) {
-                    }
-                    sleepTime = sleepTime * 2;
-                    if (sleepTime > maxSleepTime) {
-                        sleepTime = maxSleepTime;
-                    }
-                    sessions[id] = getSession(id, true);
-                    continue;
-                } else {
-                    failed++;
-                    // remove the failed content from pendingUris
-                    DocumentURI failedUri = 
-                            pendingUris[id].remove(content.getUri());
-                    LOG.warn("Failed document " + failedUri);
-                }
-            } catch (RequestServerException e) {
-                if (e instanceof QueryException) {
-                    LOG.error(((QueryException)e).getFormatString());
-                } else {
-                    LOG.error(e.getMessage());
-                }
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(e);
-                }
-                failed++;   
-                // remove the failed content from pendingUris
-                DocumentURI failedUri = pendingUris[id].remove(content.getUri());
-                LOG.warn("Failed document " + failedUri);
-            } catch (RequestException e) {
-                if (needCommit) {
-                    rollback(id);
-                }
-                if (t < maxRetries) {
-                    sessions[id].close();
-                    sessions[id] = getSession(id, true);
-                    continue;
-                }
-                pendingUris[id].clear();
-                throw new IOException(e);
-            }
-            break;
-        }
-    }
-    
     protected void commit(int id) throws IOException {
         try {
             sessions[id].commit();
             succeeded += commitUris[id].size();
             commitUris[id].clear();
         } catch (RequestServerException e) {
+            LOG.error("Error commiting transaction " + e.getMessage());
             rollback(id);
             sessions[id].close();
             sessions[id] = null;
         } catch (RequestException e) {
+            LOG.error("Error commiting transaction " + e.getMessage());
             rollback(id);
             throw new IOException(e);
         } catch (Exception e) {
@@ -724,32 +628,19 @@ implements MarkLogicConstants {
         }
         pendingUris[sid].put(content, (DocumentURI)key.clone());
         boolean inserted = false;
-        if (batchSize > 1) {
-            forestContents[fId][counts[fId]++] = content;
-            if (counts[fId] == batchSize) {
-                if (sessions[sid] == null) {
-                    sessions[sid] = getSession(sid, false);
-                }  
-                insertBatch(forestContents[fId], sid);
-                stmtCounts[sid]++;
-                
-                //reset forest index for statistical
-                if (countBased) {
-                    sfId = -1;
-                }
-                counts[fId] = 0;
-                inserted = true;
-            }
-        } else { // batchSize == 1
+        forestContents[fId][counts[fId]++] = content;
+        if (counts[fId] == batchSize) {
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
-            }
-            insertContent(content, sid);   
+            }  
+            insertBatch(forestContents[fId], sid);
             stmtCounts[sid]++;
+                
             //reset forest index for statistical
             if (countBased) {
                 sfId = -1;
             }
+            counts[fId] = 0;
             inserted = true;
         }
         boolean committed = false;

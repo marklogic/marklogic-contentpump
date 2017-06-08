@@ -507,14 +507,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             XdmValue[] valueList, XdmValue[] optionsValList) 
     throws IOException
     {
-        int t = 0;
-        final int maxRetries = 15;
-        int sleepTime = 100;
-        final int maxSleepTime = 60000;
-        while (t++ < maxRetries) {
+        retry = 0;
+        sleepTime = 500;
+        while (retry < maxRetries) {
         try {
-            if (t > 1) {
-                LOG.info("Retrying insert document " + t);
+            if (retry > 0) {
+                LOG.info("Retrying insert document " + retry);
             }
             if (transOpt != null) {
                 queries[id].setNewVariable(transOptName, transOpt);
@@ -532,16 +530,18 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             }
             counts[id] = 0;
             break;
-        } catch (RequestServerException e) {
+        } catch (Exception e) {
             // compatible mode: log error and continue
             if (e instanceof QueryException) {
                 LOG.error("QueryException:" + 
                         ((QueryException) e).getFormatString());
-            } else {
+            } else if (e instanceof RequestServerException) {
                 LOG.error("RequestServerException:" + e.getMessage());
+            } else {
+                LOG.error("Exception:" + e.getMessage());
             }
             rollback(id);
-            if (t < maxRetries) {
+            if (++retry < maxRetries) {
                 try {
                     InternalUtilities.sleep(sleepTime);
                 } catch (Exception e2) {
@@ -558,33 +558,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 queries[id].setNewVariables(optionsName, optionsValList);
                 continue;
             }
-            for ( DocumentURI failedUri: pendingURIs[id] ) {
-               LOG.warn("Failed document " + failedUri);
-               failed++;
-            }
-            pendingURIs[id].clear();
-            counts[id] = 0;
-            break;
-        } catch (Exception e) {
-            LOG.error("RequestException:" + e.getMessage());
-            rollback(id);
-            if (t < maxRetries) {
-                try {
-                    InternalUtilities.sleep(sleepTime);
-                } catch (Exception e2) {
-                }
-                sleepTime = sleepTime * 2;
-                if (sleepTime > maxSleepTime)
-                    sleepTime = maxSleepTime;
-
-                sessions[id].close();
-                sessions[id] = getSession(id, true);
-                queries[id] = getAdhocQuery(id);
-                queries[id].setNewVariables(uriName, uriList);
-                queries[id].setNewVariables(contentName, valueList);
-                queries[id].setNewVariables(optionsName, optionsValList);
-                continue;
-            }
+            LOG.info("Exceeded max retry");
             for ( DocumentURI failedUri: pendingURIs[id] ) {
                LOG.warn("Failed document " + failedUri);
                failed++;
