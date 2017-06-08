@@ -83,8 +83,15 @@ extends ImportRecordReader<VALUEIN> {
             }
             setFile(split.getPath());
             String uri = makeURIFromPath(file);
-            FileSystem fs = file.getFileSystem(context.getConfiguration());        
-            FSDataInputStream fileIn = fs.open(file);
+            FileSystem fs = file.getFileSystem(context.getConfiguration());
+            FSDataInputStream fileIn;
+            // HADOOP-3257 Path cannot handle file names with colon
+            try {
+                fileIn = fs.open(file);
+            } catch (IllegalArgumentException e) {
+                setSkipKey(0, 0, e.getMessage());
+                return true;
+            }
             long splitLength = split.getLength();
             // See HADOOP-11901 for information on restrictions of BytesWritable
             // TODO remove this check after hadoop 2.8.0

@@ -89,9 +89,10 @@ public class CompressedDocumentReader<VALUEIN> extends
         if (LOG.isDebugEnabled()) {
             LOG.debug("Starting " + file);
         }
-        setFile(((FileSplit) inSplit).getPath());  
-
-        FSDataInputStream fileIn = fs.open(file);
+        FSDataInputStream fileIn = openFile(inSplit, false);
+        if (fileIn == null) {
+            return;
+        }
 
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
