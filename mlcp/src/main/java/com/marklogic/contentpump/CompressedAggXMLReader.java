@@ -130,7 +130,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
             }
         } else {
             throw new UnsupportedOperationException("Unsupported codec: "
-                + codec.name());
+                + codecString);
         }    
         if (useAutomaticId) {
             idGen = new IdGenerator(file.toUri().getPath() + "-"

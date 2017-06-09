@@ -87,6 +87,9 @@ public class CompressedDelimitedTextReader extends DelimitedTextReader<Text> {
             .toString())) {
             zipIn = new GZIPInputStream(fileIn);
             codec = CompressionCodec.GZIP;
+        } else {
+            throw new UnsupportedOperationException("Unsupported codec: "
+                    + codecString);
         }
         
         if (uriName == null) {
