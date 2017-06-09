@@ -97,7 +97,13 @@ public class CompressedDocumentReader<VALUEIN> extends
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
             CompressionCodec.ZIP.toString()).toUpperCase();
-        codec = CompressionCodec.valueOf(codecString);
+        try {
+            codec = CompressionCodec.valueOf(codecString);
+        } catch (IllegalArgumentException e) {
+            String error = "Unsupported codec: " + codec.name();
+            LOG.error(error, new UnsupportedOperationException(error));
+            return;
+        }
         switch (codec) {
         case ZIP:
             zipIn = new ZipInputStream(fileIn);
