@@ -56,7 +56,6 @@ import com.marklogic.xcc.Session;
 import com.marklogic.xcc.Session.TransactionMode;
 import com.marklogic.xcc.ValueFactory;
 import com.marklogic.xcc.exceptions.QueryException;
-import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
 import com.marklogic.xcc.types.ValueType;
 import com.marklogic.xcc.types.XName;
@@ -164,7 +163,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             transMap.put("transform-param", functionParam);
         }
         if (transMap.isEmpty()) {
-            return ValueFactory.newValue(ValueType.SEQUENCE, new XdmValue[0]);
+            return ValueFactory.newJSNull();
         } else {
             ObjectNode node = mapToNode(transMap);
             return ValueFactory.newValue(ValueType.JS_OBJECT, node);
