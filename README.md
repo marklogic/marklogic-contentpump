@@ -32,15 +32,15 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Getting Started
 
-- [Getting Started with mlcp](http://docs.marklogic.com/guide/mlcp/getting-started)
-- [Getting Started with the MarkLogic Connector for Hadoop](http://docs.marklogic.com/guide/mapreduce/quickstart)
+- [Getting Started with mlcp](http://docs.marklogic.com/9.0/guide/mlcp/getting-started)
+- [Getting Started with the MarkLogic Connector for Hadoop](http://docs.marklogic.com/9.0/guide/mapreduce/quickstart)
 
 ## Documentation
 
 For official product documentation, please refer to:
 
 - [mlcp User Guide](http://docs.marklogic.com/guide/mlcp)
-- [MarkLogic Connector for Hadoop Developer's Guide](http://docs.marklogic.com/guide/mapreduce)
+- [MarkLogic Connector for Hadoop Developer's Guide](http://docs.marklogic.com/9.0/guide/mapreduce)
 
 Wiki pages of this project contain useful information when you work on development:
 
@@ -49,7 +49,7 @@ Wiki pages of this project contain useful information when you work on developme
 ## Required Software
 
 - [Required Software for the Hadoop Connector](http://docs.marklogic.com/9.0/guide/mapreduce/quickstart#id_78738)
-- [Required Software for mlcp](http://pubs.marklogic.com:8011/9.0/guide/mlcp/install#id_44231)
+- [Required Software for mlcp](http://docs.marklogic.com/9.0/guide/mlcp/install#id_44231)
 - [Apache Maven](https://maven.apache.org/) (version >= 3.03) is required to build mlcp and the Hadoop Connector.
 
 ## Build
