@@ -280,8 +280,8 @@ public class DatabaseContentReader extends
         } catch (QueryException e) {
             LOG.error("QueryException:" + e);
             throw new IOException(e);
-        } catch (RequestException e) {
-            LOG.error("RequestException:" + e.getMessage());
+        } catch (Exception e) {
+            LOG.error("Exception:" + e.getMessage());
             if (curForest != -1) {
                 if (++retry < maxRetries) {
                     // failover
