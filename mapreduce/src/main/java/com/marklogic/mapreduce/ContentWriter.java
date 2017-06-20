@@ -737,7 +737,7 @@ implements MarkLogicConstants {
             	sid = 0;
             }
             for (int i = 0; i < len; i++, sid++) {             
-                if (pendingUris[sid].size() > 0) {
+                if (sid != -1 && pendingUris[sid].size() > 0) {
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0, 
                             counts[i]);
