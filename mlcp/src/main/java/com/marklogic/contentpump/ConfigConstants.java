@@ -109,7 +109,6 @@ public interface ConfigConstants {
     static final String OUTPUT_DATABASE = "output_database";
     static final String DELIMITER = "delimiter";
     static final String DEFAULT_DELIMITER = ",";
-    // TODO: merge with "aggregate_uri_id" ??
     static final String DELIMITED_URI_ID = "delimited_uri_id";
     static final String DELIMITED_ROOT_NAME = "delimited_root_name";
     static final String GENERATE_URI = "generate_uri";
@@ -124,6 +123,9 @@ public interface ConfigConstants {
     static final String TRANSFORM_FUNCTION = "transform_function";
     static final String TRANSFORM_PARAM = "transform_param";
     static final String TEMPORAL_COLLECTION = "temporal_collection";
+    static final String RESTRICT_HOSTS = "restrict_hosts";
+    static final String RESTRICT_INPUT_HOSTS = "restrict_input_hosts";
+    static final String RESTRICT_OUTPUT_HOSTS = "restrict_output_hosts";
 
     static final String RDF_STREAMING_MEMORY_THRESHOLD  = 
             "rdf_streaming_memory_threshold";

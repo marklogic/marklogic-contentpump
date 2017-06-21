@@ -37,6 +37,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.functions.LexiconFunction;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.RestrictedHostsUtil;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
@@ -142,6 +143,11 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
         String splitQuery;
         String queryLanguage = null;
+        String[] inputHosts = jobConf.getStrings(INPUT_HOST);
+        if (inputHosts == null || inputHosts.length == 0) {
+            throw new IllegalStateException(INPUT_HOST + " is not specified.");
+        }
+        
         if (advancedMode) {
             queryLanguage = jobConf.get(INPUT_QUERY_LANGUAGE);
             splitQuery = jobConf.get(SPLIT_QUERY);
@@ -183,7 +189,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         boolean localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));
         String localHost = null;
         try {
-            ContentSource cs = InternalUtilities.getInputContentSource(jobConf);
+            ContentSource cs = InternalUtilities.getInputContentSource(jobConf, inputHosts[0]);
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
             options.setCacheResult(false);
@@ -214,7 +220,6 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 ResultItem item = result.next();
                 localHost = item.asString();
             }
-            
             int count = 0;
             while (result.hasNext()) {
                 ResultItem item = result.next();
@@ -249,9 +254,6 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         } catch (RequestException e) {
             LOG.error(e);
             LOG.error("Query: " + splitQuery);
-            throw new IOException(e);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
             throw new IOException(e);
         } finally {
             if (result != null) {

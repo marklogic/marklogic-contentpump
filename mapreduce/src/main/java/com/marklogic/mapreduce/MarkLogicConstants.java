@@ -861,4 +861,25 @@ public interface MarkLogicConstants {
      */
     static final String COPY_QUALITY = 
             "mapreduce.marklogic.copyquality";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to copy document metadata from
+     * source to destination. 
+     */
+    static final String COPY_METADATA = 
+            "mapreduce.marklogic.copymetadata";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to restrict input hosts that
+     * mlcp will connect to.
+     */
+    static final String INPUT_RESTRICT_HOSTS = 
+            "mapreduce.marklogic.input.restricthosts";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies whether to restrict output hosts that
+     * mlcp will connecot to.
+     */
+    static final String OUTPUT_RESTRICT_HOSTS =
+            "mapreduce.marklogic.output.restricthosts";
 }

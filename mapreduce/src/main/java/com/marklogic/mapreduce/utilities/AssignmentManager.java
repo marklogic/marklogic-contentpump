@@ -49,10 +49,11 @@ public class AssignmentManager {
 
     public synchronized void initialize(AssignmentPolicy.Kind kind,
         LinkedMapWritable map, int batchSize) {
-        if (initialized)
+        if (initialized) {
             return;
-        else
+        } else {
             initialized = true;
+        }
         LinkedHashSet<String> forests = new LinkedHashSet<String>();
         LinkedHashSet<String> updatableForests = new LinkedHashSet<String>();
         for (Writable f : map.keySet()) {

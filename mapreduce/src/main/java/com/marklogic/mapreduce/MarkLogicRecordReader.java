@@ -160,7 +160,6 @@ implements MarkLogicConstants {
         // get job config properties
         boolean advancedMode = 
             conf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
-        
         // initialize the total length
         float recToFragRatio = conf.getFloat(RECORD_TO_FRAGMENT_RATIO, 
                 getDefaultRatio());

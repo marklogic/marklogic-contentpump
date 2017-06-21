@@ -80,7 +80,7 @@ public class PermissionUtil {
         ContentSource cs;
         try {
             cs = InternalUtilities.getOutputContentSource(conf,
-                conf.get(MarkLogicConstants.OUTPUT_HOST));
+                conf.getStrings(MarkLogicConstants.OUTPUT_HOST)[0]);
 
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
