@@ -275,10 +275,11 @@ public class DatabaseContentReader extends
             
             initMetadataMap();
         } catch (XccConfigException e) {
-            LOG.error("XccConfigException" + e);
+            LOG.error("XccConfigException:" + e);
             throw new IOException(e);
         } catch (QueryException e) {
             LOG.error("QueryException:" + e);
+            LOG.debug("Query: " + queryText);
             throw new IOException(e);
         } catch (Exception e) {
             LOG.error("Exception:" + e.getMessage());
@@ -296,7 +297,6 @@ public class DatabaseContentReader extends
                 }
                 LOG.info("Retry limit exceeded");
             }
-            LOG.error("Query: " + queryText);
             throw new IOException(e);
         }
         break;
