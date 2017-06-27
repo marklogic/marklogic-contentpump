@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.VersionInfo;
 
@@ -241,7 +242,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             } else {                
                 runJobLocally((LocalJob)job, cmdline, command);
             }
-            return 0;
+            return job.getJobState()==JobStatus.State.SUCCEEDED?0:1;
         } catch (Exception e) {
             LOG.error("Error running a ContentPump job", e); 
             e.printStackTrace(System.err);

@@ -39,6 +39,7 @@ import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobID;
 import org.apache.hadoop.mapreduce.JobStatus;
+import org.apache.hadoop.mapreduce.JobStatus.State;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -140,6 +141,7 @@ public class LocalJobRunner implements ConfigConstants {
                 LOG.error("Error getting input splits: ");
                 LOG.error(ex.getMessage());
             }
+            job.setJobState(State.FAILED);
             return;
         }               
         OutputFormat<OUTKEY, OUTVALUE> outputFormat = 
@@ -158,6 +160,7 @@ public class LocalJobRunner implements ConfigConstants {
                 LOG.error("Error checking output specification: ");
                 LOG.error(ex.getMessage());
             }
+            job.setJobState(State.FAILED);
             return;
         }
         progress = new AtomicInteger[splits.size()];
