@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.VersionInfo;
 
@@ -241,7 +242,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             } else {                
                 runJobLocally((LocalJob)job, cmdline, command);
             }
-            return 0;
+            return getReturnCode(job.getJobState());
         } catch (Exception e) {
             LOG.error("Error running a ContentPump job", e); 
             e.printStackTrace(System.err);
@@ -379,6 +380,23 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 Versions.getMaxServerVersion());
     }
     
+    public static int getReturnCode(JobStatus.State state) {
+        switch (state) {
+            case RUNNING:
+                return -1;
+            case SUCCEEDED:
+                return 0;
+            case FAILED:
+                return 1;
+            case PREP:
+                return 2;
+            case KILLED:
+                return 3;
+            default:
+                return 4;
+        }
+    }
+
     static class ShutdownHook extends Thread { 
         boolean needToWait() {
             boolean needToWait = false;

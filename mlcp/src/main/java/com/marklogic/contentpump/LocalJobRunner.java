@@ -140,6 +140,7 @@ public class LocalJobRunner implements ConfigConstants {
                 LOG.error("Error getting input splits: ");
                 LOG.error(ex.getMessage());
             }
+            job.setJobState(JobStatus.State.FAILED);
             return;
         }               
         OutputFormat<OUTKEY, OUTVALUE> outputFormat = 
@@ -158,6 +159,7 @@ public class LocalJobRunner implements ConfigConstants {
                 LOG.error("Error checking output specification: ");
                 LOG.error(ex.getMessage());
             }
+            job.setJobState(JobStatus.State.FAILED);
             return;
         }
         progress = new AtomicInteger[splits.size()];
