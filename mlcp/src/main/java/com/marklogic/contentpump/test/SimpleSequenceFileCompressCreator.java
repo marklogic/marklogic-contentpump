@@ -30,13 +30,12 @@ public class SimpleSequenceFileCompressCreator {
         SequenceFile.Writer writer = null;
         SimpleSequenceFileKey key = new SimpleSequenceFileKey();
 
-        BufferedReader buffer = new BufferedReader(new FileReader(filePath));
         String line = null;
 
-        SimpleSequenceFileValue<Text> value = new SimpleSequenceFileValue<Text>();
-        try {
-//            writer = SequenceFile.createWriter(fs, conf, path, key.getClass(),
-//                value.getClass(), CompressionType.BLOCK, new GzipCodec());
+        try (BufferedReader buffer = 
+                 new BufferedReader(new FileReader(filePath))) {
+            SimpleSequenceFileValue<Text> value = 
+                 new SimpleSequenceFileValue<Text>();
             writer = SequenceFile.createWriter(fs, conf, path, key.getClass(),
                 value.getClass(), CompressionType.RECORD, new GzipCodec());
             while ((line = buffer.readLine()) != null) {
