@@ -101,10 +101,10 @@ public class DelimitedTextReader<VALUEIN> extends
     
     protected void initParser(InputSplit inSplit) throws IOException,
         InterruptedException {
-        setFile(((FileSplit) inSplit).getPath());
-        configFileNameAsCollection(conf, file);
-
-        fileIn = fs.open(file);
+        fileIn = openFile(inSplit, true);
+        if (fileIn == null) {
+            return;
+        }
         instream = new InputStreamReader(fileIn, encoding);
 
         bytesRead = 0;

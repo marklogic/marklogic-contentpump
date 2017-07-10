@@ -125,10 +125,10 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         start = 0;
         end = inSplit.getLength();
         overflow = false;
-        setFile(((FileSplit) inSplit).getPath());
-        configFileNameAsCollection(conf, file);
-
-        fInputStream = fs.open(file);
+        fInputStream = openFile(inSplit, true);
+        if (fInputStream == null) {
+            return;
+        }
 
         try {
             xmlSR = f.createXMLStreamReader(fInputStream, encoding);

@@ -254,6 +254,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                         if (result.hasNext()) {
                             item = result.next();
                             replicaHost = item.asString();
+                            if (localMode && replicaHost.equals(localHost)) {
+                                replicaHost = inputHosts[0];
+                            }
                             ForestHost info = new ForestHost(replicaForest, replicaHost);
                             replicas.add(info);
                         }
