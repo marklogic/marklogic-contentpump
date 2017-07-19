@@ -300,12 +300,12 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 MarkLogicInputSplit split;
                 if (remainingCount < splitSize) {
                     split = new MarkLogicInputSplit(start, remainingCount,
-                                    fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                                    fsplit.forestId, fsplit.hostName);
                     split.setLastSplit(true);
                     remainingCount = 0L;
                 } else {
                     split = new MarkLogicInputSplit(start, splitSize,
-                                    fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                                    fsplit.forestId, fsplit.hostName);
                     remainingCount -= splitSize;
                 }
                 splits.add(split);
