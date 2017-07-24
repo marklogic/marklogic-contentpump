@@ -138,6 +138,7 @@ public class TestEDSeparation {
         String[] expandedArgs = null;
         expandedArgs = OptionsFileUtil.expandArguments(args);
         ContentPump.runCommand(expandedArgs);
+        Utils.deleteDirectory(new File(Constants.OUT_PATH.toUri().getPath()));
         // Export
         String cmdEx = "EXPORT -password admin -username admin -host localhost"
                 + " -output_file_path " + Constants.OUT_PATH.toUri()
