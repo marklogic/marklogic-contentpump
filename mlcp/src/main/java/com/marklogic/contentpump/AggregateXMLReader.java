@@ -314,7 +314,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             String aName = xmlSR.getAttributeLocalName(i);
             String aValue = StringEscapeUtils.escapeXml10(xmlSR
                 .getAttributeValue(i));
-            sb.append(" " + (null == aPrefix ? "" : (aPrefix + ":")) + aName
+            sb.append(" " + (null == aPrefix || "".equals(aPrefix) ?
+                    "" : (aPrefix + ":")) + aName
                 + "=\"" + aValue + "\"");
             if (!useAutomaticId 
                     && newDoc 
