@@ -54,6 +54,10 @@ public class DocumentMetadata {
 
     protected String properties = null;
 
+    public DocumentMetadata() {
+        xstream.omitField(this.getClass(), "meta");
+    }
+
     protected boolean isNakedProps;
     public boolean isNakedProps() {
         return isNakedProps;
