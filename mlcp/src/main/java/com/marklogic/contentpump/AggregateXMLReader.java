@@ -310,6 +310,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
         }
         for (int i = 0; i < attrCount; i++) {
+            // aPrefix is null if i is invalid (out of boundary)
+            // aPrefix is empty if the attribute has no prefix
             String aPrefix = xmlSR.getAttributePrefix(i);
             String aName = xmlSR.getAttributeLocalName(i);
             String aValue = StringEscapeUtils.escapeXml10(xmlSR
