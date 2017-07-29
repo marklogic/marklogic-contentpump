@@ -26,6 +26,8 @@ import com.marklogic.xcc.DocumentFormat;
 import com.marklogic.xcc.exceptions.UnimplementedFeatureException;
 import com.marklogic.xcc.types.XSInteger;
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.mapper.CannotResolveClassException;
+import com.thoughtworks.xstream.mapper.MapperWrapper;
 
 /**
  * Metadata of a MarkLogicDocument, includes properties, permissions, quality
@@ -54,10 +56,6 @@ public class DocumentMetadata {
 
     protected String properties = null;
 
-    public DocumentMetadata() {
-        xstream.omitField(this.getClass(), "meta");
-    }
-
     protected boolean isNakedProps;
     public boolean isNakedProps() {
         return isNakedProps;
@@ -71,6 +69,9 @@ public class DocumentMetadata {
      * @param reader
      */
     public static DocumentMetadata fromXML(Reader reader) {
+        // meta is introduced in 9.0.1.
+        // For forward compatibility, omit additional fields from archives
+        xstream.omitField(DocumentMetadata.class, "meta");
         return (DocumentMetadata) xstream.fromXML(reader);
     }
 
