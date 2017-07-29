@@ -659,9 +659,11 @@ public class DatabaseContentReader extends
         // and sec:role xs:unsignedLong (but we need string)
         String permString = _permissionElement.asString();
         int i = permString.indexOf("<sec:role-name>");
-        int j = permString.indexOf("</sec:role-name>")+16;
+        int j = permString.indexOf("</sec:role-name>");
+        if (i == -1 || j == -1)
+          throw new Exception("Error retrieving document permission");
         buf.append(permString.substring(0, i));
-        buf.append(permString.substring(j));   
+        buf.append(permString.substring(j+16));
         Element permissionW3cElement = _permissionElement.asW3cElement();
 
         NodeList capabilities = permissionW3cElement
