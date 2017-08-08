@@ -359,7 +359,7 @@ implements MarkLogicConstants {
     }
     
     protected boolean needCommit() {
-        return (txnSize > 1);
+        return true;
     }
 
     protected Content createContent(DocumentURI key, VALUEOUT value) 
