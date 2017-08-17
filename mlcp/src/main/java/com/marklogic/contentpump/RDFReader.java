@@ -187,9 +187,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             RequestOptions options = new RequestOptions();
             options.setDefaultXQueryVersion("1.0-ml");
             session.setDefaultRequestOptions(options);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(graphQry);
-            }
             AdhocQuery query = session.newAdhocQuery(graphQry.toString());
             if(LOG.isDebugEnabled()) {
                 LOG.debug(graphQry.toString());
