@@ -153,8 +153,14 @@ public class ExpandedTree implements Writable {
 			value = atomString[i];
 		}
 		if (value == null) {
-			value = atomString[i] = new String(atomData, atomIndex[i] + 1,
-					atomIndex[i + 1] - atomIndex[i] - 2, UTF8);
+                    int aidx;
+                    if (atomData[atomIndex[i]]>=0) {
+                        aidx = atomIndex[i] + 1;
+                    } else {
+                        aidx = atomIndex[i] + 2;
+                    }
+                    value = atomString[i] = new String(atomData, aidx,
+                            atomIndex[i + 1] - aidx - 1, UTF8);
 		}
 		return value;
 	}

@@ -26,7 +26,7 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -125,10 +125,10 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         start = 0;
         end = inSplit.getLength();
         overflow = false;
-        setFile(((FileSplit) inSplit).getPath());
-        configFileNameAsCollection(conf, file);
-
-        fInputStream = fs.open(file);
+        fInputStream = openFile(inSplit, true);
+        if (fInputStream == null) {
+            return;
+        }
 
         try {
             xmlSR = f.createXMLStreamReader(fInputStream, encoding);
@@ -310,11 +310,14 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             }
         }
         for (int i = 0; i < attrCount; i++) {
+            // aPrefix is null if i is invalid (out of boundary)
+            // aPrefix is empty if the attribute has no prefix
             String aPrefix = xmlSR.getAttributePrefix(i);
             String aName = xmlSR.getAttributeLocalName(i);
-            String aValue = StringEscapeUtils.escapeXml(xmlSR
+            String aValue = StringEscapeUtils.escapeXml10(xmlSR
                 .getAttributeValue(i));
-            sb.append(" " + (null == aPrefix ? "" : (aPrefix + ":")) + aName
+            sb.append(" " + (null == aPrefix || "".equals(aPrefix) ?
+                    "" : (aPrefix + ":")) + aName
                 + "=\"" + aValue + "\"");
             if (!useAutomaticId 
                     && newDoc 
@@ -336,7 +339,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     + " is not a simple node: at" + xmlSR.getLocation());
             }
             do {
-                String idStr = StringEscapeUtils.escapeXml(xmlSR.getText());
+                String idStr = StringEscapeUtils.escapeXml10(xmlSR.getText());
                 if (currentId == null) {
                     currentId = "";
                 }
@@ -478,7 +481,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     processStartElement();
                     break;
                 case XMLStreamConstants.CHARACTERS:
-                    write(StringEscapeUtils.escapeXml(xmlSR.getText()));
+                    write(StringEscapeUtils.escapeXml10(xmlSR.getText()));
                     break;
                 case XMLStreamConstants.CDATA:
                     write("<![CDATA[");

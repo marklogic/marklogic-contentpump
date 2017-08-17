@@ -27,4 +27,13 @@ public class TextArrayWritable extends ArrayWritable {
     public TextArrayWritable(Text[] values) {
         super(Text.class, values);
     }
+    
+    public TextArrayWritable(String[] values) {
+        super(Text.class);
+        Text[] texts = new Text[values.length];
+        for (int i = 0; i < texts.length; i++) {
+            texts[i] = new Text(values[i]);
+        }
+        super.set(texts);
+    }
 }

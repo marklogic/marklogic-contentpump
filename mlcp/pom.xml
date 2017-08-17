@@ -1,26 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>mlcp</artifactId>
-  <version>8.0.6.4</version>
+  <version>8.0.7</version>
   <name>MarkLogic Content Pump</name>
   <description>MarkLogic Content Pump</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
   <packaging>jar</packaging>
+
   <licenses>
     <license>
       <name>The Apache License, Version 2.0</name>
       <url>http://www.apache.org/licenses/LICENSE-2.0</url>
     </license>
   </licenses>
+
+  <developers>
+    <developer>
+      <name>MarkLogic Github Contributors</name>
+      <email>general@developer.marklogic.com</email>
+      <organization>Github Contributors</organization>
+      <organizationUrl>
+        https://github.com/marklogic/marklogic-contentpump/graphs/contributors
+      </organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>
+      scm:git:git@github.com:marklogic/marklogic-contentpump.git
+    </connection>
+    <developerConnection>
+      scm:git:git@github.com:marklogic/marklogic-contentpump.git
+    </developerConnection>
+    <url>git@github.com:marklogic/marklogic-contentpump.git</url>
+  </scm>
+
   <properties>
     <skipTests>false</skipTests>
     <test.excludes>**/*TestDistributed*</test.excludes>
-    <hadoopConnectorVersion>2.1.6.4</hadoopConnectorVersion>
+    <hadoopConnectorVersion>2.1.7</hadoopConnectorVersion>
     <hadoopConnectorBaseDir>${basedir}/../mapreduce</hadoopConnectorBaseDir>
-    <xccVersion>8.0.6.4</xccVersion>
-    <versionString>8.0.6.4</versionString>
+    <xccVersion>8.0.7</xccVersion>
+    <versionString>8.0.7</versionString>
     <bundleArtifact>apache</bundleArtifact>
     <!-- Settings related to unit test -->
     <contentpumpHome>${project.build.directory}/mlcp-${versionString}-lib</contentpumpHome>
@@ -29,6 +52,7 @@
     <testDb>Documents</testDb>
     <testCopyDst>CopyDst</testCopyDst>
   </properties>
+
   <profiles>
     <profile>
       <!--  Run tests in distributed mode, which means distributed tests will also be run -->
@@ -243,9 +267,15 @@
           <artifactId>hadoop-yarn-client</artifactId>
           <version>2.7.0-mapr-1602</version>
         </dependency>
+        <dependency>
+           <groupId>org.apache.commons</groupId>
+           <artifactId>commons-lang3</artifactId>
+           <version>3.5</version>
+        </dependency>
       </dependencies>
     </profile>
   </profiles>
+
   <repositories>
     <repository>
       <id>mapr-releases</id>
@@ -253,7 +283,13 @@
       <snapshots><enabled>false</enabled></snapshots>
       <releases><enabled>true</enabled></releases>
     </repository>
+    <repository>
+      <id>MarkLogic-releases</id>
+      <name>MarkLogic Releases</name>
+      <url>http://developer.marklogic.com/maven2</url>
+    </repository>
   </repositories>
+
   <dependencies>
       <dependency>
           <groupId>commons-modeler</groupId>
@@ -399,7 +435,13 @@
           <scope>system</scope>
           <systemPath>${hadoopConnectorBaseDir}/src/lib/marklogic-xcc-${xccVersion}.jar</systemPath>
       </dependency>
+      <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-lang3</artifactId>
+          <version>3.5</version>
+      </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>

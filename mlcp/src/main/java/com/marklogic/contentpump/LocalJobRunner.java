@@ -27,7 +27,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.CommandLine;
@@ -38,8 +37,8 @@ import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.InputFormat;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.JobID;
+import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.OutputCommitter;
 import org.apache.hadoop.mapreduce.OutputFormat;
@@ -65,10 +64,9 @@ public class LocalJobRunner implements ConfigConstants {
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
     public static final int DEFAULT_THREAD_COUNT = 4;
     
-    private Job job;
+    private LocalJob job;
     private ExecutorService pool;
     private AtomicInteger[] progress;
-    private AtomicBoolean jobComplete;
     private long startTime;
     private int threadsPerSplit = 0;
     private int threadCount;
@@ -78,7 +76,7 @@ public class LocalJobRunner implements ConfigConstants {
     private int minThreads = 1;
     private Command cmd;
     
-    public LocalJobRunner(Job job, CommandLine cmdline, Command cmd) {
+    public LocalJobRunner(LocalJob job, CommandLine cmdline, Command cmd) {
         this.job = job;
         this.cmd = cmd;
         
@@ -101,8 +99,7 @@ public class LocalJobRunner implements ConfigConstants {
         
         Configuration conf = job.getConfiguration();
         minThreads = conf.getInt(CONF_MIN_THREADS, minThreads);
-        
-        jobComplete = new AtomicBoolean();
+
         startTime = System.currentTimeMillis();
     }
 
@@ -125,13 +122,25 @@ public class LocalJobRunner implements ConfigConstants {
         InputFormat<INKEY,INVALUE> inputFormat = 
             (InputFormat<INKEY, INVALUE>)ReflectionUtils.newInstance(
                 job.getInputFormatClass(), conf);
-        List<InputSplit> splits = inputFormat.getSplits(job);
-        T[] array = (T[])splits.toArray(
-                new org.apache.hadoop.mapreduce.InputSplit[splits.size()]);
-        
-        // sort the splits into order based on size, so that the biggest
-        // goes first
-        Arrays.sort(array, new SplitLengthComparator());
+        List<InputSplit> splits;
+        T[] array;
+        try {
+            splits = inputFormat.getSplits(job);
+            array = (T[])splits.toArray(
+                    new org.apache.hadoop.mapreduce.InputSplit[splits.size()]);
+            // sort the splits into order based on size, so that the biggest
+            // goes first
+            Arrays.sort(array, new SplitLengthComparator());
+        } catch (Exception ex) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Error getting input splits: ", ex);
+            } else {
+                LOG.error("Error getting input splits: ");
+                LOG.error(ex.getMessage());
+            }
+            job.setJobState(JobStatus.State.FAILED);
+            return;
+        }
         OutputFormat<OUTKEY, OUTVALUE> outputFormat = 
             (OutputFormat<OUTKEY, OUTVALUE>)ReflectionUtils.newInstance(
                 job.getOutputFormatClass(), conf);
@@ -148,6 +157,7 @@ public class LocalJobRunner implements ConfigConstants {
                 LOG.error("Error checking output specification: ");
                 LOG.error(ex.getMessage());
             }
+            job.setJobState(JobStatus.State.FAILED);
             return;
         }
         conf = job.getConfiguration();
@@ -155,11 +165,13 @@ public class LocalJobRunner implements ConfigConstants {
         for (int i = 0; i < splits.size(); i++) {
             progress[i] = new AtomicInteger();
         }
+     
+        job.setJobState(JobStatus.State.RUNNING);
         Monitor monitor = new Monitor();
         monitor.start();
         ContentPumpReporter reporter = new ContentPumpReporter();
         List<Future<Object>> taskList = new ArrayList<Future<Object>>();
-        for (int i = 0; i < array.length; i++) {        
+        for (int i = 0; i < array.length && !ContentPump.shutdown; i++) {        
             InputSplit split = array[i];
             if (pool != null) {
                 LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE> task = 
@@ -228,21 +240,42 @@ public class LocalJobRunner implements ConfigConstants {
                 mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) 
                     ReflectionUtils.newInstance(mapClass,
                         mapperContext.getConfiguration());
-                mapper.run(mapperContext);
-                trackingReader.close();
-                writer.close(mapperContext);
-                committer.commitTask(context);
+                try {
+                    mapper.run(mapperContext);
+                } finally {
+                    try {
+                        trackingReader.close();
+                    } catch (Throwable t) {
+                        LOG.error("Error closing reader: " + t.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(t);
+                        }
+                    }
+                    try {
+                        writer.close(mapperContext);
+                    } catch (Throwable t) {
+                        LOG.error("Error closing writer: " + t.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(t);
+                        }
+                    } 
+                    try {
+                        committer.commitTask(context);
+                    } catch (Throwable t) {
+                        LOG.error("Error committing task: " + t.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(t);
+                        }
+                    }
+                }
             }
         }
         // wait till all tasks are done
         if (pool != null) {
-            for (Future<Object> f : taskList) {
-                f.get();
-            }
-            pool.shutdown();   
-            while (!pool.awaitTermination(1, TimeUnit.DAYS));
-            jobComplete.set(true);
-        }
+            pool.shutdown();
+            while (!pool.awaitTermination(1, TimeUnit.HOURS));
+        } 
+        job.setJobState(JobStatus.State.SUCCEEDED);
         monitor.interrupt();
         monitor.join(1000);
         
@@ -377,7 +410,12 @@ public class LocalJobRunner implements ConfigConstants {
                 }
                 mapper.run(mapperContext);
             } catch (Throwable t) {
-                LOG.error("Error running task: ", t);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Error running task: ", t);
+                } else {
+                    LOG.error("Error running task: ");
+                    LOG.error(t.getMessage());
+                }
                 try{
                     synchronized(pool) {
                         pool.notify();
@@ -385,19 +423,35 @@ public class LocalJobRunner implements ConfigConstants {
                 } catch (Throwable t1) {
                     LOG.error(t1);
                 }
-            } finally {
-                try {
-                    if (trackingReader != null) {
-                        trackingReader.close();
-                    }
-                    if (writer != null) {
-                        writer.close(mapperContext);
-                    }
-                    committer.commitTask(context);
-                } catch (Throwable t) {
-                	LOG.error("Error committing task: ", t);
-                } 
             }
+            try {
+                if (trackingReader != null) {
+                    trackingReader.close();
+                }
+            } catch (Throwable t) {
+                LOG.error("Error closing reader: " + t.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(t);
+                }
+            } 
+            try {
+                if (writer != null) {
+                    writer.close(mapperContext);
+                }
+            } catch (Throwable t) {
+                LOG.error("Error closing writer: " + t.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(t);
+                }
+            } 
+            try {
+                committer.commitTask(context);
+            } catch (Throwable t) {
+                LOG.error("Error committing task: " + t.getMessage());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(t);
+                }
+            } 
             return null;
         }      
     }
@@ -452,8 +506,12 @@ public class LocalJobRunner implements ConfigConstants {
         
         public void run() {
             try {
-                while (!jobComplete.get() && !interrupted()) {
+                while (!ContentPump.shutdown && !interrupted() &&
+                        !job.done()) {
                     Thread.sleep(1000);
+                    if (ContentPump.shutdown) {
+                        break;
+                    }
                     String report = 
                         (" completed " + 
                             StringUtils.formatPercent(computeProgress(), 0));

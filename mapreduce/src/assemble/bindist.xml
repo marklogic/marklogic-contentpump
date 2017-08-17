@@ -32,6 +32,9 @@
       <includes>
         <include>*.jar</include>
       </includes>
+      <excludes>
+        <exclude>*test.jar</exclude>
+      </excludes>
     </fileSet>
     <!-- javadoc -->
     <fileSet>

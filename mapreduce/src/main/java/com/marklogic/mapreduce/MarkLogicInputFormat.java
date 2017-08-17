@@ -18,7 +18,6 @@ package com.marklogic.mapreduce;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +36,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 
 import com.marklogic.mapreduce.functions.LexiconFunction;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.RestrictedHostsUtil;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
@@ -44,6 +44,7 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.ServerConnectionException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.XSInteger;
 import com.marklogic.xcc.types.XSString;
@@ -142,6 +143,11 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
         String splitQuery;
         String queryLanguage = null;
+        String[] inputHosts = jobConf.getStrings(INPUT_HOST);
+        if (inputHosts == null || inputHosts.length == 0) {
+            throw new IllegalStateException(INPUT_HOST + " is not specified.");
+        }
+        
         if (advancedMode) {
             queryLanguage = jobConf.get(INPUT_QUERY_LANGUAGE);
             splitQuery = jobConf.get(SPLIT_QUERY);
@@ -171,7 +177,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 "Max split size is required to be positive. It is set to " +
                 maxSplitSize);
         }
-        
+
         // fetch data from server
         List<ForestSplit> forestSplits = null;
         Session session = null;
@@ -181,85 +187,106 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             LOG.debug("Split query: " + splitQuery);
         }
         boolean localMode = MODE_LOCAL.equals(jobConf.get(EXECUTION_MODE));
+        int hostIdx = 0;
         String localHost = null;
-        try {
-            ContentSource cs = InternalUtilities.getInputContentSource(jobConf);
-            session = cs.newSession();
-            RequestOptions options = new RequestOptions();
-            options.setCacheResult(false);
-            
-            if (localMode && advancedMode) {
-                AdhocQuery hostQuery = session.newAdhocQuery(
-                    "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
-                hostQuery.setOptions(options);
-                result = session.submitRequest(hostQuery);
-                if(result.hasNext()) {
+        while (hostIdx < inputHosts.length) {
+            try {
+                ContentSource cs = InternalUtilities.getInputContentSource(jobConf, inputHosts[0]);
+                session = cs.newSession();
+                RequestOptions options = new RequestOptions();
+                options.setCacheResult(false);
+                
+                if (localMode && advancedMode) {
+                    AdhocQuery hostQuery = session.newAdhocQuery(
+                        "xquery version \"1.0-ml\";xdmp:host-name(xdmp:host())");
+                    hostQuery.setOptions(options);
+                    result = session.submitRequest(hostQuery);
+                    if(result.hasNext()) {
+                        ResultItem item = result.next();
+                        localHost = item.asString();
+                    }
+                    if (result != null) {
+                        result.close();
+                    }
+                }
+                
+                AdhocQuery query = session.newAdhocQuery(splitQuery);
+                if (queryLanguage != null) {
+                    InternalUtilities.checkQueryLanguage(queryLanguage);
+                    options.setQueryLanguage(queryLanguage);
+                }
+                query.setOptions(options);
+                result = session.submitRequest(query);
+                
+                if (!advancedMode && result.hasNext()) {
                     ResultItem item = result.next();
                     localHost = item.asString();
                 }
+                boolean restrictHosts = jobConf.getBoolean(INPUT_RESTRICT_HOSTS, false);
+                RestrictedHostsUtil rhUtil = restrictHosts?new RestrictedHostsUtil(inputHosts):null;
+                int count = 0;
+                while (result.hasNext()) {
+                    ResultItem item = result.next();
+                    if (forestSplits == null) {
+                        forestSplits = new ArrayList<ForestSplit>();
+                    }
+                    int index = count % 3;
+                    if (index == 0) {
+                        ForestSplit split = new ForestSplit();
+                        split.forestId = ((XSInteger)item.getItem()).asBigInteger();
+                        forestSplits.add(split);
+                    } else if (index == 1) {
+                        forestSplits.get(forestSplits.size() - 1).recordCount = 
+                            ((XSInteger)item.getItem()).asLong();
+                    } else if (index == 2) {
+                        String forestHost = ((XSString) item.getItem()).asString();
+                        if (restrictHosts) {
+                            rhUtil.addForestHost(forestHost);
+                            forestSplits.get(forestSplits.size() - 1).hostName = forestHost;
+                        } else {
+                            if (localMode && forestHost.equals(localHost)) {
+                                forestSplits.get(forestSplits.size() - 1).hostName = inputHosts[0];
+                            } else {
+                                forestSplits.get(forestSplits.size() - 1).hostName = forestHost;
+                            }
+                        }
+                    }
+                    count++;
+                }
+                // Replace the target host if not in restricted host list
+                if (restrictHosts) {
+                    for (ForestSplit split : forestSplits) {
+                        split.hostName = rhUtil.getNextHost(split.hostName);
+                    }
+                }
+                LOG.info("Fetched " + 
+                        (forestSplits == null ? 0 : forestSplits.size()) + 
+                        " forest splits.");
+                break;
+            } catch (XccConfigException e) {
+                LOG.error(e);
+                throw new IOException(e);
+            } catch (ServerConnectionException e) {
+                LOG.warn("Unable to connect to " + inputHosts[hostIdx]
+                        + " to query source information");
+                hostIdx++;
+            } catch (RequestException e) {
+                LOG.error(e);
+                LOG.error("Query: " + splitQuery);
+                throw new IOException(e);
+            } finally {
                 if (result != null) {
                     result.close();
                 }
-            }
-            
-            AdhocQuery query = session.newAdhocQuery(splitQuery);
-            if (queryLanguage != null) {
-                InternalUtilities.checkQueryLanguage(queryLanguage);
-                options.setQueryLanguage(queryLanguage);
-            }
-            query.setOptions(options);
-            result = session.submitRequest(query);
-            
-            if (!advancedMode && result.hasNext()) {
-                ResultItem item = result.next();
-                localHost = item.asString();
-            }
-            
-            int count = 0;
-            while (result.hasNext()) {
-                ResultItem item = result.next();
-                if (forestSplits == null) {
-                    forestSplits = new ArrayList<ForestSplit>();
+                if (session != null) {
+                    session.close();
                 }
-                int index = count % 3;
-                if (index == 0) {
-                    ForestSplit split = new ForestSplit();
-                    split.forestId = ((XSInteger)item.getItem()).asBigInteger();
-                    forestSplits.add(split);
-                } else if (index == 1) {
-                    forestSplits.get(forestSplits.size() - 1).recordCount = 
-                        ((XSInteger)item.getItem()).asLong();
-                } else if (index == 2) {
-                    String hn = ((XSString) item.getItem()).asString();
-                    if (localMode && hn.equals(localHost)) {
-                        String inputHost = jobConf.get(INPUT_HOST);
-                        forestSplits.get(forestSplits.size() - 1).hostName = inputHost;
-                    } else {
-                        forestSplits.get(forestSplits.size() - 1).hostName = hn;
-                    }
-                }
-                count++;
             }
-            LOG.info("Fetched " + 
-                    (forestSplits == null ? 0 : forestSplits.size()) + 
-                    " forest splits.");            
-        } catch (XccConfigException e) {
-            LOG.error(e);
-            throw new IOException(e);
-        } catch (RequestException e) {
-            LOG.error(e);
-            LOG.error("Query: " + splitQuery);
-            throw new IOException(e);
-        } catch (URISyntaxException e) {
-            LOG.error(e);
-            throw new IOException(e);
-        } finally {
-            if (result != null) {
-                result.close();
-            }
-            if (session != null) {
-                session.close();
-            }
+        }
+        if (hostIdx == inputHosts.length) {
+            // No usable input hostname found at this point
+            throw new IOException("Unable to query source information,"
+                    + " no usable hostname found");
         }
         
         // create a split list per forest per host
@@ -286,44 +313,39 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             } else {
                 continue;
             }
-            if (fsplit.recordCount < maxSplitSize) {
-                MarkLogicInputSplit split = 
-                    new MarkLogicInputSplit(0, fsplit.recordCount, 
-                            fsplit.forestId, fsplit.hostName);
+
+            long splitSize = maxSplitSize;
+            if (this instanceof KeyValueInputFormat<?, ?> &&
+                    (splitSize & 0x1) != 0) {
+                splitSize--;
+            }
+            long remainingCount = fsplit.recordCount;
+            // split size zero or negative means unknown split size
+            if (remainingCount <= 0) {
+                MarkLogicInputSplit split = new MarkLogicInputSplit(0, 0,
+                        fsplit.forestId, fsplit.hostName);
                 split.setLastSplit(true);
                 splits.add(split);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Added split " + split);
-                }    
-            } else {
-                long splitCount = fsplit.recordCount / maxSplitSize;
-                long remainder = fsplit.recordCount % maxSplitSize;
-                if (remainder != 0) {
-                    splitCount++;
                 }
-                long splitSize = fsplit.recordCount / splitCount;
-                remainder = fsplit.recordCount % splitCount;
-                if (remainder != 0) {
-                    splitSize++;
-                }
-                if (this instanceof KeyValueInputFormat<?, ?>) {
-                    // each split size has to be an even number
-                    if ((splitSize & 0x1) != 0) {
-                        splitSize++;
-                    }
-                }
-                long remainingCount = fsplit.recordCount;
-                while (remainingCount > 0) {
-                    long start = fsplit.recordCount - remainingCount; 
-                    long length = splitSize;
-                    MarkLogicInputSplit split = 
-                        new MarkLogicInputSplit(start, length, fsplit.forestId,
-                                fsplit.hostName);
-                    if (remainingCount <= maxSplitSize) {
+            }
+            else {
+                while (remainingCount > 0L) {
+                    long start = fsplit.recordCount - remainingCount;
+                    MarkLogicInputSplit split;
+                    if (remainingCount < splitSize) {
+                        split = new MarkLogicInputSplit(start, remainingCount,
+                                    fsplit.forestId, fsplit.hostName);
                         split.setLastSplit(true);
+                        remainingCount = 0L;
+                    } else {
+                        split = new MarkLogicInputSplit(start, splitSize,
+                                    fsplit.forestId, fsplit.hostName);
+                        remainingCount -= splitSize;
                     }
                     splits.add(split);
-                    remainingCount -= length;
+
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Added split " + split);
                     }

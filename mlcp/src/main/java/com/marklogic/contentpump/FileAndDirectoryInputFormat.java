@@ -226,7 +226,13 @@ FileInputFormat<K, V> {
         for (int i=0; i < dirs.length; ++i) {
             Path p = dirs[i];
             FileSystem fs = p.getFileSystem(conf);
-            FileStatus[] matches = fs.globStatus(p, inputFilter);
+            FileStatus[] matches;
+            try {
+                matches = fs.globStatus(p, inputFilter);
+            } catch (IllegalArgumentException e) {
+                errors.add(new IOException(e.getMessage()));
+                continue;
+            }
             if (matches == null) {
                 errors.add(new IOException("Input path does not exist: " + p));
             } else if (matches.length == 0) {

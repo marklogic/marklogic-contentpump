@@ -33,6 +33,7 @@ import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
 import com.marklogic.mapreduce.utilities.ForestInfo;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
+import com.marklogic.mapreduce.utilities.RestrictedHostsUtil;
 import com.marklogic.mapreduce.utilities.TextArrayWritable;
 import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentCapability;
@@ -148,8 +149,9 @@ public class ContentOutputFormat<VALUEOUT> extends
                     }
                 }
             }
+            boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
             // initialize server host name and assignment policy
-            initialize(session);
+            initialize(session, restrictHosts);
             
             // ensure manual directory creation 
             if (fastLoad) {
@@ -173,15 +175,20 @@ public class ContentOutputFormat<VALUEOUT> extends
                     throw new IllegalStateException(
                             "Failed to query directory creation mode.");
                 }
-            } else {
-                TextArrayWritable hostArray; 
-                // 23798: replace hostname in forest config with 
-                // user-specified output host
-                String outputHost = conf.get(OUTPUT_HOST);
-                if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
-                	hostArray = queryHosts(cs, initHostName, outputHost);
+            } else {                
+                TextArrayWritable hostArray = null;
+                if (restrictHosts) {
+                    String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+                    hostArray = new TextArrayWritable(outputHosts);
                 } else {
-                	hostArray = queryHosts(cs);
+                    String outputHost = cs.getConnectionProvider().getHostName();
+                    // 23798: replace hostname in forest config with 
+                    // user-specified output host
+                    if (MODE_LOCAL.equals(conf.get(EXECUTION_MODE))) {
+                        hostArray = queryHosts(cs, initHostName, outputHost);
+                    } else {
+                        hostArray = queryHosts(cs);
+                    }
                 }
                 DefaultStringifier.store(conf, hostArray, OUTPUT_FOREST_HOST);
             }
@@ -229,31 +236,42 @@ public class ContentOutputFormat<VALUEOUT> extends
             new LinkedHashMap<String, ContentSource>();
         if (fastLoad) {
             LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
-            // get host->contentSource mapping
+            String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+            // Fastload import needs restrictHosts info from conf for 
+            // multiple instances of ContentOutputFormat created by 
+            // MultiThreadedMapper. It can't be saved as instance member 
+            // because initialize() is only called once in LocalJobRunner
+            boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
+            RestrictedHostsUtil rhUtil = null;
+            // construct forest->contentSource map
             Map<String, ContentSource> hostSourceMap = 
-                new HashMap<String, ContentSource>();
-            for (Writable v : forestStatusMap.values()) {
-                ForestInfo fs = (ForestInfo)v;
-                //unupdatable forests
-                if(fs.getUpdatable() == false) continue;
-                if (hostSourceMap.get(fs.getHostName()) == null) {
-                    try {
-                        ContentSource cs = InternalUtilities.getOutputContentSource(
-                            conf, fs.getHostName().toString());
-                        hostSourceMap.put(fs.getHostName(), cs);
-                    } catch (XccConfigException e) {
-                        throw new IOException(e);
-                    } 
+                    new HashMap<String, ContentSource>();
+            if (restrictHosts) {
+                rhUtil = new RestrictedHostsUtil(outputHosts);
+                for (Writable forestId : forestStatusMap.keySet()) {
+                    String forestHost = ((ForestInfo)forestStatusMap.get(forestId))
+                            .getHostName();
+                    rhUtil.addForestHost(forestHost);
                 }
             }
-            
-            // consolidate forest->host map and host-contentSource map to 
-            // forest-contentSource map
             for (Writable forestId : forestStatusMap.keySet()) {
-                String forest = ((Text)forestId).toString();
-                String hostName = ((ForestInfo)forestStatusMap.get(forestId)).getHostName();
-                ContentSource cs = hostSourceMap.get(hostName);
-                sourceMap.put(ID_PREFIX + forest, cs);
+                ForestInfo fs = (ForestInfo)forestStatusMap.get(forestId);
+                String forestIdStr = ((Text)forestId).toString();
+                String forestHost = fs.getHostName();
+                String targetHost = restrictHosts?
+                        rhUtil.getNextHost(forestHost):forestHost;
+                if (fs.getUpdatable() &&
+                        hostSourceMap.get(targetHost) == null) {
+                    try {
+                        ContentSource cs = InternalUtilities.getOutputContentSource(
+                                conf, targetHost);
+                        hostSourceMap.put(targetHost, cs);
+                    } catch (XccConfigException e) {
+                        throw new IOException(e);
+                    }
+                }
+                sourceMap.put(ID_PREFIX + forestIdStr,
+                        hostSourceMap.get(targetHost));
             }
         } else {
             TextArrayWritable hosts = getHosts(conf);
@@ -281,13 +299,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         // construct the ContentWriter
         return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
     }
-    
-    // forest host map is saved when checkOutputSpecs() is called.  In certain 
-    // versions of Hadoop, the config is not persisted as part of the job hence
-    // will be lost.  See MAPREDUCE-3377 for details.  When this entry cannot
-    // be found from the config, re-query the database to get this info.  It is
-    // possible that each task gets a different version of the map if the 
-    // forest config changes while the job runs.
+
     protected LinkedMapWritable getForestStatusMap(Configuration conf) 
     throws IOException {
         String forestHost = conf.get(OUTPUT_FOREST_HOST);
@@ -307,18 +319,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             }
             return fhmap;
         } else {
-            try {
-                // try getting a connection
-                ContentSource cs = 
-                    InternalUtilities.getOutputContentSource(conf, 
-                            conf.get(OUTPUT_HOST));
-                //get policy
-                initialize(cs.newSession());
-                // query forest status mapping
-                return queryForestInfo(cs);
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
+            throw new IOException("Forest host map not found");
         }
     }
     
@@ -329,7 +330,7 @@ public class ContentOutputFormat<VALUEOUT> extends
      * @throws IOException
      * @throws RequestException
      */
-    protected void initialize(Session session )
+    protected void initialize(Session session, boolean restrictHosts)
         throws IOException, RequestException {
         AdhocQuery query = session.newAdhocQuery(INIT_QUERY);
         RequestOptions options = new RequestOptions();
@@ -411,7 +412,7 @@ public class ContentOutputFormat<VALUEOUT> extends
         try {
             session = cs.newSession();   
             AdhocQuery query = null;
-            if (legacy) {             
+            if (legacy) {
                 LOG.debug("Legacy assignment is assumed for older MarkLogic" + 
                           " Server.");
                 query = session.newAdhocQuery(FOREST_HOST_MAP_QUERY);
@@ -438,7 +439,7 @@ public class ContentOutputFormat<VALUEOUT> extends
 
             LinkedMapWritable forestStatusMap = new LinkedMapWritable();
             Text forest = null;
-            String outputHost = conf.get(OUTPUT_HOST);
+            String outputHost = cs.getConnectionProvider().getHostName();
             boolean local = MODE_LOCAL.equals(conf.get(EXECUTION_MODE));
             
             while (result.hasNext()) {

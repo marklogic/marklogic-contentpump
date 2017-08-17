@@ -23,6 +23,7 @@ import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Writable;
@@ -207,5 +208,26 @@ implements ConfigConstants {
     public void setFile(Path file) {
         this.file = file;
         srcId = file.toString();
+    }
+    
+    public FSDataInputStream openFile(InputSplit inSplit,
+            boolean configCol) throws IOException {
+        while (true) {
+            setFile(((FileSplit) inSplit).getPath());
+            if (configCol) {
+                configFileNameAsCollection(conf, file);
+            }
+            try {
+                return fs.open(file);
+            } catch (IllegalArgumentException e){
+                LOG.error("Input file skipped, reason: " + e.getMessage());
+                if (iterator != null &&
+                        iterator.hasNext()) {
+                    inSplit = iterator.next();
+                } else {
+                    return null;
+                }
+            }
+        }
     }
 }

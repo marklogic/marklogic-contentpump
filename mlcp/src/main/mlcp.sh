@@ -19,4 +19,4 @@ do
   fi
 done
 CLASSPATH=$DIR/conf:$CLASSPATH
-java -cp "$CLASSPATH" -DCONTENTPUMP_HOME="$DIR/lib/" -DBUNDLE_ARTIFACT=$BUNDLE_ARTIFACT $VMARGS $JVM_OPTS -Djava.library.path="$DIR/lib/native" -Djavax.security.auth.useSubjectCredsOnly=false com.marklogic.contentpump.ContentPump $*
+java -cp "$CLASSPATH" -DCONTENTPUMP_HOME="$DIR/lib/" -DBUNDLE_ARTIFACT=$BUNDLE_ARTIFACT $VMARGS $JVM_OPTS -Djava.library.path="$DIR/lib/native" -Djavax.security.auth.useSubjectCredsOnly=false com.marklogic.contentpump.ContentPump "$@"

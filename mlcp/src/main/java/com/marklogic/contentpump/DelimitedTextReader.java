@@ -101,10 +101,10 @@ public class DelimitedTextReader<VALUEIN> extends
     
     protected void initParser(InputSplit inSplit) throws IOException,
         InterruptedException {
-        setFile(((FileSplit) inSplit).getPath());
-        configFileNameAsCollection(conf, file);
-
-        fileIn = fs.open(file);
+        fileIn = openFile(inSplit, true);
+        if (fileIn == null) {
+            return;
+        }
         instream = new InputStreamReader(fileIn, encoding);
 
         bytesRead = 0;
@@ -138,20 +138,28 @@ public class DelimitedTextReader<VALUEIN> extends
     }
 
     protected String[] getLine() throws IOException{
-    	CSVRecord record = (CSVRecord)parserIterator.next();
+    	return getLine(getRecordLine());
+    }
+
+    protected String[] getLine(CSVRecord record)
+            throws IOException {
         Iterator<String> recordIterator = record.iterator();
         int recordSize = record.size();
         String[] values = new String[recordSize];
         for (int i = 0; i < recordSize; i++) {
-        	if (recordIterator.hasNext()) {
-        		values[i] = (String)recordIterator.next();
-        	} else {
-        		throw new IOException("Record size doesn't match the real size");
-        	}
+            if (recordIterator.hasNext()) {
+                values[i] = (String)recordIterator.next();
+            } else {
+                throw new IOException("Record size doesn't match the real size");
+            }
         }
         return values;
     }
-    
+
+    protected CSVRecord getRecordLine() {
+        return (CSVRecord)parserIterator.next();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public boolean nextKeyValue() throws IOException, InterruptedException {

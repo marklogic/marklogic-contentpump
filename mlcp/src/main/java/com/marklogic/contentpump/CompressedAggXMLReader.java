@@ -56,7 +56,10 @@ public class CompressedAggXMLReader<VALUEIN> extends
         super.close();
         //close the zip
         if (zipIn != null) {
-            ((ZipInputStream)zipIn).closeStream();
+            if (zipIn instanceof ZipInputStream) {
+                ((ZipInputStream)zipIn).closeStream();
+            }
+            zipIn.close();
         }
     }
 
@@ -79,8 +82,10 @@ public class CompressedAggXMLReader<VALUEIN> extends
 
     protected void initStreamReader(InputSplit inSplit) throws IOException,
     InterruptedException {
-        setFile(((FileSplit) inSplit).getPath());
-        FSDataInputStream fileIn = fs.open(file);
+        FSDataInputStream fileIn = openFile(inSplit, false);
+        if (fileIn == null) {
+            return;
+        }
         String codecString = conf.get(
             ConfigConstants.CONF_INPUT_COMPRESSION_CODEC,
             CompressionCodec.ZIP.toString());
@@ -127,7 +132,7 @@ public class CompressedAggXMLReader<VALUEIN> extends
             }
         } else {
             throw new UnsupportedOperationException("Unsupported codec: "
-                + codec.name());
+                + codecString);
         }    
         if (useAutomaticId) {
             idGen = new IdGenerator(file.toUri().getPath() + "-"

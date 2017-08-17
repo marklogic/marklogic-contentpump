@@ -39,6 +39,7 @@ import com.marklogic.xcc.ResultItem;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.ServerConnectionException;
 
 /**
  * MarkLogic-based OutputFormat superclass. Use the provided subclasses, such
@@ -79,21 +80,31 @@ implements MarkLogicConstants, Configurable {
     @Override
     public void checkOutputSpecs(JobContext context) throws IOException,
             InterruptedException {
-        String host = conf.get(OUTPUT_HOST);
-        if (host == null || host.isEmpty()) {
+        String[] hosts = conf.getStrings(OUTPUT_HOST);
+        if (hosts == null || hosts.length == 0) {
             throw new IllegalStateException(OUTPUT_HOST +
                     " is not specified.");
-        }                     
-
-        try {
-            // try getting a connection
-            ContentSource cs = InternalUtilities.getOutputContentSource(conf,
-                host);
-            checkOutputSpecs(conf, cs);
-        } 
-        catch (Exception ex) {
-            throw new IOException(ex);
         }
+        for (int i = 0; i < hosts.length; i++) {
+            try {
+                ContentSource cs = InternalUtilities.getOutputContentSource(conf,
+                        hosts[i]);
+                checkOutputSpecs(conf, cs);
+                return;
+            }
+            catch (Exception ex) {
+                if (ex.getCause() instanceof ServerConnectionException) {
+                    LOG.warn("Unable to connect to " + hosts[i]
+                            + " to query destination information");
+                    continue;
+                } else {
+                    throw new IOException(ex);
+                }
+            }
+        }
+        // No usable output hostname found at this point
+        throw new IOException("Unable to query destination information,"
+                + " no usable hostname found");
     }
 
     @Override
@@ -130,15 +141,7 @@ implements MarkLogicConstants, Configurable {
                 OUTPUT_FOREST_HOST, TextArrayWritable.class);
             return hosts;
         } else {
-            try {
-                // try getting a connection
-                ContentSource cs = InternalUtilities.getOutputContentSource(
-                    conf, conf.get(OUTPUT_HOST));
-                // query hosts
-                return queryHosts(cs);
-            } catch (Exception ex) {
-                throw new IOException(ex);
-            }
+            throw new IOException("Forest host map not found");
         }
     }
     

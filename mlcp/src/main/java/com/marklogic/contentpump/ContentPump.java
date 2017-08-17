@@ -22,6 +22,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -30,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.JobStatus;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.VersionInfo;
 
@@ -48,6 +51,14 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 public class ContentPump implements MarkLogicConstants, ConfigConstants {
     
     public static final Log LOG = LogFactory.getLog(ContentPump.class);
+    // A global flag to indicate that JVM is exiting
+    public static volatile boolean shutdown = false;
+    // Job state in local mode
+    static List<Job> jobs = new LinkedList<Job>();
+    static {
+        // register a shutdown hook
+        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+    }
     
     public static void main(String[] args) throws Exception {
         if (args.length == 0) {
@@ -69,7 +80,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         System.exit(rc);
     }
 
-    public static int runCommand(String[] args) throws IOException {
+    public static int runCommand(String[] args) throws IOException {      
         // get command
         String cmd = args[0];
         if (cmd.equalsIgnoreCase("help")) {
@@ -145,6 +156,11 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         }
         conf.set(EXECUTION_MODE, distributed ? MODE_DISTRIBUTED : MODE_LOCAL);
         
+        if (conf.getBoolean(RESTRICT_INPUT_HOSTS, true) ||
+                conf.getBoolean(RESTRICT_OUTPUT_HOSTS, true)) {
+            System.setProperty("xcc.httpcompliant", "true");
+        }
+
         if (distributed) {
             if (!cmdline.hasOption(SPLIT_INPUT)
                 && Command.getInputType(cmdline).equals(
@@ -205,16 +221,19 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             e.printStackTrace();
             return 1;
         }
+        synchronized (ContentPump.class) {
+            jobs.add(job);
+        }
         
         // run job
         try {
             if (distributed) {
                 // submit job
                 submitJob(job); 
-            } else {
-                runJobLocally(job, cmdline, command);
+            } else {      
+                runJobLocally((LocalJob)job, cmdline, command);
             }
-            return 0;
+            return getReturnCode(job.getJobState());
         } catch (Exception e) {
             LOG.error("Error running a ContentPump job", e); 
             e.printStackTrace(System.err);
@@ -310,12 +329,22 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         if (LOG.isTraceEnabled())
             LOG.trace("LIBJARS:" + jars.toString());
         job.waitForCompletion(true);    
+        
+        synchronized(ContentPump.class) {
+            jobs.remove(job);
+            ContentPump.class.notify();
+        }
     }
     
-    private static void runJobLocally(Job job, CommandLine cmdline, Command cmd) 
-    throws Exception {
+    private static void runJobLocally(LocalJob job, CommandLine cmdline, 
+            Command cmd) throws Exception {
         LocalJobRunner runner = new LocalJobRunner(job, cmdline, cmd);
-        runner.run();  
+        runner.run();
+        
+        synchronized(ContentPump.class) {
+            jobs.remove(job);
+            ContentPump.class.notify();
+        }
     }
 
     private static void printUsage() {
@@ -337,5 +366,79 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         System.out.println("Supported MarkLogic versions: " + 
                 Versions.getMinServerVersion() + " - " + 
                 Versions.getMaxServerVersion());
+    }
+    
+    public static int getReturnCode(JobStatus.State state) {
+        switch (state) {
+            case RUNNING:
+                return -1;
+            case SUCCEEDED:
+                return 0;
+            case FAILED:
+                return 1;
+            case PREP:
+                return 2;
+            case KILLED:
+                return 3;
+            default:
+                return 4;
+        }
+    }
+
+    static class ShutdownHook extends Thread { 
+        boolean needToWait() {
+            boolean needToWait = false;
+            for (Job job : jobs) {
+                if (job instanceof LocalJob) {
+                    needToWait = true;
+                    break;
+                }
+            } 
+            return needToWait;
+        }
+        
+        public void run() {
+            shutdown = true;
+            try {
+                synchronized (ContentPump.class) {
+                    boolean needToWait = false;
+                    List<Job> jobList = new LinkedList<Job>();
+                    for (Job job : jobs) {
+                        if (job instanceof LocalJob) {
+                            LOG.info("Aborting job " + job.getJobName());
+                            needToWait = true;
+                            jobList.add(job);
+                        }
+                    }
+                    if (needToWait) { // wait up to 30 seconds
+                        for (int i = 0; i < 30; ++i) {
+                            if (i > 0) { // check again
+                                needToWait = needToWait();
+                            }
+                            if (needToWait) {
+                                if (i > 0) {
+                                    LOG.info("Waiting..." + (30-i));
+                                }
+                                try {
+                                    ContentPump.class.wait(1000);
+                                } catch (InterruptedException e) {
+                                    // go back to wait
+                                }
+                            }  
+                        }
+                    }
+                    for (Job job : jobs) {
+                        LOG.warn("Job " + job.getJobName() +
+                                " status remains " + job.getJobState()); 
+                        jobList.remove(job);
+                    }
+                    for (Job job : jobList) {
+                        LOG.warn("Job " + job.getJobName() + " is aborted");
+                    }
+                }
+            } catch (Exception e) {
+                LOG.error("Error terminating job", e);
+            }
+        }
     }
 }
