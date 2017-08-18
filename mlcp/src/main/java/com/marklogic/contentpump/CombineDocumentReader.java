@@ -56,7 +56,7 @@ extends ImportRecordReader<VALUEIN> {
      */
     @Override
     public float getProgress() throws IOException, InterruptedException {
-        return bytesRead / (float)bytesTotal;
+        return bytesRead>bytesTotal?1:bytesRead/(float)bytesTotal;
     }
 
     @Override
