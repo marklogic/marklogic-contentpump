@@ -359,7 +359,7 @@ implements MarkLogicConstants {
     }
     
     protected boolean needCommit() {
-        return (txnSize > 1);
+        return true;
     }
 
     protected Content createContent(DocumentURI key, VALUEOUT value) 
@@ -583,15 +583,6 @@ implements MarkLogicConstants {
             sessions[id].commit();
             succeeded += commitUris[id].size();
             commitUris[id].clear();
-        } catch (RequestServerException e) {
-            LOG.error("Error commiting transaction " + e.getMessage());
-            rollback(id);
-            sessions[id].close();
-            sessions[id] = null;
-        } catch (RequestException e) {
-            LOG.error("Error commiting transaction " + e.getMessage());
-            rollback(id);
-            throw new IOException(e);
         } catch (Exception e) {
             LOG.error("Error commiting transaction " + e.getMessage());
             rollback(id);
