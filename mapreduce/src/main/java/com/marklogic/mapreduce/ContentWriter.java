@@ -760,16 +760,10 @@ implements MarkLogicConstants {
                 ((ZipEntryInputStream)is).closeZipInputStream();
             }
         }
-        Counter committedCounter = context.getCounter(
-                MarkLogicCounter.OUTPUT_RECORDS_COMMITTED);
-        synchronized(committedCounter) {
-            committedCounter.increment(succeeded);
-        }
-        Counter failedCounter = context.getCounter(
-                MarkLogicCounter.OUTPUT_RECORDS_FAILED);
-        synchronized(failedCounter) {
-            failedCounter.increment(failed);
-        }
+        context.getCounter(MarkLogicCounter.OUTPUT_RECORDS_COMMITTED)
+                .increment(succeeded);
+        context.getCounter(MarkLogicCounter.OUTPUT_RECORDS_FAILED)
+                .increment(failed);
     }
     
     @Override
