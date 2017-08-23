@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.MarkLogicInputSplit;
 import com.marklogic.mapreduce.MarkLogicRecordReader;
@@ -108,6 +109,8 @@ public class DatabaseContentReader extends
         mlSplit = (MarkLogicInputSplit) inSplit;
         count = 0;
         nakedCount = 0;
+        context.getCounter(MarkLogicCounter.ESTIMATED_INPUT_RECORDS)
+            .increment(mlSplit.getLength());
 
         // construct the server URI
         hostNames = mlSplit.getLocations();

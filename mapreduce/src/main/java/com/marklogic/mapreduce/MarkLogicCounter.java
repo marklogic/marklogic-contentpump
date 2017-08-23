@@ -17,6 +17,7 @@
 package com.marklogic.mapreduce;
 
 public enum MarkLogicCounter {
+    ESTIMATED_INPUT_RECORDS,
     INPUT_RECORDS,
     OUTPUT_RECORDS,
     OUTPUT_RECORDS_COMMITTED,
