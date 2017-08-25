@@ -220,6 +220,8 @@ implements MarkLogicConstants {
             throws IOException, InterruptedException {
         mlSplit = (MarkLogicInputSplit)split;
         count = 0;
+        context.getCounter(MarkLogicCounter.ESTIMATED_INPUT_RECORDS)
+            .increment(mlSplit.getLength());
 
         // check hostnames
         hostNames = mlSplit.getLocations();
