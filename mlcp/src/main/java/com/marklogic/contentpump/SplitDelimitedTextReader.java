@@ -36,7 +36,7 @@ import com.marklogic.mapreduce.utilities.TextArrayWritable;
 
 /**
  * Reader for DelimitedTextInputFormat if split_input is true
- * 
+ *
  * @author ali
  *
  * @param <VALUEIN>
@@ -74,12 +74,12 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                 return false;
             }
             CSVRecord record = getRecordLine();
-            if (record.getCharacterPosition() >= end) {
+            if (record.getCharacterByte() >= end) {
                 return false;
             }
             String[] values = getLine(record);
             if (values.length != fields.length) {
-                setSkipKey(0, 0, 
+                setSkipKey(0, 0,
                         "number of fields does not match number of columns");
                 return true;
             }
@@ -115,7 +115,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         } catch (RuntimeException ex) {
             if (ex.getMessage().contains(
                 "invalid char between encapsulated token and delimiter")) {
-                setSkipKey(0, 0, 
+                setSkipKey(0, 0,
                         "invalid char between encapsulated token and delimiter");
                 // hasNext() will always be true here since this exception is caught
                 if (parserIterator.hasNext()) {
@@ -193,7 +193,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         // while parsing the first line in the split
         parser = new CSVParser(instream, CSVParserFormatter.
                 getFormat(delimiter, null, false,false),
-                start,0L);
+                start, 0L, encoding);
         parserIterator = parser.iterator();
 
         if (parserIterator.hasNext()) {
@@ -204,16 +204,16 @@ public class SplitDelimitedTextReader<VALUEIN> extends
             // which will be used to initialize the parser
             if (parserIterator.hasNext()) {
                 CSVRecord record = getRecordLine();
-                long pos = record.getCharacterPosition();                
+                long pos = record.getCharacterByte();
                 fileIn.seek(pos);
                 instream = new InputStreamReader(fileIn, encoding);
                 parser = new CSVParser(instream, CSVParserFormatter.
                         getFormat(delimiter, encapsulator, false,false),
-                        pos,0L);
+                        pos, 0L, encoding);
                 parserIterator = parser.iterator();
             }
-            
-        }        
+
+        }
     }
 
     private String retrieveLineSeparator(FSDataInputStream fis)
