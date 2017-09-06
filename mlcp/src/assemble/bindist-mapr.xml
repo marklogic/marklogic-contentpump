@@ -49,7 +49,7 @@
     <fileSet>
       <directory>src/lib</directory>
       <outputDirectory>${file.separator}lib</outputDirectory>
-      <fileMode>0755</fileMode>
+      <fileMode>0664</fileMode>
       <includes>
         <include>*</include>
         <include>*/*</include>
@@ -76,7 +76,7 @@
       <scope>runtime</scope>
       <outputDirectory>${file.separator}lib</outputDirectory>
       <includes>
-		<include>org.apache.commons:commons-csv:jar:*</include>
+		<!-- include>org.apache.commons:commons-csv:jar:*</include -->
         <include>commons-httpclient:commons-httpclient:jar:*</include>
         <include>commons-io:commons-io:jar:*</include>
         <include>org.apache.htrace:htrace-core:jar:*</include>
