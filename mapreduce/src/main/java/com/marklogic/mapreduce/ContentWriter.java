@@ -748,10 +748,12 @@ implements MarkLogicConstants {
                 if (stmtCounts[i] > 0 && needCommit) {
                     try {
                         commit(i);
+                        sessions[i].close();
                     } catch (Exception e) {
                     }
+                } else {
+                    sessions[i].close();
                 }
-                sessions[i].close();
             }
         }
         if (is != null) {
