@@ -749,11 +749,13 @@ implements MarkLogicConstants {
                 if (stmtCounts[i] > 0 && needCommit) {
                     try {
                         commit(i);
+                        sessions[i].close();
                     } catch (Throwable e) {
                         LOG.error("Error committing transaction: ", e);
                     }
+                } else {
+                    sessions[i].close();
                 }
-                sessions[i].close();
             }
         }
         if (is != null) {
