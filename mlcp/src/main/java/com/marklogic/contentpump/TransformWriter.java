@@ -70,7 +70,7 @@ import com.marklogic.xcc.types.XdmValue;
 public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public static final Log LOG = LogFactory.getLog(TransformWriter.class);
     static final long BATCH_MIN_VERSION = 8000604;
-    static final long TRANS_OPT_NONCOMPATIBLE_VERSION = 9000100;
+    static final long TRANS_OPT_MIN_VERSION = 9000200;
     static final String MAP_ELEM_START_TAG = 
         "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
         + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
@@ -119,8 +119,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
         // Whether the server mlcp talks to has a transformation-option
         // in transformation-insert-batch signature
-        boolean hasOpt = effectiveVersion > BATCH_MIN_VERSION &&
-                effectiveVersion != TRANS_OPT_NONCOMPATIBLE_VERSION;
+        boolean hasOpt = effectiveVersion >= TRANS_OPT_MIN_VERSION;
         uris = new XdmValue[counts.length][batchSize];
         values = new XdmValue[counts.length][batchSize];
         optionsVals = new XdmValue[counts.length][batchSize];
