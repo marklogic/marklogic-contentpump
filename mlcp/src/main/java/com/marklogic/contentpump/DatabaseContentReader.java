@@ -155,7 +155,9 @@ public class DatabaseContentReader extends
 
         buf.append("'META',");
         buf.append("$uri,");
-        buf.append("if(fn:empty($doc/node())) then 0 else xdmp:node-kind($doc/node())");
+        buf.append("if(fn:empty($doc/node())) then 0 ");
+        buf.append("else if (fn:count($doc/node())>1) then \"element\" ");
+        buf.append("else xdmp:node-kind($doc/node())");
         if (copyCollection || copyPermission || copyProperties || copyQuality) {
         	buf.append(",");
             if (copyCollection) {
