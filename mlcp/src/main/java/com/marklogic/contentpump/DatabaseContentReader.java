@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.MarkLogicInputSplit;
 import com.marklogic.mapreduce.MarkLogicRecordReader;
@@ -108,6 +109,8 @@ public class DatabaseContentReader extends
         mlSplit = (MarkLogicInputSplit) inSplit;
         count = 0;
         nakedCount = 0;
+        context.getCounter(MarkLogicCounter.ESTIMATED_INPUT_RECORDS)
+            .increment(mlSplit.getLength());
 
         // construct the server URI
         hostNames = mlSplit.getLocations();
@@ -192,7 +195,9 @@ public class DatabaseContentReader extends
 
         buf.append("'META',");
         buf.append("$uri,");
-        buf.append("if(fn:empty($doc/node())) then 0 else xdmp:node-kind($doc/node())");
+        buf.append("if(fn:empty($doc/node())) then 0 ");
+        buf.append("else if (fn:count($doc/node())>1) then \"element\" ");
+        buf.append("else xdmp:node-kind($doc/node())");
         if (copyCollection || copyPermission || copyProperties || copyQuality) {
             buf.append(",");
             if (copyCollection) {
@@ -659,9 +664,11 @@ public class DatabaseContentReader extends
         // and sec:role xs:unsignedLong (but we need string)
         String permString = _permissionElement.asString();
         int i = permString.indexOf("<sec:role-name>");
-        int j = permString.indexOf("</sec:role-name>")+16;
+        int j = permString.indexOf("</sec:role-name>");
+        if (i == -1 || j == -1)
+          throw new Exception("Error retrieving document permission");
         buf.append(permString.substring(0, i));
-        buf.append(permString.substring(j));   
+        buf.append(permString.substring(j+16));
         Element permissionW3cElement = _permissionElement.asW3cElement();
 
         NodeList capabilities = permissionW3cElement

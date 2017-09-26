@@ -359,7 +359,7 @@ implements MarkLogicConstants {
     }
     
     protected boolean needCommit() {
-        return (txnSize > 1);
+        return true;
     }
 
     protected Content createContent(DocumentURI key, VALUEOUT value) 
@@ -583,15 +583,6 @@ implements MarkLogicConstants {
             sessions[id].commit();
             succeeded += commitUris[id].size();
             commitUris[id].clear();
-        } catch (RequestServerException e) {
-            LOG.error("Error commiting transaction " + e.getMessage());
-            rollback(id);
-            sessions[id].close();
-            sessions[id] = null;
-        } catch (RequestException e) {
-            LOG.error("Error commiting transaction " + e.getMessage());
-            rollback(id);
-            throw new IOException(e);
         } catch (Exception e) {
             LOG.error("Error commiting transaction " + e.getMessage());
             rollback(id);
@@ -758,11 +749,13 @@ implements MarkLogicConstants {
                 if (stmtCounts[i] > 0 && needCommit) {
                     try {
                         commit(i);
+                        sessions[i].close();
                     } catch (Throwable e) {
                         LOG.error("Error committing transaction: ", e);
                     }
+                } else {
+                    sessions[i].close();
                 }
-                sessions[i].close();
             }
         }
         if (is != null) {
@@ -771,16 +764,10 @@ implements MarkLogicConstants {
                 ((ZipEntryInputStream)is).closeZipInputStream();
             }
         }
-        Counter committedCounter = context.getCounter(
-                MarkLogicCounter.OUTPUT_RECORDS_COMMITTED);
-        synchronized(committedCounter) {
-            committedCounter.increment(succeeded);
-        }
-        Counter failedCounter = context.getCounter(
-                MarkLogicCounter.OUTPUT_RECORDS_FAILED);
-        synchronized(failedCounter) {
-            failedCounter.increment(failed);
-        }
+        context.getCounter(MarkLogicCounter.OUTPUT_RECORDS_COMMITTED)
+                .increment(succeeded);
+        context.getCounter(MarkLogicCounter.OUTPUT_RECORDS_FAILED)
+                .increment(failed);
     }
     
     @Override
