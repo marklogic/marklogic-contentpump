@@ -162,7 +162,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         int count = 0;
         boolean restrictHosts = jobConf.getBoolean(INPUT_RESTRICT_HOSTS, false);
         RestrictedHostsUtil rhUtil = restrictHosts?new RestrictedHostsUtil(inputHosts):null;
-        
+
         // First while loop: splits info
         while (result.hasNext()) {
             ResultItem item = result.next();
@@ -254,6 +254,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                         if (result.hasNext()) {
                             item = result.next();
                             replicaHost = item.asString();
+                            if (localMode && replicaHost.equals(localHost)) {
+                                replicaHost = inputHosts[0];
+                            }
                             ForestHost info = new ForestHost(replicaForest, replicaHost);
                             replicas.add(info);
                         }
@@ -446,23 +449,34 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 splitSize--;
             }
             long remainingCount = fsplit.recordCount;
-            while (remainingCount > 0L) {
-                long start = fsplit.recordCount - remainingCount;
-                MarkLogicInputSplit split;
-                if (remainingCount < splitSize) {
-                    split = new MarkLogicInputSplit(start, remainingCount,
-                                    fsplit.forestId, fsplit.hostName, fsplit.replicas);
-                    split.setLastSplit(true);
-                    remainingCount = 0L;
-                } else {
-                    split = new MarkLogicInputSplit(start, splitSize,
-                                    fsplit.forestId, fsplit.hostName, fsplit.replicas);
-                    remainingCount -= splitSize;
-                }
+            // split size zero or negative means unknown split size
+            if (remainingCount <= 0) {
+                MarkLogicInputSplit split = new MarkLogicInputSplit(0, 0,
+                        fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                split.setLastSplit(true);
                 splits.add(split);
-
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Added split " + split);
+                }
+            } else {
+                while (remainingCount > 0L) {
+                    long start = fsplit.recordCount - remainingCount;
+                    MarkLogicInputSplit split;
+                    if (remainingCount < splitSize) {
+                        split = new MarkLogicInputSplit(start, remainingCount,
+                                        fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                        split.setLastSplit(true);
+                        remainingCount = 0L;
+                    } else {
+                        split = new MarkLogicInputSplit(start, splitSize,
+                                        fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                        remainingCount -= splitSize;
+                    }
+                    splits.add(split);
+
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Added split " + split);
+                    }
                 }
             }
         }

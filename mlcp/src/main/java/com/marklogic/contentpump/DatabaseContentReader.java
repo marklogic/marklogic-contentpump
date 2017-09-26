@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.MarkLogicCounter;
 import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.MarkLogicInputSplit;
 import com.marklogic.mapreduce.MarkLogicRecordReader;
@@ -108,8 +109,8 @@ public class DatabaseContentReader extends
         mlSplit = (MarkLogicInputSplit) inSplit;
         count = 0;
         nakedCount = 0;
-        retry = 0;
-        sleepTime = 100;
+        context.getCounter(MarkLogicCounter.ESTIMATED_INPUT_RECORDS)
+            .increment(mlSplit.getLength());
 
         // construct the server URI
         hostNames = mlSplit.getLocations();
@@ -130,6 +131,9 @@ public class DatabaseContentReader extends
                 }
             }
         }
+
+        retry = 0;
+        sleepTime = 500;
         init();
     }
 
@@ -191,7 +195,9 @@ public class DatabaseContentReader extends
 
         buf.append("'META',");
         buf.append("$uri,");
-        buf.append("if(fn:empty($doc/node())) then 0 else xdmp:node-kind($doc/node())");
+        buf.append("if(fn:empty($doc/node())) then 0 ");
+        buf.append("else if (fn:count($doc/node())>1) then \"element\" ");
+        buf.append("else xdmp:node-kind($doc/node())");
         if (copyCollection || copyPermission || copyProperties || copyQuality) {
             buf.append(",");
             if (copyCollection) {
@@ -233,8 +239,11 @@ public class DatabaseContentReader extends
         }
 
         // set up a connection to the server
-        while (retry++ < maxRetries) {
+        while (retry < maxRetries) {
         try {
+            if (retry == 1) {
+                LOG.info("Retrying connect");
+            }
             String curForestName = "";
             String curHostName = "";
             if (curForest == -1) {
@@ -271,25 +280,28 @@ public class DatabaseContentReader extends
             
             initMetadataMap();
         } catch (XccConfigException e) {
-            LOG.error(e);
+            LOG.error("XccConfigException:" + e);
             throw new IOException(e);
         } catch (QueryException e) {
-            LOG.error(e);
+            LOG.error("QueryException:" + e);
+            LOG.debug("Query: " + queryText);
             throw new IOException(e);
-        } catch (RequestException e) {
-            if (curForest != -1 && retry < maxRetries) {
-                // failover
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (Exception e2) {
-                }
-                sleepTime = Math.min(sleepTime * 2,maxSleepTime);
+        } catch (Exception e) {
+            LOG.error("Exception:" + e.getMessage());
+            if (curForest != -1) {
+                if (++retry < maxRetries) {
+                    // failover
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (Exception e2) {
+                    }
+                    sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
-                curForest = (curForest+1)%replicas.size();
-                continue;
+                    curForest = (curForest+1)%replicas.size();
+                    continue;
+                }
+                LOG.info("Retry limit exceeded");
             }
-            LOG.error("Query: " + queryText);
-            LOG.error(e);
             throw new IOException(e);
         }
         break;
@@ -498,8 +510,8 @@ public class DatabaseContentReader extends
     public boolean nextKeyValue() throws IOException, InterruptedException {
         if (!docDone) {
             retry = 0;
-            sleepTime = 100;
-            while (retry++ < maxRetries) {
+            sleepTime = 500;
+            while (retry < maxRetries) {
                 try {
                     if (result != null && (result.hasNext())) {
                         ResultItem currItem = null;
@@ -529,16 +541,20 @@ public class DatabaseContentReader extends
                         return true;
                     }
                 } catch (RuntimeException e) {
-                    if (curForest != -1 && retry < maxRetries) {
-                        try {
-                            Thread.sleep(sleepTime);
-                        } catch (Exception e2) {
-                        }
-                        sleepTime = Math.min(sleepTime * 2,maxSleepTime);
+                    LOG.error("RuntimeException:" + e);
+                    if (curForest != -1) {
+                        if (++retry < maxRetries) {
+                            try {
+                                Thread.sleep(sleepTime);
+                            } catch (Exception e2) {
+                            }
+                            sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
-                        curForest = (curForest+1)%replicas.size();
-                        init();
-                        continue;
+                            curForest = (curForest+1)%replicas.size();
+                            init();
+                            continue;
+                        }
+                        LOG.info("Retry limit exceeded");
                     }
                     throw e;
                 }
@@ -549,8 +565,8 @@ public class DatabaseContentReader extends
 
         if (copyProperties && mlSplit.getStart() == 0) {
             retry = 0;
-            sleepTime = 100;
-            while (retry++ < maxRetries) {
+            sleepTime = 500;
+            while (retry < maxRetries) {
                 try {
                     if (!nakedDone) {
                         queryNakedProperties();
@@ -594,29 +610,37 @@ public class DatabaseContentReader extends
                         return true;
                     }
                 } catch (RequestException e) {
-                    if (curForest != -1 && retry < maxRetries) {
-                        try {
-                            Thread.sleep(sleepTime);
-                        } catch (Exception e2) {
-                        }
-                        sleepTime = Math.min(sleepTime * 2,maxSleepTime);
+                    LOG.error("RequestException:" + e);
+                    if (curForest != -1) {
+                        if (++retry < maxRetries) {
+                            try {
+                                Thread.sleep(sleepTime);
+                            } catch (Exception e2) {
+                            }
+                            sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
-                        curForest = (curForest+1)%replicas.size();
-                        init();
-                        continue;
+                            curForest = (curForest+1)%replicas.size();
+                            init();
+                            continue;
+                        }
+                        LOG.info("Exceeded max retry");
                     }
                     throw new IOException(e);
                 } catch (RuntimeException e) {
-                    if (curForest != -1 && retry < maxRetries) {
-                        try {
-                            Thread.sleep(sleepTime);
-                        } catch (Exception e2) {
-                        }
-                        sleepTime = Math.min(sleepTime * 2,maxSleepTime);
+                    LOG.error("RuntimeException:" + e);
+                    if (curForest != -1) {
+                        if (++retry < maxRetries) {
+                            try {
+                                Thread.sleep(sleepTime);
+                            } catch (Exception e2) {
+                            }
+                            sleepTime = Math.min(sleepTime * 2,maxSleepTime);
 
-                        curForest = (curForest+1)%replicas.size();
-                        init();
-                        continue;
+                            curForest = (curForest+1)%replicas.size();
+                            init();
+                            continue;
+                        }
+                        LOG.info("Exceeded max retry");
                     }
                     throw e;
                 }
@@ -640,9 +664,11 @@ public class DatabaseContentReader extends
         // and sec:role xs:unsignedLong (but we need string)
         String permString = _permissionElement.asString();
         int i = permString.indexOf("<sec:role-name>");
-        int j = permString.indexOf("</sec:role-name>")+16;
+        int j = permString.indexOf("</sec:role-name>");
+        if (i == -1 || j == -1)
+          throw new Exception("Error retrieving document permission");
         buf.append(permString.substring(0, i));
-        buf.append(permString.substring(j));   
+        buf.append(permString.substring(j+16));
         Element permissionW3cElement = _permissionElement.asW3cElement();
 
         NodeList capabilities = permissionW3cElement

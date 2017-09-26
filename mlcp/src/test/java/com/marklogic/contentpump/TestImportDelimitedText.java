@@ -17,7 +17,7 @@ public class TestImportDelimitedText{
     public void tearDown() {
         Utils.closeSession();
     }
-    
+
     @Test
     public void testImportDelimitedText_() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -39,7 +39,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("1", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -53,7 +53,7 @@ public class TestImportDelimitedText{
 //            + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
 //        assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedText() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -75,7 +75,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -88,7 +88,7 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextGenerateId() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -111,7 +111,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -126,7 +126,7 @@ public class TestImportDelimitedText{
         System.out.println("DUMP:" + sb.length() +"@" + sb.toString());
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextRootName() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -174,7 +174,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -187,7 +187,7 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportTransformDelimitedTextFileNameAsCollection() throws Exception {
         Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
@@ -218,7 +218,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -257,7 +257,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("14", result.next().asString());
         Utils.closeSession();
-//        
+//
 //        result = Utils.getNonEmptyDocsURIs(Utils.getDocumentsDbXccUri());
 //
 //        StringBuilder sb = new StringBuilder();
@@ -269,8 +269,8 @@ public class TestImportDelimitedText{
 //        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
 //            + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
 //        assertTrue(sb.toString().equals(key));
-    }    
-    
+    }
+
 /*
  *  test output_language and namespace
  */
@@ -301,7 +301,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
-        
+
 //        result = Utils.getNonEmptyDocsURIs(Utils.getDocumentsDbXccUri());
 //
 //        StringBuilder sb = new StringBuilder();
@@ -313,7 +313,7 @@ public class TestImportDelimitedText{
 //        String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
 //            + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
 //        assertTrue(sb.toString().equals(key));
-    }   
+    }
     @Test
     public void testImportDelimitedTextPipe() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -336,7 +336,7 @@ public class TestImportDelimitedText{
         assertEquals("6", result.next().asString());
         Utils.closeSession();
     }
-    
+
     //split each file into 3 splits, the last of which is skipped bc' reaching the end
     @Test
     public void testImport3DelimitedSplits() throws Exception {
@@ -362,7 +362,7 @@ public class TestImportDelimitedText{
         assertEquals("3", result.next().asString());
         Utils.closeSession();
     }
-    
+
     @Test
     public void testImport2DelimitedSplits() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -388,7 +388,7 @@ public class TestImportDelimitedText{
         assertEquals("6", result.next().asString());
         Utils.closeSession();
     }
-    
+
     @Test
     public void testImportDelimitedTextTab() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -411,7 +411,7 @@ public class TestImportDelimitedText{
         assertEquals("3", result.next().asString());
         Utils.closeSession();
     }
-    
+
     @Test
     public void testImportDelimitedTextPipe2() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -436,7 +436,7 @@ public class TestImportDelimitedText{
         assertEquals("3", result.next().asString());
         Utils.closeSession();
     }
-    
+
     @Test
     public void testImportDelimitedTextBad() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -458,7 +458,7 @@ public class TestImportDelimitedText{
         assertEquals("2", result.next().asString());
         Utils.closeSession();
     }
-    
+
     @Test
     public void testImportDelimitedTextElemNames() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -479,7 +479,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -493,7 +493,7 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportDelimitedTextElemNames.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextElemNamesSplit() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -515,7 +515,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -528,7 +528,7 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportDelimitedTextElemNamesSplit.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextWithQuotes() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -551,7 +551,7 @@ public class TestImportDelimitedText{
         assertEquals("1", result.next().asString());
         Utils.closeSession();
     }
-    
+
     @Test
     public void testImportDelimitedTextHard() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -573,7 +573,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -587,7 +587,7 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportDelimitedTextHard.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextHardZip() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -609,7 +609,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -623,11 +623,11 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportDelimitedTextHardZip.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextUTF16LE() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
-            + " -input_file_path " + Constants.TEST_PATH.toUri() 
+            + " -input_file_path " + Constants.TEST_PATH.toUri()
             + "/encoding/samplecsv.utf16le.csv -content_encoding utf-16le"
             + " -delimited_uri_id first"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
@@ -647,7 +647,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -656,17 +656,17 @@ public class TestImportDelimitedText{
             sb.append(s);
         }
         Utils.closeSession();
-        
+
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedTextUTF16LE.txt");
         System.out.println("DUMP:" + sb.length() +"@" + sb.toString());
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextUTF16BE() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
-            + " -input_file_path " + Constants.TEST_PATH.toUri() 
+            + " -input_file_path " + Constants.TEST_PATH.toUri()
             + "/encoding/samplecsv.utf16be.csv -content_encoding utf-16be"
             + " -delimited_uri_id first "
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
@@ -686,7 +686,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -695,16 +695,16 @@ public class TestImportDelimitedText{
             sb.append(s);
         }
         Utils.closeSession();
-        
+
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedTextUTF16BE.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextUTF16LEZip() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
-            + " -input_file_path " + Constants.TEST_PATH.toUri() 
+            + " -input_file_path " + Constants.TEST_PATH.toUri()
             + "/encoding/samplecsv.utf16le.zip -content_encoding utf-16le"
             + " -delimited_uri_id first -input_compressed"
             + " -output_uri_replace " + Constants.MLCP_HOME + ",'/space/workspace/xcc/mlcp'"
@@ -724,7 +724,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("3", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -733,15 +733,15 @@ public class TestImportDelimitedText{
             sb.append(s);
         }
         Utils.closeSession();
-        
+
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedTextUTF16LEZip.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextZip() throws Exception {
-        String cmd = 
+        String cmd =
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
             + " -delimited_uri_id first"
@@ -762,7 +762,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -770,15 +770,15 @@ public class TestImportDelimitedText{
             sb.append(s);
         }
         Utils.closeSession();
-        
+
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedTextZip.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextZipGenId() throws Exception {
-        String cmd = 
+        String cmd =
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
             + " -generate_uri true"
@@ -800,7 +800,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -813,11 +813,11 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportDelimitedTextZipGenId.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportTransformDelimitedTextZip() throws Exception {
         Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
-        String cmd = 
+        String cmd =
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
             + " -delimited_uri_id first"
@@ -840,7 +840,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("5", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while(result.hasNext()) {
@@ -852,7 +852,7 @@ public class TestImportDelimitedText{
             + "/keys/TestImportDelimitedText#testImportTransformDelimitedTextZip.txt");
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextDocJSON() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -876,12 +876,12 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
     }
-    
+
     @Test
     public void testImportDelimitedTextDocJSONWithOptions() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -906,12 +906,12 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("4", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.assertDocsFormat(Utils.getTestDbXccUri(),"JSON");
         assertTrue(result.hasNext());
         assertTrue(result.next().asString().equals("true"));
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
@@ -926,7 +926,7 @@ public class TestImportDelimitedText{
         System.out.println(sb.toString());
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextJSONDataType() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -950,7 +950,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
@@ -964,7 +964,7 @@ public class TestImportDelimitedText{
 
         assertTrue(sb.toString().equals(key));
     }
-    
+
     @Test
     public void testImportDelimitedTextInvalidType() throws Exception {
         String cmd = "IMPORT -host localhost -username admin -password admin"
@@ -988,7 +988,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("2", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getAllDocs(Utils.getTestDbXccUri());
         StringBuilder sb = new StringBuilder();
         while (result.hasNext()) {
@@ -1003,10 +1003,10 @@ public class TestImportDelimitedText{
         assertTrue(sb.toString().equals(key));
     }
 
-  //4 files into 6 delimited splits
+    //4 files into 6 delimited splits
     @Test
     public void testImportDelimitedTextSplit() throws Exception {
-        String cmd = 
+        String cmd =
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -delimited_uri_id first"
@@ -1028,7 +1028,7 @@ public class TestImportDelimitedText{
         assertTrue(result.hasNext());
         assertEquals("7", result.next().asString());
         Utils.closeSession();
-        
+
         result = Utils.getNonEmptyDocsURIs(Utils.getTestDbXccUri());
 
         StringBuilder sb = new StringBuilder();
@@ -1037,9 +1037,101 @@ public class TestImportDelimitedText{
             sb.append(s);
         }
         Utils.closeSession();
-        
+
         String key = Utils.readSmallFile(Constants.TEST_PATH.toUri().getPath()
             + "/keys/TestImportDelimitedText#testImportDelimitedText.txt");
         assertTrue(sb.toString().equals(key));
     }
+
+    @Test
+    public void testBug44422() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedText/44422.csv"
+                + " -fastload false -input_file_type delimited_text"
+                + " -split_input true -max_split_size 1000 -uri_id id"
+                + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("900", result.next().asString());
+        Utils.closeSession();
+    }
+
+    @Test
+    public void testBug42027() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedText/42027.csv"
+                + " -fastload false -input_file_type delimited_text -document_type json"
+                + " -split_input true -max_split_size 50 -generate_uri true"
+                + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1000", result.next().asString());
+        Utils.closeSession();
+    }
+
+    @Test
+    public void testBug39564() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedText/39564.csv"
+                + " -fastload false -input_file_type delimited_text"
+                + " -split_input true -max_split_size 300 -generate_uri true"
+                + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("20", result.next().asString());
+        Utils.closeSession();
+    }
+
+    @Test
+    public void testBug44422JP() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri() + "/delimitedText/44422JP.csv"
+                + " -input_file_type delimited_text -split_input true -max_split_size 1000"
+                + " -uri_id id -output_uri_prefix .xml"
+                + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        ResultSequence result = Utils.runQuery(
+                Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("900", result.next().asString());
+        Utils.closeSession();
+    }
+
 }

@@ -179,7 +179,7 @@ public class DatabaseContentWriter<VALUE> extends
                 isCopyColls, isCopyQuality, isCopyMeta, isCopyPerms, 
                 effectiveVersion);
             MarkLogicDocument doc = (MarkLogicDocument)value;
-            if (!meta.isNakedProps()) {
+            if (meta == null || !meta.isNakedProps()) {
                 opt.setFormat(doc.getContentType().getDocumentFormat());
                 if (doc.getContentType() == ContentType.BINARY) {
                     content = ContentFactory.newContent(uri,
@@ -203,86 +203,57 @@ public class DatabaseContentWriter<VALUE> extends
         }
         pendingUris[sid].put(content, new DocumentURI(key));
         boolean inserted = false;
-        if (batchSize > 1) {
-            if (!meta.isNakedProps()) {
-                // add new content
-                forestContents[fId][counts[fId]] = content;
-                metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
-            } else if (isCopyProps) { // naked properties
-                if (sessions[sid] == null) {
-                    sessions[sid] = getSession(sid, false);
-                }
-                boolean suc = setDocumentProperties(uri, meta.getProperties(),
-                        isCopyPerms?meta.getPermString():null,
-                        isCopyColls?meta.getCollectionString():null,
-                        isCopyQuality?meta.getQualityString():null, 
-                        isCopyMeta?meta.getMeta():null, sessions[sid]);
-                stmtCounts[sid]++;
-                if (suc) { 
-                    commitUris[sid].add(key);
-                } else {
-                    failed++;
-                }
-            }
-            if (counts[fId] == batchSize) {
-                if (sessions[sid] == null) {
-                    sessions[sid] = getSession(sid, false);
-                }    
-                insertBatch(forestContents[fId], sid);     
-                stmtCounts[sid]++;
-                if (isCopyProps) {
-                    // insert properties
-                    for (int i = 0; i < counts[fId]; i++) {
-                        DocumentMetadata m = metadatas[fId][i].getMeta();
-                        String u = metadatas[fId][i].getUri();
-                        if (m != null && m.getProperties() != null) {
-                            boolean suc = setDocumentProperties(u, 
-                                    m.getProperties(),null,null,null,null,
-                                    sessions[sid]);
-                            stmtCounts[sid]++;
-                            if (suc) { 
-                                commitUris[sid].add(key);
-                            } else {
-                                failed++;
-                            }
-                        }
-                    }
-                }
-                //reset forest index for statistical
-                if (countBased) {
-                    sfId = -1;
-                }
-                counts[fId] = 0;
-                inserted = true;
-            }
-        } else { // batchSize <= 1
+        if (meta == null || !meta.isNakedProps()) {
+            // add new content
+            forestContents[fId][counts[fId]] = content;
+            metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
+        } else if (isCopyProps) { // naked properties
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
             }
-            if (content != null) {
-                insertContent(content, sid);
-                stmtCounts[sid]++;
+            boolean suc = setDocumentProperties(uri, meta.getProperties(),
+                    isCopyPerms?meta.getPermString():null,
+                    isCopyColls?meta.getCollectionString():null,
+                    isCopyQuality?meta.getQualityString():null, 
+                    isCopyMeta?meta.getMeta():null, sessions[sid]);
+            stmtCounts[sid]++;
+            if (suc) { 
+                commitUris[sid].add(key);
+            } else {
+                failed++;
+            }
+        }
+        if (counts[fId] == batchSize) {
+            if (sessions[sid] == null) {
+                sessions[sid] = getSession(sid, false);
+            }    
+            insertBatch(forestContents[fId], sid);     
+            stmtCounts[sid]++;
+            if (isCopyProps) {
+                // insert properties
+                for (int i = 0; i < counts[fId]; i++) {
+                    DocumentMetadata m = metadatas[fId][i].getMeta();
+                    String u = metadatas[fId][i].getUri();
+                    if (m != null && m.getProperties() != null) {
+                        boolean suc = setDocumentProperties(u, 
+                                m.getProperties(),null,null,null,null,
+                                sessions[sid]);
+                        stmtCounts[sid]++;
+                        if (suc) { 
+                            commitUris[sid].add(key);
+                        } else {
+                            failed++;
+                        }
+                    }
+                }
             }
             //reset forest index for statistical
             if (countBased) {
                 sfId = -1;
-            }     
-            if (isCopyProps && meta.getProperties() != null) {
-                boolean naked = content == null;
-                boolean suc = setDocumentProperties(uri, meta.getProperties(),
-                        isCopyPerms&&naked?meta.getPermString():null,
-                        isCopyColls&&naked?meta.getCollectionString():null,
-                        isCopyQuality&&naked?meta.getQualityString():null,
-                        isCopyMeta&&naked?meta.meta:null, sessions[sid]);
-                stmtCounts[sid]++;
-                if (suc) { 
-                    commitUris[sid].add(key);
-                } else {
-                    failed++;
-                }
             }
+            counts[fId] = 0;
             inserted = true;
-        }
+        } 
         boolean committed = false;
         if (stmtCounts[sid] == txnSize && needCommit) {
             commit(sid);
@@ -309,7 +280,7 @@ public class DatabaseContentWriter<VALUE> extends
                 sid = 0;
             }
             for (int i = 0; i < len; i++, sid++) {
-                if (counts[i] > 0) {
+                if (pendingUris[sid].size() > 0) {
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0,
                             counts[i]);

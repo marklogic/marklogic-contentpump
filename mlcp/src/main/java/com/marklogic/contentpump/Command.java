@@ -276,13 +276,15 @@ public enum Command implements ConfigConstants {
                 .create(THREADS_PER_SPLIT);
             options.addOption(threadsPerSplit);
 
-            Option tolerateErrors = OptionBuilder
+            Option tolerateErrors_opt = OptionBuilder
                 .withArgName("true,false")
                 .hasOptionalArg()
                 .withDescription(
                     "Whether to tolerate insertion errors and make sure all "
                     + "successful inserts are committed")
                 .create(TOLERATE_ERRORS);
+            CommandlineOption tolerateErrors = new CommandlineOption(tolerateErrors_opt);
+            tolerateErrors.setHidden(true);
             options.addOption(tolerateErrors);
 
             Option rdfMemoryThreshold_opt = OptionBuilder
@@ -1198,13 +1200,15 @@ public enum Command implements ConfigConstants {
                 .withDescription("Output directory in MarkLogic.")
                 .create(OUTPUT_DIRECTORY);
             options.addOption(outputDir);
-            Option tolerateErrors = OptionBuilder
+            Option tolerateErrors_opt = OptionBuilder
                 .withArgName("tolerate errors")
                 .hasOptionalArg()
                 .withDescription(
                     "Whether to tolerate insertion errors and make sure all "
                     + "successful inserts are committed")
                 .create(TOLERATE_ERRORS);
+            CommandlineOption tolerateErrors = new CommandlineOption(tolerateErrors_opt);
+            tolerateErrors.setHidden(true);
             options.addOption(tolerateErrors);
             
             configPartition(options);
@@ -1893,6 +1897,18 @@ public enum Command implements ConfigConstants {
             .withDescription("Parameters of the transform function")
             .create(TRANSFORM_PARAM);
         options.addOption(param);
+        Option modules = OptionBuilder
+                .withArgName("String")
+                .hasArg()
+                .withDescription("The database that contains application modules")
+                .create(MODULES);
+        options.addOption(modules);
+        Option root = OptionBuilder
+                .withArgName("String")
+                .hasArg()
+                .withDescription("The root document directory pathname")
+                .create(MODULES_ROOT);
+        options.addOption(root);
     }
     
     static void configPartition(Options options) {
@@ -1958,6 +1974,14 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(TRANSFORM_PARAM)) {
                 arg = cmdline.getOptionValue(TRANSFORM_PARAM);
                 conf.set(CONF_TRANSFORM_PARAM, arg);
+            }
+            if (cmdline.hasOption(MODULES)){
+                arg = cmdline.getOptionValue(MODULES);
+                conf.set(CONF_INPUT_MODULES_DATABASE, arg);
+            }
+            if (cmdline.hasOption(MODULES_ROOT)){
+                arg = cmdline.getOptionValue(MODULES_ROOT);
+                conf.set(CONF_INPUT_MODULES_ROOT, arg);
             }
         }
     }

@@ -36,7 +36,7 @@ import com.marklogic.mapreduce.utilities.TextArrayWritable;
 
 /**
  * Reader for DelimitedTextInputFormat if split_input is true
- * 
+ *
  * @author ali
  *
  * @param <VALUEIN>
@@ -74,12 +74,12 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                 return false;
             }
             CSVRecord record = getRecordLine();
-            if (record.getCharacterPosition() >= end) {
+            if (record.getCharacterByte() >= end) {
                 return false;
             }
             String[] values = getLine(record);
             if (values.length != fields.length) {
-                setSkipKey(0, 0, 
+                setSkipKey(0, 0,
                         "number of fields does not match number of columns");
                 return true;
             }
@@ -115,7 +115,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         } catch (RuntimeException ex) {
             if (ex.getMessage().contains(
                 "invalid char between encapsulated token and delimiter")) {
-                setSkipKey(0, 0, 
+                setSkipKey(0, 0,
                         "invalid char between encapsulated token and delimiter");
                 // hasNext() will always be true here since this exception is caught
                 if (parserIterator.hasNext()) {
@@ -132,9 +132,10 @@ public class SplitDelimitedTextReader<VALUEIN> extends
     @Override
     protected void initParser(InputSplit inSplit) throws IOException,
         InterruptedException {
-        setFile(((DelimitedSplit) inSplit).getPath());
-        configFileNameAsCollection(conf, file);
-
+        fileIn = openFile(inSplit, true);
+        if (fileIn == null) {
+            return;
+        }
         // get header from the DelimitedSplit
         TextArrayWritable taw = ((DelimitedSplit) inSplit).getHeader();
         fields = taw.toStrings();
@@ -146,7 +147,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
             return;
         }
 
-        fileIn = fs.open(file);
         lineSeparator = retrieveLineSeparator(fileIn);
         if (start != 0) {
             // in case the cut point is \n, back off 1 char to create a partial
@@ -188,28 +188,31 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         }
 
         // keep leading and trailing whitespaces to ensure accuracy of pos
-        // do not skip empty line just in case the split boundary is \n
+        // do not skip empty line just in case the split boundary is \n.
+        // Set encapsulator to null so that it will ignore quotes
+        // while parsing the first line in the split
         parser = new CSVParser(instream, CSVParserFormatter.
-                getFormat(delimiter, encapsulator, false,false),
-                start,0L);
+                getFormat(delimiter, null, false,false),
+                start, 0L, encoding);
         parserIterator = parser.iterator();
 
-        // skip first line:
-        // 1st split, skip header; other splits, skip partial line
-        try {
+        if (parserIterator.hasNext()) {
+            // skip first line:
+            // 1st split, skip header; other splits, skip partial line
+            getLine();
+            // Read next record and get the beginning position,
+            // which will be used to initialize the parser
             if (parserIterator.hasNext()) {
-                String[] values = getLine();
+                CSVRecord record = getRecordLine();
+                long pos = record.getCharacterByte();
+                fileIn.seek(pos);
+                instream = new InputStreamReader(fileIn, encoding);
+                parser = new CSVParser(instream, CSVParserFormatter.
+                        getFormat(delimiter, encapsulator, false,false),
+                        pos, 0L, encoding);
+                parserIterator = parser.iterator();
             }
-        } catch (RuntimeException e) {
-            if (e.getMessage().
-                    contains("invalid char between encapsulated "
-                            + "token and delimiter")) {
-                if (parserIterator.hasNext()) {
-                    String[] values = getLine();
-                }
-            } else {
-                throw new IOException(e);
-            }
+
         }
     }
 

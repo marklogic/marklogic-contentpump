@@ -88,14 +88,16 @@ public class ArchiveRecordReader extends
     }
     
     protected void initStream(InputSplit inSplit) throws IOException {
-        setFile(((FileSplit) inSplit).getPath());
+        FSDataInputStream fileIn = openFile(inSplit, false);
+        if (fileIn == null) {
+            return;
+        }
         int index = file.toUri().getPath().lastIndexOf(EXTENSION);
         String subStr = file.toUri().getPath().substring(0, index);
         index = subStr.lastIndexOf('-');
         String typeStr = subStr.substring(index + 1, subStr.length());
         type = ContentType.valueOf(typeStr);
         value = new DatabaseDocumentWithMeta();
-        FSDataInputStream fileIn = fs.open(file);
         zipIn = new ZipInputStream(fileIn);
     }
 
