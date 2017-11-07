@@ -500,6 +500,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     break;
                 case XMLStreamConstants.PROCESSING_INSTRUCTION:
                     write("<?");
+                    write(xmlSR.getPITarget());
+                    write(" ");
                     write(xmlSR.getPIData());
                     write("?>");
                     break;
