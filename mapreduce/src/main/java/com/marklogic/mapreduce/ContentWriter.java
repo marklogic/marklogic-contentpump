@@ -501,9 +501,11 @@ implements MarkLogicConstants {
                     LOG.debug("Retry successful");
                 }
             } catch (Exception e) {
+                boolean retriable = true;
                 if (e instanceof RetryableQueryException) {
                     // log error and continue on RequestServerException
                     LOG.error("RetryableQueryException:" + ((RetryableQueryException)e).getFormatString());
+                    retriable = ((RetryableQueryException)e).isRetryable();
                 } else if (e instanceof QueryException) {
                     LOG.error("QueryException:" + ((QueryException)e).getFormatString());
                 } else if (e instanceof RequestServerException) {
@@ -519,7 +521,7 @@ implements MarkLogicConstants {
                     rollback(id);
                 }
 
-                if (++retry < maxRetries) {
+                if (retriable && ++retry < maxRetries) {
                     // necessary to close the session too.
                     sessions[id].close();
                     try {
@@ -534,8 +536,9 @@ implements MarkLogicConstants {
                     // because it could be "sync replicating" (bug:45785)
                     sessions[id] = getSession(id, true);
                     continue;
-                } 
-                LOG.info("Exceeded max retry");
+                } else if (retriable) {
+                    LOG.info("Exceeded max retry");
+                }
                 failed += batch.length;
                 // remove the failed content from pendingUris
                 for (Content fc : batch) {
