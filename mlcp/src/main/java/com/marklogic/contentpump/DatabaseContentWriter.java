@@ -92,7 +92,7 @@ public class DatabaseContentWriter<VALUE> extends
     protected static ContentCreateOptions newContentCreateOptions(
             DocumentMetadata meta, ContentCreateOptions options, 
             boolean isCopyColls, boolean isCopyQuality, boolean isCopyMeta,
-            boolean isCopyPerms, long effectiveVersion) {
+            boolean isCopyPerms, boolean isCopyProps, long effectiveVersion) {
         ContentCreateOptions opt = (ContentCreateOptions)options.clone();
         if (meta != null) {
             if (isCopyQuality && opt.getQuality() == 0) {
@@ -147,6 +147,9 @@ public class DatabaseContentWriter<VALUE> extends
             if (isCopyMeta) {
                 opt.setMetadata(meta.meta);
             }
+            if (isCopyProps) {
+                opt.setProperties(meta.getProperties());
+            }
         }       
         return opt;
     }
@@ -176,7 +179,7 @@ public class DatabaseContentWriter<VALUE> extends
             try {
             meta = ((DatabaseDocumentWithMeta) value).getMeta();
             ContentCreateOptions opt = newContentCreateOptions(meta, options,
-                isCopyColls, isCopyQuality, isCopyMeta, isCopyPerms, 
+                isCopyColls, isCopyQuality, isCopyMeta, isCopyPerms, isCopyProps,
                 effectiveVersion);
             MarkLogicDocument doc = (MarkLogicDocument)value;
             if (meta == null || !meta.isNakedProps()) {

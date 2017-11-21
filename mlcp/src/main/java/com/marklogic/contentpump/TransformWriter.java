@@ -473,6 +473,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         if (temporalCollection != null) {
             optionsMap.put("temporal-collection", temporalCollection);
         }
+
+        String props = options.getProperties();
+        if (props != null) {
+            optionsMap.put("properties", props);
+        }
+
         if (effectiveVersion < BATCH_MIN_VERSION) {
             String optionElem = mapToElement(optionsMap);
             optionsVals[id][counts[id]] = 

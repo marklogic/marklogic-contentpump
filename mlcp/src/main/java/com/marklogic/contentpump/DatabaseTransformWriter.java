@@ -76,7 +76,7 @@ public class DatabaseTransformWriter<VALUE> extends
         DocumentMetadata meta = doc.getMeta();
         ContentCreateOptions opt = 
             DatabaseContentWriter.newContentCreateOptions(meta, options, 
-            isCopyColls, isCopyQuality, isCopyMeta, isCopyPerms, 
+            isCopyColls, isCopyQuality, isCopyMeta, isCopyPerms, isCopyProps,
             effectiveVersion);
         boolean naked = meta.isNakedProps();
         if (sessions[sid] == null) {
@@ -105,21 +105,21 @@ public class DatabaseTransformWriter<VALUE> extends
                 pendingURIs[sid].clear();
             }
         }
-        if (isCopyProps && meta.getProperties() != null) {            
+        if (isCopyProps && meta.getProperties() != null && naked) {
             boolean suc = DatabaseContentWriter.setDocumentProperties(uri, 
                     meta.getProperties(),
-                    isCopyPerms&&naked?meta.getPermString():null,
-                    isCopyColls&&naked?meta.getCollectionString():null,
-                    isCopyQuality&&naked?meta.getQualityString():null, 
-                    isCopyMeta&&naked?meta.getMeta():null, sessions[sid]);
+                    isCopyPerms?meta.getPermString():null,
+                    isCopyColls?meta.getCollectionString():null,
+                    isCopyQuality?meta.getQualityString():null,
+                    isCopyMeta?meta.getMeta():null, sessions[sid]);
             stmtCounts[sid]++;
-            if (suc && naked) {
+            if (suc) {
                 if (needCommit) {
                     commitUris[sid].add(key);
                 } else {
                     succeeded++;
                 }
-            } else if (!suc && naked) {
+            } else if (!suc) {
                 failed++;
             }
         }
