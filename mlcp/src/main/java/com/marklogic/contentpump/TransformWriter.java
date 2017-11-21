@@ -539,6 +539,16 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             if (e instanceof QueryException) {
                 LOG.error("QueryException:" + 
                         ((QueryException) e).getFormatString());
+                if (!((QueryException) e).isRetryable()) {
+                    rollback(id);
+                    for (DocumentURI failedUri: pendingURIs[id] ) {
+                        LOG.warn("Failed document " + failedUri);
+                        failed++;
+                     }
+                     pendingURIs[id].clear();
+                     counts[id] = 0;
+                     throw new IOException(e);
+                }
             } else if (e instanceof RequestServerException) {
                 LOG.error("RequestServerException:" + e.getMessage());
             } else {
@@ -570,7 +580,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             pendingURIs[id].clear();
             counts[id] = 0;
             throw new IOException(e);
-        } 
+        }
         }
     }
     
