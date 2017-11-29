@@ -535,19 +535,19 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             counts[id] = 0;
             break;
         } catch (Exception e) {
-            boolean retriable = true;
+            boolean retryable = true;
             // compatible mode: log error and continue
             if (e instanceof QueryException) {
                 LOG.error("QueryException:" + 
                         ((QueryException) e).getFormatString());
-                retriable = ((QueryException) e).isRetryable();
+                retryable = ((QueryException) e).isRetryable();
             } else if (e instanceof RequestServerException) {
                 LOG.error("RequestServerException:" + e.getMessage());
             } else {
                 LOG.error("Exception:" + e.getMessage());
             }
             rollback(id);
-            if (retriable && ++retry < maxRetries) {
+            if (retryable && ++retry < maxRetries) {
                 try {
                     InternalUtilities.sleep(sleepTime);
                 } catch (Exception e2) {
@@ -563,7 +563,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 queries[id].setNewVariables(contentName, valueList);
                 queries[id].setNewVariables(optionsName, optionsValList);
                 continue;
-            } else if (retriable) {
+            } else if (retryable) {
                 LOG.info("Exceeded max retry");
             }
             for ( DocumentURI failedUri: pendingURIs[id] ) {
