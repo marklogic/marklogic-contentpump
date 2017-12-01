@@ -502,10 +502,7 @@ implements MarkLogicConstants {
                 }
             } catch (Exception e) {
                 boolean retryable = true;
-                if (e instanceof RetryableQueryException) {
-                    LOG.error("RetryableQueryException:" + ((RetryableQueryException)e).getFormatString());
-                    retryable = ((RetryableQueryException)e).isRetryable();
-                } else if (e instanceof QueryException) {
+                if (e instanceof QueryException) {
                     LOG.error("QueryException:" + ((QueryException)e).getFormatString());
                     retryable = ((QueryException)e).isRetryable();
                 } else if (e instanceof RequestServerException) {
