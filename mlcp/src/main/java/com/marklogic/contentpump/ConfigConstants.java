@@ -247,4 +247,5 @@ public interface ConfigConstants {
             "mlcpcopyexportstart";
     static final String AUDIT_MLCPFINISH_CODE = 
             "mlcpcopyexportfinish";
+    static final long BATCH_MIN_VERSION = 8000604;
 }
