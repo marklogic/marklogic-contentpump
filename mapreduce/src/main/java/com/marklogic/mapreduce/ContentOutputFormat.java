@@ -211,7 +211,8 @@ public class ContentOutputFormat<VALUEOUT> extends
                     if (!perm.equalsIgnoreCase(ContentCapability.READ.toString()) &&
                         !perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString()) &&
                         !perm.equalsIgnoreCase(ContentCapability.INSERT.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
+                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.NODE_UPDATE.toString())) {
                         throw new IllegalStateException("Illegal capability: " + perm);
                     }
                     i++;
