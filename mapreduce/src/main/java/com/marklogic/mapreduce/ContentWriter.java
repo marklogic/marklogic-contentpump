@@ -239,6 +239,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     capability = ContentCapability.INSERT;
                 } else if (perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
                     capability = ContentCapability.UPDATE;
+                } else if (perm.equalsIgnoreCase(ContentCapability.NODE_UPDATE.toString())) {
+                    capability = ContentCapability.NODE_UPDATE;
                 } else {
                     LOG.error("Illegal permission: " + perm);
                 }
