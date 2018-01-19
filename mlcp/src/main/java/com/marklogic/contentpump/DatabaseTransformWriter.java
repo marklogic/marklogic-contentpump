@@ -85,7 +85,7 @@ public class DatabaseTransformWriter<VALUE> extends
         }
         if (!naked) {
             opt.setFormat(doc.getContentType().getDocumentFormat());
-            addValue(uri, value, sid, opt);
+            addValue(uri, value, sid, opt, effectiveVersion<PROPS_MIN_VERSION?null:meta.getProperties());
             pendingURIs[sid].add((DocumentURI)key.clone());
             if (++counts[sid] == batchSize) {
                 queries[sid].setNewVariables(uriName, uris[sid]);
@@ -105,12 +105,13 @@ public class DatabaseTransformWriter<VALUE> extends
                 pendingURIs[sid].clear();
             }
         }
-        if (isCopyProps && meta.getProperties() != null) {            
+        if (isCopyProps && meta.getProperties() != null &&
+                (effectiveVersion < PROPS_MIN_VERSION || naked)) {
             boolean suc = DatabaseContentWriter.setDocumentProperties(uri, 
                     meta.getProperties(),
                     isCopyPerms&&naked?meta.getPermString():null,
                     isCopyColls&&naked?meta.getCollectionString():null,
-                    isCopyQuality&&naked?meta.getQualityString():null, 
+                    isCopyQuality&&naked?meta.getQualityString():null,
                     isCopyMeta&&naked?meta.getMeta():null, sessions[sid]);
             stmtCounts[sid]++;
             if (suc && naked) {
