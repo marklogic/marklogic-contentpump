@@ -71,6 +71,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public static final Log LOG = LogFactory.getLog(TransformWriter.class);
     static final long BATCH_MIN_VERSION = 8000604;
     static final long TRANS_OPT_MIN_VERSION = 9000200;
+    static final long PROPS_MIN_VERSION = 9000400;
     static final String MAP_ELEM_START_TAG = 
         "<map:map xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi"
         + "=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:map=\"http:"
@@ -223,7 +224,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             }
         }
         int sid = fId;
-        addValue(uri, value, sid, options);
+        addValue(uri, value, sid, options, null);
         pendingURIs[sid].add((DocumentURI)key.clone());
         if (++counts[sid] == batchSize) {
             if (sessions[sid] == null) {
@@ -303,7 +304,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     }
     
     protected void addValue(String uri, VALUEOUT value, int id, 
-        ContentCreateOptions options) throws UnsupportedEncodingException {
+        ContentCreateOptions options, String properties) throws UnsupportedEncodingException {
         uris[id][counts[id]] = ValueFactory.newValue(ValueType.XS_STRING,uri);
         ContentType docContentType = contentType;
         if (options.getFormat() != DocumentFormat.NONE) {
@@ -473,6 +474,11 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         if (temporalCollection != null) {
             optionsMap.put("temporal-collection", temporalCollection);
         }
+
+        if (properties != null) {
+            optionsMap.put("properties", properties);
+        }
+
         if (effectiveVersion < BATCH_MIN_VERSION) {
             String optionElem = mapToElement(optionsMap);
             optionsVals[id][counts[id]] = 
@@ -529,17 +535,19 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             counts[id] = 0;
             break;
         } catch (Exception e) {
+            boolean retryable = true;
             // compatible mode: log error and continue
             if (e instanceof QueryException) {
                 LOG.error("QueryException:" + 
                         ((QueryException) e).getFormatString());
+                retryable = ((QueryException) e).isRetryable();
             } else if (e instanceof RequestServerException) {
                 LOG.error("RequestServerException:" + e.getMessage());
             } else {
                 LOG.error("Exception:" + e.getMessage());
             }
             rollback(id);
-            if (++retry < maxRetries) {
+            if (retryable && ++retry < maxRetries) {
                 try {
                     InternalUtilities.sleep(sleepTime);
                 } catch (Exception e2) {
@@ -555,8 +563,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 queries[id].setNewVariables(contentName, valueList);
                 queries[id].setNewVariables(optionsName, optionsValList);
                 continue;
+            } else if (retryable) {
+                LOG.info("Exceeded max retry");
             }
-            LOG.info("Exceeded max retry");
             for ( DocumentURI failedUri: pendingURIs[id] ) {
                LOG.warn("Failed document " + failedUri);
                failed++;
@@ -564,7 +573,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             pendingURIs[id].clear();
             counts[id] = 0;
             throw new IOException(e);
-        } 
+        }
         }
     }
     

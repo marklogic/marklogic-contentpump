@@ -63,6 +63,8 @@ public class DocumentPathFilter implements PathFilter, Configurable {
                     return true;
                 }
             }
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Skipped path: " + inPath + ", reason: " + e.getMessage());
         } catch (IOException e) {
             e.printStackTrace();
         }
