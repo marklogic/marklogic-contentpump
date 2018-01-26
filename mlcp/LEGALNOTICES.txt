@@ -1,20 +1,21 @@
 
 Combined Product Notices
 
-MarkLogic Server 8.0-7 and supporting 
-products. Last updated: July 31, 2017
+MarkLogic Server 8.0-8 and supporting products. 
+Last updated: January 18, 2018
 
 
 COPYRIGHT
 
 
-Copyright © 2016 MarkLogic Corporation. All rights reserved.
-This technology is protected by U.S. Patent No. 7,127,469B2, U.S. Patent No. 7,171,404B2, U.S. 
-Patent No. 7,756,858 B2, U.S. Patent No 7,962,474 B2, US 8,892,599, and US 8,935,267.
+Copyright © 2018 MarkLogic Corporation.
+MarkLogic technology is protected by one or more U.S. Patents 7,127,469, 7,171,404, 7,756,858, 
+7,962,474, 8,892,599, 8,935,267, and 9,092,507.
+MarkLogic and the MarkLogic logo are trademarks or registered trademarks of MarkLogic 
+Corporation in the United States and other countries.  All other trademarks are the property of 
+their respective owners.
 
-The MarkLogic software is protected by United States and international copyright laws, and 
-incorporates certain third party libraries and components which are subject to the attributions, 
-terms, conditions and disclaimers set forth below.
+ The following software may be included in this project:
 
 1. Contains SAP BusinessObjects Text Analysis XI from SAP AG. Copyright © 1996-2011. All 
 rights reserved.
@@ -34,7 +35,7 @@ reserved. Icons are licensed subject to http://creativecommons.org/licenses/by/3
 
 7. ISYS Search.  Copyright © 2011 ISYS™ Search Software, Inc.  All rights reserved.
 
-8. Software developed by the OpenSSL Project for use in the OpenSSL Toolkit, Version  1.0.2j 
+8. Software developed by the OpenSSL Project for use in the OpenSSL Toolkit, Version  1.0.2n 
 (http://www.openssl.org/) Copyright © 1995-1998 Eric Young (eay@cryptsoft.com). All rights 
 reserved. Copyright © 1998-2011 The OpenSSL Project. All rights reserved. Redistribution and 
 use in source and binary forms, with or without modification, are permitted provided that the 
@@ -46,11 +47,7 @@ mentioning features or use of this software must display the following acknowled
 product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit. 
 (http://www.openssl.org/)" 4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be 
 used to endorse or promote products derived from this software without prior written permission. 
-For written permission, please contact openssl-core@openssl.org. 5. Products derived from this
-
-
-
-
+For written permission, please contact openssl-core@openssl.org. 5. Products derived from this 
 software may not be called "OpenSSL" nor may "OpenSSL" appear in their names without prior 
 written permission of the OpenSSL Project. 6. Redistributions of any form whatsoever must 
 retain the following  acknowledgment: "This product includes software developed by the 
