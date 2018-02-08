@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2017 MarkLogic Corporation
+ * Copyright 2003-2018 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -211,7 +211,8 @@ public class ContentOutputFormat<VALUEOUT> extends
                     if (!perm.equalsIgnoreCase(ContentCapability.READ.toString()) &&
                         !perm.equalsIgnoreCase(ContentCapability.EXECUTE.toString()) &&
                         !perm.equalsIgnoreCase(ContentCapability.INSERT.toString()) &&
-                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
+                        !perm.equalsIgnoreCase(ContentCapability.UPDATE.toString()) &&
+                        !perm.equalsIgnoreCase(ContentCapability.NODE_UPDATE.toString())) {
                         throw new IllegalStateException("Illegal capability: " + perm);
                     }
                     i++;

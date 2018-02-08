@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2017 MarkLogic Corporation
+ * Copyright 2003-2018 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -239,6 +239,8 @@ extends MarkLogicRecordWriter<DocumentURI, VALUEOUT> implements MarkLogicConstan
                     capability = ContentCapability.INSERT;
                 } else if (perm.equalsIgnoreCase(ContentCapability.UPDATE.toString())) {
                     capability = ContentCapability.UPDATE;
+                } else if (perm.equalsIgnoreCase(ContentCapability.NODE_UPDATE.toString())) {
+                    capability = ContentCapability.NODE_UPDATE;
                 } else {
                     LOG.error("Illegal permission: " + perm);
                 }

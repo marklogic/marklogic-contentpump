@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2017 MarkLogic Corporation
+ * Copyright 2003-2018 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class CSVParserFormatter {
 	 * @return
 	 */
 	public static CSVFormat getFormat(char delimiter,
-			char encapsulator,
+			Character encapsulator,
 			boolean ignoreSurroundingSpaces, 
 			boolean ignoreEmptyLines) {
 		CSVFormat format = CSVFormat.newFormat(delimiter);

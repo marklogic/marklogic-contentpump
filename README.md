@@ -21,6 +21,10 @@ The Hadoop Connector is an extension to Hadoop’s MapReduce framework that allo
 
 ## Release Note
 
+### What's New in mlcp and Hadoop Connector 8.0.8
+
+- bug fixes
+
 ### What's New in mlcp and Hadoop Connector 8.0.7
 
 - New option to run behind a load balancer or firewall

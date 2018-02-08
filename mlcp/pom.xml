@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>mlcp</artifactId>
-  <version>8.0.7</version>
+  <version>8.0.8</version>
   <name>MarkLogic Content Pump</name>
   <description>MarkLogic Content Pump</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
@@ -40,10 +40,12 @@
   <properties>
     <skipTests>false</skipTests>
     <test.excludes>**/*TestDistributed*</test.excludes>
-    <hadoopConnectorVersion>2.1.7</hadoopConnectorVersion>
+    <hadoopConnectorVersion>2.1.8</hadoopConnectorVersion>
     <hadoopConnectorBaseDir>${basedir}/../mapreduce</hadoopConnectorBaseDir>
-    <xccVersion>8.0.7</xccVersion>
-    <versionString>8.0.7</versionString>
+    <libdir>${basedir}/src/lib</libdir>
+    <commonsCsvVersion>1.5-marklogic</commonsCsvVersion>
+    <xccVersion>8.0.8</xccVersion>
+    <versionString>8.0.8</versionString>
     <bundleArtifact>apache</bundleArtifact>
     <!-- Settings related to unit test -->
     <contentpumpHome>${project.build.directory}/mlcp-${versionString}-lib</contentpumpHome>
@@ -149,11 +151,6 @@
           <version>0.9.5</version>
         </dependency>
         <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-csv</artifactId>
-          <version>1.2</version>
-        </dependency>
-        <dependency>
           <groupId>xml-apis</groupId>
           <artifactId>xml-apis</artifactId>
           <version>1.4.01</version>
@@ -188,6 +185,13 @@
           <artifactId>htrace-core</artifactId>
           <version>3.1.0-incubating</version>
         </dependency>	
+        <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-csv</artifactId>
+          <version>${commonsCsvVersion}</version>
+          <scope>system</scope>
+          <systemPath>${libdir}/commons-csv-${commonsCsvVersion}.jar</systemPath>
+        </dependency>
         <dependency>
           <groupId>com.marklogic</groupId>
           <artifactId>marklogic-mapreduce2</artifactId>
@@ -377,11 +381,6 @@
           <version>0.9.5</version>
       </dependency>
       <dependency>
-          <groupId>org.apache.commons</groupId>
-          <artifactId>commons-csv</artifactId>
-          <version>1.2</version>
-      </dependency>
-      <dependency>
           <groupId>xml-apis</groupId>
           <artifactId>xml-apis</artifactId>
           <version>1.4.01</version>
@@ -421,6 +420,13 @@
           <artifactId>htrace-core</artifactId>
           <version>3.0.4</version>
       </dependency>	
+      <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-csv</artifactId>
+          <version>${commonsCsvVersion}</version>
+          <scope>system</scope>
+          <systemPath>${libdir}/commons-csv-${commonsCsvVersion}.jar</systemPath>
+      </dependency>
       <dependency>
           <groupId>com.marklogic</groupId>
           <artifactId>marklogic-mapreduce2</artifactId>
