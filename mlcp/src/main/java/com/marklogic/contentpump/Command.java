@@ -649,6 +649,26 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 }
             }
+            if (cmdline.hasOption(SSL_PROTOCOL)) {
+                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
+                if (arg == null || arg.equalsIgnoreCase("SSLv3")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSLv3");
+                } else if(arg.equalsIgnoreCase("SSLv2")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSLv2");
+                } else if(arg.equalsIgnoreCase("SSL")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSL");
+                } else if(arg.equalsIgnoreCase("TLSv1")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1");
+                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.1");
+                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.2");
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL_PROTOCOL
+                                    + ": " + arg);
+                }
+            }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
                 conf.set(MarkLogicConstants.TEMPORAL_COLLECTION, tempColl);
@@ -1049,6 +1069,27 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 } 
             }
+            if (cmdline.hasOption(SSL_PROTOCOL)) {
+                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
+                if (arg == null || arg.equalsIgnoreCase("SSLv3")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSLv3");
+                } else if(arg.equalsIgnoreCase("SSLv2")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSLv2");
+                } else if(arg.equalsIgnoreCase("SSL")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSL");
+                } else if(arg.equalsIgnoreCase("TLSv1")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1");
+                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.1");
+                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.2");
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL_PROTOCOL
+                                    + ": " + arg);
+                }
+            }
+
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
                 conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
@@ -1135,6 +1176,15 @@ public enum Command implements ConfigConstants {
                  "Use ssl to encrypt communication with input MarkLogic Server")
                  .create(INPUT_SSL);
             options.addOption(inputSSL);
+
+            Option inputSSLProtocol = OptionBuilder
+                 .withArgName("ssl_protocol")
+                 .hasOptionalArg()
+                 .withDescription(
+                 "Input ssl protocol, e.g.SSLv3, TLSv1")
+                 .create(INPUT_SSL_PROTOCOL);
+            options.addOption(inputSSLProtocol);
+
             Option outputUsername = OptionBuilder
                 .withArgName("username")
                 .hasArg()
@@ -1180,6 +1230,15 @@ public enum Command implements ConfigConstants {
                 "Use ssl to encryt communication with the output MarkLogic Server")
                 .create(OUTPUT_SSL);
             options.addOption(outputSSL);
+
+            Option outputSSLProtocol = OptionBuilder
+                .withArgName("ssl_protocol")
+                .hasOptionalArg()
+                .withDescription(
+                "Output ssl protocol, e.g.SSLv3, TLSv1")
+                .create(OUTPUT_SSL_PROTOCOL);
+            options.addOption(outputSSLProtocol);
+
             Option tcf = OptionBuilder
                 .withArgName("String")
                 .hasArg()
@@ -1331,6 +1390,28 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 }
             }
+
+            if (cmdline.hasOption(OUTPUT_SSL_PROTOCOL)) {
+                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
+                if (arg == null || arg.equalsIgnoreCase("SSLv3")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSLv3");
+                } else if(arg.equalsIgnoreCase("SSLv2")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSLv2");
+                } else if(arg.equalsIgnoreCase("SSL")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSL");
+                } else if(arg.equalsIgnoreCase("TLSv1")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1");
+                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.1");
+                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.2");
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL_PROTOCOL
+                                    + ": " + arg);
+                }
+            }
+
             if (cmdline.hasOption(INPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(INPUT_USERNAME);
                 conf.set(MarkLogicConstants.INPUT_USERNAME, username);
@@ -1374,6 +1455,28 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 }
             }
+
+            if (cmdline.hasOption(INPUT_SSL_PROTOCOL)) {
+                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
+                if (arg == null || arg.equalsIgnoreCase("SSLv3")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSLv3");
+                } else if(arg.equalsIgnoreCase("SSLv2")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSLv2");
+                } else if(arg.equalsIgnoreCase("SSL")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSL");
+                } else if(arg.equalsIgnoreCase("TLSv1")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1");
+                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.1");
+                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.2");
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL_PROTOCOL
+                                    + ": " + arg);
+                }
+            }
+
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
                 conf.set(MarkLogicConstants.TEMPORAL_COLLECTION, tempColl);
@@ -1820,6 +1923,12 @@ public enum Command implements ConfigConstants {
             .withDescription("Use SSL for encryted communication")
             .create(SSL);
         options.addOption(ssl);
+        Option ssl_protocol = OptionBuilder
+            .withArgName(SSL_PROTOCOL)
+            .hasOptionalArg()
+            .withDescription("SSL protocol, e.g. SSLv3, TLSv1")
+            .create(SSL_PROTOCOL);
+        options.addOption(ssl_protocol);
     }
 
     static void configCopyOptions(Options options) {
