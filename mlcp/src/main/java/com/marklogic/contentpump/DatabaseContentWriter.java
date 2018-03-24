@@ -241,8 +241,6 @@ public class DatabaseContentWriter<VALUE> extends
                         stmtCounts[sid]++;
                         if (suc) { 
                             commitUris[sid].add(key);
-                        } else {
-                            failed++;
                         }
                     }
                 }
