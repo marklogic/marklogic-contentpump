@@ -261,9 +261,6 @@ public class DatabaseContentWriter<VALUE> extends
                 if (propertyUris != null) {
                     boolean suc = setBatchProperties(propertyUris[fId], propertyXmlString[fId], sessions[sid]);
                     stmtCounts[sid]++;
-                    if (!suc) {
-                        failed = failed + counts[fId];
-                    }
                 } else {
                     for (int i = 0; i < counts[fId]; i++) {
                         DocumentMetadata m = metadatas[fId][i].getMeta();
@@ -275,8 +272,6 @@ public class DatabaseContentWriter<VALUE> extends
                             stmtCounts[sid]++;
                             if (suc) {
                                 commitUris[sid].add(key);
-                            } else {
-                                failed++;
                             }
                         }
                     }
@@ -341,9 +336,6 @@ public class DatabaseContentWriter<VALUE> extends
 
                             boolean suc = setBatchProperties( propertyRemainder, propertyXmlStringRemainder, sessions[sid]);
                             stmtCounts[sid]++;
-                            if (!suc) {
-                                failed = failed + counts[i];
-                            }
                         }
                     }
                     else { //non-batch insert props
