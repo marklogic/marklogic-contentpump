@@ -1181,7 +1181,7 @@ public enum Command implements ConfigConstants {
                  .withArgName("ssl_protocol")
                  .hasOptionalArg()
                  .withDescription(
-                 "Input ssl protocol, e.g.SSLv3, TLSv1")
+                 "Input ssl protocol, e.g. SSL, TLSv1.2")
                  .create(INPUT_SSL_PROTOCOL);
             options.addOption(inputSSLProtocol);
 
