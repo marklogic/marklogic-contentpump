@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page xml:lang="en" xmlns="http://www.mediawiki.org/xml/export-0.4/">
+    <title>International Atomic Time</title>
+    <id>334</id>
+    <revision>
+      <id>320746946</id>
+      <timestamp>2009-10-19T05:53:42Z</timestamp>
+      <contributor>
+        <username>Shadowjams</username>
+        <id>8786164</id>
+      </contributor>
+      <minor/>
+      <comment>
+<p>/* Operation */put xtrnl links in text into references, other cleanup using <a href="Project:AutoWikiBrowser" title="Project:AutoWikiBrowser">AWB</a></p></comment>
+      <text xml:space="preserve">
+<p>{{Refimprove}}</p>
+<p><b>International Atomic Time</b> (<b><a class="externallink" href="http://www.bipm.org/en/scientific/tai/tai.html" rel="nofollow" title="http://www.bipm.org/en/scientific/tai/tai.html">TAI</a></b>, from the <a href="French_language" title="French language">French</a> name <b>Temps Atomique International</b>) is a high-precision atomic <a href="Coordinate_time" title="coordinate time">coordinate</a> <a href="Time_standard" title="time standard">time standard</a> based on the notional passage of <a href="Proper_time" title="proper time">proper time</a> on <a href="Earth" title="Earth">Earth</a>'s <a href="Geoid" title="geoid">geoid</a>.  It is the principal realisation of <a href="Terrestrial_Time" title="Terrestrial Time">Terrestrial Time</a>, and the basis for <a href="Coordinated_Universal_Time" title="Coordinated Universal Time">Coordinated Universal Time</a> (UTC) which is used for civil timekeeping all over the Earth's surface. {{As of}}, TAI was exactly 34 seconds ahead of UTC: an initial difference of 10 seconds at the start of 1972, plus 24 <a href="Leap_second" title="leap second">leap seconds</a> in UTC since 1972; the last leap second was added on December 31, 2008.<sup id="_ref-tai-utc.dat_a" class="reference"><a href="#_note-tai-utc.dat" title="">[1]</a></sup><sup id="_ref-Bulletin_C_36_a" class="reference"><a href="#_note-Bulletin_C_36" title="">[2]</a></sup></p>
+<p>Time coordinates on the TAI scales are conventionally specified using traditional means of specifying days, carried over from non-uniform time standards based on the rotation of the Earth. Specifically, both <a href="Julian_Date" title="Julian Date">Julian Dates</a> and the <a href="Gregorian_calendar" title="Gregorian calendar">Gregorian calendar</a> are used.  TAI in this form was synchronised with <a href="Universal_Time" title="Universal Time">Universal Time</a> at the beginning of 1958, and the two have drifted apart ever since, due to the changing motion of the Earth.</p>
+<table id="toc" class="toc" summary="Contents">
+<tr>
+<td>
+<div id="toctitle">
+<h2>Contents</h2>
+</div>
+<ul>
+<ul>
+<li class="toclevel-1"><a href="#Operation">Operation</a>
+</li>
+<li class="toclevel-1"><a href="#History">History</a>
+</li>
+<li class="toclevel-1"><a href="#See_also">See also</a>
+</li>
+<li class="toclevel-1"><a href="#References">References</a>
+</li>
+<li class="toclevel-1"><a href="#External_links">External links</a>
+</li>
+</ul>
+</ul></td></tr></table><hr/>
+<a id="Operation" name="Operation"/><h2>Operation</h2>
+
+<p>TAI as a <a href="Frequency" title="frequency">frequency</a> standard is a weighted average of the time kept by about 300 <a href="Atomic_clock" title="atomic clock">atomic clocks</a> in over 50 national laboratories worldwide. The clocks are compared using satellites.<sup id="_ref-3" class="reference"><a href="#_note-3" title="">[3]</a></sup>  Many of these are <a href="Caesium" title="caesium">caesium</a> atomic clocks, which are the standard by which the <a href="SI" title="SI">SI</a> <a href="Second" title="second">second</a> is defined.  Due to the averaging it is far more stable than any clock would be alone.</p>
+<p>The participating institutions each broadcast, in real time (in the <a href="Present" title="present">present</a>), a frequency signal with <a href="Time_code" title="time code">time codes</a>, which is their estimate of TAI.  Time codes are usually published in the form of UTC. The better laboratories' signals are mutually synchronised to within less than 10<sup>−7</sup> s, but there are outliers up to 10<sup>−5</sup> s out.  These time scales are denoted in the form <i>TAI(NPL)</i> (<i>UTC(NPL)</i> for the UTC form), where <i>NPL</i> in this case identifies the <a href="National_Physical_Laboratory%2C_UK" title="National Physical Laboratory, UK">National Physical Laboratory, UK</a>.  Some laboratories also publish their own atomic time scale, denoted in the form <i>TA(USNO)</i> (<i>USNO</i> identifies the <a href="United_States_Naval_Observatory" title="United States Naval Observatory">United States Naval Observatory</a>).</p>
+<p>The clocks at different institutions are regularly compared against each other.  The <a href="International_Bureau_of_Weights_and_Measures" title="International Bureau of Weights and Measures">International Bureau of Weights and Measures</a> (BIPM) combines these measurements to retrospectively calculate the weighted average that forms the most stable time scale possible.  This combined time scale is published monthly in <a class="externallink" href="ftp://ftp2.bipm.fr/pub/tai/publication/cirt/" rel="nofollow" title="ftp://ftp2.bipm.fr/pub/tai/publication/cirt/">Circular T</a>, and is the <a href="Canonical" title="canonical">canonical</a> TAI.  This time scale is expressed in the form of tables of differences UTC-UTC(<i>x</i>) and TAI-TA(<i>x</i>), for each participating institution <i>x</i>.</p>
+<p>Errors in publication may be corrected by issuing a revision of the faulty Circular T or by errata in a subsequent Circular T.  Aside from this, once published in Circular T the TAI scale is not revised.  In hindsight it is possible to discover errors in TAI, and to make better estimates of the true proper time scale.  Doing so does not create another version of TAI; it is instead considered to be creating a better realisation of <a href="Terrestrial_Time" title="Terrestrial Time">Terrestrial Time</a> (TT).</p>
+<a id="History" name="History"/><h2>History</h2>
+<p>Atomic timekeeping services started experimentally in 1955, using the first caesium atomic clock at the National Physical Laboratory, UK (NPL).  The first formalised atomic time scale was the <i>A.1</i> scale defined by USNO in 1959.  A.1 was defined by an <a href="Epoch_(reference_date)" title="epoch (reference date)">epoch</a> at the beginning of 1958: it was set to read Julian Date 2436204.5 (1958-01-01T00:00:00) at the <a href="UT2" title="UT2">UT2</a> instant JD 2436204.5 (1958-01-01T00:00:00) as calculated at USNO.  This synchronisation was inevitably imperfect, depending as it did on the <a href="Astronomy" title="astronomy">astronomical</a> realisation of UT2.  At the time, UT2 as published by various observatories differed by several <a href="Centisecond" title="centisecond">centiseconds</a>.  A.1 was extrapolated backwards to 1956.</p>
+<p>In 1961, the <a href="International_Time_Bureau" title="International Time Bureau">Bureau International de l'Heure</a> (BIH) (later superseded by the BIPM and the IERS) constructed an atomic time scale named <i>AM</i> based on three atomic clocks.  The clocks were compared by listening to radio <a href="Time_signal" title="time signal">time signals</a> based on them.  The BIH's time scale was synchronised with A.1's epoch, and extrapolated back to 1955 using time signals from the first caesium clock at NPL.  This time scale was soon renamed from AM to <i>A3</i>.</p>
+<p>Also in 1961, UTC began.  UTC is a discontinuous time scale composed from segments that are linear transformations of atomic time, the discontinuities being arranged so that UTC approximates <a href="UT1" title="UT1">UT1</a>.  This was a <a href="Compromise" title="compromise">compromise</a> arrangement for a broadcast time scale: a linear transformation of the BIH's atomic time meant that the time scale was stable and internationally synchronised, while approximating UT1 means that tasks such as <a href="Navigation" title="navigation">navigation</a> which require a source of Universal Time continue to be well served by public time broadcasts.</p>
+<p>In 1967 the SI second was redefined in terms of the frequency supplied by a caesium atomic clock.</p>
+<p>More clocks were added to the A3 time scale from 1967, and it was renamed to <i>TA</i>.  Finally in 1971 it was renamed <i>TAI</i>.</p>
+<p>In the 1970s, it became clear that the clocks participating in TAI were ticking at different rates due to <a href="Gravitational_time_dilation" title="gravitational time dilation">gravitational time dilation</a>, and the combined TAI scale therefore corresponded to an average of the <a href="Altitude" title="altitude">altitudes</a> of the various clocks.  Starting from Julian Date 2443144.5 (1977-01-01T00:00:00), corrections were applied to the output of all participating clocks, so that TAI would correspond to proper time at <a href="Mean_sea_level" title="mean sea level">mean sea level</a> (the geoid).  Because the clocks had been on average well above sea level, this meant that TAI slowed down, by about 10<sup>−12</sup>.  The former uncorrected time scale continues to be published, under the name <i>EAL</i> (<i>Echelle Atomique Libre</i>, meaning <i>Free Atomic Scale</i>).</p>
+<p>The instant that the gravitational correction started to be applied serves as the epoch for <a href="Barycentric_Coordinate_Time" title="Barycentric Coordinate Time">Barycentric Coordinate Time</a> (TCB), <a href="Geocentric_Coordinate_Time" title="Geocentric Coordinate Time">Geocentric Coordinate Time</a> (TCG), and Terrestrial Time (TT).  All three of these time scales were defined to read JD 2443144.5003725 (1977-01-01T00:00:32.184) exactly at that instant.  (The offset is to provide continuity with the older <a href="Ephemeris_Time" title="Ephemeris Time">Ephemeris Time</a>.)  TAI was henceforth a realisation of TT, with the equation TT(TAI) = TAI + 32.184 s.</p>
+<p>In the 1990s, annual periodic variations in the rate of some clocks were traced to <a href="Blackbody_radiation" title="blackbody radiation">blackbody radiation</a> that varies with the ambient <a href="Temperature" title="temperature">temperature</a>.  It became clear that a correction for this was required.  Accordingly, in 1997 the BIPM declared that the definition of the SI second referred to a caesium atom at rest and at <a href="Absolute_zero" title="absolute zero">absolute zero</a> temperature.  Temperature corrections were implemented in TAI from 1995 to 1998, speeding TAI up by about 10<sup>−14.3</sup>.</p>
+<a id="See_also" name="See_also"/><h2>See also</h2>
+
+
+<ul>
+<li><a href="Time_and_frequency_transfer" title="Time and frequency transfer">Time and frequency transfer</a></li>
+<li><a href="Clock_synchronization" title="Clock synchronization">Clock synchronization</a></li>
+<li><a href="Network_Time_Protocol" title="Network Time Protocol">Network Time Protocol</a> (used to disseminate TAI in the form of UTC)</li>
+<li><a href="Precision_Time_Protocol" title="Precision Time Protocol">Precision Time Protocol</a>, a related though separate technology</li>
+<li><a href="Magneto-optical_trap" title="Magneto-optical trap">Magneto-optical trap</a></li></ul>
+
+<a id="References" name="References"/><h2>References</h2>
+<p>{{reflist}}</p>
+<a id="External_links" name="External_links"/><h2>External links</h2>
+
+<ul>
+<li><a class="externallink" href="http://www.bipm.fr/enus/5_Scientific/c_time/time_1.html" rel="nofollow" title="http://www.bipm.fr/enus/5_Scientific/c_time/time_1.html"><i>Bureau International des Poids et Mesures: TAI</i></a></li>
+<li><a class="externallink" href="http://www.npl.co.uk/time/" rel="nofollow" title="http://www.npl.co.uk/time/"><i>Time and Frequency Section - National Physical Laboratory, UK</i></a></li>
+<li><a class="externallink" href="http://hpiers.obspm.fr" rel="nofollow" title="http://hpiers.obspm.fr">IERS website</a></li>
+<li><a class="externallink" href="http://www.boulder.nist.gov/timefreq/general/faq.htm" rel="nofollow" title="http://www.boulder.nist.gov/timefreq/general/faq.htm"><i>NIST Time and Frequency FAQs</i></a></li>
+<li><a class="externallink" href="http://www.ucolick.org/~sla/leapsecs/timescales.html" rel="nofollow" title="http://www.ucolick.org/~sla/leapsecs/timescales.html">History of time scales</a></li>
+<li><a class="externallink" href="http://physics.nist.gov/TechAct/Div847/div847.html" rel="nofollow" title="http://physics.nist.gov/TechAct/Div847/div847.html"><i>NIST cesium fountain standard</i></a></li>
+<li><a class="externallink" href="http://inms-ienm.nrc-cnrc.gc.ca/research/optical_frequency_projects_e.html#femtosecond" rel="nofollow" title="http://inms-ienm.nrc-cnrc.gc.ca/research/optical_frequency_projects_e.html#femtosecond">Optical frequency comb for metrology and timekeeping</a></li>
+<li><a class="externallink" href="http://jjy.nict.go.jp/index-e.html" rel="nofollow" title="http://jjy.nict.go.jp/index-e.html"><i>Japan Standard Time Project, NICT, Japan</i></a></li></ul>
+
+<p>{{Time Topics}}
+{{Time measurement and standards}}</p>
+<p><a href="http://cs.wikipedia.org/wiki/Mezin%C3%A1rodn%C3%AD_atomov%C3%BD_%C4%8Das">cs:Mezinárodní atomový čas</a>
+<a href="http://de.wikipedia.org/wiki/Internationale_Atomzeit">de:Internationale Atomzeit</a>
+<a href="http://es.wikipedia.org/wiki/Tiempo_At%C3%B3mico_Internacional">es:Tiempo Atómico Internacional</a>
+<a href="http://eo.wikipedia.org/wiki/Tempo_atoma_internacia">eo:Tempo atoma internacia</a>
+<a href="http://fr.wikipedia.org/wiki/Temps_atomique_international">fr:Temps atomique international</a>
+<a href="http://ko.wikipedia.org/wiki/%EA%B5%AD%EC%A0%9C%EC%9B%90%EC%9E%90%EC%8B%9C">ko:국제원자시</a>
+<a href="http://id.wikipedia.org/wiki/Waktu_Atom_Internasional">id:Waktu Atom Internasional</a>
+<a href="http://it.wikipedia.org/wiki/Tempo_atomico_internazionale">it:Tempo atomico internazionale</a>
+<a href="http://he.wikipedia.org/wiki/%D7%94%D7%96%D7%9E%D7%9F_%D7%94%D7%90%D7%98%D7%95%D7%9E%D7%99_%D7%94%D7%91%D7%99%D7%A0%D7%9C%D7%90%D7%95%D7%9E%D7%99">he:הזמן האטומי הבינלאומי</a>
+<a href="http://ja.wikipedia.org/wiki/%E5%9B%BD%E9%9A%9B%E5%8E%9F%E5%AD%90%E6%99%82">ja:国際原子時</a>
+<a href="http://pl.wikipedia.org/wiki/Mi%C4%99dzynarodowy_czas_atomowy">pl:Międzynarodowy czas atomowy</a>
+<a href="http://pt.wikipedia.org/wiki/Tempo_At%C3%B4mico_Internacional">pt:Tempo Atômico Internacional</a>
+<a href="http://ro.wikipedia.org/wiki/Timpul_atomic_interna%C5%A3ional">ro:Timpul atomic internaţional</a>
+<a href="http://ru.wikipedia.org/wiki/%D0%9C%D0%B5%D0%B6%D0%B4%D1%83%D0%BD%D0%B0%D1%80%D0%BE%D0%B4%D0%BD%D0%BE%D0%B5_%D0%B0%D1%82%D0%BE%D0%BC%D0%BD%D0%BE%D0%B5_%D0%B2%D1%80%D0%B5%D0%BC%D1%8F">ru:Международное атомное время</a>
+<a href="http://sk.wikipedia.org/wiki/Medzin%C3%A1rodn%C3%BD_at%C3%B3mov%C3%BD_%C4%8Das">sk:Medzinárodný atómový čas</a>
+<a href="http://sl.wikipedia.org/wiki/Mednarodni_atomski_%C4%8Das">sl:Mednarodni atomski čas</a>
+<a href="http://sv.wikipedia.org/wiki/Internationell_atomtid">sv:Internationell atomtid</a>
+<a href="http://vi.wikipedia.org/wiki/Th%E1%BB%9Di_gian_Nguy%C3%AAn_t%E1%BB%AD_Qu%E1%BB%91c_t%E1%BA%BF">vi:Thời gian Nguyên tử Quốc tế</a>
+<a href="http://zh.wikipedia.org/wiki/%E5%8E%9F%E5%AD%90%E6%97%B6">zh:原子时</a></p></text>
+    </revision>
+  </page>
