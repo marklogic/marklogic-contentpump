@@ -61,7 +61,8 @@ public class DatabaseContentWriter<VALUE> extends
 
     private URIMetadata[][] metadatas;
     protected XdmValue[][] propertyUris = null;
-    protected XdmValue[][] propertyXmlString = null;
+    protected XdmValue[][] propertyXmlStrings = null;
+    protected int[] propertyCounts = null;
 
     protected boolean isCopyProps;
     protected boolean isCopyPerms;
@@ -78,26 +79,16 @@ public class DatabaseContentWriter<VALUE> extends
             Map<String, ContentSource> hostSourceMap, boolean fastLoad,
             AssignmentManager am) {
         super(conf, hostSourceMap, fastLoad, am);
-
-        if (countBased) {
-            metadatas = new URIMetadata[1][batchSize];
-        } else {
-            metadatas = new URIMetadata[forestIds.length][batchSize];
-        }
+        
+        int arraySize = countBased ? 1 : forestIds.length;
+        metadatas = new URIMetadata[arraySize][batchSize];
         isCopyProps = conf.getBoolean(CONF_COPY_PROPERTIES, true);
         isCopyPerms = conf.getBoolean(CONF_COPY_PERMISSIONS, true);
 
         if (effectiveVersion >= BATCH_MIN_VERSION && isCopyProps) {
-            if (countBased) {
-                // Allocate space for properties batch insert
-                propertyUris = new XdmValue[1][batchSize];
-                propertyXmlString = new XdmValue[1][batchSize];
-
-            } else {
-                // Allocate space for properties batch insert
-                propertyUris = new XdmValue[forestIds.length][batchSize];
-                propertyXmlString = new XdmValue[forestIds.length][batchSize];
-            }
+            propertyUris = new XdmValue[arraySize][batchSize];
+            propertyXmlStrings = new XdmValue[arraySize][batchSize];
+            propertyCounts = new int[arraySize];
         }
     }
 
@@ -222,17 +213,17 @@ public class DatabaseContentWriter<VALUE> extends
         if (meta == null || !meta.isNakedProps()) {
             // add new content
             forestContents[fId][counts[fId]] = content;
-            //to handle property batch insert
-            if (propertyUris != null) {
-                propertyUris[fId][counts[fId]] = ValueFactory.newValue(ValueType.XS_STRING, uri );
-                if (meta != null && meta.getProperties() != null ) { // this return a string
-                    propertyXmlString[fId][counts[fId]] = ValueFactory.newValue(ValueType.XS_STRING, meta.getProperties());
-                }else{
-                    propertyXmlString[fId][counts[fId]] = ValueFactory.newValue(ValueType.XS_STRING, "");
-                }
+            // add properties
+            if (propertyUris != null && meta != null && 
+                    meta.getProperties() != null) {
+                propertyUris[fId][propertyCounts[fId]] = 
+                        ValueFactory.newValue(ValueType.XS_STRING, uri);
+                propertyXmlStrings[fId][propertyCounts[fId]] = 
+                        ValueFactory.newValue(ValueType.XS_STRING, 
+                                meta.getProperties());
+                propertyCounts[fId]++;
                 counts[fId]++;
-            }
-            else {
+            } else {
                 metadatas[fId][counts[fId]++] = new URIMetadata(uri, meta);
             }
         } else if (isCopyProps) { // naked properties
@@ -259,7 +250,7 @@ public class DatabaseContentWriter<VALUE> extends
             stmtCounts[sid]++;
             if (isCopyProps) { //prop batch insert
                 if (propertyUris != null) {
-                    boolean suc = setBatchProperties(propertyUris[fId], propertyXmlString[fId], sessions[sid]);
+                    setBatchProperties(fId, sessions[sid]);
                     stmtCounts[sid]++;
                 } else {
                     for (int i = 0; i < counts[fId]; i++) {
@@ -325,20 +316,11 @@ public class DatabaseContentWriter<VALUE> extends
                     if (!isCopyProps) {
                         continue;
                     }
-                    if (propertyUris != null) {
-                        if( counts[i] > 0 ){ // clean up the batch queue when necessary
-                            XdmValue[] propertyRemainder = new XdmValue[counts[i]];
-                            XdmValue[] propertyXmlStringRemainder = new XdmValue[counts[i]];
-                            System.arraycopy(propertyUris[i], 0, propertyRemainder, 0,
-                                    counts[i]);
-                            System.arraycopy(propertyXmlString[i], 0, propertyXmlStringRemainder, 0,
-                                    counts[i]);
-
-                            boolean suc = setBatchProperties( propertyRemainder, propertyXmlStringRemainder, sessions[sid]);
-                            stmtCounts[sid]++;
-                        }
-                    }
-                    else { //non-batch insert props
+                    if (propertyUris != null && propertyCounts[i] > 0) {
+                        setBatchProperties(i, sessions[sid]);
+                        stmtCounts[sid]++;
+                    } else if (propertyUris == null) { 
+                        // non-batch insert props
                         for (int j = 0; j < counts[i]; j++) {
                             DocumentMetadata m = metadatas[i][j].getMeta();
                             String u = metadatas[i][j].getUri();
@@ -380,8 +362,9 @@ public class DatabaseContentWriter<VALUE> extends
                 MarkLogicCounter.OUTPUT_RECORDS_FAILED).increment(failed);
     }
 
-    protected static boolean setBatchProperties( XdmValue[] uriArray, 
-            XdmValue[] xmlStringArray, Session s ) {
+    protected boolean setBatchProperties(int i, Session s) {
+        if (i == 0) return true;
+        
         String query = XQUERY_VERSION_1_0_ML
                 + "declare variable $URI as xs:string* external;\n" +
                 "declare variable $XML-STRING as xs:string* external;\n" +
@@ -394,6 +377,17 @@ public class DatabaseContentWriter<VALUE> extends
             LOG.debug(query);
         }
         AdhocQuery req = s.newAdhocQuery(query);
+        
+        XdmValue[] uriArray = propertyUris[i];
+        XdmValue[] xmlStringArray = propertyXmlStrings[i]; 
+        if (i < batchSize) {
+            uriArray = new XdmValue[propertyCounts[i]];
+            xmlStringArray = new XdmValue[propertyCounts[i]];
+            System.arraycopy(propertyUris[i], 0, 
+                    uriArray, 0, propertyCounts[i]);
+            System.arraycopy(propertyXmlStrings[i], 0, 
+                    xmlStringArray, 0, propertyCounts[i]);
+        }
 
         req.setNewVariables(new XName("URI"), uriArray);
         req.setNewVariables(new XName("XML-STRING"), xmlStringArray);
