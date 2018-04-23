@@ -363,7 +363,7 @@ public class DatabaseContentWriter<VALUE> extends
     }
 
     protected boolean setBatchProperties(int i, Session s) {
-        if (i == 0) return true;
+        if (propertyCounts[i] == 0) return true;
         
         String query = XQUERY_VERSION_1_0_ML
                 + "declare variable $URI as xs:string* external;\n" +
@@ -380,7 +380,7 @@ public class DatabaseContentWriter<VALUE> extends
         
         XdmValue[] uriArray = propertyUris[i];
         XdmValue[] xmlStringArray = propertyXmlStrings[i]; 
-        if (i < batchSize) {
+        if (propertyCounts[i] < batchSize) {
             uriArray = new XdmValue[propertyCounts[i]];
             xmlStringArray = new XdmValue[propertyCounts[i]];
             System.arraycopy(propertyUris[i], 0, 
