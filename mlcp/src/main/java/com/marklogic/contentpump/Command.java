@@ -652,12 +652,8 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(SSL_PROTOCOL)) {
                 String arg = cmdline.getOptionValue(SSL_PROTOCOL);
-                if (arg.equalsIgnoreCase("SSLv3")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSLv3");
-                } else if(arg.equalsIgnoreCase("SSLv2")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSLv2");
-                } else if(arg.equalsIgnoreCase("SSL")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSL");
+                if (arg.equalsIgnoreCase("TLS")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLS");
                 } else if(arg.equalsIgnoreCase("TLSv1")) {
                     conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1");
                 } else if(arg.equalsIgnoreCase("TLSv1.1")) {
@@ -1072,12 +1068,8 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(SSL_PROTOCOL)) {
                 String arg = cmdline.getOptionValue(SSL_PROTOCOL);
-                if (arg.equalsIgnoreCase("SSLv3")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSLv3");
-                } else if(arg.equalsIgnoreCase("SSLv2")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSLv2");
-                } else if(arg.equalsIgnoreCase("SSL")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSL");
+                if(arg.equalsIgnoreCase("TLS")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLS");
                 } else if(arg.equalsIgnoreCase("TLSv1")) {
                     conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1");
                 } else if(arg.equalsIgnoreCase("TLSv1.1")) {
@@ -1182,7 +1174,7 @@ public enum Command implements ConfigConstants {
                  .withArgName("string")
                  .hasArg()
                  .withDescription(
-                 "Input ssl protocol, e.g. SSL, TLSv1.2")
+                 "Input ssl protocol, e.g. TLS, TLSv1.2")
                  .create(INPUT_SSL_PROTOCOL);
             options.addOption(inputSSLProtocol);
 
@@ -1236,7 +1228,7 @@ public enum Command implements ConfigConstants {
                 .withArgName("string")
                 .hasArg()
                 .withDescription(
-                "Output ssl protocol, e.g.SSLv3, TLSv1")
+                "Output ssl protocol, e.g.TLS, TLSv1")
                 .create(OUTPUT_SSL_PROTOCOL);
             options.addOption(outputSSLProtocol);
 
@@ -1394,12 +1386,8 @@ public enum Command implements ConfigConstants {
 
             if (cmdline.hasOption(OUTPUT_SSL_PROTOCOL)) {
                 String arg = cmdline.getOptionValue(SSL_PROTOCOL);
-                if (arg.equalsIgnoreCase("SSLv3")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSLv3");
-                } else if(arg.equalsIgnoreCase("SSLv2")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSLv2");
-                } else if(arg.equalsIgnoreCase("SSL")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "SSL");
+                if (arg.equalsIgnoreCase("TLS")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLS");
                 } else if(arg.equalsIgnoreCase("TLSv1")) {
                     conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1");
                 } else if(arg.equalsIgnoreCase("TLSv1.1")) {
@@ -1459,12 +1447,8 @@ public enum Command implements ConfigConstants {
 
             if (cmdline.hasOption(INPUT_SSL_PROTOCOL)) {
                 String arg = cmdline.getOptionValue(SSL_PROTOCOL);
-                if (arg.equalsIgnoreCase("SSLv3")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSLv3");
-                } else if(arg.equalsIgnoreCase("SSLv2")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSLv2");
-                } else if(arg.equalsIgnoreCase("SSL")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "SSL");
+                if (arg.equalsIgnoreCase("TLS")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLS");
                 } else if(arg.equalsIgnoreCase("TLSv1")) {
                     conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1");
                 } else if(arg.equalsIgnoreCase("TLSv1.1")) {
@@ -1927,7 +1911,7 @@ public enum Command implements ConfigConstants {
         Option ssl_protocol = OptionBuilder
             .withArgName("string")
             .hasArg()
-            .withDescription("SSL protocol, e.g. SSLv3, TLSv1")
+            .withDescription("SSL protocol, e.g. TLS, TLSv1")
             .create(SSL_PROTOCOL);
         options.addOption(ssl_protocol);
     }
