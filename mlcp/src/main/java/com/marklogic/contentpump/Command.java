@@ -1385,7 +1385,7 @@ public enum Command implements ConfigConstants {
             }
 
             if (cmdline.hasOption(OUTPUT_SSL_PROTOCOL)) {
-                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
+                String arg = cmdline.getOptionValue(OUTPUT_SSL_PROTOCOL);
                 if (arg.equalsIgnoreCase("TLS")) {
                     conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLS");
                 } else if(arg.equalsIgnoreCase("TLSv1")) {
@@ -1396,8 +1396,8 @@ public enum Command implements ConfigConstants {
                     conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.2");
                 } else {
                     throw new IllegalArgumentException(
-                            "Unrecognized option argument for " + SSL_PROTOCOL
-                                    + ": " + arg);
+                            "Unrecognized option argument for " + 
+                             OUTPUT_SSL_PROTOCOL + ": " + arg);
                 }
             }
 
@@ -1446,7 +1446,7 @@ public enum Command implements ConfigConstants {
             }
 
             if (cmdline.hasOption(INPUT_SSL_PROTOCOL)) {
-                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
+                String arg = cmdline.getOptionValue(INPUT_SSL_PROTOCOL);
                 if (arg.equalsIgnoreCase("TLS")) {
                     conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLS");
                 } else if(arg.equalsIgnoreCase("TLSv1")) {
@@ -1457,8 +1457,8 @@ public enum Command implements ConfigConstants {
                     conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.2");
                 } else {
                     throw new IllegalArgumentException(
-                            "Unrecognized option argument for " + SSL_PROTOCOL
-                                    + ": " + arg);
+                            "Unrecognized option argument for " + 
+                             INPUT_SSL_PROTOCOL + ": " + arg);
                 }
             }
 
