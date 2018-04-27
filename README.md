@@ -21,7 +21,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Release Note
 
-### What's New in mlcp and Hadoop Connector 9.0.4
+### What's New in mlcp and Hadoop Connector 9.0.5
 
 - Support HDP 2.6
 - Performance improvement in mlcp archive import and copy
