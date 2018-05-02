@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2017 MarkLogic Corporation
+ * Copyright 2003-2018 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -78,6 +78,14 @@ public interface MarkLogicConstants {
      * SSL enabled; false is assumed if not set.
      */
     static final String INPUT_USE_SSL = "mapreduce.marklogic.input.usessl";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the SSL protocol which will be used if 
+     * {@link #INPUT_USE_SSL input.ssl} is set to true.
+     */
+    static final String INPUT_SSL_PROTOCOL = 
+        "mapreduce.marklogic.input.sslprotocol";
+
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class implementing 
@@ -477,9 +485,16 @@ public interface MarkLogicConstants {
     static final String OUTPUT_USE_SSL = "mapreduce.marklogic.output.usessl";
     /**
      * The config property name (<code>{@value}</code>)
-     * which, if set, specifies the name of the class implementing 
-     * {@link SslConfigOptions} which will be used if 
+     * which, if set, specifies SSL protocol which will be used if 
      * {@link #OUTPUT_USE_SSL output.usessl} is set to true.
+     */
+    static final String OUTPUT_SSL_PROTOCOL = 
+        "mapreduce.marklogic.output.sslprotocol";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the name of the class implementing
+     * {@link SslConfigOptions} which will be used if
+     * {@link #OUTPUT_SSL_PROTOCOL output.usesslprotocol} is set to SSLv3.
      */
     static final String OUTPUT_SSL_OPTIONS_CLASS = 
         "mapreduce.marklogic.output.ssloptionsclass"; 

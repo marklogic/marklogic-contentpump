@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2017 MarkLogic Corporation
+ * Copyright 2003-2018 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,8 @@ public class InternalUtilities implements MarkLogicConstants {
                         (SslConfigOptions)ReflectionUtils.newInstance(
                                 sslOptionClass, conf);
             } else {
-                inputSslOptions = newTrustAnyoneOptions();
+                String ssl_protocol = conf.get(INPUT_SSL_PROTOCOL, "TLS");
+                inputSslOptions = new TrustAnyoneOptions( ssl_protocol );
             }
             return inputSslOptions;
         }
@@ -166,56 +167,57 @@ public class InternalUtilities implements MarkLogicConstants {
                         (SslConfigOptions)ReflectionUtils.newInstance(
                                 sslOptionClass, conf);
             } else {
-                outputSslOptions = newTrustAnyoneOptions();
+                String ssl_protocol = conf.get(OUTPUT_SSL_PROTOCOL, "SSLv3");
+                outputSslOptions = new TrustAnyoneOptions(ssl_protocol);
             }
             return outputSslOptions;
         }
     }
+    
+    static class TrustAnyoneOptions implements SslConfigOptions {
+        String sslprotocol;
+        public TrustAnyoneOptions(String sslprotocol) {
+            this.sslprotocol = sslprotocol;
+        }
+        @Override
+        public SSLContext getSslContext() throws NoSuchAlgorithmException,
+                KeyManagementException {
+            TrustManager[] trust = new TrustManager[] { new X509TrustManager() {
+                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                    return new X509Certificate[0];
+                }
+                /**
+                 * @throws CertificateException
+                 */
+                public void checkClientTrusted(
+                        java.security.cert.X509Certificate[] certs,
+                        String authType) throws CertificateException {
+                    // no exception means it's okay
+                }
+                /**
+                 * @throws CertificateException
+                 */
+                public void checkServerTrusted(
+                        java.security.cert.X509Certificate[] certs,
+                        String authType) throws CertificateException {
+                    // no exception means it's okay
+                }
+            } };
+            SSLContext sslContext = SSLContext.getInstance(sslprotocol);
+            sslContext.init(null, trust, null);
 
-    private static SslConfigOptions newTrustAnyoneOptions() {
-        return new SslConfigOptions() {
+            return sslContext;
+        }
 
-            @Override
-            public SSLContext getSslContext() 
-                    throws NoSuchAlgorithmException, KeyManagementException {
-                TrustManager[] trust = new TrustManager[] { new X509TrustManager() {
-                    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                        return new X509Certificate[0];
-                    }
-                    /**
-                     * @throws CertificateException
-                     */
-                    public void checkClientTrusted(
-                            java.security.cert.X509Certificate[] certs,
-                            String authType) throws CertificateException {
-                        // no exception means it's okay
-                    }
-                    /**
-                     * @throws CertificateException
-                     */
-                    public void checkServerTrusted(
-                            java.security.cert.X509Certificate[] certs,
-                            String authType) throws CertificateException {
-                        // no exception means it's okay
-                    }
-                } };
-                SSLContext sslContext = SSLContext.getInstance("SSLv3");
-                sslContext.init(null, trust, null);
-                
-                return sslContext;
-            }
+        @Override
+        public String[] getEnabledProtocols() {
+            return null;
+        }
 
-            @Override
-            public String[] getEnabledProtocols() {
-                return null;
-            }
-
-            @Override
-            public String[] getEnabledCipherSuites() {
-                return null;
-            }
-            
-        };
+        @Override
+        public String[] getEnabledCipherSuites() {
+            return null;
+        }
     }
 
     static ContentSource getSecureContentSource(String host, int port,

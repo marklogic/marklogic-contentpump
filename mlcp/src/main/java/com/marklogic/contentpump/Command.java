@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2017 MarkLogic Corporation
+ * Copyright 2003-2018 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public enum Command implements ConfigConstants {
             configRDFGraphOutputOptions(options);
             
 			Option inputFilePath = OptionBuilder
-                .withArgName("path")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("The file system location for input, as a "
                         + "regular expression")
@@ -76,28 +76,28 @@ public enum Command implements ConfigConstants {
             inputFilePath.setRequired(true);
             options.addOption(inputFilePath);
             Option inputFilePattern = OptionBuilder
-                .withArgName("regex pattern")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Matching regex pattern for files found in "
                     + "the input file path")
                 .create(INPUT_FILE_PATTERN);
             options.addOption(inputFilePattern);
             Option aggregateRecordElement = OptionBuilder
-                .withArgName("QName")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Element name in which each document is "
                         + "found")
                 .create(AGGREGATE_RECORD_ELEMENT);
             options.addOption(aggregateRecordElement);
             Option aggregateRecordNamespace = OptionBuilder
-                .withArgName("namespace")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Element namespace in which each document "
                         + "is found")
                 .create(AGGREGATE_RECORD_NAMESPACE);
             options.addOption(aggregateRecordNamespace);
             Option aggregateUriId = OptionBuilder
-                .withArgName("QName")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Deprecated. Name of the first element or attribute "
                         + "within a record element to be used as document URI."
@@ -106,7 +106,7 @@ public enum Command implements ConfigConstants {
                 .create(AGGREGATE_URI_ID);
             options.addOption(aggregateUriId);
             Option inputFileType = OptionBuilder
-                .withArgName("type")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Type of input file.  Valid choices are: "
                     + "aggregates, archive, delimited_text, documents, forest,"
@@ -120,13 +120,13 @@ public enum Command implements ConfigConstants {
                 .create(INPUT_COMPRESSED);
             options.addOption(inputCompressed);
             Option inputCompressionCodec = OptionBuilder
-                .withArgName("codec")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Codec used for compression: ZIP, GZIP")
                 .create(INPUT_COMPRESSION_CODEC);
             options.addOption(inputCompressionCodec);
             Option documentType = OptionBuilder
-                .withArgName("type")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Type of document content. Valid choices: "
                     + "XML, JSON, TEXT, BINARY, and MIXED.  Default type for " 
@@ -136,39 +136,39 @@ public enum Command implements ConfigConstants {
                 .create(DOCUMENT_TYPE);
             options.addOption(documentType);
             Option delimiter = OptionBuilder
-                .withArgName(DELIMITER)
+                .withArgName("character")
                 .hasArg()
                 .withDescription("Delimiter for delimited text.")
                 .create(DELIMITER);
             options.addOption(delimiter);
             Option delimitedUri = OptionBuilder
-                .withArgName("column name")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Deprecated. Delimited uri id for delimited text.")
                 .create(DELIMITED_URI_ID);
             options.addOption(delimitedUri);
             Option delimitedRoot = OptionBuilder
-                .withArgName("root name")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Root element local name of the XML " +
                         "document constructed from one delimited text record.")
                 .create(DELIMITED_ROOT_NAME);
             options.addOption(delimitedRoot);
             Option generateUri = OptionBuilder
-                .withArgName("true, false")
+                .withArgName("true,false")
                 .hasOptionalArg()
                 .withDescription("Enables automatic URI generation for " +
                         "delimited text records.")
                 .create(GENERATE_URI);
             options.addOption(generateUri);
             Option namespace = OptionBuilder
-                .withArgName(NAMESPACE)
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Namespace used for output document.")
                 .create(NAMESPACE);
             options.addOption(namespace);
             Option outputLanguage = OptionBuilder
-                .withArgName("language")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Language name to associate with output "
                 + "documents.  A value of \"en\" indicates that the "
@@ -183,7 +183,7 @@ public enum Command implements ConfigConstants {
                 .create(OUTPUT_CLEANDIR);
             options.addOption(outputCleanDir);
             Option outputDir = OptionBuilder
-                .withArgName("directory")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Output directory in MarkLogic.")
                 .create(OUTPUT_DIRECTORY);
@@ -195,28 +195,28 @@ public enum Command implements ConfigConstants {
                 .create(OUTPUT_FILENAME_AS_COLLECTION);
             options.addOption(outputFilenameCollection);
             Option repairLevel = OptionBuilder
-                .withArgName("level")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Whether to repair documents to make it well "
                         + "formed or throw error.")
                 .create(XML_REPAIR_LEVEL);
             options.addOption(repairLevel);
             Option seqKeyClass = OptionBuilder
-                .withArgName("class name")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Name of class to be used as key to read the "
                         + " input SequenceFile")
                 .create(INPUT_SEQUENCEFILE_KEY_CLASS);
             options.addOption(seqKeyClass);
             Option seqValueClass = OptionBuilder
-                .withArgName("class name")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Name of class to be used as value to read "
                         + "the input SequenceFile")
                 .create(INPUT_SEQUENCEFILE_VALUE_CLASS);
             options.addOption(seqValueClass);
             Option seqValueType = OptionBuilder
-                .withArgName("value type")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Type of the value data returned by the above"
                         + " class.  Valid choices are: Text, BytesWritable, "
@@ -245,15 +245,15 @@ public enum Command implements ConfigConstants {
                 .create(STREAMING);
             options.addOption(streaming);
             Option encoding = OptionBuilder
-                .withArgName("encoding")
-                .hasOptionalArg()
+                .withArgName("string")
+                .hasArg()
                 .withDescription(
                     "The charset encoding to be used by the MarkLogic when "
                         + "loading documents.  The default is \"UTF-8\".")
                 .create(CONTENT_ENCODING);
             options.addOption(encoding);
             Option uriId = OptionBuilder
-                    .withArgName("uri name")
+                    .withArgName("string")
                     .hasArg()
                     .withDescription("A column name in delimited text file "
                             + "or an element name in aggregated XML "
@@ -262,7 +262,7 @@ public enum Command implements ConfigConstants {
                     .create(URI_ID);
             options.addOption(uriId);
             Option dataType = OptionBuilder
-                    .withArgName("data type")
+                    .withArgName("comma list")
                     .hasArg()
                     .withDescription("Comma separated list of column name "
                             + " and data type pairs. 1st to match column name,"
@@ -270,10 +270,11 @@ public enum Command implements ConfigConstants {
                             + "Data type can be String, Number or Boolean.")
                     .create(DATA_TYPE);
             options.addOption(dataType);
-            Option threadsPerSplit = OptionBuilder.withArgName("count")
-                .hasOptionalArg()
-                .withDescription("The number of threads per split")
-                .create(THREADS_PER_SPLIT);
+            Option threadsPerSplit = OptionBuilder
+                    .withArgName("number")
+                    .hasArg()
+                    .withDescription("The number of threads per split")
+                    .create(THREADS_PER_SPLIT);
             options.addOption(threadsPerSplit);
 
             Option tolerateErrors_opt = OptionBuilder
@@ -288,7 +289,7 @@ public enum Command implements ConfigConstants {
             options.addOption(tolerateErrors);
 
             Option rdfMemoryThreshold_opt = OptionBuilder
-                    .withArgName("threshold")
+                    .withArgName("number")
                     .hasArg()
                     .withDescription("Maximum size of an RDF document to be processed in memory")
                     .create(RDF_STREAMING_MEMORY_THRESHOLD);
@@ -297,7 +298,7 @@ public enum Command implements ConfigConstants {
             options.addOption(rdfMemoryThreshold);
 
             Option rdfTriplesPerDoc_opt = OptionBuilder
-                    .withArgName("count")
+                    .withArgName("number")
                     .hasArg()
                     .withDescription("Maximum number of triples per sem:triples document")
                     .create(RDF_TRIPLES_PER_DOCUMENT);
@@ -317,25 +318,25 @@ public enum Command implements ConfigConstants {
             options.addOption(splitInput);
             
             Option df = OptionBuilder
-                .withArgName("String")
+                .withArgName("comma list")
                 .hasArg()
                 .withDescription("Comma-separated list of directories")
                 .create(DIRECTORY_FILTER);
             options.addOption(df);
             Option cf = OptionBuilder
-                .withArgName("String")
+                .withArgName("comma list")
                 .hasArg()
                 .withDescription("Comma-separated list of collections")
                 .create(COLLECTION_FILTER);
             options.addOption(cf);
             Option tf = OptionBuilder
-                .withArgName("String")
+                .withArgName("comma list")
                 .hasArg()
                 .withDescription("Comma-separated list of document types")
                 .create(TYPE_FILTER);
             options.addOption(tf);
             Option tcf = OptionBuilder
-                .withArgName("String")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("temporal collection name")
                 .create(TEMPORAL_COLLECTION);
@@ -649,6 +650,22 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 }
             }
+            if (cmdline.hasOption(SSL_PROTOCOL)) {
+                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
+                if (arg.equalsIgnoreCase("TLS")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLS");
+                } else if(arg.equalsIgnoreCase("TLSv1")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1");
+                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.1");
+                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.2");
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL_PROTOCOL
+                                    + ": " + arg);
+                }
+            }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
                 conf.set(MarkLogicConstants.TEMPORAL_COLLECTION, tempColl);
@@ -877,13 +894,13 @@ public enum Command implements ConfigConstants {
             configRedactionOptions(options);
 
             Option outputType = OptionBuilder
-                .withArgName("type")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("export output type")
                 .create(OUTPUT_TYPE);
             options.addOption(outputType);
             Option outputFilePath = OptionBuilder
-                .withArgName("path")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("export output file path")
                 .create(OUTPUT_FILE_PATH);
@@ -909,8 +926,8 @@ public enum Command implements ConfigConstants {
                 .create(SNAPSHOT);
             options.addOption(snapshot);
             Option encoding = OptionBuilder
-                .withArgName("encoding")
-                .hasOptionalArg()
+                .withArgName("string")
+                .hasArg()
                 .withDescription(
                     "The charset encoding to be used by the MarkLogic when "
                         + "exporting documents").create(CONTENT_ENCODING);
@@ -1049,6 +1066,23 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 } 
             }
+            if (cmdline.hasOption(SSL_PROTOCOL)) {
+                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
+                if(arg.equalsIgnoreCase("TLS")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLS");
+                } else if(arg.equalsIgnoreCase("TLSv1")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1");
+                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.1");
+                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.2");
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + SSL_PROTOCOL
+                                    + ": " + arg);
+                }
+            }
+
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
                 conf.set(MarkLogicConstants.MAX_SPLIT_SIZE, maxSize);
@@ -1091,19 +1125,19 @@ public enum Command implements ConfigConstants {
             configRedactionOptions(options);
             
             Option inputUsername = OptionBuilder
-                .withArgName("username")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("User name of the input MarkLogic Server")
                 .create(INPUT_USERNAME);
             options.addOption(inputUsername);
             Option inputPassword = OptionBuilder
-                .withArgName("password")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Password of the input MarkLogic Server")
                 .create(INPUT_PASSWORD);
             options.addOption(inputPassword);
             Option inputHost = OptionBuilder
-                .withArgName("host")
+                .withArgName("comma list")
                 .hasArg()
                 .withDescription("Comma-separated list of hosts of the input "
                         + "MarkLogic Server")
@@ -1111,44 +1145,53 @@ public enum Command implements ConfigConstants {
             inputHost.setRequired(true);
             options.addOption(inputHost);
             Option inputPort = OptionBuilder
-                .withArgName("port")
+                .withArgName("number")
                 .hasArg()
                 .withDescription("Port of the input MarkLogic Server")
                 .create(INPUT_PORT);
             options.addOption(inputPort);
             Option inputDB = OptionBuilder
-                .withArgName("database")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Database of the input MarkLogic Server")
                 .create(INPUT_DATABASE);
             options.addOption(inputDB);
             Option restrictInputHosts = OptionBuilder
-                .withArgName("restrict hosts")
+                .withArgName("true,false")
                 .hasOptionalArg()
                 .withDescription("Whether to restrict the input hosts mlcp connects to")
                 .create(RESTRICT_INPUT_HOSTS);
             options.addOption(restrictInputHosts);
             Option inputSSL = OptionBuilder
-                 .withArgName("ssl")
+                 .withArgName("true,false")
                  .hasOptionalArg()
                  .withDescription(
                  "Use ssl to encrypt communication with input MarkLogic Server")
                  .create(INPUT_SSL);
             options.addOption(inputSSL);
+
+            Option inputSSLProtocol = OptionBuilder
+                 .withArgName("string")
+                 .hasArg()
+                 .withDescription(
+                 "Input ssl protocol, e.g. TLS, TLSv1.2")
+                 .create(INPUT_SSL_PROTOCOL);
+            options.addOption(inputSSLProtocol);
+
             Option outputUsername = OptionBuilder
-                .withArgName("username")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("User Name of the output MarkLogic Server")
                 .create(OUTPUT_USERNAME);
             options.addOption(outputUsername);
             Option outputPassword = OptionBuilder
-                .withArgName("password")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Password of the output MarkLogic Server")
                 .create(OUTPUT_PASSWORD);
             options.addOption(outputPassword);
             Option outputHost = OptionBuilder
-                .withArgName("host")
+                .withArgName("comma list")
                 .hasArg()
                 .withDescription("Comma-separated list of hosts of the output "
                         + "MarkLogic Server")
@@ -1156,32 +1199,41 @@ public enum Command implements ConfigConstants {
             outputHost.setRequired(true);
             options.addOption(outputHost);
             Option outputPort = OptionBuilder
-                 .withArgName("port")
+                 .withArgName("number")
                  .hasArg()
                  .withDescription("Port of the output MarkLogic Server")
                  .create(OUTPUT_PORT);
             options.addOption(outputPort);
             Option outputDB = OptionBuilder
-                .withArgName("database")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Database of the output MarkLogic Server")
                 .create(OUTPUT_DATABASE);
             options.addOption(outputDB);
             Option restrictOutputHosts = OptionBuilder
-                .withArgName("restrict hosts")
+                .withArgName("true,fasle")
                 .hasOptionalArg()
                 .withDescription("Whether to the restrict output hosts mlcp connects to")
                 .create(RESTRICT_OUTPUT_HOSTS);
             options.addOption(restrictOutputHosts);
             Option outputSSL = OptionBuilder
-                .withArgName("ssl")
+                .withArgName("true,false")
                 .hasOptionalArg()
                 .withDescription(
                 "Use ssl to encryt communication with the output MarkLogic Server")
                 .create(OUTPUT_SSL);
             options.addOption(outputSSL);
+
+            Option outputSSLProtocol = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription(
+                "Output ssl protocol, e.g.TLS, TLSv1")
+                .create(OUTPUT_SSL_PROTOCOL);
+            options.addOption(outputSSLProtocol);
+
             Option tcf = OptionBuilder
-                .withArgName("String")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("temporal collection name, used only" +
                     " for temporal documents")
@@ -1195,7 +1247,7 @@ public enum Command implements ConfigConstants {
                  .create(FAST_LOAD);
             options.addOption(fastLoad);
             Option outputDir = OptionBuilder
-                .withArgName("directory")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("Output directory in MarkLogic.")
                 .create(OUTPUT_DIRECTORY);
@@ -1331,6 +1383,24 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 }
             }
+
+            if (cmdline.hasOption(OUTPUT_SSL_PROTOCOL)) {
+                String arg = cmdline.getOptionValue(OUTPUT_SSL_PROTOCOL);
+                if (arg.equalsIgnoreCase("TLS")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLS");
+                } else if(arg.equalsIgnoreCase("TLSv1")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1");
+                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.1");
+                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
+                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.2");
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                             OUTPUT_SSL_PROTOCOL + ": " + arg);
+                }
+            }
+
             if (cmdline.hasOption(INPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(INPUT_USERNAME);
                 conf.set(MarkLogicConstants.INPUT_USERNAME, username);
@@ -1374,6 +1444,24 @@ public enum Command implements ConfigConstants {
                             + ": " + arg);
                 }
             }
+
+            if (cmdline.hasOption(INPUT_SSL_PROTOCOL)) {
+                String arg = cmdline.getOptionValue(INPUT_SSL_PROTOCOL);
+                if (arg.equalsIgnoreCase("TLS")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLS");
+                } else if(arg.equalsIgnoreCase("TLSv1")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1");
+                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.1");
+                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
+                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.2");
+                } else {
+                    throw new IllegalArgumentException(
+                            "Unrecognized option argument for " + 
+                             INPUT_SSL_PROTOCOL + ": " + arg);
+                }
+            }
+
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
                 conf.set(MarkLogicConstants.TEMPORAL_COLLECTION, tempColl);
@@ -1472,7 +1560,7 @@ public enum Command implements ConfigConstants {
         public void configOptions(Options options) {
             configCommonOptions(options); 
             Option inputFilePath = OptionBuilder
-                .withArgName("path")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("The file system location for input, as a "
                     + "regular expression")
@@ -1480,7 +1568,7 @@ public enum Command implements ConfigConstants {
             inputFilePath.setRequired(true);
             options.addOption(inputFilePath);
             Option outputFilePath = OptionBuilder
-                .withArgName("path")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("export output file path")
                 .create(OUTPUT_FILE_PATH);
@@ -1493,19 +1581,19 @@ public enum Command implements ConfigConstants {
                 .create(OUTPUT_COMPRESS);
             options.addOption(exportCompress);   
             Option df = OptionBuilder
-                .withArgName("String")
+                .withArgName("comma list")
                 .hasArg()
                 .withDescription("Comma-separated list of directories")
                 .create(DIRECTORY_FILTER);
             options.addOption(df);
             Option cf = OptionBuilder
-                .withArgName("String")
+                .withArgName("comma list")
                 .hasArg()
                 .withDescription("Comma-separated list of collections")
                 .create(COLLECTION_FILTER);
             options.addOption(cf);
             Option tf = OptionBuilder
-                .withArgName("String")
+                .withArgName("comma list")
                 .hasArg()
                 .withDescription("Comma-separated list of document types")
                .create(TYPE_FILTER);
@@ -1677,7 +1765,7 @@ public enum Command implements ConfigConstants {
     
     static void configRedactionOptions(Options options) {
     	Option redaction = OptionBuilder
-            	.withArgName("redaction rules")
+            	.withArgName("comma list")
             	.hasArg()
             	.withDescription("Comma separated list of redaction rule collection URIs")
             	.create(REDACTION);
@@ -1686,19 +1774,19 @@ public enum Command implements ConfigConstants {
     
     static void configCommonOptions(Options options) {
         Option mode = OptionBuilder
-            .withArgName(MODE)
+            .withArgName("string")
             .hasArg()
             .withDescription("Whether to run in local or distributed mode.")
             .create(MODE);
         options.addOption(mode);
         Option hadoopConfDir = OptionBuilder
-            .withArgName("directory")
+            .withArgName("string")
             .hasArg()
             .withDescription("Override $HADOOP_CONF_DIR")
             .create(HADOOP_CONF_DIR);
         options.addOption(hadoopConfDir);
         Option threadCount = OptionBuilder
-            .withArgName("count")
+            .withArgName("number")
             .hasArg()
             .withDescription("Number of threads")
             .create(THREAD_COUNT);
@@ -1721,11 +1809,11 @@ public enum Command implements ConfigConstants {
     }
 
     static void configRDFGraphOutputOptions(Options options) {
-        Option outputGraph = OptionBuilder.withArgName("graph").hasArg()
+        Option outputGraph = OptionBuilder.withArgName("string").hasArg()
             .withDescription("Default graph for quad").create(OUTPUT_GRAPH);
         options.addOption(outputGraph);
 
-        Option outputOverrideGraph = OptionBuilder.withArgName("graph")
+        Option outputOverrideGraph = OptionBuilder.withArgName("string")
             .hasArg().withDescription("Graph overrided for quad")
             .create(OUTPUT_OVERRIDE_GRAPH);
         options.addOption(outputOverrideGraph);
@@ -1733,7 +1821,7 @@ public enum Command implements ConfigConstants {
     
     static void configCommonOutputOptions(Options options) {
         Option outputUriReplace = OptionBuilder
-            .withArgName("list")
+            .withArgName("comma list")
             .hasArg()
             .withDescription("Comma separated list of regex pattern and "
                     + "string pairs, 1st to match a uri segment, 2nd the "
@@ -1741,20 +1829,20 @@ public enum Command implements ConfigConstants {
             .create(OUTPUT_URI_REPLACE);
         options.addOption(outputUriReplace);
         Option outputUriPrefix = OptionBuilder
-            .withArgName("prefix")
+            .withArgName("string")
             .hasArg()
             .withDescription("String to prepend to all document URIs")
             .create(OUTPUT_URI_PREFIX);
         options.addOption(outputUriPrefix);
         Option outputUriSuffix = OptionBuilder
-            .withArgName("suffix")
+            .withArgName("string")
             .hasArg()
             .withDescription("String to append to all document URIs")
             .create(OUTPUT_URI_SUFFIX);
         options.addOption(outputUriSuffix);
 
         Option outputCollections = OptionBuilder
-            .withArgName("collections")
+            .withArgName("comma list")
             .hasArg()
             .withDescription("Comma separated list of collection to be applied"
                     + " to output documents")
@@ -1762,14 +1850,14 @@ public enum Command implements ConfigConstants {
         options.addOption(outputCollections);
         
         Option outputPermissions = OptionBuilder
-            .withArgName("permissions")
+            .withArgName("comma list")
             .hasArg()
             .withDescription("Comma separated list of user-privilege pairs to "
                     + "be applied to output documents")
             .create(OUTPUT_PERMISSIONS);
         options.addOption(outputPermissions);
         Option outputQuantity = OptionBuilder
-            .withArgName("quality")
+            .withArgName("number")
             .hasArg()
             .withDescription("Quality to be applied to output documents")
             .create(OUTPUT_QUALITY);
@@ -1778,32 +1866,32 @@ public enum Command implements ConfigConstants {
 
     static void configConnectionId(Options options) {
         Option username = OptionBuilder
-            .withArgName(USERNAME)
+            .withArgName("string")
             .hasArg()
             .withDescription("User name of MarkLogic Server")
             .create(USERNAME);
         options.addOption(username);
         Option password = OptionBuilder
-            .withArgName(PASSWORD)
+            .withArgName("string")
             .hasArg()
             .withDescription("Password of MarkLogic Server")
             .create(PASSWORD);
         options.addOption(password);
         Option host = OptionBuilder
-            .withArgName(HOST)
+            .withArgName("string")
             .hasArg()
             .withDescription("Comma-separated list of hosts of MarkLogic Server")
             .create(HOST);
         host.setRequired(true);
         options.addOption(host);
         Option port = OptionBuilder
-            .withArgName(PORT)
+            .withArgName("number")
             .hasArg()
             .withDescription("Port of MarkLogic Server")
             .create(PORT);
         options.addOption(port);
         Option db = OptionBuilder
-            .withArgName(DATABASE)
+            .withArgName("string")
             .hasArg()
             .withDescription("Database of MarkLogic Server")
             .create(DATABASE);
@@ -1815,11 +1903,17 @@ public enum Command implements ConfigConstants {
             .create(RESTRICT_HOSTS);
         options.addOption(restricHosts);
         Option ssl = OptionBuilder
-            .withArgName(SSL)
+            .withArgName("true,false")
             .hasOptionalArg()
             .withDescription("Use SSL for encryted communication")
             .create(SSL);
         options.addOption(ssl);
+        Option ssl_protocol = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription("SSL protocol, e.g. TLS, TLSv1")
+            .create(SSL_PROTOCOL);
+        options.addOption(ssl_protocol);
     }
 
     static void configCopyOptions(Options options) {
@@ -1879,32 +1973,32 @@ public enum Command implements ConfigConstants {
     
     static void configModule(Options options) {
         Option moduleUri = OptionBuilder
-            .withArgName("String")
+            .withArgName("string")
             .hasArg()
             .withDescription(
                 "Path to the module containing the transform function")
             .create(TRANSFORM_MODULE);
         options.addOption(moduleUri);
-        Option ns = OptionBuilder.withArgName("String").hasArg()
+        Option ns = OptionBuilder.withArgName("string").hasArg()
             .withDescription("Namespace of the transform function")
             .create(TRANSFORM_NAMESPACE);
         options.addOption(ns);
-        Option func = OptionBuilder.withArgName("String").hasArg()
+        Option func = OptionBuilder.withArgName("string").hasArg()
             .withDescription("Name of the transform function")
             .create(TRANSFORM_FUNCTION);
         options.addOption(func);
-        Option param = OptionBuilder.withArgName("String").hasArg()
+        Option param = OptionBuilder.withArgName("string").hasArg()
             .withDescription("Parameters of the transform function")
             .create(TRANSFORM_PARAM);
         options.addOption(param);
         Option modules = OptionBuilder
-                .withArgName("String")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("The database that contains application modules")
                 .create(MODULES);
         options.addOption(modules);
         Option root = OptionBuilder
-                .withArgName("String")
+                .withArgName("string")
                 .hasArg()
                 .withDescription("The root document directory pathname")
                 .create(MODULES_ROOT);
@@ -1912,7 +2006,7 @@ public enum Command implements ConfigConstants {
     }
     
     static void configPartition(Options options) {
-        Option partition = OptionBuilder.withArgName("partition name")
+        Option partition = OptionBuilder.withArgName("string")
             .hasArg().withDescription("The partition where docs are inserted")
             .create(OUTPUT_PARTITION);
         options.addOption(partition);
@@ -1920,33 +2014,33 @@ public enum Command implements ConfigConstants {
 
     static void configFilteringOptions(Options options) {
         Option df = OptionBuilder
-            .withArgName("String")
+            .withArgName("string")
             .hasArg()
             .withDescription("Comma-separated list of directories")
             .create(DIRECTORY_FILTER);
         options.addOption(df);
         Option cf = OptionBuilder
-            .withArgName("String")
+            .withArgName("comma list")
             .hasArg()
             .withDescription("Comma-separated list of collections")
             .create(COLLECTION_FILTER);
         options.addOption(cf);
         Option ds = OptionBuilder
-            .withArgName("String")
+            .withArgName("string")
             .hasArg()
             .withDescription("Path expression used to retrieve documents or " +
                     "element nodes from the server")
             .create(DOCUMENT_SELECTOR);
         options.addOption(ds);
         Option ns = OptionBuilder
-            .withArgName("String")
+            .withArgName("comma list")
         	.hasArg()
         	.withDescription("Comma-separated list of alias-URI bindings " +
                     "used in document_selector")
             .create(PATH_NAMESPACE);
         options.addOption(ns);
         Option qf = OptionBuilder
-            .withArgName("String")
+            .withArgName("string")
             .hasArg()
             .withDescription("cts query to retrieve documents with")
             .create(QUERY_FILTER);
