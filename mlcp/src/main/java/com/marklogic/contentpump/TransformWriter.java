@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2017 MarkLogic Corporation
+ * Copyright 2003-2018 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,6 @@ import com.marklogic.xcc.types.XdmValue;
  */
 public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     public static final Log LOG = LogFactory.getLog(TransformWriter.class);
-    static final long BATCH_MIN_VERSION = 8000604;
     static final long TRANS_OPT_MIN_VERSION = 9000200;
     static final long PROPS_MIN_VERSION = 9000400;
     static final String MAP_ELEM_START_TAG = 
@@ -99,7 +98,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         AssignmentManager am) {
         super(conf, hostSourceMap, fastLoad, am);
 
-        batchSize = effectiveVersion >= BATCH_MIN_VERSION ? batchSize : 1;
+        batchSize = effectiveVersion >= ConfigConstants.BATCH_MIN_VERSION ? batchSize : 1;
         moduleUri = conf.get(ConfigConstants.CONF_TRANSFORM_MODULE);
         functionNs = conf.get(ConfigConstants.CONF_TRANSFORM_NAMESPACE, "");
         functionName = conf.get(ConfigConstants.CONF_TRANSFORM_FUNCTION,
@@ -180,7 +179,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         .append("declare variable $URI as xs:string* external;\n")
         .append("declare variable $CONTENT as item()* external;\n")
         .append("declare variable $INSERT-OPTIONS as ");
-        if (effectiveVersion < BATCH_MIN_VERSION) {
+        if (effectiveVersion < ConfigConstants.BATCH_MIN_VERSION) {
             q.append("element() external;\nhadoop:transform-and-insert(\"");
         } else {
             q.append("map:map* external;\n");
@@ -479,7 +478,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             optionsMap.put("properties", properties);
         }
 
-        if (effectiveVersion < BATCH_MIN_VERSION) {
+        if (effectiveVersion < ConfigConstants.BATCH_MIN_VERSION) {
             String optionElem = mapToElement(optionsMap);
             optionsVals[id][counts[id]] = 
                     ValueFactory.newValue(ValueType.ELEMENT, optionElem);

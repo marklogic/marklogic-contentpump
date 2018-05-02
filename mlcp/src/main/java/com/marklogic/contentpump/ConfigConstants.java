@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2017 MarkLogic Corporation
+ * Copyright 2003-2018 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,6 +132,9 @@ public interface ConfigConstants {
     static final String SSL = "ssl";
     static final String INPUT_SSL = "input_ssl";
     static final String OUTPUT_SSL = "output_ssl";
+    static final String SSL_PROTOCOL = "ssl_protocol";
+    static final String INPUT_SSL_PROTOCOL = "input_ssl_protocol";
+    static final String OUTPUT_SSL_PROTOCOL = "output_ssl_protocol";
     static final String MODULES = "modules";
     static final String MODULES_ROOT = "modules_root";
 
@@ -248,4 +251,5 @@ public interface ConfigConstants {
             "mlcpcopyexportstart";
     static final String AUDIT_MLCPFINISH_CODE = 
             "mlcpcopyexportfinish";
+    static final long BATCH_MIN_VERSION = 8000604;
 }
