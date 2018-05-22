@@ -29,6 +29,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.mapreduce.MarkLogicConstants;
+import com.marklogic.mapreduce.MarkLogicCounter;
 
 /**
  * RecordReader for CombineDocumentInputFormat.
@@ -63,6 +64,9 @@ extends ImportRecordReader<VALUEIN> {
     public void initialize(InputSplit inSplit, TaskAttemptContext context)
     throws IOException, InterruptedException {
         initConfig(context);
+        int skippedEmptyFiles = conf.getInt(ConfigConstants.CONF_EMPTY_INPUT_FILE, 0);
+        context.getCounter(MarkLogicCounter.INPUT_RECORDS)
+            .increment(skippedEmptyFiles);
 
         iterator = new FileIterator(((CombineDocumentSplit) inSplit)
             .getSplits().iterator(), context);
