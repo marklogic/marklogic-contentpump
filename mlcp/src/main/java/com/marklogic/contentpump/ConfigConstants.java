@@ -227,8 +227,6 @@ public interface ConfigConstants {
             "mapreduce.marklogic.input.modules";
     static final String CONF_INPUT_MODULES_ROOT =
             "mapreduce.marklogic.input.modulesroot";
-    static final String CONF_EMPTY_INPUT_FILE =
-            "mapreduce.marklogic.input.emptyinputfile";
 
     /**
      * <Role-name,Role-id> map for internal use

@@ -67,7 +67,6 @@ extends FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
         List<InputSplit> combinedSplits = new ArrayList<InputSplit>();
         CombineDocumentSplit split = null;
         int skippedEmptyFiles = 0;
-        Configuration conf = job.getConfiguration();
         for (InputSplit file: splits) {
             Path path = ((FileSplit)file).getPath();
             FileSystem fs = path.getFileSystem(job.getConfiguration());
@@ -95,7 +94,7 @@ extends FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
                 }
             } else {
                 skippedEmptyFiles++;
-                LOG.warn("Skipped empty file: " + path.toUri());
+                LOG.debug("Skipped empty file: " + path.toUri());
             }
         }
         if (split != null) {
@@ -105,8 +104,10 @@ extends FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
             LOG.debug("Total # of splits: " + splits.size());
             LOG.debug("Total # of combined splits: " + combinedSplits.size());
         }
-        conf.setInt(ConfigConstants.CONF_EMPTY_INPUT_FILE, skippedEmptyFiles);
-        
+        if (skippedEmptyFiles > 0) {
+            LOG.warn("Total empty file skipped during getSplits: " + skippedEmptyFiles);
+        }
+
         return combinedSplits;
     }
 }
