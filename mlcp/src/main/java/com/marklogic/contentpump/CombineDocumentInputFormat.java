@@ -94,7 +94,10 @@ extends FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
                 }
             } else {
                 skippedEmptyFiles++;
-                LOG.debug("Skipped empty file: " + path.toUri());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Skipped empty file: " + path.toUri());
+                }
+
             }
         }
         if (split != null) {
