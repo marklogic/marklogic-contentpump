@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -65,6 +66,7 @@ extends FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
         List<InputSplit> splits = super.getSplits(job);
         List<InputSplit> combinedSplits = new ArrayList<InputSplit>();
         CombineDocumentSplit split = null;
+        int skippedEmptyFiles = 0;
         for (InputSplit file: splits) {
             Path path = ((FileSplit)file).getPath();
             FileSystem fs = path.getFileSystem(job.getConfiguration());
@@ -90,7 +92,13 @@ extends FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
                     LOG.error(e);
                     throw new RuntimeException(e);
                 }
-            } 
+            } else {
+                skippedEmptyFiles++;
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Skipped empty file: " + path.toUri());
+                }
+
+            }
         }
         if (split != null) {
             combinedSplits.add(split);
@@ -99,7 +107,10 @@ extends FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, VALUE> {
             LOG.debug("Total # of splits: " + splits.size());
             LOG.debug("Total # of combined splits: " + combinedSplits.size());
         }
-        
+        if (skippedEmptyFiles > 0) {
+            LOG.warn("Total empty file skipped during getSplits: " + skippedEmptyFiles);
+        }
+
         return combinedSplits;
     }
 }
