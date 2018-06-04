@@ -150,6 +150,44 @@ public class TestRDF {
     }
 
     @Test
+    public void testNBDCTurtle() throws Exception {
+        String cmd =
+                "IMPORT -host localhost -username admin -password admin"
+                        + " -input_file_path " + Constants.TEST_PATH.toUri() + "/NBDC_sample.ttl"
+                        + " -input_file_type rdf -rdf_streaming_memory_threshold " + threshold
+                        + " -port " + Constants.port + " -database " + Constants.testDb;
+
+        String[] args = cmd.split(" ");
+
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:triples)");
+        assertTrue(result.hasNext());
+        assertEquals("12", result.next().asString());
+
+        result = Utils.runQuery(
+                Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(//sem:triple)");
+        assertTrue(result.hasNext());
+        assertEquals("1171", result.next().asString());
+
+        result = Utils.runQuery(
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(/sem:graph)");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+
+        result = Utils.runQuery(
+            Utils.getTestDbXccUri(), "declare namespace sem=\"http://marklogic.com/semantics\"; fn:count(fn:doc(\"http://marklogic.com/semantics#default-graph\"))");
+        assertTrue(result.hasNext());
+        assertEquals("1", result.next().asString());
+
+        Utils.closeSession();
+    }
+    @Test
     public void testTurtlePermission() throws Exception {
         String cmd =
                 "IMPORT -host localhost -username admin -password admin"
