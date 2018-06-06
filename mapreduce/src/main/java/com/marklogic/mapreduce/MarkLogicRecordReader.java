@@ -177,6 +177,8 @@ implements MarkLogicConstants {
     }
     
     protected void buildSrcInSearchQuery(String docExpr, String ctsQuery, StringBuilder buf) {
+        ctsQuery = ctsQuery.replaceAll("&", "&amp;");
+        ctsQuery = ctsQuery.replaceAll("'", "&apos;");
         buf.append("fn:unordered(cts:search(");
         buf.append(docExpr);
         buf.append(",cts:query(xdmp:unquote('");
