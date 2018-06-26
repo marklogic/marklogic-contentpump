@@ -252,6 +252,7 @@ public class DatabaseContentWriter<VALUE> extends
                 if (propertyUris != null) {
                     setBatchProperties(fId, sessions[sid]);
                     stmtCounts[sid]++;
+                    propertyCounts[fId] = 0;
                 } else {
                     for (int i = 0; i < counts[fId]; i++) {
                         DocumentMetadata m = metadatas[fId][i].getMeta();

@@ -1,0 +1,974 @@
+##<Chemical substance> jst:material-type '[C, X, or T]'. 'C' means 'Decided Structure', 'X' means 'Mixture', and 'T' means 'Undecided Structure'. 
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <http://schema.org/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dbpo: <http://dbpedia.org/ontology/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix bibo: <http://purl.org/ontology/bibo/> .
+@prefix prism: <http://prismstandard.org/namespaces/basic/2.0/> .
+@prefix tl: <http://purl.org/NET/c4dm/timeline.owl#> .
+@prefix jst: <http://vocab.jst.go.jp/terms/sti#> .
+@prefix jstd: <http://vocab.jst.go.jp/terms/vlist#> .
+@prefix jstpat: <http://vocab.jst.go.jp/terms/patent#> .
+@prefix ndl: <http://ndl.go.jp/dcndl/terms/> .
+@prefix xl: <http://www.w3.org/2008/05/skos-xl#> .
+@prefix xsd:<http://www.w3.org/2001/XMLSchema#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix xsd:<http://www.w3.org/2001/XMLSchema#> .
+
+
+<http://doi.org/10.18908/lsdba.nbdc01530-02-001>
+            a                           void:Dataset ;
+            dcterms:description        "NBDC_NikkajiRDF:This RDF data includes the basic information of 3.6 million or more chemical substances, such as NIkkaji Number, molecular formula, molecular weight, English/Japanese names"@en ;
+            dcterms:license             <http://creativecommons.org/licenses/by/2.1/> ;
+            dcterms:publisher           <http://www.jst.go.jp/EN/> ;
+            dcterms:title              "NBDC_NikkajiRDF:Main_March 6, 2018"@en ;
+            pav:contributedBy           <http://biosciencedbc.jp/en/> ;
+            pav:version                "20180306" ;
+            owl:versionInfo            "NBDC_NikkajiRDF:Main_20180306"^^xsd:string ;
+            rdfs:seeAlso                <http://doi.org/10.15079/NIKKAJI> .
+
+
+
+
+<http://stirdf.jst.go.jp/id/200907065026510419>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00691780A" ;
+	rdfs:label "N-[3-(アセトキシメチル)-5-[(アクリジン-9-イル)アミノ]フェニル]メタンスルホンアミド"@ja, "N-[3-(Acetoxymethyl)-5-[(acridin-9-yl)amino]phenyl]methanesulfonamide"@en ;
+	jst:chem-formula "C<sub>23</sub>H<sub>21</sub>N<sub>3</sub>O<sub>4</sub>S"^^rdfs:Literal, "C23-H21-N3-O4-S" ;
+	jst:molar-weight "435.498"^^xsd:float ;
+	jst:nikkaji-number "J691.780A" ;
+	dcterms:identifier "J691.780A" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065026510419-1) ;
+	jst:systematic-name "N-[3-(アセトキシメチル)-5-[(アクリジン-9-イル)アミノ]フェニル]メタンスルホンアミド"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065026510419-1) ;
+	jst:common-name "N-[3-(Acetoxymethyl)-5-[(acridin-9-yl)amino]phenyl]methanesulfonamide"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/006/917/J691.780A.png> ;
+	xl:altLabel  (_:alt-label1-200907065026510419-1 _:alt-label1-200907065026510419-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J691.780A> .
+_:structured.name-chemsys1-200907065026510419-1
+	dc:language "J" ;
+	rdfs:label "N-[3-(アセトキシメチル)-5-[(アクリジン-9-イル)アミノ]フェニル]メタンスルホンアミド" ;
+	ndl:transcription "N-((3-(アセトキシ#メチル#)-5-(((アクリジン#-9-イル#)アミノ#))フエニル#))メタン#スルホン#アミド#" .
+_:structured.name-common1-200907065026510419-1
+	dc:language "E" ;
+	rdfs:label "N-[3-(Acetoxymethyl)-5-[(acridin-9-yl)amino]phenyl]methanesulfonamide" .
+_:alt-label1-200907065026510419-1
+	xl:literalForm "N-[3-(Acetoxymethyl)-5-[(acridin-9-yl)amino]phenyl]methanesulfonamide" .
+_:alt-label1-200907065026510419-2
+	xl:literalForm "N-[3-(アセトキシメチル)-5-[(アクリジン-9-イル)アミノ]フェニル]メタンスルホンアミド" .
+<http://stirdf.jst.go.jp/id/200907065026579842>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00104060J" ;
+	rdfs:label "2-メチルベンズアルデヒド2,4-ジニトロフェニルヒドラゾン"@ja, "2-Methylbenzaldehyde 2,4-dinitrophenyl hydrazone"@en ;
+	jst:chem-formula "C<sub>14</sub>H<sub>12</sub>N<sub>4</sub>O<sub>4</sub>"^^rdfs:Literal, "C14-H12-N4-O4" ;
+	jst:molar-weight "300.274"^^xsd:float ;
+	jst:nikkaji-number "J104.060J" ;
+	dcterms:identifier "J104.060J" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065026579842-1) ;
+	jst:systematic-name "2-メチルベンズアルデヒド2,4-ジニトロフェニルヒドラゾン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065026579842-1) ;
+	jst:common-name "2-Methylbenzaldehyde 2,4-dinitrophenyl hydrazone"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/001/040/J104.060J.png> ;
+	xl:altLabel  (_:alt-label1-200907065026579842-1 _:alt-label1-200907065026579842-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J104.060J> .
+_:structured.name-chemsys1-200907065026579842-1
+	dc:language "J" ;
+	rdfs:label "2-メチルベンズアルデヒド2,4-ジニトロフェニルヒドラゾン" ;
+	ndl:transcription "2-メチル#ベンズ#アルデヒド#2,4-ジ#ニトロ#フエニル#ヒドラゾン#" .
+_:structured.name-common1-200907065026579842-1
+	dc:language "E" ;
+	rdfs:label "2-Methylbenzaldehyde 2,4-dinitrophenyl hydrazone" .
+_:alt-label1-200907065026579842-1
+	xl:literalForm "2-Methylbenzaldehyde 2,4-dinitrophenyl hydrazone" .
+_:alt-label1-200907065026579842-2
+	xl:literalForm "2-メチルベンズアルデヒド2,4-ジニトロフェニルヒドラゾン" .
+<http://stirdf.jst.go.jp/id/200907065026589996>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01148051I" ;
+	rdfs:label "2-(ブチルアミノ)-4-メチル-6-[1,2,2,2-テトラフルオロ-1-[1,1,2,3,3,3-ヘキサフルオロ-(以下略)"@ja, "2-(Butylamino)-4-methyl-6-[1,2,2,2-tetrafluoro-1-[1,1,2,3,3,3-hexafluoro-2-(heptafluoropropoxy)propoxy]ethyl]pyrimidine"@en ;
+	jst:chem-formula "C<sub>17</sub>H<sub>14</sub>F<sub>17</sub>N<sub>3</sub>O<sub>2</sub>"^^rdfs:Literal, "C17-H14-F17-N3-O2" ;
+	jst:molar-weight "615.284"^^xsd:float ;
+	jst:nikkaji-number "J1.148.051I" ;
+	dcterms:identifier "J1.148.051I" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065026589996-1) ;
+	jst:systematic-name "2-(ブチルアミノ)-4-メチル-6-[1,2,2,2-テトラフルオロ-1-[1,1,2,3,3,3-ヘキサフルオロ-2-(ヘプタフルオロプロポキシ)プロポキシ]エチル]ピリミジン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065026589996-1) ;
+	jst:common-name "2-(Butylamino)-4-methyl-6-[1,2,2,2-tetrafluoro-1-[1,1,2,3,3,3-hexafluoro-2-(heptafluoropropoxy)propoxy]ethyl]pyrimidine"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/011/480/J1.148.051I.png> ;
+	xl:altLabel  (_:alt-label1-200907065026589996-1 _:alt-label1-200907065026589996-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.148.051I> .
+_:structured.name-chemsys1-200907065026589996-1
+	dc:language "J" ;
+	rdfs:label "2-(ブチルアミノ)-4-メチル-6-[1,2,2,2-テトラフルオロ-1-[1,1,2,3,3,3-ヘキサフルオロ-2-(ヘプタフルオロプロポキシ)プロポキシ]エチル]ピリミジン" ;
+	ndl:transcription "2-(ブチル#アミノ#)-4-メチル#-6-((1,2,2,2-テトラ#フルオロ#-1-((1,1,2,3,3,3-ヘキサ#フルオロ#-2-(ヘプタ#フルオロ#プロポキシ#)プロポキシ#))エチル#))ピリミジン#" .
+_:structured.name-common1-200907065026589996-1
+	dc:language "E" ;
+	rdfs:label "2-(Butylamino)-4-methyl-6-[1,2,2,2-tetrafluoro-1-[1,1,2,3,3,3-hexafluoro-2-(heptafluoropropoxy)propoxy]ethyl]pyrimidine" .
+_:alt-label1-200907065026589996-1
+	xl:literalForm "2-(Butylamino)-4-methyl-6-[1,2,2,2-tetrafluoro-1-[1,1,2,3,3,3-hexafluoro-2-(heptafluoropropoxy)propoxy]ethyl]pyrimidine" .
+_:alt-label1-200907065026589996-2
+	xl:literalForm "2-(ブチルアミノ)-4-メチル-6-[1,2,2,2-テトラフルオロ-1-[1,1,2,3,3,3-ヘキサフルオロ-2-(ヘプタフルオロプロポキシ)プロポキシ]エチル]ピリミジン" .
+<http://stirdf.jst.go.jp/id/200907065026686991>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01205693A" ;
+	rdfs:label "(3R)-2,3,4,5,6,7,8,8aβ-オクタヒドロ-3β,6β,8,8-テトラメチル-6α-ヒドロキシ-1H-(以下略)"@ja, "(3R)-2,3,4,5,6,7,8,8abeta-Octahydro-3beta,6beta,8,8-tetramethyl-6alpha-hydroxy-1H-3aalpha,7alpha-methanoazulene-5-oneoxime"@en ;
+	jst:chem-formula "C<sub>15</sub>H<sub>25</sub>NO<sub>2</sub>"^^rdfs:Literal, "C15-H25-N-O2" ;
+	jst:molar-weight "251.370"^^xsd:float ;
+	jst:nikkaji-number "J1.205.693A" ;
+	dcterms:identifier "J1.205.693A" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065026686991-1) ;
+	jst:systematic-name "(3R)-2,3,4,5,6,7,8,8aβ-オクタヒドロ-3β,6β,8,8-テトラメチル-6α-ヒドロキシ-1H-3aα,7α-メタノアズレン-5-オンオキシム"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065026686991-1) ;
+	jst:common-name "(3R)-2,3,4,5,6,7,8,8abeta-Octahydro-3beta,6beta,8,8-tetramethyl-6alpha-hydroxy-1H-3aalpha,7alpha-methanoazulene-5-oneoxime"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/012/056/J1.205.693A.png> ;
+	xl:altLabel  (_:alt-label1-200907065026686991-1 _:alt-label1-200907065026686991-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.205.693A> .
+_:structured.name-chemsys1-200907065026686991-1
+	dc:language "J" ;
+	rdfs:label "(3R)-2,3,4,5,6,7,8,8aβ-オクタヒドロ-3β,6β,8,8-テトラメチル-6α-ヒドロキシ-1H-3aα,7α-メタノアズレン-5-オンオキシム" ;
+	ndl:transcription "(3R)-2,3,4,5,6,7,8,8A.BETA.-オクタ#ヒドロ#-3.BETA.,6.BETA.,8,8-テトラ#メチル#-6.ALPHA.-ヒドロキシ#-1H-3A.ALPHA.,7.ALPHA.-メタノ#アズレン#-5-オン#オキシム#" .
+_:structured.name-common1-200907065026686991-1
+	dc:language "E" ;
+	rdfs:label "(3R)-2,3,4,5,6,7,8,8abeta-Octahydro-3beta,6beta,8,8-tetramethyl-6alpha-hydroxy-1H-3aalpha,7alpha-methanoazulene-5-oneoxime" .
+_:alt-label1-200907065026686991-1
+	xl:literalForm "(3R)-2,3,4,5,6,7,8,8abeta-Octahydro-3beta,6beta,8,8-tetramethyl-6alpha-hydroxy-1H-3aalpha,7alpha-methanoazulene-5-oneoxime" .
+_:alt-label1-200907065026686991-2
+	xl:literalForm "(3R)-2,3,4,5,6,7,8,8abeta-オクタヒドロ-3beta,6beta,8,8-テトラメチル-6alpha-ヒドロキシ-1H-3aalpha,7alpha-メタノアズレン-5-オンオキシム" .
+<http://stirdf.jst.go.jp/id/200907065027047186>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "02061244D" ;
+	rdfs:label "2,2′′-(オキシビスシリレン)ビス[(E)-アゾベンゼン]"@ja, "2,2''-(Oxybissilylene)bis[(E)-azobenzene]"@en ;
+	jst:chem-formula "C<sub>24</sub>H<sub>22</sub>N<sub>4</sub>OSi<sub>2</sub>"^^rdfs:Literal, "C24-H22-N4-O-SI2" ;
+	jst:molar-weight "438.639"^^xsd:float ;
+	jst:nikkaji-number "J2.061.244D" ;
+	dcterms:identifier "J2.061.244D" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065027047186-1 _:structured.name-chemsys1-200907065027047186-2) ;
+	jst:systematic-name "2,2′′-(オキシビスシリレン)ビス[(E)-アゾベンゼン]"@ja, "2,2′′-[オキシビス(シランジイル)]ビス[(E)-アゾベンゼン]"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065027047186-1 _:structured.name-common1-200907065027047186-2) ;
+	jst:common-name "2,2′′-(Oxybissilylene)bis[(E)-azobenzene]"@en, "2,2′′-[Oxybis(silanediyl)]bis[(E)-azobenzene]"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/020/612/J2.061.244D.png> ;
+	xl:altLabel  (_:alt-label1-200907065027047186-1 _:alt-label1-200907065027047186-2 _:alt-label1-200907065027047186-3 _:alt-label1-200907065027047186-4) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J2.061.244D> .
+_:structured.name-chemsys1-200907065027047186-1
+	dc:language "J" ;
+	rdfs:label "2,2′′-(オキシビスシリレン)ビス[(E)-アゾベンゼン]" ;
+	ndl:transcription "2,2''-(オキシ#ビス#シリレン#)ビス#(((E)-アゾ#ベンゼン#))" .
+_:structured.name-chemsys1-200907065027047186-2
+	dc:language "J" ;
+	rdfs:label "2,2′′-[オキシビス(シランジイル)]ビス[(E)-アゾベンゼン]" ;
+	ndl:transcription "2,2''-((オキシ#ビス#(シラン#ジ#イル#)))ビス#(((E)-アゾ#ベンゼン#))" .
+_:structured.name-common1-200907065027047186-1
+	dc:language "E" ;
+	rdfs:label "2,2′′-(Oxybissilylene)bis[(E)-azobenzene]" .
+_:structured.name-common1-200907065027047186-2
+	dc:language "E" ;
+	rdfs:label "2,2′′-[Oxybis(silanediyl)]bis[(E)-azobenzene]" .
+_:alt-label1-200907065027047186-1
+	xl:literalForm "2,2′′-(Oxybissilylene)bis[(E)-azobenzene]" .
+_:alt-label1-200907065027047186-2
+	xl:literalForm "2,2′′-(オキシビスシリレン)ビス[(E)-アゾベンゼン]" .
+_:alt-label1-200907065027047186-3
+	xl:literalForm "2,2′′-[Oxybis(silanediyl)]bis[(E)-azobenzene]" .
+_:alt-label1-200907065027047186-4
+	xl:literalForm "2,2′′-[オキシビス(シランジイル)]ビス[(E)-アゾベンゼン]" .
+<http://stirdf.jst.go.jp/id/200907065027082992>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00219884C" ;
+	rdfs:label "亜テルル酸ジルビジウム"@ja, "Tellurous acid dirubidium salt"@en ;
+	jst:chem-formula "O<sub>3</sub>Rb<sub>2</sub>Te"^^rdfs:Literal, "O3-RB2-TE" ;
+	jst:molar-weight "346.533"^^xsd:float ;
+	jst:nikkaji-number "J219.884C" ;
+	dcterms:identifier "J219.884C" ;
+	jst:regulation-number "EINECS2400235", "TSCA(15885-40-2)" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065027082992-1) ;
+	jst:systematic-name "亜テルル酸ジルビジウム"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065027082992-1) ;
+	jst:common-name "Tellurous acid dirubidium salt"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/002/198/J219.884C.png> ;
+	xl:altLabel  (_:alt-label1-200907065027082992-1 _:alt-label1-200907065027082992-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J219.884C> .
+_:structured.name-chemsys1-200907065027082992-1
+	dc:language "J" ;
+	rdfs:label "亜テルル酸ジルビジウム" ;
+	ndl:transcription "ア#テルル#サン#ジ#ルビジウム#" .
+_:structured.name-common1-200907065027082992-1
+	dc:language "E" ;
+	rdfs:label "Tellurous acid dirubidium salt" .
+_:alt-label1-200907065027082992-1
+	xl:literalForm "Tellurous acid dirubidium salt" .
+_:alt-label1-200907065027082992-2
+	xl:literalForm "亜テルル酸ジルビジウム" .
+<http://stirdf.jst.go.jp/id/200907065027189908>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00594785E" ;
+	rdfs:label "酢酸1-フェニル-2-ヨ-ドエチル"@ja, "(1-Acetoxy-2-iodoethyl)benzene"@en ;
+	jst:chem-formula "C<sub>10</sub>H<sub>11</sub>IO<sub>2</sub>"^^rdfs:Literal, "C10-H11-I-O2" ;
+	jst:molar-weight "290.100"^^xsd:float ;
+	jst:nikkaji-number "J594.785E" ;
+	dcterms:identifier "J594.785E" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065027189908-1 _:structured.name-chemsys1-200907065027189908-2 _:structured.name-chemsys1-200907065027189908-3) ;
+	jst:systematic-name "(1-アセトキシ-2-ヨ-ドエチル)ベンゼン"@ja, "酢酸1-フェニル-2-ヨ-ドエチル"@ja, "1-アセトキシ-1-フェニル-2-ヨ-ドエタン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065027189908-1 _:structured.name-common1-200907065027189908-2 _:structured.name-common1-200907065027189908-3) ;
+	jst:common-name "(1-Acetoxy-2-iodoethyl)benzene"@en, "Acetic acid 1-phenyl-2-iodoethyl ester"@en, "1-Acetoxy-1-phenyl-2-iodoethane"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/005/947/J594.785E.png> ;
+	xl:altLabel  (_:alt-label1-200907065027189908-1 _:alt-label1-200907065027189908-2 _:alt-label1-200907065027189908-3 _:alt-label1-200907065027189908-4 _:alt-label1-200907065027189908-5 _:alt-label1-200907065027189908-6) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J594.785E> .
+_:structured.name-chemsys1-200907065027189908-1
+	dc:language "J" ;
+	rdfs:label "(1-アセトキシ-2-ヨ-ドエチル)ベンゼン" ;
+	ndl:transcription "(1-アセトキシ#-2-ヨ-ド#エチル#)ベンゼン#" .
+_:structured.name-chemsys1-200907065027189908-2
+	dc:language "J" ;
+	rdfs:label "酢酸1-フェニル-2-ヨ-ドエチル" ;
+	ndl:transcription "サク#サン#1-フェニル#-2-ヨ-ド#エチル#" .
+_:structured.name-chemsys1-200907065027189908-3
+	dc:language "J" ;
+	rdfs:label "1-アセトキシ-1-フェニル-2-ヨ-ドエタン" ;
+	ndl:transcription "1-アセトキシ#-1-フェニル#-2-ヨ-ド#エタン#" .
+_:structured.name-common1-200907065027189908-1
+	dc:language "E" ;
+	rdfs:label "(1-Acetoxy-2-iodoethyl)benzene" .
+_:structured.name-common1-200907065027189908-2
+	dc:language "E" ;
+	rdfs:label "Acetic acid 1-phenyl-2-iodoethyl ester" .
+_:structured.name-common1-200907065027189908-3
+	dc:language "E" ;
+	rdfs:label "1-Acetoxy-1-phenyl-2-iodoethane" .
+_:alt-label1-200907065027189908-1
+	xl:literalForm "(1-Acetoxy-2-iodoethyl)benzene" .
+_:alt-label1-200907065027189908-2
+	xl:literalForm "(1-アセトキシ-2-ヨ-ドエチル)ベンゼン" .
+_:alt-label1-200907065027189908-3
+	xl:literalForm "Acetic acid 1-phenyl-2-iodoethyl ester" .
+_:alt-label1-200907065027189908-4
+	xl:literalForm "酢酸1-フェニル-2-ヨ-ドエチル" .
+_:alt-label1-200907065027189908-5
+	xl:literalForm "1-Acetoxy-1-phenyl-2-iodoethane" .
+_:alt-label1-200907065027189908-6
+	xl:literalForm "1-アセトキシ-1-フェニル-2-ヨ-ドエタン" .
+<http://stirdf.jst.go.jp/id/200907065027594934>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00929462G" ;
+	rdfs:label "5-メチルチオ-1,3-ジオキサン"@ja, "5-Methylthio-1,3-dioxane"@en ;
+	jst:chem-formula "C<sub>5</sub>H<sub>10</sub>O<sub>2</sub>S"^^rdfs:Literal, "C5-H10-O2-S" ;
+	jst:molar-weight "134.193"^^xsd:float ;
+	jst:nikkaji-number "J929.462G" ;
+	dcterms:identifier "J929.462G" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065027594934-1) ;
+	jst:systematic-name "5-メチルチオ-1,3-ジオキサン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065027594934-1) ;
+	jst:common-name "5-Methylthio-1,3-dioxane"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/009/294/J929.462G.png> ;
+	xl:altLabel  (_:alt-label1-200907065027594934-1 _:alt-label1-200907065027594934-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J929.462G> .
+_:structured.name-chemsys1-200907065027594934-1
+	dc:language "J" ;
+	rdfs:label "5-メチルチオ-1,3-ジオキサン" ;
+	ndl:transcription "5-メチル#チオ#-1,3-ジオキサン#" .
+_:structured.name-common1-200907065027594934-1
+	dc:language "E" ;
+	rdfs:label "5-Methylthio-1,3-dioxane" .
+_:alt-label1-200907065027594934-1
+	xl:literalForm "5-Methylthio-1,3-dioxane" .
+_:alt-label1-200907065027594934-2
+	xl:literalForm "5-メチルチオ-1,3-ジオキサン" .
+<http://stirdf.jst.go.jp/id/200907065027769939>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01393844J" ;
+	rdfs:label "1-[(1R,2S)-1-[(ジメチルシリル)オキシ]-2-メチル-3-ブチニル]シクロヘキサン"@ja, "1-[(1R,2S)-1-[(Dimethylsilyl)oxy]-2-methyl-3-butynyl]cyclohexane"@en ;
+	jst:chem-formula "C<sub>13</sub>H<sub>24</sub>OSi"^^rdfs:Literal, "C13-H24-O-SI" ;
+	jst:molar-weight "224.420"^^xsd:float ;
+	jst:nikkaji-number "J1.393.844J" ;
+	dcterms:identifier "J1.393.844J" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065027769939-1) ;
+	jst:systematic-name "1-[(1R,2S)-1-[(ジメチルシリル)オキシ]-2-メチル-3-ブチニル]シクロヘキサン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065027769939-1) ;
+	jst:common-name "1-[(1R,2S)-1-[(Dimethylsilyl)oxy]-2-methyl-3-butynyl]cyclohexane"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/013/938/J1.393.844J.png> ;
+	xl:altLabel  (_:alt-label1-200907065027769939-1 _:alt-label1-200907065027769939-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.393.844J> .
+_:structured.name-chemsys1-200907065027769939-1
+	dc:language "J" ;
+	rdfs:label "1-[(1R,2S)-1-[(ジメチルシリル)オキシ]-2-メチル-3-ブチニル]シクロヘキサン" ;
+	ndl:transcription "1-(((1R,2S)-1-(((ジ#メチル#シリル#)オキシ#))-2-メチル#-3-ブチニル#))シクロヘキサン#" .
+_:structured.name-common1-200907065027769939-1
+	dc:language "E" ;
+	rdfs:label "1-[(1R,2S)-1-[(Dimethylsilyl)oxy]-2-methyl-3-butynyl]cyclohexane" .
+_:alt-label1-200907065027769939-1
+	xl:literalForm "1-[(1R,2S)-1-[(Dimethylsilyl)oxy]-2-methyl-3-butynyl]cyclohexane" .
+_:alt-label1-200907065027769939-2
+	xl:literalForm "1-[(1R,2S)-1-[(ジメチルシリル)オキシ]-2-メチル-3-ブチニル]シクロヘキサン" .
+<http://stirdf.jst.go.jp/id/200907065027798661>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01806392A" ;
+	rdfs:label "2-(4-カルボキシ-1H-ピラゾ-ル-1-イル)-2′-O,3′-O,5′-O-トリス(tert-ブチルジメチルシリ(以下略)"@ja, "2-(4-Carboxy-1H-pyrazole-1-yl)-2'-O,3'-O,5'-O-tris(tert-butyldimethylsilyl)adenosine"@en ;
+	jst:chem-formula "C<sub>32</sub>H<sub>57</sub>N<sub>7</sub>O<sub>6</sub>Si<sub>3</sub>"^^rdfs:Literal, "C32-H57-N7-O6-SI3" ;
+	jst:molar-weight "720.109"^^xsd:float ;
+	jst:nikkaji-number "J1.806.392A" ;
+	dcterms:identifier "J1.806.392A" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065027798661-1) ;
+	jst:systematic-name "2-(4-カルボキシ-1H-ピラゾ-ル-1-イル)-2′-O,3′-O,5′-O-トリス(tert-ブチルジメチルシリル)アデノシン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065027798661-1) ;
+	jst:common-name "2-(4-Carboxy-1H-pyrazole-1-yl)-2′-O,3′-O,5′-O-tris(tert-butyldimethylsilyl)adenosine"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/018/063/J1.806.392A.png> ;
+	xl:altLabel  (_:alt-label1-200907065027798661-1 _:alt-label1-200907065027798661-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.806.392A> .
+_:structured.name-chemsys1-200907065027798661-1
+	dc:language "J" ;
+	rdfs:label "2-(4-カルボキシ-1H-ピラゾ-ル-1-イル)-2′-O,3′-O,5′-O-トリス(tert-ブチルジメチルシリル)アデノシン" ;
+	ndl:transcription "2-(4-カルボキシ#-1H-ピラゾ-ル#-1-イル#)-2'-O,3'-O,5'-O-トリス#(TERT-ブチル#ジ#メチル#シリル#)アデノシン#" .
+_:structured.name-common1-200907065027798661-1
+	dc:language "E" ;
+	rdfs:label "2-(4-Carboxy-1H-pyrazole-1-yl)-2′-O,3′-O,5′-O-tris(tert-butyldimethylsilyl)adenosine" .
+_:alt-label1-200907065027798661-1
+	xl:literalForm "2-(4-Carboxy-1H-pyrazole-1-yl)-2′-O,3′-O,5′-O-tris(tert-butyldimethylsilyl)adenosine" .
+_:alt-label1-200907065027798661-2
+	xl:literalForm "2-(4-カルボキシ-1H-ピラゾ-ル-1-イル)-2′-O,3′-O,5′-O-トリス(tert-ブチルジメチルシリル)アデノシン" .
+<http://stirdf.jst.go.jp/id/200907065027802430>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00017042I" ;
+	rdfs:label "β-アコラジエン"@ja, "beta-Acoradiene"@en ;
+	jst:chem-formula "C<sub>15</sub>H<sub>24</sub>"^^rdfs:Literal, "C15-H24" ;
+	jst:molar-weight "204.357"^^xsd:float ;
+	jst:nikkaji-number "J17.042I" ;
+	dcterms:identifier "J17.042I" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065027802430-1) ;
+	jst:systematic-name "(1R,4S,5R)-1,8-ジメチル-4-(1-メチルエテニル)スピロ[4.5]デカ-7-エン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065027802430-1 _:structured.name-common1-200907065027802430-2 _:structured.name-common1-200907065027802430-3) ;
+	jst:common-name "β-アコラジエン"@ja, "beta-Acoradiene"@en, "(1R,4S,5R)-1,8-Dimethyl-4-(1-methylethenyl)spiro[4.5]dec-7-ene"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/000/170/J17.042I.png> ;
+	xl:altLabel  (_:alt-label1-200907065027802430-1 _:alt-label1-200907065027802430-2 _:alt-label1-200907065027802430-3 _:alt-label1-200907065027802430-4) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J17.042I> .
+_:structured.name-chemsys1-200907065027802430-1
+	dc:language "J" ;
+	rdfs:label "(1R,4S,5R)-1,8-ジメチル-4-(1-メチルエテニル)スピロ[4.5]デカ-7-エン" ;
+	ndl:transcription "(1R,4S,5R)-1,8-ジ#メチル#-4-(1-メチル#エテニル#)スピロ#((4.5))デカ#-7-エン#" .
+_:structured.name-common1-200907065027802430-1
+	dc:language "J" ;
+	rdfs:label "β-アコラジエン" ;
+	ndl:transcription ".BETA.-アコラジエン" .
+_:structured.name-common1-200907065027802430-2
+	dc:language "E" ;
+	rdfs:label "beta-Acoradiene" .
+_:structured.name-common1-200907065027802430-3
+	dc:language "E" ;
+	rdfs:label "(1R,4S,5R)-1,8-Dimethyl-4-(1-methylethenyl)spiro[4.5]dec-7-ene" .
+_:alt-label1-200907065027802430-1
+	xl:literalForm "(1R,4S,5R)-1,8-ジメチル-4-(1-メチルエテニル)スピロ[4.5]デカ-7-エン" .
+_:alt-label1-200907065027802430-2
+	xl:literalForm "beta-アコラジエン" .
+_:alt-label1-200907065027802430-3
+	xl:literalForm "beta-Acoradiene" .
+_:alt-label1-200907065027802430-4
+	xl:literalForm "(1R,4S,5R)-1,8-Dimethyl-4-(1-methylethenyl)spiro[4.5]dec-7-ene" .
+<http://stirdf.jst.go.jp/id/200907065029818333>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "02381145F" ;
+	rdfs:label "1-[(2,2,2-<sup>2</sup>H<sub>3</sub>)エチル]-4-オキソ-7-[(<sup>2</(以下略)"@ja, "1-[(2,2,2-<sup>2</sup>H<sub>3</sub>)Ethyl]-4-oxo-7-[(<sup>2</sup>H<sub>3</sub>)methyl]-1,4-dihydro-(5,6-<sup>2</sup>H<sub>2</sub>)1,8-naphthyridine-3-carboxylic acid"@en ;
+	jst:chem-formula "C<sub>12</sub>H<sub>12</sub>N<sub>2</sub>O<sub>3</sub>[<sup>2</sup>H<sub>8</sub>]"^^rdfs:Literal, "C12-H12-N2-O3[2H8]" ;
+	jst:molar-weight "240.287"^^xsd:float ;
+	jst:nikkaji-number "J2.381.145F" ;
+	dcterms:identifier "J2.381.145F" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065029818333-1) ;
+	jst:systematic-name "1-[(2,2,2-<sup>2</sup>H<sub>3</sub>)エチル]-4-オキソ-7-[(<sup>2</sup>H<sub>3</sub>)メチル]-1,4-ジヒドロ-(5,6-<sup>2</sup>H<sub>2</sub>)1,8-ナフチリジン-3-カルボン酸"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065029818333-1) ;
+	jst:common-name "1-[(2,2,2-<sup>2</sup>H<sub>3</sub>)Ethyl]-4-oxo-7-[(<sup>2</sup>H<sub>3</sub>)methyl]-1,4-dihydro-(5,6-<sup>2</sup>H<sub>2</sub>)1,8-naphthyridine-3-carboxylic acid"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/023/811/J2.381.145F.png> ;
+	xl:altLabel  (_:alt-label1-200907065029818333-1 _:alt-label1-200907065029818333-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J2.381.145F> .
+_:structured.name-chemsys1-200907065029818333-1
+	dc:language "J" ;
+	rdfs:label "1-[(2,2,2-<sup>2</sup>H<sub>3</sub>)エチル]-4-オキソ-7-[(<sup>2</sup>H<sub>3</sub>)メチル]-1,4-ジヒドロ-(5,6-<sup>2</sup>H<sub>2</sub>)1,8-ナフチリジン-3-カルボン酸" ;
+	ndl:transcription "1-(((2,2,2-2H#3#)エチル#))-4-オキソ#-7-(((2H#3#)メチル#))-1,4-ジ#ヒドロ#-(5,6-2H#2#)1,8-ナフチリジン#-3-カルボン#サン#" .
+_:structured.name-common1-200907065029818333-1
+	dc:language "E" ;
+	rdfs:label "1-[(2,2,2-<sup>2</sup>H<sub>3</sub>)Ethyl]-4-oxo-7-[(<sup>2</sup>H<sub>3</sub>)methyl]-1,4-dihydro-(5,6-<sup>2</sup>H<sub>2</sub>)1,8-naphthyridine-3-carboxylic acid" .
+_:alt-label1-200907065029818333-1
+	xl:literalForm "1-[(2,2,2-<sup>2</sup>H<sub>3</sub>)Ethyl]-4-oxo-7-[(<sup>2</sup>H<sub>3</sub>)methyl]-1,4-dihydro-(5,6-<sup>2</sup>H<sub>2</sub>)1,8-naphthyridine-3-carboxylic acid" .
+_:alt-label1-200907065029818333-2
+	xl:literalForm "1-[(2,2,2-<sup>2</sup>H<sub>3</sub>)エチル]-4-オキソ-7-[(<sup>2</sup>H<sub>3</sub>)メチル]-1,4-ジヒドロ-(5,6-<sup>2</sup>H<sub>2</sub>)1,8-ナフチリジン-3-カルボン酸" .
+<http://stirdf.jst.go.jp/id/200907065030044961>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "02332944A" ;
+	rdfs:label "りん酸ジエチル(2E,4S)-3-メチル-4-(tert-ブチルジメチルシロキシ)-8-(フェニルジメチルシリル)-2(以下略)"@ja, "Phosphoric acid diethyl(2E,4S)-3-methyl-4-(tert-butyldimethylsiloxy)-8-(phenyldimethylsilyl)-2-octene-7-ynyl ester"@en ;
+	jst:chem-formula "C<sub>27</sub>H<sub>47</sub>O<sub>5</sub>PSi<sub>2</sub>"^^rdfs:Literal, "C27-H47-O5-P-SI2" ;
+	jst:molar-weight "538.814"^^xsd:float ;
+	jst:nikkaji-number "J2.332.944A" ;
+	dcterms:identifier "J2.332.944A" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065030044961-1) ;
+	jst:systematic-name "りん酸ジエチル(2E,4S)-3-メチル-4-(tert-ブチルジメチルシロキシ)-8-(フェニルジメチルシリル)-2-オクテン-7-イニル"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065030044961-1) ;
+	jst:common-name "Phosphoric acid diethyl(2E,4S)-3-methyl-4-(tert-butyldimethylsiloxy)-8-(phenyldimethylsilyl)-2-octene-7-ynyl ester"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/023/329/J2.332.944A.png> ;
+	xl:altLabel  (_:alt-label1-200907065030044961-1 _:alt-label1-200907065030044961-2 _:alt-label1-200907065030044961-3 _:alt-label1-200907065030044961-4) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J2.332.944A> .
+_:structured.name-chemsys1-200907065030044961-1
+	dc:language "J" ;
+	rdfs:label "りん酸ジエチル(2E,4S)-3-メチル-4-(tert-ブチルジメチルシロキシ)-8-(フェニルジメチルシリル)-2-オクテン-7-イニル" ;
+	ndl:transcription "リン#サン#ジ#エチル#(2E,4S)-3-メチル#-4-(TERT-ブチル#ジ#メチル#シロキシ#)-8-(フェニル#ジ#メチル#シリル#)-2-オクテン#-7-イニル#" .
+_:structured.name-common1-200907065030044961-1
+	dc:language "E" ;
+	rdfs:label "Phosphoric acid diethyl(2E,4S)-3-methyl-4-(tert-butyldimethylsiloxy)-8-(phenyldimethylsilyl)-2-octene-7-ynyl ester" .
+_:alt-label1-200907065030044961-1
+	xl:literalForm "Phosphoric acid diethyl(2E,4S)-3-methyl-4-(tert-butyldimethylsiloxy)-8-(phenyldimethylsilyl)-2-octene-7-ynyl ester" .
+_:alt-label1-200907065030044961-2
+	xl:literalForm "りん酸ジエチル(2E,4S)-3-メチル-4-(tert-ブチルジメチルシロキシ)-8-(フェニルジメチルシリル)-2-オクテン-7-イニル" .
+_:alt-label1-200907065030044961-3
+	xl:literalForm "リン酸ジエチル(2E,4S)-3-メチル-4-(tert-ブチルジメチルシロキシ)-8-(フェニルジメチルシリル)-2-オクテン-7-イニル" .
+_:alt-label1-200907065030044961-4
+	xl:literalForm "燐酸ジエチル(2E,4S)-3-メチル-4-(tert-ブチルジメチルシロキシ)-8-(フェニルジメチルシリル)-2-オクテン-7-イニル" .
+<http://stirdf.jst.go.jp/id/200907065030244731>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "02518218I" ;
+	rdfs:label "1-ヒドロキシ-4,5,6,7-テトラフルオロ-1-ヨ-ダ(III)イソベンゾフラン-3(1H)-オン"@ja, "1-Hydroxy-4,5,6,7-tetrafluoro-1-ioda(III)isobenzofuran-3(1H)-one"@en ;
+	jst:chem-formula "C<sub>7</sub>HF<sub>4</sub>IO<sub>3</sub>"^^rdfs:Literal, "C7-H-F4-I-O3" ;
+	jst:molar-weight "335.978"^^xsd:float ;
+	jst:nikkaji-number "J2.518.218I" ;
+	dcterms:identifier "J2.518.218I" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065030244731-1 _:structured.name-chemsys1-200907065030244731-2) ;
+	jst:systematic-name "1-ヒドロキシ-4,5,6,7-テトラフルオロ-1-ヨ-ダ(III)イソベンゾフラン-3(1H)-オン"@ja, "1-ヒドロキシ-4,5,6,7-テトラフルオロ-1,3-ジヒドロ-1-ヨ-ダ(III)イソベンゾフラン-3-オン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065030244731-1 _:structured.name-common1-200907065030244731-2) ;
+	jst:common-name "1-Hydroxy-4,5,6,7-tetrafluoro-1-ioda(III)isobenzofuran-3(1H)-one"@en, "1-Hydroxy-4,5,6,7-tetrafluoro-1,3-dihydro-1-ioda(III)isobenzofuran-3-one"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/025/182/J2.518.218I.png> ;
+	xl:altLabel  (_:alt-label1-200907065030244731-1 _:alt-label1-200907065030244731-2 _:alt-label1-200907065030244731-3 _:alt-label1-200907065030244731-4) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J2.518.218I> .
+_:structured.name-chemsys1-200907065030244731-1
+	dc:language "J" ;
+	rdfs:label "1-ヒドロキシ-4,5,6,7-テトラフルオロ-1-ヨ-ダ(III)イソベンゾフラン-3(1H)-オン" ;
+	ndl:transcription "1-ヒドロキシ#-4,5,6,7-テトラ#フルオロ#-1-ヨ-ダ(III)#イソ#ベンゾ#フラン#-3(1H)-オン#" .
+_:structured.name-chemsys1-200907065030244731-2
+	dc:language "J" ;
+	rdfs:label "1-ヒドロキシ-4,5,6,7-テトラフルオロ-1,3-ジヒドロ-1-ヨ-ダ(III)イソベンゾフラン-3-オン" ;
+	ndl:transcription "1-ヒドロキシ#-4,5,6,7-テトラ#フルオロ#-1,3-ジ#ヒドロ#-1-ヨ-ダ(III)#イソ#ベンゾ#フラン#-3-オン#" .
+_:structured.name-common1-200907065030244731-1
+	dc:language "E" ;
+	rdfs:label "1-Hydroxy-4,5,6,7-tetrafluoro-1-ioda(III)isobenzofuran-3(1H)-one" .
+_:structured.name-common1-200907065030244731-2
+	dc:language "E" ;
+	rdfs:label "1-Hydroxy-4,5,6,7-tetrafluoro-1,3-dihydro-1-ioda(III)isobenzofuran-3-one" .
+_:alt-label1-200907065030244731-1
+	xl:literalForm "1-Hydroxy-4,5,6,7-tetrafluoro-1-ioda(III)isobenzofuran-3(1H)-one" .
+_:alt-label1-200907065030244731-2
+	xl:literalForm "1-ヒドロキシ-4,5,6,7-テトラフルオロ-1-ヨ-ダ(III)イソベンゾフラン-3(1H)-オン" .
+_:alt-label1-200907065030244731-3
+	xl:literalForm "1-Hydroxy-4,5,6,7-tetrafluoro-1,3-dihydro-1-ioda(III)isobenzofuran-3-one" .
+_:alt-label1-200907065030244731-4
+	xl:literalForm "1-ヒドロキシ-4,5,6,7-テトラフルオロ-1,3-ジヒドロ-1-ヨ-ダ(III)イソベンゾフラン-3-オン" .
+<http://stirdf.jst.go.jp/id/200907065030633932>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00911258H" ;
+	rdfs:label "N-メタクリロイル-L-グルタミン酸1-メチル5-tert-ブチル"@ja, "N-Methacryloyl-L-glutamic acid 1-methyl 5-tert-butyl ester"@en ;
+	jst:chem-formula "C<sub>14</sub>H<sub>23</sub>NO<sub>5</sub>"^^rdfs:Literal, "C14-H23-N-O5" ;
+	jst:molar-weight "285.340"^^xsd:float ;
+	jst:nikkaji-number "J911.258H" ;
+	dcterms:identifier "J911.258H" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065030633932-1) ;
+	jst:systematic-name "N-メタクリロイル-L-グルタミン酸1-メチル5-tert-ブチル"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065030633932-1) ;
+	jst:common-name "N-Methacryloyl-L-glutamic acid 1-methyl 5-tert-butyl ester"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/009/112/J911.258H.png> ;
+	xl:altLabel  (_:alt-label1-200907065030633932-1 _:alt-label1-200907065030633932-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J911.258H> .
+_:structured.name-chemsys1-200907065030633932-1
+	dc:language "J" ;
+	rdfs:label "N-メタクリロイル-L-グルタミン酸1-メチル5-tert-ブチル" ;
+	ndl:transcription "N-メタクリロイル#-L-グルタミン#サン#1-メチル#5-tert-ブチル#" .
+_:structured.name-common1-200907065030633932-1
+	dc:language "E" ;
+	rdfs:label "N-Methacryloyl-L-glutamic acid 1-methyl 5-tert-butyl ester" .
+_:alt-label1-200907065030633932-1
+	xl:literalForm "N-Methacryloyl-L-glutamic acid 1-methyl 5-tert-butyl ester" .
+_:alt-label1-200907065030633932-2
+	xl:literalForm "N-メタクリロイル-L-グルタミン酸1-メチル5-tert-ブチル" .
+<http://stirdf.jst.go.jp/id/200907065030716870>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00712278K" ;
+	rdfs:label "(R)-2-アジド-1-オクタノ-ル"@ja, "(R)-2-Azido-1-octanol"@en ;
+	jst:chem-formula "C<sub>8</sub>H<sub>17</sub>N<sub>3</sub>O"^^rdfs:Literal, "C8-H17-N3-O" ;
+	jst:molar-weight "171.244"^^xsd:float ;
+	jst:nikkaji-number "J712.278K" ;
+	dcterms:identifier "J712.278K" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065030716870-1 _:structured.name-chemsys1-200907065030716870-2) ;
+	jst:systematic-name "(R)-2-アジド-1-オクタノ-ル"@ja, "(R)-2-アジドオクタン-1-オ-ル"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065030716870-1 _:structured.name-common1-200907065030716870-2) ;
+	jst:common-name "(R)-2-Azido-1-octanol"@en, "(R)-2-Azidooctane-1-ol"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/007/122/J712.278K.png> ;
+	xl:altLabel  (_:alt-label1-200907065030716870-1 _:alt-label1-200907065030716870-2 _:alt-label1-200907065030716870-3 _:alt-label1-200907065030716870-4) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J712.278K> .
+_:structured.name-chemsys1-200907065030716870-1
+	dc:language "J" ;
+	rdfs:label "(R)-2-アジド-1-オクタノ-ル" ;
+	ndl:transcription "(R)-2-アジド#-1-オクタ#ノ-ル#" .
+_:structured.name-chemsys1-200907065030716870-2
+	dc:language "J" ;
+	rdfs:label "(R)-2-アジドオクタン-1-オ-ル" ;
+	ndl:transcription "(R)-2-アジド#オクタン#-1-オ-ル#" .
+_:structured.name-common1-200907065030716870-1
+	dc:language "E" ;
+	rdfs:label "(R)-2-Azido-1-octanol" .
+_:structured.name-common1-200907065030716870-2
+	dc:language "E" ;
+	rdfs:label "(R)-2-Azidooctane-1-ol" .
+_:alt-label1-200907065030716870-1
+	xl:literalForm "(R)-2-Azido-1-octanol" .
+_:alt-label1-200907065030716870-2
+	xl:literalForm "(R)-2-アジド-1-オクタノ-ル" .
+_:alt-label1-200907065030716870-3
+	xl:literalForm "(R)-2-Azidooctane-1-ol" .
+_:alt-label1-200907065030716870-4
+	xl:literalForm "(R)-2-アジドオクタン-1-オ-ル" .
+<http://stirdf.jst.go.jp/id/200907065030729301>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01955993I" ;
+	rdfs:label "[4-(トリフルオロメチル)フェニル]ビス[4-(ジメチルアミノ)フェニル]ホスフィン"@ja, "[4-(Trifluoromethyl)phenyl]bis[4-(dimethylamino)phenyl]phosphine"@en ;
+	jst:chem-formula "C<sub>23</sub>H<sub>24</sub>F<sub>3</sub>N<sub>2</sub>P"^^rdfs:Literal, "C23-H24-F3-N2-P" ;
+	jst:molar-weight "416.427"^^xsd:float ;
+	jst:nikkaji-number "J1.955.993I" ;
+	dcterms:identifier "J1.955.993I" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065030729301-1) ;
+	jst:systematic-name "[4-(トリフルオロメチル)フェニル]ビス[4-(ジメチルアミノ)フェニル]ホスフィン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065030729301-1) ;
+	jst:common-name "[4-(Trifluoromethyl)phenyl]bis[4-(dimethylamino)phenyl]phosphine"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/019/559/J1.955.993I.png> ;
+	xl:altLabel  (_:alt-label1-200907065030729301-1 _:alt-label1-200907065030729301-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.955.993I> .
+_:structured.name-chemsys1-200907065030729301-1
+	dc:language "J" ;
+	rdfs:label "[4-(トリフルオロメチル)フェニル]ビス[4-(ジメチルアミノ)フェニル]ホスフィン" ;
+	ndl:transcription "((4-(トリ#フルオロ#メチル#)フェニル#))ビス#((4-(ジ#メチル#アミノ#)フェニル#))ホスフィン#" .
+_:structured.name-common1-200907065030729301-1
+	dc:language "E" ;
+	rdfs:label "[4-(Trifluoromethyl)phenyl]bis[4-(dimethylamino)phenyl]phosphine" .
+_:alt-label1-200907065030729301-1
+	xl:literalForm "[4-(Trifluoromethyl)phenyl]bis[4-(dimethylamino)phenyl]phosphine" .
+_:alt-label1-200907065030729301-2
+	xl:literalForm "[4-(トリフルオロメチル)フェニル]ビス[4-(ジメチルアミノ)フェニル]ホスフィン" .
+<http://stirdf.jst.go.jp/id/200907065031088377>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01915014C" ;
+	rdfs:label "3-[1-(トリフルオロメチル)-2-[(1,2,2,3,3-ペンタフルオロシクロプロピル)オキシ]トリフルオロエトキ(以下略)"@ja, "3-[1-(Trifluoromethyl)-2-[(1,2,2,3,3-pentafluorocyclopropyl)oxy]trifluoroethoxy]tetrafluoropropanenitrile"@en ;
+	jst:chem-formula "C<sub>9</sub>F<sub>15</sub>NO<sub>2</sub>"^^rdfs:Literal, "C9-F15-N-O2" ;
+	jst:molar-weight "439.074"^^xsd:float ;
+	jst:nikkaji-number "J1.915.014C" ;
+	dcterms:identifier "J1.915.014C" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065031088377-1) ;
+	jst:systematic-name "3-[1-(トリフルオロメチル)-2-[(1,2,2,3,3-ペンタフルオロシクロプロピル)オキシ]トリフルオロエトキシ]テトラフルオロプロパンニトリル"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065031088377-1) ;
+	jst:common-name "3-[1-(Trifluoromethyl)-2-[(1,2,2,3,3-pentafluorocyclopropyl)oxy]trifluoroethoxy]tetrafluoropropanenitrile"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/019/150/J1.915.014C.png> ;
+	xl:altLabel  (_:alt-label1-200907065031088377-1 _:alt-label1-200907065031088377-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.915.014C> .
+_:structured.name-chemsys1-200907065031088377-1
+	dc:language "J" ;
+	rdfs:label "3-[1-(トリフルオロメチル)-2-[(1,2,2,3,3-ペンタフルオロシクロプロピル)オキシ]トリフルオロエトキシ]テトラフルオロプロパンニトリル" ;
+	ndl:transcription "3-((1-(トリ#フルオロ#メチル#)-2-(((1,2,2,3,3-ペンタ#フルオロ#シクロプロピル#)オキシ#))トリ#フルオロ#エトキシ#))テトラ#フルオロ#プロパン#ニトリル#" .
+_:structured.name-common1-200907065031088377-1
+	dc:language "E" ;
+	rdfs:label "3-[1-(Trifluoromethyl)-2-[(1,2,2,3,3-pentafluorocyclopropyl)oxy]trifluoroethoxy]tetrafluoropropanenitrile" .
+_:alt-label1-200907065031088377-1
+	xl:literalForm "3-[1-(Trifluoromethyl)-2-[(1,2,2,3,3-pentafluorocyclopropyl)oxy]trifluoroethoxy]tetrafluoropropanenitrile" .
+_:alt-label1-200907065031088377-2
+	xl:literalForm "3-[1-(トリフルオロメチル)-2-[(1,2,2,3,3-ペンタフルオロシクロプロピル)オキシ]トリフルオロエトキシ]テトラフルオロプロパンニトリル" .
+<http://stirdf.jst.go.jp/id/200907065031171266>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "02405798D" ;
+	rdfs:label "3α-(6-アミノ-9H-プリン-9-イル)-4β-(フェニルチオ)-8,8-ジメチル-1,7,9-トリオキサスピロ[(以下略)"@ja, "3alpha-(6-Amino-9H-purine-9-yl)-4beta-(phenylthio)-8,8-dimethyl-1,7,9-trioxaspiro[4.5]decane"@en ;
+	jst:chem-formula "C<sub>20</sub>H<sub>23</sub>N<sub>5</sub>O<sub>3</sub>S"^^rdfs:Literal, "C20-H23-N5-O3-S" ;
+	jst:molar-weight "413.496"^^xsd:float ;
+	jst:nikkaji-number "J2.405.798D" ;
+	dcterms:identifier "J2.405.798D" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065031171266-1) ;
+	jst:systematic-name "3α-(6-アミノ-9H-プリン-9-イル)-4β-(フェニルチオ)-8,8-ジメチル-1,7,9-トリオキサスピロ[4.5]デカン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065031171266-1) ;
+	jst:common-name "3alpha-(6-Amino-9H-purine-9-yl)-4beta-(phenylthio)-8,8-dimethyl-1,7,9-trioxaspiro[4.5]decane"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/024/057/J2.405.798D.png> ;
+	xl:altLabel  (_:alt-label1-200907065031171266-1 _:alt-label1-200907065031171266-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J2.405.798D> .
+_:structured.name-chemsys1-200907065031171266-1
+	dc:language "J" ;
+	rdfs:label "3α-(6-アミノ-9H-プリン-9-イル)-4β-(フェニルチオ)-8,8-ジメチル-1,7,9-トリオキサスピロ[4.5]デカン" ;
+	ndl:transcription "3.ALPHA.-(6-アミノ#-9H-プリン#-9-イル#)-4.BETA.-(フェニル#チオ#)-8,8-ジ#メチル#-1,7,9-トリ#オキサ#スピロ#((4.5))デカン#" .
+_:structured.name-common1-200907065031171266-1
+	dc:language "E" ;
+	rdfs:label "3alpha-(6-Amino-9H-purine-9-yl)-4beta-(phenylthio)-8,8-dimethyl-1,7,9-trioxaspiro[4.5]decane" .
+_:alt-label1-200907065031171266-1
+	xl:literalForm "3alpha-(6-Amino-9H-purine-9-yl)-4beta-(phenylthio)-8,8-dimethyl-1,7,9-trioxaspiro[4.5]decane" .
+_:alt-label1-200907065031171266-2
+	xl:literalForm "3alpha-(6-アミノ-9H-プリン-9-イル)-4beta-(フェニルチオ)-8,8-ジメチル-1,7,9-トリオキサスピロ[4.5]デカン" .
+<http://stirdf.jst.go.jp/id/200907065032135646>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "02492730J" ;
+	rdfs:label "(3R)-3α-メチル-4β-ホルミル-5β-(2-メチルフェニル)ピロリジン-2,2-ジカルボン酸ジエチル"@ja, "(3R)-3alpha-Methyl-4beta-formyl-5beta-(2-methylphenyl)pyrrolidine-2,2-dicarboxylic acid diethyl ester"@en ;
+	jst:chem-formula "C<sub>19</sub>H<sub>25</sub>NO<sub>5</sub>"^^rdfs:Literal, "C19-H25-N-O5" ;
+	jst:molar-weight "347.411"^^xsd:float ;
+	jst:nikkaji-number "J2.492.730J" ;
+	dcterms:identifier "J2.492.730J" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065032135646-1 _:structured.name-chemsys1-200907065032135646-2) ;
+	jst:systematic-name "(3R)-3α-メチル-4β-ホルミル-5β-(2-メチルフェニル)ピロリジン-2,2-ジカルボン酸ジエチル"@ja, "(3R)-3α-メチル-5β-(2-メチルフェニル)-4β-ホルミルピロリジン-2,2-ジカルボン酸ジエチル"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065032135646-1 _:structured.name-common1-200907065032135646-2) ;
+	jst:common-name "(3R)-3alpha-Methyl-4beta-formyl-5beta-(2-methylphenyl)pyrrolidine-2,2-dicarboxylic acid diethyl ester"@en, "(3R)-3alpha-Methyl-5beta-(2-methylphenyl)-4beta-formylpyrrolidine-2,2-dicarboxylic acid diethyl ester"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/024/927/J2.492.730J.png> ;
+	xl:altLabel  (_:alt-label1-200907065032135646-1 _:alt-label1-200907065032135646-2 _:alt-label1-200907065032135646-3 _:alt-label1-200907065032135646-4) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J2.492.730J> .
+_:structured.name-chemsys1-200907065032135646-1
+	dc:language "J" ;
+	rdfs:label "(3R)-3α-メチル-4β-ホルミル-5β-(2-メチルフェニル)ピロリジン-2,2-ジカルボン酸ジエチル" ;
+	ndl:transcription "(3R)-3.ALPHA.-メチル#-4.BETA.-ホルミル#-5.BETA.-(2-メチル#フェニル#)ピロリジン#-2,2-ジ#カルボン#サン#ジ#エチル#" .
+_:structured.name-chemsys1-200907065032135646-2
+	dc:language "J" ;
+	rdfs:label "(3R)-3α-メチル-5β-(2-メチルフェニル)-4β-ホルミルピロリジン-2,2-ジカルボン酸ジエチル" ;
+	ndl:transcription "(3R)-3.ALPHA.-メチル#-5.BETA.-(2-メチル#フェニル#)-4.BETA.-ホルミル#ピロリジン#-2,2-ジ#カルボン#サン#ジ#エチル#" .
+_:structured.name-common1-200907065032135646-1
+	dc:language "E" ;
+	rdfs:label "(3R)-3alpha-Methyl-4beta-formyl-5beta-(2-methylphenyl)pyrrolidine-2,2-dicarboxylic acid diethyl ester" .
+_:structured.name-common1-200907065032135646-2
+	dc:language "E" ;
+	rdfs:label "(3R)-3alpha-Methyl-5beta-(2-methylphenyl)-4beta-formylpyrrolidine-2,2-dicarboxylic acid diethyl ester" .
+_:alt-label1-200907065032135646-1
+	xl:literalForm "(3R)-3alpha-Methyl-4beta-formyl-5beta-(2-methylphenyl)pyrrolidine-2,2-dicarboxylic acid diethyl ester" .
+_:alt-label1-200907065032135646-2
+	xl:literalForm "(3R)-3alpha-メチル-4beta-ホルミル-5beta-(2-メチルフェニル)ピロリジン-2,2-ジカルボン酸ジエチル" .
+_:alt-label1-200907065032135646-3
+	xl:literalForm "(3R)-3alpha-Methyl-5beta-(2-methylphenyl)-4beta-formylpyrrolidine-2,2-dicarboxylic acid diethyl ester" .
+_:alt-label1-200907065032135646-4
+	xl:literalForm "(3R)-3alpha-メチル-5beta-(2-メチルフェニル)-4beta-ホルミルピロリジン-2,2-ジカルボン酸ジエチル" .
+<http://stirdf.jst.go.jp/id/200907065033033073>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01326724C" ;
+	rdfs:label "2,2,3,4,4-ペンタメチル-5-(α-ヒドロキシベンジル)-3,4-ジヒドロ-2H-イミダゾ-ル1-オキシド"@ja, "2,2,3,4,4-Pentamethyl-5-(alpha-hydroxybenzyl)-3,4-dihydro-2H-imidazole 1-oxide"@en ;
+	jst:chem-formula "C<sub>15</sub>H<sub>22</sub>N<sub>2</sub>O<sub>2</sub>"^^rdfs:Literal, "C15-H22-N2-O2" ;
+	jst:molar-weight "262.353"^^xsd:float ;
+	jst:nikkaji-number "J1.326.724C" ;
+	dcterms:identifier "J1.326.724C" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065033033073-1) ;
+	jst:systematic-name "2,2,3,4,4-ペンタメチル-5-(α-ヒドロキシベンジル)-3,4-ジヒドロ-2H-イミダゾ-ル1-オキシド"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065033033073-1) ;
+	jst:common-name "2,2,3,4,4-Pentamethyl-5-(alpha-hydroxybenzyl)-3,4-dihydro-2H-imidazole 1-oxide"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/013/267/J1.326.724C.png> ;
+	xl:altLabel  (_:alt-label1-200907065033033073-1 _:alt-label1-200907065033033073-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.326.724C> .
+_:structured.name-chemsys1-200907065033033073-1
+	dc:language "J" ;
+	rdfs:label "2,2,3,4,4-ペンタメチル-5-(α-ヒドロキシベンジル)-3,4-ジヒドロ-2H-イミダゾ-ル1-オキシド" ;
+	ndl:transcription "2,2,3,4,4-ペンタ#メチル#-5-(.ALPHA.-ヒドロキシ#ベンジル#)-3,4-ジ#ヒドロ#-2H-イミダゾ-ル#1-オキシド#" .
+_:structured.name-common1-200907065033033073-1
+	dc:language "E" ;
+	rdfs:label "2,2,3,4,4-Pentamethyl-5-(alpha-hydroxybenzyl)-3,4-dihydro-2H-imidazole 1-oxide" .
+_:alt-label1-200907065033033073-1
+	xl:literalForm "2,2,3,4,4-Pentamethyl-5-(alpha-hydroxybenzyl)-3,4-dihydro-2H-imidazole 1-oxide" .
+_:alt-label1-200907065033033073-2
+	xl:literalForm "2,2,3,4,4-ペンタメチル-5-(alpha-ヒドロキシベンジル)-3,4-ジヒドロ-2H-イミダゾ-ル1-オキシド" .
+<http://stirdf.jst.go.jp/id/200907065034076337>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00193844D" ;
+	rdfs:label "ペルフルオロヘキサンスルホン酸"@ja, "Perfluorohexanesulfonic acid"@en ;
+	jst:chem-formula "C<sub>6</sub>HF<sub>13</sub>O<sub>3</sub>S"^^rdfs:Literal, "C6-H-F13-O3-S" ;
+	jst:molar-weight "400.105"^^xsd:float ;
+	jst:nikkaji-number "J193.844D" ;
+	dcterms:identifier "J193.844D" ;
+	jst:regulation-number "EINECS2065871", "TSCA(355-46-4)", "2-(4)-1058" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065034076337-1 _:structured.name-chemsys1-200907065034076337-2 _:structured.name-chemsys1-200907065034076337-3 _:structured.name-chemsys1-200907065034076337-4) ;
+	jst:systematic-name "トリデカフルオロ-1-ヘキサンスルホン酸"@ja, "1,1,2,2,3,3,4,4,5,5,6,6,6-トリデカフルオロ-1-ヘキサンスルホン酸"@ja, "トリデカフルオロヘキサン-1-スルホン酸"@ja, "1,1,2,2,3,3,4,4,5,5,6,6,6-トリデカフルオロヘキサン-1-スルホン酸"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065034076337-1 _:structured.name-common1-200907065034076337-2 _:structured.name-common1-200907065034076337-3 _:structured.name-common1-200907065034076337-4 _:structured.name-common1-200907065034076337-5 _:structured.name-common1-200907065034076337-6 _:structured.name-common1-200907065034076337-7 _:structured.name-common1-200907065034076337-8) ;
+	jst:common-name "1,1,2,2,3,3,4,4,5,5,6,6,6-Tridecafluoro-1-hexanesulfonic acid"@en, "Tridecafluorohexane-1-sulfonic acid"@en, "1,1,2,2,3,3,4,4,5,5,6,6,6-Tridecafluorohexane-1-sulfonic acid"@en, "ペルフルオロヘキサンスルホン酸"@ja, "Perfluorohexanesulfonic acid"@en, "Perfluorohexane sulfonate"@en, "ペルフルオロヘキサンスルホナ-ト"@ja, "Tridecafluoro-1-hexanesulfonic acid"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/001/938/J193.844D.png> ;
+	xl:altLabel  (_:alt-label1-200907065034076337-1 _:alt-label1-200907065034076337-2 _:alt-label1-200907065034076337-3 _:alt-label1-200907065034076337-4 _:alt-label1-200907065034076337-5 _:alt-label1-200907065034076337-6 _:alt-label1-200907065034076337-7 _:alt-label1-200907065034076337-8 _:alt-label1-200907065034076337-9 _:alt-label1-200907065034076337-10 _:alt-label1-200907065034076337-11 _:alt-label1-200907065034076337-12) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J193.844D> .
+_:structured.name-chemsys1-200907065034076337-1
+	dc:language "J" ;
+	rdfs:label "トリデカフルオロ-1-ヘキサンスルホン酸" ;
+	ndl:transcription "トリデカ#フルオロ#-1-ヘキサン#スルホン#サン#" .
+_:structured.name-chemsys1-200907065034076337-2
+	dc:language "J" ;
+	rdfs:label "1,1,2,2,3,3,4,4,5,5,6,6,6-トリデカフルオロ-1-ヘキサンスルホン酸" ;
+	ndl:transcription "1,1,2,2,3,3,4,4,5,5,6,6,6-トリデカ#フルオロ#-1-ヘキサン#スルホン#サン#" .
+_:structured.name-chemsys1-200907065034076337-3
+	dc:language "J" ;
+	rdfs:label "トリデカフルオロヘキサン-1-スルホン酸" ;
+	ndl:transcription "トリデカ#フルオロ#ヘキサン#-1-スルホン#サン#" .
+_:structured.name-chemsys1-200907065034076337-4
+	dc:language "J" ;
+	rdfs:label "1,1,2,2,3,3,4,4,5,5,6,6,6-トリデカフルオロヘキサン-1-スルホン酸" ;
+	ndl:transcription "1,1,2,2,3,3,4,4,5,5,6,6,6-トリデカ#フルオロ#ヘキサン#-1-スルホン#サン#" .
+_:structured.name-common1-200907065034076337-1
+	dc:language "E" ;
+	rdfs:label "1,1,2,2,3,3,4,4,5,5,6,6,6-Tridecafluoro-1-hexanesulfonic acid" .
+_:structured.name-common1-200907065034076337-2
+	dc:language "E" ;
+	rdfs:label "Tridecafluorohexane-1-sulfonic acid" .
+_:structured.name-common1-200907065034076337-3
+	dc:language "E" ;
+	rdfs:label "1,1,2,2,3,3,4,4,5,5,6,6,6-Tridecafluorohexane-1-sulfonic acid" .
+_:structured.name-common1-200907065034076337-4
+	dc:language "J" ;
+	rdfs:label "ペルフルオロヘキサンスルホン酸" ;
+	ndl:transcription "ペルフルオロヘキサンスルホンサン" .
+_:structured.name-common1-200907065034076337-5
+	dc:language "E" ;
+	rdfs:label "Perfluorohexanesulfonic acid" .
+_:structured.name-common1-200907065034076337-6
+	dc:language "E" ;
+	rdfs:label "Perfluorohexane sulfonate" .
+_:structured.name-common1-200907065034076337-7
+	dc:language "J" ;
+	rdfs:label "ペルフルオロヘキサンスルホナ-ト" ;
+	ndl:transcription "ペルフルオロヘキサンスルホナ-ト" .
+_:structured.name-common1-200907065034076337-8
+	dc:language "E" ;
+	rdfs:label "Tridecafluoro-1-hexanesulfonic acid" .
+_:alt-label1-200907065034076337-1
+	xl:literalForm "1,1,2,2,3,3,4,4,5,5,6,6,6-Tridecafluoro-1-hexanesulfonic acid" .
+_:alt-label1-200907065034076337-2
+	xl:literalForm "トリデカフルオロ-1-ヘキサンスルホン酸" .
+_:alt-label1-200907065034076337-3
+	xl:literalForm "1,1,2,2,3,3,4,4,5,5,6,6,6-トリデカフルオロ-1-ヘキサンスルホン酸" .
+_:alt-label1-200907065034076337-4
+	xl:literalForm "Tridecafluorohexane-1-sulfonic acid" .
+_:alt-label1-200907065034076337-5
+	xl:literalForm "1,1,2,2,3,3,4,4,5,5,6,6,6-Tridecafluorohexane-1-sulfonic acid" .
+_:alt-label1-200907065034076337-6
+	xl:literalForm "トリデカフルオロヘキサン-1-スルホン酸" .
+_:alt-label1-200907065034076337-7
+	xl:literalForm "1,1,2,2,3,3,4,4,5,5,6,6,6-トリデカフルオロヘキサン-1-スルホン酸" .
+_:alt-label1-200907065034076337-8
+	xl:literalForm "ペルフルオロヘキサンスルホン酸" .
+_:alt-label1-200907065034076337-9
+	xl:literalForm "Perfluorohexanesulfonic acid" .
+_:alt-label1-200907065034076337-10
+	xl:literalForm "Perfluorohexane sulfonate" .
+_:alt-label1-200907065034076337-11
+	xl:literalForm "ペルフルオロヘキサンスルホナ-ト" .
+_:alt-label1-200907065034076337-12
+	xl:literalForm "Tridecafluoro-1-hexanesulfonic acid" .
+<http://stirdf.jst.go.jp/id/200907065034237551>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01761928D" ;
+	rdfs:label "2-オキソ-2H-シクロヘプタ[b]フラン-3-カルボニトリル"@ja, "2-Oxo-2H-cyclohepta[b]furan-3-carbonitrile"@en ;
+	jst:chem-formula "C<sub>10</sub>H<sub>5</sub>NO<sub>2</sub>"^^rdfs:Literal, "C10-H5-N-O2" ;
+	jst:molar-weight "171.155"^^xsd:float ;
+	jst:nikkaji-number "J1.761.928D" ;
+	dcterms:identifier "J1.761.928D" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065034237551-1) ;
+	jst:systematic-name "2-オキソ-2H-シクロヘプタ[b]フラン-3-カルボニトリル"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065034237551-1) ;
+	jst:common-name "2-Oxo-2H-cyclohepta[b]furan-3-carbonitrile"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/017/619/J1.761.928D.png> ;
+	xl:altLabel  (_:alt-label1-200907065034237551-1 _:alt-label1-200907065034237551-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.761.928D> .
+_:structured.name-chemsys1-200907065034237551-1
+	dc:language "J" ;
+	rdfs:label "2-オキソ-2H-シクロヘプタ[b]フラン-3-カルボニトリル" ;
+	ndl:transcription "2-オキソ#-2H-シクロヘプタ((B))フラン#-3-カルボ#ニトリル#" .
+_:structured.name-common1-200907065034237551-1
+	dc:language "E" ;
+	rdfs:label "2-Oxo-2H-cyclohepta[b]furan-3-carbonitrile" .
+_:alt-label1-200907065034237551-1
+	xl:literalForm "2-Oxo-2H-cyclohepta[b]furan-3-carbonitrile" .
+_:alt-label1-200907065034237551-2
+	xl:literalForm "2-オキソ-2H-シクロヘプタ[b]フラン-3-カルボニトリル" .
+<http://stirdf.jst.go.jp/id/200907065034482629>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00308062E" ;
+	rdfs:label "アセナフテン-5,6-ジカルボン酸無水物"@ja, "Acenaphthene-5,6-dicarboxylic anhydride"@en ;
+	jst:chem-formula "C<sub>14</sub>H<sub>8</sub>O<sub>3</sub>"^^rdfs:Literal, "C14-H8-O3" ;
+	jst:molar-weight "224.215"^^xsd:float ;
+	jst:nikkaji-number "J308.062E" ;
+	dcterms:identifier "J308.062E" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065034482629-1) ;
+	jst:systematic-name "アセナフテン-5,6-ジカルボン酸無水物"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065034482629-1) ;
+	jst:common-name "Acenaphthene-5,6-dicarboxylic anhydride"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/003/080/J308.062E.png> ;
+	xl:altLabel  (_:alt-label1-200907065034482629-1 _:alt-label1-200907065034482629-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J308.062E> .
+_:structured.name-chemsys1-200907065034482629-1
+	dc:language "J" ;
+	rdfs:label "アセナフテン-5,6-ジカルボン酸無水物" ;
+	ndl:transcription "アセナフテン#-5,6-ジ#カルボン#サン#ムスイブツ#" .
+_:structured.name-common1-200907065034482629-1
+	dc:language "E" ;
+	rdfs:label "Acenaphthene-5,6-dicarboxylic anhydride" .
+_:alt-label1-200907065034482629-1
+	xl:literalForm "Acenaphthene-5,6-dicarboxylic anhydride" .
+_:alt-label1-200907065034482629-2
+	xl:literalForm "アセナフテン-5,6-ジカルボン酸無水物" .
+<http://stirdf.jst.go.jp/id/200907065035841193>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00678705C" ;
+	rdfs:label "11-フェニル-5,11-エポキシ-5H,8H-6,7,9,10-テトラオキサスピロ[ベンゾシクロデセン-12(11H(以下略)"@ja, "11-Phenyl-5,11-epoxy-5H,8H-6,7,9,10-tetraoxaspiro[benzocyclodecene-12(11H),1'-cyclopentane]"@en ;
+	jst:chem-formula "C<sub>20</sub>H<sub>20</sub>O<sub>5</sub>"^^rdfs:Literal, "C20-H20-O5" ;
+	jst:molar-weight "340.375"^^xsd:float ;
+	jst:nikkaji-number "J678.705C" ;
+	dcterms:identifier "J678.705C" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065035841193-1) ;
+	jst:systematic-name "11-フェニル-5,11-エポキシ-5H,8H-6,7,9,10-テトラオキサスピロ[ベンゾシクロデセン-12(11H),1′-シクロペンタン]"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065035841193-1) ;
+	jst:common-name "11-Phenyl-5,11-epoxy-5H,8H-6,7,9,10-tetraoxaspiro[benzocyclodecene-12(11H),1′-cyclopentane]"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/006/787/J678.705C.png> ;
+	xl:altLabel  (_:alt-label1-200907065035841193-1 _:alt-label1-200907065035841193-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J678.705C> .
+_:structured.name-chemsys1-200907065035841193-1
+	dc:language "J" ;
+	rdfs:label "11-フェニル-5,11-エポキシ-5H,8H-6,7,9,10-テトラオキサスピロ[ベンゾシクロデセン-12(11H),1′-シクロペンタン]" ;
+	ndl:transcription "11-フエニル#-5,11-エポキシ#-5H,8H-6,7,9,10-テトラ#オキサ#スピロ#((ベンゾ#シクロデセン#-12(11H),1'-シクロペンタン#))" .
+_:structured.name-common1-200907065035841193-1
+	dc:language "E" ;
+	rdfs:label "11-Phenyl-5,11-epoxy-5H,8H-6,7,9,10-tetraoxaspiro[benzocyclodecene-12(11H),1′-cyclopentane]" .
+_:alt-label1-200907065035841193-1
+	xl:literalForm "11-Phenyl-5,11-epoxy-5H,8H-6,7,9,10-tetraoxaspiro[benzocyclodecene-12(11H),1′-cyclopentane]" .
+_:alt-label1-200907065035841193-2
+	xl:literalForm "11-フェニル-5,11-エポキシ-5H,8H-6,7,9,10-テトラオキサスピロ[ベンゾシクロデセン-12(11H),1′-シクロペンタン]" .
+<http://stirdf.jst.go.jp/id/200907065037081765>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01042446A" ;
+	rdfs:label "(2S,3R)-N-メトキシ-N,2-ジメチル-3-アジド-4-(ベンジルオキシ)ブタンアミド"@ja, "(2S,3R)-N-Methoxy-N,2-dimethyl-3-azido-4-(benzyloxy)butanamide"@en ;
+	jst:chem-formula "C<sub>14</sub>H<sub>20</sub>N<sub>4</sub>O<sub>3</sub>"^^rdfs:Literal, "C14-H20-N4-O3" ;
+	jst:molar-weight "292.339"^^xsd:float ;
+	jst:nikkaji-number "J1.042.446A" ;
+	dcterms:identifier "J1.042.446A" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065037081765-1) ;
+	jst:systematic-name "(2S,3R)-N-メトキシ-N,2-ジメチル-3-アジド-4-(ベンジルオキシ)ブタンアミド"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065037081765-1) ;
+	jst:common-name "(2S,3R)-N-Methoxy-N,2-dimethyl-3-azido-4-(benzyloxy)butanamide"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/010/424/J1.042.446A.png> ;
+	xl:altLabel  (_:alt-label1-200907065037081765-1 _:alt-label1-200907065037081765-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.042.446A> .
+_:structured.name-chemsys1-200907065037081765-1
+	dc:language "J" ;
+	rdfs:label "(2S,3R)-N-メトキシ-N,2-ジメチル-3-アジド-4-(ベンジルオキシ)ブタンアミド" ;
+	ndl:transcription "(2S,3R)-N-メトキシ#-N,2-ジ#メチル#-3-アジド#-4-(ベンジル#オキシ#)ブタン#アミド#" .
+_:structured.name-common1-200907065037081765-1
+	dc:language "E" ;
+	rdfs:label "(2S,3R)-N-Methoxy-N,2-dimethyl-3-azido-4-(benzyloxy)butanamide" .
+_:alt-label1-200907065037081765-1
+	xl:literalForm "(2S,3R)-N-Methoxy-N,2-dimethyl-3-azido-4-(benzyloxy)butanamide" .
+_:alt-label1-200907065037081765-2
+	xl:literalForm "(2S,3R)-N-メトキシ-N,2-ジメチル-3-アジド-4-(ベンジルオキシ)ブタンアミド" .
+<http://stirdf.jst.go.jp/id/200907065037113985>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00724168B" ;
+	rdfs:label "(2S)-1-(2-ニトロ-4-ヒドロキシ-5-メトキシチオベンゾイル)ピロリジン-2α-カルボチオアルデヒド"@ja, "(2S)-1-(2-Nitro-4-hydroxy-5-methoxythiobenzoyl)pyrrolidine-2alpha-carbothialdehyde"@en ;
+	jst:chem-formula "C<sub>13</sub>H<sub>14</sub>N<sub>2</sub>O<sub>4</sub>S<sub>2</sub>"^^rdfs:Literal, "C13-H14-N2-O4-S2" ;
+	jst:molar-weight "326.385"^^xsd:float ;
+	jst:nikkaji-number "J724.168B" ;
+	dcterms:identifier "J724.168B" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065037113985-1) ;
+	jst:systematic-name "(2S)-1-(2-ニトロ-4-ヒドロキシ-5-メトキシチオベンゾイル)ピロリジン-2α-カルボチオアルデヒド"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065037113985-1) ;
+	jst:common-name "(2S)-1-(2-Nitro-4-hydroxy-5-methoxythiobenzoyl)pyrrolidine-2alpha-carbothialdehyde"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/007/241/J724.168B.png> ;
+	xl:altLabel  (_:alt-label1-200907065037113985-1 _:alt-label1-200907065037113985-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J724.168B> .
+_:structured.name-chemsys1-200907065037113985-1
+	dc:language "J" ;
+	rdfs:label "(2S)-1-(2-ニトロ-4-ヒドロキシ-5-メトキシチオベンゾイル)ピロリジン-2α-カルボチオアルデヒド" ;
+	ndl:transcription "(2S)-1-(2-ニトロ#-4-ヒドロキシ#-5-メトキシ#チオ#ベンゾイル#)ピロリジン#-2.ALPHA.-カルボ#チオ#アルデヒド#" .
+_:structured.name-common1-200907065037113985-1
+	dc:language "E" ;
+	rdfs:label "(2S)-1-(2-Nitro-4-hydroxy-5-methoxythiobenzoyl)pyrrolidine-2alpha-carbothialdehyde" .
+_:alt-label1-200907065037113985-1
+	xl:literalForm "(2S)-1-(2-Nitro-4-hydroxy-5-methoxythiobenzoyl)pyrrolidine-2alpha-carbothialdehyde" .
+_:alt-label1-200907065037113985-2
+	xl:literalForm "(2S)-1-(2-ニトロ-4-ヒドロキシ-5-メトキシチオベンゾイル)ピロリジン-2alpha-カルボチオアルデヒド" .
+<http://stirdf.jst.go.jp/id/200907065037422481>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "01993655D" ;
+	rdfs:label "(3R,4S)-2-(フェニルスルホニル)-3-フェニル-8-アセチル-2,8-ジアザ-5-チアスピロ[3.4]オクタ(以下略)"@ja, "(3R,4S)-2-(Phenylsulfonyl)-3-phenyl-8-acetyl-2,8-diaza-5-thiaspiro[3.4]octane-1-one"@en ;
+	jst:chem-formula "C<sub>19</sub>H<sub>18</sub>N<sub>2</sub>O<sub>4</sub>S<sub>2</sub>"^^rdfs:Literal, "C19-H18-N2-O4-S2" ;
+	jst:molar-weight "402.483"^^xsd:float ;
+	jst:nikkaji-number "J1.993.655D" ;
+	dcterms:identifier "J1.993.655D" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065037422481-1 _:structured.name-chemsys1-200907065037422481-2) ;
+	jst:systematic-name "(3R,4S)-2-(フェニルスルホニル)-3-フェニル-8-アセチル-2,8-ジアザ-5-チアスピロ[3.4]オクタン-1-オン"@ja, "(3R,4S)-2-(フェニルスルホニル)-8-アセチル-3-フェニル-5-チア-2,8-ジアザスピロ[3.4]オクタン-1-オン"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065037422481-1 _:structured.name-common1-200907065037422481-2) ;
+	jst:common-name "(3R,4S)-2-(Phenylsulfonyl)-3-phenyl-8-acetyl-2,8-diaza-5-thiaspiro[3.4]octane-1-one"@en, "(3R,4S)-2-(Phenylsulfonyl)-8-acetyl-3-phenyl-5-thia-2,8-diazaspiro[3.4]octane-1-one"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/019/936/J1.993.655D.png> ;
+	xl:altLabel  (_:alt-label1-200907065037422481-1 _:alt-label1-200907065037422481-2 _:alt-label1-200907065037422481-3 _:alt-label1-200907065037422481-4) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J1.993.655D> .
+_:structured.name-chemsys1-200907065037422481-1
+	dc:language "J" ;
+	rdfs:label "(3R,4S)-2-(フェニルスルホニル)-3-フェニル-8-アセチル-2,8-ジアザ-5-チアスピロ[3.4]オクタン-1-オン" ;
+	ndl:transcription "(3R,4S)-2-(フェニル#スルホニル#)-3-フェニル#-8-アセチル#-2,8-ジ#アザ#-5-チア#スピロ#((3.4))オクタン#-1-オン#" .
+_:structured.name-chemsys1-200907065037422481-2
+	dc:language "J" ;
+	rdfs:label "(3R,4S)-2-(フェニルスルホニル)-8-アセチル-3-フェニル-5-チア-2,8-ジアザスピロ[3.4]オクタン-1-オン" ;
+	ndl:transcription "(3R,4S)-2-(フェニル#スルホニル#)-8-アセチル#-3-フェニル#-5-チア#-2,8-ジ#アザ#スピロ#((3.4))オクタン#-1-オン#" .
+_:structured.name-common1-200907065037422481-1
+	dc:language "E" ;
+	rdfs:label "(3R,4S)-2-(Phenylsulfonyl)-3-phenyl-8-acetyl-2,8-diaza-5-thiaspiro[3.4]octane-1-one" .
+_:structured.name-common1-200907065037422481-2
+	dc:language "E" ;
+	rdfs:label "(3R,4S)-2-(Phenylsulfonyl)-8-acetyl-3-phenyl-5-thia-2,8-diazaspiro[3.4]octane-1-one" .
+_:alt-label1-200907065037422481-1
+	xl:literalForm "(3R,4S)-2-(Phenylsulfonyl)-3-phenyl-8-acetyl-2,8-diaza-5-thiaspiro[3.4]octane-1-one" .
+_:alt-label1-200907065037422481-2
+	xl:literalForm "(3R,4S)-2-(フェニルスルホニル)-3-フェニル-8-アセチル-2,8-ジアザ-5-チアスピロ[3.4]オクタン-1-オン" .
+_:alt-label1-200907065037422481-3
+	xl:literalForm "(3R,4S)-2-(Phenylsulfonyl)-8-acetyl-3-phenyl-5-thia-2,8-diazaspiro[3.4]octane-1-one" .
+_:alt-label1-200907065037422481-4
+	xl:literalForm "(3R,4S)-2-(フェニルスルホニル)-8-アセチル-3-フェニル-5-チア-2,8-ジアザスピロ[3.4]オクタン-1-オン" .
+<http://stirdf.jst.go.jp/id/200907065038101140>
+	rdf:type jst:Chemical ;
+	jst:nikkaji-ID-registry "00213821B" ;
+	rdfs:label "2-エチルヘキサン酸フェニル水銀(II)"@ja, "2-Ethylhexanoic acid phenylmercury(II) salt"@en ;
+	jst:chem-formula "C<sub>14</sub>H<sub>20</sub>HgO<sub>2</sub>"^^rdfs:Literal, "C14-H20-HG-O2" ;
+	jst:molar-weight "420.902"^^xsd:float ;
+	jst:nikkaji-number "J213.821B" ;
+	dcterms:identifier "J213.821B" ;
+	jst:regulation-number "EINECS2363267", "TSCA(13302-00-6)" ;
+	jstd:systematic-name (_:structured.name-chemsys1-200907065038101140-1) ;
+	jst:systematic-name "2-エチルヘキサン酸フェニル水銀(II)"@ja ;
+	jstd:common-name (_:structured.name-common1-200907065038101140-1) ;
+	jst:common-name "2-Ethylhexanoic acid phenylmercury(II) salt"@en ;
+	foaf:depiction <http://api.jglobal.jst.go.jp/chemical/images//detail_large/002/138/J213.821B.png> ;
+	xl:altLabel  (_:alt-label1-200907065038101140-1 _:alt-label1-200907065038101140-2) ;
+	jst:substance-type "Decided Structure" ;
+	owl:sameAs <http://stirdf.jst.go.jp/cde/nikkaji/J213.821B> .
+_:structured.name-chemsys1-200907065038101140-1
+	dc:language "J" ;
+	rdfs:label "2-エチルヘキサン酸フェニル水銀(II)" ;
+	ndl:transcription "2-エチル#ヘキサン#サン#フエニル#スイギン(II)#" .
+_:structured.name-common1-200907065038101140-1
+	dc:language "E" ;
+	rdfs:label "2-Ethylhexanoic acid phenylmercury(II) salt" .
+_:alt-label1-200907065038101140-1
+	xl:literalForm "2-Ethylhexanoic acid phenylmercury(II) salt" .
+_:alt-label1-200907065038101140-2
+	xl:literalForm "2-エチルヘキサン酸フェニル水銀(II)" .
