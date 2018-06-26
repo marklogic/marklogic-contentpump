@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>mlcp</artifactId>
-  <version>9.0.5</version>
+  <version>9.0.6</version>
   <name>MarkLogic Content Pump</name>
   <description>MarkLogic Content Pump</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
@@ -19,13 +19,13 @@
   <parent>
     <groupId>com.marklogic</groupId>
     <artifactId>marklogic-contentpump</artifactId>
-    <version>9.0.5</version>
+    <version>9.0.6</version>
   </parent>
 
   <properties>
-    <versionString>9.0.5</versionString>
+    <versionString>9.0.6</versionString>
     <xccVersion>${versionString}</xccVersion>
-    <hadoopConnectorVersion>2.2.5</hadoopConnectorVersion>
+    <hadoopConnectorVersion>2.2.6</hadoopConnectorVersion>
     <skipTests>false</skipTests>
     <testExcludes>**/*TestDistributed*</testExcludes>
     <bundleArtifact>apache</bundleArtifact>
@@ -252,17 +252,17 @@
         <dependency>
           <groupId>org.apache.jena</groupId>
           <artifactId>jena-arq</artifactId>
-          <version>2.10.0</version>
+          <version>2.13.0</version>
         </dependency>
         <dependency>
           <groupId>org.apache.jena</groupId>
           <artifactId>jena-core</artifactId>
-          <version>2.10.0</version>
+          <version>2.13.0</version>
         </dependency>
         <dependency>
           <groupId>org.apache.jena</groupId>
           <artifactId>jena-iri</artifactId>
-          <version>0.9.5</version>
+          <version>1.1.2</version>
         </dependency>
         <dependency>
           <groupId>xml-apis</groupId>
@@ -442,17 +442,17 @@
     <dependency>
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-arq</artifactId>
-      <version>2.10.0</version>
+      <version>2.13.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-core</artifactId>
-      <version>2.10.0</version>
+      <version>2.13.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-iri</artifactId>
-      <version>0.9.5</version>
+      <version>1.1.2</version>
     </dependency>
     <dependency>
       <groupId>xml-apis</groupId>
