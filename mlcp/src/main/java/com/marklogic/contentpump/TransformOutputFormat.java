@@ -72,33 +72,36 @@ public class TransformOutputFormat<VALUEOUT> extends
                 ConfigConstants.CONF_MIMETYPES, LinkedMapWritable.class);
             return mimetypeMap;
         }
-        String host = conf.get(OUTPUT_HOST);
+        String[] hosts = conf.getStrings(OUTPUT_HOST);
         Session session = null;
         ResultSequence result = null;
         try {
-            ContentSource cs = InternalUtilities.getOutputContentSource(conf,
-                host);
-            session = cs.newSession();
-            AdhocQuery query = session.newAdhocQuery(MIMETYPES_QUERY);
-            RequestOptions options = new RequestOptions();
-            options.setDefaultXQueryVersion("1.0-ml");
-            query.setOptions(options);
-            result = session.submitRequest(query);
-            if (!result.hasNext()) {
-                throw new IOException(
-                    "Server-side transform requires MarkLogic 7 or later");
+            for (int i = 0; i < hosts.length; i++) {
+                String host = hosts[i];
+                ContentSource cs = InternalUtilities.getOutputContentSource(conf,
+                        host);
+                    session = cs.newSession();
+                    AdhocQuery query = session.newAdhocQuery(MIMETYPES_QUERY);
+                    RequestOptions options = new RequestOptions();
+                    options.setDefaultXQueryVersion("1.0-ml");
+                    query.setOptions(options);
+                    result = session.submitRequest(query);
+                    if (!result.hasNext()) {
+                        throw new IOException(
+                            "Server-side transform requires MarkLogic 7 or later");
+                    }
+                    mimetypeMap = new LinkedMapWritable();
+                    while (result.hasNext()) {
+                        String suffs = result.next().asString();
+                        Text format = new Text(result.next().asString());
+                        // some extensions are in a space separated string
+                        for (String s : suffs.split(" ")) {
+                            Text suff = new Text(s);
+                            mimetypeMap.put(suff, format);
+                        }
+                    }
+                    return mimetypeMap;
             }
-            mimetypeMap = new LinkedMapWritable();
-            while (result.hasNext()) {
-                String suffs = result.next().asString();
-                Text format = new Text(result.next().asString());
-                // some extensions are in a space separated string
-                for (String s : suffs.split(" ")) {
-                    Text suff = new Text(s);
-                    mimetypeMap.put(suff, format);
-                }
-            }
-            return mimetypeMap;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             throw new IOException(e);
@@ -110,6 +113,7 @@ public class TransformOutputFormat<VALUEOUT> extends
                 session.close();
             }
         }
+        return null;
     }
 
     @Override
