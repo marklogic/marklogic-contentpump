@@ -33,6 +33,7 @@ import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.ResultSequence;
 import com.marklogic.xcc.Session;
+import com.marklogic.xcc.exceptions.ServerConnectionException;
 
 /**
  * OutputFormat for content of transformation. Use this class to transform the
@@ -75,8 +76,9 @@ public class TransformOutputFormat<VALUEOUT> extends
         String[] hosts = conf.getStrings(OUTPUT_HOST);
         Session session = null;
         ResultSequence result = null;
-        try {
-            for (int i = 0; i < hosts.length; i++) {
+        
+        for (int i = 0; i < hosts.length; i++) {
+            try {
                 String host = hosts[i];
                 ContentSource cs = InternalUtilities.getOutputContentSource(conf,
                         host);
@@ -101,16 +103,21 @@ public class TransformOutputFormat<VALUEOUT> extends
                         }
                     }
                     return mimetypeMap;
-            }
-        } catch (Exception e) {
-            LOG.error(e.getMessage(), e);
-            throw new IOException(e);
-        } finally {
-            if (result != null) {
-                result.close();
-            }
-            if (session != null) {
-                session.close();
+            } catch (Exception e) {
+                if (e.getCause() instanceof ServerConnectionException) {
+                    LOG.warn("Unable to connect to " + hosts[i]
+                            + " to query destination information");
+                    continue;
+                }
+                LOG.error(e.getMessage(), e);
+                throw new IOException(e);
+            } finally {
+                if (result != null) {
+                    result.close();
+                }
+                if (session != null) {
+                    session.close();
+                }
             }
         }
         return null;
