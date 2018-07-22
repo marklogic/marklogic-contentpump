@@ -541,7 +541,21 @@ public class DatabaseContentReader extends
                         return true;
                     }
                 } catch (RuntimeException e) {
-                    LOG.error("RuntimeException:" + e);
+                    LOG.error("RuntimeException reading " + currentKey + " :" 
+                        + e);
+                    StringBuilder buf = new StringBuilder();
+                    if (hostNames.length > 1) {
+                        buf.append("host names: ");
+                    } else {
+                        buf.append("host name: ");
+                    }
+                    for (int i = 0; i < hostNames.length; i++) {
+                        if (i > 0) {
+                            buf.append(", ");
+                        }
+                        buf.append(hostNames[i]);
+                    }
+                    LOG.info(buf.toString());
                     if (curForest != -1) {
                         if (++retry < maxRetries) {
                             try {
