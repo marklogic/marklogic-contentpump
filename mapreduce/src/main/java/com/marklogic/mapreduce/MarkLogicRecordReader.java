@@ -127,6 +127,8 @@ implements MarkLogicConstants {
     
     protected void buildSearchQuery(String docExpr, String ctsQuery, 
             Collection<String> nsCol, StringBuilder buf) {
+        ctsQuery = ctsQuery.replaceAll("&", "&amp;");
+        ctsQuery = ctsQuery.replaceAll("'", "&apos;");
         if (docExpr == null) {
             docExpr = "fn:collection()";
         }
