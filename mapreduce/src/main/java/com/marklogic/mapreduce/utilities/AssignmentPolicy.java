@@ -29,7 +29,7 @@ public abstract class AssignmentPolicy {
     public static final Log LOG = LogFactory.getLog(AssignmentPolicy.class);
 
     public enum Kind {
-        LEGACY, BUCKET, RANGE, STATISTICAL, QUERY;
+        LEGACY, BUCKET, RANGE, STATISTICAL, QUERY, SEGMENT;
         public static Kind forName(String type) {
             for (Kind e : values()) {
                 if (e.toString().equalsIgnoreCase(type)) {
