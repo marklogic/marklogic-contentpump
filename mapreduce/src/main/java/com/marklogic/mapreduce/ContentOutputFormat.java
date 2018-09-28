@@ -467,7 +467,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             options.setDefaultXQueryVersion("1.0-ml");
             query.setOptions(options);
             if(LOG.isDebugEnabled()) {
-                LOG.debug(query.toString());
+                LOG.debug(query.getQuery());
             }
             result = session.submitRequest(query);
 
