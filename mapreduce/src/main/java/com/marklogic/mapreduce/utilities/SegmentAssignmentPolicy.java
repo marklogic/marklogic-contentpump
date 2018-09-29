@@ -52,7 +52,12 @@ public class SegmentAssignmentPolicy extends LegacyAssignmentPolicy {
             u ^= rotr(uriKey,53);
             u ^= rotr(uriKey,59);
             u ^= rotr(uriKey,61);
-            return (int) (u%size);
+            return (int) Long.remainderUnsigned(u,size);
         }
+    }
+    
+    @Override
+    public int getPlacementForestIndex(DocumentURI uri) {
+        return getPlacementId(uri, forests.length);
     }
 }
