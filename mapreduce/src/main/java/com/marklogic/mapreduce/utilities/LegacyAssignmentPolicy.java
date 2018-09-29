@@ -29,7 +29,7 @@ public class LegacyAssignmentPolicy extends AssignmentPolicy {
     private static final long HASH64_SEED = 0x39a51471f80aabf7l;
     private static final BigInteger URI_KEY_HASH = hash64("uri()");
 
-    private String[] forests;
+    protected String[] forests;
 
     public LegacyAssignmentPolicy() {
     }
