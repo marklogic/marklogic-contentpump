@@ -20,6 +20,7 @@ import java.nio.charset.Charset;
 import java.util.Random;
 
 import com.marklogic.contentpump.utilities.CommandlineOption;
+import com.marklogic.http.HttpChannel;
 import com.marklogic.contentpump.utilities.AuditUtil;
 
 import org.apache.commons.cli.CommandLine;
@@ -619,11 +620,14 @@ public enum Command implements ConfigConstants {
                 String restrict = cmdline.getOptionValue(RESTRICT_HOSTS);
                 if (restrict == null || "true".equalsIgnoreCase(restrict)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
+                    HttpChannel.setUseHTTP(true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + 
                                     RESTRICT_OUTPUT_HOSTS + ": " + restrict);
                 }
+            } else { // use HTTP compliant mode to true for initial probing
+                HttpChannel.setUseHTTP(true);
             }
             if (cmdline.hasOption(DATABASE)) {
                 String db = cmdline.getOptionValue(DATABASE);
@@ -1014,11 +1018,14 @@ public enum Command implements ConfigConstants {
                 String restrict = cmdline.getOptionValue(RESTRICT_HOSTS);
                 if (restrict == null || "true".equalsIgnoreCase(restrict)) {
                     conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
+                    HttpChannel.setUseHTTP(true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + 
                                     RESTRICT_INPUT_HOSTS + ": " + restrict);
                 }
+            } else { // use HTTP compliant mode to true for initial probing
+                HttpChannel.setUseHTTP(true);
             }
             if (cmdline.hasOption(USERNAME)) {
                 String user = cmdline.getOptionValue(USERNAME);
@@ -1333,11 +1340,14 @@ public enum Command implements ConfigConstants {
                 String restrict = cmdline.getOptionValue(RESTRICT_OUTPUT_HOSTS);
                 if (restrict == null || "true".equalsIgnoreCase(restrict)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
+                    HttpChannel.setUseHTTP(true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + 
                                     RESTRICT_OUTPUT_HOSTS + ": " + restrict);
                 }
+            } else { // use HTTP compliant mode to true for initial probing
+                HttpChannel.setUseHTTP(true);
             }
             if (cmdline.hasOption(OUTPUT_SSL)) {
                 String arg = cmdline.getOptionValue(OUTPUT_SSL);
@@ -1394,11 +1404,14 @@ public enum Command implements ConfigConstants {
                 String restrict = cmdline.getOptionValue(RESTRICT_INPUT_HOSTS);
                 if (restrict == null || "true".equalsIgnoreCase(restrict)) {
                     conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
+                    HttpChannel.setUseHTTP(true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + 
                                     RESTRICT_INPUT_HOSTS + ": " + restrict);
                 }
+            } else { // use HTTP compliant mode to true for initial probing
+                HttpChannel.setUseHTTP(true);
             }
             if (cmdline.hasOption(INPUT_SSL)) {
                 String arg = cmdline.getOptionValue(INPUT_SSL);
