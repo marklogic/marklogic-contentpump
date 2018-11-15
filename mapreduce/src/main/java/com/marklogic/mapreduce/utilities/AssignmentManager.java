@@ -88,6 +88,9 @@ public class AssignmentManager {
         case LEGACY:
             initLegacyPolicy(updatableForests);
             break;
+        case SEGMENT:
+            initSegmentPolicy(updatableForests);
+            break;
         case RANGE: {
             String[] uForests = updatableForests
                 .toArray(new String[updatableForests.size()]);
@@ -143,6 +146,10 @@ public class AssignmentManager {
 
     public void initLegacyPolicy(LinkedHashSet<String> uForests) {
         policy = new LegacyAssignmentPolicy(uForests);
+    }
+    
+    public void initSegmentPolicy(LinkedHashSet<String> uForests) {
+        policy = new SegmentAssignmentPolicy(uForests);
     }
 
     public int getPlacementForestIndex(DocumentURI uri) {
