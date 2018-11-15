@@ -28,7 +28,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 ### What's New in mlcp and Hadoop Connector 9.0.7
 
 - AWS Application Load Balancer support
-- ug fixes
+- Bug fixes
 
 ### What's New in mlcp and Hadoop Connector 9.0.6
 
