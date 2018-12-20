@@ -34,6 +34,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.http.HttpChannel;
 import com.marklogic.mapreduce.functions.LexiconFunction;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.RestrictedHostsUtil;
@@ -162,7 +163,8 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             ResultSequence result, 
             List<ForestSplit> forestSplits,
             List<String> ruleUris,
-            String[] inputHosts) throws IOException {
+            String[] inputHosts,
+            boolean getReplica) throws IOException {
         int count = 0;
         boolean restrictHosts = jobConf.getBoolean(INPUT_RESTRICT_HOSTS, false);
         RestrictedHostsUtil rhUtil = restrictHosts?new RestrictedHostsUtil(inputHosts):null;
@@ -226,7 +228,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
 
         // forest with failover hosts
-        if (!restrictHosts) {
+        if (getReplica) {
             String forest = "";
             String hostName = "";
             HashMap<String, List<ForestHost> > 
@@ -267,11 +269,13 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     }
                     forestHostMap.put(forest,replicas);
                 }
+            } // while (result.hasNext())
+            if (!restrictHosts) {
+                for (ForestSplit split : forestSplits) {
+                    split.replicas = forestHostMap.get(split.forestId.toString());
+                }
             }
-            for (ForestSplit split : forestSplits) {
-                split.replicas = forestHostMap.get(split.forestId.toString());
-            }
-        }
+        } // if (getReplica)
     }
     
     protected void appendCustom(StringBuilder buf) {
@@ -291,7 +295,13 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         jobConf = jobContext.getConfiguration();        
         boolean advancedMode = 
                 jobConf.get(INPUT_MODE, BASIC_MODE).equals(ADVANCED_MODE);
-        boolean restrictHosts = jobConf.getBoolean(INPUT_RESTRICT_HOSTS, false);
+        String restrictHostsString = jobConf.getTrimmed(INPUT_RESTRICT_HOSTS);
+        boolean restrictHosts = false;
+        if (restrictHostsString!=null && !restrictHostsString.isEmpty()) {
+            restrictHosts = Boolean.parseBoolean(restrictHostsString);
+        }
+        boolean getForwardHeader = restrictHostsString == null;
+        boolean getReplica = !restrictHosts;
         String splitQuery;
         String queryLanguage = null;
         String[] redactionRuleCol = jobConf.getStrings(REDACTION_RULE_COLLECTION);
@@ -306,6 +316,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         } else {
             StringBuilder buf = new StringBuilder();
             buf.append("xquery version \"1.0-ml\";\n");
+            if (getForwardHeader) {
+                buf.append("fn:exists(xdmp:get-request-header('x-forwarded-for'));\n");
+            }
             buf.append("import module namespace hadoop = ");
             buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
             buf.append("\"/MarkLogic/hadoop.xqy\";\n");
@@ -382,9 +395,20 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 }
                 query.setOptions(options);
                 result = session.submitRequest(query);
-                
+                boolean forwardHeaderExists = false;
                 if (!advancedMode && result.hasNext()) {
                     ResultItem item = result.next();
+                    if (getForwardHeader) {
+                        forwardHeaderExists = item.asString().equals("true");
+                        item = result.next();
+                        if (forwardHeaderExists) {
+                            restrictHosts = true;
+                            jobConf.setBoolean(INPUT_RESTRICT_HOSTS, true);
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("HTTP compliant mode enabled since x-forwarded-for exists");
+                            }
+                        } // delay disable http mode since the output host may need it
+                    }
                     localHost = item.asString();
                 }
                 List<String> ruleUris = null;
@@ -392,7 +416,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     ruleUris = new ArrayList<String>();
                 }
                 getForestSplits(jobContext, result, forestSplits,
-                        ruleUris, inputHosts);
+                        ruleUris, inputHosts, getReplica);
                 LOG.info("Fetched " + forestSplits.size() +
                         " forest splits.");
                 break;

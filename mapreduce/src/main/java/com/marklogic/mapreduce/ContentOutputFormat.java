@@ -30,6 +30,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
+import com.marklogic.http.HttpChannel;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.AssignmentPolicy;
 import com.marklogic.mapreduce.utilities.ForestInfo;
@@ -113,6 +114,8 @@ public class ContentOutputFormat<VALUEOUT> extends
       + "let $f := "
       + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
       + "return if (exists($f)) then $f() else ()";
+    public static final String HEADER_QUERY =
+        "fn:exists(xdmp:get-request-header('x-forwarded-for'))";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;
@@ -162,9 +165,15 @@ public class ContentOutputFormat<VALUEOUT> extends
                     }
                 }
             }
-            boolean restrictHosts = conf.getBoolean(OUTPUT_RESTRICT_HOSTS, false);
+            String restrictHostsString = conf.getTrimmed(OUTPUT_RESTRICT_HOSTS);
+            boolean restrictHosts = false;
+            if (restrictHostsString!=null && !restrictHostsString.isEmpty()) {
+                restrictHosts = Boolean.parseBoolean(restrictHostsString);
+            }
+            boolean getForwardHeader = restrictHostsString == null;
+            
             // initialize server host name and assignment policy
-            initialize(session, restrictHosts);
+            restrictHosts = initialize(session, restrictHosts, getForwardHeader);
             
             // ensure manual directory creation 
             if (fastLoad) {
@@ -346,19 +355,52 @@ public class ContentOutputFormat<VALUEOUT> extends
      * Initialize initial server host name, assignment policy and fastload.
      * 
      * @param session
+     * @return true if restrict_hosts is to be enabled; false otherwise
      * @throws IOException
      * @throws RequestException
      */
-    protected void initialize(Session session, boolean restrictHosts)
+    protected boolean initialize(Session session, boolean restrictHosts, 
+            boolean getForwardHeader)
         throws IOException, RequestException {
-        AdhocQuery query = session.newAdhocQuery(INIT_QUERY);
+        String queryText = INIT_QUERY;
+        if (getForwardHeader) {
+            StringBuilder buf = new StringBuilder();
+            buf.append(HEADER_QUERY).append(";\n").append(queryText);
+            queryText = buf.toString();
+        }
+        AdhocQuery query = session.newAdhocQuery(queryText);
         RequestOptions options = new RequestOptions();
         options.setDefaultXQueryVersion("1.0-ml");
         query.setOptions(options);
         ResultSequence result = null;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("init query: \n" + query.getQuery());
+        }
         result = session.submitRequest(query);
 
         ResultItem item = result.next();
+        boolean forwardHeaderExists = false;
+        if (getForwardHeader) {
+            forwardHeaderExists = item.asString().equals("true");
+            item = result.next();
+            if (forwardHeaderExists) {
+                restrictHosts = true;
+                conf.setBoolean(OUTPUT_RESTRICT_HOSTS, true);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("HTTP compliant mode enabled since x-forwarded-for exists");
+                }
+            } else {
+                // check if input needs to be in HTTP compliant mode
+                String inputRestrictHost = conf.getTrimmed(INPUT_RESTRICT_HOSTS);
+                if (inputRestrictHost == null || 
+                    inputRestrictHost.equalsIgnoreCase("false")) {
+                    HttpChannel.setUseHTTP(false);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("HTTP compliant mode disabled since x-forwarded-for doesn't exist");
+                    }
+                }
+            }
+        }
         initHostName = item.asString();
         item = result.next();
         am.setEffectiveVersion(((XSInteger)item.getItem()).asLong());
@@ -415,6 +457,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             }
         }
         conf.setBoolean(OUTPUT_FAST_LOAD, fastLoad);
+        return restrictHosts;
     }
 
     /**
@@ -467,7 +510,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             options.setDefaultXQueryVersion("1.0-ml");
             query.setOptions(options);
             if(LOG.isDebugEnabled()) {
-                LOG.debug(query.toString());
+                LOG.debug(query.getQuery());
             }
             result = session.submitRequest(query);
 
