@@ -73,9 +73,11 @@ extends com.marklogic.mapreduce.DocumentInputFormat<VALUEIN> {
             ResultSequence result, 
             List<ForestSplit> forestSplits,
             List<String> ruleUris,
-            String[] inputHosts) throws IOException {
+            String[] inputHosts,
+            boolean getReplica) throws IOException {
         Configuration jobConf = jobContext.getConfiguration();
-        super.getForestSplits(jobContext, result, forestSplits, ruleUris, inputHosts);
+        super.getForestSplits(jobContext, result, forestSplits, ruleUris,
+            inputHosts, getReplica);
         // Third while loop: audit settings
         while (result.hasNext()) {
             ResultItem item = result.next();

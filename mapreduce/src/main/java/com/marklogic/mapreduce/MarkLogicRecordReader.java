@@ -391,7 +391,7 @@ implements MarkLogicConstants {
                 }
             }
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Input query: " + query.toString());
+                LOG.debug("Input query: " + query.getQuery());
             }
             query.setOptions(options);       
             result = session.submitRequest(query);
