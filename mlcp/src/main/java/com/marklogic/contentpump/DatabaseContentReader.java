@@ -368,7 +368,7 @@ public class DatabaseContentReader extends
             buf.append("(let $f := fn:function-lookup(xs:QName('xdmp:document-get-metadata'),1)\n"
                     + "return if (exists($f)) then $f($uri) else ()),\n");
         }
-        buf.append("document {$doc/*}/*, \n");
+        buf.append("document {$doc/prop:properties}/*, \n");
 
         // end-of-record marker
         buf.append("0");
