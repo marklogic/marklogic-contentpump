@@ -47,7 +47,7 @@
   </fileSets>
   <files>
     <file>
-      <source>LEGALNOTICES.txt</source>
+      <source>NOTICE.txt</source>
       <outputDirectory>${file.separator}</outputDirectory>
     </file>
     <file>
