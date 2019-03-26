@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2018 MarkLogic Corporation
+ * Copyright 2003-2019 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -368,7 +368,7 @@ public class DatabaseContentReader extends
             buf.append("(let $f := fn:function-lookup(xs:QName('xdmp:document-get-metadata'),1)\n"
                     + "return if (exists($f)) then $f($uri) else ()),\n");
         }
-        buf.append("$doc/prop:properties, \n");
+        buf.append("document {$doc/prop:properties}/*, \n");
 
         // end-of-record marker
         buf.append("0");

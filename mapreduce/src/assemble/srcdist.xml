@@ -33,7 +33,7 @@
        <outputDirectory>${file.separator}</outputDirectory> 
     </file>
     <file>
-       <source>LEGALNOTICES.txt</source>
+       <source>NOTICE.txt</source>
        <outputDirectory>${file.separator}</outputDirectory> 
     </file>
   </files>
