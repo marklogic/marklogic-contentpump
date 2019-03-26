@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2018 MarkLogic Corporation
+ * Copyright 2003-2019 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ public class DelimitedTextReader<VALUEIN> extends
     protected boolean compressed;
     protected DocBuilder docBuilder;
     protected Iterator<CSVRecord> parserIterator;
+    private int prevLineNumber = 1;
     
     @Override
     public void close() throws IOException {
@@ -233,6 +234,10 @@ public class DelimitedTextReader<VALUEIN> extends
                 values = getLine();
             }
             int line = (int)parser.getCurrentLineNumber();
+            // If the CSVParser is giving the same line number as previous
+            // because there is no newline char at EOF, manually increase it.
+            if (line == prevLineNumber) line++;
+            prevLineNumber = line;
             if (values.length != fields.length) {
                 setSkipKey(line, 0, 
                         "number of fields does not match number of columns");
