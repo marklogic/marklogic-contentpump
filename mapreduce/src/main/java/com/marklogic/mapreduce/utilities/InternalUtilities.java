@@ -144,7 +144,7 @@ public class InternalUtilities implements MarkLogicConstants {
                         (SslConfigOptions)ReflectionUtils.newInstance(
                                 sslOptionClass, conf);
             } else {
-                String ssl_protocol = conf.get(INPUT_SSL_PROTOCOL, "TLS");
+                String ssl_protocol = conf.get(INPUT_SSL_PROTOCOL, "TLSv1.2");
                 inputSslOptions = new TrustAnyoneOptions( ssl_protocol );
             }
             return inputSslOptions;
@@ -167,7 +167,7 @@ public class InternalUtilities implements MarkLogicConstants {
                         (SslConfigOptions)ReflectionUtils.newInstance(
                                 sslOptionClass, conf);
             } else {
-                String ssl_protocol = conf.get(OUTPUT_SSL_PROTOCOL, "SSLv3");
+                String ssl_protocol = conf.get(OUTPUT_SSL_PROTOCOL, "TLSv1.2");
                 outputSslOptions = new TrustAnyoneOptions(ssl_protocol);
             }
             return outputSslOptions;
