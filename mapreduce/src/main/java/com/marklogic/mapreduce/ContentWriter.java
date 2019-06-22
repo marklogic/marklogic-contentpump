@@ -750,8 +750,7 @@ implements MarkLogicConstants {
                     try {
                         commit(i);
                         sessions[i].close();
-                    } catch (Throwable e) {
-                        LOG.error("Error committing transaction: ", e);
+                    } catch (Exception e) {
                     }
                 } else {
                     sessions[i].close();

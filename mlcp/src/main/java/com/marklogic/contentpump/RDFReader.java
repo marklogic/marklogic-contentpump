@@ -125,6 +125,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected Random random;
     protected long randomValue;
     protected long milliSecs;
+    private long HASH64_STEP = 15485863L;
 
     protected String origFn;
     // Tracks input filename even in the CompressedRDFReader case
@@ -420,10 +421,18 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         return x^rotl(x,20)^rotl(x,40);
     }
 
+    private long hash64(long value, String str) {
+        char[] arr = str.toCharArray();
+        for (int i = 0; i < str.length(); i++) {
+            value = (value + Character.getNumericValue(arr[i])) * HASH64_STEP;
+        }
+        return value;
+    }
+
     protected String resource(Node rsrc) {
         if (rsrc.isBlank()) {
             return "http://marklogic.com/semantics/blank/" + Long.toHexString(
-                        fuse(scramble((long)rsrc.hashCode()),fuse(scramble(milliSecs),randomValue)));
+                        hash64(fuse(scramble(milliSecs),randomValue), rsrc.getBlankNodeLabel()));
         } else {
             return escapeXml(rsrc.toString());
         }
@@ -437,7 +446,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private String resource(Resource rsrc) {
         if (rsrc.isAnon()) {
             return "http://marklogic.com/semantics/blank/" + Long.toHexString(
-                    fuse(scramble((long)rsrc.hashCode()),fuse(scramble(milliSecs),randomValue)));
+                    hash64(fuse(scramble(milliSecs),randomValue), rsrc.getId().getLabelString()));
         } else {
             return escapeXml(rsrc.toString());
         }
@@ -488,7 +497,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             return "<sem:object" + type + lang + ">" + escapeXml(text) + "</sem:object>";
         } else if (node.isBlank()) {
             return "<sem:object>http://marklogic.com/semantics/blank/" + Long.toHexString(
-                    fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
+                    hash64(fuse(scramble(milliSecs),randomValue), node.getBlankNodeLabel()))
                     +"</sem:object>";
         } else {
             return "<sem:object>" + escapeXml(node.toString()) + "</sem:object>";
@@ -520,7 +529,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             return "<sem:object" + type + lang + ">" + escapeXml(text) + "</sem:object>";
         } else if (node.isAnon()) {
             return "<sem:object>http://marklogic.com/semantics/blank/" + Long.toHexString(
-                    fuse(scramble((long)node.hashCode()),fuse(scramble(milliSecs),randomValue)))
+                    hash64(fuse(scramble(milliSecs),randomValue), node.toString()))
                     +"</sem:object>";
         } else {
             return "<sem:object>" + escapeXml(node.toString()) + "</sem:object>";

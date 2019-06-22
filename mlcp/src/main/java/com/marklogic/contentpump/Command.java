@@ -278,17 +278,6 @@ public enum Command implements ConfigConstants {
                     .create(THREADS_PER_SPLIT);
             options.addOption(threadsPerSplit);
 
-            Option tolerateErrors_opt = OptionBuilder
-                .withArgName("true,false")
-                .hasOptionalArg()
-                .withDescription(
-                    "Whether to tolerate insertion errors and make sure all "
-                    + "successful inserts are committed")
-                .create(TOLERATE_ERRORS);
-            CommandlineOption tolerateErrors = new CommandlineOption(tolerateErrors_opt);
-            tolerateErrors.setHidden(true);
-            options.addOption(tolerateErrors);
-
             Option rdfMemoryThreshold_opt = OptionBuilder
                     .withArgName("number")
                     .hasArg()
@@ -772,19 +761,6 @@ public enum Command implements ConfigConstants {
                         "Cannot ingest RDF into temporal collection");
                 }
             }
-            if (cmdline.hasOption(TOLERATE_ERRORS)) {
-                String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
-                    conf.setBoolean(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, true);
-                } else if (arg.equalsIgnoreCase("false")) {
-                    conf.setBoolean(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, false);
-                } else {
-                    throw new IllegalArgumentException(
-                            "Unrecognized option argument for " + TOLERATE_ERRORS
-                                    + ": " + arg);
-                }
-            }
-            
             applyPartitionConfigOptions(conf, cmdline);
         
             applyModuleConfigOptions(conf, cmdline);
@@ -1259,16 +1235,6 @@ public enum Command implements ConfigConstants {
                 .withDescription("Output directory in MarkLogic.")
                 .create(OUTPUT_DIRECTORY);
             options.addOption(outputDir);
-            Option tolerateErrors_opt = OptionBuilder
-                .withArgName("tolerate errors")
-                .hasOptionalArg()
-                .withDescription(
-                    "Whether to tolerate insertion errors and make sure all "
-                    + "successful inserts are committed")
-                .create(TOLERATE_ERRORS);
-            CommandlineOption tolerateErrors = new CommandlineOption(tolerateErrors_opt);
-            tolerateErrors.setHidden(true);
-            options.addOption(tolerateErrors);
             
             configPartition(options);
             
@@ -1495,10 +1461,6 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(OUTPUT_DIRECTORY)) {
                 String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
                 conf.set(MarkLogicConstants.OUTPUT_DIRECTORY, outDir);
-            }
-            if (cmdline.hasOption(TOLERATE_ERRORS)) {
-                String arg = cmdline.getOptionValue(TOLERATE_ERRORS);
-                conf.set(MarkLogicConstants.OUTPUT_TOLERATE_ERRORS, arg);
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 InputType inputType = getInputType(cmdline);   

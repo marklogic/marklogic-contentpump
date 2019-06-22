@@ -784,13 +784,6 @@ public interface MarkLogicConstants {
         "mapreduce.marklogic.output.content.repairlevel";
     /**
      * The config property name (<code>{@value}</code>)
-     * which, if set, specifies whether to tolerate insertion errors and 
-     * make sure all successful inserts are committed. 
-     */
-    static final String OUTPUT_TOLERATE_ERRORS = 
-        "mapreduce.marklogic.output.content.tolerateerrors";
-    /**
-     * The config property name (<code>{@value}</code>)
      * which, if set, specifies the partition  
      * where output documents are created. 
      */
