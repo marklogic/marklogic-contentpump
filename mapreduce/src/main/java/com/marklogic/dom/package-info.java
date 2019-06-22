@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 /**
- * This package provides W3C DOM based APIs to the
+ * This package provides W3C DOM based APIs to 
  * the internal on-disk representation of documents and their
  * contents in the expanded tree cache of a MarkLogic database
  * forest. 

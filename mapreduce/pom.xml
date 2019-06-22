@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>marklogic-mapreduce2</artifactId>
-  <version>2.2.9</version>
+  <version>2.3.1</version>
   <name>${productName}</name>
   <description>MarkLogic Connector for Hadoop MapReduce</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
@@ -16,22 +16,43 @@
     </license>
   </licenses>
 
+  <developers>
+    <developer>
+      <name>MarkLogic Github Contributors</name>
+      <email>general@developer.marklogic.com</email>
+      <organization>Github Contributors</organization>
+      <organizationUrl>
+        https://github.com/marklogic/marklogic-contentpump/graphs/contributors
+      </organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>
+      scm:git:git@github.com:marklogic/marklogic-contentpump.git
+    </connection>
+    <developerConnection>
+      scm:git:git@github.com:marklogic/marklogic-contentpump.git
+    </developerConnection>
+    <url>git@github.com:marklogic/marklogic-contentpump.git</url>
+  </scm>
+
   <parent>
     <groupId>com.marklogic</groupId>
     <artifactId>marklogic-contentpump</artifactId>
-    <version>9.0.9</version>
+    <version>10.0.1</version>
   </parent>
 
   <properties>
     <!-- Global definitions -->
     <productName>MarkLogic Connector for Hadoop</productName>
     <productNameShort>MarkLogic Connector for Hadoop</productNameShort>
-    <versionString>2.2.9</versionString>
+    <versionString>2.3.1</versionString>
     <jarVersionNumberString>${versionString}</jarVersionNumberString>
     <dateString>${maven.build.timestamp}</dateString>
     <libdir>${basedir}/src/lib</libdir>
     <skipTests>true</skipTests>
-    <xccVersion>9.0.9</xccVersion>
+    <xccVersion>10.0.1</xccVersion>
     <deliverableName>Connector-for-Hadoop2</deliverableName>
 
     <!-- Static definitions of where things are relative to the root -->
@@ -96,8 +117,8 @@
           <failOnError>true</failOnError>
           <showDeprecation>true</showDeprecation>
           <debug>${compileDebugSymbolsFlag}</debug>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>

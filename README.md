@@ -21,6 +21,11 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Release Note
 
+### What's New in mlcp and Hadoop Connector 10.0.1
+
+-  Libraries upgrade
+-	Bug fixes
+
 ### What's New in mlcp and Hadoop Connector 9.0.9
 
 -	Bug fixes
@@ -30,14 +35,10 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 -	mlcp more load balancer friendly
 -	Bug fixes
 
-### What's New in mlcp and Hadoop Connector 9.0.7.2
-
-- Fastload support for segment assignment policy
-
 ### What's New in mlcp and Hadoop Connector 9.0.7
 
 - AWS Application Load Balancer support
-- Bug fixes
+- bug fixes
 
 ### What's New in mlcp and Hadoop Connector 9.0.6
 
@@ -91,8 +92,8 @@ Wiki pages of this project contain useful information when you work on developme
 
 ## Required Software
 
-- [Required Software for the Hadoop Connector](http://docs.marklogic.com/9.0/guide/mapreduce/quickstart#id_78738)
-- [Required Software for mlcp](http://docs.marklogic.com/9.0/guide/mlcp/install#id_44231)
+- [Required Software for the Hadoop Connector](http://docs.marklogic.com/guide/mapreduce/quickstart#id_78738)
+- [Required Software for mlcp](http://pubs.marklogic.com:8011/9.0/guide/mlcp/install#id_44231)
 - [Apache Maven](https://maven.apache.org/) (version >= 3.03) is required to build mlcp and the Hadoop Connector.
 
 ## Build
@@ -119,7 +120,7 @@ The unit tests included in this repository are designed to provide illustrative 
 $ mvn test
 ```
 
-For detailed information about running unit tests, see [Guideline to Running Tests](https://github.com/marklogic/marklogic-contentpump/wiki/Guideline-to-Run-Tests).
+For detailed information about running unit tests, see [Guideline to Run Tests](https://github.com/marklogic/marklogic-contentpump/wiki/Guide-to-Running-Tests).
 
 ## Have a question? Need help?
 
