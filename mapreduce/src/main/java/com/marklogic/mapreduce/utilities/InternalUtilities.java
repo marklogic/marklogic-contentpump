@@ -16,73 +16,45 @@
 
 package com.marklogic.mapreduce.utilities;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
-
+import com.marklogic.mapreduce.*;
+import com.marklogic.xcc.*;
+import com.marklogic.xcc.exceptions.XccConfigException;
+import com.marklogic.xcc.types.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.BooleanWritable;
-import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.FloatWritable;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.VIntWritable;
-import org.apache.hadoop.io.VLongWritable;
-import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.MarkLogicConstants;
-import com.marklogic.mapreduce.DatabaseDocument;
-import com.marklogic.mapreduce.MarkLogicNode;
-import com.marklogic.mapreduce.SslConfigOptions;
-import com.marklogic.xcc.ContentSource;
-import com.marklogic.xcc.ContentSourceFactory;
-import com.marklogic.xcc.ResultItem;
-import com.marklogic.xcc.SecurityOptions;
-import com.marklogic.xcc.ValueFactory;
-import com.marklogic.xcc.exceptions.XccConfigException;
-import com.marklogic.xcc.types.ValueType;
-import com.marklogic.xcc.types.XSBase64Binary;
-import com.marklogic.xcc.types.XSBoolean;
-import com.marklogic.xcc.types.XSDouble;
-import com.marklogic.xcc.types.XSFloat;
-import com.marklogic.xcc.types.XSHexBinary;
-import com.marklogic.xcc.types.XSInteger;
-import com.marklogic.xcc.types.XdmBinary;
-import com.marklogic.xcc.types.XdmValue;
+import javax.net.ssl.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.URISyntaxException;
+import java.security.*;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 /**
  * Internal utilities shared by mapreduce package.  No need to document.
- * 
+ *
  * @author jchen
  */
 public class InternalUtilities implements MarkLogicConstants {
     public static final Log LOG =
-        LogFactory.getLog(InternalUtilities.class);
-    
+            LogFactory.getLog(InternalUtilities.class);
+
     static final String FOREST_HOST_MAP_QUERY =
-        "import module namespace hadoop = " +
-        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
-        "hadoop:get-forest-host-map()";
+            "import module namespace hadoop = " +
+                    "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+                    "hadoop:get-forest-host-map()";
 
     private static SslConfigOptions inputSslOptions;
     private static SslConfigOptions outputSslOptions;
 
     private static Object sslOptionsMutex = new Object();
-    
+
     /**
      * Get content source for input server.
      * @param conf job configuration.
@@ -91,29 +63,29 @@ public class InternalUtilities implements MarkLogicConstants {
      * @throws XccConfigException
      * @throws IOException
      */
-    public static ContentSource getInputContentSource(Configuration conf) 
-    throws URISyntaxException, XccConfigException, IOException {
+    public static ContentSource getInputContentSource(Configuration conf)
+            throws URISyntaxException, XccConfigException, IOException {
         String host = conf.getStrings(INPUT_HOST)[0];
         if (host == null || host.isEmpty()) {
-            throw new IllegalArgumentException(INPUT_HOST + 
+            throw new IllegalArgumentException(INPUT_HOST +
                     " is not specified.");
         }
-        
+
         return getInputContentSource(conf, host);
     }
-    
+
     /**
      * Get input content source.
      *
      * @param conf job configuration
      * @param host host to connect to
      * @return content source
-     * @throws IOException 
+     * @throws IOException
      * @throws XccConfigException
      */
     public static ContentSource getInputContentSource(Configuration conf,
-            String host) 
-    throws XccConfigException, IOException {      
+                                                      String host)
+            throws XccConfigException {
         String user = conf.get(INPUT_USERNAME, "");
         String password = conf.get(INPUT_PASSWORD, "");
         String port = conf.get(INPUT_PORT,"8000");
@@ -121,14 +93,14 @@ public class InternalUtilities implements MarkLogicConstants {
         int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
         if (useSsl) {
-            return getSecureContentSource(host, portInt, user, password, 
-                        db, getInputSslOptions(conf));
+            return getSecureContentSource(host, portInt, user, password,
+                    db, getInputSslOptions(conf));
         }
-        return ContentSourceFactory.newContentSource(host, portInt, 
+        return ContentSourceFactory.newContentSource(host, portInt,
                 user, password, db);
     }
-    
-    private static SslConfigOptions getInputSslOptions(Configuration conf) {
+
+    private static SslConfigOptions getInputSslOptions(Configuration conf) throws XccConfigException {
         if (null != inputSslOptions) {
             return inputSslOptions;
         }
@@ -136,22 +108,58 @@ public class InternalUtilities implements MarkLogicConstants {
             if (null != inputSslOptions) {
                 return inputSslOptions;
             }
-            Class<? extends SslConfigOptions> sslOptionClass = 
-                    conf.getClass(INPUT_SSL_OPTIONS_CLASS, 
-                    null, SslConfigOptions.class);
+            Class<? extends SslConfigOptions> sslOptionClass =
+                    conf.getClass(INPUT_SSL_OPTIONS_CLASS,
+                            null, SslConfigOptions.class);
             if (sslOptionClass != null) {
-                inputSslOptions = 
+                inputSslOptions =
                         (SslConfigOptions)ReflectionUtils.newInstance(
                                 sslOptionClass, conf);
             } else {
                 String ssl_protocol = conf.get(INPUT_SSL_PROTOCOL, "TLSv1.2");
-                inputSslOptions = new TrustAnyoneOptions( ssl_protocol );
+                String keystore_path = conf.get(INPUT_KEYSTORE_PATH, null);
+                String keystore_passwd = conf.get(INPUT_KEYSTORE_PASSWD, null);
+                String truststore_path = conf.get(INPUT_TRUSTSTORE_PATH, null);
+                String truststore_passwd = conf.get(INPUT_TRUSTSTORE_PASSWD, null);
+                if ((keystore_path == null) && (truststore_path == null) ) {
+                    inputSslOptions = new TrustAnyoneOptions(ssl_protocol);
+                } else {
+                    KeyManager[] keyManager = null;
+                    TrustManager[] trustManager = null;
+                    if (keystore_path != null) {
+                        if (keystore_passwd != null) {
+                            try {
+                                keyManager = getUserKeyManager(keystore_path, keystore_passwd);
+                            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException e) {
+                                throw new XccConfigException("Error constructing SecurityOptions",e);
+                            }
+                        } else {
+                            throw new IllegalArgumentException(INPUT_KEYSTORE_PASSWD +
+                                    " is not specified.");
+                        }
+                    }
+                    if (truststore_path != null) {
+                        if (truststore_passwd != null) {
+                            try {
+                                trustManager = getUserTrustManager(truststore_path,truststore_passwd);
+                            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+                                throw new XccConfigException("Error constructing SecurityOptions", e);
+                            }
+                        }else {
+                            throw new IllegalArgumentException(INPUT_TRUSTSTORE_PASSWD +
+                                    " is not specified.");
+                        }
+                    } else {
+                        trustManager = getTrustAnyoneManager();
+                    }
+                    inputSslOptions = new UserTrustOptions(ssl_protocol, keyManager, trustManager);
+                }
             }
             return inputSslOptions;
         }
     }
-    
-    private static SslConfigOptions getOutputSslOptions(Configuration conf) {
+
+    private static SslConfigOptions getOutputSslOptions(Configuration conf) throws XccConfigException {
         if (null != outputSslOptions) {
             return outputSslOptions;
         }
@@ -159,21 +167,86 @@ public class InternalUtilities implements MarkLogicConstants {
             if (null != outputSslOptions) {
                 return outputSslOptions;
             }
-            Class<? extends SslConfigOptions> sslOptionClass = 
-                    conf.getClass(OUTPUT_SSL_OPTIONS_CLASS, 
-                    null, SslConfigOptions.class);
+            Class<? extends SslConfigOptions> sslOptionClass =
+                    conf.getClass(OUTPUT_SSL_OPTIONS_CLASS,
+                            null, SslConfigOptions.class);
             if (sslOptionClass != null) {
-                outputSslOptions = 
+                outputSslOptions =
                         (SslConfigOptions)ReflectionUtils.newInstance(
                                 sslOptionClass, conf);
             } else {
                 String ssl_protocol = conf.get(OUTPUT_SSL_PROTOCOL, "TLSv1.2");
-                outputSslOptions = new TrustAnyoneOptions(ssl_protocol);
+                String keystore_path = conf.get(OUTPUT_KEYSTORE_PATH, null);
+                String keystore_passwd = conf.get(OUTPUT_KEYSTORE_PASSWD, null);
+                String truststore_path = conf.get(OUTPUT_TRUSTSTORE_PATH, null);
+                String truststore_passwd = conf.get(OUTPUT_TRUSTSTORE_PASSWD, null);
+                if ((keystore_path == null) && (truststore_path == null) ) {
+                    outputSslOptions = new TrustAnyoneOptions(ssl_protocol);
+                } else {
+                    KeyManager[] keyManager = null;
+                    TrustManager[] trustManager = null;
+                    if (keystore_path != null) {
+                        if (keystore_passwd != null) {
+                            try {
+                                keyManager = getUserKeyManager(keystore_path, keystore_passwd);
+                            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException e) {
+                                throw new XccConfigException("Error constructing SecurityOptions",e);
+                            }
+                        } else {
+                            throw new IllegalArgumentException(OUTPUT_KEYSTORE_PASSWD +
+                                    " is not specified.");
+                        }
+                    }
+                    if (truststore_path != null) {
+                        if (truststore_passwd != null) {
+                            try {
+                                trustManager = getUserTrustManager(truststore_path,truststore_passwd);
+                            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+                                throw new XccConfigException("Error constructing SecurityOptions", e);
+                            }
+                        }else {
+                            throw new IllegalArgumentException(OUTPUT_TRUSTSTORE_PASSWD +
+                                    " is not specified.");
+                        }
+                    } else {
+                        trustManager = getTrustAnyoneManager();
+                    }
+                    outputSslOptions = new UserTrustOptions(ssl_protocol, keyManager, trustManager);
+                }
             }
             return outputSslOptions;
         }
     }
-    
+
+    static class UserTrustOptions implements SslConfigOptions {
+        String sslprotocol;
+        KeyManager[] keymanager;
+        TrustManager[] trustmanager;
+
+        public UserTrustOptions(String sslprotocol, KeyManager[] keymanager, TrustManager[] trustmanager) {
+            this.sslprotocol = sslprotocol;
+            this.keymanager = keymanager;
+            this.trustmanager = trustmanager;
+        }
+        @Override
+        public SSLContext getSslContext() throws NoSuchAlgorithmException,
+                KeyManagementException {
+            SSLContext sslContext = SSLContext.getInstance(sslprotocol);
+            sslContext.init(keymanager, trustmanager, null);
+
+            return sslContext;
+        }
+        @Override
+        public String[] getEnabledProtocols() {
+            return null;
+        }
+
+        @Override
+        public String[] getEnabledCipherSuites() {
+            return null;
+        }
+    }
+
     static class TrustAnyoneOptions implements SslConfigOptions {
         String sslprotocol;
         public TrustAnyoneOptions(String sslprotocol) {
@@ -182,29 +255,8 @@ public class InternalUtilities implements MarkLogicConstants {
         @Override
         public SSLContext getSslContext() throws NoSuchAlgorithmException,
                 KeyManagementException {
-            TrustManager[] trust = new TrustManager[] { new X509TrustManager() {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-                /**
-                 * @throws CertificateException
-                 */
-                public void checkClientTrusted(
-                        java.security.cert.X509Certificate[] certs,
-                        String authType) throws CertificateException {
-                    // no exception means it's okay
-                }
-                /**
-                 * @throws CertificateException
-                 */
-                public void checkServerTrusted(
-                        java.security.cert.X509Certificate[] certs,
-                        String authType) throws CertificateException {
-                    // no exception means it's okay
-                }
-            } };
             SSLContext sslContext = SSLContext.getInstance(sslprotocol);
-            sslContext.init(null, trust, null);
+            sslContext.init(null, getTrustAnyoneManager(), null);
 
             return sslContext;
         }
@@ -220,12 +272,54 @@ public class InternalUtilities implements MarkLogicConstants {
         }
     }
 
+    private static KeyManager[] getUserKeyManager(String path, String password) throws KeyStoreException, IOException,
+            NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+        KeyStore ks = KeyStore.getInstance("JKS");
+        ks.load(new FileInputStream(path), password.toCharArray());
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(ks, password.toCharArray());
+        return kmf.getKeyManagers();
+    }
+
+    private static TrustManager[] getUserTrustManager(String path, String password) throws KeyStoreException,
+            IOException, NoSuchAlgorithmException, CertificateException {
+        KeyStore ks = KeyStore.getInstance("JKS");
+        ks.load(new FileInputStream(path), password.toCharArray());
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+        tmf.init(ks);
+        return tmf.getTrustManagers();
+    }
+
+    private static TrustManager[] getTrustAnyoneManager() {
+        return new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+            }
+            /**
+             * @throws CertificateException
+             */
+            public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] certs,
+                    String authType) throws CertificateException {
+                // no exception means it's okay
+            }
+            /**
+             * @throws CertificateException
+             */
+            public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] certs,
+                    String authType) throws CertificateException {
+                // no exception means it's okay
+            }
+        } };
+    }
+
     static ContentSource getSecureContentSource(String host, int port,
-            String user, String password, String db, 
-            SslConfigOptions sslOptions) 
-    throws XccConfigException {
+                                                String user, String password, String db,
+                                                SslConfigOptions sslOptions)
+            throws XccConfigException {
         ContentSource contentSource = null;
-      
+
         // construct XCC SecurityOptions
         SecurityOptions options;
         try {
@@ -236,14 +330,14 @@ public class InternalUtilities implements MarkLogicConstants {
         }
         options.setEnabledCipherSuites(sslOptions.getEnabledCipherSuites());
         options.setEnabledProtocols(sslOptions.getEnabledProtocols());
-  
+
         // construct content source
         contentSource = ContentSourceFactory.newContentSource(
-                host, port, user, password, db, options);        
- 
+                host, port, user, password, db, options);
+
         return contentSource;
     }
-    
+
     /**
      * Assign value in Writable type from XCC result item.
      * @param <VALUEIN>
@@ -251,8 +345,8 @@ public class InternalUtilities implements MarkLogicConstants {
      * @param result
      * @param value
      */
-    public static <VALUEIN> void assignResultValue(Class<? extends Writable> valueClass, 
-            ResultItem result, VALUEIN value) {
+    public static <VALUEIN> void assignResultValue(Class<? extends Writable> valueClass,
+                                                   ResultItem result, VALUEIN value) {
         if (valueClass.equals(Text.class)) {
             ((Text)value).set(result.asString());
         } else if (valueClass.equals(IntWritable.class) &&
@@ -299,16 +393,16 @@ public class InternalUtilities implements MarkLogicConstants {
             ((BytesWritable)value).set(bytes, 0, bytes.length);
         } else if (valueClass.equals(MarkLogicNode.class) &&
                 (result.getValueType() == ValueType.NODE ||
-                 result.getValueType() == ValueType.ELEMENT ||
-                 result.getValueType() == ValueType.DOCUMENT ||
-                 result.getValueType() == ValueType.ATTRIBUTE ||
-                 result.getValueType() == ValueType.TEXT)) {
+                        result.getValueType() == ValueType.ELEMENT ||
+                        result.getValueType() == ValueType.DOCUMENT ||
+                        result.getValueType() == ValueType.ATTRIBUTE ||
+                        result.getValueType() == ValueType.TEXT)) {
             ((MarkLogicNode)value).set(result);
         } else if (valueClass.equals(DatabaseDocument.class)) {
             ((DatabaseDocument) value).set(result);
         } else {
-            throw new UnsupportedOperationException("Value " +  
-                    valueClass + " is unsupported for result type: " + 
+            throw new UnsupportedOperationException("Value " +
+                    valueClass + " is unsupported for result type: " +
                     result.getValueType());
         }
     }
@@ -319,13 +413,13 @@ public class InternalUtilities implements MarkLogicConstants {
      * @param conf job configuration
      * @param hostName host name
      * @return content source
-     * @throws IOException 
-     * @throws XccConfigException 
-     * @throws IOException 
+     * @throws IOException
+     * @throws XccConfigException
+     * @throws IOException
      */
     public static ContentSource getOutputContentSource(Configuration conf,
-            String hostName) 
-    throws XccConfigException, IOException {
+                                                       String hostName)
+            throws XccConfigException {
         String user = conf.get(OUTPUT_USERNAME, "");
         String password = conf.get(OUTPUT_PASSWORD, "");
         String port = conf.get(OUTPUT_PORT,"8000");
@@ -334,31 +428,31 @@ public class InternalUtilities implements MarkLogicConstants {
         boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
         if (useSsl) {
             return getSecureContentSource(hostName, portInt, user, password,
-                        db, getOutputSslOptions(conf));
+                    db, getOutputSslOptions(conf));
         }
-        return ContentSourceFactory.newContentSource(hostName, portInt, 
+        return ContentSourceFactory.newContentSource(hostName, portInt,
                 user, password, db);
     }
-    
+
     /**
      * Return the host from the host array based on a random fashion
      * @param hosts a WritableArray of host names
      * @return the host name
-     * @throws IOException 
+     * @throws IOException
      */
     public static String getHost(TextArrayWritable hosts) throws IOException {
         String [] hostStrings = hosts.toStrings();
-        if(hostStrings == null || hostStrings.length==0) 
+        if(hostStrings == null || hostStrings.length==0)
             throw new IOException("Number of forests is 0: "
-                + "check forests in database");
+                    + "check forests in database");
         int count = hostStrings.length;
         int position = (int)(Math.random() * count);
         return hostStrings[position];
     }
-    
+
     /**
      * Create new XdmValue from value type and Writables.
-     *  
+     *
      */
     public static XdmValue newValue(ValueType valueType, Object value) {
         if (value instanceof Text) {
@@ -382,11 +476,11 @@ public class InternalUtilities implements MarkLogicConstants {
         } else if (value instanceof MarkLogicNode) {
             return ValueFactory.newValue(valueType, ((MarkLogicNode)value).get());
         } else {
-            throw new UnsupportedOperationException("Value " +  
+            throw new UnsupportedOperationException("Value " +
                     value.getClass().getName() + " is unsupported.");
         }
     }
-    
+
     public static String unparse(String s) {
         int len = s.length();
         StringBuilder buf = new StringBuilder(len * 2);
@@ -407,16 +501,16 @@ public class InternalUtilities implements MarkLogicConstants {
             } else {
                 buf.append("&#x");
                 buf.append(Long.toString(cp, 16));
-                buf.append(';');    
+                buf.append(';');
             }
         }
         return buf.toString();
     }
-    
+
     /**
      * If outputDir is available and valid, modify DocumentURI, and return uri
      * in string
-     * 
+     *
      * @param key
      * @param outputDir
      * @return URI
@@ -424,18 +518,18 @@ public class InternalUtilities implements MarkLogicConstants {
     public static String getUriWithOutputDir(DocumentURI key, String outputDir){
         String uri = key.getUri();
         if (outputDir != null && !outputDir.isEmpty()) {
-            uri = outputDir.endsWith("/") || uri.startsWith("/") ? 
-                  outputDir + uri : outputDir + '/' + uri;
+            uri = outputDir.endsWith("/") || uri.startsWith("/") ?
+                    outputDir + uri : outputDir + '/' + uri;
             key.setUri(uri);
             key.validate();
-        }    
+        }
         return uri;
     }
-    
+
     public static int compareUnsignedLong(long x, long y) {
         return (x == y) ? 0 : ((x < y) ^ ((x < 0) != (y < 0)) ? -1 : 1);
     }
-    
+
     public static void checkQueryLanguage(String s) {
         if (!(s.equalsIgnoreCase("xquery") || s.equalsIgnoreCase("javascript"))) {
             throw new IllegalArgumentException("Invalid output query language:" + s);
@@ -453,11 +547,11 @@ public class InternalUtilities implements MarkLogicConstants {
             }
         }
     }
-    
+
     /**
      * Wake up every 1 second to check whether to abort
      * @param millis
-     * @throws InterruptedException 
+     * @throws InterruptedException
      */
     public static void sleep(long millis) throws InterruptedException {
         while (millis > 0) {
