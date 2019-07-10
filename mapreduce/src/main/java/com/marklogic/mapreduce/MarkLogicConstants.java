@@ -88,6 +88,35 @@ public interface MarkLogicConstants {
 
     /**
      * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the Keystore which will be used if
+     * {@link #INPUT_USE_SSL input.ssl} is set to true.
+     */
+    static final String INPUT_KEYSTORE_PATH =
+            "mapreduce.marklogic.input.keystorepath";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the Keystore password which will be used if
+     * {@link #INPUT_USE_SSL input.ssl} is set to true.
+     */
+    static final String INPUT_KEYSTORE_PASSWD =
+            "mapreduce.marklogic.input.keystorepasswd";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the Keystore which will be used if
+     * {@link #INPUT_USE_SSL input.ssl} is set to true.
+     */
+    static final String INPUT_TRUSTSTORE_PATH =
+            "mapreduce.marklogic.input.truststorepath";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the Keystore password which will be used if
+     * {@link #INPUT_USE_SSL input.ssl} is set to true.
+     */
+    static final String INPUT_TRUSTSTORE_PASSWD =
+            "mapreduce.marklogic.input.truststorepasswd";
+
+    /**
+     * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class implementing 
      * {@link SslConfigOptions} which will be used if 
      * {@link #INPUT_USE_SSL input.ssl} is set to true.
@@ -488,6 +517,34 @@ public interface MarkLogicConstants {
      * which, if set, specifies SSL protocol which will be used if 
      * {@link #OUTPUT_USE_SSL output.usessl} is set to true.
      */
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the Keystore which will be used if
+     * {@link #INPUT_USE_SSL input.ssl} is set to true.
+     */
+    static final String OUTPUT_KEYSTORE_PATH =
+            "mapreduce.marklogic.output.keystorepath";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the Keystore password which will be used if
+     * {@link #INPUT_USE_SSL input.ssl} is set to true.
+     */
+    static final String OUTPUT_KEYSTORE_PASSWD =
+            "mapreduce.marklogic.output.keystorepasswd";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the Keystore which will be used if
+     * {@link #INPUT_USE_SSL input.ssl} is set to true.
+     */
+    static final String OUTPUT_TRUSTSTORE_PATH =
+            "mapreduce.marklogic.output.truststorepath";
+    /**
+     * The config property name (<code>{@value}</code>)
+     * which, if set, specifies the Keystore password which will be used if
+     * {@link #INPUT_USE_SSL input.ssl} is set to true.
+     */
+    static final String OUTPUT_TRUSTSTORE_PASSWD =
+            "mapreduce.marklogic.output.truststorepasswd";
     static final String OUTPUT_SSL_PROTOCOL = 
         "mapreduce.marklogic.output.sslprotocol";
     /**
