@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>marklogic-mapreduce2</artifactId>
-  <version>2.2</version>
+  <version>2.2.10</version>
   <name>${productName}</name>
   <description>MarkLogic Connector for Hadoop MapReduce</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
@@ -19,19 +19,19 @@
   <parent>
     <groupId>com.marklogic</groupId>
     <artifactId>marklogic-contentpump</artifactId>
-    <version>9.0</version>
+    <version>9.0.10</version>
   </parent>
 
   <properties>
     <!-- Global definitions -->
     <productName>MarkLogic Connector for Hadoop</productName>
     <productNameShort>MarkLogic Connector for Hadoop</productNameShort>
-    <versionString>2.2</versionString>
+    <versionString>2.2.10</versionString>
     <jarVersionNumberString>${versionString}</jarVersionNumberString>
     <dateString>${maven.build.timestamp}</dateString>
     <libdir>${basedir}/src/lib</libdir>
     <skipTests>true</skipTests>
-    <xccVersion>9.0</xccVersion>
+    <xccVersion>9.0.10</xccVersion>
     <deliverableName>Connector-for-Hadoop2</deliverableName>
 
     <!-- Static definitions of where things are relative to the root -->
