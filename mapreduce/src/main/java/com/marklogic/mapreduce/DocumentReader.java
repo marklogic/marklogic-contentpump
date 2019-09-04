@@ -67,7 +67,6 @@ extends MarkLogicRecordReader<DocumentURI, VALUEIN> {
     protected boolean nextResult(ResultItem result) {
         if (currentKey != null) {
             currentKey.setUri(result.getDocumentURI());
-            currentValue = null;
         } else {
             currentKey = new DocumentURI(result.getDocumentURI());
         }
