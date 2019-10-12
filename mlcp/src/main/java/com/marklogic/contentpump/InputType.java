@@ -289,7 +289,9 @@ public enum InputType implements ConfigConstants {
                 } catch (ServerConnectionException e) {
                     LOG.warn("Unable to connect to " + outputHosts[hostIdx]
                             + " to query destination information");
-                    LOG.debug(e);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(e);
+                    }
                     hostIdx++;
                 } catch (XccConfigException e) {
                     throw new IOException(e);

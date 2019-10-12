@@ -99,7 +99,9 @@ implements MarkLogicConstants, Configurable {
                 if (ex.getCause() instanceof ServerConnectionException) {
                     LOG.warn("Unable to connect to " + hosts[i]
                             + " to query destination information");
-                    LOG.debug(ex);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(ex);
+                    }
                     continue;
                 } else {
                     throw new IOException(ex);
