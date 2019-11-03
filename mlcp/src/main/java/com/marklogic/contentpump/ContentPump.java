@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.marklogic.contentpump.utilities.RegexMaskerUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -102,8 +103,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             for (String arg : optionArgs) {
                 buf.append(arg);
                 buf.append(' ');
-            }     
-            LOG.debug("Arguments: " + buf);
+            }
+            LOG.debug("Arguments: " + RegexMaskerUtil.maskData(buf.toString()));
         }
         
         // parse hadoop specific options
