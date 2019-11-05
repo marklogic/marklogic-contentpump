@@ -99,7 +99,18 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Command: " + command);
             StringBuilder buf = new StringBuilder();
+            // Password masking
+            boolean isPassword = false;
             for (String arg : optionArgs) {
+                if (isPassword) {
+                    buf.append("...");
+                    buf.append(' ');
+                    isPassword = false;
+                    continue;
+                }
+                if (arg.matches(".*password")) {
+                    isPassword = true;
+                }
                 buf.append(arg);
                 buf.append(' ');
             }     
