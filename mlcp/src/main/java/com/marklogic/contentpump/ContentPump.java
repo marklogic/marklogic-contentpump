@@ -103,10 +103,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             boolean isPassword = false;
             for (String arg : optionArgs) {
                 if (isPassword) {
-                    buf.append("...");
-                    buf.append(' ');
+                    arg = "...";
                     isPassword = false;
-                    continue;
                 }
                 if (arg.matches(".*password")) {
                     isPassword = true;
