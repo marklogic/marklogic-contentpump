@@ -339,6 +339,8 @@ public class DatabaseContentReader extends
             buf.append("(\"unfiltered\",\"score-zero\"))\n");
         } else {
             buf.append("cts:and-query((cts:query(xdmp:unquote('");
+            ctsQuery = ctsQuery.replaceAll("&", "&amp;");
+            ctsQuery = ctsQuery.replaceAll("'", "&apos;");
             buf.append(ctsQuery);
             buf.append("')/*),cts:not-query(cts:document-fragment-query(");
             buf.append("cts:and-query(()))))),");
