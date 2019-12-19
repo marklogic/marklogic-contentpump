@@ -748,7 +748,9 @@ implements MarkLogicConstants {
                 if (stmtCounts[i] > 0 && needCommit) {
                     try {
                         commit(i);
-                        sessions[i].close();
+                        if (sessions[i] != null) {
+                            sessions[i].close();
+                        }
                     } catch (Exception e) {
                     }
                 } else {
