@@ -583,6 +583,7 @@ implements MarkLogicConstants {
             sessions[id].commit();
             succeeded += commitUris[id].size();
             commitUris[id].clear();
+            sessions[id].close();
         } catch (Exception e) {
             LOG.error("Error commiting transaction " + e.getMessage());
             rollback(id);
@@ -746,11 +747,7 @@ implements MarkLogicConstants {
         for (int i = 0; i < sessions.length; i++) {
             if (sessions[i] != null) {
                 if (stmtCounts[i] > 0 && needCommit) {
-                    try {
-                        commit(i);
-                        sessions[i].close();
-                    } catch (Exception e) {
-                    }
+                    commit(i);
                 } else {
                     sessions[i].close();
                 }
