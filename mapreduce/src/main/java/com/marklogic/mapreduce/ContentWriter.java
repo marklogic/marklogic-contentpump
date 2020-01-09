@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2019 MarkLogic Corporation
+ * Copyright 2003-2020 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -749,7 +749,9 @@ implements MarkLogicConstants {
                 if (stmtCounts[i] > 0 && needCommit) {
                     try {
                         commit(i);
-                        sessions[i].close();
+                        if (sessions[i] != null) {
+                            sessions[i].close();
+                        }
                     } catch (Exception e) {
                     }
                 } else {

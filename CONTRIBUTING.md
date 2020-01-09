@@ -8,19 +8,19 @@ MarkLogic Content Pump (MLCP) and MarkLogic Connector for Hadoop (Hadoop Connect
 	- [Submitting an Issue](#submitting-an-issue)
 	- [Submitting a Pull Request](#submitting-a-pull-request)
 
-##Got a question / Need help?
+## Got a question / Need help?
 
 If you have questions about how to use MLCP or Hadoop Connector, you can ask on [StackOverflow](http://stackoverflow.com/questions/tagged/mlcp). Remember to tag the question with **mlcp** and **marklogic**. There are field experts monitoring tagged questions and ready to help!
 
-##Issue/Bug Report or Feature Request
+## Issue/Bug Report or Feature Request
 
 If you found a bug or ran into any issue in MLCP or Hadoop Connector or the documentations of these products, you can help us by submitting an issue to [GitHub Issue Tracker](https://github.com/marklogic/marklogic-contentpump/issues). You are also welcome to submit a pull request with a fix for the issue you filed.
 
 If you would like to request a new feature, please submit an issue to [GitHub Issue Tracker](https://github.com/marklogic/marklogic-contentpump/issues). If you would like to implement a new feature then first create a new issue and discuss it with one of our project maintainers.
 
-##Submission Guidlines
+## Submission Guidlines
 
-###Submitting an Issue
+### Submitting an Issue
 
 If your issue appears to be a bug, and hasn't been reported, open a new issue. Providing the following information will increase the chances of your issue being dealt with quickly:
 
@@ -29,13 +29,13 @@ If your issue appears to be a bug, and hasn't been reported, open a new issue. P
 - **Environment** - Operating System? MarkLogic Server version? MLCP (Hadoop Connector) version? Details help.
 - **Suggest a fix** -  if you can't fix the bug yourself, perhaps you can point to what might be causing the problem (line of code or commit)
 
-###Submitting a Pull Request
+### Submitting a Pull Request
 
-####Fill in the CLA
+#### Fill in the CLA
 
 Before we can accept your pull request, we need you to sign the [Contributor License Agreement](http://developer.marklogic.com/products/cla).
 
-####Fork the Repository
+#### Fork the Repository
 
 For the project on GitHub and clone your copy.
 ``` bash
