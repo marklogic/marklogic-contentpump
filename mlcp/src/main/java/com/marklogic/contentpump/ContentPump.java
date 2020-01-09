@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2019 MarkLogic Corporation
+ * Copyright 2003-2020 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,7 +99,16 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Command: " + command);
             StringBuilder buf = new StringBuilder();
+            // Password masking
+            boolean isPassword = false;
             for (String arg : optionArgs) {
+                if (isPassword) {
+                    arg = "...";
+                    isPassword = false;
+                }
+                if (arg.matches(".*password")) {
+                    isPassword = true;
+                }
                 buf.append(arg);
                 buf.append(' ');
             }     
