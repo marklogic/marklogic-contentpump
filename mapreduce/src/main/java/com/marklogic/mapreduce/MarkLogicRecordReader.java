@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2019 MarkLogic Corporation
+ * Copyright 2003-2020 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -200,6 +200,7 @@ implements MarkLogicConstants {
         if (redactionRuleCol != null) {
             buf.append("rdt:redact(");
             buildSrcInSearchQuery(docExpr, ctsQuery, buf);
+            buf.append("[$mlmr:splitstart to $mlmr:splitend]");
             buf.append(",((");
             
             for (int i = 0; i < redactionRuleCol.length; i++) {
@@ -211,10 +212,10 @@ implements MarkLogicConstants {
             buf.append(")))");
         } else {
             buildSrcInSearchQuery(docExpr, ctsQuery, buf);
+            buf.append("[$mlmr:splitstart to $mlmr:splitend]");
         }
         
         buf.append(")");
-        buf.append("[$mlmr:splitstart to $mlmr:splitend]");
     }
 
     @Override
