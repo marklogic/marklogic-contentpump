@@ -779,7 +779,7 @@ implements MarkLogicConstants {
             int txnSize = conf.getInt(TXN_SIZE, 0);
             return txnSize <= 0 ? 1 : txnSize;
         } 
-        return 1000 / conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
+        return DEFAULT_TXN_SIZE;
     }
     
 }
