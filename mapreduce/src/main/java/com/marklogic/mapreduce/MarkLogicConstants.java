@@ -829,6 +829,10 @@ public interface MarkLogicConstants {
      */
     static final int DEFAULT_BATCH_SIZE = 100;
     /**
+     * Default transaction size.
+     */
+    static final int DEFAULT_TXN_SIZE = 1;
+    /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates the number of requests in one transaction. 
      * Optional.

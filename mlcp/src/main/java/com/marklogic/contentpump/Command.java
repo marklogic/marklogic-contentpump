@@ -1941,7 +1941,7 @@ public enum Command implements ConfigConstants {
             .withArgName("number")
             .hasArg()
             .withDescription(
-                    "Number of requests in one transaction (default 10)")
+                    "Number of requests in one transaction (default 1)")
             .create(TRANSACTION_SIZE);
         options.addOption(txnSize);
     }
