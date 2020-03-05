@@ -139,11 +139,6 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         }
     }
     
-    @Override
-    protected boolean needCommit() {
-        return txnSize > 1;
-    }
-    
     private static XdmValue constructTransformOption(Configuration conf,
             String functionParam, String functionNs) {
         HashMap<String, String> transMap = new HashMap<>();
