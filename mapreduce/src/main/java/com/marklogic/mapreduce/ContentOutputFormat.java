@@ -535,7 +535,8 @@ public class ContentOutputFormat<VALUEOUT> extends
                     boolean updatable = true;
                     long dc = -1;
                     if (!legacy) {
-                        if (policy == AssignmentPolicy.Kind.BUCKET) {
+                        if (policy == AssignmentPolicy.Kind.BUCKET ||
+                            policy == AssignmentPolicy.Kind.SEGMENT) {
                             item = result.next();
                             updatable = Boolean.parseBoolean(item
                                 .asString());
