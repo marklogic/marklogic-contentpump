@@ -61,7 +61,7 @@
 
     <!-- Properties related to JavaDoc -->
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-    <javadocCopyrightMessage>Copyright &amp;copy; ${dateString} MarkLogic Corporation. All Rights Reserved.</javadocCopyrightMessage>
+    <javadocCopyrightMessage>Copyright &amp;copy; ${dateString} MarkLogic Corporation</javadocCopyrightMessage>
     <mapreduceExamplesDir>${javaSource}/com/marklogic/mapreduce/examples</mapreduceExamplesDir>
     <mapreduceJavadocExamplesDir>${javaDocDir}/com/marklogic/mapreduce/examples/doc-files</mapreduceJavadocExamplesDir>
     <mapreduceJavadocLoggingPropsDir>${javaDocDir}/com/marklogic/mapreduce/doc-files</mapreduceJavadocLoggingPropsDir>
