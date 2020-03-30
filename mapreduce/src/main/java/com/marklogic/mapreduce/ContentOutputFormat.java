@@ -123,8 +123,15 @@ public class ContentOutputFormat<VALUEOUT> extends
       + "let $f := "
       + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
       + "return if (exists($f)) then $f() else ()";
+    // For HTTP Server
     public static final String HEADER_QUERY =
-        "fn:exists(xdmp:get-request-header('x-forwarded-for'))";
+        "fn:exists(xdmp:get-request-header('host'))";
+    // For XDBC Server
+    public static final String XDBC_HEADER_QUERY =
+        "let $xdbcHeaderf := " +
+        "fn:function-lookup(xs:QName('xdmp:get-xdbc-request-header'),1)\n" +
+        "return if (exists($xdbcHeaderf)) " +
+        "then fn:exists($xdbcHeaderf('host')) else false()";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;
@@ -374,7 +381,9 @@ public class ContentOutputFormat<VALUEOUT> extends
         String queryText = INIT_QUERY;
         if (getForwardHeader) {
             StringBuilder buf = new StringBuilder();
-            buf.append(HEADER_QUERY).append(";\n").append(queryText);
+            buf.append(HEADER_QUERY).append(";\n");
+            buf.append(XDBC_HEADER_QUERY).append(";\n");
+            buf.append(queryText);
             queryText = buf.toString();
         }
         AdhocQuery query = session.newAdhocQuery(queryText);
@@ -388,11 +397,14 @@ public class ContentOutputFormat<VALUEOUT> extends
         result = session.submitRequest(query);
 
         ResultItem item = result.next();
-        boolean forwardHeaderExists = false;
+        boolean httpForwardHeaderExists;
+        boolean xdbcForwardHeaderExists;
         if (getForwardHeader) {
-            forwardHeaderExists = item.asString().equals("true");
+            httpForwardHeaderExists = item.asString().equals("true");
             item = result.next();
-            if (forwardHeaderExists) {
+            xdbcForwardHeaderExists = item.asString().equals("true");
+            item = result.next();
+            if (httpForwardHeaderExists || xdbcForwardHeaderExists) {
                 restrictHosts = true;
                 conf.setBoolean(OUTPUT_RESTRICT_HOSTS, true);
                 if (LOG.isDebugEnabled()) {
