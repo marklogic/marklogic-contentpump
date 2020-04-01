@@ -21,6 +21,10 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Release Note
 
+### What's New in mlcp and Hadoop Connector 10.0.4
+
+-	Bug fixes
+
 ### What's New in mlcp and Hadoop Connector 10.0.3
 
 -	Bug fixes
@@ -36,7 +40,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ### What's New in mlcp and Hadoop Connector 10.0.1
 
-- 	Libraries upgrade
+- 	Library upgrade
 -	Bug fixes
 
 ### What's New in mlcp and Hadoop Connector 9.0.10
@@ -137,7 +141,7 @@ The unit tests included in this repository are designed to provide illustrative 
 $ mvn test
 ```
 
-For detailed information about running unit tests, see [Guideline to Run Tests](https://github.com/marklogic/marklogic-contentpump/wiki/Guide-to-Running-Tests).
+For detailed information about running unit tests, see [Guideline to Run Tests](https://github.com/marklogic/marklogic-contentpump/wiki/Guideline-to-Run-Tests).
 
 ## Have a question? Need help?
 
