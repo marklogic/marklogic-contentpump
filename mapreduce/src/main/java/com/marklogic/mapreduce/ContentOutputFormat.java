@@ -85,8 +85,6 @@ public class ContentOutputFormat<VALUEOUT> extends
     // Also used here alone as the forest id placeholder in non-fast-mode.
     public static final String ID_PREFIX = "#";
 
-    static final long MIN_SEGMENT_VERSION = 10000400;
-    
     static final String FOREST_HOST_MAP_QUERY =
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
@@ -120,18 +118,21 @@ public class ContentOutputFormat<VALUEOUT> extends
       + "let $repf := "
       + "  fn:function-lookup(xs:QName('hadoop:get-forest-replica-hosts'),2)\n"
       + "return exists($repf),"
+      + "let $segRepf := "
+      + "fn:function-lookup(xs:QName('hadoop:get-forest-replica-hosts-with-segment'),2)\n"
+      + "return exists($segRepf),"
       + "let $f := "
       + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
       + "return if (exists($f)) then $f() else ()";
     // For HTTP Server
     public static final String HEADER_QUERY =
-        "fn:exists(xdmp:get-request-header('host'))";
+        "fn:exists(xdmp:get-request-header('x-forwarded-for'))";
     // For XDBC Server
     public static final String XDBC_HEADER_QUERY =
         "let $xdbcHeaderf := " +
         "fn:function-lookup(xs:QName('xdmp:get-xdbc-request-header'),1)\n" +
         "return if (exists($xdbcHeaderf)) " +
-        "then fn:exists($xdbcHeaderf('host')) else false()";
+        "then fn:exists($xdbcHeaderf('x-forwarded-for')) else false()";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;
@@ -140,6 +141,8 @@ public class ContentOutputFormat<VALUEOUT> extends
     protected AssignmentPolicy.Kind policy;
     protected boolean legacy = false;
     protected boolean failover = false;
+    // Added for backward compatibility issues with segment policy
+    protected boolean supportSegment = false;
     protected String initHostName;
 
     @Override
@@ -427,6 +430,8 @@ public class ContentOutputFormat<VALUEOUT> extends
         am.setEffectiveVersion(((XSInteger)item.getItem()).asLong());
         item = result.next();
         failover = !restrictHosts && item.asString().equals("true");
+        item = result.next();
+        supportSegment = item.asString().equals("true");
         if (result.hasNext()) {
             item = result.next();
             String policyStr = item.asString();
@@ -511,7 +516,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                  * we need the failover forests and hosts for failover
                  */
                 if (failover) {
-                    if (am.getEffectiveVersion()>=MIN_SEGMENT_VERSION) {
+                    if (supportSegment) {
                         query = session.newAdhocQuery(
                         FOREST_REPLICA_HOST_QUERY_WITH_SEGMENT);
                     } else {
@@ -562,8 +567,7 @@ public class ContentOutputFormat<VALUEOUT> extends
                     long dc = -1;
                     if (!legacy) {
                         if (policy == AssignmentPolicy.Kind.BUCKET ||
-                            policy == AssignmentPolicy.Kind.SEGMENT &&
-                            am.getEffectiveVersion()>=MIN_SEGMENT_VERSION) {
+                            policy == AssignmentPolicy.Kind.SEGMENT && supportSegment) {
                             item = result.next();
                             updatable = Boolean.parseBoolean(item
                                 .asString());
