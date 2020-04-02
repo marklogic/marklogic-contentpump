@@ -84,6 +84,8 @@ public class ContentOutputFormat<VALUEOUT> extends
     // Prepend to a forest id to form a database name parsed by XDBC.
     // Also used here alone as the forest id placeholder in non-fast-mode.
     public static final String ID_PREFIX = "#";
+
+    static final long MIN_SEGMENT_VERSION = 10000400;
     
     static final String FOREST_HOST_MAP_QUERY =
         "import module namespace hadoop = " +
@@ -101,6 +103,13 @@ public class ContentOutputFormat<VALUEOUT> extends
         "declare variable $policy as xs:string external;\n" +
         "declare variable $partition-name as xs:string external;\n" + 
         "hadoop:get-forest-replica-hosts($policy,$partition-name)";
+    // For supporting backward compatibility for segment policy
+    public static final String FOREST_REPLICA_HOST_QUERY_WITH_SEGMENT =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "declare variable $policy as xs:string external;\n" +
+        "declare variable $partition-name as xs:string external;\n" +
+        "hadoop:get-forest-replica-hosts-with-segment($policy,$partition-name)";
     public static final String INIT_QUERY =
         "import module namespace hadoop = "
       + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
@@ -502,7 +511,12 @@ public class ContentOutputFormat<VALUEOUT> extends
                  * we need the failover forests and hosts for failover
                  */
                 if (failover) {
-                  query = session.newAdhocQuery(FOREST_REPLICA_HOST_QUERY);
+                    if (am.getEffectiveVersion()>=MIN_SEGMENT_VERSION) {
+                        query = session.newAdhocQuery(
+                        FOREST_REPLICA_HOST_QUERY_WITH_SEGMENT);
+                    } else {
+                        query = session.newAdhocQuery(FOREST_REPLICA_HOST_QUERY);
+                    }
                 } else {
                   query = session.newAdhocQuery(FOREST_HOST_QUERY);
                 }
@@ -548,7 +562,8 @@ public class ContentOutputFormat<VALUEOUT> extends
                     long dc = -1;
                     if (!legacy) {
                         if (policy == AssignmentPolicy.Kind.BUCKET ||
-                            policy == AssignmentPolicy.Kind.SEGMENT) {
+                            policy == AssignmentPolicy.Kind.SEGMENT &&
+                            am.getEffectiveVersion()>=MIN_SEGMENT_VERSION) {
                             item = result.next();
                             updatable = Boolean.parseBoolean(item
                                 .asString());
