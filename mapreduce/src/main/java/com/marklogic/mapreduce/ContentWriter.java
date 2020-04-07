@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2020 MarkLogic Corporation
+ * Copyright (c) 2020 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -778,7 +778,7 @@ implements MarkLogicConstants {
             int txnSize = conf.getInt(TXN_SIZE, 0);
             return txnSize <= 0 ? 1 : txnSize;
         } 
-        return 1000 / conf.getInt(BATCH_SIZE, DEFAULT_BATCH_SIZE);
+        return DEFAULT_TXN_SIZE;
     }
     
 }

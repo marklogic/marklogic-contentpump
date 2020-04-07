@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2020 MarkLogic Corporation
+ * Copyright (c) 2020 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,7 +84,7 @@ public class ContentOutputFormat<VALUEOUT> extends
     // Prepend to a forest id to form a database name parsed by XDBC.
     // Also used here alone as the forest id placeholder in non-fast-mode.
     public static final String ID_PREFIX = "#";
-    
+
     static final String FOREST_HOST_MAP_QUERY =
         "import module namespace hadoop = " +
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
@@ -101,6 +101,13 @@ public class ContentOutputFormat<VALUEOUT> extends
         "declare variable $policy as xs:string external;\n" +
         "declare variable $partition-name as xs:string external;\n" + 
         "hadoop:get-forest-replica-hosts($policy,$partition-name)";
+    // For supporting backward compatibility for segment policy
+    public static final String FOREST_REPLICA_HOST_QUERY_WITH_SEGMENT =
+        "import module namespace hadoop = " +
+        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
+        "declare variable $policy as xs:string external;\n" +
+        "declare variable $partition-name as xs:string external;\n" +
+        "hadoop:get-forest-replica-hosts-with-segment($policy,$partition-name)";
     public static final String INIT_QUERY =
         "import module namespace hadoop = "
       + "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"
@@ -111,11 +118,21 @@ public class ContentOutputFormat<VALUEOUT> extends
       + "let $repf := "
       + "  fn:function-lookup(xs:QName('hadoop:get-forest-replica-hosts'),2)\n"
       + "return exists($repf),"
+      + "let $segRepf := "
+      + "fn:function-lookup(xs:QName('hadoop:get-forest-replica-hosts-with-segment'),2)\n"
+      + "return exists($segRepf),"
       + "let $f := "
       + "  fn:function-lookup(xs:QName('hadoop:get-assignment-policy'),0)\n"
       + "return if (exists($f)) then $f() else ()";
+    // For HTTP Server
     public static final String HEADER_QUERY =
         "fn:exists(xdmp:get-request-header('x-forwarded-for'))";
+    // For XDBC Server
+    public static final String XDBC_HEADER_QUERY =
+        "let $xdbcHeaderf := " +
+        "fn:function-lookup(xs:QName('xdmp:get-xdbc-request-header'),1)\n" +
+        "return if (exists($xdbcHeaderf)) " +
+        "then fn:exists($xdbcHeaderf('x-forwarded-for')) else false()";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;
@@ -124,6 +141,8 @@ public class ContentOutputFormat<VALUEOUT> extends
     protected AssignmentPolicy.Kind policy;
     protected boolean legacy = false;
     protected boolean failover = false;
+    // Added for backward compatibility issues with segment policy
+    protected boolean supportSegment = false;
     protected String initHostName;
 
     @Override
@@ -365,7 +384,9 @@ public class ContentOutputFormat<VALUEOUT> extends
         String queryText = INIT_QUERY;
         if (getForwardHeader) {
             StringBuilder buf = new StringBuilder();
-            buf.append(HEADER_QUERY).append(";\n").append(queryText);
+            buf.append(HEADER_QUERY).append(";\n");
+            buf.append(XDBC_HEADER_QUERY).append(";\n");
+            buf.append(queryText);
             queryText = buf.toString();
         }
         AdhocQuery query = session.newAdhocQuery(queryText);
@@ -379,11 +400,14 @@ public class ContentOutputFormat<VALUEOUT> extends
         result = session.submitRequest(query);
 
         ResultItem item = result.next();
-        boolean forwardHeaderExists = false;
+        boolean httpForwardHeaderExists;
+        boolean xdbcForwardHeaderExists;
         if (getForwardHeader) {
-            forwardHeaderExists = item.asString().equals("true");
+            httpForwardHeaderExists = item.asString().equals("true");
             item = result.next();
-            if (forwardHeaderExists) {
+            xdbcForwardHeaderExists = item.asString().equals("true");
+            item = result.next();
+            if (httpForwardHeaderExists || xdbcForwardHeaderExists) {
                 restrictHosts = true;
                 conf.setBoolean(OUTPUT_RESTRICT_HOSTS, true);
                 if (LOG.isDebugEnabled()) {
@@ -406,6 +430,8 @@ public class ContentOutputFormat<VALUEOUT> extends
         am.setEffectiveVersion(((XSInteger)item.getItem()).asLong());
         item = result.next();
         failover = !restrictHosts && item.asString().equals("true");
+        item = result.next();
+        supportSegment = item.asString().equals("true");
         if (result.hasNext()) {
             item = result.next();
             String policyStr = item.asString();
@@ -490,7 +516,12 @@ public class ContentOutputFormat<VALUEOUT> extends
                  * we need the failover forests and hosts for failover
                  */
                 if (failover) {
-                  query = session.newAdhocQuery(FOREST_REPLICA_HOST_QUERY);
+                    if (supportSegment) {
+                        query = session.newAdhocQuery(
+                        FOREST_REPLICA_HOST_QUERY_WITH_SEGMENT);
+                    } else {
+                        query = session.newAdhocQuery(FOREST_REPLICA_HOST_QUERY);
+                    }
                 } else {
                   query = session.newAdhocQuery(FOREST_HOST_QUERY);
                 }
@@ -535,7 +566,8 @@ public class ContentOutputFormat<VALUEOUT> extends
                     boolean updatable = true;
                     long dc = -1;
                     if (!legacy) {
-                        if (policy == AssignmentPolicy.Kind.BUCKET) {
+                        if (policy == AssignmentPolicy.Kind.BUCKET ||
+                            policy == AssignmentPolicy.Kind.SEGMENT && supportSegment) {
                             item = result.next();
                             updatable = Boolean.parseBoolean(item
                                 .asString());
