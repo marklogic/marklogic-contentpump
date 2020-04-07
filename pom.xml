@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>marklogic-contentpump</artifactId>
-  <version>10.0</version>
+  <version>10.0.4</version>
   <name>MarkLogic Content Pump and Connector for Hadoop</name>
   <description>MarkLogic Content Pump and Connector for Hadoop</description>
   <packaging>pom</packaging>
