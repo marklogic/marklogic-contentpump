@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2020 MarkLogic Corporation
+ * Copyright (c) 2020 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -107,7 +107,7 @@ extends RecordWriter<KEYOUT, VALUEOUT> implements MarkLogicConstants {
     }
        
     public int getTransactionSize(Configuration conf) {
-        return conf.getInt(TXN_SIZE, 1000);
+        return conf.getInt(TXN_SIZE, DEFAULT_TXN_SIZE);
     }
     
 }

@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>mlcp</artifactId>
-  <version>10.0.3</version>
+  <version>10.0.4</version>
   <name>MarkLogic Content Pump</name>
   <description>MarkLogic Content Pump</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
@@ -40,13 +40,13 @@
   <parent>
     <groupId>com.marklogic</groupId>
     <artifactId>marklogic-contentpump</artifactId>
-    <version>10.0.3</version>
+    <version>10.0.4</version>
   </parent>
 
   <properties>
-    <versionString>10.0.3</versionString>
+    <versionString>10.0.4</versionString>
     <xccVersion>${versionString}</xccVersion>
-    <hadoopConnectorVersion>2.3.3</hadoopConnectorVersion>
+    <hadoopConnectorVersion>2.3.4</hadoopConnectorVersion>
     <skipTests>false</skipTests>
     <testExcludes>**/*TestDistributed*</testExcludes>
     <bundleArtifact>apache</bundleArtifact>
@@ -69,7 +69,7 @@
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
     <dateString>${maven.build.timestamp}</dateString>
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-    <javadocCopyrightMessage>Copyright &amp;copy; ${dateString} MarkLogic Corporation. All Rights Reserved.</javadocCopyrightMessage>
+    <javadocCopyrightMessage>Copyright &amp;copy; ${dateString} MarkLogic Corporation</javadocCopyrightMessage>
     <overviewFile></overviewFile>
   </properties>
 

@@ -20,14 +20,14 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 * Write results from MapReduce jobs to MarkLogic in parallel
 
 ## Release Note
+### What's New in mlcp and Hadoop Connector 10.0.4
+
+-  Bug fixes
 
 ### What's New in mlcp and Hadoop Connector 10.0.3
 
 -	Bug fixes
 
-### What's New in mlcp and Hadoop Connector 9.0.11
-
--  Bug fixes
 
 ### What's New in mlcp and Hadoop Connector 10.0.2
 
@@ -35,60 +35,10 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ### What's New in mlcp and Hadoop Connector 10.0.1
 
--  Libraries upgrade
+-  Library upgrade
 -	Bug fixes
 
-### What's New in mlcp and Hadoop Connector 9.0.10
 
--	Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.9
-
--	Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.8
-
--	MLCP more load balancer friendly
--	Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.7
-
-- AWS Application Load Balancer support
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.6
-
-- Upgraded Jena library
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.5
-
-- Support HDP 2.6
-- Performance improvement in mlcp archive import and copy
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.4
-
-- Performance optimization in mlcp archive import and mlcp copy
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.3
-
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.2
-
-- New option to specify modules database and root directory for server-side transoformation
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.1
-
-- New option to enable SSL communication
-- New option to run behind a load balancer or firewall
-- Survive server node failover events
-- Server-side transform in batches
-- Get and set document permission, collection and metadata in server-side transformation
-- Performance improvements and bug fixes
 
 ## Getting Started
 
@@ -136,7 +86,7 @@ The unit tests included in this repository are designed to provide illustrative 
 $ mvn test
 ```
 
-For detailed information about running unit tests, see [Guideline to Run Tests](https://github.com/marklogic/marklogic-contentpump/wiki/Guide-to-Running-Tests).
+For detailed information about running unit tests, see [Guideline to Run Tests](https://github.com/marklogic/marklogic-contentpump/wiki/Guideline-to-Run-Tests).
 
 ## Have a question? Need help?
 

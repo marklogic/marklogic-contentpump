@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2020 MarkLogic Corporation
+ * Copyright (c) 2020 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -828,6 +828,10 @@ public interface MarkLogicConstants {
      * Default batch size.
      */
     static final int DEFAULT_BATCH_SIZE = 100;
+    /**
+     * Default transaction size.
+     */
+    static final int DEFAULT_TXN_SIZE = 1;
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, indicates the number of requests in one transaction. 
