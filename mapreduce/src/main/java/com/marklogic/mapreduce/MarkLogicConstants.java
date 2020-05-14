@@ -921,4 +921,9 @@ public interface MarkLogicConstants {
      */
     static final long MIN_NODEUPDATE_VERSION =
             9000040L;
+
+    /**
+     * Internal use only
+     */
+    static final String SERVER_THREAD_COUNT = "server-thread-count";
 }
