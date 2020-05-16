@@ -76,6 +76,7 @@ public class LocalJobRunner implements ConfigConstants {
     private int availableThreads = 1;
     // minimally required thread per task defined by the job
     private int minThreads = 1;
+    private int maxThreads;
     private Command cmd;
     private ContentPumpReporter reporter;
     
@@ -92,7 +93,12 @@ public class LocalJobRunner implements ConfigConstants {
             threadsPerSplit = Integer.parseInt(
             		cmdline.getOptionValue(THREADS_PER_SPLIT));
         }
-        
+
+        if (cmdline.hasOption(MAX_THREADS)) {
+            maxThreads = Integer.parseInt(
+                cmdline.getOptionValue(MAX_THREADS));
+        }
+
         Configuration conf = job.getConfiguration();
         minThreads = conf.getInt(CONF_MIN_THREADS, minThreads);
 
@@ -332,10 +338,14 @@ public class LocalJobRunner implements ConfigConstants {
                 // thread count
                 numThreads = DEFAULT_THREAD_COUNT;
             } else {
-                numThreads = (int)(0.5 * numThreads);
+                numThreads =
+                    (int)(MarkLogicConstants.THREAD_MULTIPLIER * numThreads);
             }
         }
         threadCount = Math.max(numThreads, minThreads);
+        if (maxThreads > 0) {
+            threadCount = Math.min(threadCount, maxThreads);
+        }
         if (threadCount > 1) {
             pool = Executors.newFixedThreadPool(threadCount);
             if (LOG.isDebugEnabled()) {

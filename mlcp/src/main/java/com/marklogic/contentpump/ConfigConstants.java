@@ -137,6 +137,7 @@ public interface ConfigConstants {
     static final String OUTPUT_SSL_PROTOCOL = "output_ssl_protocol";
     static final String MODULES = "modules";
     static final String MODULES_ROOT = "modules_root";
+    static final String MAX_THREADS = "max_threads";
 
     static final String RDF_STREAMING_MEMORY_THRESHOLD  = 
             "rdf_streaming_memory_threshold";

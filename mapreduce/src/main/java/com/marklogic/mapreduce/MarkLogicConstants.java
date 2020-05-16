@@ -923,7 +923,8 @@ public interface MarkLogicConstants {
             9000040L;
 
     /**
-     * Internal use only
+     *  For adjusting MLCP concurrency, internal use only
      */
     static final String SERVER_THREAD_COUNT = "server-thread-count";
+    static final double THREAD_MULTIPLIER = 0.5;
 }
