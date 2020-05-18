@@ -330,7 +330,13 @@ public enum Command implements ConfigConstants {
                 .hasArg()
                 .withDescription("temporal collection name")
                 .create(TEMPORAL_COLLECTION);
-            options.addOption(tcf);                        
+            options.addOption(tcf);
+            Option maxThreads = OptionBuilder
+                .withArgName("number")
+                .hasArg()
+                .withDescription("The maximum number of threads")
+                .create(MAX_THREADS);
+            options.addOption(maxThreads);
         }
 
         @Override
