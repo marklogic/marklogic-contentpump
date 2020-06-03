@@ -332,10 +332,10 @@ public class LocalJobRunner implements ConfigConstants {
         } else {
             // Use server max thread count
             numThreads =  conf.getInt(
-                MarkLogicConstants.SERVER_THREAD_COUNT, DEFAULT_THREAD_COUNT);
+                MarkLogicConstants.SERVER_THREAD_COUNT, 0);
             if (numThreads == 0) {
-                // ML server version is below 10.0-4.2, unable to get server
-                // thread count
+                // Mlcp export command or ML server version is below 10.0-4.2,
+                // unable to get server thread count
                 numThreads = DEFAULT_THREAD_COUNT;
             } else {
                 numThreads =
