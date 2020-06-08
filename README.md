@@ -20,6 +20,12 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 * Write results from MapReduce jobs to MarkLogic in parallel
 
 ## Release Note
+### What's New in mlcp and Hadoop Connector 10.0.4.2
+
+- Add initial server thread polling for mlcp import.
+- Add a new command line option -max_threads.
+- Bug fixes.
+
 ### What's New in mlcp and Hadoop Connector 10.0.4
 
 -  Bug fixes
