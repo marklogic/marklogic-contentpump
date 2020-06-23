@@ -45,7 +45,7 @@
 
   <properties>
     <versionString>10.0.4</versionString>
-    <xccVersion>${versionString}</xccVersion>
+    <xccVersion>10.0.4</xccVersion>
     <hadoopConnectorVersion>2.3.4</hadoopConnectorVersion>
     <skipTests>false</skipTests>
     <testExcludes>**/*TestDistributed*</testExcludes>
