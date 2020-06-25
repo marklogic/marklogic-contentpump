@@ -29,10 +29,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.marklogic.mapreduce.MarkLogicConstants;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -62,7 +65,6 @@ import com.marklogic.contentpump.utilities.ReflectionUtil;
  */
 public class LocalJobRunner implements ConfigConstants {
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
-    public static final int DEFAULT_THREAD_COUNT = 4;
     
     private LocalJob job;
     private ExecutorService pool;
@@ -74,30 +76,29 @@ public class LocalJobRunner implements ConfigConstants {
     private int availableThreads = 1;
     // minimally required thread per task defined by the job
     private int minThreads = 1;
+    private int maxThreads;
     private Command cmd;
     private ContentPumpReporter reporter;
     
     public LocalJobRunner(LocalJob job, CommandLine cmdline, Command cmd) {
         this.job = job;
         this.cmd = cmd;
-        
-        threadCount = DEFAULT_THREAD_COUNT;
+
         if (cmdline.hasOption(THREAD_COUNT)) {
             threadCount = Integer.parseInt(
             		cmdline.getOptionValue(THREAD_COUNT));
-        }
-        if (threadCount > 1) {
-            pool = Executors.newFixedThreadPool(threadCount);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Thread pool size: " + threadCount);
-            }
         }
         
         if (cmdline.hasOption(THREADS_PER_SPLIT)) {
             threadsPerSplit = Integer.parseInt(
             		cmdline.getOptionValue(THREADS_PER_SPLIT));
         }
-        
+
+        if (cmdline.hasOption(MAX_THREADS)) {
+            maxThreads = Integer.parseInt(
+                cmdline.getOptionValue(MAX_THREADS));
+        }
+
         Configuration conf = job.getConfiguration();
         minThreads = conf.getInt(CONF_MIN_THREADS, minThreads);
 
@@ -162,6 +163,9 @@ public class LocalJobRunner implements ConfigConstants {
             job.setJobState(JobStatus.State.FAILED);
             return;
         }
+
+        createThreadPool(conf);
+
         progress = new AtomicInteger[splits.size()];
         for (int i = 0; i < splits.size(); i++) {
             progress[i] = new AtomicInteger();
@@ -317,6 +321,36 @@ public class LocalJobRunner implements ConfigConstants {
             return threadCount / splitCount + 1;
         } else {
             return threadCount / splitCount;
+        }
+    }
+
+    private void createThreadPool(Configuration conf) {
+        int numThreads;
+        if (threadCount != 0) {
+            // Use specified threadCount in the command line
+            numThreads = threadCount;
+        } else {
+            // Use server max thread count
+            numThreads =  conf.getInt(
+                MarkLogicConstants.SERVER_THREAD_COUNT, 0);
+            if (numThreads == 0) {
+                // Mlcp export command or ML server version is below 10.0-4.2,
+                // unable to get server thread count
+                numThreads = DEFAULT_THREAD_COUNT;
+            } else {
+                numThreads =
+                    (int)(MarkLogicConstants.THREAD_MULTIPLIER * numThreads);
+            }
+        }
+        threadCount = Math.max(numThreads, minThreads);
+        if (maxThreads > 0) {
+            threadCount = Math.min(threadCount, maxThreads);
+        }
+        if (threadCount > 1) {
+            pool = Executors.newFixedThreadPool(threadCount);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Thread pool size: " + threadCount);
+            }
         }
     }
     

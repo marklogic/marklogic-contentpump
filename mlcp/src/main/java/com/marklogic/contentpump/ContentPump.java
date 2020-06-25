@@ -152,6 +152,10 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 MODE + ": " + mode);
             return 1;
         }
+        if (MODE_DISTRIBUTED.equalsIgnoreCase(mode)) {
+            LOG.warn("MLCP distributed mode will be disabled in the next " +
+                "release.");
+        }
         String hadoopConfDir = System.getenv(HADOOP_CONFDIR_ENV_NAME);
         if (cmdline.hasOption(HADOOP_CONF_DIR)) {
             hadoopConfDir = cmdline.getOptionValue(HADOOP_CONF_DIR);
