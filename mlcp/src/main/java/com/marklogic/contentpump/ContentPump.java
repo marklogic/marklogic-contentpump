@@ -165,7 +165,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         }
         if (distributed) {
             LOG.warn("Mlcp distributed mode has been deprecated and will be "
-                + "disabled in the next release.");
+                + "disabled in the next release. For more info, please refer " +
+                "to: https://docs.marklogic.com/9.0/guide/mlcp/intro");
         }
         
         if (LOG.isDebugEnabled()) {
