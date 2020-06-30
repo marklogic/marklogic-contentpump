@@ -304,13 +304,13 @@
           <groupId>org.apache.htrace</groupId>
           <artifactId>htrace-core</artifactId>
           <version>3.2.0-incubating</version>
-        </dependency>	
+        </dependency>
         <dependency>
-          <groupId>com.marklogic</groupId>
+          <groupId>local</groupId>
           <artifactId>marklogic-mapreduce2</artifactId>
           <version>${hadoopConnectorVersion}</version>
           <scope>system</scope>
-          <systemPath>${hadoopConnectorBaseDir}/target/marklogic-mapreduce2-${hadoopConnectorVersion}.jar</systemPath>
+          <systemPath>${libdir}/marklogic-mapreduce2-${hadoopConnectorVersion}.jar</systemPath>
         </dependency>
         <dependency>
           <groupId>com.marklogic</groupId>
@@ -496,11 +496,11 @@
       <systemPath>${libdir}/commons-csv-${commonsCsvVersion}.jar</systemPath>
     </dependency>
     <dependency>
-      <groupId>com.marklogic</groupId>
+      <groupId>local</groupId>
       <artifactId>marklogic-mapreduce2</artifactId>
       <version>${hadoopConnectorVersion}</version>
       <scope>system</scope>
-      <systemPath>${hadoopConnectorBaseDir}/target/marklogic-mapreduce2-${hadoopConnectorVersion}.jar</systemPath>
+      <systemPath>${libdir}/marklogic-mapreduce2-${hadoopConnectorVersion}.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>com.marklogic</groupId>
