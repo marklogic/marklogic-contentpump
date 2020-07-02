@@ -8,20 +8,23 @@ MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest w
 * Archive and restore database contents across environments
 * Export data from a database to a file system
 * Copy subsets of data between databases
-* Load documents from HDFS, including Hadoop SequenceFiles
+* Load documents from HDFS, including Hadoop SequenceFiles (deprecated)
 
-You can run mlcp across many threads on a single machine or across many nodes in a Hadoop cluster.
+You can run mlcp across many threads on a single machine or across many nodes in a Hadoop cluster (deprecated).
 
-The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. Use the Hadoop Connector to build Hadoop MapReduce jobs that interact with MarkLogic. The Hadoop Connector is also used by mlcp. Core features of the  Hadoop Connector include:
-
-* Process data in MarkLogic with Hadoop MapReduce for bulk analytics or transformation
-* Persist data from Hadoop to MarkLogic for query and update
-* Access MarkLogic text, geospatial, scalar, and document structure indexes to send only the most relevant data to Hadoop for processing
-* Write results from MapReduce jobs to MarkLogic in parallel
+The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. From 9.0-13, Hadoop Connector is removed from release, but mlcp still uses Hadoop Connector as an internal dependency. 
 
 ## Release Note
+### What's New in mlcp and Hadoop Connector 9.0.13
+
+- Deprecate mlcp distributed mode
+- Stop publishing Hadoop Connector
+- Bug fixes
+- Library upgrade for fixing security vulnerabilities 
+
 ### What's New in mlcp and Hadoop Connector 9.0.12
 
+- Deprecate Hadoop Connector
 - Bug fixes
 
 ### What's New in mlcp and Hadoop Connector 9.0.11
@@ -61,7 +64,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ### What's New in mlcp and Hadoop Connector 9.0.6
 
-- Upgraded Jena library
+- Upgrade Jena library
 - Bug fixes
 
 ### What's New in mlcp and Hadoop Connector 9.0.5
@@ -96,14 +99,12 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 ## Getting Started
 
 - [Getting Started with mlcp](http://docs.marklogic.com/9.0/guide/mlcp/getting-started)
-- [Getting Started with the MarkLogic Connector for Hadoop](http://docs.marklogic.com/9.0/guide/mapreduce/quickstart)
 
 ## Documentation
 
 For official product documentation, please refer to:
 
 - [mlcp User Guide](http://docs.marklogic.com/guide/mlcp)
-- [MarkLogic Connector for Hadoop Developer's Guide](http://docs.marklogic.com/9.0/guide/mapreduce)
 
 Wiki pages of this project contain useful information when you work on development:
 
@@ -111,7 +112,6 @@ Wiki pages of this project contain useful information when you work on developme
 
 ## Required Software
 
-- [Required Software for the Hadoop Connector](http://docs.marklogic.com/9.0/guide/mapreduce/quickstart#id_78738)
 - [Required Software for mlcp](http://docs.marklogic.com/9.0/guide/mlcp/install#id_44231)
 - [Apache Maven](https://maven.apache.org/) (version >= 3.03) is required to build mlcp and the Hadoop Connector.
 
