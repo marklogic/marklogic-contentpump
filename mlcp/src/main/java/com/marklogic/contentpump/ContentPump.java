@@ -152,10 +152,6 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                 MODE + ": " + mode);
             return 1;
         }
-        if (MODE_DISTRIBUTED.equalsIgnoreCase(mode)) {
-            LOG.warn("MLCP distributed mode will be disabled in the next " +
-                "release.");
-        }
         String hadoopConfDir = System.getenv(HADOOP_CONFDIR_ENV_NAME);
         if (cmdline.hasOption(HADOOP_CONF_DIR)) {
             hadoopConfDir = cmdline.getOptionValue(HADOOP_CONF_DIR);
@@ -166,6 +162,11 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         if (MODE_DISTRIBUTED.equalsIgnoreCase(mode) && !distributed) {
             LOG.error("Cannot run in distributed mode.  HADOOP_CONF_DIR is "
                     + "not configured.");
+        }
+        if (distributed) {
+            LOG.warn("Mlcp distributed mode has been deprecated and will be "
+                + "disabled in the next release. For more info, please refer " +
+                "to: https://docs.marklogic.com/9.0/guide/mlcp/intro");
         }
         
         if (LOG.isDebugEnabled()) {
