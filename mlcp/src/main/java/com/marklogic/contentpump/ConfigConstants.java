@@ -135,17 +135,17 @@ public interface ConfigConstants {
     static final String INPUT_SSL_PROTOCOL = "input_ssl_protocol";
     static final String OUTPUT_SSL_PROTOCOL = "output_ssl_protocol";
     static final String KEYSTORE_PATH ="keystore_path";
-    static final String KEYSTORE_PASSWD ="keystore_passwd";
+    static final String KEYSTORE_PASSWD ="keystore_password";
     static final String TRUSTSTORE_PATH ="truststore_path";
-    static final String TRUSTSTORE_PASSWD ="truststore_passwd";
+    static final String TRUSTSTORE_PASSWD ="truststore_password";
     static final String INPUT_KEYSTORE_PATH ="input_keystore_path";
-    static final String INPUT_KEYSTORE_PASSWD ="input_keystore_passwd";
+    static final String INPUT_KEYSTORE_PASSWD ="input_keystore_password";
     static final String INPUT_TRUSTSTORE_PATH ="input_truststore_path";
-    static final String INPUT_TRUSTSTORE_PASSWD ="input_truststore_passwd";
+    static final String INPUT_TRUSTSTORE_PASSWD ="input_truststore_password";
     static final String OUTPUT_KEYSTORE_PATH ="output_keystore_path";
-    static final String OUTPUT_KEYSTORE_PASSWD ="output_keystore_passwd";
+    static final String OUTPUT_KEYSTORE_PASSWD ="output_keystore_password";
     static final String OUTPUT_TRUSTSTORE_PATH ="output_truststore_path";
-    static final String OUTPUT_TRUSTSTORE_PASSWD ="output_truststore_passwd";
+    static final String OUTPUT_TRUSTSTORE_PASSWD ="output_truststore_password";
     static final String MODULES = "modules";
     static final String MODULES_ROOT = "modules_root";
 

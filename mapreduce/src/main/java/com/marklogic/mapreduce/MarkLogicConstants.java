@@ -98,7 +98,7 @@ public interface MarkLogicConstants {
      * {@link #INPUT_USE_SSL input.ssl} is set to true.
      */
     static final String INPUT_KEYSTORE_PASSWD =
-            "mapreduce.marklogic.input.keystorepasswd";
+            "mapreduce.marklogic.input.keystorepassword";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the Keystore which will be used if
@@ -112,7 +112,7 @@ public interface MarkLogicConstants {
      * {@link #INPUT_USE_SSL input.ssl} is set to true.
      */
     static final String INPUT_TRUSTSTORE_PASSWD =
-            "mapreduce.marklogic.input.truststorepasswd";
+            "mapreduce.marklogic.input.truststorepassword";
 
     /**
      * The config property name (<code>{@value}</code>)
@@ -531,7 +531,7 @@ public interface MarkLogicConstants {
      * {@link #INPUT_USE_SSL input.ssl} is set to true.
      */
     static final String OUTPUT_KEYSTORE_PASSWD =
-            "mapreduce.marklogic.output.keystorepasswd";
+            "mapreduce.marklogic.output.keystorepassword";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the Keystore which will be used if
@@ -545,7 +545,7 @@ public interface MarkLogicConstants {
      * {@link #INPUT_USE_SSL input.ssl} is set to true.
      */
     static final String OUTPUT_TRUSTSTORE_PASSWD =
-            "mapreduce.marklogic.output.truststorepasswd";
+            "mapreduce.marklogic.output.truststorepassword";
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the name of the class implementing
