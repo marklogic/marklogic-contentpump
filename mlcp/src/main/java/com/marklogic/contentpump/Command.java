@@ -659,6 +659,24 @@ public enum Command implements ConfigConstants {
                                     + ": " + arg);
                 }
             }
+            if (cmdline.hasOption(KEYSTORE_PATH)) {
+                String path = cmdline.getOptionValue(KEYSTORE_PATH);
+                path = new Path(path).toString();
+                conf.set(MarkLogicConstants.OUTPUT_KEYSTORE_PATH, path);
+            }
+            if (cmdline.hasOption(KEYSTORE_PASSWD)) {
+                String passwd = cmdline.getOptionValue(KEYSTORE_PASSWD);
+                conf.set(MarkLogicConstants.OUTPUT_KEYSTORE_PASSWD, passwd);
+            }
+            if (cmdline.hasOption(TRUSTSTORE_PATH)) {
+                String path = cmdline.getOptionValue(TRUSTSTORE_PATH);
+                path = new Path(path).toString();
+                conf.set(MarkLogicConstants.OUTPUT_TRUSTSTORE_PATH, path);
+            }
+            if (cmdline.hasOption(TRUSTSTORE_PASSWD)) {
+                String passwd = cmdline.getOptionValue(TRUSTSTORE_PASSWD);
+                conf.set(MarkLogicConstants.OUTPUT_TRUSTSTORE_PASSWD, passwd);
+            }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String tempColl = cmdline.getOptionValue(TEMPORAL_COLLECTION);
                 conf.set(MarkLogicConstants.TEMPORAL_COLLECTION, tempColl);
@@ -1065,6 +1083,24 @@ public enum Command implements ConfigConstants {
                                     + ": " + arg);
                 }
             }
+            if (cmdline.hasOption(KEYSTORE_PATH)) {
+                String path = cmdline.getOptionValue(KEYSTORE_PATH);
+                path = new Path(path).toString();
+                conf.set(MarkLogicConstants.INPUT_KEYSTORE_PATH, path);
+            }
+            if (cmdline.hasOption(KEYSTORE_PASSWD)) {
+                String passwd = cmdline.getOptionValue(KEYSTORE_PASSWD);
+                conf.set(MarkLogicConstants.INPUT_KEYSTORE_PASSWD, passwd);
+            }
+            if (cmdline.hasOption(TRUSTSTORE_PATH)) {
+                String path = cmdline.getOptionValue(TRUSTSTORE_PATH);
+                path = new Path(path).toString();
+                conf.set(MarkLogicConstants.INPUT_TRUSTSTORE_PATH, path);
+            }
+            if (cmdline.hasOption(TRUSTSTORE_PASSWD)) {
+                String passwd = cmdline.getOptionValue(TRUSTSTORE_PASSWD);
+                conf.set(MarkLogicConstants.INPUT_TRUSTSTORE_PASSWD, passwd);
+            }
 
             if (cmdline.hasOption(MAX_SPLIT_SIZE)) {
                 String maxSize = cmdline.getOptionValue(MAX_SPLIT_SIZE);
@@ -1161,6 +1197,35 @@ public enum Command implements ConfigConstants {
                  .create(INPUT_SSL_PROTOCOL);
             options.addOption(inputSSLProtocol);
 
+            Option inputKeystorePath = OptionBuilder
+                    .withArgName("string")
+                    .hasArg()
+                    .withDescription(
+                            "Input Keystore path to use for SSL connections.")
+                    .create(INPUT_KEYSTORE_PATH);
+            options.addOption(inputKeystorePath);
+            Option inputKeystorePasswd = OptionBuilder
+                    .withArgName("string")
+                    .hasArg()
+                    .withDescription(
+                            "Input Keystore password to use for SSL connections")
+                    .create(INPUT_KEYSTORE_PASSWD);
+            options.addOption(inputKeystorePasswd);
+            Option inputTruststorePath = OptionBuilder
+                    .withArgName("string")
+                    .hasArg()
+                    .withDescription(
+                            "Input Truststore path to use for SSL connections.")
+                    .create(INPUT_TRUSTSTORE_PATH);
+            options.addOption(inputTruststorePath);
+            Option inputTruststorePasswd = OptionBuilder
+                    .withArgName("string")
+                    .hasArg()
+                    .withDescription(
+                            "Input Truststore password to use for SSL connections")
+                    .create(INPUT_TRUSTSTORE_PASSWD);
+            options.addOption(inputTruststorePasswd);
+
             Option outputUsername = OptionBuilder
                 .withArgName("string")
                 .hasArg()
@@ -1214,6 +1279,35 @@ public enum Command implements ConfigConstants {
                 "Output ssl protocol, e.g.TLS, TLSv1")
                 .create(OUTPUT_SSL_PROTOCOL);
             options.addOption(outputSSLProtocol);
+
+            Option outputKeystorePath = OptionBuilder
+                    .withArgName("string")
+                    .hasArg()
+                    .withDescription(
+                            "Output Keystore path to use for SSL connections.")
+                    .create(OUTPUT_KEYSTORE_PATH);
+            options.addOption(outputKeystorePath);
+            Option outputKeystorePasswd = OptionBuilder
+                    .withArgName("string")
+                    .hasArg()
+                    .withDescription(
+                            "Output Keystore password to use for SSL connections")
+                    .create(OUTPUT_KEYSTORE_PASSWD);
+            options.addOption(outputKeystorePasswd);
+            Option outputTruststorePath = OptionBuilder
+                    .withArgName("string")
+                    .hasArg()
+                    .withDescription(
+                            "Output Truststore path to use for SSL connections.")
+                    .create(OUTPUT_TRUSTSTORE_PATH);
+            options.addOption(outputTruststorePath);
+            Option outputTruststorePasswd = OptionBuilder
+                    .withArgName("string")
+                    .hasArg()
+                    .withDescription(
+                            "Output Truststore password to use for SSL connections")
+                    .create(OUTPUT_TRUSTSTORE_PASSWD);
+            options.addOption(outputTruststorePasswd);
 
             Option tcf = OptionBuilder
                 .withArgName("string")
@@ -1376,6 +1470,24 @@ public enum Command implements ConfigConstants {
                              OUTPUT_SSL_PROTOCOL + ": " + arg);
                 }
             }
+            if (cmdline.hasOption(OUTPUT_KEYSTORE_PATH)) {
+                String path = cmdline.getOptionValue(OUTPUT_KEYSTORE_PATH);
+                path = new Path(path).toString();
+                conf.set(MarkLogicConstants.OUTPUT_KEYSTORE_PATH, path);
+            }
+            if (cmdline.hasOption(OUTPUT_KEYSTORE_PASSWD)) {
+                String passwd = cmdline.getOptionValue(OUTPUT_KEYSTORE_PASSWD);
+                conf.set(MarkLogicConstants.OUTPUT_KEYSTORE_PASSWD, passwd);
+            }
+            if (cmdline.hasOption(OUTPUT_TRUSTSTORE_PATH)) {
+                String path = cmdline.getOptionValue(OUTPUT_TRUSTSTORE_PATH);
+                path = new Path(path).toString();
+                conf.set(MarkLogicConstants.OUTPUT_TRUSTSTORE_PATH, path);
+            }
+            if (cmdline.hasOption(OUTPUT_TRUSTSTORE_PASSWD)) {
+                String passwd = cmdline.getOptionValue(OUTPUT_TRUSTSTORE_PASSWD);
+                conf.set(MarkLogicConstants.OUTPUT_TRUSTSTORE_PASSWD, passwd);
+            }
 
             if (cmdline.hasOption(INPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(INPUT_USERNAME);
@@ -1439,6 +1551,24 @@ public enum Command implements ConfigConstants {
                             "Unrecognized option argument for " + 
                              INPUT_SSL_PROTOCOL + ": " + arg);
                 }
+            }
+            if (cmdline.hasOption(INPUT_KEYSTORE_PATH)) {
+                String path = cmdline.getOptionValue(INPUT_KEYSTORE_PATH);
+                path = new Path(path).toString();
+                conf.set(MarkLogicConstants.INPUT_KEYSTORE_PATH, path);
+            }
+            if (cmdline.hasOption(INPUT_KEYSTORE_PASSWD)) {
+                String passwd = cmdline.getOptionValue(INPUT_KEYSTORE_PASSWD);
+                conf.set(MarkLogicConstants.INPUT_KEYSTORE_PASSWD, passwd);
+            }
+            if (cmdline.hasOption(INPUT_TRUSTSTORE_PATH)) {
+                String path = cmdline.getOptionValue(INPUT_TRUSTSTORE_PATH);
+                path = new Path(path).toString();
+                conf.set(MarkLogicConstants.INPUT_TRUSTSTORE_PATH, path);
+            }
+            if (cmdline.hasOption(INPUT_TRUSTSTORE_PASSWD)) {
+                String passwd = cmdline.getOptionValue(INPUT_TRUSTSTORE_PASSWD);
+                conf.set(MarkLogicConstants.INPUT_TRUSTSTORE_PASSWD, passwd);
             }
 
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
@@ -1889,6 +2019,34 @@ public enum Command implements ConfigConstants {
             .withDescription("SSL protocol, e.g. TLS, TLSv1")
             .create(SSL_PROTOCOL);
         options.addOption(ssl_protocol);
+        Option keystorePath = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription(
+                        "Output Keystore path to use for SSL connections.")
+                .create(KEYSTORE_PATH);
+        options.addOption(keystorePath);
+        Option keystorePasswd = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription(
+                        "Keystore password to use for SSL connections")
+                .create(KEYSTORE_PASSWD);
+        options.addOption(keystorePasswd);
+        Option truststorePath = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription(
+                        "Truststore path to use for SSL connections.")
+                .create(TRUSTSTORE_PATH);
+        options.addOption(truststorePath);
+        Option truststorePasswd = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription(
+                        "Truststore password to use for SSL connections")
+                .create(TRUSTSTORE_PASSWD);
+        options.addOption(truststorePasswd);
     }
 
     static void configCopyOptions(Options options) {

@@ -23,10 +23,19 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.KeyStoreException;
+import java.security.UnrecoverableKeyException;
+import java.security.KeyStore;
+
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.KeyManager;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
+
+import java.io.FileInputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -128,7 +137,7 @@ public class InternalUtilities implements MarkLogicConstants {
                 user, password, db);
     }
     
-    private static SslConfigOptions getInputSslOptions(Configuration conf) {
+    private static SslConfigOptions getInputSslOptions(Configuration conf) throws XccConfigException {
         if (null != inputSslOptions) {
             return inputSslOptions;
         }
@@ -145,13 +154,49 @@ public class InternalUtilities implements MarkLogicConstants {
                                 sslOptionClass, conf);
             } else {
                 String ssl_protocol = conf.get(INPUT_SSL_PROTOCOL, "TLSv1.2");
-                inputSslOptions = new TrustAnyoneOptions( ssl_protocol );
+                String keystore_path = conf.get(INPUT_KEYSTORE_PATH, null);
+                String keystore_passwd = conf.get(INPUT_KEYSTORE_PASSWD, null);
+                String truststore_path = conf.get(INPUT_TRUSTSTORE_PATH, null);
+                String truststore_passwd = conf.get(INPUT_TRUSTSTORE_PASSWD, null);
+                if ((keystore_path == null) && (truststore_path == null) ) {
+                    inputSslOptions = new TrustAnyoneOptions(ssl_protocol);
+                } else {
+                    KeyManager[] keyManager = null;
+                    TrustManager[] trustManager = null;
+                    if (keystore_path != null) {
+                        if (keystore_passwd != null) {
+                            try {
+                                keyManager = getUserKeyManager(keystore_path, keystore_passwd);
+                            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException e) {
+                                throw new XccConfigException("Error constructing SecurityOptions",e);
+                            }
+                        } else {
+                            throw new IllegalArgumentException(INPUT_KEYSTORE_PASSWD +
+                                    " is not specified.");
+                        }
+                    }
+                    if (truststore_path != null) {
+                        if (truststore_passwd != null) {
+                            try {
+                                trustManager = getUserTrustManager(truststore_path,truststore_passwd);
+                            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+                                throw new XccConfigException("Error constructing SecurityOptions", e);
+                            }
+                        }else {
+                            throw new IllegalArgumentException(INPUT_TRUSTSTORE_PASSWD +
+                                    " is not specified.");
+                        }
+                    } else {
+                        trustManager = getTrustAnyoneManager();
+                    }
+                    inputSslOptions = new UserTrustOptions(ssl_protocol, keyManager, trustManager);
+                }
             }
             return inputSslOptions;
         }
     }
     
-    private static SslConfigOptions getOutputSslOptions(Configuration conf) {
+    private static SslConfigOptions getOutputSslOptions(Configuration conf) throws XccConfigException {
         if (null != outputSslOptions) {
             return outputSslOptions;
         }
@@ -168,12 +213,77 @@ public class InternalUtilities implements MarkLogicConstants {
                                 sslOptionClass, conf);
             } else {
                 String ssl_protocol = conf.get(OUTPUT_SSL_PROTOCOL, "TLSv1.2");
-                outputSslOptions = new TrustAnyoneOptions(ssl_protocol);
+                String keystore_path = conf.get(OUTPUT_KEYSTORE_PATH, null);
+                String keystore_passwd = conf.get(OUTPUT_KEYSTORE_PASSWD, null);
+                String truststore_path = conf.get(OUTPUT_TRUSTSTORE_PATH, null);
+                String truststore_passwd = conf.get(OUTPUT_TRUSTSTORE_PASSWD, null);
+                if ((keystore_path == null) && (truststore_path == null) ) {
+                    outputSslOptions = new TrustAnyoneOptions(ssl_protocol);
+                } else {
+                    KeyManager[] keyManager = null;
+                    TrustManager[] trustManager = null;
+                    if (keystore_path != null) {
+                        if (keystore_passwd != null) {
+                            try {
+                                keyManager = getUserKeyManager(keystore_path, keystore_passwd);
+                            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | UnrecoverableKeyException e) {
+                                throw new XccConfigException("Error constructing SecurityOptions",e);
+                            }
+                        } else {
+                            throw new IllegalArgumentException(OUTPUT_KEYSTORE_PASSWD +
+                                    " is not specified.");
+                        }
+                    }
+                    if (truststore_path != null) {
+                        if (truststore_passwd != null) {
+                            try {
+                                trustManager = getUserTrustManager(truststore_path,truststore_passwd);
+                            } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException e) {
+                                throw new XccConfigException("Error constructing SecurityOptions", e);
+                            }
+                        }else {
+                            throw new IllegalArgumentException(OUTPUT_TRUSTSTORE_PASSWD +
+                                    " is not specified.");
+                        }
+                    } else {
+                        trustManager = getTrustAnyoneManager();
+                    }
+                    outputSslOptions = new UserTrustOptions(ssl_protocol, keyManager, trustManager);
+                }
             }
             return outputSslOptions;
         }
     }
-    
+
+    static class UserTrustOptions implements SslConfigOptions {
+        String sslprotocol;
+        KeyManager[] keymanager;
+        TrustManager[] trustmanager;
+
+        public UserTrustOptions(String sslprotocol, KeyManager[] keymanager, TrustManager[] trustmanager) {
+            this.sslprotocol = sslprotocol;
+            this.keymanager = keymanager;
+            this.trustmanager = trustmanager;
+        }
+        @Override
+        public SSLContext getSslContext() throws NoSuchAlgorithmException,
+                KeyManagementException {
+            SSLContext sslContext = SSLContext.getInstance(sslprotocol);
+            sslContext.init(keymanager, trustmanager, null);
+
+            return sslContext;
+        }
+        @Override
+        public String[] getEnabledProtocols() {
+            return null;
+        }
+
+        @Override
+        public String[] getEnabledCipherSuites() {
+            return null;
+        }
+    }
+
     static class TrustAnyoneOptions implements SslConfigOptions {
         String sslprotocol;
         public TrustAnyoneOptions(String sslprotocol) {
@@ -182,29 +292,8 @@ public class InternalUtilities implements MarkLogicConstants {
         @Override
         public SSLContext getSslContext() throws NoSuchAlgorithmException,
                 KeyManagementException {
-            TrustManager[] trust = new TrustManager[] { new X509TrustManager() {
-                public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                    return new X509Certificate[0];
-                }
-                /**
-                 * @throws CertificateException
-                 */
-                public void checkClientTrusted(
-                        java.security.cert.X509Certificate[] certs,
-                        String authType) throws CertificateException {
-                    // no exception means it's okay
-                }
-                /**
-                 * @throws CertificateException
-                 */
-                public void checkServerTrusted(
-                        java.security.cert.X509Certificate[] certs,
-                        String authType) throws CertificateException {
-                    // no exception means it's okay
-                }
-            } };
             SSLContext sslContext = SSLContext.getInstance(sslprotocol);
-            sslContext.init(null, trust, null);
+            sslContext.init(null, getTrustAnyoneManager(), null);
 
             return sslContext;
         }
@@ -218,6 +307,48 @@ public class InternalUtilities implements MarkLogicConstants {
         public String[] getEnabledCipherSuites() {
             return null;
         }
+    }
+
+    private static KeyManager[] getUserKeyManager(String path, String password) throws KeyStoreException, IOException,
+            NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
+        KeyStore ks = KeyStore.getInstance("JKS");
+        ks.load(new FileInputStream(path), password.toCharArray());
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(ks, password.toCharArray());
+        return kmf.getKeyManagers();
+    }
+
+    private static TrustManager[] getUserTrustManager(String path, String password) throws KeyStoreException,
+            IOException, NoSuchAlgorithmException, CertificateException {
+        KeyStore ks = KeyStore.getInstance("JKS");
+        ks.load(new FileInputStream(path), password.toCharArray());
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+        tmf.init(ks);
+        return tmf.getTrustManagers();
+    }
+
+    private static TrustManager[] getTrustAnyoneManager() {
+        return new TrustManager[] { new X509TrustManager() {
+            public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[0];
+            }
+            /**
+             * @throws CertificateException
+             */
+            public void checkClientTrusted(
+                    java.security.cert.X509Certificate[] certs,
+                    String authType) throws CertificateException {
+                // no exception means it's okay
+            }
+            /**
+             * @throws CertificateException
+             */
+            public void checkServerTrusted(
+                    java.security.cert.X509Certificate[] certs,
+                    String authType) throws CertificateException {
+                // no exception means it's okay
+            }
+        } };
     }
 
     static ContentSource getSecureContentSource(String host, int port,
