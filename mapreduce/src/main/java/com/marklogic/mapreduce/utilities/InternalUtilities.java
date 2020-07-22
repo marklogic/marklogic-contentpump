@@ -312,18 +312,22 @@ public class InternalUtilities implements MarkLogicConstants {
     private static KeyManager[] getUserKeyManager(String path, String password) throws KeyStoreException, IOException,
             NoSuchAlgorithmException, CertificateException, UnrecoverableKeyException {
         KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(path), password.toCharArray());
+        FileInputStream ksFile = new FileInputStream(path);
+        ks.load(ksFile, password.toCharArray());
         KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
         kmf.init(ks, password.toCharArray());
+        ksFile.close();
         return kmf.getKeyManagers();
     }
 
     private static TrustManager[] getUserTrustManager(String path, String password) throws KeyStoreException,
             IOException, NoSuchAlgorithmException, CertificateException {
         KeyStore ks = KeyStore.getInstance("JKS");
-        ks.load(new FileInputStream(path), password.toCharArray());
+        FileInputStream ksFile = new FileInputStream(path);
+        ks.load(ksFile, password.toCharArray());
         TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
         tmf.init(ks);
+        ksFile.close();
         return tmf.getTrustManagers();
     }
 
