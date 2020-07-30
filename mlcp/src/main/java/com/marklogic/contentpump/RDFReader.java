@@ -168,6 +168,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     @Override
     public void close() throws IOException {
+        //report total counts of triples on close
+        LOG.info("Ingested " + ingestedTriples + " triples from " + origFn);
         if(rdfIter!=null) {
             rdfIter.close();
         }
