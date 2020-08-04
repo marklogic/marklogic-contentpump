@@ -357,5 +357,15 @@
       <scope>system</scope>
       <systemPath>${libdir}/marklogic-xcc-${xccVersion}.jar</systemPath>
     </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.9.4</version>
+    </dependency>
   </dependencies>
 </project>
