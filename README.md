@@ -59,8 +59,8 @@ Wiki pages of this project contain useful information when you work on developme
 ## Required Software
 
 - [Required Software for the Hadoop Connector](http://docs.marklogic.com/guide/mapreduce/quickstart#id_78738)
-- [Required Software for mlcp](http://pubs.marklogic.com:8011/9.0/guide/mlcp/install#id_44231)
-- [Apache Maven](https://maven.apache.org/) (version >= 3.03) is required to build mlcp and the Hadoop Connector.
+- [Required Software for mlcp](http://docs.marklogic.com/guide/mlcp/install#id_44231)
+- [Apache Maven](https://maven.apache.org/) (version >= 3.0.3) is required to build mlcp and the Hadoop Connector.
 
 ## Build
 
