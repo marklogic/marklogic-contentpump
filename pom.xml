@@ -130,13 +130,6 @@
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <version>2.6</version>
-        <configuration>
-          <descriptors>
-            <descriptor>src/assemble/srcdist.xml</descriptor>
-            <descriptor>src/assemble/testdist.xml</descriptor>
-            <descriptor>src/assemble/bindist.xml</descriptor>
-          </descriptors>
-        </configuration>
         <executions>
           <execution>
             <id>make-assembly-example-doc</id>
