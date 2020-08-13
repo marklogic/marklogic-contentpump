@@ -11,7 +11,7 @@ MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest w
 
 You can run mlcp across many threads on a single machine or across many nodes in a cluster.
 
-The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. Use the Hadoop Connector to build Hadoop MapReduce jobs that interact with MarkLogic. From 10.0-5, Hadoop Connector is removed from a separate release, but mlcp still uses Hadoop Connector as an internal dependency.
+The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. From 10.0-5, Hadoop Connector is removed from separate release, but mlcp still uses Hadoop Connector as an internal dependency. 
 
 ## Release Note
 
@@ -106,15 +106,9 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 ## Documentation
 
 For official product documentation, please refer to:
-
 - [mlcp User Guide](http://docs.marklogic.com/guide/mlcp)
 
-Wiki pages of this project contain useful information when you work on development:
-
-- [Wiki Page of marklogic-contentpump](https://github.com/marklogic/marklogic-contentpump/wiki)
-
 ## Required Software
-
 - [Required Software for mlcp](http://docs.marklogic.com/guide/mlcp/install#id_44231)
 - [Apache Maven](https://maven.apache.org/) (version >= 3.0.3) is required to build mlcp and the Hadoop Connector.
 
