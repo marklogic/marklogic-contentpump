@@ -8,17 +8,16 @@ MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest w
 * Archive and restore database contents across environments
 * Export data from a database to a file system
 * Copy subsets of data between databases
-* Load documents from HDFS, including Hadoop SequenceFiles (deprecated)
 
-You can run mlcp across many threads on a single machine or across many nodes in a Hadoop cluster (deprecated).
+You can run mlcp across many threads on a single machine or across many nodes in a cluster.
 
-The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. From 9.0-13, Hadoop Connector is removed from release, but mlcp still uses Hadoop Connector as an internal dependency. 
+The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. From 9.0-13, Hadoop Connector is removed from separate release, but mlcp still uses Hadoop Connector as an internal dependency. 
 
 ## Release Note
 ### What's New in mlcp and Hadoop Connector 9.0.13
 
 - Deprecate mlcp distributed mode
-- Stop publishing Hadoop Connector
+- Refactor mlcp repo to remove Hadoop Connector from separate release
 - Bug fixes
 - Library upgrade for fixing security vulnerabilities 
 
@@ -104,7 +103,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 For official product documentation, please refer to:
 
-- [mlcp User Guide](http://docs.marklogic.com/guide/mlcp)
+- [mlcp User Guide](https://docs.marklogic.com/9.0/guide/mlcp)
 
 Wiki pages of this project contain useful information when you work on development:
 
@@ -112,12 +111,12 @@ Wiki pages of this project contain useful information when you work on developme
 
 ## Required Software
 
-- [Required Software for mlcp](http://docs.marklogic.com/9.0/guide/mlcp/install#id_44231)
-- [Apache Maven](https://maven.apache.org/) (version >= 3.03) is required to build mlcp and the Hadoop Connector.
+- [Required software for mlcp](http://docs.marklogic.com/9.0/guide/mlcp/install#id_44231)
+- [Apache Maven](https://maven.apache.org/) (version >= 3.0.3) is required to build mlcp.
 
 ## Build
 
-mlcp and Hadoop Connector can be built together. Steps to build:
+Steps to build mlcp:
 
 ``` bash
 $ git clone https://github.com/marklogic/marklogic-contentpump.git
@@ -125,9 +124,7 @@ $ cd marklogic-contentpump
 $ mvn clean package -DskipTests=true
 ```
 
-The build writes to the respective **deliverable** directory under the top-level `./mlcp/` and `./mapreduce/` directories.
-
-Alternatively, you can build mlcp and the Hadoop Connector independently from each component’s root directory (i.e. `./mlcp/` and `./mapreduce/`) with the above command. *Note that mlcp depends on the Hadoop Connector*, so a successful build of the Hadoop Connector is required to build mlcp.
+The build writes to the respective **deliverable** directory under the root directory `marklogic-contentpump/`
 
 For information on contributing to this project see [CONTRIBUTING.md](https://github.com/marklogic/marklogic-contentpump/blob/develop/CONTRIBUTING.md). For information on working on development of this project see [project wiki page](https://github.com/marklogic/marklogic-contentpump/wiki).
 
