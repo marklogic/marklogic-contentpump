@@ -58,7 +58,7 @@ public class TestRestrictedHostsUtil {
     }
     
     /**
-     * Test method for {@link com.marklogic.mapreduce.contentpump.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
+     * Test method for {@link com.marklogic.mapreduce.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
      */
     @Test
     public void testGetNextHost1() {
@@ -79,7 +79,7 @@ public class TestRestrictedHostsUtil {
     }
 
     /**
-     * Test method for {@link com.marklogic.mapreduce.contentpump.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
+     * Test method for {@link com.marklogic.mapreduce.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
      */
     @Test
     public void testGetNextHost2() {
@@ -97,7 +97,7 @@ public class TestRestrictedHostsUtil {
     }
     
     /**
-     * Test method for {@link com.marklogic.mapreduce.contentpump.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
+     * Test method for {@link com.marklogic.mapreduce.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
      */
     @Test
     public void testGetNextHost3() {
@@ -124,7 +124,7 @@ public class TestRestrictedHostsUtil {
     
     /**
      * for bug:43647
-     * Test method for {@link com.marklogic.mapreduce.contentpump.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
+     * Test method for {@link com.marklogic.mapreduce.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
      */
     @Test
     public void testGetNextHost4() {
@@ -149,7 +149,7 @@ public class TestRestrictedHostsUtil {
     }
     
     /**
-     * Test method for {@link com.marklogic.mapreduce.contentpump.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
+     * Test method for {@link com.marklogic.mapreduce.utilities.RestrictedHostsUtil#getNextHost(java.lang.String)}.
      */
     @Test
     public void testGetNextHost5() {
