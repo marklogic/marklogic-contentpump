@@ -24,8 +24,8 @@ import java.util.Map;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.commons.logging.Log;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.JsonGenerator;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
 
 import com.marklogic.contentpump.ColumnDataType;
 import com.marklogic.contentpump.ConfigConstants;
