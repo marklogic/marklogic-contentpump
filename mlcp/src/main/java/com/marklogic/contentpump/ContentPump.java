@@ -164,8 +164,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
                     + "not configured.");
         }
         if (distributed) {
-            LOG.warn("MLCP distributed mode has been disabled. Switching to local mode.");
-            distributed = false;
+            LOG.error("MLCP distributed mode has been disabled. Please use local mode instead.");
+            return 1;
         }
         if (LOG.isDebugEnabled()) {
             LOG.debug("Running in: " + (distributed ? "distributed " : "local")
