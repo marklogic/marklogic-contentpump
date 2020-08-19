@@ -473,6 +473,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             optionsMap.put("properties", properties);
         }
 
+        Map<String, String> meta = options.getMetadata();
+        if (meta != null && meta instanceof HashMap) {
+            HashMap<String, String> hMeta = (HashMap<String, String>) meta;
+            optionsMap.put("metadata", mapToNode(hMeta).toString());
+        }
+
         if (effectiveVersion < ConfigConstants.BATCH_MIN_VERSION) {
             String optionElem = mapToElement(optionsMap);
             optionsVals[id][counts[id]] = 
