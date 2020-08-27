@@ -60,12 +60,14 @@ public class DatabaseDocumentWithMeta extends DatabaseDocument {
 
     @Override
     public void readFields(DataInput in) throws IOException {
+        int ordinal = in.readInt();
+        contentType = ContentType.valueOf(ordinal);
         int contentLen = WritableUtils.readVInt(in);
         if (0 != contentLen) {
             content = new byte[contentLen];
             in.readFully(content, 0, contentLen);
-            int ordinal = in.readInt();
-            contentType = ContentType.valueOf(ordinal);
+        } else {
+            content = new byte[0];
         }
         int len = in.readInt();
         if (0 != len) {
@@ -78,10 +80,10 @@ public class DatabaseDocumentWithMeta extends DatabaseDocument {
 
     @Override
     public void write(DataOutput out) throws IOException {
+        out.writeInt(contentType.ordinal());
         if (null != content) {
             WritableUtils.writeVInt(out, content.length);
             out.write(content, 0, content.length);
-            out.writeInt(contentType.ordinal());
         } else {
             WritableUtils.writeVInt(out, 0);
         }
