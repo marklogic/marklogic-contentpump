@@ -83,24 +83,57 @@ public class DatabaseTransformWriter<VALUE> extends
             sessions[sid] = getSession(sid, false);
             queries[sid] = getAdhocQuery(sid);
         }
+        boolean committed = false;
         if (!naked) {
             opt.setFormat(doc.getContentType().getDocumentFormat());
             addValue(uri, value, sid, opt, effectiveVersion<PROPS_MIN_VERSION?null:meta.getProperties());
             pendingURIs[sid].add((DocumentURI)key.clone());
             if (++counts[sid] == batchSize) {
-                queries[sid].setNewVariables(uriName, uris[sid]);
-                queries[sid].setNewVariables(contentName, values[sid]);
-                queries[sid].setNewVariables(optionsName, optionsVals[sid]);
-                insertBatch(sid,uris[sid],values[sid],optionsVals[sid]);
-                stmtCounts[sid]++;
-                //reset forest index for statistical
-                if (countBased) {
-                    sfId = -1;
-                }
-                if (needCommit) {
-                    commitUris[sid].addAll(pendingURIs[sid]);
-                } else {
-                    succeeded += pendingURIs[sid].size();
+                commitRetry = 0;
+                commitSleepTime = MINSLEEPTIME;
+                while (commitRetry < commitRetryLimit) {
+                    committed = false;
+                    if (commitRetry > 0) {
+                        LOG.info("Retrying batch insert " + commitRetry);
+                    }
+                    queries[sid].setNewVariables(uriName, uris[sid]);
+                    queries[sid].setNewVariables(contentName, values[sid]);
+                    queries[sid].setNewVariables(optionsName, optionsVals[sid]);
+                    insertBatch(sid,uris[sid],values[sid],optionsVals[sid]);
+                    stmtCounts[sid]++;
+                    //reset forest index for statistical
+                    if (countBased) {
+                        sfId = -1;
+                    }
+                    counts[fId] = 0;
+                    if (needCommit && stmtCounts[sid] == txnSize) {
+                        try {
+                            commit(sid);
+                            if (commitRetry > 0) {
+                                LOG.info("Retrying batch insert successful");
+                            }
+                        } catch (Exception e) {
+                            LOG.error("Error committing transaction: " + e.getMessage());
+                            if (needCommitRetry() && ++commitRetry<commitRetryLimit) {
+                                handleCommitExceptions(sid);
+                                commitSleepTime = sleep(commitSleepTime);
+                                stmtCounts[sid] = 0;
+                                sessions[sid] = getSession(sid, true);
+                                continue;
+                            } else if (needCommitRetry()) {
+                                LOG.info("Exceeded max batch retry");
+                            }
+                            failed += commitUris[sid].size();
+                            for (DocumentURI failedUri : commitUris[sid]) {
+                                LOG.warn("Failed document: " + failedUri);
+                            }
+                            handleCommitExceptions(sid);
+                        } finally {
+                            stmtCounts[sid] = 0;
+                            committed = true;
+                        }
+                    }
+                    break;
                 }
                 pendingURIs[sid].clear();
             }
@@ -124,10 +157,14 @@ public class DatabaseTransformWriter<VALUE> extends
                 failed++;
             }
         }
-        
-        boolean committed = false;
-        if (stmtCounts[sid] >= txnSize && needCommit) {
-            commit(sid);
+
+        if (needCommit && stmtCounts[sid] >= txnSize) {
+            try {
+                commit(sid);
+            } catch (Exception e) {
+                LOG.error("Error committing transaction: " + e.getMessage());
+                handleCommitExceptions(sid);
+            }
             stmtCounts[sid] = 0;
             committed = true;
         }
@@ -135,14 +172,7 @@ public class DatabaseTransformWriter<VALUE> extends
             // rotate to next host and reset session
             hostId = (hostId + 1)%forestIds.length;
             sessions[0] = null;
+            queries[0] = null;
         }
-    }
-
-    protected Session getSession(int fId, boolean nextReplica) {
-        TransactionMode mode = TransactionMode.AUTO;
-        if (txnSize > 1) {
-            mode = TransactionMode.UPDATE;
-        }
-        return getSession(fId, nextReplica, mode);
     }
 }

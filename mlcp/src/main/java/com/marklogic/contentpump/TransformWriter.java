@@ -220,38 +220,67 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         int sid = fId;
         addValue(uri, value, sid, options, null);
         pendingURIs[sid].add((DocumentURI)key.clone());
+        boolean committed = false;
         if (++counts[sid] == batchSize) {
+            commitRetry = 0;
+            commitSleepTime = MINSLEEPTIME;
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
                 queries[sid] = getAdhocQuery(sid);
-            } 
-            queries[sid].setNewVariables(uriName, uris[sid]);
-            queries[sid].setNewVariables(contentName, values[sid]);
-            queries[sid].setNewVariables(optionsName, optionsVals[sid]);
-            insertBatch(sid, uris[sid], values[sid], optionsVals[sid]);
-            stmtCounts[sid]++;
-            if (countBased) {
-                sfId = -1;
-            }  
-            if (needCommit) {
-                commitUris[sid].addAll(pendingURIs[sid]);
-            } else {
-                succeeded += pendingURIs[sid].size();
+            }
+            while (commitRetry < commitRetryLimit) {
+                committed = false;
+                if (commitRetry > 0) {
+                    LOG.info("Retrying batch insert " + commitRetry);
+                }
+                queries[sid].setNewVariables(uriName, uris[sid]);
+                queries[sid].setNewVariables(contentName, values[sid]);
+                queries[sid].setNewVariables(optionsName, optionsVals[sid]);
+                insertBatch(sid, uris[sid], values[sid], optionsVals[sid]);
+                stmtCounts[sid]++;
+                //reset forest index for statistical
+                if (countBased) {
+                    sfId = -1;
+                }
+                counts[sid] = 0;
+                if (needCommit && stmtCounts[sid] == txnSize) {
+                    try {
+                        commit(sid);
+                        if (commitRetry > 0) {
+                            LOG.info("Retrying batch insert successful");
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Error committing transaction: " + e.getMessage());
+                        if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                            handleCommitExceptions(sid);
+                            commitSleepTime = sleep(commitSleepTime);
+                            stmtCounts[sid] = 0;
+                            sessions[sid] = getSession(sid, true);
+                            queries[sid] = getAdhocQuery(sid);
+                            continue;
+                        } else if (needCommitRetry()) {
+                            LOG.info("Exceeded max batch retry");
+                        }
+                        failed += commitUris[sid].size();
+                        for (DocumentURI failedUri : commitUris[sid]) {
+                            LOG.warn("Failed document: " + failedUri);
+                        }
+                        handleCommitExceptions(sid);
+                    }
+                    finally {
+                        stmtCounts[sid] = 0;
+                        committed = true;
+                    }
+                }
+                break;
             }
             pendingURIs[sid].clear();
-            
-            boolean committed = false;
-            if (stmtCounts[sid] == txnSize && needCommit) {
-                commit(sid);
-                stmtCounts[sid] = 0;
-                committed = true;
-            }
-            if ((!fastLoad) && ((!needCommit) || committed)) { 
-                // rotate to next host and reset session
-                hostId = (hostId + 1)%forestIds.length;
-                sessions[0] = null;
-                queries[0] = null;
-            }
+        }
+        if ((!fastLoad) && ((!needCommit) || committed)) {
+            // rotate to next host and reset session
+            hostId = (hostId + 1)%forestIds.length;
+            sessions[0] = null;
+            queries[0] = null;
         }
     }
     
@@ -511,12 +540,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             XdmValue[] valueList, XdmValue[] optionsValList) 
     throws IOException
     {
-        retry = 0;
-        sleepTime = 500;
-        while (retry < maxRetries) {
+        batchRetry = 0;
+        batchSleepTime = 500;
+        while (batchRetry < MAXRETRIES) {
         try {
-            if (retry > 0) {
-                LOG.info("Retrying insert document " + retry);
+            if (batchRetry > 0) {
+                LOG.info("Retrying document insert " + batchRetry);
             }
             if (transOpt != null) {
                 queries[id].setNewVariable(transOptName, transOpt);
@@ -532,8 +561,6 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     LOG.warn(err);
                 } else break;   
             }
-            counts[id] = 0;
-            break;
         } catch (Exception e) {
             boolean retryable = true;
             // compatible mode: log error and continue
@@ -547,16 +574,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 LOG.error("Exception:" + e.getMessage());
             }
             rollback(id);
-            if (retryable && ++retry < maxRetries) {
-                try {
-                    InternalUtilities.sleep(sleepTime);
-                } catch (Exception e2) {
-                }
-                sleepTime = sleepTime * 2;
-                if (sleepTime > maxSleepTime)
-                    sleepTime = maxSleepTime;
-
+            if (retryable && ++batchRetry < MAXRETRIES) {
                 sessions[id].close();
+                batchSleepTime = sleep(batchSleepTime);
                 sessions[id] = getSession(id, true);
                 queries[id] = getAdhocQuery(id);
                 queries[id].setNewVariables(uriName, uriList);
@@ -564,16 +584,20 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 queries[id].setNewVariables(optionsName, optionsValList);
                 continue;
             } else if (retryable) {
-                LOG.info("Exceeded max retry");
+                LOG.info("Exceeded max document retry");
             }
             for ( DocumentURI failedUri: pendingURIs[id] ) {
                LOG.warn("Failed document " + failedUri);
                failed++;
             }
-            pendingURIs[id].clear();
-            counts[id] = 0;
             throw new IOException(e);
         }
+        break;
+        }
+        if (needCommit) {
+            commitUris[id].addAll(pendingURIs[id]);
+        } else {
+            succeeded += pendingURIs[id].size();
         }
     }
     
@@ -583,49 +607,57 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         for (int i = 0; i < sessions.length; i++) {
             if (pendingURIs[i].size() > 0) {
                 if (sessions[i] == null) {
-                    sessions[i] = getSession(i,false);
-                }
-                if (queries[i] == null) {
+                    sessions[i] = getSession(i, false);
                     queries[i] = getAdhocQuery(i);
                 }
                 XdmValue[] urisLeft = new XdmValue[counts[i]];
                 System.arraycopy(uris[i], 0, urisLeft, 0, counts[i]);
-                queries[i].setNewVariables(uriName, urisLeft);
                 XdmValue[] valuesLeft = new XdmValue[counts[i]];
                 System.arraycopy(values[i], 0, valuesLeft, 0, counts[i]);
-                queries[i].setNewVariables(contentName, valuesLeft);
                 XdmValue[] optionsLeft = new XdmValue[counts[i]];
                 System.arraycopy(optionsVals[i], 0, optionsLeft, 0, counts[i]);
-                queries[i].setNewVariables(optionsName, optionsLeft);
-                try {
-                    insertBatch(i, urisLeft, valuesLeft, optionsLeft);
-                } catch (Exception e) {
-                }
-                if (!needCommit) {
-                    succeeded += pendingURIs[i].size(); 
-                } else {
-                    stmtCounts[i]++;
-                    commitUris[i].addAll(pendingURIs[i]);
-                }
-            }
-            if (stmtCounts[i] > 0 && needCommit) {  
-                try {
-                    commit(i);
-                } catch (Exception e) {
-                    LOG.error("Error committing transaction: " + 
-                        e.getMessage());
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(e);
+
+                while (commitRetry < commitRetryLimit) {
+                    queries[i].setNewVariables(uriName, urisLeft);
+                    queries[i].setNewVariables(contentName, valuesLeft);
+                    queries[i].setNewVariables(optionsName, optionsLeft);
+                    try {
+                        insertBatch(i, urisLeft, valuesLeft, optionsLeft);
+                    } catch (Exception e) {
                     }
+                    stmtCounts[i]++;
+                    if (stmtCounts[i] > 0 && needCommit) {
+                        try {
+                            commit(i);
+                        } catch (Exception e) {
+                            LOG.error("Error committing transaction: " +
+                                e.getMessage());
+                            if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                                handleCommitExceptions(i);
+                                commitSleepTime = sleep(commitSleepTime);
+                                sessions[i] = getSession(i, true);
+                                stmtCounts[i] = 0;
+                                continue;
+                            } else if (needCommitRetry()) {
+                                LOG.info("Exceeded max batch retry");
+                            }
+                            failed += commitUris[i].size();
+                            for (DocumentURI failedUri : commitUris[i]) {
+                                LOG.warn("Failed document: " + failedUri);
+                            }
+                            handleCommitExceptions(i);
+                        } finally {
+                            stmtCounts[i] = 0;
+                            sessions[i].close();
+                        }
+                    }
+                    break;
                 }
-                succeeded += commitUris[i].size();
             }
         }
-        for (int i = 0; i < sessions.length; i++) {
-            if (sessions[i] != null) {
-                sessions[i].close();
-            }
-        }
+
+        closeSessions();
+
         if (is != null) {
             is.close();
             if (is instanceof ZipEntryInputStream) {

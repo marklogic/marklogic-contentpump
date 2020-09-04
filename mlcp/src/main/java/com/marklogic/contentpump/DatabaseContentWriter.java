@@ -209,7 +209,6 @@ public class DatabaseContentWriter<VALUE> extends
             fId = 0;
         }
         pendingUris[sid].put(content, new DocumentURI(key));
-        boolean inserted = false;
         if (meta == null || !meta.isNakedProps()) {
             // add new content
             forestContents[fId][counts[fId]] = content;
@@ -236,51 +235,97 @@ public class DatabaseContentWriter<VALUE> extends
                     isCopyQuality?meta.getQualityString():null, 
                     isCopyMeta?meta.getMeta():null, sessions[sid]);
             stmtCounts[sid]++;
-            if (suc) { 
+            if (suc && needCommit) {
                 commitUris[sid].add(key);
             } else {
                 failed++;
             }
         }
+
+        boolean inserted = false;
+        boolean committed = false;
         if (counts[fId] == batchSize) {
+            commitRetry = 0;
+            commitSleepTime = MINSLEEPTIME;
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
-            }    
-            insertBatch(forestContents[fId], sid);     
-            stmtCounts[sid]++;
-            if (isCopyProps) { //prop batch insert
-                if (propertyUris != null) {
-                    setBatchProperties(fId, sessions[sid]);
-                    stmtCounts[sid]++;
-                    propertyCounts[fId] = 0;
-                } else {
-                    for (int i = 0; i < counts[fId]; i++) {
-                        DocumentMetadata m = metadatas[fId][i].getMeta();
-                        String u = metadatas[fId][i].getUri();
-                        if (m != null && m.getProperties() != null) {
-                            boolean suc = setDocumentProperties(u,
+            }
+            while (commitRetry < commitRetryLimit) {
+                inserted = false;
+                committed = false;
+                if (commitRetry > 0) {
+                    LOG.info("Retrying batch insert " + commitRetry);
+                }
+                insertBatch(forestContents[fId], sid);
+                stmtCounts[sid]++;
+                if (isCopyProps) { //prop batch insert
+                    if (propertyUris != null) {
+                        setBatchProperties(fId, sessions[sid]);
+                        stmtCounts[sid]++;
+                        propertyCounts[fId] = 0;
+                    } else {
+                        for (int i = 0; i < counts[fId]; i++) {
+                            DocumentMetadata m = metadatas[fId][i].getMeta();
+                            String u = metadatas[fId][i].getUri();
+                            if (m != null && m.getProperties() != null) {
+                                boolean suc = setDocumentProperties(u,
                                     m.getProperties(), null, null, null, null,
                                     sessions[sid]);
-                            stmtCounts[sid]++;
-                            if (suc) {
-                                commitUris[sid].add(key);
+                                stmtCounts[sid]++;
+                                if (suc && needCommit) {
+                                    commitUris[sid].add(key);
+                                }
                             }
                         }
                     }
                 }
+                //reset forest index for statistical
+                if (countBased) {
+                    sfId = -1;
+                }
+                counts[fId] = 0;
+                inserted = true;
+                if (needCommit && stmtCounts[sid] >= txnSize) {
+                    try {
+                        commit(sid);
+                        if (commitRetry > 0) {
+                            LOG.info("Retrying batch insert successful");
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Error committing transaction: " + e.getMessage());
+                        if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                            handleCommitExceptions(sid);
+                            commitSleepTime = sleep(commitSleepTime);
+                            stmtCounts[sid] = 0;
+                            sessions[sid] = getSession(sid, true);
+                            continue;
+                        } else if (needCommitRetry()) {
+                            LOG.info("Exceeded max batch retry");
+                        }
+                        failed += commitUris[sid].size();
+                        for (DocumentURI failedUri : commitUris[sid]) {
+                            LOG.warn("Failed document: " + failedUri);
+                        }
+                        handleCommitExceptions(sid);
+                    } finally {
+                        stmtCounts[sid] = 0;
+                        committed = true;
+                    }
+                }
+                break;
             }
-            //reset forest index for statistical
-            if (countBased) {
-                sfId = -1;
-            }
-            counts[fId] = 0;
-            inserted = true;
+            pendingUris[sid].clear();
         }
-        boolean committed = false;
-        if (stmtCounts[sid] == txnSize && needCommit) {
-            commit(sid);
-            stmtCounts[sid] = 0;
-            committed = true;
+        if (stmtCounts[sid] >= txnSize && needCommit) { // For naked properties
+            try {
+                commit(sid);
+            } catch (Exception e) {
+                LOG.error("Error committing transaction: " + e.getMessage());
+                handleCommitExceptions(sid);
+            } finally {
+                stmtCounts[sid] = 0;
+                committed = true;
+            }
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) {
             // rotate to next host and reset session
@@ -303,60 +348,70 @@ public class DatabaseContentWriter<VALUE> extends
             }
             for (int i = 0; i < len; i++, sid++) {
                 if (pendingUris[sid].size() > 0) {
+                    commitRetry = 0;
+                    commitSleepTime = MINSLEEPTIME;
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0,
                             counts[i]);
                     if (sessions[sid] == null) {
                         sessions[sid] = getSession(i, false);
                     }
-                    try {
-                        insertBatch(remainder, sid);
-                    } catch (Exception e) {
-                    }
-                    stmtCounts[sid]++;
-                    if (!isCopyProps) {
-                        continue;
-                    }
-                    if (propertyUris != null && propertyCounts[i] > 0) {
-                        setBatchProperties(i, sessions[sid]);
+
+                    while (commitRetry < commitRetryLimit) {
+                        try {
+                            insertBatch(remainder, sid);
+                        } catch (Exception e) {}
                         stmtCounts[sid]++;
-                    } else if (propertyUris == null) { 
-                        // non-batch insert props
-                        for (int j = 0; j < counts[i]; j++) {
-                            DocumentMetadata m = metadatas[i][j].getMeta();
-                            String u = metadatas[i][j].getUri();
-                            if (m != null && m.getProperties() != null) {
-                                setDocumentProperties(u, m.getProperties(),
+                        if (!isCopyProps) {
+                            break;
+                        }
+                        if (propertyUris != null && propertyCounts[i] > 0) {
+                            setBatchProperties(i, sessions[sid]);
+                            stmtCounts[sid]++;
+                        } else if (propertyUris == null) {
+                            // non-batch insert props
+                            for (int j = 0; j < counts[i]; j++) {
+                                DocumentMetadata m = metadatas[i][j].getMeta();
+                                String u = metadatas[i][j].getUri();
+                                if (m != null && m.getProperties() != null) {
+                                    setDocumentProperties(u, m.getProperties(),
                                         null, null, null, null, sessions[sid]);
-                                stmtCounts[sid]++;
+                                    stmtCounts[sid]++;
+                                }
                             }
                         }
-                    }
-                }
-            }
-        }
-        for (int i = 0; i < sessions.length; i++) {
-            if (sessions[i] != null) {
-                if (stmtCounts[i] > 0 && needCommit) {
-                    try {
-                        sessions[i].commit();
-                        succeeded += commitUris[i].size();
-                    } catch (RequestException e) {
-                        // log error and continue on RequestServerException
-                        LOG.error("Error commiting transaction", e);
-                        failed += commitUris[i].size();
-                        for (DocumentURI failedUri : commitUris[i]) {
-                            LOG.warn("Failed document " + failedUri);
+                        if (needCommit && stmtCounts[sid] > 0) {
+                            try {
+                                commit(sid);
+                            } catch (Exception e) {
+                                LOG.error("Error committing transaction: " + e.getMessage());
+                                if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                                    handleCommitExceptions(sid);
+                                    commitSleepTime = sleep(commitSleepTime);
+                                    sessions[sid] = getSession(sid, true);
+                                    stmtCounts[sid] = 0;
+                                    continue;
+                                } else if (needCommitRetry()) {
+                                    LOG.info("Exceeded max batch retry");
+                                }
+                                failed += commitUris[sid].size();
+                                for (DocumentURI failedUri : commitUris[sid]) {
+                                    LOG.warn("Failed document: " + failedUri);
+                                }
+                                handleCommitExceptions(sid);
+                            } finally {
+                                stmtCounts[sid] = 0;
+                                sessions[sid].close();
+                            }
                         }
-                        commitUris[i].clear();
-                    } finally {
-                        sessions[i].close();
+                        break;
                     }
-                } else {
-                    sessions[i].close();
                 }
             }
         }
+
+        closeSessions();
+
         context.getCounter(
                 MarkLogicCounter.OUTPUT_RECORDS_COMMITTED).increment(succeeded);
         context.getCounter(
