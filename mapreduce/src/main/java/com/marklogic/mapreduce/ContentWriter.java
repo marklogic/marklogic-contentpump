@@ -182,13 +182,26 @@ implements MarkLogicConstants {
     /**
      * for failover retry
      */
-    protected int retry;
+    // Global counter for counting retry inserting documents when insertBatch fails
+    protected int batchRetry;
 
-    protected final int maxRetries = 15;
+    protected int batchSleepTime;
 
-    protected int sleepTime;
+    // Global counter for counting retry inserting the whole batch when commit fails
+    protected int commitRetry;
 
-    protected final int maxSleepTime = 30000;
+    protected int commitSleepTime;
+
+    protected int commitRetryLimit;
+
+    protected final int MINRETRIES = 1;
+
+    protected final int MAXRETRIES = 15;
+
+    protected final int MINSLEEPTIME = 500;
+
+    protected final int MAXSLEEPTIME = 30000;
+
     
     public ContentWriter(Configuration conf, 
         Map<String, ContentSource> hostSourceMap, boolean fastLoad) {
@@ -356,10 +369,22 @@ implements MarkLogicConstants {
         isCopyColls = conf.getBoolean(COPY_COLLECTIONS, true);
         isCopyQuality = conf.getBoolean(COPY_QUALITY, true);
         isCopyMeta = conf.getBoolean(COPY_METADATA, true);
+
+        if (needCommitRetry()) {
+            commitRetryLimit = MAXRETRIES;
+        } else {
+            commitRetryLimit = MINRETRIES;
+        }
     }
     
     protected boolean needCommit() {
-        return true;
+        return !(txnSize==1 && batchSize==1) ;
+    }
+
+    protected boolean needCommitRetry() {
+        // Only retry on commit failure when txnSize is 1 since mlcp only
+        // caches one batch
+        return (txnSize == 1);
     }
 
     protected Content createContent(DocumentURI key, VALUEOUT value) 
@@ -465,12 +490,12 @@ implements MarkLogicConstants {
      */
     protected void insertBatch(Content[] batch, int id) 
     throws IOException {
-        retry = 0;
-        sleepTime = 500;
-        while (retry < maxRetries) {
+        batchRetry = 0;
+        batchSleepTime = MINSLEEPTIME;
+        while (batchRetry < MAXRETRIES) {
             try {
-                if (retry == 1) { 
-                    LOG.info("Retrying document insert");
+                if (batchRetry > 0) {
+                    LOG.info("Retrying document insert " + batchRetry);
                 }
                 List<RequestException> errors = 
                     sessions[id].insertContentCollectErrors(batch);
@@ -490,15 +515,15 @@ implements MarkLogicConstants {
                                     ((ContentInsertException)ex).getContent();
                             DocumentURI failedUri = 
                                     pendingUris[id].remove(content);
-                            failed++;
                             if (failedUri != null) {
+                                failed++;
                                 LOG.warn("Failed document " + failedUri);
                             }
                         }
                     }
                 }
-                if (retry > 0) { 
-                    LOG.debug("Retry successful");
+                if (batchRetry > 0) {
+                    LOG.debug("Retry document insert successful");
                 }
             } catch (Exception e) {
                 boolean retryable = true;
@@ -518,23 +543,16 @@ implements MarkLogicConstants {
                     rollback(id);
                 }
 
-                if (retryable && ++retry < maxRetries) {
+                if (retryable && ++batchRetry < MAXRETRIES) {
                     // necessary to close the session too.
                     sessions[id].close();
-                    try {
-                        InternalUtilities.sleep(sleepTime);
-                    } catch (Exception e2) {
-                    }
-                    sleepTime = sleepTime * 2;
-                    if (sleepTime > maxSleepTime) 
-                        sleepTime = maxSleepTime;
-                    
+                    batchSleepTime = sleep(batchSleepTime);
                     // We need to switch host even for RetryableQueryException
                     // because it could be "sync replicating" (bug:45785)
                     sessions[id] = getSession(id, true);
                     continue;
                 } else if (retryable) {
-                    LOG.info("Exceeded max retry");
+                    LOG.info("Exceeded max document retry");
                 }
                 failed += batch.length;
                 // remove the failed content from pendingUris
@@ -555,7 +573,6 @@ implements MarkLogicConstants {
         } else {
             succeeded += pendingUris[id].size();
         }
-        pendingUris[id].clear();
     }
 
     protected void rollback(int id) throws IOException {
@@ -570,7 +587,6 @@ implements MarkLogicConstants {
             if (countBased) {
                 rollbackCount(id);
             }
-            failed += commitUris[id].size();
             for (DocumentURI failedUri : commitUris[id]) {
                 LOG.warn("Failed document: " + failedUri);
             }
@@ -578,17 +594,10 @@ implements MarkLogicConstants {
         }
     }
 
-    protected void commit(int id) throws IOException {
-        try {
-            sessions[id].commit();
-            succeeded += commitUris[id].size();
-            commitUris[id].clear();
-        } catch (Exception e) {
-            LOG.error("Error commiting transaction " + e.getMessage());
-            rollback(id);
-            sessions[id].close();
-            sessions[id] = null;
-        }
+    protected void commit(int id) throws Exception {
+        sessions[id].commit();
+        succeeded += commitUris[id].size();
+        commitUris[id].clear();
     }
     
     @Override
@@ -618,29 +627,62 @@ implements MarkLogicConstants {
             fId = 0;
         }
         pendingUris[sid].put(content, (DocumentURI)key.clone());
-        boolean inserted = false;
         forestContents[fId][counts[fId]++] = content;
+
+        boolean inserted = false;
+        boolean committed = false;
         if (counts[fId] == batchSize) {
+            commitRetry = 0;
+            commitSleepTime = MINSLEEPTIME;
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
-            }  
-            insertBatch(forestContents[fId], sid);
-            stmtCounts[sid]++;
-                
-            //reset forest index for statistical
-            if (countBased) {
-                sfId = -1;
             }
-            counts[fId] = 0;
-            inserted = true;
+            while (commitRetry < commitRetryLimit) {
+                inserted = false;
+                committed = false;
+                if (commitRetry > 0) {
+                    LOG.info("Retrying batch insert " + commitRetry);
+                }
+                insertBatch(forestContents[fId], sid);
+                stmtCounts[sid]++;
+                //reset forest index for statistical
+                if (countBased) {
+                    sfId = -1;
+                }
+                counts[fId] = 0;
+                inserted = true;
+                if (needCommit && stmtCounts[sid] == txnSize) {
+                    try {
+                        commit(sid);
+                        if (commitRetry > 0) {
+                            LOG.info("Retrying batch insert successful");
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Error committing transaction: " + e.getMessage());
+                        if (needCommitRetry() && ++commitRetry<commitRetryLimit) {
+                            handleCommitExceptions(sid);
+                            commitSleepTime = sleep(commitSleepTime);
+                            stmtCounts[sid] = 0;
+                            sessions[sid] = getSession(sid, true);
+                            continue;
+                        } else if (needCommitRetry()) {
+                            LOG.info("Exceeded max batch retry");
+                        }
+                        failed += commitUris[sid].size();
+                        for (DocumentURI failedUri : commitUris[sid]) {
+                            LOG.warn("Failed document: " + failedUri);
+                        }
+                        handleCommitExceptions(sid);
+                    } finally {
+                        stmtCounts[sid] = 0;
+                        committed = true;
+                    }
+                }
+                break;
+            }
+            pendingUris[sid].clear();
         }
-        boolean committed = false;
-        if (needCommit && stmtCounts[sid] == txnSize) {
-            commit(sid);  
-            stmtCounts[sid] = 0;         
-            committed = true;
-        }
-        if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) { 
+        if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) {
             // rotate to next host and reset session
             int oldHostId = hostId;
             for (;;) {
@@ -729,35 +771,52 @@ implements MarkLogicConstants {
             }
             for (int i = 0; i < len; i++, sid++) {             
                 if (sid != -1 && pendingUris[sid].size() > 0) {
+                    commitRetry = 0;
+                    commitSleepTime = MINSLEEPTIME;
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0, 
                             counts[i]);
                     if (sessions[sid] == null) {
                         sessions[sid] = getSession(sid, false);
                     }
-                    try {
-                        insertBatch(remainder, sid);
-                    } catch (Exception e) {
-                    }
-                    stmtCounts[sid]++;
-                }
-            }
-        }
-        for (int i = 0; i < sessions.length; i++) {
-            if (sessions[i] != null) {
-                if (stmtCounts[i] > 0 && needCommit) {
-                    try {
-                        commit(i);
-                        if (sessions[i] != null) {
-                            sessions[i].close();
+                    while (commitRetry < commitRetryLimit) {
+                        try {
+                            insertBatch(remainder, sid);
+                        } catch (Exception e) {}
+                        stmtCounts[sid]++;
+                        if (stmtCounts[sid] > 0 && needCommit) {
+                            try {
+                                commit(sid);
+                            } catch (Exception e) {
+                                LOG.error("Error committing transaction: " + e.getMessage());
+                                if (needCommitRetry() && ++commitRetry<commitRetryLimit) {
+                                    handleCommitExceptions(sid);
+                                    commitSleepTime = sleep(commitSleepTime);
+                                    sessions[sid] = getSession(sid, true);
+                                    stmtCounts[sid] = 0;
+                                    continue;
+                                } else if (needCommitRetry()) {
+                                    LOG.info("Exceeded max batch retry");
+                                }
+                                failed += commitUris[sid].size();
+                                for (DocumentURI failedUri : commitUris[sid]) {
+                                    LOG.warn("Failed document: " + failedUri);
+                                }
+                                handleCommitExceptions(sid);
+                            } finally {
+                                stmtCounts[sid] = 0;
+                                sessions[sid].close();
+                            }
                         }
-                    } catch (Exception e) {
+                        break;
                     }
-                } else {
-                    sessions[i].close();
+                    pendingUris[sid].clear();
                 }
             }
         }
+
+        closeSessions();
+
         if (is != null) {
             is.close();
             if (is instanceof ZipEntryInputStream) {
@@ -779,5 +838,35 @@ implements MarkLogicConstants {
         } 
         return DEFAULT_TXN_SIZE;
     }
-    
+
+    protected int sleep(int sleepTime) {
+        try {
+            InternalUtilities.sleep(sleepTime);
+        } catch (Exception e) {}
+        sleepTime = Math.min(batchSleepTime*2, MAXSLEEPTIME);
+        return sleepTime;
+    }
+
+    protected void handleCommitExceptions(int id) throws IOException {
+        rollback(id);
+        sessions[id].close();
+        sessions[id] = null;
+    }
+
+    protected void closeSessions() {
+        for (int i = 0; i < sessions.length; i++) {
+            if (sessions[i] != null) {
+                if (stmtCounts[i] > 0 && needCommit) {
+                    try {
+                        commit(i);
+                    } catch (Exception e) {
+                    } finally {
+                        sessions[i].close();
+                    }
+                } else {
+                    sessions[i].close();
+                }
+            }
+        }
+    }
 }
