@@ -82,6 +82,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     protected XdmValue transOpt;
     protected ContentType contentType;
     protected AdhocQuery[] queries;
+    // Please note the name diff between pendingURIs here and pendingUris in ContentWriter
     protected Set<DocumentURI>[] pendingURIs;
     protected XdmValue[][] uris;
     protected XdmValue[][] values;

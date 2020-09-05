@@ -750,6 +750,10 @@ implements MarkLogicConstants {
     }
     
     protected Session getSession(int fId, boolean nextReplica) {
+        // Use AUTO mode when txnSize=1, batchSize=1, no session affinity needed
+        // Use UPDATE mode otherwise. For txnSize=1, batchSize=n, mlcp sends
+        // (n+1) requests, n for n documents, 1 for obtaing session id from the
+        // server, session affinity needed.
         TransactionMode mode = TransactionMode.AUTO;
         if (needCommit) {
             mode = TransactionMode.UPDATE;
