@@ -8,18 +8,22 @@ MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest w
 * Archive and restore database contents across environments
 * Export data from a database to a file system
 * Copy subsets of data between databases
-* Load documents from HDFS, including Hadoop SequenceFiles
 
-You can run mlcp across many threads on a single machine or across many nodes in a Hadoop cluster.
+You can run mlcp across many threads on a single machine or across many nodes in a cluster.
 
-The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. Use the Hadoop Connector to build Hadoop MapReduce jobs that interact with MarkLogic. The Hadoop Connector is also used by mlcp. Core features of the  Hadoop Connector include:
-
-* Process data in MarkLogic with Hadoop MapReduce for bulk analytics or transformation
-* Persist data from Hadoop to MarkLogic for query and update
-* Access MarkLogic text, geospatial, scalar, and document structure indexes to send only the most relevant data to Hadoop for processing
-* Write results from MapReduce jobs to MarkLogic in parallel
+The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. Use the Hadoop Connector to build Hadoop MapReduce jobs that interact with MarkLogic. From 10.0-5, Hadoop Connector is removed from a separate release, but mlcp still uses Hadoop Connector as an internal dependency.
 
 ## Release Note
+### What's New in mlcp and Hadoop Connector 10.0.5
+- Enable MLCP retry inserting documents when commit fails to make mlcp more robust.
+- Support passing Java Keystore through mlcp command line for TLS Client Authentication connections.
+- Refactor mlcp repo to remove Hadoop Connector from a separate release.
+- Add initial server thread polling for mlcp import. 
+- Add a new command line option -max_threads.
+- Disable mlcp distributed mode.
+- Upgrade dependencies for fixing security vulnerabilities.
+- Bug fixes
+
 ### What's New in mlcp and Hadoop Connector 10.0.4
 
 -  Bug fixes
@@ -43,14 +47,12 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 ## Getting Started
 
 - [Getting Started with mlcp](http://docs.marklogic.com/guide/mlcp/getting-started)
-- [Getting Started with the MarkLogic Connector for Hadoop](http://docs.marklogic.com/guide/mapreduce/quickstart)
 
 ## Documentation
 
 For official product documentation, please refer to:
 
 - [mlcp User Guide](http://docs.marklogic.com/guide/mlcp)
-- [MarkLogic Connector for Hadoop Developer's Guide](http://docs.marklogic.com/guide/mapreduce)
 
 Wiki pages of this project contain useful information when you work on development:
 
@@ -58,13 +60,12 @@ Wiki pages of this project contain useful information when you work on developme
 
 ## Required Software
 
-- [Required Software for the Hadoop Connector](http://docs.marklogic.com/guide/mapreduce/quickstart#id_78738)
 - [Required Software for mlcp](http://docs.marklogic.com/guide/mlcp/install#id_44231)
 - [Apache Maven](https://maven.apache.org/) (version >= 3.0.3) is required to build mlcp and the Hadoop Connector.
 
 ## Build
 
-mlcp and Hadoop Connector can be built together. Steps to build:
+Steps to build mlcp:
 
 ``` bash
 $ git clone https://github.com/marklogic/marklogic-contentpump.git
@@ -72,9 +73,7 @@ $ cd marklogic-contentpump
 $ mvn clean package -DskipTests=true
 ```
 
-The build writes to the respective **deliverable** directory under the top-level `./mlcp/` and `./mapreduce/` directories.
-
-Alternatively, you can build mlcp and the Hadoop Connector independently from each component’s root directory (i.e. `./mlcp/` and `./mapreduce/`) with the above command. *Note that mlcp depends on the Hadoop Connector*, so a successful build of the Hadoop Connector is required to build mlcp.
+The build writes to the respective **deliverable** directory under under the root directory `marklogic-contentpump/`.
 
 For information on contributing to this project see [CONTRIBUTING.md](https://github.com/marklogic/marklogic-contentpump/blob/develop/CONTRIBUTING.md). For information on working on development of this project see [project wiki page](https://github.com/marklogic/marklogic-contentpump/wiki).
 
