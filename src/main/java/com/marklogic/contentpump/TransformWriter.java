@@ -232,7 +232,10 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             while (commitRetry < commitRetryLimit) {
                 committed = false;
                 if (commitRetry > 0) {
-                    LOG.info("Retrying batch insert " + commitRetry);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Retrying committing batch #" + batchId +
+                            ", Attempts: " + commitRetry + "/" + MAXRETRIES);
+                    }
                 }
                 queries[sid].setNewVariables(uriName, uris[sid]);
                 queries[sid].setNewVariables(contentName, values[sid]);
@@ -248,10 +251,17 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     try {
                         commit(sid);
                         if (commitRetry > 0) {
-                            LOG.info("Retrying batch insert successful");
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Retrying committing batch #" +
+                                    batchId + " is successful");
+                            }
                         }
                     } catch (Exception e) {
                         LOG.error("Error committing transaction: " + e.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Batch #" + batchId +
+                                " failed during committing");
+                        }
                         if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                             handleCommitExceptions(sid);
                             commitSleepTime = sleep(commitSleepTime);
@@ -260,11 +270,13 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                             queries[sid] = getAdhocQuery(sid);
                             continue;
                         } else if (needCommitRetry()) {
-                            LOG.info("Exceeded max batch retry");
+                            LOG.warn("Exceeded max commit retry, batch #" +
+                                batchId + " failed permanently");
                         }
                         failed += commitUris[sid].size();
                         for (DocumentURI failedUri : commitUris[sid]) {
-                            LOG.warn("Failed document: " + failedUri);
+                            LOG.warn("Document: " + failedUri +
+                                " failed permanently");
                         }
                         handleCommitExceptions(sid);
                     }
@@ -275,6 +287,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 }
                 break;
             }
+            batchId++;
             pendingURIs[sid].clear();
         }
         if ((!fastLoad) && ((!needCommit) || committed)) {
@@ -542,11 +555,14 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     throws IOException
     {
         batchRetry = 0;
-        batchSleepTime = 500;
+        batchSleepTime = MINSLEEPTIME;
         while (batchRetry < MAXRETRIES) {
         try {
             if (batchRetry > 0) {
-                LOG.info("Retrying document insert " + batchRetry);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Retrying inserting batch #" + batchId +
+                        ", Attempts: " + batchRetry + "/" + MAXRETRIES);
+                }
             }
             if (transOpt != null) {
                 queries[id].setNewVariable(transOptName, transOpt);
@@ -554,7 +570,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             ResultSequence rs = sessions[id].submitRequest(queries[id]);
             while (rs.hasNext()) { // batch mode
                 String uri = rs.next().asString();
-                LOG.warn("Failed document " + uri);
+                LOG.warn("Document: " + uri + " failed permanently");
                 failed++;
                 pendingURIs[id].remove(new DocumentURI(uri));
                 if (rs.hasNext()) {
@@ -574,6 +590,10 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             } else {
                 LOG.error("Exception:" + e.getMessage());
             }
+
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Batch #" + batchRetry + " failed during inserting");
+            }
             rollback(id);
             if (retryable && ++batchRetry < MAXRETRIES) {
                 sessions[id].close();
@@ -585,11 +605,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 queries[id].setNewVariables(optionsName, optionsValList);
                 continue;
             } else if (retryable) {
-                LOG.info("Exceeded max document retry");
+                LOG.warn("Exceeded max batch retry, batch #" + batchId +
+                    " failed permanently");
             }
             for ( DocumentURI failedUri: pendingURIs[id] ) {
-               LOG.warn("Failed document " + failedUri);
-               failed++;
+                LOG.warn("Document: " + failedUri + " failed permanently");
+                failed++;
             }
             throw new IOException(e);
         }
@@ -607,6 +628,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     InterruptedException {
         for (int i = 0; i < sessions.length; i++) {
             if (pendingURIs[i].size() > 0) {
+                commitRetry = 0;
+                commitSleepTime = MINSLEEPTIME;
                 if (sessions[i] == null) {
                     sessions[i] = getSession(i, false);
                     queries[i] = getAdhocQuery(i);
@@ -619,6 +642,13 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 System.arraycopy(optionsVals[i], 0, optionsLeft, 0, counts[i]);
 
                 while (commitRetry < commitRetryLimit) {
+                    if (commitRetry > 0) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Retrying committing batch #" +
+                                batchId + ", Attempts: " + commitRetry +
+                                "/" + MAXRETRIES);
+                        }
+                    }
                     queries[i].setNewVariables(uriName, urisLeft);
                     queries[i].setNewVariables(contentName, valuesLeft);
                     queries[i].setNewVariables(optionsName, optionsLeft);
@@ -630,9 +660,19 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     if (stmtCounts[i] > 0 && needCommit) {
                         try {
                             commit(i);
+                            if (commitRetry > 0) {
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Retrying committing batch #" +
+                                        batchId + " is successful");
+                                }
+                            }
                         } catch (Exception e) {
                             LOG.error("Error committing transaction: " +
                                 e.getMessage());
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Batch #" + batchId +
+                                    " failed during committing");
+                            }
                             if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                 handleCommitExceptions(i);
                                 commitSleepTime = sleep(commitSleepTime);
@@ -640,11 +680,14 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                                 stmtCounts[i] = 0;
                                 continue;
                             } else if (needCommitRetry()) {
-                                LOG.info("Exceeded max batch retry");
+                                LOG.warn(
+                                    "Exceeded max commit retry, batch #" +
+                                        batchId + " failed permanently");
                             }
                             failed += commitUris[i].size();
                             for (DocumentURI failedUri : commitUris[i]) {
-                                LOG.warn("Failed document: " + failedUri);
+                                LOG.warn("Document: " + failedUri +
+                                    " failed permanently");
                             }
                             handleCommitExceptions(i);
                         } finally {
@@ -654,6 +697,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     }
                     break;
                 }
+                batchId++;
+                pendingURIs[i].clear();
             }
         }
 

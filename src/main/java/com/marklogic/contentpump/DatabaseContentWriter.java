@@ -198,7 +198,7 @@ public class DatabaseContentWriter<VALUE> extends
                 }
             } catch (Exception e) {
                 failed++;
-                LOG.warn("Failed document: " + uri);
+                LOG.warn("Document: " + uri + " failed permanently");
                 return;
             }
         } else {
@@ -254,7 +254,10 @@ public class DatabaseContentWriter<VALUE> extends
                 inserted = false;
                 committed = false;
                 if (commitRetry > 0) {
-                    LOG.info("Retrying batch insert " + commitRetry);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Retrying batch #" + batchId +
+                            ", Attempts: " + commitRetry + "/" + MAXRETRIES);
+                    }
                 }
                 insertBatch(forestContents[fId], sid);
                 stmtCounts[sid]++;
@@ -289,10 +292,17 @@ public class DatabaseContentWriter<VALUE> extends
                     try {
                         commit(sid);
                         if (commitRetry > 0) {
-                            LOG.info("Retrying batch insert successful");
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Retrying committing batch #" +
+                                    batchId + " is successful");
+                            }
                         }
                     } catch (Exception e) {
                         LOG.error("Error committing transaction: " + e.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Batch #" + batchId +
+                                " failed during committing");
+                        }
                         if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                             handleCommitExceptions(sid);
                             commitSleepTime = sleep(commitSleepTime);
@@ -300,11 +310,14 @@ public class DatabaseContentWriter<VALUE> extends
                             sessions[sid] = getSession(sid, true);
                             continue;
                         } else if (needCommitRetry()) {
-                            LOG.info("Exceeded max batch retry");
+                            LOG.warn(
+                                "Exceeded max commit retry, batch #" +
+                                    batchId + " failed permanently");
                         }
                         failed += commitUris[sid].size();
                         for (DocumentURI failedUri : commitUris[sid]) {
-                            LOG.warn("Failed document: " + failedUri);
+                            LOG.warn("Document: " + failedUri +
+                                " failed permanently");
                         }
                         handleCommitExceptions(sid);
                     } finally {
@@ -314,6 +327,7 @@ public class DatabaseContentWriter<VALUE> extends
                 }
                 break;
             }
+            batchId++;
             pendingUris[sid].clear();
         }
         if (stmtCounts[sid] >= txnSize && needCommit) { // For naked properties
@@ -358,6 +372,13 @@ public class DatabaseContentWriter<VALUE> extends
                     }
 
                     while (commitRetry < commitRetryLimit) {
+                        if (commitRetry > 0) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Retrying committing batch #" +
+                                    batchId + ", Attempts: " + commitRetry +
+                                    "/" + MAXRETRIES);
+                            }
+                        }
                         try {
                             insertBatch(remainder, sid);
                         } catch (Exception e) {}
@@ -383,8 +404,16 @@ public class DatabaseContentWriter<VALUE> extends
                         if (needCommit && stmtCounts[sid] > 0) {
                             try {
                                 commit(sid);
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Retrying committing batch #" +
+                                        batchId + " is successful");
+                                }
                             } catch (Exception e) {
                                 LOG.error("Error committing transaction: " + e.getMessage());
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Batch #" + batchId +
+                                        " failed during committing");
+                                }
                                 if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                     handleCommitExceptions(sid);
                                     commitSleepTime = sleep(commitSleepTime);
@@ -392,11 +421,14 @@ public class DatabaseContentWriter<VALUE> extends
                                     stmtCounts[sid] = 0;
                                     continue;
                                 } else if (needCommitRetry()) {
-                                    LOG.info("Exceeded max batch retry");
+                                    LOG.warn(
+                                        "Exceeded max commit retry, batch #" +
+                                            batchId + " failed permanently");
                                 }
                                 failed += commitUris[sid].size();
                                 for (DocumentURI failedUri : commitUris[sid]) {
-                                    LOG.warn("Failed document: " + failedUri);
+                                    LOG.warn("Document: " + failedUri +
+                                        " failed permanently");
                                 }
                                 handleCommitExceptions(sid);
                             } finally {
@@ -406,6 +438,8 @@ public class DatabaseContentWriter<VALUE> extends
                         }
                         break;
                     }
+                    batchId++;
+                    pendingUris[sid].clear();
                 }
             }
         }
