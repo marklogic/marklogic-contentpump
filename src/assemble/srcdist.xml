@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly>
+    <id>src</id>
+    <formats>
+      <format>zip</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <fileSets>
+      <fileSet>
+        <directory>src</directory>
+        <outputDirectory>${file.separator}src</outputDirectory>
+        <excludes>
+          <exclude>**/test/**</exclude>
+          <exclude>**/test.properties</exclude> 
+          <exclude>conf/*.xml</exclude>
+          <exclude>main/java/doc-files/**</exclude>
+          <exclude>**/*.css</exclude>
+          <exclude>**/*.html</exclude>
+        </excludes>
+      </fileSet>
+    </fileSets>
+    <files>
+      <file>
+        <source>NOTICE.txt</source>
+        <outputDirectory>${file.separator}</outputDirectory>
+      </file>
+      <file>
+        <source>LICENSE.txt</source>
+        <outputDirectory>${file.separator}</outputDirectory>
+      </file>
+      <file>
+        <source>pom.xml</source>
+        <outputDirectory>${file.separator}</outputDirectory>
+      </file>
+    </files>
+</assembly>
