@@ -94,7 +94,10 @@ public class DatabaseTransformWriter<VALUE> extends
                 while (commitRetry < commitRetryLimit) {
                     committed = false;
                     if (commitRetry > 0) {
-                        LOG.info("Retrying batch insert " + commitRetry);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Retrying committing batch #" + batchId +
+                                ", Attempts: " + commitRetry + "/" + MAXRETRIES);
+                        }
                     }
                     queries[sid].setNewVariables(uriName, uris[sid]);
                     queries[sid].setNewVariables(contentName, values[sid]);
@@ -110,22 +113,32 @@ public class DatabaseTransformWriter<VALUE> extends
                         try {
                             commit(sid);
                             if (commitRetry > 0) {
-                                LOG.info("Retrying batch insert successful");
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Retrying committing batch #" +
+                                        batchId + " is successful");
+                                }
                             }
                         } catch (Exception e) {
-                            LOG.error("Error committing transaction: " + e.getMessage());
-                            if (needCommitRetry() && ++commitRetry<commitRetryLimit) {
+                            LOG.error("Error committing transaction: " +
+                                e.getMessage());
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Batch #" + batchId +
+                                    " failed during committing");
+                            }
+                            if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                 handleCommitExceptions(sid);
                                 commitSleepTime = sleep(commitSleepTime);
                                 stmtCounts[sid] = 0;
                                 sessions[sid] = getSession(sid, true);
                                 continue;
                             } else if (needCommitRetry()) {
-                                LOG.info("Exceeded max batch retry");
+                                LOG.warn("Exceeded max commit retry, batch #" +
+                                    batchId + " failed permanently");
                             }
                             failed += commitUris[sid].size();
                             for (DocumentURI failedUri : commitUris[sid]) {
-                                LOG.warn("Failed document: " + failedUri);
+                                LOG.warn("Document: " + failedUri +
+                                    " failed permanently");
                             }
                             handleCommitExceptions(sid);
                         } finally {
@@ -135,6 +148,7 @@ public class DatabaseTransformWriter<VALUE> extends
                     }
                     break;
                 }
+                batchId++;
                 pendingURIs[sid].clear();
             }
         }

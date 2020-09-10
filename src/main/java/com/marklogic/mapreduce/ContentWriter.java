@@ -179,6 +179,8 @@ implements MarkLogicConstants {
     
     protected boolean isTxnCompatible = false;
 
+    protected int batchId = 0;
+
     /**
      * for failover retry
      */
@@ -495,7 +497,10 @@ implements MarkLogicConstants {
         while (batchRetry < MAXRETRIES) {
             try {
                 if (batchRetry > 0) {
-                    LOG.info("Retrying document insert " + batchRetry);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Retrying inserting batch #" + batchId +
+                            ", Attempts: " + batchRetry + "/" + MAXRETRIES);
+                    }
                 }
                 List<RequestException> errors = 
                     sessions[id].insertContentCollectErrors(batch);
@@ -517,13 +522,17 @@ implements MarkLogicConstants {
                                     pendingUris[id].remove(content);
                             if (failedUri != null) {
                                 failed++;
-                                LOG.warn("Failed document " + failedUri);
+                                LOG.warn("Document: " + failedUri +
+                                    " failed permanently");
                             }
                         }
                     }
                 }
                 if (batchRetry > 0) {
-                    LOG.debug("Retry document insert successful");
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Retrying inserting batch #" + batchId +
+                            " is successful");
+                    }
                 }
             } catch (Exception e) {
                 boolean retryable = true;
@@ -538,6 +547,9 @@ implements MarkLogicConstants {
                     LOG.error("Exception:" + e.getMessage());
                 }
 
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Batch #" + batchId + " failed during inserting");
+                }
                 // necessary to roll back in certain scenarios.
                 if (needCommit) {
                     rollback(id);
@@ -552,13 +564,14 @@ implements MarkLogicConstants {
                     sessions[id] = getSession(id, true);
                     continue;
                 } else if (retryable) {
-                    LOG.info("Exceeded max document retry");
+                    LOG.warn("Exceeded max batch retry, batch #" + batchId +
+                        " failed permanently");
                 }
                 failed += batch.length;
                 // remove the failed content from pendingUris
                 for (Content fc : batch) {
                     DocumentURI failedUri = pendingUris[id].remove(fc);
-                    LOG.warn("Failed document " + failedUri);
+                    LOG.warn("Document: " + failedUri + " failed permanently");
                 }
                 throw new IOException(e);
             } 
@@ -579,16 +592,13 @@ implements MarkLogicConstants {
         try {
             sessions[id].rollback();
         } catch (Exception e) {
-            LOG.error("Error rolling back transaction " + e.getMessage());
+            LOG.error("Error rolling back transaction: " + e.getMessage());
             if (LOG.isDebugEnabled()) {
                 LOG.debug(e);
             }
         } finally {
             if (countBased) {
                 rollbackCount(id);
-            }
-            for (DocumentURI failedUri : commitUris[id]) {
-                LOG.warn("Failed document: " + failedUri);
             }
             commitUris[id].clear();
         }
@@ -641,7 +651,10 @@ implements MarkLogicConstants {
                 inserted = false;
                 committed = false;
                 if (commitRetry > 0) {
-                    LOG.info("Retrying batch insert " + commitRetry);
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Retrying committing batch #" + batchId +
+                            ", Attempts: " + commitRetry + "/" + MAXRETRIES);
+                    }
                 }
                 insertBatch(forestContents[fId], sid);
                 stmtCounts[sid]++;
@@ -655,22 +668,32 @@ implements MarkLogicConstants {
                     try {
                         commit(sid);
                         if (commitRetry > 0) {
-                            LOG.info("Retrying batch insert successful");
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Retrying committing batch #" +
+                                    batchId + " is successful");
+                            }
                         }
                     } catch (Exception e) {
-                        LOG.error("Error committing transaction: " + e.getMessage());
-                        if (needCommitRetry() && ++commitRetry<commitRetryLimit) {
+                        LOG.error("Error committing transaction: " +
+                            e.getMessage());
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Batch #" + batchId +
+                                " failed during committing");
+                        }
+                        if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                             handleCommitExceptions(sid);
                             commitSleepTime = sleep(commitSleepTime);
                             stmtCounts[sid] = 0;
                             sessions[sid] = getSession(sid, true);
                             continue;
                         } else if (needCommitRetry()) {
-                            LOG.info("Exceeded max batch retry");
+                            LOG.warn("Exceeded max commit retry, batch #" +
+                                batchId + " failed permanently");
                         }
                         failed += commitUris[sid].size();
                         for (DocumentURI failedUri : commitUris[sid]) {
-                            LOG.warn("Failed document: " + failedUri);
+                            LOG.warn("Document: " + failedUri +
+                                " failed permanently");
                         }
                         handleCommitExceptions(sid);
                     } finally {
@@ -680,6 +703,7 @@ implements MarkLogicConstants {
                 }
                 break;
             }
+            batchId++;
             pendingUris[sid].clear();
         }
         if ((!fastLoad) && ((inserted && (!needCommit)) || committed)) {
@@ -784,6 +808,13 @@ implements MarkLogicConstants {
                         sessions[sid] = getSession(sid, false);
                     }
                     while (commitRetry < commitRetryLimit) {
+                        if (commitRetry > 0) {
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug("Retrying committing batch #" +
+                                    batchId + ", Attempts: " + commitRetry +
+                                    "/" + MAXRETRIES);
+                            }
+                        }
                         try {
                             insertBatch(remainder, sid);
                         } catch (Exception e) {}
@@ -791,8 +822,19 @@ implements MarkLogicConstants {
                         if (stmtCounts[sid] > 0 && needCommit) {
                             try {
                                 commit(sid);
+                                if (commitRetry > 0) {
+                                    if (LOG.isDebugEnabled()) {
+                                        LOG.debug("Retrying committing batch #" +
+                                            batchId + " is successful");
+                                    }
+                                }
                             } catch (Exception e) {
-                                LOG.error("Error committing transaction: " + e.getMessage());
+                                LOG.error("Error committing transaction: " +
+                                    e.getMessage());
+                                if (LOG.isDebugEnabled()) {
+                                    LOG.debug("Batch #" + batchId +
+                                        " failed during committing");
+                                }
                                 if (needCommitRetry() && ++commitRetry<commitRetryLimit) {
                                     handleCommitExceptions(sid);
                                     commitSleepTime = sleep(commitSleepTime);
@@ -800,11 +842,14 @@ implements MarkLogicConstants {
                                     stmtCounts[sid] = 0;
                                     continue;
                                 } else if (needCommitRetry()) {
-                                    LOG.info("Exceeded max batch retry");
+                                    LOG.warn(
+                                        "Exceeded max commit retry, batch #" +
+                                            batchId + " failed permanently");
                                 }
                                 failed += commitUris[sid].size();
                                 for (DocumentURI failedUri : commitUris[sid]) {
-                                    LOG.warn("Failed document: " + failedUri);
+                                    LOG.warn("Document: " + failedUri +
+                                        " failed permanently");
                                 }
                                 handleCommitExceptions(sid);
                             } finally {
@@ -814,6 +859,7 @@ implements MarkLogicConstants {
                         }
                         break;
                     }
+                    batchId++;
                     pendingUris[sid].clear();
                 }
             }
@@ -845,6 +891,9 @@ implements MarkLogicConstants {
 
     protected int sleep(int sleepTime) {
         try {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Sleeping..." + "sleepTime=" + sleepTime);
+            }
             InternalUtilities.sleep(sleepTime);
         } catch (Exception e) {}
         sleepTime = Math.min(batchSleepTime*2, MAXSLEEPTIME);
