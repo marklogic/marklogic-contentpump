@@ -202,7 +202,7 @@ implements MarkLogicConstants {
 
     protected final int MINSLEEPTIME = 500;
 
-    protected final int MAXSLEEPTIME = 30000;
+    protected final int MAXSLEEPTIME = 120000;
 
     
     public ContentWriter(Configuration conf, 
@@ -892,7 +892,7 @@ implements MarkLogicConstants {
     protected int sleep(int sleepTime) {
         try {
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Sleeping..." + "sleepTime=" + sleepTime);
+                LOG.debug("Sleeping..." + "sleepTime=" + sleepTime + "ms");
             }
             InternalUtilities.sleep(sleepTime);
         } catch (Exception e) {}
