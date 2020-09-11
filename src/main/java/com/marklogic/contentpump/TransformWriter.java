@@ -240,7 +240,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 queries[sid].setNewVariables(uriName, uris[sid]);
                 queries[sid].setNewVariables(contentName, values[sid]);
                 queries[sid].setNewVariables(optionsName, optionsVals[sid]);
-                insertBatch(sid, uris[sid], values[sid], optionsVals[sid]);
+                try {
+                    insertBatch(sid, uris[sid], values[sid], optionsVals[sid]);
+                } catch (Exception e) {}
                 stmtCounts[sid]++;
                 //reset forest index for statistical
                 if (countBased) {
@@ -258,10 +260,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                         }
                     } catch (Exception e) {
                         LOG.error("Error committing transaction: " + e.getMessage());
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Batch #" + batchId +
-                                " failed during committing");
-                        }
+                        LOG.warn("Batch #" + batchId + " failed during committing");
+
                         if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                             handleCommitExceptions(sid);
                             commitSleepTime = sleep(commitSleepTime);
@@ -270,13 +270,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                             queries[sid] = getAdhocQuery(sid);
                             continue;
                         } else if (needCommitRetry()) {
-                            LOG.warn("Exceeded max commit retry, batch #" +
+                            LOG.error("Exceeded max commit retry, batch #" +
                                 batchId + " failed permanently");
                         }
                         failed += commitUris[sid].size();
                         for (DocumentURI failedUri : commitUris[sid]) {
-                            LOG.warn("Document: " + failedUri +
-                                " failed permanently");
+                            LOG.error("Document failed permanently: " + failedUri);
                         }
                         handleCommitExceptions(sid);
                     }
@@ -570,9 +569,10 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             ResultSequence rs = sessions[id].submitRequest(queries[id]);
             while (rs.hasNext()) { // batch mode
                 String uri = rs.next().asString();
-                LOG.warn("Document: " + uri + " failed permanently");
-                failed++;
-                pendingURIs[id].remove(new DocumentURI(uri));
+                if (pendingURIs[id].remove(new DocumentURI(uri))) {
+                    LOG.error("Document failed permanently: " + uri);
+                    failed++;
+                }
                 if (rs.hasNext()) {
                     String err = rs.next().asString();
                     LOG.warn(err);
@@ -590,11 +590,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             } else {
                 LOG.error("Exception:" + e.getMessage());
             }
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Batch #" + batchRetry + " failed during inserting");
-            }
+            LOG.warn("Batch #" + batchId + " failed during inserting");
             rollback(id);
+
             if (retryable && ++batchRetry < MAXRETRIES) {
                 sessions[id].close();
                 batchSleepTime = sleep(batchSleepTime);
@@ -605,12 +603,13 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 queries[id].setNewVariables(optionsName, optionsValList);
                 continue;
             } else if (retryable) {
-                LOG.warn("Exceeded max batch retry, batch #" + batchId +
+                LOG.error("Exceeded max batch retry, batch #" + batchId +
                     " failed permanently");
             }
             for ( DocumentURI failedUri: pendingURIs[id] ) {
-                LOG.warn("Document: " + failedUri + " failed permanently");
+                LOG.error("Document failed permanently: " + failedUri);
                 failed++;
+                pendingURIs[id].remove(failedUri);
             }
             throw new IOException(e);
         }
@@ -669,10 +668,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                         } catch (Exception e) {
                             LOG.error("Error committing transaction: " +
                                 e.getMessage());
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Batch #" + batchId +
-                                    " failed during committing");
-                            }
+                            LOG.warn("Batch #" + batchId + " failed during committing");
                             if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                 handleCommitExceptions(i);
                                 commitSleepTime = sleep(commitSleepTime);
@@ -680,14 +676,14 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                                 stmtCounts[i] = 0;
                                 continue;
                             } else if (needCommitRetry()) {
-                                LOG.warn(
+                                LOG.error(
                                     "Exceeded max commit retry, batch #" +
                                         batchId + " failed permanently");
                             }
                             failed += commitUris[i].size();
                             for (DocumentURI failedUri : commitUris[i]) {
-                                LOG.warn("Document: " + failedUri +
-                                    " failed permanently");
+                                LOG.error("Document failed permanently: " +
+                                    failedUri);
                             }
                             handleCommitExceptions(i);
                         } finally {

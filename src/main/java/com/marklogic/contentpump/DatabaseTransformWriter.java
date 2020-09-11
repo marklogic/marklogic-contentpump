@@ -102,7 +102,9 @@ public class DatabaseTransformWriter<VALUE> extends
                     queries[sid].setNewVariables(uriName, uris[sid]);
                     queries[sid].setNewVariables(contentName, values[sid]);
                     queries[sid].setNewVariables(optionsName, optionsVals[sid]);
-                    insertBatch(sid,uris[sid],values[sid],optionsVals[sid]);
+                    try {
+                        insertBatch(sid, uris[sid], values[sid], optionsVals[sid]);
+                    } catch (Exception e) {}
                     stmtCounts[sid]++;
                     //reset forest index for statistical
                     if (countBased) {
@@ -121,10 +123,7 @@ public class DatabaseTransformWriter<VALUE> extends
                         } catch (Exception e) {
                             LOG.error("Error committing transaction: " +
                                 e.getMessage());
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug("Batch #" + batchId +
-                                    " failed during committing");
-                            }
+                            LOG.warn("Batch #" + batchId + " failed during committing");
                             if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                 handleCommitExceptions(sid);
                                 commitSleepTime = sleep(commitSleepTime);
@@ -132,12 +131,12 @@ public class DatabaseTransformWriter<VALUE> extends
                                 sessions[sid] = getSession(sid, true);
                                 continue;
                             } else if (needCommitRetry()) {
-                                LOG.warn("Exceeded max commit retry, batch #" +
+                                LOG.error("Exceeded max commit retry, batch #" +
                                     batchId + " failed permanently");
                             }
                             failed += commitUris[sid].size();
                             for (DocumentURI failedUri : commitUris[sid]) {
-                                LOG.warn("Document: " + failedUri +
+                                LOG.error("Document: " + failedUri +
                                     " failed permanently");
                             }
                             handleCommitExceptions(sid);
