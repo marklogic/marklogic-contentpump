@@ -655,7 +655,9 @@ implements MarkLogicConstants {
                             ", Attempts: " + commitRetry + "/" + MAXRETRIES);
                     }
                 }
-                insertBatch(forestContents[fId], sid);
+                try {
+                    insertBatch(forestContents[fId], sid);
+                } catch (Exception e) {}
                 stmtCounts[sid]++;
                 //reset forest index for statistical
                 if (countBased) {

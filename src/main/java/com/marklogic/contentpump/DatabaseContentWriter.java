@@ -259,7 +259,9 @@ public class DatabaseContentWriter<VALUE> extends
                             ", Attempts: " + commitRetry + "/" + MAXRETRIES);
                     }
                 }
-                insertBatch(forestContents[fId], sid);
+                try {
+                    insertBatch(forestContents[fId], sid);
+                } catch (Exception e) {}
                 stmtCounts[sid]++;
                 if (isCopyProps) { //prop batch insert
                     if (propertyUris != null) {
