@@ -102,7 +102,9 @@ public class DatabaseTransformWriter<VALUE> extends
                     queries[sid].setNewVariables(uriName, uris[sid]);
                     queries[sid].setNewVariables(contentName, values[sid]);
                     queries[sid].setNewVariables(optionsName, optionsVals[sid]);
-                    insertBatch(sid,uris[sid],values[sid],optionsVals[sid]);
+                    try {
+                        insertBatch(sid, uris[sid], values[sid], optionsVals[sid]);
+                    } catch (Exception e) {}
                     stmtCounts[sid]++;
                     //reset forest index for statistical
                     if (countBased) {
