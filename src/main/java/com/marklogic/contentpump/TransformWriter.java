@@ -233,8 +233,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 committed = false;
                 if (commitRetry > 0) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Retrying committing batch #" + batchId +
-                            ", Attempts: " + commitRetry + "/" + MAXRETRIES);
+                        LOG.debug(getFormattedBatchId() +
+                            "Retrying committing batch, attempts: " +
+                            commitRetry + "/" + MAXRETRIES);
                     }
                 }
                 queries[sid].setNewVariables(uriName, uris[sid]);
@@ -249,20 +250,21 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     sfId = -1;
                 }
                 counts[sid] = 0;
+
                 if (needCommit && stmtCounts[sid] == txnSize) {
                     try {
                         commit(sid);
                         if (commitRetry > 0) {
                             if (LOG.isDebugEnabled()) {
-                                LOG.debug("Retrying committing batch #" +
-                                    batchId + " is successful");
+                                LOG.debug(getFormattedBatchId() +
+                                    "Retrying committing batch is successful");
                             }
                         }
                     } catch (Exception e) {
-                        LOG.error("Error committing transaction: " + e.getMessage());
-                        LOG.warn("Batch #" + batchId + " failed during committing");
-
+                        LOG.warn(getFormattedBatchId() +
+                            "Error committing transaction: " + e.getMessage());
                         if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                            LOG.warn(getFormattedBatchId() + "Failed during committing");
                             handleCommitExceptions(sid);
                             commitSleepTime = sleep(commitSleepTime);
                             stmtCounts[sid] = 0;
@@ -270,12 +272,13 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                             queries[sid] = getAdhocQuery(sid);
                             continue;
                         } else if (needCommitRetry()) {
-                            LOG.error("Exceeded max commit retry, batch #" +
-                                batchId + " failed permanently");
+                            LOG.error(getFormattedBatchId() +
+                                "Exceeded max commit retry, batch failed permanently");
                         }
                         failed += commitUris[sid].size();
                         for (DocumentURI failedUri : commitUris[sid]) {
-                            LOG.error("Document failed permanently: " + failedUri);
+                            LOG.error(getFormattedBatchId() +
+                                "Document failed permanently: " + failedUri);
                         }
                         handleCommitExceptions(sid);
                     }
@@ -559,8 +562,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         try {
             if (batchRetry > 0) {
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Retrying inserting batch #" + batchId +
-                        ", Attempts: " + batchRetry + "/" + MAXRETRIES);
+                    LOG.debug(getFormattedBatchId() +
+                        "Retrying inserting batch, attempts: " + batchRetry +
+                        "/" + MAXRETRIES);
                 }
             }
             if (transOpt != null) {
@@ -570,7 +574,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
             while (rs.hasNext()) { // batch mode
                 String uri = rs.next().asString();
                 if (pendingURIs[id].remove(new DocumentURI(uri))) {
-                    LOG.error("Document failed permanently: " + uri);
+                    LOG.error(getFormattedBatchId() +
+                        "Document failed permanently: " + uri);
                     failed++;
                 }
                 if (rs.hasNext()) {
@@ -578,20 +583,28 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     LOG.warn(err);
                 } else break;   
             }
+            if (batchRetry > 0) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(getFormattedBatchId() +
+                        "Retrying inserting batch is successful");
+                }
+            }
         } catch (Exception e) {
             boolean retryable = true;
             // compatible mode: log error and continue
             if (e instanceof QueryException) {
-                LOG.error("QueryException:" + 
+                LOG.warn(getFormattedBatchId() + "QueryException: " +
                         ((QueryException) e).getFormatString());
                 retryable = ((QueryException) e).isRetryable();
             } else if (e instanceof RequestServerException) {
-                LOG.error("RequestServerException:" + e.getMessage());
+                LOG.warn(getFormattedBatchId() + "RequestServerException:" + e.getMessage());
             } else {
-                LOG.error("Exception:" + e.getMessage());
+                LOG.warn(getFormattedBatchId() + "Exception:" + e.getMessage());
             }
-            LOG.warn("Batch #" + batchId + " failed during inserting");
-            rollback(id);
+            LOG.warn(getFormattedBatchId() + "Failed during inserting");
+            if (needCommit) {
+                rollback(id);
+            }
 
             if (retryable && ++batchRetry < MAXRETRIES) {
                 sessions[id].close();
@@ -603,11 +616,12 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 queries[id].setNewVariables(optionsName, optionsValList);
                 continue;
             } else if (retryable) {
-                LOG.error("Exceeded max batch retry, batch #" + batchId +
-                    " failed permanently");
+                LOG.error(getFormattedBatchId() +
+                    "Exceeded max batch retry, batch failed permanently");
             }
             for ( DocumentURI failedUri: pendingURIs[id] ) {
-                LOG.error("Document failed permanently: " + failedUri);
+                LOG.error(getFormattedBatchId() +
+                    "Document failed permanently: " + failedUri);
                 failed++;
                 pendingURIs[id].remove(failedUri);
             }
@@ -643,9 +657,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 while (commitRetry < commitRetryLimit) {
                     if (commitRetry > 0) {
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug("Retrying committing batch #" +
-                                batchId + ", Attempts: " + commitRetry +
-                                "/" + MAXRETRIES);
+                            LOG.debug(getFormattedBatchId() +
+                                "Retrying committing batch, attempts: " +
+                                commitRetry + "/" + MAXRETRIES);
                         }
                     }
                     queries[i].setNewVariables(uriName, urisLeft);
@@ -656,34 +670,34 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     } catch (Exception e) {
                     }
                     stmtCounts[i]++;
+
                     if (stmtCounts[i] > 0 && needCommit) {
                         try {
                             commit(i);
                             if (commitRetry > 0) {
                                 if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Retrying committing batch #" +
-                                        batchId + " is successful");
+                                    LOG.debug(getFormattedBatchId() +
+                                        "Retrying committing batch is successful");
                                 }
                             }
                         } catch (Exception e) {
-                            LOG.error("Error committing transaction: " +
-                                e.getMessage());
-                            LOG.warn("Batch #" + batchId + " failed during committing");
+                            LOG.warn(getFormattedBatchId() +
+                                "Error committing transaction: " + e.getMessage());
                             if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                                LOG.warn(getFormattedBatchId() + "Failed during committing");
                                 handleCommitExceptions(i);
                                 commitSleepTime = sleep(commitSleepTime);
                                 sessions[i] = getSession(i, true);
                                 stmtCounts[i] = 0;
                                 continue;
                             } else if (needCommitRetry()) {
-                                LOG.error(
-                                    "Exceeded max commit retry, batch #" +
-                                        batchId + " failed permanently");
+                                LOG.error(getFormattedBatchId() +
+                                    "Exceeded max commit retry, batch failed permanently");
                             }
                             failed += commitUris[i].size();
                             for (DocumentURI failedUri : commitUris[i]) {
-                                LOG.error("Document failed permanently: " +
-                                    failedUri);
+                                LOG.error(getFormattedBatchId() +
+                                    "Document failed permanently: " + failedUri);
                             }
                             handleCommitExceptions(i);
                         } finally {

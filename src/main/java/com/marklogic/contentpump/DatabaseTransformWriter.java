@@ -93,11 +93,10 @@ public class DatabaseTransformWriter<VALUE> extends
                 commitSleepTime = MINSLEEPTIME;
                 while (commitRetry < commitRetryLimit) {
                     committed = false;
-                    if (commitRetry > 0) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Retrying committing batch #" + batchId +
-                                ", Attempts: " + commitRetry + "/" + MAXRETRIES);
-                        }
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(getFormattedBatchId() +
+                            "Retrying committing batch , attempts: " +
+                            commitRetry + "/" + MAXRETRIES);
                     }
                     queries[sid].setNewVariables(uriName, uris[sid]);
                     queries[sid].setNewVariables(contentName, values[sid]);
@@ -111,33 +110,35 @@ public class DatabaseTransformWriter<VALUE> extends
                         sfId = -1;
                     }
                     counts[fId] = 0;
+
                     if (needCommit && stmtCounts[sid] == txnSize) {
                         try {
                             commit(sid);
                             if (commitRetry > 0) {
                                 if (LOG.isDebugEnabled()) {
-                                    LOG.debug("Retrying committing batch #" +
-                                        batchId + " is successful");
+                                    LOG.debug(getFormattedBatchId() +
+                                        "Retrying committing batch is successful");
                                 }
                             }
                         } catch (Exception e) {
-                            LOG.error("Error committing transaction: " +
-                                e.getMessage());
-                            LOG.warn("Batch #" + batchId + " failed during committing");
-                            if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                            LOG.warn(getFormattedBatchId() +
+                                "Error committing transaction: " + e.getMessage());
+                            if (needCommitRetry() &&
+                                ++commitRetry < commitRetryLimit) {
+                                LOG.warn(getFormattedBatchId() + "Failed during committing");
                                 handleCommitExceptions(sid);
                                 commitSleepTime = sleep(commitSleepTime);
                                 stmtCounts[sid] = 0;
                                 sessions[sid] = getSession(sid, true);
                                 continue;
                             } else if (needCommitRetry()) {
-                                LOG.error("Exceeded max commit retry, batch #" +
-                                    batchId + " failed permanently");
+                                LOG.error(getFormattedBatchId() +
+                                    "Exceeded max commit retry, batch failed permanently");
                             }
                             failed += commitUris[sid].size();
                             for (DocumentURI failedUri : commitUris[sid]) {
-                                LOG.error("Document: " + failedUri +
-                                    " failed permanently");
+                                LOG.error(getFormattedBatchId() +
+                                    "Document failed permanently: " + failedUri);
                             }
                             handleCommitExceptions(sid);
                         } finally {
@@ -151,6 +152,7 @@ public class DatabaseTransformWriter<VALUE> extends
                 pendingURIs[sid].clear();
             }
         }
+
         if (isCopyProps && meta.getProperties() != null &&
                 (effectiveVersion < PROPS_MIN_VERSION || naked)) {
             boolean suc = DatabaseContentWriter.setDocumentProperties(uri, 
@@ -175,12 +177,14 @@ public class DatabaseTransformWriter<VALUE> extends
             try {
                 commit(sid);
             } catch (Exception e) {
-                LOG.error("Error committing transaction: " + e.getMessage());
+                LOG.warn(getFormattedBatchId() +
+                    "Error committing transaction: " + e.getMessage());
                 handleCommitExceptions(sid);
             }
             stmtCounts[sid] = 0;
             committed = true;
         }
+
         if ((!fastLoad) && ((!needCommit) || committed)) { 
             // rotate to next host and reset session
             hostId = (hostId + 1)%forestIds.length;
