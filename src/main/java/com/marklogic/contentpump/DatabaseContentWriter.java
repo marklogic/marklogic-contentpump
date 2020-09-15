@@ -297,10 +297,8 @@ public class DatabaseContentWriter<VALUE> extends
                     try {
                         commit(sid);
                         if (commitRetry > 0) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(getFormattedBatchId() +
-                                    "Retrying committing batch is successful");
-                            }
+                            LOG.info(getFormattedBatchId() +
+                                "Retrying committing batch is successful");
                         }
                     } catch (Exception e) {
                         LOG.warn(getFormattedBatchId() +
@@ -409,10 +407,8 @@ public class DatabaseContentWriter<VALUE> extends
                             try {
                                 commit(sid);
                                 if (commitRetry > 0) {
-                                    if (LOG.isDebugEnabled()) {
-                                        LOG.debug(getFormattedBatchId() +
-                                            "Retrying committing batch is successful");
-                                    }
+                                    LOG.info(getFormattedBatchId() +
+                                        "Retrying committing batch is successful");
                                 }
                             } catch (Exception e) {
                                 LOG.warn(getFormattedBatchId() +
