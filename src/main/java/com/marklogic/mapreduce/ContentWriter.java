@@ -532,10 +532,8 @@ implements MarkLogicConstants {
                     }
                 }
                 if (batchRetry > 0) {
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(getFormattedBatchId() +
-                            "Retrying inserting batch is successful");
-                    }
+                    LOG.info(getFormattedBatchId() +
+                        "Retrying inserting batch is successful");
                 }
             } catch (Exception e) {
                 boolean retryable = true;
@@ -678,10 +676,8 @@ implements MarkLogicConstants {
                     try {
                         commit(sid);
                         if (commitRetry > 0) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(getFormattedBatchId() +
-                                    "Retrying committing batch is successful");
-                            }
+                            LOG.info(getFormattedBatchId() +
+                                "Retrying committing batch is successful");
                         }
                     } catch (Exception e) {
                         LOG.warn(getFormattedBatchId() +
@@ -832,10 +828,8 @@ implements MarkLogicConstants {
                             try {
                                 commit(sid);
                                 if (commitRetry > 0) {
-                                    if (LOG.isDebugEnabled()) {
-                                        LOG.debug(getFormattedBatchId() +
-                                            "Retrying committing batch is successful");
-                                    }
+                                    LOG.info(getFormattedBatchId() +
+                                        "Retrying committing batch is successful");
                                 }
                             } catch (Exception e) {
                                 LOG.warn(getFormattedBatchId() +

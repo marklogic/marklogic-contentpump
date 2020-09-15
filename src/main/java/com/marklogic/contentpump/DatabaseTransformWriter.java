@@ -115,16 +115,13 @@ public class DatabaseTransformWriter<VALUE> extends
                         try {
                             commit(sid);
                             if (commitRetry > 0) {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug(getFormattedBatchId() +
-                                        "Retrying committing batch is successful");
-                                }
+                                LOG.info(getFormattedBatchId() +
+                                    "Retrying committing batch is successful");
                             }
                         } catch (Exception e) {
                             LOG.warn(getFormattedBatchId() +
                                 "Error committing transaction: " + e.getMessage());
-                            if (needCommitRetry() &&
-                                ++commitRetry < commitRetryLimit) {
+                            if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                 LOG.warn(getFormattedBatchId() + "Failed during committing");
                                 handleCommitExceptions(sid);
                                 commitSleepTime = sleep(commitSleepTime);

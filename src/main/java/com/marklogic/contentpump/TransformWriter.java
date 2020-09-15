@@ -255,10 +255,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     try {
                         commit(sid);
                         if (commitRetry > 0) {
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(getFormattedBatchId() +
-                                    "Retrying committing batch is successful");
-                            }
+                            LOG.info(getFormattedBatchId() +
+                                "Retrying committing batch is successful");
                         }
                     } catch (Exception e) {
                         LOG.warn(getFormattedBatchId() +
@@ -584,10 +582,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 } else break;   
             }
             if (batchRetry > 0) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug(getFormattedBatchId() +
-                        "Retrying inserting batch is successful");
-                }
+                LOG.info(getFormattedBatchId() +
+                    "Retrying inserting batch is successful");
             }
         } catch (Exception e) {
             boolean retryable = true;
@@ -675,10 +671,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                         try {
                             commit(i);
                             if (commitRetry > 0) {
-                                if (LOG.isDebugEnabled()) {
-                                    LOG.debug(getFormattedBatchId() +
-                                        "Retrying committing batch is successful");
-                                }
+                                LOG.info(getFormattedBatchId() +
+                                    "Retrying committing batch is successful");
                             }
                         } catch (Exception e) {
                             LOG.warn(getFormattedBatchId() +
