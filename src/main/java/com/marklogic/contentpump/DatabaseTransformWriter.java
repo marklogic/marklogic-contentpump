@@ -120,7 +120,7 @@ public class DatabaseTransformWriter<VALUE> extends
                             }
                         } catch (Exception e) {
                             LOG.warn(getFormattedBatchId() +
-                                "Error committing transaction: " + e.getMessage());
+                                "Failed committing transaction: " + e.getMessage());
                             if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                 LOG.warn(getFormattedBatchId() + "Failed during committing");
                                 handleCommitExceptions(sid);
@@ -175,7 +175,7 @@ public class DatabaseTransformWriter<VALUE> extends
                 commit(sid);
             } catch (Exception e) {
                 LOG.warn(getFormattedBatchId() +
-                    "Error committing transaction: " + e.getMessage());
+                    "Failed committing transaction: " + e.getMessage());
                 handleCommitExceptions(sid);
             }
             stmtCounts[sid] = 0;

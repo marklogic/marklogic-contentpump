@@ -511,10 +511,10 @@ implements MarkLogicConstants {
                         Throwable cause = ex.getCause();
                         if (cause != null) {
                             if (cause instanceof QueryException) {
-                                LOG.error(getFormattedBatchId() +
+                                LOG.warn(getFormattedBatchId() +
                                     ((QueryException)cause).getFormatString());
                             } else {
-                                LOG.error(getFormattedBatchId() +
+                                LOG.warn(getFormattedBatchId() +
                                     cause.getMessage());
                             }
                         }
@@ -596,7 +596,7 @@ implements MarkLogicConstants {
             sessions[id].rollback();
         } catch (Exception e) {
             LOG.warn(getFormattedBatchId() +
-                "Error rolling back transaction: " + e.getMessage());
+                "Failed rolling back transaction: " + e.getMessage());
             if (LOG.isDebugEnabled()) {
                 LOG.debug(e);
             }
@@ -681,7 +681,7 @@ implements MarkLogicConstants {
                         }
                     } catch (Exception e) {
                         LOG.warn(getFormattedBatchId() +
-                            "Error committing transaction: " + e.getMessage());
+                            "Failed committing transaction: " + e.getMessage());
                         if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                             LOG.warn(getFormattedBatchId() + "Failed during committing");
                             handleCommitExceptions(sid);
@@ -833,7 +833,7 @@ implements MarkLogicConstants {
                                 }
                             } catch (Exception e) {
                                 LOG.warn(getFormattedBatchId() +
-                                    "Error committing transaction: " + e.getMessage());
+                                    "Failed committing transaction: " + e.getMessage());
                                 if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                     LOG.warn(getFormattedBatchId() + "Failed during committing");
                                     handleCommitExceptions(sid);
