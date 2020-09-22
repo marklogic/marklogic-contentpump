@@ -260,7 +260,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                         }
                     } catch (Exception e) {
                         LOG.warn(getFormattedBatchId() +
-                            "Error committing transaction: " + e.getMessage());
+                            "Failed committing transaction: " + e.getMessage());
                         if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                             LOG.warn(getFormattedBatchId() + "Failed during committing");
                             handleCommitExceptions(sid);
@@ -619,8 +619,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 LOG.error(getFormattedBatchId() +
                     "Document failed permanently: " + failedUri);
                 failed++;
-                pendingURIs[id].remove(failedUri);
             }
+            pendingURIs[id].clear();
             throw new IOException(e);
         }
         break;
@@ -676,7 +676,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                             }
                         } catch (Exception e) {
                             LOG.warn(getFormattedBatchId() +
-                                "Error committing transaction: " + e.getMessage());
+                                "Failed committing transaction: " + e.getMessage());
                             if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                 LOG.warn(getFormattedBatchId() + "Failed during committing");
                                 handleCommitExceptions(i);
