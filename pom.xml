@@ -509,7 +509,22 @@
           <groupId>net.sf.saxon</groupId>
           <artifactId>Saxon-HE</artifactId>
           <version>9.7.0-7</version>
-      </dependency>
+        </dependency>
+        <dependency>
+          <groupId>ch.qos.logback</groupId>
+          <artifactId>logback-classic</artifactId>
+          <version>1.2.3</version>
+        </dependency>
+        <dependency>
+          <groupId>commons-beanutils</groupId>
+          <artifactId>commons-beanutils</artifactId>
+          <version>1.9.4</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.thrift</groupId>
+          <artifactId>libthrift</artifactId>
+          <version>0.13.0</version>
+        </dependency>
       <!-- System dependencies-->
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -651,6 +666,21 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>3.5</version>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>1.2.3</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.9.4</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.thrift</groupId>
+      <artifactId>libthrift</artifactId>
+      <version>0.13.0</version>
     </dependency>
     <dependency>
       <groupId>commons-modeler</groupId>
