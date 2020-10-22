@@ -548,6 +548,9 @@ implements MarkLogicConstants {
                         "RequestServerException: " + e.getMessage());
                 } else {
                     LOG.warn(getFormattedBatchId() + "Exception: " + e.getMessage());
+                    if (e.getMessage().contains("404")) {
+                        retryable = false;
+                    }
                 }
                 LOG.warn(getFormattedBatchId() + "Failed during inserting");
                 // necessary to roll back in certain scenarios.

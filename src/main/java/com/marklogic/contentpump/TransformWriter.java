@@ -596,6 +596,9 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 LOG.warn(getFormattedBatchId() + "RequestServerException:" + e.getMessage());
             } else {
                 LOG.warn(getFormattedBatchId() + "Exception:" + e.getMessage());
+                if (e.getMessage().contains("404")) {
+                    retryable = false;
+                }
             }
             LOG.warn(getFormattedBatchId() + "Failed during inserting");
             if (needCommit) {
