@@ -331,12 +331,13 @@ public enum Command implements ConfigConstants {
                 .withDescription("temporal collection name")
                 .create(TEMPORAL_COLLECTION);
             options.addOption(tcf);
-            Option maxThreads = OptionBuilder
+            Option maxThreadPercentage = OptionBuilder
                 .withArgName("number")
                 .hasArg()
-                .withDescription("The maximum number of threads")
-                .create(MAX_THREADS);
-            options.addOption(maxThreads);
+                .withDescription("The maximum percentage of available server " +
+                    "threads for running mlcp requests on the client side.")
+                .create(MAX_THREAD_PERCENTAGE);
+            options.addOption(maxThreadPercentage);
         }
 
         @Override
@@ -840,6 +841,10 @@ public enum Command implements ConfigConstants {
                     LOG.warn("The setting for " + TYPE_FILTER + 
                             " is not applicable for " + inputType); 
                 }
+            }
+            if (cmdline.hasOption(MAX_THREAD_PERCENTAGE)) {
+                String arg = cmdline.getOptionValue(MAX_THREAD_PERCENTAGE);
+                double maxPct = Double.parseDouble(arg);
             }
         }
 
