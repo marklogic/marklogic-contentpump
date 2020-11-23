@@ -17,25 +17,18 @@ package com.marklogic.contentpump;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.marklogic.mapreduce.MarkLogicConstants;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.DefaultStringifier;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.CounterGroup;
 import org.apache.hadoop.mapreduce.InputFormat;
@@ -67,41 +60,15 @@ public class LocalJobRunner implements ConfigConstants {
     public static final Log LOG = LogFactory.getLog(LocalJobRunner.class);
     
     private LocalJob job;
-    private ExecutorService pool;
     private AtomicInteger[] progress;
     private long startTime;
-    private int threadsPerSplit = 0;
-    private int threadCount;
-    //TODO confusing, rename it
-    private int availableThreads = 1;
-    // minimally required thread per task defined by the job
-    private int minThreads = 1;
-    private int maxThreads;
-    private Command cmd;
     private ContentPumpReporter reporter;
+    private ThreadManager threadManager;
+    private ThreadPoolExecutor pool;
     
     public LocalJobRunner(LocalJob job, CommandLine cmdline, Command cmd) {
         this.job = job;
-        this.cmd = cmd;
-
-        if (cmdline.hasOption(THREAD_COUNT)) {
-            threadCount = Integer.parseInt(
-            		cmdline.getOptionValue(THREAD_COUNT));
-        }
-        
-        if (cmdline.hasOption(THREADS_PER_SPLIT)) {
-            threadsPerSplit = Integer.parseInt(
-            		cmdline.getOptionValue(THREADS_PER_SPLIT));
-        }
-
-        if (cmdline.hasOption(MAX_THREADS)) {
-            maxThreads = Integer.parseInt(
-                cmdline.getOptionValue(MAX_THREADS));
-        }
-
-        Configuration conf = job.getConfiguration();
-        minThreads = conf.getInt(CONF_MIN_THREADS, minThreads);
-
+        this.threadManager = new ThreadManager(job, cmdline, cmd);
         startTime = System.currentTimeMillis();
     }
 
@@ -152,6 +119,8 @@ public class LocalJobRunner implements ConfigConstants {
             (Mapper<INKEY,INVALUE,OUTKEY,OUTVALUE>)ReflectionUtils.newInstance(
                 mapperClass, conf);
         try {
+            // Set newServerThreads and restrictHosts in ThreadManager for
+            // initializing thread pool
             outputFormat.checkOutputSpecs(job);
         } catch (Exception ex) {         
             if (LOG.isDebugEnabled()) {
@@ -163,8 +132,9 @@ public class LocalJobRunner implements ConfigConstants {
             job.setJobState(JobStatus.State.FAILED);
             return;
         }
-
-        createThreadPool(conf);
+        // Initialize thread pool
+        pool = threadManager.initThreadPool();
+        threadManager.runThreadPoller();
 
         progress = new AtomicInteger[splits.size()];
         for (int i = 0; i < splits.size(); i++) {
@@ -174,7 +144,6 @@ public class LocalJobRunner implements ConfigConstants {
         job.setJobState(JobStatus.State.RUNNING);
         Monitor monitor = new Monitor();
         monitor.start();
-        List<Future<Object>> taskList = new ArrayList<Future<Object>>();
         for (int i = 0; i < array.length && !ContentPump.shutdown; i++) {        
             InputSplit split = array[i];
             if (pool != null) {
@@ -182,38 +151,7 @@ public class LocalJobRunner implements ConfigConstants {
                     new LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE>(
                         inputFormat, outputFormat, conf, i, split, reporter,
                         progress[i]);
-                availableThreads = assignThreads(i, array.length);
-                Class<? extends Mapper<?, ?, ?, ?>> runtimeMapperClass = 
-                    job.getMapperClass();
-                if (availableThreads > 1 && 
-                    availableThreads != threadsPerSplit) { 
-                	// possible runtime adjustment
-                    if (runtimeMapperClass != (Class)MultithreadedMapper.class) {
-                	    runtimeMapperClass = (Class<? extends 
-                	        Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>>)
-                	        cmd.getRuntimeMapperClass(job, mapperClass, 
-                		        threadsPerSplit, availableThreads);
-                    }   
-                    if (runtimeMapperClass != mapperClass) {
-                	    task.setMapperClass(runtimeMapperClass);
-                    }
-                    if (runtimeMapperClass == (Class)MultithreadedMapper.class) {
-                	    task.setThreadCount(availableThreads);
-                	    if (LOG.isDebugEnabled()) {
-                            LOG.debug("Thread Count for Split#" + i + " : "
-                                    + availableThreads);
-                        }
-                    }
-                }
-                
-                if (runtimeMapperClass == (Class)MultithreadedMapper.class) {
-                    synchronized (pool) {
-                        taskList.add(pool.submit(task));
-                        pool.wait();
-                    }
-                } else {
-                	pool.submit(task);
-                }
+                threadManager.submitTask(task, i, array.length);
             } else { // single-threaded
                 JobID jid = new JobID();
                 TaskID taskId = new TaskID(jid.getJtIdentifier(), jid.getId(), TaskType.MAP, i);
@@ -274,11 +212,7 @@ public class LocalJobRunner implements ConfigConstants {
                 }
             }
         }
-        // wait till all tasks are done
-        if (pool != null) {
-            pool.shutdown();
-            while (!pool.awaitTermination(1, TimeUnit.HOURS));
-        } 
+        threadManager.shutdownThreadPool();
         job.setJobState(JobStatus.State.SUCCEEDED);
         monitor.interrupt();
         monitor.join(1000);
@@ -299,61 +233,7 @@ public class LocalJobRunner implements ConfigConstants {
         LOG.info("Total execution time: " + 
                  (System.currentTimeMillis() - startTime) / 1000 + " sec");
     }
-    
-    /**
-     * Assign thread count for a given split
-     * 
-     * @param splitIndex split index
-     * @param splitCount
-     * @return
-     */
-    private int assignThreads(int splitIndex, int splitCount) {
-    	if (threadsPerSplit > 0) {
-    		return threadsPerSplit;
-    	}
-        if (splitCount == 1) {
-            return threadCount;
-        }
-        if (splitCount * minThreads > threadCount) {
-            return minThreads;
-        }
-        if (splitIndex % threadCount < threadCount % splitCount) {
-            return threadCount / splitCount + 1;
-        } else {
-            return threadCount / splitCount;
-        }
-    }
 
-    private void createThreadPool(Configuration conf) {
-        int numThreads;
-        if (threadCount != 0) {
-            // Use specified threadCount in the command line
-            numThreads = threadCount;
-        } else {
-            // Use server max thread count
-            numThreads =  conf.getInt(
-                MarkLogicConstants.SERVER_THREAD_COUNT, 0);
-            if (numThreads == 0) {
-                // Mlcp export command or ML server version is below 10.0-4.2,
-                // unable to get server thread count
-                numThreads = DEFAULT_THREAD_COUNT;
-            } else {
-                numThreads =
-                    (int)(MarkLogicConstants.THREAD_MULTIPLIER * numThreads);
-            }
-        }
-        threadCount = Math.max(numThreads, minThreads);
-        if (maxThreads > 0) {
-            threadCount = Math.min(threadCount, maxThreads);
-        }
-        if (threadCount > 1) {
-            pool = Executors.newFixedThreadPool(threadCount);
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Thread pool size: " + threadCount);
-            }
-        }
-    }
-    
     /**
      * A map task to be run in a thread.
      * 
@@ -395,13 +275,13 @@ public class LocalJobRunner implements ConfigConstants {
 			}
         }
         
-        public int getThreadCount() {
-        	return threadCount;
-        }
-        
         public void setThreadCount(int threads) {
 			threadCount = threads;		
 		}
+
+		public int getThreadCount() {
+            return threadCount;
+        }
 
 		public Class<? extends Mapper<?,?,?,?>> getMapperClass() {
         	return mapperClass;
@@ -411,6 +291,10 @@ public class LocalJobRunner implements ConfigConstants {
 				Class<? extends Mapper<?,?,?,?>> runtimeMapperClass) {
 			mapperClass =  runtimeMapperClass;		
 		}
+
+		public Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE> getMapper() {
+            return mapper;
+        }
 
 		@SuppressWarnings("unchecked")
         @Override

@@ -62,15 +62,6 @@ public class BaseMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
         }
     }
     
-    public int getRequiredThreads() {
-        return 1;
-    }
-    
-    public List<Future<Object>> submitTasks(ExecutorService threadPool,
-            InputSplit inputSplit) {
-        return Collections.emptyList();
-    }
-    
     @Override
     public void run(Context context) throws IOException, InterruptedException {
         setup(context);

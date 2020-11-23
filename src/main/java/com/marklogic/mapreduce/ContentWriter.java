@@ -18,10 +18,7 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
@@ -197,6 +194,7 @@ implements MarkLogicConstants {
 
     protected int commitRetryLimit;
 
+    // Retry parameters that can be tuned based on DHS use cases
     protected final int MINRETRIES = 1;
 
     protected final int MAXRETRIES = 15;
@@ -783,7 +781,7 @@ implements MarkLogicConstants {
     protected Session getSession(int fId, boolean nextReplica) {
         // Use AUTO mode when txnSize=1, batchSize=1, no session affinity needed
         // Use UPDATE mode otherwise. For txnSize=1, batchSize=n, mlcp sends
-        // (n+1) requests, n for n documents, 1 for obtaing session id from the
+        // (n+1) requests, n for n documents, 1 for obtaining session id from the
         // server, session affinity needed.
         TransactionMode mode = TransactionMode.AUTO;
         if (needCommit) {

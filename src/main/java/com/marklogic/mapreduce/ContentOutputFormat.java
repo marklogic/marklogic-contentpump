@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.marklogic.contentpump.ThreadManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -193,6 +194,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             
             // initialize server host name and assignment policy
             restrictHosts = initialize(session, restrictHosts, getForwardHeader);
+            ThreadManager.setRestrictHosts(restrictHosts);
             
             // ensure manual directory creation 
             if (fastLoad) {
