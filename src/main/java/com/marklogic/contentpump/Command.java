@@ -842,10 +842,6 @@ public enum Command implements ConfigConstants {
                             " is not applicable for " + inputType); 
                 }
             }
-            if (cmdline.hasOption(MAX_THREAD_PERCENTAGE)) {
-                String arg = cmdline.getOptionValue(MAX_THREAD_PERCENTAGE);
-                double maxPct = Double.parseDouble(arg);
-            }
         }
 
         @Override
