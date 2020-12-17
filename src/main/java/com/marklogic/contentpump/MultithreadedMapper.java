@@ -55,6 +55,8 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
     private List<Future<?>> runnerFutureList = new ArrayList<>();
     private int threadCount = 0;
     private ThreadPoolExecutor threadPool;
+    // Minimum number of runners reserved for each mapper
+    private int minRunners = 1;
 
     /**
      * Get thread count set for this mapper.
@@ -163,11 +165,12 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             Mapper.class);
     }
 
-    public void createRunners(int numThreads) throws IOException,
+    public void createRunners(int numRunners) throws IOException,
         InterruptedException, ClassNotFoundException {
         synchronized (threadPool) {
-                for (int i = 0; i < numThreads; ++i) {
+            for (int i = 0; i < numRunners; i++) {
                 MapRunner runner = new MapRunner();
+                runnerList.add(runner);
                 if (!threadPool.isShutdown()) {
                     Future<?> future = threadPool.submit(runner);
                     runnerFutureList.add(future);
@@ -178,6 +181,35 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             }
             threadPool.notify();
         }
+    }
+
+    public void stopRunners(int numRunners) {
+        if (numRunners > (threadCount - minRunners)) {
+            LOG.debug("Thread count has reached minimum value: " +
+                minRunners + " for this MultithreadedMapper and the thread " +
+                "pool will not further scale in.");
+            // Guarantee there is at least #minRunners threads running each
+            // LocalMapTask
+            numRunners = threadCount - minRunners;
+        }
+        for (int i = 0; i < numRunners; i++) {
+            // Stop the last numThreads of runners
+            runnerList.get(runnerList.size()-i-1).setShutdown(true);
+        }
+        // Wait until every runner is shutdown
+        while(true) {
+            boolean allDone = true;
+            for (int i = 0; i < numRunners; i++) {
+                allDone &=
+                    runnerList.get(runnerList.size()-i-1).getIsShutdownDone();
+            }
+            if (allDone) break;
+        }
+        for (int i = 0; i < numRunners; i++) {
+            runnerList.remove(runnerList.size()-1);
+            runnerFutureList.remove(runnerFutureList.size()-1);
+        }
+
     }
 
     /**
@@ -211,7 +243,6 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                     f.get();
                 }
 	        } else {
-	            // vzhang TODO: single-threaded
                 for (int i = 0; i < numberOfThreads; ++i) {
                     MapRunner thread;
                     thread = new MapRunner();
@@ -335,11 +366,13 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 
     }
 
-    private class MapRunner extends Thread {
+    protected class MapRunner extends Thread {
         private BaseMapper<K1, V1, K2, V2> mapper;
         private Context subcontext;
         private Throwable throwable;
         private RecordWriter<K2, V2> writer;
+        private volatile boolean shutdown = false;
+        private boolean isShutdownDone = false;
 
         MapRunner() throws IOException, ClassNotFoundException {
             // initiate the real mapper that does the work
@@ -370,7 +403,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         @Override
         public void run() {
             try {
-                mapper.runThreadSafe(outer, subcontext);
+                mapper.runThreadSafe(outer, subcontext, this);
             } catch (Throwable ie) {
                 LOG.error("Error running task: " + ie.getMessage());
                 if (LOG.isDebugEnabled()) {
@@ -385,7 +418,19 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                     LOG.debug(t);
                 }
             }
+            isShutdownDone = true;
+        }
+
+        public void setShutdown(boolean shutdown) {
+            this.shutdown = shutdown;
+        }
+
+        public boolean getShutdown() {
+            return shutdown;
+        }
+
+        public boolean getIsShutdownDone() {
+            return isShutdownDone;
         }
     }
-
 }

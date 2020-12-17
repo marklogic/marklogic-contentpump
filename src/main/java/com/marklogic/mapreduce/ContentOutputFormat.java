@@ -21,13 +21,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.marklogic.contentpump.ThreadManager;
+import com.marklogic.contentpump.LocalJob;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
@@ -147,7 +148,8 @@ public class ContentOutputFormat<VALUEOUT> extends
     protected String initHostName;
 
     @Override
-    public void checkOutputSpecs(Configuration conf, ContentSource cs)
+    public void checkOutputSpecs(
+        Configuration conf, ContentSource cs, JobContext context)
     throws IOException { 
         Session session = null;
         ResultSequence result = null;
@@ -194,7 +196,7 @@ public class ContentOutputFormat<VALUEOUT> extends
             
             // initialize server host name and assignment policy
             restrictHosts = initialize(session, restrictHosts, getForwardHeader);
-            ThreadManager.setRestrictHosts(restrictHosts);
+            ((LocalJob)context).getThreadManager().setRestrictHosts(restrictHosts);
             
             // ensure manual directory creation 
             if (fastLoad) {

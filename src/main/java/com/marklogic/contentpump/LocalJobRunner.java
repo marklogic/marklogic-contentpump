@@ -68,7 +68,8 @@ public class LocalJobRunner implements ConfigConstants {
     
     public LocalJobRunner(LocalJob job, CommandLine cmdline, Command cmd) {
         this.job = job;
-        this.threadManager = new ThreadManager(job, cmdline, cmd);
+        this.threadManager = job.getThreadManager();
+        threadManager.parseCmdlineOptions(cmdline, cmd);
         startTime = System.currentTimeMillis();
     }
 
@@ -182,6 +183,10 @@ public class LocalJobRunner implements ConfigConstants {
                 mapper = (Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE>) 
                     ReflectionUtils.newInstance(mapClass,
                         mapperContext.getConfiguration());
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Running with single thread and will not " +
+                        "auto-scale");
+                }
                 try {
                     mapper.run(mapperContext);
                 } finally {
