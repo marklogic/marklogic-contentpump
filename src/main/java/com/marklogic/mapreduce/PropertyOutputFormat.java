@@ -22,6 +22,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
@@ -71,7 +72,8 @@ extends MarkLogicOutputFormat<DocumentURI, MarkLogicNode> {
     }
 
     @Override
-    public void checkOutputSpecs(Configuration conf, ContentSource cs) 
+    public void checkOutputSpecs(
+        Configuration conf, ContentSource cs, JobContext context)
     throws IOException {
         // warn against unsupported configuration
         if (conf.get(BATCH_SIZE) != null) {

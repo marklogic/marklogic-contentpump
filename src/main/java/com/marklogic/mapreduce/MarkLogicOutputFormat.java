@@ -19,7 +19,7 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.marklogic.contentpump.ThreadManager;
+import com.marklogic.contentpump.LocalJob;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
@@ -92,8 +92,8 @@ implements MarkLogicConstants, Configurable {
             try {
                 ContentSource cs = InternalUtilities.getOutputContentSource(conf,
                         hosts[i]);
-                ThreadManager.queryServerMaxThreads(cs);
-                checkOutputSpecs(conf, cs);
+                ((LocalJob)context).getThreadManager().queryServerMaxThreads(cs);
+                checkOutputSpecs(conf, cs, context);
                 return;
             }
             catch (Exception ex) {
@@ -202,6 +202,7 @@ implements MarkLogicConstants, Configurable {
         }
     }
 
-    public abstract void checkOutputSpecs(Configuration conf, ContentSource cs) 
+    public abstract void checkOutputSpecs(
+        Configuration conf, ContentSource cs, JobContext context)
     throws IOException;
 }

@@ -57,28 +57,39 @@ public class ThreadManager implements ConfigConstants {
     // minimally required thread per task defined by the job
     private int minThreads = 1;
     private int curServerThreads;
+    // Flag for indicating whether auto-scaling from last polling period is done
+    private boolean isScalingDone = true;
 
     /**
-     * Static variables set by checkOutputFormat
+     * Variables set by checkOutputFormat
      */
-    private static int newServerThreads;
+    private int newServerThreads;
     // Whether mlcp is running against a load balancer
-    private static boolean restrictHosts = false;
+    private boolean restrictHosts = false;
 
     /**
      * Command line options
      */
     private int threadCount;
     private int threadsPerSplit;
-    private static double maxThreadPercentage = 1;
+    private int maxThreads;
+    private double maxThreadPercentage = 1;
 
-    public ThreadManager(LocalJob job, CommandLine cmdline, Command cmd) {
+
+    public ThreadManager(LocalJob job) {
         this.job = job;
-        this.cmd = cmd;
         this.conf = job.getConfiguration();
         this.minThreads = conf.getInt(CONF_MIN_THREADS, minThreads);
         this.scheduler = Executors.newScheduledThreadPool(1);
+    }
 
+    /**
+     * Parse command line options
+     * @param cmdline
+     * @param cmd
+     */
+    public void parseCmdlineOptions(CommandLine cmdline, Command cmd) {
+        this.cmd = cmd;
         // Parse command line options
         if (cmdline.hasOption(THREAD_COUNT)) {
             threadCount = Integer.parseInt(
@@ -88,9 +99,13 @@ public class ThreadManager implements ConfigConstants {
             threadsPerSplit = Integer.parseInt(
                 cmdline.getOptionValue(THREADS_PER_SPLIT));
         }
+        if (cmdline.hasOption(MAX_THREADS)) {
+            maxThreads = Integer.parseInt(
+                cmdline.getOptionValue(MAX_THREADS));
+        }
         if (cmdline.hasOption(MAX_THREAD_PERCENTAGE)) {
-            maxThreadPercentage = Double.parseDouble(
-                cmdline.getOptionValue(MAX_THREAD_PERCENTAGE));
+            maxThreadPercentage = ((double)Integer.parseInt(
+                cmdline.getOptionValue(MAX_THREAD_PERCENTAGE))) / 100;
         }
     }
 
@@ -99,7 +114,7 @@ public class ThreadManager implements ConfigConstants {
      * @param cs
      * @throws IOException
      */
-    public static void queryServerMaxThreads(ContentSource cs)
+    public void queryServerMaxThreads(ContentSource cs)
         throws IOException {
         Session session = null;
         ResultSequence result = null;
@@ -172,7 +187,9 @@ public class ThreadManager implements ConfigConstants {
             }
         }
         numThreads = Math.max(numThreads, minThreads);
-
+        if (maxThreads > 0) {
+            numThreads = Math.min(numThreads, maxThreads);
+        }
         if (numThreads > 1) {
             pool = (ThreadPoolExecutor)Executors.newFixedThreadPool(numThreads);
             if (LOG.isDebugEnabled()) {
@@ -192,18 +209,26 @@ public class ThreadManager implements ConfigConstants {
 
     /**
      * Scale-out thread pool based on newly available server threads. Create
-     * new map runners and assign them to each exisiting LocalMapTask.
+     * new map runners and assign them to each existing LocalMapTask in a
+     * round-robin fashion.
      */
     public void scaleOutThreadPool() {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Thread pool is scaling-out. New thread pool " +
-                "size: " + newServerThreads);
+        if (maxThreads > 0 && newServerThreads > maxThreads) {
+            LOG.debug("Thread count has reached the maximum value: " +
+                maxThreads + " , and the thread pool will not further scale " +
+                "out.");
+            newServerThreads = maxThreads;
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Thread pool is scaling-out. New thread pool " +
+                    "size: " + newServerThreads);
+            }
         }
         synchronized (pool) {
             pool.setMaximumPoolSize(newServerThreads);
             pool.setCorePoolSize(newServerThreads);
         }
-        // Assign new available threads
+        // Assign new available threads to each task
         for (int i = 0; i < taskList.size(); i++) {
             LocalMapTask task = taskList.get(i);
             int deltaTaskThreads = assignThreads(i, taskList.size(),
@@ -229,10 +254,56 @@ public class ThreadManager implements ConfigConstants {
                     LOG.error(e.getMessage(), e);
                 }
             } else {
-                return; // vzhang TODO: non Multithreadedmapper case
+                // Safe guard for single-threaded case
+                isScalingDone = true;
+                return;
             }
-
         }
+        isScalingDone = true;
+    }
+
+    /**
+     * Scale-in thread pool based on new available server threads. Deduct
+     * active runners from each LocalMapTask in a round-robin fashion.
+     */
+    public void scaleInThreadPool() {
+        if (newServerThreads < minThreads) {
+            LOG.debug("Thread count has reached minimum value: " + minThreads
+                + " and the thread pool will not further scale in.");
+            newServerThreads = minThreads;
+        } else {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Thread pool is scaling-in. New thread pool " +
+                    "size: " + newServerThreads);
+            }
+        }
+        // Deduct runners from each task
+        for (int i = 0; i < taskList.size(); i++) {
+            LocalMapTask task = taskList.get(i);
+            int deltaTaskThreads = assignThreads(i, taskList.size(),
+                (curServerThreads - newServerThreads));
+            if (task.getMapperClass() == (Class)MultithreadedMapper.class) {
+                int newTaskThreads =  task.getThreadCount() - deltaTaskThreads;
+                // Stop currently running MapRunners
+                ((MultithreadedMapper)task.getMapper()).stopRunners(
+                    deltaTaskThreads);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Running with MultithreadedMapper. New " +
+                        "thread count for split #" + i + ": " +
+                        newTaskThreads);
+                }
+                task.setThreadCount(newTaskThreads);
+                ((MultithreadedMapper)task.getMapper()).setThreadCount(
+                    newTaskThreads);
+            } else {
+                // Safe guard for single-threaded case
+                isScalingDone = true;
+                return;
+            }
+        }
+        pool.setCorePoolSize(newServerThreads);
+        pool.setMaximumPoolSize(newServerThreads);
+        isScalingDone = true;
     }
 
     /**
@@ -264,10 +335,12 @@ public class ThreadManager implements ConfigConstants {
         int taskThreads = assignThreads(index, splitCount, newServerThreads);
         Class<? extends Mapper<?,?,?,?>> mapperClass = job.getMapperClass();
         Class<? extends Mapper<?,?,?,?>> runtimeMapperClass = job.getMapperClass();
-        // Possible runtime mapperClass adjustment
-        if (taskThreads > 1 && taskThreads != threadsPerSplit) {
+        // Possible runtime mapperClass adjustment. Use MultithreadedMapper for
+        // each InputSplit assigned with only 1 thread as well for auto-scaling
+        // purpose.
+        if (taskThreads != threadsPerSplit) {
             runtimeMapperClass = cmd.getRuntimeMapperClass(job, mapperClass,
-                threadsPerSplit, taskThreads);
+                threadsPerSplit);
             if (runtimeMapperClass != mapperClass) {
                 task.setMapperClass(runtimeMapperClass);
             }
@@ -315,7 +388,12 @@ public class ThreadManager implements ConfigConstants {
         }
     }
 
-    public static void setRestrictHosts(boolean newRestrictHosts) {
+    /**
+     * Used by checkOutputSpecs for indicating whether mlcp is running against
+     * a load balancer.
+     * @param newRestrictHosts
+     */
+    public void setRestrictHosts(boolean newRestrictHosts) {
         restrictHosts = newRestrictHosts;
     }
 
@@ -330,6 +408,14 @@ public class ThreadManager implements ConfigConstants {
                 return;
             }
             if (!runAutoScaling()) return;
+            // Make sure that auto-scaling from the last polling period is done
+            if (!isScalingDone) {
+                LOG.debug("MLCP auto-scaling is not done yet, will run " +
+                    "with thread pool size: " + curServerThreads +
+                    " until it's done.");
+                return;
+            }
+
             // Poll server max threads
             String[] hosts = conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
             for (int i = 0; i < hosts.length; i++) {
@@ -356,16 +442,15 @@ public class ThreadManager implements ConfigConstants {
                     }
                 }
             }
-
             if (curServerThreads < newServerThreads) {
                 // Scale out
+                isScalingDone = false;
                 scaleOutThreadPool();
             } else if (curServerThreads > newServerThreads) {
                 // Scale in
-                // vzhang TODO: Scale in
-                return;
+                isScalingDone = false;
+                scaleInThreadPool();
             } else return;
-
             curServerThreads = newServerThreads;
         }
     }

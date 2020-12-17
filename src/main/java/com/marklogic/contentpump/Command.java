@@ -331,11 +331,19 @@ public enum Command implements ConfigConstants {
                 .withDescription("temporal collection name")
                 .create(TEMPORAL_COLLECTION);
             options.addOption(tcf);
+            Option maxThreads = OptionBuilder
+                .withArgName("number")
+                .hasArg()
+                .withDescription("The maximum number of threads allowed " +
+                    "running on the client side")
+                .create(MAX_THREADS);
+            options.addOption(maxThreads);
             Option maxThreadPercentage = OptionBuilder
                 .withArgName("number")
                 .hasArg()
-                .withDescription("The maximum percentage of available server " +
-                    "threads for running mlcp requests on the client side.")
+                .withDescription("The maximum percentage (between 0 and 100) " +
+                    "of available server threads used by the client for " +
+                    "running mlcp requests.")
                 .create(MAX_THREAD_PERCENTAGE);
             options.addOption(maxThreadPercentage);
         }
@@ -775,7 +783,17 @@ public enum Command implements ConfigConstants {
                             THREAD_COUNT + 
                             " to a value less than the minimum required " +
                             " threads (" + inputType.getMinThreads() +
-                            ")for the job.");
+                            ") for the job.");
+                }
+            }
+            if (cmdline.hasOption(MAX_THREADS)) {
+                String arg = cmdline.getOptionValue(MAX_THREADS);
+                int maxThreads = Integer.parseInt(arg);
+                if (maxThreads < inputType.getMinThreads()) {
+                    throw new IllegalArgumentException("Cannot set " +
+                        MAX_THREADS + " to a value less than the minimum " +
+                        "required threads (" + inputType.getMinThreads() +
+                        ") for the job.");
                 }
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
@@ -871,14 +889,13 @@ public enum Command implements ConfigConstants {
             }
 		}
 
-		@SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked")
         @Override
-		public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(Job job,
-				Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
-				int availableThreads) {
-			if (threadCnt == 0 && availableThreads > 1 &&
-			    !job.getConfiguration().getBoolean(
-			            MarkLogicConstants.OUTPUT_STREAMING, false)) {
+        public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(
+            Job job, Class<? extends Mapper<?,?,?,?>> mapper,
+            int threadsPerSplit) {
+			if (threadsPerSplit == 0 && !job.getConfiguration().getBoolean(
+			    MarkLogicConstants.OUTPUT_STREAMING, false)) {
                 Class<? extends Mapper<?, ?, ?, ?>> mapperClass = 
                 	(Class<? extends Mapper<?, ?, ?, ?>>) (Class) MultithreadedMapper.class;
                 MultithreadedMapper.setMapperClass(job.getConfiguration(),
@@ -1134,8 +1151,7 @@ public enum Command implements ConfigConstants {
 		@Override
 		public Class<? extends Mapper<?,?,?,?>> 
 	    getRuntimeMapperClass(Job job, 
-				Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
-				int availableThreads) {
+				Class<? extends Mapper<?,?,?,?>> mapper, int threadsPerSplit) {
 			return mapper;
 		}
     },
@@ -1627,10 +1643,10 @@ public enum Command implements ConfigConstants {
         }
 
         @Override
-        public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(Job job, 
-                Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
-                int availableThreads) {
-                    return mapper;
+        public Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(
+            Job job, Class<? extends Mapper<?,?,?,?>> mapper,
+            int threadsPerSplit) {
+            return mapper;
         }
     },
     EXTRACT {
@@ -1742,7 +1758,7 @@ public enum Command implements ConfigConstants {
         @Override
         public Class<? extends Mapper<?, ?, ?, ?>> getRuntimeMapperClass(
                 Job job, Class<? extends Mapper<?, ?, ?, ?>> mapper,
-                int threadCnt, int availableThreads) {
+                int threadsPerSplit) {
             return mapper;
         }
 
@@ -1860,8 +1876,7 @@ public enum Command implements ConfigConstants {
     		CommandLine cmdline);
     
     public abstract Class<? extends Mapper<?,?,?,?>> getRuntimeMapperClass(
-            Job job, Class<? extends Mapper<?,?,?,?>> mapper, int threadCnt, 
-            int availableThreads);
+        Job job, Class<? extends Mapper<?,?,?,?>> mapper, int threadsPerSplit);
 
     static void setQueryTimestamp(Configuration conf) 
     throws IOException {
