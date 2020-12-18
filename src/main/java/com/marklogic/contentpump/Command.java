@@ -346,6 +346,19 @@ public enum Command implements ConfigConstants {
                     "running mlcp requests.")
                 .create(MAX_THREAD_PERCENTAGE);
             options.addOption(maxThreadPercentage);
+            Option pollingPeriod = OptionBuilder
+                .withArgName("number")
+                .hasArg()
+                .withDescription("The period (in minutes) mlcp talks to the " +
+                    "server to collect concurrency info and decides whether " +
+                    "to auto-scale.")
+                .create(POLLING_PERIOD);
+            Option pollingInitDelay = OptionBuilder
+                .withArgName("number")
+                .hasArg()
+                .withDescription("The initial delay (in minutes) before mlcp " +
+                    "starts running polling requests to ther server.")
+                .create(POLLING_INIT_DELAY);
         }
 
         @Override
@@ -794,6 +807,15 @@ public enum Command implements ConfigConstants {
                         MAX_THREADS + " to a value less than the minimum " +
                         "required threads (" + inputType.getMinThreads() +
                         ") for the job.");
+                }
+            }
+            if (cmdline.hasOption(MAX_THREAD_PERCENTAGE)) {
+                String arg = cmdline.getOptionValue(MAX_THREAD_PERCENTAGE);
+                int maxThreadPercentage = Integer.parseInt(arg);
+                if (maxThreadPercentage <= 0 || maxThreadPercentage > 100) {
+                    throw new IllegalArgumentException("Illegal percentage " +
+                        "set for " + MAX_THREAD_PERCENTAGE + ". Please " +
+                        "specify a number between 0 and 100");
                 }
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {

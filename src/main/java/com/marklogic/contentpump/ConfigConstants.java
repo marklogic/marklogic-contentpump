@@ -272,7 +272,7 @@ public interface ConfigConstants {
     /**
      * Auto-scaling constants
      */
-    static final long POLLING_INIT_DELAY = 5;
-    static final long POLLING_PERIOD = 5;
+    static final String POLLING_INIT_DELAY = "polling_init_delay";
+    static final String POLLING_PERIOD = "polling_period";
     static final TimeUnit POLLING_TIME_UNIT = TimeUnit.MINUTES;
 }
