@@ -74,6 +74,8 @@ public class ThreadManager implements ConfigConstants {
     private int threadsPerSplit;
     private int maxThreads;
     private double maxThreadPercentage = 1;
+    private int pollingInitDelay = 1;
+    private int pollingPeriod = 1;
 
 
     public ThreadManager(LocalJob job) {
@@ -106,6 +108,14 @@ public class ThreadManager implements ConfigConstants {
         if (cmdline.hasOption(MAX_THREAD_PERCENTAGE)) {
             maxThreadPercentage = ((double)Integer.parseInt(
                 cmdline.getOptionValue(MAX_THREAD_PERCENTAGE))) / 100;
+        }
+        if (cmdline.hasOption(POLLING_INIT_DELAY)) {
+            pollingInitDelay = Integer.parseInt(
+                cmdline.getOptionValue(POLLING_INIT_DELAY));
+        }
+        if (cmdline.hasOption(POLLING_PERIOD)) {
+            pollingPeriod = Integer.parseInt(
+                cmdline.getOptionValue(POLLING_PERIOD));
         }
     }
 
@@ -152,8 +162,8 @@ public class ThreadManager implements ConfigConstants {
      */
     public void runThreadPoller() {
         final ScheduledFuture<?> handler =
-            scheduler.scheduleAtFixedRate(new ThreadPoller(),
-                POLLING_INIT_DELAY, POLLING_PERIOD, POLLING_TIME_UNIT);
+            scheduler.scheduleAtFixedRate(new ThreadPoller(), pollingInitDelay,
+                pollingPeriod, POLLING_TIME_UNIT);
     }
 
     /**
@@ -213,6 +223,7 @@ public class ThreadManager implements ConfigConstants {
      * round-robin fashion.
      */
     public void scaleOutThreadPool() {
+        isScalingDone = false;
         if (maxThreads > 0 && newServerThreads > maxThreads) {
             LOG.debug("Thread count has reached the maximum value: " +
                 maxThreads + " , and the thread pool will not further scale " +
@@ -253,10 +264,6 @@ public class ThreadManager implements ConfigConstants {
                 } catch (IOException | InterruptedException e) {
                     LOG.error(e.getMessage(), e);
                 }
-            } else {
-                // Safe guard for single-threaded case
-                isScalingDone = true;
-                return;
             }
         }
         isScalingDone = true;
@@ -267,6 +274,7 @@ public class ThreadManager implements ConfigConstants {
      * active runners from each LocalMapTask in a round-robin fashion.
      */
     public void scaleInThreadPool() {
+        isScalingDone = false;
         if (newServerThreads < minThreads) {
             LOG.debug("Thread count has reached minimum value: " + minThreads
                 + " and the thread pool will not further scale in.");
@@ -295,10 +303,6 @@ public class ThreadManager implements ConfigConstants {
                 task.setThreadCount(newTaskThreads);
                 ((MultithreadedMapper)task.getMapper()).setThreadCount(
                     newTaskThreads);
-            } else {
-                // Safe guard for single-threaded case
-                isScalingDone = true;
-                return;
             }
         }
         pool.setCorePoolSize(newServerThreads);
@@ -444,11 +448,9 @@ public class ThreadManager implements ConfigConstants {
             }
             if (curServerThreads < newServerThreads) {
                 // Scale out
-                isScalingDone = false;
                 scaleOutThreadPool();
             } else if (curServerThreads > newServerThreads) {
                 // Scale in
-                isScalingDone = false;
                 scaleInThreadPool();
             } else return;
             curServerThreads = newServerThreads;

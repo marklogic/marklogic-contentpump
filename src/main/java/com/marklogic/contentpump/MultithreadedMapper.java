@@ -186,8 +186,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
     public void stopRunners(int numRunners) {
         if (numRunners > (threadCount - minRunners)) {
             LOG.debug("Thread count has reached minimum value: " +
-                minRunners + " for this MultithreadedMapper and the thread " +
-                "pool will not further scale in.");
+                minRunners + " and the thread pool will not further scale in.");
             // Guarantee there is at least #minRunners threads running each
             // LocalMapTask
             numRunners = threadCount - minRunners;
