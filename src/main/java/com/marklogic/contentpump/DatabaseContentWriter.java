@@ -247,7 +247,7 @@ public class DatabaseContentWriter<VALUE> extends
         boolean committed = false;
         if (counts[fId] == batchSize) {
             commitRetry = 0;
-            commitSleepTime = MINSLEEPTIME;
+            commitSleepTime = MIN_SLEEP_TIME;
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
             }
@@ -258,7 +258,7 @@ public class DatabaseContentWriter<VALUE> extends
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(getFormattedBatchId() +
                             "Retrying committing batch, attempts: " +
-                            commitRetry + "/" + MAXRETRIES);
+                            commitRetry + "/" + MAX_RETRIES);
                     }
                 }
                 try {
@@ -365,7 +365,7 @@ public class DatabaseContentWriter<VALUE> extends
             for (int i = 0; i < len; i++, sid++) {
                 if (pendingUris[sid].size() > 0) {
                     commitRetry = 0;
-                    commitSleepTime = MINSLEEPTIME;
+                    commitSleepTime = MIN_SLEEP_TIME;
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0,
                             counts[i]);
@@ -377,7 +377,7 @@ public class DatabaseContentWriter<VALUE> extends
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(getFormattedBatchId() +
                                     "Retrying committing batch, attempts: " +
-                                    commitRetry + "/" + MAXRETRIES);
+                                    commitRetry + "/" + MAX_RETRIES);
                             }
                         }
                         try {
