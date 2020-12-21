@@ -405,6 +405,11 @@ public class ThreadManager implements ConfigConstants {
      * Run server thread polling query and adjust thread pool
      */
     class ThreadPoller implements Runnable {
+        private int pollingRetry;
+        private int pollingSleepTime;
+        private final int MAX_RETRIES = 5;
+        private final int MIN_SLEEP_TIME = 500;
+
         @Override
         public void run() {
             if (ContentPump.shutdown) {
@@ -420,30 +425,43 @@ public class ThreadManager implements ConfigConstants {
                 return;
             }
 
+            boolean succeeded = false;
+            pollingRetry = 0;
+            pollingSleepTime = MIN_SLEEP_TIME;
             // Poll server max threads
-            String[] hosts = conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
-            for (int i = 0; i < hosts.length; i++) {
-                try {
-                    ContentSource cs = InternalUtilities.getOutputContentSource(
-                        conf, hosts[i]);
-                    queryServerMaxThreads(cs);
+            while (pollingRetry < MAX_RETRIES) {
+                if (pollingRetry > 0) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("New available server threads: " +
-                            newServerThreads);
+                        LOG.debug("Retrying querying available server max threads.");
                     }
-                    break;
-                } catch (Exception e) {
-                    if (e.getCause() instanceof ServerConnectionException) {
-                        LOG.warn("Unable to connect to " + hosts[i]
-                            + " to query destination information");
+                }
+                String[] hosts = conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
+                for (int i = 0; i < hosts.length; i++) {
+                    try {
+                        ContentSource cs = InternalUtilities.
+                            getOutputContentSource(conf, hosts[i]);
+                        queryServerMaxThreads(cs);
                         if (LOG.isDebugEnabled()) {
-                            LOG.debug(e);
+                            LOG.debug("New available server threads: " +
+                                newServerThreads);
                         }
-                    } else {
-                        LOG.error(e.getMessage(), e);
-                        job.setJobState(JobStatus.State.FAILED);
-                        return;
+                        succeeded = true;
+                        break;
+                    } catch (Exception e) {
+                        if (e.getCause() instanceof ServerConnectionException) {
+                            LOG.warn("Unable to connect to " + hosts[i]
+                                + " to query available server max threads.");
+                            if (LOG.isDebugEnabled()) {
+                                LOG.debug(e);
+                            }
+                        } else {
+                            LOG.error(e.getMessage(), e);
+                        }
                     }
+                }
+                if (succeeded) break;
+                if (++pollingRetry < MAX_RETRIES) {
+                    sleep();
                 }
             }
             if (curServerThreads < newServerThreads) {
@@ -454,6 +472,17 @@ public class ThreadManager implements ConfigConstants {
                 scaleInThreadPool();
             } else return;
             curServerThreads = newServerThreads;
+        }
+
+        private void sleep() {
+            try {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Sleeping before retrying...sleepTime= " +
+                        pollingSleepTime + "ms");
+                }
+                InternalUtilities.sleep(pollingSleepTime);
+            } catch (Exception e) {}
+            pollingSleepTime = pollingSleepTime * 2;
         }
     }
 }

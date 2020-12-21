@@ -195,13 +195,13 @@ implements MarkLogicConstants {
     protected int commitRetryLimit;
 
     // Retry parameters that can be tuned based on DHS use cases
-    protected final int MINRETRIES = 1;
+    protected final int MIN_RETRIES = 1;
 
-    protected final int MAXRETRIES = 15;
+    protected final int MAX_RETRIES = 15;
 
-    protected final int MINSLEEPTIME = 500;
+    protected final int MIN_SLEEP_TIME = 500;
 
-    protected final int MAXSLEEPTIME = 120000;
+    protected final int MAX_SLEEP_TIME = 120000;
 
     
     public ContentWriter(Configuration conf, 
@@ -372,9 +372,9 @@ implements MarkLogicConstants {
         isCopyMeta = conf.getBoolean(COPY_METADATA, true);
 
         if (needCommitRetry()) {
-            commitRetryLimit = MAXRETRIES;
+            commitRetryLimit = MAX_RETRIES;
         } else {
-            commitRetryLimit = MINRETRIES;
+            commitRetryLimit = MIN_RETRIES;
         }
     }
     
@@ -492,14 +492,14 @@ implements MarkLogicConstants {
     protected void insertBatch(Content[] batch, int id) 
     throws IOException {
         batchRetry = 0;
-        batchSleepTime = MINSLEEPTIME;
-        while (batchRetry < MAXRETRIES) {
+        batchSleepTime = MIN_SLEEP_TIME;
+        while (batchRetry < MAX_RETRIES) {
             try {
                 if (batchRetry > 0) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(getFormattedBatchId() +
                             "Retrying inserting batch, attempts: " + batchRetry
-                            + "/" + MAXRETRIES);
+                            + "/" + MAX_RETRIES);
                     }
                 }
                 List<RequestException> errors = 
@@ -556,7 +556,7 @@ implements MarkLogicConstants {
                     rollback(id);
                 }
 
-                if (retryable && ++batchRetry < MAXRETRIES) {
+                if (retryable && ++batchRetry < MAX_RETRIES) {
                     // necessary to close the session too.
                     sessions[id].close();
                     batchSleepTime = sleep(batchSleepTime);
@@ -648,7 +648,7 @@ implements MarkLogicConstants {
         boolean committed = false;
         if (counts[fId] == batchSize) {
             commitRetry = 0;
-            commitSleepTime = MINSLEEPTIME;
+            commitSleepTime = MIN_SLEEP_TIME;
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
             }
@@ -659,7 +659,7 @@ implements MarkLogicConstants {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(getFormattedBatchId() +
                             "Retrying committing batch, attempts: " +
-                            commitRetry + "/" + MAXRETRIES);
+                            commitRetry + "/" + MAX_RETRIES);
                     }
                 }
                 try {
@@ -805,7 +805,7 @@ implements MarkLogicConstants {
             for (int i = 0; i < len; i++, sid++) {             
                 if (sid != -1 && pendingUris[sid].size() > 0) {
                     commitRetry = 0;
-                    commitSleepTime = MINSLEEPTIME;
+                    commitSleepTime = MIN_SLEEP_TIME;
                     Content[] remainder = new Content[counts[i]];
                     System.arraycopy(forestContents[i], 0, remainder, 0, 
                             counts[i]);
@@ -817,7 +817,7 @@ implements MarkLogicConstants {
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(getFormattedBatchId() +
                                     "Retrying committing batch, attempts: " +
-                                    commitRetry + "/" + MAXRETRIES);
+                                    commitRetry + "/" + MAX_RETRIES);
                             }
                         }
                         try {
@@ -897,7 +897,7 @@ implements MarkLogicConstants {
             }
             InternalUtilities.sleep(sleepTime);
         } catch (Exception e) {}
-        sleepTime = Math.min(batchSleepTime*2, MAXSLEEPTIME);
+        sleepTime = Math.min(batchSleepTime*2, MAX_SLEEP_TIME);
         return sleepTime;
     }
 

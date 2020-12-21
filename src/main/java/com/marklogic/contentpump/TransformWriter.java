@@ -224,7 +224,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         boolean committed = false;
         if (++counts[sid] == batchSize) {
             commitRetry = 0;
-            commitSleepTime = MINSLEEPTIME;
+            commitSleepTime = MIN_SLEEP_TIME;
             if (sessions[sid] == null) {
                 sessions[sid] = getSession(sid, false);
                 queries[sid] = getAdhocQuery(sid);
@@ -235,7 +235,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(getFormattedBatchId() +
                             "Retrying committing batch, attempts: " +
-                            commitRetry + "/" + MAXRETRIES);
+                            commitRetry + "/" + MAX_RETRIES);
                     }
                 }
                 queries[sid].setNewVariables(uriName, uris[sid]);
@@ -555,14 +555,14 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
     throws IOException
     {
         batchRetry = 0;
-        batchSleepTime = MINSLEEPTIME;
-        while (batchRetry < MAXRETRIES) {
+        batchSleepTime = MIN_SLEEP_TIME;
+        while (batchRetry < MAX_RETRIES) {
         try {
             if (batchRetry > 0) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(getFormattedBatchId() +
                         "Retrying inserting batch, attempts: " + batchRetry +
-                        "/" + MAXRETRIES);
+                        "/" + MAX_RETRIES);
                 }
             }
             if (transOpt != null) {
@@ -605,7 +605,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 rollback(id);
             }
 
-            if (retryable && ++batchRetry < MAXRETRIES) {
+            if (retryable && ++batchRetry < MAX_RETRIES) {
                 sessions[id].close();
                 batchSleepTime = sleep(batchSleepTime);
                 sessions[id] = getSession(id, true);
@@ -641,7 +641,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         for (int i = 0; i < sessions.length; i++) {
             if (pendingURIs[i].size() > 0) {
                 commitRetry = 0;
-                commitSleepTime = MINSLEEPTIME;
+                commitSleepTime = MIN_SLEEP_TIME;
                 if (sessions[i] == null) {
                     sessions[i] = getSession(i, false);
                     queries[i] = getAdhocQuery(i);
@@ -658,7 +658,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                         if (LOG.isDebugEnabled()) {
                             LOG.debug(getFormattedBatchId() +
                                 "Retrying committing batch, attempts: " +
-                                commitRetry + "/" + MAXRETRIES);
+                                commitRetry + "/" + MAX_RETRIES);
                         }
                     }
                     queries[i].setNewVariables(uriName, urisLeft);
