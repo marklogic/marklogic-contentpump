@@ -358,7 +358,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         }
     }
     
-    private static void runJobLocally(LocalJob job, CommandLine cmdline, 
+    private static void runJobLocally(LocalJob job, CommandLine cmdline,
             Command cmd) throws Exception {
         LocalJobRunner runner = new LocalJobRunner(job, cmdline, cmd);
         runner.run();

@@ -19,6 +19,7 @@ import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.DefaultStringifier;
+import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.RecordWriter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
@@ -47,7 +48,8 @@ public class KeyValueOutputFormat<KEYOUT, VALUEOUT> extends
     }
 
     @Override
-    public void checkOutputSpecs(Configuration conf, ContentSource cs) 
+    public void checkOutputSpecs(
+        Configuration conf, ContentSource cs, JobContext context)
     throws IOException {
         // check for required configuration
         if (conf.get(OUTPUT_QUERY) == null) {

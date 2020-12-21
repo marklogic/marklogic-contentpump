@@ -90,13 +90,13 @@ public class DatabaseTransformWriter<VALUE> extends
             pendingURIs[sid].add((DocumentURI)key.clone());
             if (++counts[sid] == batchSize) {
                 commitRetry = 0;
-                commitSleepTime = MINSLEEPTIME;
+                commitSleepTime = MIN_SLEEP_TIME;
                 while (commitRetry < commitRetryLimit) {
                     committed = false;
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(getFormattedBatchId() +
                             "Retrying committing batch , attempts: " +
-                            commitRetry + "/" + MAXRETRIES);
+                            commitRetry + "/" + MAX_RETRIES);
                     }
                     queries[sid].setNewVariables(uriName, uris[sid]);
                     queries[sid].setNewVariables(contentName, values[sid]);

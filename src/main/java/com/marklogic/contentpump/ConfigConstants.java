@@ -15,6 +15,8 @@
  */
 package com.marklogic.contentpump;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * Constants for configuration option names and values.
  * 
@@ -150,6 +152,7 @@ public interface ConfigConstants {
     static final String MODULES = "modules";
     static final String MODULES_ROOT = "modules_root";
     static final String MAX_THREADS = "max_threads";
+    static final String MAX_THREAD_PERCENTAGE = "max_thread_percentage";
 
     static final String RDF_STREAMING_MEMORY_THRESHOLD  = 
             "rdf_streaming_memory_threshold";
@@ -265,4 +268,11 @@ public interface ConfigConstants {
     static final String AUDIT_MLCPFINISH_CODE = 
             "mlcpcopyexportfinish";
     static final long BATCH_MIN_VERSION = 8000604;
+
+    /**
+     * Auto-scaling constants
+     */
+    static final String POLLING_INIT_DELAY = "polling_init_delay";
+    static final String POLLING_PERIOD = "polling_period";
+    static final TimeUnit POLLING_TIME_UNIT = TimeUnit.MINUTES;
 }
