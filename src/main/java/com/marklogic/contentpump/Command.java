@@ -350,15 +350,18 @@ public enum Command implements ConfigConstants {
                 .withArgName("number")
                 .hasArg()
                 .withDescription("The period (in minutes) mlcp talks to the " +
-                    "server to collect concurrency info and decides whether " +
-                    "to auto-scale.")
+                    "server to collect maximum available server threads and " +
+                    "decides whether to auto-scale.")
                 .create(POLLING_PERIOD);
+            options.addOption(pollingPeriod);
             Option pollingInitDelay = OptionBuilder
                 .withArgName("number")
                 .hasArg()
                 .withDescription("The initial delay (in minutes) before mlcp " +
-                    "starts running polling requests to ther server.")
+                    "starts running polling requests to the server to collect" +
+                    "maximum available server threads for auto-scaling.")
                 .create(POLLING_INIT_DELAY);
+            options.addOption(pollingInitDelay);
         }
 
         @Override
