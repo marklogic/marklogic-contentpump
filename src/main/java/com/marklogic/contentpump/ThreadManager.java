@@ -291,7 +291,7 @@ public class ThreadManager implements ConfigConstants {
             int deltaTaskThreads = assignThreads(i, taskList.size(),
                 (curServerThreads - newServerThreads));
             if (task.getMapperClass() == (Class)MultithreadedMapper.class) {
-                int newTaskThreads =  task.getThreadCount() - deltaTaskThreads;
+                int newTaskThreads = task.getThreadCount() - deltaTaskThreads;
                 // Stop currently running MapRunners
                 ((MultithreadedMapper)task.getMapper()).stopRunners(
                     deltaTaskThreads);
@@ -316,7 +316,7 @@ public class ThreadManager implements ConfigConstants {
      * @throws ExecutionException
      */
     public void shutdownThreadPool() throws InterruptedException,
-        ExecutionException{
+        ExecutionException {
         // wait till all tasks are done
         for (Future<?> f : taskFutureList) {
             f.get();
@@ -335,7 +335,7 @@ public class ThreadManager implements ConfigConstants {
      * @throws Exception
      */
     public void submitTask(LocalMapTask task, int index, int splitCount)
-        throws Exception{
+        throws Exception {
         int taskThreads = assignThreads(index, splitCount, newServerThreads);
         Class<? extends Mapper<?,?,?,?>> mapperClass = job.getMapperClass();
         Class<? extends Mapper<?,?,?,?>> runtimeMapperClass = job.getMapperClass();
@@ -419,9 +419,11 @@ public class ThreadManager implements ConfigConstants {
             if (!runAutoScaling()) return;
             // Make sure that auto-scaling from the last polling period is done
             if (!isScalingDone) {
-                LOG.debug("MLCP auto-scaling is not done yet, will run " +
-                    "with thread pool size: " + curServerThreads +
-                    " until it's done.");
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("MLCP auto-scaling is not done yet, will " +
+                        "run with thread pool size: " + curServerThreads +
+                        " until it's done.");
+                }
                 return;
             }
 
@@ -462,6 +464,11 @@ public class ThreadManager implements ConfigConstants {
                 if (succeeded) break;
                 if (++pollingRetry < MAX_RETRIES) {
                     sleep();
+                } else {
+                    LOG.error("Exceed max querying retry. Unable to query" +
+                        "available server max threads.");
+                    job.setJobState(JobStatus.State.FAILED);
+                    return;
                 }
             }
             if (curServerThreads < newServerThreads) {
