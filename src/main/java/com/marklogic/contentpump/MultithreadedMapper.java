@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.marklogic.mapreduce.utilities.InternalUtilities;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -203,6 +205,10 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                     runnerList.get(runnerList.size()-i-1).getIsShutdownDone();
             }
             if (allDone) break;
+            // Speculative fix for Bug 55693: Sleep for 0.5s between every check
+            try {
+                InternalUtilities.sleep(500);
+            } catch (Exception e) {}
         }
         for (int i = 0; i < numRunners; i++) {
             runnerList.remove(runnerList.size()-1);
@@ -370,8 +376,12 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         private Context subcontext;
         private Throwable throwable;
         private RecordWriter<K2, V2> writer;
-        private volatile boolean shutdown = false;
-        private boolean isShutdownDone = false;
+        // Whether the polling thread has notified the runner to shutdown in a
+        // scaling-in event
+        AtomicBoolean shutdown = new AtomicBoolean(false);
+        // Whether the runner itself has finished shutting-down in a scaling-in
+        // event
+        AtomicBoolean isShutdownDone = new AtomicBoolean(false);
 
         MapRunner() throws IOException, ClassNotFoundException {
             // initiate the real mapper that does the work
@@ -417,19 +427,19 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                     LOG.debug(t);
                 }
             }
-            isShutdownDone = true;
+            isShutdownDone.set(true);
         }
 
         public void setShutdown(boolean shutdown) {
-            this.shutdown = shutdown;
+            this.shutdown.set(shutdown);
         }
 
         public boolean getShutdown() {
-            return shutdown;
+            return shutdown.get();
         }
 
         public boolean getIsShutdownDone() {
-            return isShutdownDone;
+            return isShutdownDone.get();
         }
     }
 }
