@@ -225,15 +225,13 @@ public class ThreadManager implements ConfigConstants {
     public void scaleOutThreadPool() {
         isScalingDone = false;
         if (maxThreads > 0 && newServerThreads > maxThreads) {
-            LOG.debug("Thread count has reached the maximum value: " +
+            LOG.info("Thread count has reached the maximum value: " +
                 maxThreads + " , and the thread pool will not further scale " +
                 "out.");
             newServerThreads = maxThreads;
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Thread pool is scaling-out. New thread pool " +
-                    "size: " + newServerThreads);
-            }
+            LOG.info("Thread pool is scaling-out. New thread pool size: " +
+                newServerThreads);
         }
         synchronized (pool) {
             pool.setMaximumPoolSize(newServerThreads);
@@ -276,14 +274,12 @@ public class ThreadManager implements ConfigConstants {
     public void scaleInThreadPool() {
         isScalingDone = false;
         if (newServerThreads < minThreads) {
-            LOG.debug("Thread count has reached minimum value: " + minThreads
+            LOG.info("Thread count has reached minimum value: " + minThreads
                 + " and the thread pool will not further scale in.");
             newServerThreads = minThreads;
         } else {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Thread pool is scaling-in. New thread pool " +
-                    "size: " + newServerThreads);
-            }
+            LOG.info("Thread pool is scaling-in. New thread pool size: " +
+                newServerThreads);
         }
         // Deduct runners from each task
         for (int i = 0; i < taskList.size(); i++) {
