@@ -9,13 +9,18 @@ MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest w
 * Export data from a database to a file system
 * Copy subsets of data between databases
 
-You can run mlcp across many threads on a single machine or across many nodes in a cluster.
+You can run mlcp across many threads on a single machine or across many nodes in a cluster. Mlcp can now run against MarkLogic clusters hosted on AWS/Azure.
 
 The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. From 10.0-5, Hadoop Connector is removed from separate release, but mlcp still uses Hadoop Connector as an internal dependency. 
 
 ## Release Note
+### What's New in mlcp and Hadoop Connector 10.0.6
+
+- Add auto-scaling capability (scale-out/scale-in) for MLCP import to be leveraged by DHS.
+- Bug fixes.
 
 ### What's New in mlcp and Hadoop Connector 10.0.5
+
 - Enable MLCP retry inserting documents when commit fails to make mlcp more robust.
 - Support passing Java Keystore through mlcp command line for TLS Client Authentication connections.
 - Refactor mlcp repo to remove Hadoop Connector from a separate release.
@@ -27,77 +32,20 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ### What's New in mlcp and Hadoop Connector 10.0.4
 
--	Bug fixes
+-	Bug fixes.
 
 ### What's New in mlcp and Hadoop Connector 10.0.3
 
--	Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.11
-
--	Bug fixes
-
+-	Bug fixes.
 
 ### What's New in mlcp and Hadoop Connector 10.0.2
 
--	Bug fixes
+-	Bug fixes.
 
 ### What's New in mlcp and Hadoop Connector 10.0.1
 
-- 	Library upgrade
--	Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.10
-
--	Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.9
-
--	Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.8
-
--	MLCP more load balancer friendly
--	Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.7
-
-- AWS Application Load Balancer support
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.6
-
-- Upgraded Jena library
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.5
-
-- Support HDP 2.6
-- Performance improvement in mlcp archive import and copy
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.4
-
-- Performance optimization in mlcp archive import and mlcp copy
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.3
-
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.2
-
-- New option to specify modules database and root directory for server-side transoformation
-- Bug fixes
-
-### What's New in mlcp and Hadoop Connector 9.0.1
-
-- New option to enable SSL communication
-- New option to run behind a load balancer or firewall
-- Survive server node failover events
-- Server-side transform in batches
-- Get and set document permission, collection and metadata in server-side transformation
-- Performance improvements and bug fixes
+- 	Library upgrade.
+-	Bug fixes.
 
 ## Getting Started
 
