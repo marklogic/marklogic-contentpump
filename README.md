@@ -17,6 +17,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 ### What's New in mlcp and Hadoop Connector 10.0.6
 
 - Add auto-scaling capability (scale-out/scale-in) for MLCP import to be leveraged by DHS.
+- Add new command line options: -max\_thread\_percentage, -polling\_init\_delay, -polling_period.
 - Bug fixes.
 
 ### What's New in mlcp and Hadoop Connector 10.0.5
