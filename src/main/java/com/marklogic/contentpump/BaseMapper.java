@@ -16,14 +16,11 @@
 package com.marklogic.contentpump;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.mapreduce.InputSplit;
+
+import com.marklogic.contentpump.MultithreadedMapper.MapRunner;
 
 /**
  * Content Pump base mapper with the capability to run in thread-safe mode.
@@ -38,13 +35,13 @@ import org.apache.hadoop.mapreduce.InputSplit;
 public class BaseMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
     org.apache.hadoop.mapreduce.Mapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> {
     public static final Log LOG = LogFactory.getLog(BaseMapper.class);    
-    public void runThreadSafe(Context outerCtx, Context subCtx)
+    public void runThreadSafe(Context outerCtx, Context subCtx, MapRunner runner)
         throws IOException, InterruptedException {
         setup(subCtx);
         KEYIN key = null;
         VALUEIN value = null;
         try {
-            while (!ContentPump.shutdown) {
+            while (!ContentPump.shutdown && !runner.getShutdown()) {
                 synchronized (outerCtx) {
                     if (!subCtx.nextKeyValue()) {
                         break;
@@ -60,15 +57,6 @@ public class BaseMapper<KEYIN, VALUEIN, KEYOUT, VALUEOUT> extends
             }
             cleanup(subCtx);
         }
-    }
-    
-    public int getRequiredThreads() {
-        return 1;
-    }
-    
-    public List<Future<Object>> submitTasks(ExecutorService threadPool,
-            InputSplit inputSplit) {
-        return Collections.emptyList();
     }
     
     @Override

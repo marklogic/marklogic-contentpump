@@ -19,7 +19,7 @@ package com.marklogic.mapreduce;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.marklogic.xcc.types.XSInteger;
+import com.marklogic.contentpump.LocalJob;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configurable;
@@ -78,13 +78,6 @@ implements MarkLogicConstants, Configurable {
         + "   where $p mod 2 eq 0 "
         + "   return $i";
     static final String MANUAL_DIRECTORY_MODE = "manual";
-
-    public static final String SERVER_MAX_THREADS_QUERY =
-        "import module namespace hadoop = " +
-        "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n" +
-        "let $f := " +
-        "fn:function-lookup(xs:QName('hadoop:get-port-max-threads'),0)\n" +
-        "return if (exists($f)) then $f() else 0";
     protected Configuration conf;
 
     @Override
@@ -99,9 +92,8 @@ implements MarkLogicConstants, Configurable {
             try {
                 ContentSource cs = InternalUtilities.getOutputContentSource(conf,
                         hosts[i]);
-                // Initial polling of server thread count
-                queryServerMaxThreads(conf,cs);
-                checkOutputSpecs(conf, cs);
+                ((LocalJob)context).getThreadManager().queryServerMaxThreads(cs);
+                checkOutputSpecs(conf, cs, context);
                 return;
             }
             catch (Exception ex) {
@@ -210,41 +202,7 @@ implements MarkLogicConstants, Configurable {
         }
     }
 
-    private void queryServerMaxThreads(Configuration conf, ContentSource cs)
-        throws IOException {
-        Session session = null;
-        ResultSequence result = null;
-        try {
-            session = cs.newSession();
-            AdhocQuery query = session.newAdhocQuery(SERVER_MAX_THREADS_QUERY);
-            RequestOptions options = new RequestOptions();
-            options.setDefaultXQueryVersion("1.0-ml");
-            query.setOptions(options);
-            result = session.submitRequest(query);
-
-            if (result.hasNext()) {
-                ResultItem item = result.next();
-                int serverThreadCount =
-                    ((XSInteger)item.getItem()).asPrimitiveInt();
-                // Store in system configuration file
-                conf.setInt(SERVER_THREAD_COUNT, serverThreadCount);
-            } else {
-                throw new IllegalStateException(
-                    "Failed to query server max threads");
-            }
-        }  catch (RequestException e) {
-            LOG.error(e.getMessage(), e);
-            throw new IOException(e);
-        } finally {
-            if (result != null) {
-                result.close();
-            }
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
-
-    public abstract void checkOutputSpecs(Configuration conf, ContentSource cs) 
+    public abstract void checkOutputSpecs(
+        Configuration conf, ContentSource cs, JobContext context)
     throws IOException;
 }

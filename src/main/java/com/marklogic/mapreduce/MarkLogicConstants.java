@@ -977,10 +977,4 @@ public interface MarkLogicConstants {
      */
     static final long MIN_NODEUPDATE_VERSION =
             9000040L;
-
-    /**
-     *  For adjusting MLCP concurrency, internal use only
-     */
-    static final String SERVER_THREAD_COUNT = "server-thread-count";
-    static final double THREAD_MULTIPLIER = 0.5;
 }

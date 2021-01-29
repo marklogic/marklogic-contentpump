@@ -32,10 +32,13 @@ import com.marklogic.mapreduce.MarkLogicConstants;
 public class LocalJob extends Job implements MarkLogicConstants {
     // Own job state which can be accessed through the local execution engine
     JobStatus.State state;
+    // One threadManager per local job
+    private ThreadManager threadManager;
     
     LocalJob(Configuration conf) throws IOException {
         super(new JobConf(conf));
         state = JobStatus.State.PREP;
+        this.threadManager = new ThreadManager(this);
     }
 
     public boolean done() {
@@ -57,5 +60,9 @@ public class LocalJob extends Job implements MarkLogicConstants {
         } else {
             return new LocalJob(conf);
         }
+    }
+
+    public ThreadManager getThreadManager() {
+        return threadManager;
     }
 }
