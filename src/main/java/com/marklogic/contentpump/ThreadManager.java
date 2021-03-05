@@ -57,8 +57,9 @@ public class ThreadManager implements ConfigConstants {
     // minimally required thread per task defined by the job
     private int minThreads = 1;
     private int curServerThreads;
-    // Flag for indicating whether auto-scaling from last polling period is done
-    private boolean isScalingDone = true;
+    // Number of threads in the thread pool that finish running a LocalMapTask
+    private int idleServerThreads;
+    private List<Integer> randomIndexes = new ArrayList<>();
 
     /**
      * Variables set by checkOutputFormat
@@ -126,6 +127,10 @@ public class ThreadManager implements ConfigConstants {
      */
     public void queryServerMaxThreads(ContentSource cs)
         throws IOException {
+        if (threadCount != 0) {
+            newServerThreads = threadCount;
+            return;
+        }
         Session session = null;
         ResultSequence result = null;
         try {
@@ -162,8 +167,8 @@ public class ThreadManager implements ConfigConstants {
      */
     public void runThreadPoller() {
         final ScheduledFuture<?> handler =
-            scheduler.scheduleAtFixedRate(new ThreadPoller(), pollingInitDelay,
-                pollingPeriod, POLLING_TIME_UNIT);
+            scheduler.scheduleWithFixedDelay(new ThreadPoller(),
+                pollingInitDelay, pollingPeriod, POLLING_TIME_UNIT);
     }
 
     /**
@@ -218,12 +223,29 @@ public class ThreadManager implements ConfigConstants {
     }
 
     /**
+     * Return the total counts of LocalMapTask that are actively running.
+     * @return
+     */
+    public int getActiveTaskCounts() {
+        int count = 0;
+        for (int i = 0; i < taskList.size(); i++) {
+            LocalMapTask task = taskList.get(i);
+            if (task.isTaskDone()) {
+                if (task.getThreadCount() > 0) {
+                    idleServerThreads += task.getThreadCount();
+                    task.setThreadCount(0);
+                }
+            } else count++;
+        }
+        return count;
+    }
+
+    /**
      * Scale-out thread pool based on newly available server threads. Create
      * new map runners and assign them to each existing LocalMapTask in a
      * round-robin fashion.
      */
-    public void scaleOutThreadPool() {
-        isScalingDone = false;
+    public void scaleOutThreadPool(int activeTaskCounts) {
         if (maxThreads > 0 && newServerThreads > maxThreads) {
             LOG.info("Thread count has reached the maximum value: " +
                 maxThreads + " , and the thread pool will not further scale " +
@@ -240,70 +262,134 @@ public class ThreadManager implements ConfigConstants {
         // Assign new available threads to each task
         for (int i = 0; i < taskList.size(); i++) {
             LocalMapTask task = taskList.get(i);
-            int deltaTaskThreads = assignThreads(i, taskList.size(),
-                (newServerThreads - curServerThreads));
             if (task.getMapperClass() == (Class)MultithreadedMapper.class) {
+                if (task.getThreadCount() == 0) {
+                    // Stop assigning new threads to completed LocalMapTasks
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Running with MultithreadedMapper. New " +
+                            "thread count for split #" + i + ": 0, since this " +
+                            "task is already completed.");
+                    }
+                    continue;
+                }
+                int deltaTaskThreads = assignThreads(
+                    randomIndexes.get(i), activeTaskCounts,
+                    (newServerThreads - curServerThreads + idleServerThreads),
+                    false);
                 int newTaskThreads = deltaTaskThreads + task.getThreadCount();
                 task.setThreadCount(newTaskThreads);
                 ((MultithreadedMapper)task.getMapper()).setThreadCount(
                     newTaskThreads);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Running with MultithreadedMapper. New " +
+                        "thread count for split #" + i + ": " + newTaskThreads);
+                }
+                if (task.isTaskDone()) continue;
                 try {
                     // Create new map runners
                     ((MultithreadedMapper)task.getMapper()).createRunners(
                         deltaTaskThreads);
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug("Running with MultithreadedMapper. New " +
-                            "thread count for split #" + i + ": " +
-                            newTaskThreads);
-                    }
-                }
-                catch (ClassNotFoundException e) {
+                } catch (ClassNotFoundException e) {
                     LOG.error("MapRunner class not found", e);
                 } catch (IOException | InterruptedException e) {
                     LOG.error(e.getMessage(), e);
                 }
             }
         }
-        isScalingDone = true;
     }
 
     /**
      * Scale-in thread pool based on new available server threads. Deduct
      * active runners from each LocalMapTask in a round-robin fashion.
      */
-    public void scaleInThreadPool() {
-        isScalingDone = false;
-        if (newServerThreads < minThreads) {
-            LOG.info("Thread count has reached minimum value: " + minThreads
-                + " and the thread pool will not further scale in.");
-            newServerThreads = minThreads;
-        } else {
-            LOG.info("Thread pool is scaling-in. New thread pool size: " +
-                newServerThreads);
-        }
+    public void scaleInThreadPool(int activeTaskCounts) {
+        LOG.info("Thread pool is scaling-in. New thread pool size: " +
+            newServerThreads);
         // Deduct runners from each task
         for (int i = 0; i < taskList.size(); i++) {
             LocalMapTask task = taskList.get(i);
-            int deltaTaskThreads = assignThreads(i, taskList.size(),
-                (curServerThreads - newServerThreads));
             if (task.getMapperClass() == (Class)MultithreadedMapper.class) {
+                if (task.getThreadCount() == 0) {
+                    // Stop assigning new threads to completed LocalMapTasks
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Running with MultithreadedMapper. New " +
+                            "thread count for split #" + i + ": 0, since this " +
+                            "task is already completed.");
+                    }
+                    continue;
+                }
+                int deltaTaskThreads = assignThreads(
+                    randomIndexes.get(i), activeTaskCounts,
+                    (curServerThreads - newServerThreads - idleServerThreads),
+                    false);
                 int newTaskThreads = task.getThreadCount() - deltaTaskThreads;
+                if (newTaskThreads < minThreads) {
+                    LOG.info("Thread count has reached minimum value: " +
+                        minThreads + " and the thread pool will not further " +
+                        "scale in.");
+                    newTaskThreads = minThreads;
+                }
+                task.setThreadCount(newTaskThreads);
+                ((MultithreadedMapper)task.getMapper()).setThreadCount(
+                    newTaskThreads);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Running with MultithreadedMapper. New " +
+                        "thread count for split #" + i + ": " + newTaskThreads);
+                }
+                if (task.isTaskDone()) continue;
                 // Stop currently running MapRunners
                 ((MultithreadedMapper)task.getMapper()).stopRunners(
                     deltaTaskThreads);
+            }
+        }
+        pool.setCorePoolSize(newServerThreads);
+        pool.setMaximumPoolSize(newServerThreads);
+    }
+
+    /**
+     * Reassign all the idle server threads in the thread pool to other
+     * active running tasks.
+     * @param activeTaskCounts
+     */
+    public void assignIdleThreads(int activeTaskCounts) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Assigning idle threads to each LocalMapTask. Idle thread" +
+                "counts: " + idleServerThreads);
+        }
+        for (int i = 0; i < taskList.size(); i++) {
+            LocalMapTask task = taskList.get(i);
+            if (task.isTaskDone()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Running with MultithreadedMapper. New " +
+                        "thread count for split #" + i + ": 0, since this " +
+                        "task is already completed.");
+                }
+                continue;
+            }
+            int deltaTaskThreads = assignThreads(randomIndexes.get(i),
+                activeTaskCounts, idleServerThreads, true);
+            if (task.getMapperClass() == (Class)MultithreadedMapper.class) {
+                int newTaskThreads = deltaTaskThreads + task.getThreadCount();
+                task.setThreadCount(newTaskThreads);
+                ((MultithreadedMapper)task.getMapper()).setThreadCount(
+                    newTaskThreads);
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Running with MultithreadedMapper. New " +
                         "thread count for split #" + i + ": " +
                         newTaskThreads);
                 }
-                task.setThreadCount(newTaskThreads);
-                ((MultithreadedMapper)task.getMapper()).setThreadCount(
-                    newTaskThreads);
+                if (deltaTaskThreads == 0) continue;
+                try {
+                    // Create new map runners
+                    ((MultithreadedMapper)task.getMapper()).createRunners(
+                        deltaTaskThreads);
+                } catch (ClassNotFoundException e) {
+                    LOG.error("MapRunner class not found", e);
+                } catch (IOException | InterruptedException e) {
+                    LOG.error(e.getMessage(), e);
+                }
             }
         }
-        pool.setCorePoolSize(newServerThreads);
-        pool.setMaximumPoolSize(newServerThreads);
-        isScalingDone = true;
     }
 
     /**
@@ -316,6 +402,10 @@ public class ThreadManager implements ConfigConstants {
         // wait till all tasks are done
         for (Future<?> f : taskFutureList) {
             f.get();
+        }
+        if (scheduler != null) {
+            scheduler.shutdown();
+            while (!scheduler.awaitTermination(1, TimeUnit.HOURS));
         }
         if (pool != null) {
             pool.shutdown();
@@ -332,7 +422,8 @@ public class ThreadManager implements ConfigConstants {
      */
     public void submitTask(LocalMapTask task, int index, int splitCount)
         throws Exception {
-        int taskThreads = assignThreads(index, splitCount, newServerThreads);
+        int taskThreads = assignThreads(index, splitCount, newServerThreads,
+            false);
         Class<? extends Mapper<?,?,?,?>> mapperClass = job.getMapperClass();
         Class<? extends Mapper<?,?,?,?>> runtimeMapperClass = job.getMapperClass();
         // Possible runtime mapperClass adjustment. Use MultithreadedMapper for
@@ -369,9 +460,12 @@ public class ThreadManager implements ConfigConstants {
      *
      * @param splitIndex split index
      * @param splitCount
+     * @param totalThreads
+     * @param reassign whether this function is called during idle thread reassigning
      * @return number of threads for each input split
      */
-    private int assignThreads(int splitIndex, int splitCount, int totalThreads) {
+    private int assignThreads(int splitIndex, int splitCount, int totalThreads,
+        boolean reassign) {
         if (threadsPerSplit > 0) {
             return threadsPerSplit;
         }
@@ -379,13 +473,32 @@ public class ThreadManager implements ConfigConstants {
             return totalThreads;
         }
         if (splitCount * minThreads > totalThreads) {
-            return minThreads;
+            if (reassign) {
+                if (splitIndex < totalThreads) {
+                    return minThreads;
+                }
+            } else {
+                return minThreads;
+            }
         }
         if (splitIndex % totalThreads < totalThreads % splitCount) {
             return totalThreads / splitCount + 1;
         } else {
             return totalThreads / splitCount;
         }
+    }
+
+    /**
+     * Generate an array of random split indexes for more evenly assigning
+     * threads in scale-out/scale-in events.
+     * @param splitCount
+     */
+    private void prepareRandomIndexes(int splitCount) {
+        randomIndexes.clear();
+        for (int i = 0; i < splitCount; i++) {
+            randomIndexes.add(i);
+        }
+        Collections.shuffle(randomIndexes);
     }
 
     /**
@@ -409,19 +522,9 @@ public class ThreadManager implements ConfigConstants {
         @Override
         public void run() {
             if (ContentPump.shutdown) {
-                scheduler.shutdown();
                 return;
             }
             if (!runAutoScaling()) return;
-            // Make sure that auto-scaling from the last polling period is done
-            if (!isScalingDone) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("MLCP auto-scaling is not done yet, will " +
-                        "run with thread pool size: " + curServerThreads +
-                        " until it's done.");
-                }
-                return;
-            }
 
             boolean succeeded = false;
             pollingRetry = 0;
@@ -467,14 +570,22 @@ public class ThreadManager implements ConfigConstants {
                     return;
                 }
             }
+            // Collect active task counts and idle thread counts
+            int activeTaskCounts = getActiveTaskCounts();
+            prepareRandomIndexes(activeTaskCounts);
             if (curServerThreads < newServerThreads) {
                 // Scale out
-                scaleOutThreadPool();
+                scaleOutThreadPool(activeTaskCounts);
             } else if (curServerThreads > newServerThreads) {
                 // Scale in
-                scaleInThreadPool();
+                scaleInThreadPool(activeTaskCounts);
+            } else if (idleServerThreads > 0) {
+                // If the thread count remain unchaged, reassign available
+                //idle server threads
+                assignIdleThreads(activeTaskCounts);
             } else return;
             curServerThreads = newServerThreads;
+            idleServerThreads = 0;
         }
 
         private void sleep() {
