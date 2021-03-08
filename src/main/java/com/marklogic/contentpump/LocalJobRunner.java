@@ -303,6 +303,9 @@ public class LocalJobRunner implements ConfigConstants {
             return mapper;
         }
 
+        /**
+         * Return whether a LocalMapTask has completed importing
+         */
         public boolean isTaskDone() {
             return isTaskDone.get();
         }

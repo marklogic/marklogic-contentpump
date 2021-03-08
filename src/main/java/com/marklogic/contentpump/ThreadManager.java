@@ -59,6 +59,7 @@ public class ThreadManager implements ConfigConstants {
     private int curServerThreads;
     // Number of threads in the thread pool that finish running a LocalMapTask
     private int idleServerThreads;
+    // An array of indexes for storing random splitIndexes
     private List<Integer> randomIndexes = new ArrayList<>();
 
     /**
@@ -166,6 +167,8 @@ public class ThreadManager implements ConfigConstants {
      * Schedule thread polling tasks.
      */
     public void runThreadPoller() {
+        // Use scheduleWithFixedDelay instead of scheduleAtFixedRate to
+        // guarantee that the previous task has completed.
         final ScheduledFuture<?> handler =
             scheduler.scheduleWithFixedDelay(new ThreadPoller(),
                 pollingInitDelay, pollingPeriod, POLLING_TIME_UNIT);
@@ -224,18 +227,19 @@ public class ThreadManager implements ConfigConstants {
 
     /**
      * Return the total counts of LocalMapTask that are actively running.
-     * @return
      */
     public int getActiveTaskCounts() {
         int count = 0;
-        for (int i = 0; i < taskList.size(); i++) {
-            LocalMapTask task = taskList.get(i);
-            if (task.isTaskDone()) {
-                if (task.getThreadCount() > 0) {
-                    idleServerThreads += task.getThreadCount();
-                    task.setThreadCount(0);
-                }
-            } else count++;
+        synchronized (taskList) {
+            for (int i = 0; i < taskList.size(); i++) {
+                LocalMapTask task = taskList.get(i);
+                if (task.isTaskDone()) {
+                    if (task.getThreadCount() > 0) {
+                        idleServerThreads += task.getThreadCount();
+                        task.setThreadCount(0);
+                    }
+                } else count++;
+            }
         }
         return count;
     }
@@ -272,6 +276,11 @@ public class ThreadManager implements ConfigConstants {
                     }
                     continue;
                 }
+                // In assignThreads, pass down a random index as splitIndex to
+                // make sure threads are more evenly assigned. The total delta
+                // threads in a scale-out event equals to the new available
+                // threads plus the idle threads that finish running other
+                // LocalMapTasks.
                 int deltaTaskThreads = assignThreads(
                     randomIndexes.get(i), activeTaskCounts,
                     (newServerThreads - curServerThreads + idleServerThreads),
@@ -284,6 +293,8 @@ public class ThreadManager implements ConfigConstants {
                     LOG.debug("Running with MultithreadedMapper. New " +
                         "thread count for split #" + i + ": " + newTaskThreads);
                 }
+                // Stop ThreadManager from assigning more threads to a completed
+                // task. The idle threads will be reassigned in the next round.
                 if (task.isTaskDone()) continue;
                 try {
                     // Create new map runners
@@ -318,6 +329,9 @@ public class ThreadManager implements ConfigConstants {
                     }
                     continue;
                 }
+                //  The total delta threads in a scale-in event equals to the
+                //  unavailable threads minus the idle threads that finish
+                //  running other LocalMapTasks.
                 int deltaTaskThreads = assignThreads(
                     randomIndexes.get(i), activeTaskCounts,
                     (curServerThreads - newServerThreads - idleServerThreads),
@@ -336,6 +350,8 @@ public class ThreadManager implements ConfigConstants {
                     LOG.debug("Running with MultithreadedMapper. New " +
                         "thread count for split #" + i + ": " + newTaskThreads);
                 }
+                // Stop ThreadManager from assigning more threads to a completed
+                // task. The idle threads will be reassigned in the next round
                 if (task.isTaskDone()) continue;
                 // Stop currently running MapRunners
                 ((MultithreadedMapper)task.getMapper()).stopRunners(
@@ -367,7 +383,7 @@ public class ThreadManager implements ConfigConstants {
                 continue;
             }
             int deltaTaskThreads = assignThreads(randomIndexes.get(i),
-                activeTaskCounts, idleServerThreads, true);
+                activeTaskCounts, idleServerThreads, false);
             if (task.getMapperClass() == (Class)MultithreadedMapper.class) {
                 int newTaskThreads = deltaTaskThreads + task.getThreadCount();
                 task.setThreadCount(newTaskThreads);
@@ -423,7 +439,7 @@ public class ThreadManager implements ConfigConstants {
     public void submitTask(LocalMapTask task, int index, int splitCount)
         throws Exception {
         int taskThreads = assignThreads(index, splitCount, newServerThreads,
-            false);
+            true);
         Class<? extends Mapper<?,?,?,?>> mapperClass = job.getMapperClass();
         Class<? extends Mapper<?,?,?,?>> runtimeMapperClass = job.getMapperClass();
         // Possible runtime mapperClass adjustment. Use MultithreadedMapper for
@@ -461,11 +477,11 @@ public class ThreadManager implements ConfigConstants {
      * @param splitIndex split index
      * @param splitCount
      * @param totalThreads
-     * @param reassign whether this function is called during idle thread reassigning
+     * @param initialize whether the ThreadManager is initializing LocalMapTasks
      * @return number of threads for each input split
      */
     private int assignThreads(int splitIndex, int splitCount, int totalThreads,
-        boolean reassign) {
+        boolean initialize) {
         if (threadsPerSplit > 0) {
             return threadsPerSplit;
         }
@@ -473,11 +489,17 @@ public class ThreadManager implements ConfigConstants {
             return totalThreads;
         }
         if (splitCount * minThreads > totalThreads) {
-            if (reassign) {
+            if (!initialize) {
+                // Scale-out/scale-in/assigning idle threads
                 if (splitIndex < totalThreads) {
                     return minThreads;
+                } else {
+                    return 0;
                 }
             } else {
+                // Initializing LocalMapTasks
+                // During initialization, we need to guarantee each LocalMapTask
+                // is assigned at least one thread to submit it to the threadpool.
                 return minThreads;
             }
         }
@@ -580,8 +602,8 @@ public class ThreadManager implements ConfigConstants {
                 // Scale in
                 scaleInThreadPool(activeTaskCounts);
             } else if (idleServerThreads > 0) {
-                // If the thread count remain unchaged, reassign available
-                //idle server threads
+                // If the thread count remain unchanged, reassign available
+                // idle server threads
                 assignIdleThreads(activeTaskCounts);
             } else return;
             curServerThreads = newServerThreads;
