@@ -416,9 +416,9 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             try {
                 mapper.runThreadSafe(outer, subcontext, this);
             } catch (Throwable ie) {
-                ie.printStackTrace();
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Error running task:" + ie);
+                    ie.printStackTrace();
                 }
             } 
             try {
