@@ -57,8 +57,6 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
     private List<Future<?>> runnerFutureList = new ArrayList<>();
     private int threadCount = 0;
     private ThreadPoolExecutor threadPool;
-    // Minimum number of runners reserved for each mapper
-    private int minRunners = 1;
 
     /**
      * Get thread count set for this mapper.
@@ -172,13 +170,15 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         synchronized (threadPool) {
             for (int i = 0; i < numRunners; i++) {
                 MapRunner runner = new MapRunner();
-                runnerList.add(runner);
-                if (!threadPool.isShutdown()) {
-                    Future<?> future = threadPool.submit(runner);
-                    runnerFutureList.add(future);
-                } else {
-                    throw new InterruptedException(
-                        "Thread Pool has been shut down");
+                synchronized (runnerFutureList) {
+                    runnerList.add(runner);
+                    if (!threadPool.isShutdown()) {
+                        Future<?> future = threadPool.submit(runner);
+                        runnerFutureList.add(future);
+                    } else {
+                        throw new InterruptedException(
+                            "Thread Pool has been shut down");
+                    }
                 }
             }
             threadPool.notify();
@@ -186,13 +186,6 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
     }
 
     public void stopRunners(int numRunners) {
-        if (numRunners > (threadCount - minRunners)) {
-            LOG.debug("Thread count has reached minimum value: " +
-                minRunners + " and the thread pool will not further scale in.");
-            // Guarantee there is at least #minRunners threads running each
-            // LocalMapTask
-            numRunners = threadCount - minRunners;
-        }
         for (int i = 0; i < numRunners; i++) {
             // Stop the last numThreads of runners
             runnerList.get(runnerList.size()-i-1).setShutdown(true);
@@ -200,9 +193,11 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
         // Wait until every runner is shutdown
         while(true) {
             boolean allDone = true;
-            for (int i = 0; i < numRunners; i++) {
-                allDone &=
-                    runnerList.get(runnerList.size()-i-1).getIsShutdownDone();
+            synchronized (runnerList) {
+                for (int i = 0; i < numRunners; i++) {
+                    allDone &= runnerList.get(runnerList.size()-i-1).
+                        getIsShutdownDone();
+                }
             }
             if (allDone) break;
             // Speculative fix for Bug 55693: Sleep for 0.5s between every check
@@ -210,9 +205,11 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                 InternalUtilities.sleep(500);
             } catch (Exception e) {}
         }
-        for (int i = 0; i < numRunners; i++) {
-            runnerList.remove(runnerList.size()-1);
-            runnerFutureList.remove(runnerFutureList.size()-1);
+        synchronized (runnerFutureList) {
+            for (int i = 0; i < numRunners; i++) {
+                runnerList.remove(runnerList.size()-1);
+                runnerFutureList.remove(runnerFutureList.size()-1);
+            }
         }
 
     }
@@ -239,13 +236,18 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                 // Wait until all runners are done (non-blocking)
                 while (true) {
                     boolean allDone = true;
-                    for (Future<?> f : runnerFutureList) {
-                        allDone &= f.isDone();
+                    synchronized (runnerFutureList) {
+                        for (Future<?> f : runnerFutureList) {
+                            allDone &= f.isDone();
+
+                        }
                     }
                     if (allDone) break;
                 }
-                for (Future<?> f : runnerFutureList) {
-                    f.get();
+                synchronized (runnerFutureList) {
+                    for (Future<?> f : runnerFutureList) {
+                        f.get();
+                    }
                 }
 	        } else {
                 for (int i = 0; i < numberOfThreads; ++i) {
@@ -414,9 +416,9 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             try {
                 mapper.runThreadSafe(outer, subcontext, this);
             } catch (Throwable ie) {
-                LOG.error("Error running task: " + ie.getMessage());
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug(ie);
+                    LOG.debug("Error running task:" + ie);
+                    ie.printStackTrace();
                 }
             } 
             try {
