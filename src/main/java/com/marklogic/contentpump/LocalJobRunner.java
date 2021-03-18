@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.cli.CommandLine;
@@ -261,6 +262,7 @@ public class LocalJobRunner implements ConfigConstants {
         private ContentPumpReporter reporter;
         private Class<? extends Mapper<?,?,?,?>> mapperClass;
         private int threadCount = 0;
+        private AtomicBoolean isTaskDone = new AtomicBoolean(false);
         
         public LocalMapTask(InputFormat<INKEY, INVALUE> inputFormat, 
                 OutputFormat<OUTKEY, OUTVALUE> outputFormat, 
@@ -299,6 +301,13 @@ public class LocalJobRunner implements ConfigConstants {
 
 		public Mapper<INKEY, INVALUE, OUTKEY, OUTVALUE> getMapper() {
             return mapper;
+        }
+
+        /**
+         * Return whether a LocalMapTask has completed importing
+         */
+        public boolean isTaskDone() {
+            return isTaskDone.get();
         }
 
 		@SuppressWarnings("unchecked")
@@ -374,7 +383,8 @@ public class LocalJobRunner implements ConfigConstants {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(t);
                 }
-            } 
+            }
+            isTaskDone.set(true);
             return null;
         }      
     }
