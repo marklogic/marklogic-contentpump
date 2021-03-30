@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
+import com.marklogic.xcc.exceptions.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -49,11 +50,6 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.impl.SessionImpl;
 import com.marklogic.xcc.Session.TransactionMode;
-import com.marklogic.xcc.exceptions.ContentInsertException;
-import com.marklogic.xcc.exceptions.QueryException;
-import com.marklogic.xcc.exceptions.RequestException;
-import com.marklogic.xcc.exceptions.RequestServerException;
-import com.marklogic.xcc.exceptions.RetryableQueryException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -544,6 +540,18 @@ implements MarkLogicConstants {
                     // not retryable so trying to connect to the replica
                     LOG.warn(getFormattedBatchId() +
                         "RequestServerException: " + e.getMessage());
+                } else if (e instanceof ServerConnectionException) {
+                    // Bug:55607 - When the # of requests per connection reaches
+                    // the limit of Azure application gateway, inform the user
+                    // properly and stop retrying.
+                    if (e.getMessage().contains(
+                        "Server issued connection close within a batch")) {
+                        LOG.warn(getFormattedBatchId() +
+                            "ServerConnectionException: " + e.getMessage() +
+                            ". Batch size exceeded Application Gateway limit." +
+                            " Please use a batch size <= 100.");
+                        retryable = false;
+                    }
                 } else {
                     LOG.warn(getFormattedBatchId() + "Exception: " + e.getMessage());
                     if (e.getMessage().contains("Module Not Found")) {
