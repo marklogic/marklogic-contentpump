@@ -22,7 +22,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ### What's New in mlcp and Hadoop Connector 10.0.6
 - Add auto-scaling capability (scale-out/scale-in) for MLCP import to be leveraged by DHS.
-- Add new command line options: -max\_thread\_percentage, -polling\_init\_delay, -polling_period.
+- Add new command line options: <code>-max\_thread\_percentage</code>, <code>-polling\_init\_delay</code>, <code>-polling_period</code>.
 - Bug fixes.
 
 ### What's New in mlcp and Hadoop Connector 10.0.5
@@ -30,7 +30,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 - Support passing Java Keystore through mlcp command line for TLS Client Authentication connections.
 - Refactor mlcp repo to remove Hadoop Connector from a separate release.
 - Add initial server thread polling for mlcp import. 
-- Add a new command line option -max_threads.
+- Add a new command line option <code>-max_threads</code>.
 - Disable mlcp distributed mode.
 - Upgrade dependencies for fixing security vulnerabilities.
 - Bug fixes.
