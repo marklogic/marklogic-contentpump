@@ -14,6 +14,12 @@ You can run mlcp across many threads on a single machine or across many nodes in
 The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. From 10.0-5, Hadoop Connector is removed from a separate release, but mlcp still uses Hadoop Connector as an internal dependency.
 
 ## Release Note
+
+### What's New in mlcp and Hadoop Connector 10.0.7
+- Upgrade Hadoop Library to 2.7.2.
+- Upgrade dependencies for fixing security vulnerabilities.
+- Bug fixes.
+
 ### What's New in mlcp and Hadoop Connector 10.0.6
 - Add auto-scaling capability (scale-out/scale-in) for MLCP import to be leveraged by DHS.
 - Add new command line options: -max\_thread\_percentage, -polling\_init\_delay, -polling_period.
