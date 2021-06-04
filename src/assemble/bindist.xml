@@ -74,7 +74,7 @@
       <scope>runtime</scope>
       <outputDirectory>${file.separator}lib</outputDirectory>
       <includes>
-        <include>commons-httpclient:commons-httpclient:jar:*</include>
+        <include>org.apache.httpcomponents:httpclient:jar:*</include>
         <include>commons-io:commons-io:jar:*</include>
         <include>commons-modeler:commons-modeler:jar:*</include>
         <include>org.apache.htrace:htrace-core:jar:*</include>
