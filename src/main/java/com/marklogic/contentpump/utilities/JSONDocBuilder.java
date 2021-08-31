@@ -47,7 +47,7 @@ public class JSONDocBuilder extends DocBuilder {
     public void init(Configuration conf) {
         jsonFactory = new JsonFactory();
         
-    };
+    }
     
     /* 
      * @see com.marklogic.contentpump.DocBuilder#newDoc()
