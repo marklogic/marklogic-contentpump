@@ -179,7 +179,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                 break;
             }
         }
-        if (found == false) {
+        if (!found) {
             // idname doesn't match any columns
             LOG.error("Skipped file: " + file.toUri()
                     + ", reason: " + URI_ID + " " + uriName

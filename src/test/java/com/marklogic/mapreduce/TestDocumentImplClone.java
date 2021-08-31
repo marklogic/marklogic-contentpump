@@ -866,7 +866,7 @@ public class TestDocumentImplClone extends AbstractTestCase {
             walkDOMAttr (eChildren, actualAttrSet);
         }
         for(String s : expectedAttrSet) {
-            if(actualAttrSet.contains(s) == false && expectedMissingNSDecl.contains(s) == false) {
+            if(!actualAttrSet.contains(s) && !expectedMissingNSDecl.contains(s)) {
                 if (LOG.isDebugEnabled()) 
                     LOG.debug("NOT_FOUND:" + s);
                 assertTrue(actualAttrSet.contains(s));

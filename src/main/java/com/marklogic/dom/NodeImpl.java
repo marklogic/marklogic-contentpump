@@ -291,7 +291,7 @@ public abstract class NodeImpl implements Node {
     public boolean isDefaultNamespace(String namespaceURI) {
         int type = getNodeType();
         if (type == NodeKind.ATTR) {
-            if (this instanceof AttrImpl == false) {
+            if (!(this instanceof AttrImpl)) {
                 // ns decl
                 throw new UnsupportedOperationException();
             }
