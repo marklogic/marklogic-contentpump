@@ -580,8 +580,7 @@ public class InternalUtilities implements MarkLogicConstants {
     public static void verifyHosts(String hostList, String portStr) {
         String[] hosts = hostList.split(",");
         int port = Integer.parseInt(portStr);
-        for (int i = 0; i < hosts.length; i++) {
-            String host = hosts[i];
+        for (String host : hosts) {
             InetSocketAddress address = new InetSocketAddress(host, port);
             if (address.isUnresolved()) {
                 throw new IllegalArgumentException("host " + host + " is not resolvable");

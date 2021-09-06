@@ -100,9 +100,9 @@ public class ForestInfo implements Writable {
         out.writeBoolean(updatable);
         int replicaSize = replicas.size();
         out.writeInt(replicaSize);
-        for (int i=0; i < replicaSize; i++) {
-            Text.writeString(out, replicas.get(i).getForest());
-            Text.writeString(out, replicas.get(i).getHostName());
+        for (ForestHost replica : replicas) {
+            Text.writeString(out, replica.getForest());
+            Text.writeString(out, replica.getHostName());
         }
     }
 

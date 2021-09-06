@@ -321,8 +321,8 @@ public class DocumentMetadata {
         if (null == _collections || 1 > _collections.length) {
             return;
         }
-        for (int i = 0; i < _collections.length; i++) {
-            addCollection(_collections[i]);
+        for (String collection : _collections) {
+            addCollection(collection);
         }
     }
     

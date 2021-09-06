@@ -59,8 +59,8 @@ public class CompressedTreeDecoder {
     public String utf8(String s) {
         byte b[] = s.getBytes(UTF8);
         StringBuilder buf = new StringBuilder();
-        for (int i = 0; i < b.length; ++i) {
-            buf.append(String.format("%02x", b[i] & 0xff));
+        for (byte value : b) {
+            buf.append(String.format("%02x", value & 0xff));
         }
         return buf.toString();
     }
