@@ -141,19 +141,12 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 
     /**
      * Set the application's mapper class.
-     * 
-     * @param <K1>
-     *            the map input key type
-     * @param <V1>
-     *            the map input value type
-     * @param <K2>
-     *            the map output key type
-     * @param <V2>
-     *            the map output value type
-     * @param job
-     *            the job to modify
-     * @param internalMapperClass
-     *            the class to use as the mapper
+     * @param conf
+     * @param internalMapperClass the class to use as the mapper
+     * @param <K1> the map input key type
+     * @param <V1> the map input value type
+     * @param <K2> the map output key type
+     * @param <V2> the map output value type
      */
     public static <K1, V1, K2, V2> void setMapperClass(Configuration conf,
         Class<? extends BaseMapper<?, ?, ?, ?>> internalMapperClass) {
