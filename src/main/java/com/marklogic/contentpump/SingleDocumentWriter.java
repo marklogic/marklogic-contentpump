@@ -98,18 +98,16 @@ implements MarkLogicConstants, ConfigConstants, InternalConstants {
             ContentType type = content.getContentType();
             if (ContentType.BINARY.equals(type)) {
                 if (content.isStreamable()) {
-                    InputStream is = null;
-                    try {
-                        is = content.getContentAsByteStream();
+                    try (InputStream is = content.getContentAsByteStream()) {
                         long size = content.getContentSize();
                         long bufSize = Math.min(size, MAX_BUFFER_SIZE);
-                        byte[] buf = new byte[(int)bufSize];
-                        for (long toRead = size, read = 0; 
-                             toRead > 0; 
+                        byte[] buf = new byte[(int) bufSize];
+                        for (long toRead = size, read = 0;
+                             toRead > 0;
                              toRead -= read) {
-                            read = is.read(buf, 0, (int)bufSize);
+                            read = is.read(buf, 0, (int) bufSize);
                             if (read > 0) {
-                                os.write(buf, 0, (int)read);
+                                os.write(buf, 0, (int) read);
                             } else {
                                 if (size != Integer.MAX_VALUE) {
                                     LOG.error("Premature EOF: uri=" + uri +
@@ -118,10 +116,6 @@ implements MarkLogicConstants, ConfigConstants, InternalConstants {
                                 break;
                             }
                         }
-                    } finally {
-                       if (is != null) {
-                           is.close();
-                       }
                     }
                 } else {
                     os.write(content.getContentAsByteArray());

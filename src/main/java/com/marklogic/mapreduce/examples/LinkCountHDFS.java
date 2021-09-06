@@ -181,15 +181,14 @@ class LinkRecordReader extends RecordReader<IntWritable, Text> {
             throws IOException, InterruptedException {
         Path file = ((FileSplit)inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
-        FSDataInputStream fileIn = fs.open(file);
-        DocumentBuilder docBuilder = builderLocal.get();
-        try {
+        try (FSDataInputStream fileIn = fs.open(file)) {
+            DocumentBuilder docBuilder = builderLocal.get();
             Document document = docBuilder.parse(fileIn);
             net.sf.saxon.s9api.DocumentBuilder db = saxonBuilderLocal.get();
             XdmNode xdmDoc = db.wrap(document);
             XPathCompiler xpath = proc.newXPathCompiler();
-            xpath.declareNamespace("wp", 
-                    "http://www.mediawiki.org/xml/export-0.4/");
+            xpath.declareNamespace("wp",
+                "http://www.mediawiki.org/xml/export-0.4/");
             XPathSelector selector = xpath.compile(PATH_EXPRESSION).load();
             selector.setContextItem(xdmDoc);
             items = new ArrayList<XdmItem>();
@@ -201,10 +200,6 @@ class LinkRecordReader extends RecordReader<IntWritable, Text> {
             throw new IOException(ex);
         } catch (SaxonApiException e) {
             e.printStackTrace();
-        } finally {
-            if (fileIn != null) {
-                fileIn.close();
-            }
         }
     }
 

@@ -128,17 +128,14 @@ class FileReader extends RecordReader<Text, Text> {
         bytesTotal = inSplit.getLength();
         Path file = ((FileSplit)inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
-        FSDataInputStream fileIn = fs.open(file);
-        key.set(file.toString());
-        byte[] buf = new byte[(int)inSplit.getLength()];
-        try {
+        try (FSDataInputStream fileIn = fs.open(file)) {
+            key.set(file.toString());
+            byte[] buf = new byte[(int) inSplit.getLength()];
             fileIn.readFully(buf);
             value.set(buf);
-            hasNext = true;    
+            hasNext = true;
         } catch (Exception e) {
             hasNext = false;
-        } finally {
-            fileIn.close();
         }
     }
 

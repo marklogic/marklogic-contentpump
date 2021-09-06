@@ -109,20 +109,17 @@ class BinaryFileReader extends RecordReader<Text, BytesWritable> {
         bytesTotal = inSplit.getLength();
         Path file = ((FileSplit)inSplit).getPath();
         FileSystem fs = file.getFileSystem(context.getConfiguration());
-        FSDataInputStream fileIn = fs.open(file);
-        key.set(file.toString());
-        byte[] buf = new byte[(int)inSplit.getLength()];
-        System.out.println("split length: " + inSplit.getLength());
-        try {
+        try (FSDataInputStream fileIn = fs.open(file)) {
+            key.set(file.toString());
+            byte[] buf = new byte[(int) inSplit.getLength()];
+            System.out.println("split length: " + inSplit.getLength());
             fileIn.readFully(buf);
             value.set(buf, 0, (int) inSplit.getLength());
             System.out.println("value length: " + value.getBytes().length);
-            
-            hasNext = true;    
+
+            hasNext = true;
         } catch (Exception e) {
             hasNext = false;
-        } finally {
-            fileIn.close();
         }
     }
 
