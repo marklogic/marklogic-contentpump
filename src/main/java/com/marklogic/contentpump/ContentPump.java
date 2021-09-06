@@ -304,12 +304,8 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         FilenameFilter jobJarFilter = new FilenameFilter() {
         	@Override
             public boolean accept(File dir, String name) {
-                if (name.endsWith(".jar") && 
-                    name.startsWith(CONTENTPUMP_JAR_PREFIX)) {
-                    return true;
-                } else {
-                    return false;
-                }
+              return name.endsWith(".jar") &&
+                  name.startsWith(CONTENTPUMP_JAR_PREFIX);
             }
         };
         File[] cpJars = cpHomeDir.listFiles(jobJarFilter);
@@ -329,11 +325,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
         FilenameFilter filter = new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
-                if (name.endsWith(".jar") && !name.startsWith("hadoop")) {
-                    return true;
-                } else {
-                    return false;
-                }
+                return name.endsWith(".jar") && !name.startsWith("hadoop");
             }
 
         };
