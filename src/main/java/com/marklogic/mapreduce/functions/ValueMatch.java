@@ -18,8 +18,6 @@ package com.marklogic.mapreduce.functions;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.marklogic.mapreduce.functions.ValuesOrWordsFunction.WordsFunction;
-
 /**
  * Wrapper class for the <code>cts:value-match</code> lexicon
  * function. Subclass this class to generate map input based on a lexicon.
