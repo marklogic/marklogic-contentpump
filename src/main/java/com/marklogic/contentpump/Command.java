@@ -438,7 +438,7 @@ public enum Command implements ConfigConstants {
                         InputType.DELIMITED_TEXT == inputType) {
                     conf.set(CONF_INPUT_URI_ID, uriId);
                     if (InputType.AGGREGATES != inputType && 
-                            generate != null && 
+                            generate != null &&
                             "true".equalsIgnoreCase(generate)) {
                         throw new IllegalArgumentException("Only one of " + GENERATE_URI
                                 + " and " + URI_ID + " can be specified");
@@ -526,10 +526,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(ARCHIVE_METADATA_OPTIONAL)) {
                 String arg = cmdline.getOptionValue(
                         ARCHIVE_METADATA_OPTIONAL);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
+                if (isNullOrEqualsTrue(arg)) {
                     conf.setBoolean(CONF_INPUT_ARCHIVE_METADATA_OPTIONAL,
                                     true);
-                } else if (arg.equalsIgnoreCase("false")) {
+                } else if ("false".equalsIgnoreCase(arg)) {
                     conf.setBoolean(CONF_INPUT_ARCHIVE_METADATA_OPTIONAL,
                                     false);
                 } else {
@@ -588,11 +588,7 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(OUTPUT_FILENAME_AS_COLLECTION)) {
                 String arg = cmdline.getOptionValue(
                         OUTPUT_FILENAME_AS_COLLECTION);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
-                    conf.setBoolean(CONF_OUTPUT_FILENAME_AS_COLLECTION, true);
-                } else {
-                    conf.setBoolean(CONF_OUTPUT_FILENAME_AS_COLLECTION, false);
-                }
+                conf.setBoolean(CONF_OUTPUT_FILENAME_AS_COLLECTION, isNullOrEqualsTrue(arg));
             }
             if (cmdline.hasOption(OUTPUT_DIRECTORY)) {
                 String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
@@ -600,9 +596,9 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(OUTPUT_CLEANDIR)) {
                 String arg = cmdline.getOptionValue(OUTPUT_CLEANDIR);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
+                if (isNullOrEqualsTrue(arg)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_CLEAN_DIR, true);
-                } else if (arg.equalsIgnoreCase("false")) {
+                } else if ("false".equalsIgnoreCase(arg)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_CLEAN_DIR, 
                             false);
                 } else {
@@ -649,7 +645,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_HOSTS);
-                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                if (isNullOrEqualsTrue(restrict)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
                     HttpChannel.setUseHTTP(true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
@@ -666,30 +662,15 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(SSL)) {
                 String arg = cmdline.getOptionValue(SSL);
-                if (arg == null || arg.equalsIgnoreCase("true")){
+                if (isNullOrEqualsTrue(arg)){
                     conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
-                } else if (!arg.equalsIgnoreCase("false")) {
+                } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + SSL
                             + ": " + arg);
                 }
             }
-            if (cmdline.hasOption(SSL_PROTOCOL)) {
-                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
-                if (arg.equalsIgnoreCase("TLS")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLS");
-                } else if(arg.equalsIgnoreCase("TLSv1")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1");
-                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.1");
-                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.2");
-                } else {
-                    throw new IllegalArgumentException(
-                            "Unrecognized option argument for " + SSL_PROTOCOL
-                                    + ": " + arg);
-                }
-            }
+            applyProtocol(conf, cmdline, SSL_PROTOCOL, MarkLogicConstants.OUTPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(KEYSTORE_PATH)) {
                 String path = cmdline.getOptionValue(KEYSTORE_PATH);
                 path = new Path(path).toString();
@@ -733,9 +714,9 @@ public enum Command implements ConfigConstants {
                                 DEFAULT_SEQUENCEFILE_VALUE_TYPE);
                 conf.set(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE, 
                         valueType.toUpperCase());
-                if (valueType.equalsIgnoreCase(
-                        SequenceFileValueType.BYTESWRITABLE.toString())) {
-                    conf.set(MarkLogicConstants.CONTENT_TYPE,
+                if (SequenceFileValueType.BYTESWRITABLE.toString()
+                    .equalsIgnoreCase(valueType)) {
+                        conf.set(MarkLogicConstants.CONTENT_TYPE,
                                     ContentType.BINARY.toString());
                 }
             } else if (conf.get(CONF_INPUT_SEQUENCEFILE_VALUE_TYPE) == null) {
@@ -744,20 +725,20 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(INPUT_FILE_TYPE)) {
                 String fileType = cmdline.getOptionValue(INPUT_FILE_TYPE);
-                if (fileType.equalsIgnoreCase(InputType.ARCHIVE.toString())) {
+                if (InputType.ARCHIVE.toString().equalsIgnoreCase(fileType)) {
                     conf.set(MarkLogicConstants.CONTENT_TYPE,
                                     ContentType.UNKNOWN.toString());
                 }
             }
             if (cmdline.hasOption(FAST_LOAD)) {
                 String arg = cmdline.getOptionValue(FAST_LOAD);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
+                if (isNullOrEqualsTrue(arg)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, true);
                     LOG.info("Option fastload is specified.Please make sure "+
                              "that all conditions required to run in fastload "+
                              "mode are satisfied to avoid XDMP-DBDUPURI "+
                              "errors.");
-                } else if (arg.equalsIgnoreCase("false")) {
+                } else if ("false".equalsIgnoreCase(arg)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, false);
                 } else {
                     throw new IllegalArgumentException(
@@ -767,7 +748,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(CONTENT_ENCODING)) {
                 String arg = cmdline.getOptionValue(CONTENT_ENCODING).toUpperCase();
-                if("SYSTEM".equals(arg)) {
+                if ("SYSTEM".equals(arg)) {
                     arg = Charset.defaultCharset().name();
                 } else if (!Charset.isSupported(arg)) {
                     throw new IllegalArgumentException( arg
@@ -823,8 +804,8 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
                 String fileType = cmdline.getOptionValue(INPUT_FILE_TYPE);
-                if (fileType != null && 
-                    fileType.equalsIgnoreCase(InputType.RDF.toString())) {
+                if (fileType != null &&
+                    InputType.RDF.toString().equalsIgnoreCase(fileType)) {
                     throw new IllegalArgumentException(
                         "Cannot ingest RDF into temporal collection");
                 }
@@ -836,7 +817,7 @@ public enum Command implements ConfigConstants {
             
             if (cmdline.hasOption(SPLIT_INPUT)) {
                 String arg = cmdline.getOptionValue(SPLIT_INPUT);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
+                if (isNullOrEqualsTrue(arg)) {
                     if (isInputCompressed(cmdline)) {
                         LOG.warn(INPUT_COMPRESSED + " disables " + SPLIT_INPUT);
                         conf.setBoolean(CONF_SPLIT_INPUT, false);
@@ -847,7 +828,7 @@ public enum Command implements ConfigConstants {
                             inputType);
                     }
                     conf.setBoolean(CONF_SPLIT_INPUT, true);
-                } else if (arg.equalsIgnoreCase("false")) {
+                } else if ("false".equalsIgnoreCase(arg)) {
                     conf.setBoolean(CONF_SPLIT_INPUT, false);
                 } else {
                     throw new IllegalArgumentException(
@@ -996,9 +977,9 @@ public enum Command implements ConfigConstants {
             
             if (cmdline.hasOption(SNAPSHOT)) {
                 String arg = cmdline.getOptionValue(SNAPSHOT);
-                if (arg == null || arg.equalsIgnoreCase("true")){
+                if (isNullOrEqualsTrue(arg)){
                     setQueryTimestamp(conf);
-                } else if (!arg.equalsIgnoreCase("false")) {
+                } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + SNAPSHOT
                             + ": " + arg);
@@ -1083,7 +1064,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_HOSTS);
-                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                if (isNullOrEqualsTrue(restrict)) {
                     conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
                     HttpChannel.setUseHTTP(true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
@@ -1108,30 +1089,15 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(SSL)) {
                 String arg = cmdline.getOptionValue(SSL);
-                if (arg == null || arg.equalsIgnoreCase("true")){
+                if (isNullOrEqualsTrue(arg)){
                     conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
-                } else if (!arg.equalsIgnoreCase("false")) {
+                } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + SSL
                             + ": " + arg);
                 } 
             }
-            if (cmdline.hasOption(SSL_PROTOCOL)) {
-                String arg = cmdline.getOptionValue(SSL_PROTOCOL);
-                if(arg.equalsIgnoreCase("TLS")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLS");
-                } else if(arg.equalsIgnoreCase("TLSv1")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1");
-                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.1");
-                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.2");
-                } else {
-                    throw new IllegalArgumentException(
-                            "Unrecognized option argument for " + SSL_PROTOCOL
-                                    + ": " + arg);
-                }
-            }
+            applyProtocol(conf, cmdline, SSL_PROTOCOL, MarkLogicConstants.INPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(KEYSTORE_PATH)) {
                 String path = cmdline.getOptionValue(KEYSTORE_PATH);
                 path = new Path(path).toString();
@@ -1157,7 +1123,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(CONTENT_ENCODING)) {
                 String arg = cmdline.getOptionValue(CONTENT_ENCODING).toUpperCase();
-                if("SYSTEM".equals(arg)) {
+                if ("SYSTEM".equals(arg)) {
                     arg = Charset.defaultCharset().name();
                 } else if (!Charset.isSupported(arg)) {
                     throw new IllegalArgumentException(arg
@@ -1396,9 +1362,9 @@ public enum Command implements ConfigConstants {
             
             if (cmdline.hasOption(SNAPSHOT)) {
                 String arg = cmdline.getOptionValue(SNAPSHOT);
-                if (arg == null || arg.equalsIgnoreCase("true")){
+                if (isNullOrEqualsTrue(arg)){
                     setQueryTimestamp(conf);
-                } else if (!arg.equalsIgnoreCase("false")) {
+                } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + SNAPSHOT
                             + ": " + arg);
@@ -1429,7 +1395,7 @@ public enum Command implements ConfigConstants {
             Class<?> outputFormatClass = 
                     conf.getClass(JobContext.OUTPUT_FORMAT_CLASS_ATTR, null);
             if (outputFormatClass == null) {
-                if(cmdline.hasOption(TRANSFORM_MODULE)) {
+                if (cmdline.hasOption(TRANSFORM_MODULE)) {
                     job.setOutputFormatClass(
                             DatabaseTransformOutputFormat.class);
                 } else {
@@ -1480,7 +1446,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(RESTRICT_OUTPUT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_OUTPUT_HOSTS);
-                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                if (isNullOrEqualsTrue(restrict)) {
                     conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
                     HttpChannel.setUseHTTP(true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
@@ -1493,31 +1459,15 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(OUTPUT_SSL)) {
                 String arg = cmdline.getOptionValue(OUTPUT_SSL);
-                if (arg == null || arg.equalsIgnoreCase("true")){
+                if (isNullOrEqualsTrue(arg)){
                     conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
-                } else if (!arg.equalsIgnoreCase("false")) {
+                } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + OUTPUT_SSL
                             + ": " + arg);
                 }
             }
-
-            if (cmdline.hasOption(OUTPUT_SSL_PROTOCOL)) {
-                String arg = cmdline.getOptionValue(OUTPUT_SSL_PROTOCOL);
-                if (arg.equalsIgnoreCase("TLS")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLS");
-                } else if(arg.equalsIgnoreCase("TLSv1")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1");
-                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.1");
-                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
-                    conf.set(MarkLogicConstants.OUTPUT_SSL_PROTOCOL, "TLSv1.2");
-                } else {
-                    throw new IllegalArgumentException(
-                            "Unrecognized option argument for " + 
-                             OUTPUT_SSL_PROTOCOL + ": " + arg);
-                }
-            }
+            applyProtocol(conf, cmdline, OUTPUT_SSL_PROTOCOL, MarkLogicConstants.OUTPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(OUTPUT_KEYSTORE_PATH)) {
                 String path = cmdline.getOptionValue(OUTPUT_KEYSTORE_PATH);
                 path = new Path(path).toString();
@@ -1562,7 +1512,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(RESTRICT_INPUT_HOSTS)) {
                 String restrict = cmdline.getOptionValue(RESTRICT_INPUT_HOSTS);
-                if (restrict == null || "true".equalsIgnoreCase(restrict)) {
+                if (isNullOrEqualsTrue(restrict)) {
                     conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
                     HttpChannel.setUseHTTP(true);
                 } else if (!"false".equalsIgnoreCase(restrict)) {
@@ -1575,31 +1525,15 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(INPUT_SSL)) {
                 String arg = cmdline.getOptionValue(INPUT_SSL);
-                if (arg == null || arg.equalsIgnoreCase("true")){
+                if (isNullOrEqualsTrue(arg)){
                     conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
-                } else if (!arg.equalsIgnoreCase("false")) {
+                } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + INPUT_SSL
                             + ": " + arg);
                 }
             }
-
-            if (cmdline.hasOption(INPUT_SSL_PROTOCOL)) {
-                String arg = cmdline.getOptionValue(INPUT_SSL_PROTOCOL);
-                if (arg.equalsIgnoreCase("TLS")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLS");
-                } else if(arg.equalsIgnoreCase("TLSv1")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1");
-                } else if(arg.equalsIgnoreCase("TLSv1.1")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.1");
-                } else if(arg.equalsIgnoreCase("TLSv1.2")) {
-                    conf.set(MarkLogicConstants.INPUT_SSL_PROTOCOL, "TLSv1.2");
-                } else {
-                    throw new IllegalArgumentException(
-                            "Unrecognized option argument for " + 
-                             INPUT_SSL_PROTOCOL + ": " + arg);
-                }
-            }
+            applyProtocol(conf, cmdline, INPUT_SSL_PROTOCOL, MarkLogicConstants.INPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(INPUT_KEYSTORE_PATH)) {
                 String path = cmdline.getOptionValue(INPUT_KEYSTORE_PATH);
                 path = new Path(path).toString();
@@ -1629,12 +1563,7 @@ public enum Command implements ConfigConstants {
             }
             if (cmdline.hasOption(FAST_LOAD)) {
                 String arg = cmdline.getOptionValue(FAST_LOAD);
-                if (arg == null || arg.equalsIgnoreCase("true")) {
-                    conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, true);
-                } else {
-                    conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, 
-                            false);
-                }
+                conf.setBoolean(MarkLogicConstants.OUTPUT_FAST_LOAD, isNullOrEqualsTrue(arg));
             }
             if (cmdline.hasOption(OUTPUT_DIRECTORY)) {
                 String outDir = cmdline.getOptionValue(OUTPUT_DIRECTORY);
@@ -1644,8 +1573,8 @@ public enum Command implements ConfigConstants {
                 InputType inputType = getInputType(cmdline);   
                 String fileType = cmdline.getOptionValue(INPUT_FILE_TYPE);
                 ContentType contentType = inputType.getContentType(cmdline);
-                if (fileType != null && 
-                    fileType.equalsIgnoreCase(InputType.RDF.toString())) {
+                if (fileType != null &&
+                    InputType.RDF.toString().equalsIgnoreCase(fileType)) {
                     throw new IllegalArgumentException(
                         "Cannot ingest RDF into temporal collection");
                 }
@@ -1799,13 +1728,13 @@ public enum Command implements ConfigConstants {
     private static Random rand = new Random();
     
     public static Command forName(String cmd) {
-        if (cmd.equalsIgnoreCase(IMPORT.name())) {
+        if (IMPORT.name().equalsIgnoreCase(cmd)) {
             return IMPORT;
-        } else if (cmd.equalsIgnoreCase(EXPORT.name())) {
+        } else if (EXPORT.name().equalsIgnoreCase(cmd)) {
             return EXPORT;
-        } else if (cmd.equalsIgnoreCase(COPY.name())) {
+        } else if (COPY.name().equalsIgnoreCase(cmd)) {
             return COPY;
-        } else if (cmd.equalsIgnoreCase(EXTRACT.name())) {
+        } else if (EXTRACT.name().equalsIgnoreCase(cmd)) {
             return EXTRACT;
         } else {
             throw new IllegalArgumentException("Unknown command: " + cmd);
@@ -1815,9 +1744,7 @@ public enum Command implements ConfigConstants {
     protected static boolean isInputCompressed(CommandLine cmdline) {
         if (cmdline.hasOption(INPUT_COMPRESSED)) {
             String isCompress = cmdline.getOptionValue(INPUT_COMPRESSED);
-            if (isCompress == null || isCompress.equalsIgnoreCase("true")) {
-                return true;
-            }
+            return isNullOrEqualsTrue(isCompress);
         }
         return false;
     }
@@ -1825,9 +1752,7 @@ public enum Command implements ConfigConstants {
     protected static boolean isOutputCompressed(CommandLine cmdline) {
         if (cmdline.hasOption(OUTPUT_COMPRESS)) {
             String isCompress = cmdline.getOptionValue(OUTPUT_COMPRESS);
-            if (isCompress == null || isCompress.equalsIgnoreCase("true")) {
-                return true;
-            }
+            return isNullOrEqualsTrue(isCompress);
         }
         return false;
     }
@@ -1840,7 +1765,7 @@ public enum Command implements ConfigConstants {
         String arg = null;
         if (cmdline.hasOption(STREAMING)) {
             arg = cmdline.getOptionValue(STREAMING);
-            if (arg == null || arg.equalsIgnoreCase("true")) {
+            if (isNullOrEqualsTrue(arg)) {
                 InputType inputType = getInputType(cmdline);
                 if (inputType != InputType.DOCUMENTS) {
                     LOG.warn("Streaming option is not applicable to input " +
@@ -2271,9 +2196,9 @@ public enum Command implements ConfigConstants {
     static void applyCopyConfigOptions(Configuration conf, CommandLine cmdline) {
         if (cmdline.hasOption(COPY_COLLECTIONS)) {
             String arg = cmdline.getOptionValue(COPY_COLLECTIONS);
-            if (arg == null || arg.equalsIgnoreCase("true")) {
+            if (isNullOrEqualsTrue(arg)) {
                 conf.setBoolean(MarkLogicConstants.COPY_COLLECTIONS, true);
-            } else if (arg.equalsIgnoreCase("false")) {
+            } else if ("false".equalsIgnoreCase(arg)) {
                 conf.setBoolean(MarkLogicConstants.COPY_COLLECTIONS, false);
             } else {
                 throw new IllegalArgumentException(
@@ -2286,9 +2211,9 @@ public enum Command implements ConfigConstants {
         }
         if (cmdline.hasOption(COPY_PERMISSIONS)) {
             String arg = cmdline.getOptionValue(COPY_PERMISSIONS);
-            if (arg == null || arg.equalsIgnoreCase("true")) {
+            if (isNullOrEqualsTrue(arg)) {
                 conf.setBoolean(CONF_COPY_PERMISSIONS, true);
-            } else if (arg.equalsIgnoreCase("false")) {
+            } else if ("false".equalsIgnoreCase(arg)) {
                 conf.setBoolean(CONF_COPY_PERMISSIONS, false);
             } else {
                 throw new IllegalArgumentException(
@@ -2300,19 +2225,15 @@ public enum Command implements ConfigConstants {
         }
         if (cmdline.hasOption(COPY_PROPERTIES)) {
             String arg = cmdline.getOptionValue(COPY_PROPERTIES);
-            if (arg == null || arg.equalsIgnoreCase("true")) {
-                conf.setBoolean(CONF_COPY_PROPERTIES, true);
-            } else {
-                conf.setBoolean(CONF_COPY_PROPERTIES, false);
-            }
+            conf.setBoolean(CONF_COPY_PROPERTIES, isNullOrEqualsTrue(arg));
         } else {
             conf.set(CONF_COPY_PROPERTIES, DEFAULT_COPY_PROPERTIES);
         }
         if (cmdline.hasOption(COPY_QUALITY)) {
             String arg = cmdline.getOptionValue(COPY_QUALITY);
-            if (arg == null || arg.equalsIgnoreCase("true")) {
+            if (isNullOrEqualsTrue(arg)) {
                 conf.setBoolean(MarkLogicConstants.COPY_QUALITY, true);
-            } else if (arg.equalsIgnoreCase("false")) {
+            } else if ("false".equalsIgnoreCase(arg)) {
                 conf.setBoolean(MarkLogicConstants.COPY_QUALITY, false);
             } else {
                 throw new IllegalArgumentException(
@@ -2324,9 +2245,9 @@ public enum Command implements ConfigConstants {
         }
         if (cmdline.hasOption(COPY_METADATA)) {
             String arg = cmdline.getOptionValue(COPY_METADATA);
-            if (arg == null || arg.equalsIgnoreCase("true")) {
+            if (isNullOrEqualsTrue(arg)) {
                 conf.setBoolean(MarkLogicConstants.COPY_METADATA, true);
-            } else if (arg.equalsIgnoreCase("false")) {
+            } else if ("false".equalsIgnoreCase(arg)) {
                 conf.setBoolean(MarkLogicConstants.COPY_METADATA, false);
             } else {
                 throw new IllegalArgumentException(
@@ -2559,7 +2480,30 @@ public enum Command implements ConfigConstants {
         jobNameBuf.append(++jobid);
         return jobNameBuf.toString();
     }
-    
+
+    static boolean isNullOrEqualsTrue(String arg) {
+        return arg == null || "true".equalsIgnoreCase(arg);
+    }
+
+    static void applyProtocol(Configuration conf, CommandLine cmdline, String option, String protocolName) {
+        if (cmdline.hasOption(option)) {
+            String arg = cmdline.getOptionValue(option);
+            if ("TLS".equalsIgnoreCase(arg)) {
+                conf.set(protocolName, "TLS");
+            } else if ("TLSv1".equalsIgnoreCase(arg)) {
+                conf.set(protocolName, "TLSv1");
+            } else if ("TLSv1.1".equalsIgnoreCase(arg)) {
+                conf.set(protocolName, "TLSv1.1");
+            } else if ("TLSv1.2".equalsIgnoreCase(arg)) {
+                conf.set(protocolName, "TLSv1.2");
+            } else {
+                throw new IllegalArgumentException(
+                    "Unrecognized option argument for " + option
+                        + ": " + arg);
+            }
+        }
+    }
+
     public void printUsage(Command cmd, Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp(HelpFormatter.DEFAULT_WIDTH, 
