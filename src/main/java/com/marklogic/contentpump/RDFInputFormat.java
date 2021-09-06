@@ -54,7 +54,7 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
         } catch (IOException e) {
             throw new IOException("Error creating RecordReader:" + e.getMessage());
         }
-        return new RDFReader<Text>(version,roleMap);
+        return new RDFReader<>(version, roleMap);
     }
     
     protected LinkedMapWritable getRoleMap(TaskAttemptContext context) throws IOException{

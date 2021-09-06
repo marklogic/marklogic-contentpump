@@ -60,8 +60,8 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected String idName;
     protected String currentId = null;
     private boolean keepGoing = true;
-    protected HashMap<String, Stack<String>> nameSpaces = 
-        new HashMap<String, Stack<String>>();
+    protected HashMap<String, Stack<String>> nameSpaces =
+        new HashMap<>();
     protected boolean startOfRecord = true;
     protected boolean hasNext = true;
     private boolean newDoc = false;
@@ -183,7 +183,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 if (nameSpaces.containsKey(nsDeclPrefix)) {
                     nameSpaces.get(nsDeclPrefix).push(nsDeclUri);
                 } else {
-                    Stack<String> s = new Stack<String>();
+                    Stack<String> s = new Stack<>();
                     s.push(nsDeclUri);
                     nameSpaces.put(nsDeclPrefix, s);
                 }

@@ -61,9 +61,9 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
             InputSplit split, TaskAttemptContext context) 
             throws IOException, InterruptedException {
         if (isSplitInput(context.getConfiguration())) {
-            return new SplitDelimitedTextReader<Text>();
+            return new SplitDelimitedTextReader<>();
         } else {
-            return new DelimitedTextReader<Text>();
+            return new DelimitedTextReader<>();
         }
     }
 
@@ -91,11 +91,11 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
             return splits;
         }
         // add header info into splits
-        List<InputSplit> populatedSplits = new ArrayList<InputSplit>();
+        List<InputSplit> populatedSplits = new ArrayList<>();
         LOG.info(splits.size() + " DelimitedSplits generated");
         Configuration conf = job.getConfiguration();
         char delimiter =0;
-        ArrayList<Text> hlist = new ArrayList<Text>();
+        ArrayList<Text> hlist = new ArrayList<>();
         for (InputSplit file: splits) {
             FileSplit fsplit = ((FileSplit)file);
             Path path = fsplit.getPath();

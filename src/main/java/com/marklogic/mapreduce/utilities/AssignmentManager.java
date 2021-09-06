@@ -66,9 +66,9 @@ public class AssignmentManager {
         } else {
             initialized = true;
         }
-        LinkedHashSet<String> forests = new LinkedHashSet<String>();
-        LinkedHashSet<String> updatableForests = new LinkedHashSet<String>();
-        replicaMap = new LinkedHashMap<String, List<ForestHost> >();
+        LinkedHashSet<String> forests = new LinkedHashSet<>();
+        LinkedHashSet<String> updatableForests = new LinkedHashSet<>();
+        replicaMap = new LinkedHashMap<>();
         for (Writable f : map.keySet()) {
             String fId = ((Text) f).toString();
             ForestInfo fs = (ForestInfo) map.get(f);

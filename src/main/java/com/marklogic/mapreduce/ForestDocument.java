@@ -108,7 +108,7 @@ public abstract class ForestDocument implements MarkLogicDocument {
     
     private void setCollections(String docURI, String[] cols) {
         // filter out collections that are illegal
-        List<String> colList = new ArrayList<String>(cols.length);
+        List<String> colList = new ArrayList<>(cols.length);
         for (String col : cols) {
             if (col.isEmpty()) { // Java URI does allow empty string.
                 LOG.info("Empty collection URI is removed for document "
@@ -139,7 +139,7 @@ public abstract class ForestDocument implements MarkLogicDocument {
         int numMetadata = in.readInt();
         if (numMetadata > 0) {
             String[] metaStrings = WritableUtils.readStringArray(in);
-            metadata = new HashMap<String, String>(numMetadata);
+            metadata = new HashMap<>(numMetadata);
             for (int i = 0; i < metaStrings.length - 1; i++) {
                 metadata.put(metaStrings[i], metaStrings[i + 1]);
             }
@@ -203,7 +203,7 @@ public abstract class ForestDocument implements MarkLogicDocument {
             if (cols == null || cols.length == 0) {
                 options.setCollections(collections);
             } else { // merge
-                HashSet<String> colsSet = new HashSet<String>();
+                HashSet<String> colsSet = new HashSet<>();
                 if (cols != null) {
                     for (String col : cols) {
                         colsSet.add(col);

@@ -852,8 +852,8 @@ public class TestDocumentImpl extends AbstractTestCase {
                 		+ forest, stand), false);
             assertEquals(num, trees.size());
 
-        Set<String> expectedAttrSet = new HashSet<String>();
-        Set<String> actualAttrSet = new HashSet<String>();
+        Set<String> expectedAttrSet = new HashSet<>();
+        Set<String> actualAttrSet = new HashSet<>();
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();
@@ -950,8 +950,8 @@ public class TestDocumentImpl extends AbstractTestCase {
         assertEquals(actual.toString(), clone.toString());
         assertEquals(expected.toString(), clone.toString());
 
-        Set<String> expectedAttrSet = new TreeSet<String>();
-        Set<String> actualAttrSet = new TreeSet<String>();
+        Set<String> expectedAttrSet = new TreeSet<>();
+        Set<String> actualAttrSet = new TreeSet<>();
         for (int i = 0; i < trees.size(); i++) {
             ExpandedTree t = trees.get(i);
             String uri = t.getDocumentURI();

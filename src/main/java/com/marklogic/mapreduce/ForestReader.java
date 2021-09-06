@@ -141,7 +141,7 @@ implements MarkLogicConstants {
                 String newDir = dir + "/";
                 it.remove();
                 if (addedDirs == null) {
-                    addedDirs = new ArrayList<String>();
+                    addedDirs = new ArrayList<>();
                 }
                 addedDirs.add(newDir);
             }

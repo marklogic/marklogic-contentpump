@@ -39,7 +39,7 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
     @Override
     public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(
             InputSplit is, TaskAttemptContext tac) {
-        return new AggregateXMLReader<Text>();
+        return new AggregateXMLReader<>();
     }
  
 }
