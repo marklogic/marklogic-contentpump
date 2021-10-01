@@ -29,7 +29,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.mapreduce.MarkLogicConstants;
-import com.marklogic.mapreduce.MarkLogicCounter;
 
 /**
  * RecordReader for CombineDocumentInputFormat.
