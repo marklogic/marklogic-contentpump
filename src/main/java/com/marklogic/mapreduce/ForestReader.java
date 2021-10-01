@@ -215,7 +215,7 @@ implements MarkLogicConstants {
      * Set the result as 
      * DocumentURI key.
      * 
-     * @param uri Source string of document URI.
+     * @param sub Source string of document URI.
      * @param line Line number in the source if applicable; -1 otherwise.
      * @param col Column number in the source if applicable; -1 otherwise.
      * @param reason Reason for skipping.

@@ -60,7 +60,8 @@ public class AuditUtil {
     }
     
     /**
-     * @param job
+     * @param conf
+     * @param jobName
      * @param counters
      * @throws IOException
      */

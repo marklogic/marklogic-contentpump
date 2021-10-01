@@ -41,7 +41,7 @@ public class RestrictedHostsUtil {
     
     /**
      * 
-     * @param hosts
+     * @param restrictHosts
      */
     public RestrictedHostsUtil(String[] restrictHosts) {
         this.restrictHosts = Arrays.asList(restrictHosts);

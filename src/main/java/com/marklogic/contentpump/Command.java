@@ -1869,8 +1869,7 @@ public enum Command implements ConfigConstants {
      * 
      * @param conf
      *            Hadoop configuration
-     * @param options
-     *            options
+     * @param cmdline command line options
      * @return a Hadoop job
      * @throws Exception
      */
@@ -1895,7 +1894,7 @@ public enum Command implements ConfigConstants {
      * 
      * @param job the Hadoop job 
      * @param conf Hadoop configuration
-     * @param CommandLine command line
+     * @param cmdline command line options
      */
     public abstract void setMapperClass(Job job, Configuration conf, 
     		CommandLine cmdline);
