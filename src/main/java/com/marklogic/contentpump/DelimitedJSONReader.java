@@ -229,7 +229,7 @@ public class DelimitedJSONReader<VALUEIN> extends
                         pairValue instanceof ArrayList) {
                         q.add(pairValue);
                     }
-                };
+                }
             }
         }
         return null;

@@ -279,7 +279,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     
     protected void appendCustom(StringBuilder buf) {
         buf.append("()");
-    };
+    }
     
     /**
      * Get input splits.
