@@ -399,7 +399,8 @@ public enum InputType implements ConfigConstants {
     /**
      * Get InputFormat class based on content type.
      * 
-     * @param contentType content type
+     * @param cmdline command line options
+     * @param conf configuration
      * @return InputFormat class
      */
     public abstract Class<? extends FileInputFormat> getInputFormatClass(
@@ -408,7 +409,8 @@ public enum InputType implements ConfigConstants {
     /**
      * Get Mapper class based on content type.
      * 
-     * @param contentType content type
+     * @param cmdline command line options
+     * @param conf configuration
      * @return Mapper class
      */
     public <K1, V1, K2, V2> Class<? extends BaseMapper<K1, V1, K2, V2>> 
