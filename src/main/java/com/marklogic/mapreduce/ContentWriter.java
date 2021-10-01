@@ -29,7 +29,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.AssignmentManager;
@@ -53,7 +52,6 @@ import com.marklogic.xcc.exceptions.ContentInsertException;
 import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
-import com.marklogic.xcc.exceptions.RetryableQueryException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.

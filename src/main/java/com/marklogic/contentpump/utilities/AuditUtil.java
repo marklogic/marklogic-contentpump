@@ -35,11 +35,9 @@ import com.marklogic.xcc.AdhocQuery;
 import com.marklogic.xcc.ContentSource;
 import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
-import com.marklogic.xcc.ValueFactory;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 import com.marklogic.xcc.types.ValueType;
-import com.marklogic.xcc.types.impl.XsBooleanImpl;
 
 /**
  * @author mattsun

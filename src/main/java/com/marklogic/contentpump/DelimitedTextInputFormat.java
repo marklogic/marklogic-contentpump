@@ -39,7 +39,6 @@ import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 
 import com.marklogic.contentpump.utilities.CSVParserFormatter;
 import com.marklogic.contentpump.utilities.DelimitedSplit;
-import com.marklogic.contentpump.utilities.DocBuilder;
 import com.marklogic.contentpump.utilities.EncodingUtil;
 import com.marklogic.mapreduce.DocumentURIWithSourceInfo;
 import com.marklogic.mapreduce.MarkLogicConstants;

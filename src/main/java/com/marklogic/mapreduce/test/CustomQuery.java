@@ -30,7 +30,6 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 import com.marklogic.mapreduce.NodeInputFormat;
-import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicNode;
 import com.marklogic.mapreduce.NodePath;
 import com.marklogic.mapreduce.KeyValueOutputFormat;

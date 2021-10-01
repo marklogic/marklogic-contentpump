@@ -15,26 +15,17 @@
  */
 package com.marklogic.mapreduce;
 
-import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.io.Text;
 
-import com.marklogic.dom.NodeImpl;
-import com.marklogic.dom.TextImpl;
 import com.marklogic.tree.ExpandedTree;
 import com.marklogic.tree.NodeKind;
 import com.marklogic.xcc.Content;
