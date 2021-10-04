@@ -2229,7 +2229,7 @@ public enum Command implements ConfigConstants {
     static void applyModuleConfigOptions(Configuration conf,
         CommandLine cmdline) {
         if (cmdline.hasOption(TRANSFORM_MODULE)) {
-            if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false) == true) {
+            if (conf.getBoolean(MarkLogicConstants.OUTPUT_STREAMING, false)) {
                 throw new UnsupportedOperationException(
                     "Server-side transformation can't work with streaming");
             }

@@ -48,7 +48,7 @@ public class DocumentPathFilter implements PathFilter, Configurable {
     @Override
     public boolean accept(Path inPath) {
         String filename = inPath.getName();
-        if (filename.matches(pattern) == true) {
+        if (filename.matches(pattern)) {
             return true;
         }
         // take care of the case when INPUT_FILE_PATH is a DIR
