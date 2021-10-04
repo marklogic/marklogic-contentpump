@@ -358,11 +358,7 @@ public abstract class NodeImpl implements Node {
     // TODO - override in subclasses?
 
     public boolean isSupported(String feature, String version) {
-        if (feature.equalsIgnoreCase("Core"))
-            return true;
-        if (feature.equalsIgnoreCase("XML"))
-            return true;
-        return false;
+        return "Core".equalsIgnoreCase(feature) || "XML".equalsIgnoreCase(feature);
     }
 
     protected int getNSNodeID(long ordinal, long minOrdinal) {
