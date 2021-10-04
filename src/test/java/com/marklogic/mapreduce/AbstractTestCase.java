@@ -214,7 +214,7 @@ public class AbstractTestCase extends TestCase {
                 continue;
             if (child.getNodeType() == Node.TEXT_NODE) seenText = true;
             if ("#cdata-section".equals(child.getNodeName())) {
-                if(firstSeenCDATA == false) {
+                if(!firstSeenCDATA) {
                     firstSeenCDATA = true;
                     if(seenText) continue;
                     //no text, so cdata itself will become text in xdm

@@ -149,7 +149,7 @@ public class AttributeNodeMapImpl implements NamedNodeMap {
                 Attr attr = null;
                 String name = null;
                 try {
-                    if (prefix != null && "".equals(prefix) == false) {
+                    if (prefix != null && !"".equals(prefix)) {
                         name = "xmlns:" + prefix;
                     } else {
                         name = "xmlns";
