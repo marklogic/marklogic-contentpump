@@ -454,8 +454,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         Map<String, List<List<InputSplit>>> hostForestSplits =
             new HashMap<>();
         boolean tsQuery = (jobConf.get(INPUT_QUERY_TIMESTAMP) != null);
-        for (int i = 0; i < forestSplits.size(); i++) {
-            ForestSplit fsplit = forestSplits.get(i);
+        for (ForestSplit fsplit : forestSplits) {
             List<InputSplit> splits = null;
             if (fsplit.recordCount > 0 || !tsQuery) {
                 String host = fsplit.hostName;
@@ -472,14 +471,14 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
 
             long splitSize = maxSplitSize;
             if (this instanceof KeyValueInputFormat<?, ?> &&
-                    (splitSize & 0x1) != 0) {
+                (splitSize & 0x1) != 0) {
                 splitSize--;
             }
             long remainingCount = fsplit.recordCount;
             // split size zero or negative means unknown split size
             if (remainingCount <= 0) {
                 MarkLogicInputSplit split = new MarkLogicInputSplit(0, 0,
-                        fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                    fsplit.forestId, fsplit.hostName, fsplit.replicas);
                 split.setLastSplit(true);
                 splits.add(split);
                 if (LOG.isDebugEnabled()) {
@@ -491,12 +490,12 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     MarkLogicInputSplit split;
                     if (remainingCount < splitSize) {
                         split = new MarkLogicInputSplit(start, remainingCount,
-                                        fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                            fsplit.forestId, fsplit.hostName, fsplit.replicas);
                         split.setLastSplit(true);
                         remainingCount = 0L;
                     } else {
                         split = new MarkLogicInputSplit(start, splitSize,
-                                        fsplit.forestId, fsplit.hostName, fsplit.replicas);
+                            fsplit.forestId, fsplit.hostName, fsplit.replicas);
                         remainingCount -= splitSize;
                     }
                     splits.add(split);

@@ -155,9 +155,9 @@ public class RDFWritable<VALUE> implements CustomContent {
             out.writeByte(0);
         } else {
             out.writeByte(permissions.length);
-            for(int i=0; i<permissions.length; i++) {
-                Text role = new Text(permissions[i].getRole());
-                Text cap = new Text(permissions[i].getCapability().toString());
+            for (ContentPermission permission : permissions) {
+                Text role = new Text(permission.getRole());
+                Text cap = new Text(permission.getCapability().toString());
                 role.write(out);
                 cap.write(out);
             }

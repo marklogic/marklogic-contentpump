@@ -88,18 +88,17 @@ implements MarkLogicConstants, Configurable {
             throw new IllegalStateException(OUTPUT_HOST +
                     " is not specified.");
         }
-        for (int i = 0; i < hosts.length; i++) {
+        for (String host : hosts) {
             try {
                 ContentSource cs = InternalUtilities.getOutputContentSource(conf,
-                        hosts[i]);
-                ((LocalJob)context).getThreadManager().queryServerMaxThreads(cs);
+                    host);
+                ((LocalJob) context).getThreadManager().queryServerMaxThreads(cs);
                 checkOutputSpecs(conf, cs, context);
                 return;
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 if (ex.getCause() instanceof ServerConnectionException) {
-                    LOG.warn("Unable to connect to " + hosts[i]
-                            + " to query destination information");
+                    LOG.warn("Unable to connect to " + host
+                        + " to query destination information");
                     if (LOG.isDebugEnabled()) {
                         LOG.debug(ex);
                     }
