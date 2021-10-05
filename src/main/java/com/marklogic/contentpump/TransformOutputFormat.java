@@ -131,7 +131,7 @@ public class TransformOutputFormat<VALUEOUT> extends
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         getMimetypesMap();
         // construct the ContentWriter
-        return new TransformWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
+        return new TransformWriter<>(conf, sourceMap, fastLoad, am);
     }
 
     @Override

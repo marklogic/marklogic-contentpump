@@ -73,6 +73,6 @@ public abstract class ValueCooccurrences extends CooccurrencesFunction {
         buf.append(",\n");
         // second element name
         getReference2().append(buf);
-        buf.append(",\n");;
+        buf.append(",\n");
     }
  }

@@ -173,7 +173,7 @@ implements MarkLogicConstants, Configurable {
             query.setOptions(options);
             result = session.submitRequest(query);
 
-            ArrayList<Text> hosts = new ArrayList<Text>();
+            ArrayList<Text> hosts = new ArrayList<>();
             while (result.hasNext()) {
                 ResultItem item = result.next();
                 String host = item.asString();

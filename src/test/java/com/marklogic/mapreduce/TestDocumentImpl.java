@@ -836,22 +836,22 @@ public class TestDocumentImpl extends AbstractTestCase {
                 		+ forest, stand), false);
             assertEquals(num, trees.size());
 
-        Set<String> expectedAttrSet = new HashSet<String>();
-        Set<String> actualAttrSet = new HashSet<String>();
-      for (ExpandedTree t : trees) {
-        String uri = t.getDocumentURI();
-        expectedAttrSet.add(uri);
-        actualAttrSet.add(uri);
-        Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        if (doc == null) continue;
-        NodeList children = doc.getChildNodes();
-        walkDOMAttr(children, expectedAttrSet);
-        DocumentImpl d = new DocumentImpl(t, 0);
-        NodeList eChildren = d.getChildNodes();
-        walkDOMAttr(eChildren, actualAttrSet);
-      }
+        Set<String> expectedAttrSet = new HashSet<>();
+        Set<String> actualAttrSet = new HashSet<>();
+        for (ExpandedTree t : trees) {
+            String uri = t.getDocumentURI();
+            expectedAttrSet.add(uri);
+            actualAttrSet.add(uri);
+            Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            if (doc == null) continue;
+            NodeList children = doc.getChildNodes();
+            walkDOMAttr(children, expectedAttrSet);
+            DocumentImpl d = new DocumentImpl(t, 0);
+            NodeList eChildren = d.getChildNodes();
+            walkDOMAttr(eChildren, actualAttrSet);
+        }
         for(String s : expectedAttrSet) {
-            if(actualAttrSet.contains(s) == false && expectedMissingNSDecl.contains(s) == false) {
+            if(!actualAttrSet.contains(s) && !expectedMissingNSDecl.contains(s)) {
                 if (LOG.isDebugEnabled()) 
                     LOG.debug("NOT_FOUND:" + s);
                 assertTrue(actualAttrSet.contains(s));
@@ -931,22 +931,22 @@ public class TestDocumentImpl extends AbstractTestCase {
         assertEquals(actual.toString(), clone.toString());
         assertEquals(expected.toString(), clone.toString());
 
-        Set<String> expectedAttrSet = new TreeSet<String>();
-        Set<String> actualAttrSet = new TreeSet<String>();
-      for (ExpandedTree t : trees) {
-        String uri = t.getDocumentURI();
-        Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
-        if (doc == null)
-          continue;
-        NodeList children = doc.getChildNodes();
-        walkDOMAttr(children, expectedAttrSet);
-        Document clonedDoc = (Document) (new DocumentImpl(t, 0))
-            .cloneNode(true);
-        NodeList eChildren = clonedDoc.getChildNodes();
-        walkDOMAttr(eChildren, actualAttrSet);
-      }
+        Set<String> expectedAttrSet = new TreeSet<>();
+        Set<String> actualAttrSet = new TreeSet<>();
+        for (ExpandedTree t : trees) {
+            String uri = t.getDocumentURI();
+            Document doc = Utils.readXMLasDOMDocument(new File(testData, uri));
+            if (doc == null)
+                continue;
+            NodeList children = doc.getChildNodes();
+            walkDOMAttr(children, expectedAttrSet);
+            Document clonedDoc = (Document) (new DocumentImpl(t, 0))
+                .cloneNode(true);
+            NodeList eChildren = clonedDoc.getChildNodes();
+            walkDOMAttr(eChildren, actualAttrSet);
+        }
         for (String s : expectedAttrSet) {
-            if(actualAttrSet.contains(s) == false && expectedMissingNSDecl.contains(s) == false) {
+            if(!actualAttrSet.contains(s) && !expectedMissingNSDecl.contains(s)) {
                 if (LOG.isDebugEnabled()) 
                     LOG.debug("NOT_FOUND:" + s);
                 assertTrue(actualAttrSet.contains(s));

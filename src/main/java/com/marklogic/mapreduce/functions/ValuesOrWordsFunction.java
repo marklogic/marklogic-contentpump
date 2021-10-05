@@ -101,7 +101,7 @@ public abstract class ValuesOrWordsFunction extends LexiconFunction {
     
     public static void main(String[] args) {
         Words wordsFunc = new WordsFunction();
-        Collection<String> nsbindings = new ArrayList<String>();
+        Collection<String> nsbindings = new ArrayList<>();
         for (String arg : args) {
             nsbindings.add(arg);
         }

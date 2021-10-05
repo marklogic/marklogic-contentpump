@@ -39,7 +39,7 @@ FileAndDirectoryInputFormat<DocumentURIWithSourceInfo, Text> {
     public RecordReader<DocumentURIWithSourceInfo, Text> createRecordReader(
             InputSplit split, TaskAttemptContext context) 
             throws IOException, InterruptedException {
-        return new DelimitedJSONReader<Text>();
+        return new DelimitedJSONReader<>();
     }
 
 }

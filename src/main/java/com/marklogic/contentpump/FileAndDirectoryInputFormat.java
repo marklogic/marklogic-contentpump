@@ -70,7 +70,7 @@ FileInputFormat<K, V> {
     
     @Override
     public List<InputSplit> getSplits(JobContext job) throws IOException {
-        List<InputSplit> splits = new ArrayList<InputSplit>();
+        List<InputSplit> splits = new ArrayList<>();
         Configuration conf = job.getConfiguration();
         try {
             List<FileStatus> files = listStatus(job);
@@ -132,7 +132,7 @@ FileInputFormat<K, V> {
         }
         
         PathFilter jobFilter = getInputPathFilter(job);
-        List<PathFilter> filters = new ArrayList<PathFilter>();
+        List<PathFilter> filters = new ArrayList<>();
         filters.add(hiddenFileFilter);
         if (jobFilter != null) {
             filters.add(jobFilter);
@@ -204,7 +204,7 @@ FileInputFormat<K, V> {
 
         // creates a MultiPathFilter with the hiddenFileFilter and the
         // user provided one (if any).
-        List<PathFilter> filters = new ArrayList<PathFilter>();
+        List<PathFilter> filters = new ArrayList<>();
         filters.add(hiddenFileFilter);
         PathFilter jobFilter = getInputPathFilter(job);
         if (jobFilter != null) {
@@ -220,8 +220,8 @@ FileInputFormat<K, V> {
 
     private List<FileStatus> simpleListStatus(JobContext job, Path[] dirs,
             PathFilter inputFilter, boolean recursive) throws IOException {
-        List<FileStatus> result = new ArrayList<FileStatus>();
-        List<IOException> errors = new ArrayList<IOException>();
+        List<FileStatus> result = new ArrayList<>();
+        List<IOException> errors = new ArrayList<>();
         Configuration conf = job.getConfiguration();
         for (Path p : dirs) {
             FileSystem fs = p.getFileSystem(conf);

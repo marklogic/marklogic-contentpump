@@ -27,7 +27,7 @@ public class SimpleSequenceFileLargeBinaryCreator {
         Path path = new Path(uri);
         SequenceFile.Writer writer = null;
         SimpleSequenceFileKey key = new SimpleSequenceFileKey();
-        SimpleSequenceFileValue<BytesWritable> value = new SimpleSequenceFileValue<BytesWritable>();
+        SimpleSequenceFileValue<BytesWritable> value = new SimpleSequenceFileValue<>();
         try {
             BytesWritable bw = new BytesWritable();
             Path file = new Path(binaryfile);

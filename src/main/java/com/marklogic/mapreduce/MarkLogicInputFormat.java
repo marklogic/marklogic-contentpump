@@ -34,7 +34,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.util.ReflectionUtils;
 
-import com.marklogic.http.HttpChannel;
 import com.marklogic.mapreduce.functions.LexiconFunction;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.mapreduce.utilities.RestrictedHostsUtil;
@@ -232,7 +231,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             String forest = "";
             String hostName = "";
             HashMap<String, List<ForestHost> > 
-                forestHostMap = new HashMap<String, List<ForestHost> >();
+                forestHostMap = new HashMap<>();
             while (result.hasNext()) {
                 ResultItem item = result.next();
                 if (ItemType.XS_INTEGER == item.getItemType()) {
@@ -246,7 +245,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     item = result.next();
                     hostName = item.asString();
 
-                    List<ForestHost> replicas = new ArrayList<ForestHost>();
+                    List<ForestHost> replicas = new ArrayList<>();
                     String replicaForest = "";
                     String replicaHost = "";
                     while (result.hasNext()) {
@@ -280,7 +279,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
     
     protected void appendCustom(StringBuilder buf) {
         buf.append("()");
-    };
+    }
     
     /**
      * Get input splits.
@@ -356,7 +355,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
 
         // fetch data from server
-        List<ForestSplit> forestSplits = new ArrayList<ForestSplit>();
+        List<ForestSplit> forestSplits = new ArrayList<>();
         Session session = null;
         ResultSequence result = null;            
         
@@ -413,7 +412,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 }
                 List<String> ruleUris = null;
                 if (redactionRuleCol != null) {
-                    ruleUris = new ArrayList<String>();
+                    ruleUris = new ArrayList<>();
                 }
                 getForestSplits(jobContext, result, forestSplits,
                         ruleUris, inputHosts, getReplica);
@@ -448,12 +447,12 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         
         // create a split list per forest per host
         if (forestSplits == null || forestSplits.isEmpty()) {
-            return new ArrayList<InputSplit>();
+            return new ArrayList<>();
         }
         
         // construct a list of splits per forest per host
-        Map<String, List<List<InputSplit>>> hostForestSplits = 
-            new HashMap<String, List<List<InputSplit>>>();
+        Map<String, List<List<InputSplit>>> hostForestSplits =
+            new HashMap<>();
         boolean tsQuery = (jobConf.get(INPUT_QUERY_TIMESTAMP) != null);
         for (ForestSplit fsplit : forestSplits) {
             List<InputSplit> splits = null;
@@ -461,10 +460,10 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 String host = fsplit.hostName;
                 List<List<InputSplit>> splitLists = hostForestSplits.get(host);
                 if (splitLists == null) {
-                    splitLists = new ArrayList<List<InputSplit>>();
+                    splitLists = new ArrayList<>();
                     hostForestSplits.put(host, splitLists);
                 }
-                splits = new ArrayList<InputSplit>();
+                splits = new ArrayList<>();
                 splitLists.add(splits);
             } else {
                 continue;
@@ -519,7 +518,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             if (splitLists.size() == 1) {
                 hostSplits[i++] = splitLists.get(0);
             } else {
-                hostSplits[i] = new ArrayList<InputSplit>();
+                hostSplits[i] = new ArrayList<>();
                 boolean more = true;
                 for (int j = 0; more; j++) {
                     more = false;
@@ -535,7 +534,7 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
         }
         
         // mix hostSplits into one
-        List<InputSplit> splitList = new ArrayList<InputSplit>();
+        List<InputSplit> splitList = new ArrayList<>();
         boolean more = true;
         for (int j = 0; more; j++) {
             more = false;
