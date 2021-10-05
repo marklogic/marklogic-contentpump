@@ -56,7 +56,7 @@ public class JSONDocBuilder extends DocBuilder {
     public void newDoc() throws IOException {
         sb = new StringBuilder();
         baos = new ByteArrayOutputStream();
-        generator = jsonFactory.createJsonGenerator(baos);
+        generator = jsonFactory.createGenerator(baos);
         generator.writeStartObject(); 
     }
 
