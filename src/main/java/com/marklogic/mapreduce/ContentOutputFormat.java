@@ -278,8 +278,8 @@ public class ContentOutputFormat<VALUEOUT> extends
     protected Map<String, ContentSource> getSourceMap(boolean fastLoad, 
     		TaskAttemptContext context) throws IOException{
         Configuration conf = context.getConfiguration();
-        Map<String, ContentSource> sourceMap = 
-            new LinkedHashMap<String, ContentSource>();
+        Map<String, ContentSource> sourceMap =
+            new LinkedHashMap<>();
         if (fastLoad) {
             LinkedMapWritable forestStatusMap = getForestStatusMap(conf);
             String[] outputHosts = conf.getStrings(OUTPUT_HOST);
@@ -347,8 +347,8 @@ public class ContentOutputFormat<VALUEOUT> extends
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the ContentWriter
-        return new ContentWriter<VALUEOUT>(conf, sourceMap, fastLoad, 
-                am);
+        return new ContentWriter<>(conf, sourceMap, fastLoad,
+            am);
     }
 
     protected LinkedMapWritable getForestStatusMap(Configuration conf) 
@@ -551,7 +551,7 @@ public class ContentOutputFormat<VALUEOUT> extends
 
             LinkedMapWritable forestStatusMap = new LinkedMapWritable();
             Text forest = null;
-            List<ForestHost> replicas = new ArrayList<ForestHost>();
+            List<ForestHost> replicas = new ArrayList<>();
             String outputHost = cs.getConnectionProvider().getHostName();
             boolean local = MODE_LOCAL.equals(conf.get(EXECUTION_MODE));
             

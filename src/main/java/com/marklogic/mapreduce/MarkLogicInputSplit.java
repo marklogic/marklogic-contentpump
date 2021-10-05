@@ -133,7 +133,7 @@ public class MarkLogicInputSplit extends InputSplit implements Writable {
         hostName[0] = Text.readString(in);
         isLastSplit = in.readBoolean();
         int replicaSize = in.readInt();
-        replicas = new ArrayList<ForestHost>();
+        replicas = new ArrayList<>();
         for (int i=0; i < replicaSize; i++) {
             String curForest = Text.readString(in);
             String curHost = Text.readString(in);

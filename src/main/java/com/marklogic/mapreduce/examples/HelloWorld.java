@@ -102,7 +102,7 @@ public class HelloWorld {
                 Context context
                 ) throws IOException, InterruptedException {        
             // Sort the words
-            ArrayList<String> words = new ArrayList<String>();
+            ArrayList<String> words = new ArrayList<>();
             for (Text val : values) {
                 words.add(val.toString());
             }

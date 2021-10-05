@@ -61,7 +61,7 @@ public class PermissionUtil {
                 ContentCapability capability = getCapbility(perm);
                 if (capability != null) {
                     if (permissions == null) {
-                        permissions = new ArrayList<ContentPermission>();
+                        permissions = new ArrayList<>();
                     }
                     permissions
                         .add(new ContentPermission(capability, roleName));
@@ -74,7 +74,7 @@ public class PermissionUtil {
     
     
     public static List<ContentPermission> getDefaultPermissions(Configuration conf, LinkedMapWritable roleMap) throws IOException {
-        ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+        ArrayList<ContentPermission> perms = new ArrayList<>();
         Session session = null;
         ResultSequence result = null;
         ContentSource cs;
