@@ -55,7 +55,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
     // A global flag to indicate that JVM is exiting
     public static volatile boolean shutdown = false;
     // Job state in local mode
-    static List<Job> jobs = new LinkedList<Job>();
+    static List<Job> jobs = new LinkedList<>();
     static {
         // register a shutdown hook
         Runtime.getRuntime().addShutdownHook(new ShutdownHook());
@@ -420,7 +420,7 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
             try {
                 synchronized (ContentPump.class) {
                     boolean needToWait = false;
-                    List<Job> jobList = new LinkedList<Job>();
+                    List<Job> jobList = new LinkedList<>();
                     for (Job job : jobs) {
                         if (job instanceof LocalJob) {
                             LOG.info("Aborting job " + job.getJobName());

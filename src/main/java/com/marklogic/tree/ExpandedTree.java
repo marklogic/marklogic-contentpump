@@ -201,7 +201,7 @@ public class ExpandedTree implements Writable {
     
     public Map<String, String> getMetadata() {
         if (numMetadata == 0) return null;
-        Map<String, String> metaMap = new HashMap<String, String>(numMetadata);
+        Map<String, String> metaMap = new HashMap<>(numMetadata);
         for (int i = 0; i < numMetadata; i++) {
             metaMap.put(atomString(metaKeys[i]), getText(metaVals[i]));
         }

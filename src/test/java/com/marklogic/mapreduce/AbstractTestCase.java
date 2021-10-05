@@ -28,7 +28,7 @@ public class AbstractTestCase extends TestCase {
     String forest;
     String stand;
     int num;
-    static Set<String> expectedMissingNSDecl = new HashSet<String>();
+    static Set<String> expectedMissingNSDecl = new HashSet<>();
     static {
         expectedMissingNSDecl.add("acronym@xmlns=#parent is null#nextSibling is null");
     }
@@ -43,7 +43,7 @@ public class AbstractTestCase extends TestCase {
     // requires to return a collection of arrays
     @Parameters
     public static Collection data() {
-        List<ForestData[]> dataList = new ArrayList<ForestData[]>();
+        List<ForestData[]> dataList = new ArrayList<>();
         ForestData[] ds1 = { new ForestData("src/test/resources/ns-prefix",
             "ns-prefix-forest", "00000001", 23) };
         dataList.add(ds1);
@@ -98,7 +98,7 @@ public class AbstractTestCase extends TestCase {
                     LOG.debug(n.getNodeName());
             }
             if (n.hasAttributes()) {
-                ArrayList<String> list = new ArrayList<String>();
+                ArrayList<String> list = new ArrayList<>();
                 sb.append(n.getNodeName()).append("#\n");
                 NamedNodeMap nnMap = n.getAttributes();
                 for (int j = 0; j < nnMap.getLength(); j++) {

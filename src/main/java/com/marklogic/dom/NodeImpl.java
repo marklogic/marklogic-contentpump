@@ -460,12 +460,12 @@ public abstract class NodeImpl implements Node {
 		final Node thisNode = this;
 		
 		return new NodeList() {
-			protected ArrayList<Node> elementList = new ArrayList<Node>();
+			protected ArrayList<Node> elementList = new ArrayList<>();
 			protected boolean done = false;
 			
 			protected void init() {
 				if (done) return;
-				Stack<Node> childrenStack = new Stack<Node>();
+				Stack<Node> childrenStack = new Stack<>();
 				childrenStack.push(thisNode);
 				boolean root = true;
 				while ( !childrenStack.isEmpty()) {

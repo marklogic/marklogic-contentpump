@@ -34,8 +34,8 @@ public class SimpleSequenceFileCompressCreator {
 
         try (BufferedReader buffer = 
                  new BufferedReader(new FileReader(filePath))) {
-            SimpleSequenceFileValue<Text> value = 
-                 new SimpleSequenceFileValue<Text>();
+            SimpleSequenceFileValue<Text> value =
+                new SimpleSequenceFileValue<>();
             writer = SequenceFile.createWriter(fs, conf, path, key.getClass(),
                 value.getClass(), CompressionType.RECORD, new GzipCodec());
             while ((line = buffer.readLine()) != null) {
