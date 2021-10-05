@@ -231,8 +231,7 @@ public class ThreadManager implements ConfigConstants {
     public int getActiveTaskCounts() {
         int count = 0;
         synchronized (taskList) {
-            for (int i = 0; i < taskList.size(); i++) {
-                LocalMapTask task = taskList.get(i);
+            for (LocalMapTask task : taskList) {
                 if (task.isTaskDone()) {
                     if (task.getThreadCount() > 0) {
                         idleServerThreads += task.getThreadCount();
@@ -559,10 +558,10 @@ public class ThreadManager implements ConfigConstants {
                     }
                 }
                 String[] hosts = conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
-                for (int i = 0; i < hosts.length; i++) {
+                for (String host : hosts) {
                     try {
                         ContentSource cs = InternalUtilities.
-                            getOutputContentSource(conf, hosts[i]);
+                            getOutputContentSource(conf, host);
                         queryServerMaxThreads(cs);
                         if (LOG.isDebugEnabled()) {
                             LOG.debug("New available server threads: " +
@@ -572,7 +571,7 @@ public class ThreadManager implements ConfigConstants {
                         break;
                     } catch (Exception e) {
                         if (e.getCause() instanceof ServerConnectionException) {
-                            LOG.warn("Unable to connect to " + hosts[i]
+                            LOG.warn("Unable to connect to " + host
                                 + " to query available server max threads.");
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug(e);

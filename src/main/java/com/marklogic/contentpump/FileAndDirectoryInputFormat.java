@@ -223,8 +223,7 @@ FileInputFormat<K, V> {
         List<FileStatus> result = new ArrayList<>();
         List<IOException> errors = new ArrayList<>();
         Configuration conf = job.getConfiguration();
-        for (int i=0; i < dirs.length; ++i) {
-            Path p = dirs[i];
+        for (Path p : dirs) {
             FileSystem fs = p.getFileSystem(conf);
             FileStatus[] matches;
             try {
@@ -238,14 +237,14 @@ FileInputFormat<K, V> {
             } else if (matches.length == 0) {
                 errors.add(new IOException("Input Pattern " + p + " matches 0 files"));
             } else {
-                for (FileStatus globStat: matches) {
+                for (FileStatus globStat : matches) {
                     if (globStat.isDirectory()) {
                         FileStatus[] files = fs.listStatus(globStat.getPath(), inputFilter);
-                        for (int j = 0; j < files.length; j++) {
-                            if (recursive && files[j].isDirectory()) {
-                                simpleAddInputPathRecursively(result, fs, files[j].getPath(),inputFilter);
+                        for (FileStatus file : files) {
+                            if (recursive && file.isDirectory()) {
+                                simpleAddInputPathRecursively(result, fs, file.getPath(), inputFilter);
                             } else {
-                                result.add(files[j]);
+                                result.add(file);
                             }
                         }
                     } else {
@@ -265,12 +264,12 @@ FileInputFormat<K, V> {
             FileSystem fs, Path path, PathFilter inputFilter)
                     throws IOException {
         FileStatus[] files = fs.listStatus(path, inputFilter);
-        for (int j = 0; j < files.length; j++) {
-            if (files[j].isDirectory()) {
-                simpleAddInputPathRecursively(result, fs, files[j].getPath(),
-                        inputFilter);
+        for (FileStatus file : files) {
+            if (file.isDirectory()) {
+                simpleAddInputPathRecursively(result, fs, file.getPath(),
+                    inputFilter);
             } else {
-                result.add(files[j]);
+                result.add(file);
             }
         }
     }

@@ -460,17 +460,17 @@ public class ExpandedTree implements Writable {
         }
         if (atomData != null && atomData.length > 0) {
             out.writeInt(atomData.length);
-            for (int i = 0; i < atomData.length; i++) {
-                out.writeByte(atomData[i]);
-            }
+          for (byte atomDatum : atomData) {
+            out.writeByte(atomDatum);
+          }
         } else {
             out.writeInt(0);
         }
         out.writeInt(atomLimit);
         if (atomIndex != null && atomIndex.length > 0) {
-            for (int i = 0; i < atomIndex.length; i++) {
-                out.writeInt(atomIndex[i]);
-            }
+          for (int index : atomIndex) {
+            out.writeInt(index);
+          }
         }
         if (nodeNameNameAtom != null && nodeNameNameAtom.length > 0) {
             out.writeInt(nodeNameNameAtom.length);
@@ -577,9 +577,9 @@ public class ExpandedTree implements Writable {
         if (doubles != null &&
             doubles.length > 0) {
             out.writeInt(doubles.length);
-            for (int i = 0; i < doubles.length; i++) {
-                out.writeDouble(doubles[i]);
-            }
+          for (double aDouble : doubles) {
+            out.writeDouble(aDouble);
+          }
         } else {
             out.writeInt(0);
         }

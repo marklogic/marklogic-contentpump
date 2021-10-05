@@ -141,8 +141,8 @@ implements MarkLogicConstants, ConfigConstants, InternalConstants {
                     LOG.trace(t);
                     byte[] bytes = content.getContentAsByteArray();
                     StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < bytes.length; i++) {
-                        sb.append(Byte.toString(bytes[i]));
+                    for (byte aByte : bytes) {
+                        sb.append(Byte.toString(aByte));
                         sb.append(" ");
                     }
                     LOG.trace(sb);

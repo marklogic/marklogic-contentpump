@@ -300,22 +300,21 @@ public class ContentOutputFormat<VALUEOUT> extends
             for (Writable forestId : forestStatusMap.keySet()) {
                 ForestInfo fs = (ForestInfo)forestStatusMap.get(forestId);
                 List<ForestHost> forestHostList = fs.getReplicas();
-                for (int i = 0; i < forestHostList.size(); i++) {
-                    ForestHost fh = forestHostList.get(i);
+                for (ForestHost fh : forestHostList) {
                     String forestIdStr = fh.getForest();
                     String forestHost = fh.getHostName();
-                    String targetHost = restrictHosts?
-                            rhUtil.getNextHost(forestHost):forestHost;
+                    String targetHost = restrictHosts ?
+                        rhUtil.getNextHost(forestHost) : forestHost;
                     if (fs.getUpdatable()) {
                         try {
                             ContentSource cs = sourceMap.get(targetHost);
                             if (cs == null) {
-                              cs = InternalUtilities.getOutputContentSource(
-                                conf, targetHost);
-                              sourceMap.put(targetHost, cs);
+                                cs = InternalUtilities.getOutputContentSource(
+                                    conf, targetHost);
+                                sourceMap.put(targetHost, cs);
                             }
                             if (restrictHosts) {
-                              sourceMap.put(forestHost, cs);
+                                sourceMap.put(forestHost, cs);
                             }
                         } catch (XccConfigException e) {
                             throw new IOException(e);
