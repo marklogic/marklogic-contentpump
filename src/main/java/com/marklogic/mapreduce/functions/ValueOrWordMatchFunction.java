@@ -99,7 +99,7 @@ public abstract class ValueOrWordMatchFunction extends LexiconFunction {
     
     public static void main(String[] args) { 
         UriMatch uriMatchFunc = new UriMatch();
-        Collection<String> nsbindings = new ArrayList<String>();
+        Collection<String> nsbindings = new ArrayList<>();
         System.out.println(uriMatchFunc.getInputQuery(nsbindings, 1, 1000));
     }
 }

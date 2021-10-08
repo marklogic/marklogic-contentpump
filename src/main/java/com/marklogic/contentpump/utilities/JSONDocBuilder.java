@@ -47,7 +47,7 @@ public class JSONDocBuilder extends DocBuilder {
     public void init(Configuration conf) {
         jsonFactory = new JsonFactory();
         
-    };
+    }
     
     /* 
      * @see com.marklogic.contentpump.DocBuilder#newDoc()
@@ -56,7 +56,7 @@ public class JSONDocBuilder extends DocBuilder {
     public void newDoc() throws IOException {
         sb = new StringBuilder();
         baos = new ByteArrayOutputStream();
-        generator = jsonFactory.createJsonGenerator(baos);
+        generator = jsonFactory.createGenerator(baos);
         generator.writeStartObject(); 
     }
 
@@ -105,7 +105,7 @@ public class JSONDocBuilder extends DocBuilder {
             throw new IOException("Fields not defined");
         }
         
-        datatypeMap = new HashMap<String,ColumnDataType>();
+        datatypeMap = new HashMap<>();
         for (String s: fields) {
             datatypeMap.put(s, ColumnDataType.STRING);
         }

@@ -42,7 +42,7 @@ public class ForestInfo implements Writable {
         this.hostName = hostName;
         this.frangmentCount = fmCount;
         this.updatable = updatable;
-        this.replicas = new ArrayList<ForestHost>();
+        this.replicas = new ArrayList<>();
         int start = 0;
         int len = replicas.size();
         /* find the current open forest 
@@ -85,7 +85,7 @@ public class ForestInfo implements Writable {
         frangmentCount = in.readLong();
         updatable = in.readBoolean();
         int replicaSize = in.readInt();
-        replicas = new ArrayList<ForestHost>();
+        replicas = new ArrayList<>();
         for (int i=0; i < replicaSize; i++) {
             String curForest = Text.readString(in);
             String curHost = Text.readString(in);
@@ -100,9 +100,9 @@ public class ForestInfo implements Writable {
         out.writeBoolean(updatable);
         int replicaSize = replicas.size();
         out.writeInt(replicaSize);
-        for (int i=0; i < replicaSize; i++) {
-            Text.writeString(out, replicas.get(i).getForest());
-            Text.writeString(out, replicas.get(i).getHostName());
+        for (ForestHost replica : replicas) {
+            Text.writeString(out, replica.getForest());
+            Text.writeString(out, replica.getHostName());
         }
     }
 

@@ -191,7 +191,7 @@ public class DelimitedJSONReader<VALUEIN> extends
     protected String findUriInJSON(String line) 
     throws JsonParseException, IOException {
         /* Breadth-First-Search */
-        Queue<Object> q = new LinkedList<Object>();
+        Queue<Object> q = new LinkedList<>();
         Object root = mapper.readValue(line.getBytes(), Object.class);
         if (root instanceof Map || root instanceof ArrayList) {
             q.add(root);
@@ -229,7 +229,7 @@ public class DelimitedJSONReader<VALUEIN> extends
                         pairValue instanceof ArrayList) {
                         q.add(pairValue);
                     }
-                };
+                }
             }
         }
         return null;

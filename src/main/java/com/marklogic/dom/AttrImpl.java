@@ -120,7 +120,7 @@ public class AttrImpl extends NodeImpl implements Attr {
         int parentNodeRepID = tree.nodeParentNodeRepID[node];
         if (parentNodeRepID == -1)
             parentNodeRepID = node;
-        ArrayList<Integer> ubp = new ArrayList<Integer>();
+        ArrayList<Integer> ubp = new ArrayList<>();
         long sum_ordinal = tree.ordinal + tree.nodeOrdinal[parentNodeRepID];
         for (int ns = getNSNodeID(sum_ordinal); ns >= 0; ns = nextNSNodeID(ns,
             0)) {

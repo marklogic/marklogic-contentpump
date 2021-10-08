@@ -63,8 +63,8 @@ public abstract class CooccurrencesFunction extends LexiconFunction {
         buf.append(",\"map\"");
         String[] userOptions = getUserDefinedOptions();
         if (userOptions != null) {
-            for (int i = 0; i < userOptions.length; i++) {
-                buf.append(",\"").append(userOptions[i]).append("\"");
+            for (String userOption : userOptions) {
+                buf.append(",\"").append(userOption).append("\"");
             }          
         }
         buf.append("),\n");

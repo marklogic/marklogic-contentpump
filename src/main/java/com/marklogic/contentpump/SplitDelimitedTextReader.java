@@ -17,7 +17,6 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -179,7 +178,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                 break;
             }
         }
-        if (found == false) {
+        if (!found) {
             // idname doesn't match any columns
             LOG.error("Skipped file: " + file.toUri()
                     + ", reason: " + URI_ID + " " + uriName

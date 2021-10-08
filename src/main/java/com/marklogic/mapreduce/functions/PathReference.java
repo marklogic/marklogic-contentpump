@@ -31,8 +31,8 @@ public abstract class PathReference extends Reference {
         String[] userOptions = getUserDefinedOptions();
         if (userOptions != null) {
             buf.append(",");
-            for (int i = 0; i < userOptions.length; i++) {
-                buf.append(",\"").append(userOptions[i]).append("\"");
+            for (String userOption : userOptions) {
+                buf.append(",\"").append(userOption).append("\"");
             }          
         }
         buf.append(")");    

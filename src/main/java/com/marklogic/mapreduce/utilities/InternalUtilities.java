@@ -134,7 +134,7 @@ public class InternalUtilities implements MarkLogicConstants {
                         db, getInputSslOptions(conf));
         }
         return ContentSourceFactory.newContentSource(host, portInt, 
-                user, password, db);
+                user, password.toCharArray(), db);
     }
     
     private static SslConfigOptions getInputSslOptions(Configuration conf) throws XccConfigException {
@@ -374,7 +374,7 @@ public class InternalUtilities implements MarkLogicConstants {
   
         // construct content source
         contentSource = ContentSourceFactory.newContentSource(
-                host, port, user, password, db, options);        
+                host, port, user, password.toCharArray(), db, options);
  
         return contentSource;
     }
@@ -472,7 +472,7 @@ public class InternalUtilities implements MarkLogicConstants {
                         db, getOutputSslOptions(conf));
         }
         return ContentSourceFactory.newContentSource(hostName, portInt, 
-                user, password, db);
+                user, password.toCharArray(), db);
     }
     
     /**
@@ -580,8 +580,7 @@ public class InternalUtilities implements MarkLogicConstants {
     public static void verifyHosts(String hostList, String portStr) {
         String[] hosts = hostList.split(",");
         int port = Integer.parseInt(portStr);
-        for (int i = 0; i < hosts.length; i++) {
-            String host = hosts[i];
+        for (String host : hosts) {
             InetSocketAddress address = new InetSocketAddress(host, port);
             if (address.isUnresolved()) {
                 throw new IllegalArgumentException("host " + host + " is not resolvable");

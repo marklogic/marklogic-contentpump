@@ -44,7 +44,7 @@ public class SimpleSequenceFileCreator {
 
         try (BufferedReader buffer = new BufferedReader(new FileReader(filePath))) {
             String line = null;
-            SimpleSequenceFileValue<Text> value = new SimpleSequenceFileValue<Text>();
+            SimpleSequenceFileValue<Text> value = new SimpleSequenceFileValue<>();
             writer = SequenceFile.createWriter(fs, conf, path, key.getClass(),
                 value.getClass());
             while ((line = buffer.readLine()) != null) {

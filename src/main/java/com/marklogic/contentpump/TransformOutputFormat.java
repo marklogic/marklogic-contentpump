@@ -78,9 +78,9 @@ public class TransformOutputFormat<VALUEOUT> extends
         Session session = null;
         ResultSequence result = null;
 
-        for (int i = 0; i < hosts.length; i++) {
+        for (String value : hosts) {
             try {
-                String host = hosts[i];
+                String host = value;
                 ContentSource cs = InternalUtilities.getOutputContentSource(conf,
                     host);
                 session = cs.newSession();
@@ -105,8 +105,8 @@ public class TransformOutputFormat<VALUEOUT> extends
                 return mimetypeMap;
             } catch (Exception e) {
                 if (e.getCause() instanceof ServerConnectionException) {
-                    LOG.warn("Unable to connect to " + hosts[i]
-                            + " to query destination information");
+                    LOG.warn("Unable to connect to " + value
+                        + " to query destination information");
                     continue;
                 }
                 LOG.error(e.getMessage(), e);
@@ -131,7 +131,7 @@ public class TransformOutputFormat<VALUEOUT> extends
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         getMimetypesMap();
         // construct the ContentWriter
-        return new TransformWriter<VALUEOUT>(conf, sourceMap, fastLoad, am);
+        return new TransformWriter<>(conf, sourceMap, fastLoad, am);
     }
 
     @Override

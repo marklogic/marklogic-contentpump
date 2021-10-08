@@ -149,8 +149,8 @@ public class LocalJobRunner implements ConfigConstants {
         for (int i = 0; i < array.length && !ContentPump.shutdown; i++) {        
             InputSplit split = array[i];
             if (pool != null) {
-                LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE> task = 
-                    new LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE>(
+                LocalMapTask<INKEY, INVALUE, OUTKEY, OUTVALUE> task =
+                    new LocalMapTask<>(
                         inputFormat, outputFormat, conf, i, split, reporter,
                         progress[i]);
                 threadManager.submitTask(task, i, array.length);

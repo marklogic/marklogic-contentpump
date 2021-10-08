@@ -78,7 +78,7 @@ public class RDFWritable<VALUE> implements CustomContent {
         String outputOverrideGraph = conf.get(MarkLogicConstants.OUTPUT_OVERRIDE_GRAPH);
         
         if (collections != null) {
-            List<String> optionList = new ArrayList<String>();
+            List<String> optionList = new ArrayList<>();
             if (graphUri == null) { //no graph specified in quad
                 if( outputGraph != null)//output_graph is set
                     optionList.add(outputGraph.trim()); 
@@ -155,9 +155,9 @@ public class RDFWritable<VALUE> implements CustomContent {
             out.writeByte(0);
         } else {
             out.writeByte(permissions.length);
-            for(int i=0; i<permissions.length; i++) {
-                Text role = new Text(permissions[i].getRole());
-                Text cap = new Text(permissions[i].getCapability().toString());
+            for (ContentPermission permission : permissions) {
+                Text role = new Text(permission.getRole());
+                Text cap = new Text(permission.getCapability().toString());
                 role.write(out);
                 cap.write(out);
             }

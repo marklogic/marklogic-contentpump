@@ -134,7 +134,7 @@ implements WritableComparable<DocumentURI>, Cloneable {
     }
     
     public static void main(String[] args) throws URISyntaxException {
-        HashMap<String, DocumentURI> map = new HashMap<String, DocumentURI>();
+        HashMap<String, DocumentURI> map = new HashMap<>();
         for (String arg : args) {
             URI uri = new URI(null, null, null, 0, arg, null, null);
             System.out.println("URI encoded: " + uri.toString());
