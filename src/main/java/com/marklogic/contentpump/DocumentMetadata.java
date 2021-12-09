@@ -70,7 +70,6 @@ public class DocumentMetadata {
      * @param reader
      */
     public static DocumentMetadata fromXML(Reader reader) {
-        xstream.allowTypes(new Class[] {com.marklogic.contentpump.DocumentMetadata.class});
         return (DocumentMetadata) xstream.fromXML(reader);
     }
 
