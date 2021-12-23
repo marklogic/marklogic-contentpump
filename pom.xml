@@ -91,6 +91,13 @@
           <additionalClasspathElements>
             <additionalClasspathElement>src/conf</additionalClasspathElement>
           </additionalClasspathElements>
+          <!-- Add dependency exclusions to avoid log4j 1.X being called and slf4j multiple
+          binding issues -->
+          <classpathDependencyExcludes>
+            <classpathDependencyExclude>log4j:log4j</classpathDependencyExclude>
+            <classpathDependencyExclude>org.slf4j:slf4j-log4j12</classpathDependencyExclude>
+            <classpathDependencyExclude>ch.qos.logback:logback-classic</classpathDependencyExclude>
+          </classpathDependencyExcludes>
           <skipTests>${skipTests}</skipTests>
           <argline>-DCONTENTPUMP_HOME=${contentpumpHome} -DOUTPUT_PATH=${testOutputPath} -DTEST_DB_PORT=${testDbPort} -DCOPY_DB_PORT=${copyDbPort} -DTEST_DB=${testDb} -DCOPY_DB=${copyDb}</argline>
           <excludes>
@@ -467,12 +474,12 @@
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-databind</artifactId>
+          <artifactId>jackson-core</artifactId>
           <version>2.11.0</version>
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
-          <artifactId>jackson-core</artifactId>
+          <artifactId>jackson-databind</artifactId>
           <version>2.11.0</version>
         </dependency>
         <dependency>
@@ -494,11 +501,6 @@
           <groupId>commons-modeler</groupId>
           <artifactId>commons-modeler</artifactId>
           <version>2.0.1</version>
-        </dependency>
-        <dependency>
-          <groupId>org.apache.avro</groupId>
-          <artifactId>avro-tools</artifactId>
-          <version>1.8.1</version>
         </dependency>
         <dependency>
           <groupId>info.bliki.wiki</groupId>
@@ -534,6 +536,36 @@
           <groupId>org.apache.httpcomponents</groupId>
           <artifactId>httpclient</artifactId>
           <version>4.5.13</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-1.2-api</artifactId>
+          <version>2.17.0</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-api</artifactId>
+          <version>2.17.0</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-core</artifactId>
+          <version>2.17.0</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-jcl</artifactId>
+          <version>2.17.0</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.logging.log4j</groupId>
+          <artifactId>log4j-slf4j-impl</artifactId>
+          <version>2.17.0</version>
+        </dependency>
+        <dependency>
+          <groupId>org.slf4j</groupId>
+          <artifactId>slf4j-api</artifactId>
+          <version>1.7.32</version>
         </dependency>
       <!-- System dependencies-->
       <dependency>
@@ -654,12 +686,12 @@
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
+      <artifactId>jackson-core</artifactId>
       <version>2.11.0</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
+      <artifactId>jackson-databind</artifactId>
       <version>2.11.0</version>
     </dependency>
     <dependency>
@@ -698,11 +730,6 @@
       <version>2.0.1</version>
     </dependency>
     <dependency>
-      <groupId>org.apache.avro</groupId>
-      <artifactId>avro-tools</artifactId>
-      <version>1.8.1</version>
-    </dependency>
-    <dependency>
       <groupId>info.bliki.wiki</groupId>
       <artifactId>bliki-core</artifactId>
       <version>3.1.0</version>
@@ -722,6 +749,37 @@
      <artifactId>httpclient</artifactId>
      <version>4.5.13</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-1.2-api</artifactId>
+      <version>2.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
+      <version>2.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-jcl</artifactId>
+      <version>2.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-slf4j-impl</artifactId>
+      <version>2.17.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.32</version>
+    </dependency>
+
     <!-- System dependencies-->
     <dependency>
       <groupId>org.apache.commons</groupId>
