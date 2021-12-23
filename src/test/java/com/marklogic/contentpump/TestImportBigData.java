@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
@@ -49,7 +50,6 @@ public class TestImportBigData {
     public void testBug35949() throws Exception{
         Callable<Void> callGetSplit = new Callable<Void>() {
             public Void call() throws Exception{
-                SimpleTimeLimiter stl = new SimpleTimeLimiter();
                 Configuration conf = new Configuration();
                 conf.set("mapreduce.input.fileinputformat.inputdir", 
                         Constants.TEST_PATH.toUri() + "/35949");
@@ -65,14 +65,14 @@ public class TestImportBigData {
         String pathWithoutSchema = Path.getPathWithoutSchemeAndAuthority(Constants.TEST_PATH).toString();
         Utils.unzip(pathWithoutSchema + "/35949.zip", pathWithoutSchema);
         
-        SimpleTimeLimiter stl = new SimpleTimeLimiter();       
+        SimpleTimeLimiter stl = SimpleTimeLimiter.create(Executors.newCachedThreadPool());     
         
         String system = System.getProperty("os.name");
         if (!system.contains("win")) {
-            Stopwatch sw = new Stopwatch().start();
-            stl.callWithTimeout(callGetSplit, 3L, TimeUnit.MINUTES, true);
+            Stopwatch sw = Stopwatch.createStarted();
+            stl.callWithTimeout(callGetSplit, 3L, TimeUnit.MINUTES);
             sw.stop();
-            long time = sw.elapsedTime(TimeUnit.SECONDS);
+            long time = sw.elapsed(TimeUnit.SECONDS);
             System.out.println("Total time of listStatus: " + time + " seconds.");
             assertTrue(time < 20L);
         }        
