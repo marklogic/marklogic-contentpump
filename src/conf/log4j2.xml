@@ -1,0 +1,43 @@
+<!-- This is the MLCP logging properties file for log4j2 configurations. To 
+    enable debug for mapreduce and contentpump, please uncomment the two
+    logger blocks. 
+ -->
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Console appender configuration -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yy/MM/dd HH:mm:ss} %p %c{2}: %m%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <!-- Root logger configuration -->
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+        </Root>
+        <!-- To enable debug for mapreduce -->
+        <!--
+        <Logger name="com.marklogic.mapreduce" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        -->
+        <!-- To enable debug for contentpump -->
+        <!--
+        <Logger name="com.marklogic.contentpump" level="DEBUG" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        -->
+        <!-- To enable debug for tree -->
+        <!--
+        <Logger name="com.marklogic.tree" level="TRACE" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        -->
+        <!-- To supress not native warn on Mac and Solaris -->
+        <Logger name="org.apache.hadoop.util.NativeCodeLoader" level="ERROR" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="org.apache.hadoop.ipc.Client" level="ERROR" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+    </Loggers>
+</Configuration>

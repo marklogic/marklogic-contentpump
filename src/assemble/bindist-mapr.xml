@@ -22,7 +22,7 @@
       <outputDirectory>${file.separator}conf</outputDirectory>
       <fileMode>0755</fileMode>
       <includes>
-        <include>log4j.properties</include>
+        <include>log4j2.xml</include>
         <include>xcc.logging.properties</include>
       </includes>
     </fileSet>
@@ -82,7 +82,7 @@
         <include>com.sun.jersey:jersey-client:jar:*</include>
         <include>commons-collections:commons-collections:jar:*</include>
         <include>com.marklogic:*:*:*</include>                 
-        <include>org.apache.avro:avro:jar:*</include>
+        <include>org.apache.avro:avro:jar:*</include>               
         <include>commons-cli:commons-cli:jar:*</include>
         <include>commons-codec:commons-codec:jar:*</include>
         <include>commons-configuration:commons-configuration:jar:*</include>
@@ -104,10 +104,13 @@
         <include>com.fasterxml.jackson.core:jackson-core:jar:*</include>
         <include>com.fasterxml.jackson.core:jackson-databind:jar:*</include>
         <include>com.fasterxml.jackson.core:jackson-annotations:jar:*</include>
-        <include>log4j:log4j:jar:*</include>
-        <include>com.google.protobuf:protobuf-java:jar:*</include>
+        <include>org.apache.logging.log4j:log4j-1.2-api:jar:*</include>
+        <include>org.apache.logging.log4j:log4j-api:jar:*</include>
+        <include>org.apache.logging.log4j:log4j-core:jar:*</include>
+        <include>org.apache.logging.log4j:log4j-jcl:jar:*</include>
+        <include>org.apache.logging.log4j:log4j-slf4j-impl:jar:*</include>
         <include>org.slf4j:slf4j-api:jar:*</include>
-        <include>org.slf4j:slf4j-log4j12:jar:*</include>
+        <include>com.google.protobuf:protobuf-java:jar:*</include>
         <include>xerces:xercesImpl:jar:*</include>
         <include>xpp3:xpp3:jar:*</include>
         <include>com.github.jsonld-java:jsonld-java:jar:*</include>
