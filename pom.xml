@@ -241,7 +241,7 @@
             <i>${javadocCopyrightMessage}</i>
             <p>Complete online documentation for MarkLogic Server,
               XQuery and related components may be found at
-              <a href="http://developer.marklogic.com/pubs/"
+              <a href="https://docs.marklogic.com/"
                 target="mldocs">developer.marklogic.com</a><p>
                 ]]>
               </bottom>
