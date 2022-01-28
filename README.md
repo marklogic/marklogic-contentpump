@@ -15,6 +15,11 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Release Note
 
+### What's New in mlcp and Hadoop Connector 10.0.9
+- Upgrade log4j from 2.17.0 to 2.17.1 to mitigate security vulnerability [CVE-2021-44832](https://nvd.nist.gov/vuln/detail/CVE-2021-44832).
+- Upgrade dependencies for fixing security vulnerabilities.
+- Bug fixes.
+
 ### What's New in mlcp and Hadoop Connector 10.0.8.2
 - Upgrade log4j from 1.2.17 to 2.17.0 to mitigate security vulnerability [CVE-2019-17571](https://nvd.nist.gov/vuln/detail/CVE-2019-17571).
 
