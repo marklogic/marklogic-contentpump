@@ -212,9 +212,6 @@ InternalConstants {
     
     @Override
     public boolean isStreamable() {
-        if (content == null) {
-            return true;
-        }
-        return false;
+        return content == null;
     }
 }

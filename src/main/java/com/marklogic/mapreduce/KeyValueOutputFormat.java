@@ -44,7 +44,7 @@ public class KeyValueOutputFormat<KEYOUT, VALUEOUT> extends
         Configuration conf = context.getConfiguration();
         TextArrayWritable hosts = getHosts(conf);
         String host = InternalUtilities.getHost(hosts);
-        return new KeyValueWriter<KEYOUT, VALUEOUT>(conf, host);
+        return new KeyValueWriter<>(conf, host);
     }
 
     @Override

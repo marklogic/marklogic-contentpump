@@ -37,7 +37,7 @@ public class DocumentURIWithSourceInfo extends DocumentURI {
     private int colNumber = 0;
     private String skipReason = "";
     
-    public DocumentURIWithSourceInfo() {};
+    public DocumentURIWithSourceInfo() {}
     
     public DocumentURIWithSourceInfo(String uri, String src) {
         if (uri == null) {

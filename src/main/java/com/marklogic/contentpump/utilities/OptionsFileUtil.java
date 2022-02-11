@@ -51,7 +51,7 @@ public class OptionsFileUtil implements ConfigConstants {
      * @throws Exception
      */
     public static String[] expandArguments(String[] args) throws Exception {
-        List<String> options = new ArrayList<String>();
+        List<String> options = new ArrayList<>();
 
         for (int i = 0; i < args.length; i++) {
             if (args[i].equals(OPTIONS_FILE)) {

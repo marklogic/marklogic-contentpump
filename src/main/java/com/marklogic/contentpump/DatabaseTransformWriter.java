@@ -27,8 +27,6 @@ import com.marklogic.mapreduce.utilities.AssignmentManager;
 import com.marklogic.mapreduce.utilities.InternalUtilities;
 import com.marklogic.xcc.ContentCreateOptions;
 import com.marklogic.xcc.ContentSource;
-import com.marklogic.xcc.Session;
-import com.marklogic.xcc.Session.TransactionMode;
 
 /**
  * DatabaseContentWriter that does server-side transform and insert

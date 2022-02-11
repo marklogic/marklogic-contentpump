@@ -73,6 +73,6 @@ public abstract class FieldValueCooccurrences extends CooccurrencesFunction {
         // first element name   
         buf.append(getFieldName1()).append(",\n");
         // second element name
-        buf.append(getFieldName2()).append(",\n");;
+        buf.append(getFieldName2()).append(",\n");
     }
  }

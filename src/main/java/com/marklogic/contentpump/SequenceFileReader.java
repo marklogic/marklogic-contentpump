@@ -55,7 +55,7 @@ public class SequenceFileReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     @Override
     public float getProgress() throws IOException, InterruptedException {
-        return hasNext == true ? 0 : 1;
+        return hasNext ? 0 : 1;
     }
 
     @Override

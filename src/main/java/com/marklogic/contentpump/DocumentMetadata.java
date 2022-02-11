@@ -47,9 +47,9 @@ public class DocumentMetadata {
     public static String NAKED = ".naked";
     protected DocumentFormat format = DocumentFormat.XML;
 
-    protected List<String> collectionsList = new Vector<String>();
+    protected List<String> collectionsList = new Vector<>();
 
-    protected List<ContentPermission> permissionsList = new Vector<ContentPermission>();
+    protected List<ContentPermission> permissionsList = new Vector<>();
     protected String permString = null;
     protected int quality = 0;
     protected Map<String, String> meta = null;
@@ -321,8 +321,8 @@ public class DocumentMetadata {
         if (null == _collections || 1 > _collections.length) {
             return;
         }
-        for (int i = 0; i < _collections.length; i++) {
-            addCollection(_collections[i]);
+        for (String collection : _collections) {
+            addCollection(collection);
         }
     }
     
