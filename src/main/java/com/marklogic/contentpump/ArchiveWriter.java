@@ -73,12 +73,7 @@ implements MarkLogicConstants, ConfigConstants {
         String type = conf.get(CONF_OUTPUT_TYPE, DEFAULT_OUTPUT_TYPE);
         ExportOutputType outputType = ExportOutputType.valueOf(
                         type.toUpperCase());
-        if (outputType.equals(ExportOutputType.DOCUMENT)) {
-            isExportDoc = true;
-        } else {
-            //archive uses DatabaseContentReader
-            isExportDoc = false;
-        }
+        isExportDoc = ExportOutputType.DOCUMENT.equals(outputType);
     }
 
     @Override

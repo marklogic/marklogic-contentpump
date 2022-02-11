@@ -110,8 +110,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected PipedRDFStream rdfInputStream;
     protected Lang lang;
 
-    protected Hashtable<String, Vector> collectionHash = 
-            new Hashtable<String, Vector> ();
+    protected Hashtable<String, Vector> collectionHash =
+        new Hashtable<>();
     protected int collectionCount = 0;
     private static final int MAX_COLLECTIONS = 100;
     protected boolean ignoreCollectionQuad = false;
@@ -162,8 +162,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         this.roleMap = roleMap;
         roleMapExists = roleMap!=null && roleMap.size()>0 ;
         graphQry = new StringBuilder();
-        existingMapPerms = new HashMap<String,ContentPermission[]>();
-        newGraphs = new HashSet<String>();
+        existingMapPerms = new HashMap<>();
+        newGraphs = new HashSet<>();
     }
 
     @Override
@@ -591,7 +591,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             while (result.hasNext()) {
                 String uri = result.next().asString();
                 String tmp = result.next().asString();
-                ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+                ArrayList<ContentPermission> perms = new ArrayList<>();
                 while(!tmp.equals("0")) {
                     Text roleid = new Text(tmp);
                     if (!result.hasNext()) {
@@ -628,7 +628,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
      * return ContentPermission[] for the graph
      */
     public ContentPermission[] insertGraphDoc(String graph) throws IOException {
-        ArrayList<ContentPermission> perms = new ArrayList<ContentPermission>();
+        ArrayList<ContentPermission> perms = new ArrayList<>();
             ContentPermission[] permissions = defaultPerms;
             StringBuilder sb = graphQry;
             if (countPerBatch >= MAXGRAPHSPERREQUEST) {

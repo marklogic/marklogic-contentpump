@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -38,7 +37,6 @@ import com.marklogic.mapreduce.ContentType;
 import com.marklogic.mapreduce.DatabaseDocument;
 import com.marklogic.mapreduce.DocumentInputFormat;
 import com.marklogic.mapreduce.DocumentURI;
-import com.marklogic.mapreduce.MarkLogicNode;
 
 /**
  * Read the first word from each input document, then produce
@@ -104,7 +102,7 @@ public class HelloWorld {
                 Context context
                 ) throws IOException, InterruptedException {        
             // Sort the words
-            ArrayList<String> words = new ArrayList<String>();
+            ArrayList<String> words = new ArrayList<>();
             for (Text val : values) {
                 words.add(val.toString());
             }

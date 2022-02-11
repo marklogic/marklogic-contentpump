@@ -100,7 +100,7 @@ public class DatabaseContentReader extends
         copyQuality = conf.getBoolean(MarkLogicConstants.COPY_QUALITY, true);
         copyMetadata = conf.getBoolean(MarkLogicConstants.COPY_METADATA, true);
         currentKey = new DocumentURI();
-        metadataMap = new HashMap<String, DocumentMetadata>();
+        metadataMap = new HashMap<>();
     }
 
     @Override
@@ -479,7 +479,7 @@ public class DatabaseContentReader extends
             XdmItem metaItem  = item.getItem();
             if (metaItem instanceof JsonItem) {
                 JsonNode node = ((JsonItem)metaItem).asJsonNode();
-                metadata.meta = new HashMap<String, String>(node.size());
+                metadata.meta = new HashMap<>(node.size());
                 for (Iterator<String> names = node.fieldNames(); 
                      names.hasNext();) {
                     String key = names.next();

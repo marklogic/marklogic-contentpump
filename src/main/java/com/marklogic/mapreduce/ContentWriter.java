@@ -29,7 +29,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 
 import com.marklogic.mapreduce.utilities.AssignmentManager;
@@ -53,7 +52,6 @@ import com.marklogic.xcc.exceptions.ContentInsertException;
 import com.marklogic.xcc.exceptions.QueryException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.RequestServerException;
-import com.marklogic.xcc.exceptions.RetryableQueryException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -226,7 +224,7 @@ implements MarkLogicConstants {
         requestOptions = new RequestOptions();
         requestOptions.setMaxAutoRetry(0);
         
-        permsMap = new HashMap<String,ContentPermission[]>();
+        permsMap = new HashMap<>();
         
         // key order in key set is guaranteed by LinkedHashMap,
         // i.e., the order keys are inserted
@@ -262,7 +260,7 @@ implements MarkLogicConstants {
         
         pendingUris = new HashMap[arraySize];
         for (int i = 0; i < arraySize; i++) {
-            pendingUris[i] = new HashMap<Content, DocumentURI>();
+            pendingUris[i] = new HashMap<>();
         }
 
         if (fastLoad
@@ -306,7 +304,7 @@ implements MarkLogicConstants {
                 }
                 if (capability != null) {
                     if (permissions == null) {
-                        permissions = new ArrayList<ContentPermission>();
+                        permissions = new ArrayList<>();
                     }
                     permissions.add(new ContentPermission(capability, roleName));
                 }
@@ -363,7 +361,7 @@ implements MarkLogicConstants {
         if (needCommit) {
             commitUris = new ArrayList[arraySize];
             for (int i = 0; i < arraySize; i++) {
-                commitUris[i] = new ArrayList<DocumentURI>(txnSize*batchSize);
+                commitUris[i] = new ArrayList<>(txnSize * batchSize);
             }
         }
         

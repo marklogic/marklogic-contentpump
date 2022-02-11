@@ -291,7 +291,7 @@ public abstract class NodeImpl implements Node {
     public boolean isDefaultNamespace(String namespaceURI) {
         int type = getNodeType();
         if (type == NodeKind.ATTR) {
-            if (this instanceof AttrImpl == false) {
+            if (!(this instanceof AttrImpl)) {
                 // ns decl
                 throw new UnsupportedOperationException();
             }
@@ -358,11 +358,7 @@ public abstract class NodeImpl implements Node {
     // TODO - override in subclasses?
 
     public boolean isSupported(String feature, String version) {
-        if (feature.equalsIgnoreCase("Core"))
-            return true;
-        if (feature.equalsIgnoreCase("XML"))
-            return true;
-        return false;
+        return "Core".equalsIgnoreCase(feature) || "XML".equalsIgnoreCase(feature);
     }
 
     protected int getNSNodeID(long ordinal, long minOrdinal) {
@@ -464,12 +460,12 @@ public abstract class NodeImpl implements Node {
 		final Node thisNode = this;
 		
 		return new NodeList() {
-			protected ArrayList<Node> elementList = new ArrayList<Node>();
+			protected ArrayList<Node> elementList = new ArrayList<>();
 			protected boolean done = false;
 			
 			protected void init() {
 				if (done) return;
-				Stack<Node> childrenStack = new Stack<Node>();
+				Stack<Node> childrenStack = new Stack<>();
 				childrenStack.push(thisNode);
 				boolean root = true;
 				while ( !childrenStack.isEmpty()) {

@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.Properties;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -28,7 +27,7 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 
 public class Utils {
-    private static HashMap<String, ContentSource> csMap = new HashMap<String, ContentSource>();
+    private static HashMap<String, ContentSource> csMap = new HashMap<>();
     private static Session session;
     public static String newLine = System.getProperty("line.separator");
     public static boolean moduleReady = false;

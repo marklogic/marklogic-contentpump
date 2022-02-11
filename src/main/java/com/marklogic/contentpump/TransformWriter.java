@@ -112,7 +112,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         
         pendingURIs = new HashSet[sessions.length];
         for (int i = 0; i < sessions.length; i++) {
-            pendingURIs[i] = new HashSet<DocumentURI>(batchSize);
+            pendingURIs[i] = new HashSet<>(batchSize);
         }
         // counts is only initialized by ContentWriter when batchSize > 1
         if (counts == null) {
@@ -124,7 +124,7 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
         uris = new XdmValue[counts.length][batchSize];
         values = new XdmValue[counts.length][batchSize];
         optionsVals = new XdmValue[counts.length][batchSize];
-        optionsMap = new HashMap<String, String>();
+        optionsMap = new HashMap<>();
         uriName = new XName("URI");
         contentName = new XName("CONTENT");
         optionsName = new XName("INSERT-OPTIONS");

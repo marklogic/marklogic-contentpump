@@ -230,7 +230,7 @@ public class ElementImpl extends NodeImpl implements Element {
     protected int getPrefixID(int uriAtom) {
         int a = -1;
         boolean useDefaultNS = true;
-        ArrayList<Integer> ubp = new ArrayList<Integer>();
+        ArrayList<Integer> ubp = new ArrayList<>();
         long minOrdinal = 0;
         for (int ns = getNSNodeID(tree.nodeOrdinal[node]); ns >= 0; ns = nextNSNodeID(
             ns, minOrdinal)) {

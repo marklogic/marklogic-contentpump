@@ -77,6 +77,6 @@ public abstract class ElemValueCooccurrences extends CooccurrencesFunction {
         // first element name   
         buf.append(getElementName1()).append(",\n");
         // second element name
-        buf.append(getElementName2()).append(",\n");;
+        buf.append(getElementName2()).append(",\n");
     }
 }

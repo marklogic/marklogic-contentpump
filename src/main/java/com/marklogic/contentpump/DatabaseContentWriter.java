@@ -107,8 +107,8 @@ public class DatabaseContentWriter<VALUE> extends
             }
             if (isCopyColls) {
                 if (opt.getCollections() != null) {
-                    HashSet<String> colSet = 
-                            new HashSet<String>(meta.collectionsList);
+                    HashSet<String> colSet =
+                        new HashSet<>(meta.collectionsList);
                     // union copy_collection and output_collection
                     for (String s : opt.getCollections()) {
                         colSet.add(s);
@@ -139,8 +139,8 @@ public class DatabaseContentWriter<VALUE> extends
                     }
                 }
                 if (opt.getPermissions() != null) {
-                    HashSet<ContentPermission> pSet = 
-                         new HashSet<ContentPermission>(meta.permissionsList);
+                    HashSet<ContentPermission> pSet =
+                        new HashSet<>(meta.permissionsList);
                     // union of output_permission & copy_permission
                     for (ContentPermission p : opt.getPermissions()) {
                         pSet.add(p);

@@ -42,7 +42,7 @@ public class DatabaseContentOutputFormat extends
         fastLoad = Boolean.valueOf(conf.get(OUTPUT_FAST_LOAD));
         Map<String, ContentSource> sourceMap = getSourceMap(fastLoad, context);
         // construct the DatabaseContentWriter
-        return new DatabaseContentWriter<DatabaseDocumentWithMeta>(conf,
+        return new DatabaseContentWriter<>(conf,
             sourceMap, fastLoad, am);
     }
 }
