@@ -19,7 +19,7 @@
   <properties>
     <versionString>10.0</versionString>
     <xccVersion>${versionString}</xccVersion>
-    <hadoopVersion>2.7.2</hadoopVersion>
+    <hadoopVersion>3.3.0</hadoopVersion>
     <commonsCsvVersion>1.5-marklogic</commonsCsvVersion>
     <bundleArtifact>apache</bundleArtifact>
 
@@ -389,6 +389,11 @@
         </dependency>
         <dependency>
           <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-hdfs-client</artifactId>
+          <version>2.7.0-mapr-1602</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
           <artifactId>hadoop-mapreduce-client-contrib</artifactId>
           <version>2.7.0-mapr-1602</version>
         </dependency>
@@ -492,6 +497,36 @@
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-databind</artifactId>
           <version>2.11.0</version>
+        </dependency>
+        <dependency>
+          <groupId>com.fasterxml.woodstox</groupId>
+          <artifactId>woodstox-core</artifactId>
+          <version>6.2.8</version>
+        </dependency>
+        <dependency>
+          <groupId>org.codehaus.woodstox</groupId>
+          <artifactId>stax2-api</artifactId>
+          <version>4.2.1</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-configuration2</artifactId>
+          <version>2.7</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.htrace</groupId>
+          <artifactId>htrace-core4</artifactId>
+          <version>4.1.0-incubating</version>
+        </dependency>
+        <dependency>
+          <groupId>com.google.re2j</groupId>
+          <artifactId>re2j</artifactId>
+          <version>1.6</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.commons</groupId>
+          <artifactId>commons-compress</artifactId>
+          <version>1.21</version>
         </dependency>
         <dependency>
           <groupId>com.sun.jersey</groupId>
@@ -625,6 +660,11 @@
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-hdfs-client</artifactId>
+      <version>${hadoopVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
       <artifactId>hadoop-mapreduce-client-common</artifactId>
       <version>${hadoopVersion}</version>
     </dependency>
@@ -713,6 +753,36 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>2.11.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.woodstox</groupId>
+      <artifactId>woodstox-core</artifactId>
+      <version>6.2.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.woodstox</groupId>
+      <artifactId>stax2-api</artifactId>
+      <version>4.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-configuration2</artifactId>
+      <version>2.7</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.htrace</groupId>
+      <artifactId>htrace-core4</artifactId>
+      <version>4.1.0-incubating</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.re2j</groupId>
+      <artifactId>re2j</artifactId>
+      <version>1.6</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.21</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>

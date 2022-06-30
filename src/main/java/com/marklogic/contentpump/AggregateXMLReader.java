@@ -133,7 +133,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         try {
             xmlSR = f.createXMLStreamReader(fInputStream, encoding);
         } catch (XMLStreamException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.error("Parse error", e);
         }
 
         if (useAutomaticId) {
@@ -217,6 +217,9 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private void processStartElement() throws XMLStreamException {
         String name = xmlSR.getLocalName();
         String namespace = xmlSR.getNamespaceURI();
+        if ("".equals(namespace)) {
+            namespace = null;
+        }
         if (LOG.isTraceEnabled()) {
             LOG.trace("Start-tag: " + xmlSR.getName() + " at depth " + currDepth);
         }
@@ -280,7 +283,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             Set<String> keys = nameSpaces.keySet();
             for (String k : keys) {
                 String v = nameSpaces.get(k).peek();
-                if (DEFAULT_NS == k) {
+                if (DEFAULT_NS == k || ("".equals(k)) ){
                     sb.append(" xmlns=\"" + v + "\"");
                 } else {
                     sb.append(" xmlns:" + k + "=\"" + v + "\"");
@@ -383,6 +386,9 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     private boolean processEndElement() throws XMLStreamException {
         String name = xmlSR.getLocalName();
         String namespace = xmlSR.getNamespaceURI();
+        if ("".equals(namespace)) {
+            namespace = null;
+        }
         if (LOG.isTraceEnabled()) {
             LOG.trace("End-tag: " + xmlSR.getName() + " at depth " + currDepth);
         }
