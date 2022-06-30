@@ -120,6 +120,13 @@
         <include>xml-apis:xml-apis:jar:*</include>
         <include>com.thoughtworks.xstream:xstream:jar:*</include>
         <include>junit:junit:jar:*</include>
+        <include>com.fasterxml.woodstox:woodstox-core:jar:*</include>
+        <include>org.codehaus.woodstox:stax2-api:jar:*</include>
+        <include>org.apache.commons:commons-configuration2:jar:*</include>
+        <include>org.apache.htrace:htrace-core4:jar:*</include>
+        <include>com.google.re2j:re2j:jar:*</include>
+        <include>org.apache.commons:commons-compress:jar:*</include>
+        <include>org.apache.hadoop:hadoop-hdfs-client:jar:*</include>
       </includes>
     </dependencySet>
   </dependencySets>
