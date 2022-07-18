@@ -35,3 +35,6 @@ REM echo ******** classpath: %classpath%
 java -DCONTENTPUMP_HOME="%LIB_HOME%" -DBUNDLE_ARTIFACT="%BUNDLE_ARTIFACT%" -Dfile.encoding="UTF-8" -Dxcc.txn.compatible=true %JVM_OPTS% com.marklogic.contentpump.ContentPump %*
 
 EndLocal
+
+exit /B %errorlevel%
+
