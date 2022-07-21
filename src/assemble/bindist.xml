@@ -110,7 +110,6 @@
         <include>org.apache.logging.log4j:log4j-jcl:jar:*</include>
         <include>org.apache.logging.log4j:log4j-slf4j-impl:jar:*</include>
         <include>org.slf4j:slf4j-api:jar:*</include>
-        <include>com.google.protobuf:protobuf-java:jar:*</include>
         <include>xerces:xercesImpl:jar:*</include>
         <include>xpp3:xpp3:jar:*</include>
         <include>com.github.jsonld-java:jsonld-java:jar:*</include>
