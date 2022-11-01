@@ -120,6 +120,9 @@
         <include>xml-apis:xml-apis:jar:*</include>
         <include>com.thoughtworks.xstream:xstream:jar:*</include>
         <include>junit:junit:jar:*</include>
+        <include>org.apache.hadoop:hadoop-client:jar:*</include>
+        <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:*</include>
+        <include>org.apache.hadoop.thirdparty:hadoop-shaded-protobuf_3_7:jar:*</include>
       </includes>
     </dependencySet>
   </dependencySets>
