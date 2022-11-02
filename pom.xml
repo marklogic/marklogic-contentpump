@@ -20,6 +20,7 @@
     <versionString>10.0</versionString>
     <xccVersion>${versionString}</xccVersion>
     <hadoopVersion>3.3.4</hadoopVersion>
+    <jacksonVersion>2.14.0-rc3</jacksonVersion>
     <commonsCsvVersion>1.5-marklogic</commonsCsvVersion>
     <bundleArtifact>apache</bundleArtifact>
 
@@ -483,17 +484,17 @@
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-annotations</artifactId>
-          <version>2.13.2</version>
+          <version>${jacksonVersion}</version>
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-core</artifactId>
-          <version>2.13.2</version>
+          <version>${jacksonVersion}</version>
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-databind</artifactId>
-          <version>2.14.0-rc3</version>
+          <version>${jacksonVersion}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.commons</groupId>
@@ -729,17 +730,17 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>2.13.2</version>
+      <version>${jacksonVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.13.2</version>
+      <version>${jacksonVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.14.0-rc3</version>
+      <version>${jacksonVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.woodstox</groupId>
