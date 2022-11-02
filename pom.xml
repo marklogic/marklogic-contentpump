@@ -20,6 +20,7 @@
     <versionString>11.0</versionString>
     <xccVersion>${versionString}</xccVersion>
     <hadoopVersion>3.3.4</hadoopVersion>
+    <jacksonVersion>2.14.0-rc3</jacksonVersion>
     <commonsCsvVersion>1.5-marklogic</commonsCsvVersion>
     <bundleArtifact>apache</bundleArtifact>
 
@@ -453,7 +454,7 @@
         <dependency>
           <groupId>xerces</groupId>
           <artifactId>xercesImpl</artifactId>
-          <version>2.12.0</version>
+          <version>2.12.2</version>
         </dependency>
         <dependency>
           <groupId>org.apache.jena</groupId>
@@ -483,17 +484,17 @@
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-annotations</artifactId>
-          <version>2.13.2</version>
+          <version>${jacksonVersion}</version>
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-core</artifactId>
-          <version>2.13.2</version>
+          <version>${jacksonVersion}</version>
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-databind</artifactId>
-          <version>2.13.2.1</version>
+          <version>${jacksonVersion}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.commons</groupId>
@@ -699,7 +700,7 @@
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
-      <version>2.12.0</version>
+      <version>2.12.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jena</groupId>
@@ -729,22 +730,22 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>2.13.2</version>
+      <version>${jacksonVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.13.2</version>
+      <version>${jacksonVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.13.2.1</version>
+      <version>${jacksonVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.woodstox</groupId>
       <artifactId>woodstox-core</artifactId>
-      <version>6.2.8</version>
+      <version>6.4.0</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.woodstox</groupId>
