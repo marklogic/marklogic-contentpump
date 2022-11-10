@@ -19,7 +19,8 @@
   <properties>
     <versionString>10.0</versionString>
     <xccVersion>${versionString}</xccVersion>
-    <hadoopVersion>3.3.0</hadoopVersion>
+    <hadoopVersion>3.3.4</hadoopVersion>
+    <jacksonVersion>2.14.0-rc3</jacksonVersion>
     <commonsCsvVersion>1.5-marklogic</commonsCsvVersion>
     <bundleArtifact>apache</bundleArtifact>
 
@@ -97,6 +98,8 @@
             <classpathDependencyExclude>log4j:log4j</classpathDependencyExclude>
             <classpathDependencyExclude>org.slf4j:slf4j-log4j12</classpathDependencyExclude>
             <classpathDependencyExclude>ch.qos.logback:logback-classic</classpathDependencyExclude>
+            <classpathDependencyExclude>org.slf4j:slf4j-reload4j</classpathDependencyExclude>
+            <classpathDependencyExclude>ch.qos.reload4j:reload4j</classpathDependencyExclude>
           </classpathDependencyExcludes>
           <skipTests>${skipTests}</skipTests>
           <argline>-DCONTENTPUMP_HOME=${contentpumpHome} -DOUTPUT_PATH=${testOutputPath} -DTEST_DB_PORT=${testDbPort} -DCOPY_DB_PORT=${copyDbPort} -DTEST_DB=${testDb} -DCOPY_DB=${copyDb}</argline>
@@ -451,7 +454,7 @@
         <dependency>
           <groupId>xerces</groupId>
           <artifactId>xercesImpl</artifactId>
-          <version>2.12.0</version>
+          <version>2.12.2</version>
         </dependency>
         <dependency>
           <groupId>org.apache.jena</groupId>
@@ -481,17 +484,17 @@
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-annotations</artifactId>
-          <version>2.13.2</version>
+          <version>${jacksonVersion}</version>
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-core</artifactId>
-          <version>2.13.2</version>
+          <version>${jacksonVersion}</version>
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
           <artifactId>jackson-databind</artifactId>
-          <version>2.13.2.1</version>
+          <version>${jacksonVersion}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.commons</groupId>
@@ -588,6 +591,21 @@
           <artifactId>slf4j-api</artifactId>
           <version>1.7.32</version>
         </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop</groupId>
+          <artifactId>hadoop-client</artifactId>
+          <version>${hadoopVersion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop.thirdparty</groupId>
+          <artifactId>hadoop-shaded-guava</artifactId>
+          <version>1.1.1</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.hadoop.thirdparty</groupId>
+          <artifactId>hadoop-shaded-protobuf_3_7</artifactId>
+          <version>1.1.1</version>
+        </dependency>
       <!-- System dependencies-->
       <dependency>
         <groupId>org.apache.commons</groupId>
@@ -682,7 +700,7 @@
     <dependency>
       <groupId>xerces</groupId>
       <artifactId>xercesImpl</artifactId>
-      <version>2.12.0</version>
+      <version>2.12.2</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jena</groupId>
@@ -712,22 +730,22 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-annotations</artifactId>
-      <version>2.13.2</version>
+      <version>${jacksonVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.13.2</version>
+      <version>${jacksonVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.13.2.1</version>
+      <version>${jacksonVersion}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.woodstox</groupId>
       <artifactId>woodstox-core</artifactId>
-      <version>6.2.8</version>
+      <version>6.4.0</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.woodstox</groupId>
@@ -843,6 +861,21 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.7.32</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-client</artifactId>
+      <version>${hadoopVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop.thirdparty</groupId>
+      <artifactId>hadoop-shaded-guava</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop.thirdparty</groupId>
+      <artifactId>hadoop-shaded-protobuf_3_7</artifactId>
+      <version>1.1.1</version>
     </dependency>
 
     <!-- System dependencies-->
