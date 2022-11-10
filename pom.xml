@@ -20,7 +20,7 @@
     <versionString>10.0</versionString>
     <xccVersion>${versionString}</xccVersion>
     <hadoopVersion>3.3.0</hadoopVersion>
-    <commonsCsvVersion>1.5-marklogic</commonsCsvVersion>
+    <commonsCsvVersion>1.5.1-marklogic</commonsCsvVersion>
     <bundleArtifact>apache</bundleArtifact>
 
     <!-- Settings related to unit test -->
