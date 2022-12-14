@@ -1,0 +1,47 @@
+*Configurations*
+
+To run unit tests, the following configurations on MarkLogic Server are required:
+1) MarkLogic Server runs on localhost
+2) a XDBC server with port 5275 is required to associate with Documents database;
+   use "/" for the root and the Modules database for modules.
+3) create database "CopyDst"
+4) create a forest, and attach it to database "CopyDst" 
+5) create a XDBC server with port 6275 associated with database "CopyDst";
+   use "/" for the root and the Modules database for modules.
+
+[Unit Test for Dev]
+1) Remove the comment mark around 'additionalClasspathElements' in pom.xml: maven-surefire-plugin to add log4j.properties in unit test classpath.
+2) To pass the TestImportDocs:testImportTemporalDoc, it's required to create a graph (temporal collection) named "mycollection" in Documents database. See src/test/resources/createCollection.txt for example.
+3) To pass the TestDistributedImportDocs:testImportTransformMixedDocs, it's required to enable triple index and collection lexicon on Document database.
+4) Append "-DCONTENTPUMP_HOME=${path to mlcp}/mlcp/target/mlcp-1.4-lib" to maven command.
+5) To pass TestImportDelimitedText:testImportTransformDelimitedTextFileNameAsCollection and TestImportAggregate:testImportTransformMedlineFilenameAsCollection, it's required to enable collection lexicion on Document database.
+
+[Distributed]
+hadoop runs on localhost
+
+Check out mlcp source code to some directory, say MLCP_HOME.
+Modify MLCP_HOME/src/conf/test.properties
+1) set HADOOP_CONF_DIR to the hadoop's conf directory 
+2) set OUT_PATH to some temporary path for output
+3) set HADOOP to 2.6.0(depending on the version of your hadoop server)
+4) set CONTENTPUMP_VERSION=1.3 or 1.4 (b8 is 1.3, trunk is 1.4)
+
+[Run tests]
+Run all tests on Linux:
+first make sure HADOOP_CONF_DIR has been unset, then
+mvn test -DskipTests=false
+
+Run all tests (tests for distributed mode excluded) on Linux:
+mvn test -DskipTests=false -Plocal
+
+Run a specific test on Linux:
+mvn test -DskipTests=false  -Dtest=TestImportDelimitedText
+
+As Windows is not supported for mlcp distributed mode, use the following command to 
+skip tests for distributed mode on Windows:
+mvn.bat test -DskipTests=false -Plocal
+
+By default, it will build and test using hadoop1's libraries; to test using hadoop2, append the following to the mvn command:
+-Dhadoop-deps.version=2
+
+[
