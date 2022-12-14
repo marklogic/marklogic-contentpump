@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MarkLogic Corporation
+ * Copyright (c) 2022 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ public class DocumentMetadata {
      * @param reader
      */
     public static DocumentMetadata fromXML(Reader reader) {
+        xstream.allowTypes(new Class[] {com.marklogic.contentpump.DocumentMetadata.class, com.marklogic.xcc.ContentPermission.class});
         return (DocumentMetadata) xstream.fromXML(reader);
     }
 
