@@ -100,6 +100,6 @@ public class RegularBinaryDocument extends BinaryDocument {
     
     @Override
     public long getContentSize() {
-        return size * 4;
+        return Long.valueOf(size) * 4;
     }
 }
