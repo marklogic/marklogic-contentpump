@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>mlcp</artifactId>
-  <version>11.0.0</version>
+  <version>11.0.2</version>
   <name>MarkLogic Content Pump</name>
   <description>MarkLogic Content Pump</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
@@ -17,8 +17,7 @@
   </licenses>
 
   <properties>
-
-    <versionString>11.0.0</versionString>
+    <versionString>11.0.2</versionString>
     <xccVersion>${versionString}</xccVersion>
     <hadoopVersion>3.3.4</hadoopVersion>
     <jacksonVersion>2.14.0-rc3</jacksonVersion>
@@ -545,7 +544,7 @@
         <dependency>
           <groupId>org.apache.thrift</groupId>
           <artifactId>libthrift</artifactId>
-          <version>0.14.0</version>
+          <version>0.17.0</version>
         </dependency>
         <dependency>
           <groupId>com.google.guava</groupId>
@@ -801,7 +800,7 @@
     <dependency>
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>0.14.0</version>
+      <version>0.17.0</version>
     </dependency>
     <dependency>
       <groupId>commons-modeler</groupId>
