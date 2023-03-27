@@ -17,7 +17,7 @@
   </licenses>
 
   <properties>
-    <versionString>11.0</versionString>
+    <versionString>11.1</versionString>
     <xccVersion>${versionString}</xccVersion>
     <hadoopVersion>3.3.4</hadoopVersion>
     <jacksonVersion>2.14.0-rc3</jacksonVersion>
