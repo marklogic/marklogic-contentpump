@@ -411,11 +411,6 @@
           <version>3.4.5-mapr-1503</version>
         </dependency>
         <dependency>
-          <groupId>org.json</groupId>
-          <artifactId>json</artifactId>
-          <version>20080701</version>
-        </dependency>
-        <dependency>
           <groupId>com.mapr.hadoop</groupId>
           <artifactId>maprfs</artifactId>
           <version>5.1.0-mapr</version>
