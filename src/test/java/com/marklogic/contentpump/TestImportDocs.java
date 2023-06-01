@@ -151,7 +151,7 @@ public class TestImportDocs {
      
     @Test
     public void testImportTransformMixed() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"///AbacuS.xml"
@@ -164,7 +164,7 @@ public class TestImportDocs {
             + " -fastload"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -transform_function transform"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -transaction_size 10"
             + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
@@ -190,7 +190,7 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransformBinary() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/2012-06-13_16-26-58_431.jpg"
@@ -201,7 +201,7 @@ public class TestImportDocs {
             + " -output_language fr"
             + " -namespace test"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
@@ -246,7 +246,7 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransformText() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = 
             "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki/AbacuS.xml"
@@ -258,7 +258,7 @@ public class TestImportDocs {
             + " -namespace test"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -transform_param myparam"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
         assertFalse(args.length == 0);
@@ -966,14 +966,14 @@ public class TestImportDocs {
     
     @Test
     public void testImportTransformMixedDocs() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -password admin -username admin -host localhost"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/wiki"
             + " -output_uri_replace wiki,'wiki1'"
             + " -output_uri_prefix test/"
             + " -output_collections test,ML"
             + " -fastload true"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" +");
