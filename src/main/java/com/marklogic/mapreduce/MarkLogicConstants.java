@@ -458,7 +458,44 @@ public interface MarkLogicConstants {
           "mapreduce.marklogic.input.filter.type";
       
       static final String EXTRACT_URI = "mapreduce.marklogic.input.extracturi";
-    
+
+    /**
+     * Used when mlcp talks to a reverse proxy. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the base path that maps
+     * to a MarkLogic App Server through which input queries and operations run.
+     * Required if using MarkLogic Cloud for input.
+     */
+    static final String INPUT_BASE_PATH =
+          "mapreduce.marklogic.input.base.path";
+
+    /**
+     * Used when mlcp talks to MarkLogic Cloud. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the input user api key
+     * that is assigned to a MarkLogic Cloud user. The api key is used for
+     * generating session token for token-based authentication. Required if
+     * using MarkLogic Cloud for input. When this property is specified,
+     * {@link #INPUT_BASE_PATH input.base.path} must be specified.
+     */
+    static final String INPUT_API_KEY =
+          "mapreduce.marklogic.input.api.key";
+
+    /**
+     * Used when mlcp talks to MarkLogic Cloud. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the input token
+     * endpoint for obtaining the session token for MarkLogic Cloud. Optional.
+     */
+    static final String INPUT_TOKEN_ENDPOINT =
+        "mapreduce.marklogic.input.token.endpoint";
+
+    /**
+     * Used when mlcp talks to MarkLogic Cloud. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the input grant type
+     * for the application authentication. Optional.
+     */
+    static final String INPUT_GRANT_TYPE =
+        "mapreduce.marklogic.input.grant.type";
+
+
     // output-related config property names
     /**
      * The config property name (<code>{@value}</code>)
@@ -909,7 +946,43 @@ public interface MarkLogicConstants {
      */    
     static final String TEMPORAL_COLLECTION =
         "mapreduce.marklogic.output.temporalcollection";
-   
+
+    /**
+     * Used when mlcp talks to a reverse proxy. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the base path that maps
+     * to a MarkLogic App Server through which output operations run. Required
+     * if using MarkLogic Cloud for output.
+     */
+    static final String OUTPUT_BASE_PATH =
+        "mapreduce.marklogic.output.base.path";
+
+    /**
+     * Used when mlcp talks to MarkLogic Cloud. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the output user api key
+     * that is assigned to a MarkLogic Cloud user. The api key is used for
+     * generating session token for token-based authentication. Required if
+     * using MarkLogic Cloud for output. When this property is specified,
+     * {@link #OUTPUT_BASE_PATH output.base.path} must be specified.
+     */
+    static final String OUTPUT_API_KEY =
+        "mapreduce.marklogic.output.api.key";
+
+    /**
+     * Used when mlcp talks to MarkLogic Cloud. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the output token
+     * endpoint for obtaining the session token. Optional.
+     */
+    static final String OUTPUT_TOKEN_ENDPOINT =
+        "mapreduce.marklogic.output.token.endpoint";
+
+    /**
+     * Used when mlcp talks to MarkLogic Cloud. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the output grant type
+     * for the application authentication. Optional.
+     */
+    static final String OUTPUT_GRANT_TYPE =
+        "mapreduce.marklogic.output.grant.type";
+
     /**
      * The config property name (<code>{@value}</code>)
      * which, if set, specifies the query language will be used for input query and split query.

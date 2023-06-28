@@ -67,6 +67,7 @@ public enum Command implements ConfigConstants {
             configBatchTxn(options);
             configModule(options);
             configRDFGraphOutputOptions(options);
+            configMLCloudAuthOptions(options);
             
 			Option inputFilePath = OptionBuilder
                 .withArgName("string")
@@ -633,14 +634,33 @@ public enum Command implements ConfigConstants {
                 String password = cmdline.getOptionValue(PASSWORD);
                 conf.set(MarkLogicConstants.OUTPUT_PASSWORD, password);
             }
-            String port = null;
+            if (cmdline.hasOption(BASE_PATH)) {
+                String basePath = cmdline.getOptionValue(BASE_PATH);
+                conf.set(MarkLogicConstants.OUTPUT_BASE_PATH, basePath);
+            }
+            if (cmdline.hasOption(API_KEY)) {
+                String apiKey = cmdline.getOptionValue(API_KEY);
+                conf.set(MarkLogicConstants.OUTPUT_API_KEY, apiKey);
+                // When api key is specified, we are expecting a non-empty
+                // base path.
+                if (conf.get(MarkLogicConstants.OUTPUT_BASE_PATH) == null) {
+                    throw new IllegalArgumentException("Option " + BASE_PATH +
+                    " cannot be empty when api key is specified.");
+                }
+            }
+            String port = DEFAULT_PORT;
             if (cmdline.hasOption(PORT)) {
                 port = cmdline.getOptionValue(PORT);
-                conf.set(MarkLogicConstants.OUTPUT_PORT, port);
             }
+            // If connecting to ML Cloud, ignore port input and use default 443
+            if (conf.get(MarkLogicConstants.OUTPUT_API_KEY) != null) {
+                port = DEFAULT_ML_CLOUD_PORT;
+            }
+            conf.set(MarkLogicConstants.OUTPUT_PORT, port);
             if (cmdline.hasOption(HOST)) {
                 String hosts = cmdline.getOptionValue(HOST);
-                InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
+                InternalUtilities.verifyHosts(
+                    hosts, conf.get(MarkLogicConstants.OUTPUT_PORT));
                 conf.set(MarkLogicConstants.OUTPUT_HOST, hosts);
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
@@ -656,6 +676,13 @@ public enum Command implements ConfigConstants {
             } else { // use HTTP compliant mode to true for initial probing
                 HttpChannel.setUseHTTP(true);
             }
+            // If base path is specified, it means that ML server is sitting
+            // behind a reverse proxy. Ignore input from -restrict_hosts and
+            // enable restrict_hosts and http compliant mode
+            if (conf.get(MarkLogicConstants.OUTPUT_BASE_PATH) != null) {
+                conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
+                HttpChannel.setUseHTTP(true);
+            }
             if (cmdline.hasOption(DATABASE)) {
                 String db = cmdline.getOptionValue(DATABASE);
                 conf.set(MarkLogicConstants.OUTPUT_DATABASE_NAME, db);
@@ -669,6 +696,10 @@ public enum Command implements ConfigConstants {
                             "Unrecognized option argument for " + SSL
                             + ": " + arg);
                 }
+            }
+            // If api key is specified, ignore input from -ssl and enable ssl
+            if (conf.get(MarkLogicConstants.OUTPUT_API_KEY) != null) {
+                conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
             }
             applyProtocol(conf, cmdline, SSL_PROTOCOL, MarkLogicConstants.OUTPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(KEYSTORE_PATH)) {
@@ -866,6 +897,14 @@ public enum Command implements ConfigConstants {
                             " is not applicable for " + inputType); 
                 }
             }
+            if (cmdline.hasOption(TOKEN_ENDPOINT)) {
+                String tokenEndpoint = cmdline.getOptionValue(TOKEN_ENDPOINT);
+                conf.set(MarkLogicConstants.OUTPUT_TOKEN_ENDPOINT, tokenEndpoint);
+            }
+            if (cmdline.hasOption(GRANT_TYPE)) {
+                String grantType = cmdline.getOptionValue(GRANT_TYPE);
+                conf.set(MarkLogicConstants.OUTPUT_GRANT_TYPE, grantType);
+            }
         }
 
         @Override
@@ -920,6 +959,7 @@ public enum Command implements ConfigConstants {
             configCopyOptions(options);
             configFilteringOptions(options);
             configRedactionOptions(options);
+            configMLCloudAuthOptions(options);
 
             Option outputType = OptionBuilder
                 .withArgName("string")
@@ -1052,14 +1092,33 @@ public enum Command implements ConfigConstants {
                     conf.set(MarkLogicConstants.INDENTED, indent.name());
                 }                
             }
-            String port = null;
+            if (cmdline.hasOption(BASE_PATH)) {
+                String basePath = cmdline.getOptionValue(BASE_PATH);
+                conf.set(MarkLogicConstants.INPUT_BASE_PATH, basePath);
+            }
+            if (cmdline.hasOption(API_KEY)) {
+                String apiKey = cmdline.getOptionValue(API_KEY);
+                conf.set(MarkLogicConstants.INPUT_API_KEY, apiKey);
+                // When api key is specified, we are expecting a non-empty
+                // base path.
+                if (conf.get(MarkLogicConstants.INPUT_BASE_PATH) == null) {
+                    throw new IllegalArgumentException("Option " + BASE_PATH +
+                        " cannot be empty when api key is specified.");
+                }
+            }
+            String port = DEFAULT_PORT;
             if (cmdline.hasOption(PORT)) {
                 port = cmdline.getOptionValue(PORT);
-                conf.set(MarkLogicConstants.INPUT_PORT, port);
             }
+            // If connecting to ML Cloud, ignore port input and use default 443
+            if (conf.get(MarkLogicConstants.INPUT_API_KEY) != null) {
+                port = DEFAULT_ML_CLOUD_PORT;
+            }
+            conf.set(MarkLogicConstants.INPUT_PORT, port);
             if (cmdline.hasOption(HOST)) {
                 String hosts = cmdline.getOptionValue(HOST);
-                InternalUtilities.verifyHosts(hosts, port==null?"8000":port);
+                InternalUtilities.verifyHosts(
+                    hosts, conf.get(MarkLogicConstants.INPUT_PORT));
                 conf.set(MarkLogicConstants.INPUT_HOST, hosts);
             }
             if (cmdline.hasOption(RESTRICT_HOSTS)) {
@@ -1073,6 +1132,12 @@ public enum Command implements ConfigConstants {
                                     RESTRICT_INPUT_HOSTS + ": " + restrict);
                 }
             } else { // use HTTP compliant mode to true for initial probing
+                HttpChannel.setUseHTTP(true);
+            }
+            // If base path is specified, ignore input from -restrict_hosts and
+            // enable restrict hosts and http compliant mode
+            if (conf.get(MarkLogicConstants.INPUT_BASE_PATH) != null) {
+                conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
                 HttpChannel.setUseHTTP(true);
             }
             if (cmdline.hasOption(USERNAME)) {
@@ -1096,6 +1161,10 @@ public enum Command implements ConfigConstants {
                             "Unrecognized option argument for " + SSL
                             + ": " + arg);
                 } 
+            }
+            // If connecting to ML Cloud, ignore input from ssl and enable ssl
+            if (conf.get(MarkLogicConstants.INPUT_API_KEY) != null) {
+                conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
             }
             applyProtocol(conf, cmdline, SSL_PROTOCOL, MarkLogicConstants.INPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(KEYSTORE_PATH)) {
@@ -1131,6 +1200,14 @@ public enum Command implements ConfigConstants {
                 }
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
             }
+            if (cmdline.hasOption(TOKEN_ENDPOINT)) {
+                String tokenEndpoint = cmdline.getOptionValue(TOKEN_ENDPOINT);
+                conf.set(MarkLogicConstants.INPUT_TOKEN_ENDPOINT, tokenEndpoint);
+            }
+            if (cmdline.hasOption(GRANT_TYPE)) {
+                String grantType = cmdline.getOptionValue(GRANT_TYPE);
+                conf.set(MarkLogicConstants.INPUT_GRANT_TYPE, grantType);
+            }
         }
 
 		@Override
@@ -1156,6 +1233,7 @@ public enum Command implements ConfigConstants {
             configBatchTxn(options);
             configModule(options);
             configRedactionOptions(options);
+            configCopyMLCloudAuthOptions(options);
             
             Option inputUsername = OptionBuilder
                 .withArgName("string")
@@ -1239,6 +1317,20 @@ public enum Command implements ConfigConstants {
                             "Input Truststore password to use for SSL connections")
                     .create(INPUT_TRUSTSTORE_PASSWD);
             options.addOption(inputTruststorePasswd);
+            Option inputBasePath = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription(
+                    "Input base path that maps to a MarkLogic Application Server")
+                .create(INPUT_BASE_PATH);
+            options.addOption(inputBasePath);
+            Option inputApiKey = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription(
+                    "API key for the input MarkLogic Cloud")
+                .create(INPUT_API_KEY);
+            options.addOption(inputApiKey);
 
             Option outputUsername = OptionBuilder
                 .withArgName("string")
@@ -1322,7 +1414,20 @@ public enum Command implements ConfigConstants {
                             "Output Truststore password to use for SSL connections")
                     .create(OUTPUT_TRUSTSTORE_PASSWD);
             options.addOption(outputTruststorePasswd);
-
+            Option outputBasePath = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription(
+                    "Output base path that maps to a MarkLogic Application Server")
+                .create(OUTPUT_BASE_PATH);
+            options.addOption(outputBasePath);
+            Option outputApiKey = OptionBuilder
+                .withArgName("string")
+                .hasArg()
+                .withDescription(
+                    "API key for the output MarkLogic Cloud")
+                .create(OUTPUT_API_KEY);
+            options.addOption(outputApiKey);
             Option tcf = OptionBuilder
                 .withArgName("string")
                 .hasArg()
@@ -1429,15 +1534,34 @@ public enum Command implements ConfigConstants {
                 String password = cmdline.getOptionValue(OUTPUT_PASSWORD);
                 conf.set(MarkLogicConstants.OUTPUT_PASSWORD, password);
             }
-            String outputPort = null;
+            if (cmdline.hasOption(OUTPUT_BASE_PATH)) {
+                String outputBasePath = cmdline.getOptionValue(OUTPUT_BASE_PATH);
+                conf.set(MarkLogicConstants.OUTPUT_BASE_PATH, outputBasePath);
+            }
+            if (cmdline.hasOption(OUTPUT_API_KEY)) {
+                String outputApiKey = cmdline.getOptionValue(OUTPUT_API_KEY);
+                conf.set(MarkLogicConstants.OUTPUT_API_KEY, outputApiKey);
+                // When api key is specified, we are expecting a non-empty
+                // base path.
+                if (conf.get(MarkLogicConstants.OUTPUT_BASE_PATH) == null) {
+                    throw new IllegalArgumentException(
+                        "Option " + OUTPUT_BASE_PATH +
+                        " cannot be empty when output api key is specified.");
+                }
+            }
+            String outputPort = DEFAULT_PORT;
             if (cmdline.hasOption(OUTPUT_PORT)) {
                 outputPort = cmdline.getOptionValue(OUTPUT_PORT);
-                conf.set(MarkLogicConstants.OUTPUT_PORT, outputPort);
             }
+            // If connecting to ML Cloud, ignore port input and use default 443
+            if (conf.get(MarkLogicConstants.OUTPUT_API_KEY) != null) {
+                outputPort = DEFAULT_ML_CLOUD_PORT;
+            }
+            conf.set(MarkLogicConstants.OUTPUT_PORT, outputPort);
             if (cmdline.hasOption(OUTPUT_HOST)) {
                 String outputHosts = cmdline.getOptionValue(OUTPUT_HOST);
                 InternalUtilities.verifyHosts(
-                        outputHosts, outputPort==null?"8000":outputPort);
+                        outputHosts, conf.get(MarkLogicConstants.OUTPUT_PORT));
                 conf.set(MarkLogicConstants.OUTPUT_HOST, outputHosts);
             }
             if (cmdline.hasOption(OUTPUT_DATABASE)) {
@@ -1457,6 +1581,12 @@ public enum Command implements ConfigConstants {
             } else { // use HTTP compliant mode to true for initial probing
                 HttpChannel.setUseHTTP(true);
             }
+            // If base path is specified, ignore input from -restrict_hosts and
+            // enable restrict_hosts and http compliant mode
+            if (conf.get(MarkLogicConstants.OUTPUT_BASE_PATH) != null) {
+                conf.setBoolean(MarkLogicConstants.OUTPUT_RESTRICT_HOSTS, true);
+                HttpChannel.setUseHTTP(true);
+            }
             if (cmdline.hasOption(OUTPUT_SSL)) {
                 String arg = cmdline.getOptionValue(OUTPUT_SSL);
                 if (isNullOrEqualsTrue(arg)){
@@ -1466,6 +1596,10 @@ public enum Command implements ConfigConstants {
                             "Unrecognized option argument for " + OUTPUT_SSL
                             + ": " + arg);
                 }
+            }
+            // If api key is specified, ignore input from -ssl and enable ssl
+            if (conf.get(MarkLogicConstants.OUTPUT_API_KEY) != null) {
+                conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
             }
             applyProtocol(conf, cmdline, OUTPUT_SSL_PROTOCOL, MarkLogicConstants.OUTPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(OUTPUT_KEYSTORE_PATH)) {
@@ -1486,6 +1620,14 @@ public enum Command implements ConfigConstants {
                 String passwd = cmdline.getOptionValue(OUTPUT_TRUSTSTORE_PASSWD);
                 conf.set(MarkLogicConstants.OUTPUT_TRUSTSTORE_PASSWD, passwd);
             }
+            if (cmdline.hasOption(OUTPUT_TOKEN_ENDPOINT)) {
+                String outputTokenEndpoint = cmdline.getOptionValue(OUTPUT_TOKEN_ENDPOINT);
+                conf.set(MarkLogicConstants.OUTPUT_TOKEN_ENDPOINT, outputTokenEndpoint);
+            }
+            if (cmdline.hasOption(OUTPUT_GRANT_TYPE)) {
+                String outputGrantType = cmdline.getOptionValue(OUTPUT_GRANT_TYPE);
+                conf.set(MarkLogicConstants.OUTPUT_GRANT_TYPE, outputGrantType);
+            }
 
             if (cmdline.hasOption(INPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(INPUT_USERNAME);
@@ -1495,15 +1637,34 @@ public enum Command implements ConfigConstants {
                 String password = cmdline.getOptionValue(INPUT_PASSWORD);
                 conf.set(MarkLogicConstants.INPUT_PASSWORD, password);
             }
-            String inputPort = null;
+            if (cmdline.hasOption(INPUT_BASE_PATH)) {
+                String inputBasePath = cmdline.getOptionValue(INPUT_BASE_PATH);
+                conf.set(MarkLogicConstants.INPUT_BASE_PATH, inputBasePath);
+            }
+            if (cmdline.hasOption(INPUT_API_KEY)) {
+                String inputApiKey = cmdline.getOptionValue(INPUT_API_KEY);
+                conf.set(MarkLogicConstants.INPUT_API_KEY, inputApiKey);
+                // When api key is specified, we are expecting a non-empty
+                // base path.
+                if (conf.get(MarkLogicConstants.INPUT_BASE_PATH) == null) {
+                    throw new IllegalArgumentException(
+                        "Option " + INPUT_BASE_PATH +
+                            " cannot be empty when input api key is specified.");
+                }
+            }
+            String inputPort = DEFAULT_PORT;
             if (cmdline.hasOption(INPUT_PORT)) {
                 inputPort = cmdline.getOptionValue(INPUT_PORT);
-                conf.set(MarkLogicConstants.INPUT_PORT, inputPort);
             }
+            // If connecting to ML Cloud, ignore port input and use default 443
+            if (conf.get(MarkLogicConstants.INPUT_API_KEY) != null) {
+                inputPort = DEFAULT_ML_CLOUD_PORT;
+            }
+            conf.set(MarkLogicConstants.INPUT_PORT, inputPort);
             if (cmdline.hasOption(INPUT_HOST)) {
                 String inputHosts = cmdline.getOptionValue(INPUT_HOST);
                 InternalUtilities.verifyHosts(
-                        inputHosts, inputPort==null?"8000":inputPort);
+                        inputHosts, conf.get(MarkLogicConstants.INPUT_PORT));
                 conf.set(MarkLogicConstants.INPUT_HOST, inputHosts);
             }
             if (cmdline.hasOption(INPUT_DATABASE)) {
@@ -1523,6 +1684,12 @@ public enum Command implements ConfigConstants {
             } else { // use HTTP compliant mode to true for initial probing
                 HttpChannel.setUseHTTP(true);
             }
+            // If base path is specified, ignore input from -restrict_hosts and
+            // enable restrict_hosts and http compliant mode
+            if (conf.get(MarkLogicConstants.INPUT_BASE_PATH) != null) {
+                conf.setBoolean(MarkLogicConstants.INPUT_RESTRICT_HOSTS, true);
+                HttpChannel.setUseHTTP(true);
+            }
             if (cmdline.hasOption(INPUT_SSL)) {
                 String arg = cmdline.getOptionValue(INPUT_SSL);
                 if (isNullOrEqualsTrue(arg)){
@@ -1532,6 +1699,10 @@ public enum Command implements ConfigConstants {
                             "Unrecognized option argument for " + INPUT_SSL
                             + ": " + arg);
                 }
+            }
+            // If api key is specified, ignore input from -ssl and enable ssl
+            if (conf.get(MarkLogicConstants.INPUT_API_KEY) != null) {
+                conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
             }
             applyProtocol(conf, cmdline, INPUT_SSL_PROTOCOL, MarkLogicConstants.INPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(INPUT_KEYSTORE_PATH)) {
@@ -1551,6 +1722,14 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(INPUT_TRUSTSTORE_PASSWD)) {
                 String passwd = cmdline.getOptionValue(INPUT_TRUSTSTORE_PASSWD);
                 conf.set(MarkLogicConstants.INPUT_TRUSTSTORE_PASSWD, passwd);
+            }
+            if (cmdline.hasOption(INPUT_TOKEN_ENDPOINT)) {
+                String inputTokenEndpoint = cmdline.getOptionValue(INPUT_TOKEN_ENDPOINT);
+                conf.set(MarkLogicConstants.INPUT_TOKEN_ENDPOINT, inputTokenEndpoint);
+            }
+            if (cmdline.hasOption(INPUT_GRANT_TYPE)) {
+                String inputGrantType = cmdline.getOptionValue(INPUT_GRANT_TYPE);
+                conf.set(MarkLogicConstants.INPUT_GRANT_TYPE, inputGrantType);
             }
 
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
@@ -2018,6 +2197,13 @@ public enum Command implements ConfigConstants {
                         "Truststore password to use for SSL connections")
                 .create(TRUSTSTORE_PASSWD);
         options.addOption(truststorePasswd);
+        Option basePath = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "Base path that maps to a MarkLogic Application Server")
+            .create(BASE_PATH);
+        options.addOption(basePath);
     }
 
     static void configCopyOptions(Options options) {
@@ -2149,6 +2335,75 @@ public enum Command implements ConfigConstants {
             .withDescription("cts query to retrieve documents with")
             .create(QUERY_FILTER);
         options.addOption(qf);
+    }
+
+    static void configMLCloudAuthOptions(Options options) {
+        Option apiKey = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "A unique key assigned to a MarkLogic Cloud user")
+            .create(API_KEY);
+        options.addOption(apiKey);
+        Option tokenEndpoint = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "MarkLogic Cloud token endpoint for obtaining session tokens")
+            .create(TOKEN_ENDPOINT);
+        options.addOption(tokenEndpoint);
+        Option grantType = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "Methods through which applications can gain access tokens")
+            .create(GRANT_TYPE);
+        options.addOption(grantType);
+    }
+
+    static void configCopyMLCloudAuthOptions(Options options) {
+        Option inputApiKey = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "A unique key assigned to a input MarkLogic Cloud user")
+            .create(INPUT_API_KEY);
+        options.addOption(inputApiKey);
+        Option outputApiKey = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "A unique key assigned to an output MarkLogic Cloud user")
+            .create(OUTPUT_API_KEY);
+        options.addOption(outputApiKey);
+        Option inputTokenEndpoint = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "Input MarkLogic Cloud token endpoint for obtaining session tokens")
+            .create(INPUT_TOKEN_ENDPOINT);
+        options.addOption(inputTokenEndpoint);
+        Option outputTokenEndpoint = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "Output MarkLogic Cloud token endpoint for obtaining session tokens")
+            .create(OUTPUT_TOKEN_ENDPOINT);
+        options.addOption(outputTokenEndpoint);
+        Option inputGrantType = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "Input methods through which applications can gain access tokens")
+            .create(INPUT_GRANT_TYPE);
+        options.addOption(inputGrantType);
+        Option outputGrantType = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "Output methods through which applications can gain access tokens")
+            .create(OUTPUT_GRANT_TYPE);
+        options.addOption(outputGrantType);
     }
     
     static void applyModuleConfigOptions(Configuration conf,
