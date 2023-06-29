@@ -690,7 +690,7 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(SSL)) {
                 String arg = cmdline.getOptionValue(SSL);
                 if (isNullOrEqualsTrue(arg)){
-                    conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_USE_SSL, true);
                 } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + SSL
@@ -699,7 +699,7 @@ public enum Command implements ConfigConstants {
             }
             // If api key is specified, ignore input from -ssl and enable ssl
             if (conf.get(MarkLogicConstants.OUTPUT_API_KEY) != null) {
-                conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
+                conf.setBoolean(MarkLogicConstants.OUTPUT_USE_SSL, true);
             }
             applyProtocol(conf, cmdline, SSL_PROTOCOL, MarkLogicConstants.OUTPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(KEYSTORE_PATH)) {
@@ -1155,7 +1155,7 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(SSL)) {
                 String arg = cmdline.getOptionValue(SSL);
                 if (isNullOrEqualsTrue(arg)){
-                    conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
+                    conf.setBoolean(MarkLogicConstants.INPUT_USE_SSL, true);
                 } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + SSL
@@ -1164,7 +1164,7 @@ public enum Command implements ConfigConstants {
             }
             // If connecting to ML Cloud, ignore input from ssl and enable ssl
             if (conf.get(MarkLogicConstants.INPUT_API_KEY) != null) {
-                conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
+                conf.setBoolean(MarkLogicConstants.INPUT_USE_SSL, true);
             }
             applyProtocol(conf, cmdline, SSL_PROTOCOL, MarkLogicConstants.INPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(KEYSTORE_PATH)) {
@@ -1590,7 +1590,7 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(OUTPUT_SSL)) {
                 String arg = cmdline.getOptionValue(OUTPUT_SSL);
                 if (isNullOrEqualsTrue(arg)){
-                    conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
+                    conf.setBoolean(MarkLogicConstants.OUTPUT_USE_SSL, true);
                 } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + OUTPUT_SSL
@@ -1599,7 +1599,7 @@ public enum Command implements ConfigConstants {
             }
             // If api key is specified, ignore input from -ssl and enable ssl
             if (conf.get(MarkLogicConstants.OUTPUT_API_KEY) != null) {
-                conf.set(MarkLogicConstants.OUTPUT_USE_SSL, "true");
+                conf.setBoolean(MarkLogicConstants.OUTPUT_USE_SSL, true);
             }
             applyProtocol(conf, cmdline, OUTPUT_SSL_PROTOCOL, MarkLogicConstants.OUTPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(OUTPUT_KEYSTORE_PATH)) {
@@ -1693,7 +1693,7 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(INPUT_SSL)) {
                 String arg = cmdline.getOptionValue(INPUT_SSL);
                 if (isNullOrEqualsTrue(arg)){
-                    conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
+                    conf.setBoolean(MarkLogicConstants.INPUT_USE_SSL, true);
                 } else if (!"false".equalsIgnoreCase(arg)) {
                     throw new IllegalArgumentException(
                             "Unrecognized option argument for " + INPUT_SSL
@@ -1702,7 +1702,7 @@ public enum Command implements ConfigConstants {
             }
             // If api key is specified, ignore input from -ssl and enable ssl
             if (conf.get(MarkLogicConstants.INPUT_API_KEY) != null) {
-                conf.set(MarkLogicConstants.INPUT_USE_SSL, "true");
+                conf.setBoolean(MarkLogicConstants.INPUT_USE_SSL, true);
             }
             applyProtocol(conf, cmdline, INPUT_SSL_PROTOCOL, MarkLogicConstants.INPUT_SSL_PROTOCOL);
             if (cmdline.hasOption(INPUT_KEYSTORE_PATH)) {
