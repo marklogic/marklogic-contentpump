@@ -76,12 +76,12 @@ public class TestImportArchive {
     
     @Test
     public void testArchiveTransformWithNaked() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/mixnakedzip -fastload"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -input_file_type archive"
             + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
@@ -114,12 +114,12 @@ public class TestImportArchive {
     
     @Test
     public void testArchiveTransformWithNakedTxn1() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/mixnakedzip -fastload -transaction_size 1"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -input_file_type archive"
             + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");

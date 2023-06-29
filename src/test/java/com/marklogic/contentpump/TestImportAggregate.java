@@ -45,13 +45,13 @@ public class TestImportAggregate {
     
     @Test
     public void testImportTransformMedlineFilenameAsCollection() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/agg/medline04.small.xml"
             + " -thread_count 1"// -aggregate_uri_id PMID"
             + " -input_file_type aggregates"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -filename_as_collection true"
             + " -output_collections abc,cde"
             + " -transform_namespace http://marklogic.com/module_invoke"
@@ -335,11 +335,11 @@ public class TestImportAggregate {
     
     @Test
     public void testImportTransformMedlineZip() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/medlinezip/medline04.zip"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -thread_count 2 -aggregate_uri_id PMID"
             + " -input_file_type aggregates -input_compressed -input_compressed true"
@@ -362,11 +362,11 @@ public class TestImportAggregate {
     
     @Test
     public void testImportTransformMedlineZipGenId() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/medlinezip/medline04.2.zip"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -thread_count 2"
             + " -input_file_type aggregates -input_compressed -input_compressed true"
@@ -389,12 +389,12 @@ public class TestImportAggregate {
     
     @Test
     public void testImportTransformMedlineZipFast() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password"
             + " admin -input_file_path " + Constants.TEST_PATH.toUri()
             + "/medlinezip/medline04.zip"
             + " -fastload"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -thread_count 2 -aggregate_uri_id PMID"
             + " -input_file_type aggregates -input_compressed -input_compressed true"
