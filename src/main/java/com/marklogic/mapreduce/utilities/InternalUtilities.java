@@ -52,6 +52,7 @@ import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.contentpump.ConfigConstants;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.DatabaseDocument;
@@ -125,16 +126,17 @@ public class InternalUtilities implements MarkLogicConstants {
     throws XccConfigException, IOException {      
         String user = conf.get(INPUT_USERNAME, "");
         String password = conf.get(INPUT_PASSWORD, "");
-        String port = conf.get(INPUT_PORT,"8000");
+        String port = conf.get(INPUT_PORT, ConfigConstants.DEFAULT_PORT);
         String db = conf.get(INPUT_DATABASE_NAME);
+        String basePath = conf.get(INPUT_BASE_PATH);
         int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
         if (useSsl) {
             return getSecureContentSource(host, portInt, user, password, 
-                        db, getInputSslOptions(conf));
+                        db, basePath, getInputSslOptions(conf));
         }
         return ContentSourceFactory.newContentSource(host, portInt, 
-                user, password.toCharArray(), db);
+                user, password.toCharArray(), db, basePath);
     }
     
     private static SslConfigOptions getInputSslOptions(Configuration conf) throws XccConfigException {
@@ -356,7 +358,7 @@ public class InternalUtilities implements MarkLogicConstants {
     }
 
     static ContentSource getSecureContentSource(String host, int port,
-            String user, String password, String db, 
+            String user, String password, String db, String basePath,
             SslConfigOptions sslOptions) 
     throws XccConfigException {
         ContentSource contentSource = null;
@@ -374,7 +376,7 @@ public class InternalUtilities implements MarkLogicConstants {
   
         // construct content source
         contentSource = ContentSourceFactory.newContentSource(
-                host, port, user, password.toCharArray(), db, options);
+                host, port, user, password.toCharArray(), db, basePath, options);
  
         return contentSource;
     }
@@ -463,16 +465,17 @@ public class InternalUtilities implements MarkLogicConstants {
     throws XccConfigException, IOException {
         String user = conf.get(OUTPUT_USERNAME, "");
         String password = conf.get(OUTPUT_PASSWORD, "");
-        String port = conf.get(OUTPUT_PORT,"8000");
+        String port = conf.get(OUTPUT_PORT, ConfigConstants.DEFAULT_PORT);
         String db = conf.get(OUTPUT_DATABASE_NAME);
+        String basePath = conf.get(OUTPUT_BASE_PATH);
         int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
         if (useSsl) {
             return getSecureContentSource(hostName, portInt, user, password,
-                        db, getOutputSslOptions(conf));
+                        db, basePath, getOutputSslOptions(conf));
         }
         return ContentSourceFactory.newContentSource(hostName, portInt, 
-                user, password.toCharArray(), db);
+                user, password.toCharArray(), db, basePath);
     }
     
     /**
