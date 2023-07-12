@@ -60,6 +60,7 @@ public interface ConfigConstants {
     static final String PASSWORD = "password";
     static final String HOST = "host";
     static final String PORT = "port";
+    static final String DEFAULT_PORT = "8000";
     static final String DATABASE = "database";
     static final String OUTPUT_DIRECTORY = "output_directory";
     static final String OUTPUT_COLLECTIONS = "output_collections";
@@ -275,4 +276,25 @@ public interface ConfigConstants {
     static final String POLLING_INIT_DELAY = "polling_init_delay";
     static final String POLLING_PERIOD = "polling_period";
     static final TimeUnit POLLING_TIME_UNIT = TimeUnit.MINUTES;
+
+    /**
+     * 11.1.0: Support reverse proxy constants
+     */
+    static final String BASE_PATH = "base_path";
+    static final String INPUT_BASE_PATH = "input_base_path";
+    static final String OUTPUT_BASE_PATH = "output_base_path";
+
+    /**
+     * 11.1.0: Support token-based authentication constants
+     */
+    static final String DEFAULT_ML_CLOUD_PORT = "443";
+    static final String API_KEY = "api_key";
+    static final String INPUT_API_KEY = "input_api_key";
+    static final String OUTPUT_API_KEY = "output_api_key";
+    static final String TOKEN_ENDPOINT = "token_endpoint";
+    static final String INPUT_TOKEN_ENDPOINT = "input_token_endpoint";
+    static final String OUTPUT_TOKEN_ENDPOINT = "output_token_endpoint";
+    static final String GRANT_TYPE = "grant_type";
+    static final String INPUT_GRANT_TYPE = "input_grant_type";
+    static final String OUTPUT_GRANT_TYPE = "output_grant_type";
 }
