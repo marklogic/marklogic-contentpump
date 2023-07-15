@@ -21,6 +21,7 @@
     <xccVersion>${versionString}</xccVersion>
     <hadoopVersion>3.3.4</hadoopVersion>
     <jacksonVersion>2.14.0-rc3</jacksonVersion>
+    <jenaVersion>4.9.0</jenaVersion>
     <commonsCsvVersion>1.5.2-marklogic</commonsCsvVersion>
     <bundleArtifact>apache</bundleArtifact>
 
@@ -100,6 +101,7 @@
             <classpathDependencyExclude>ch.qos.logback:logback-classic</classpathDependencyExclude>
             <classpathDependencyExclude>org.slf4j:slf4j-reload4j</classpathDependencyExclude>
             <classpathDependencyExclude>ch.qos.reload4j:reload4j</classpathDependencyExclude>
+            <classpathDependencyExclude>xml-apis:xml-apis</classpathDependencyExclude>
           </classpathDependencyExcludes>
           <skipTests>${skipTests}</skipTests>
           <argline>-DCONTENTPUMP_HOME=${contentpumpHome} -DOUTPUT_PATH=${testOutputPath} -DTEST_DB_PORT=${testDbPort} -DCOPY_DB_PORT=${copyDbPort} -DTEST_DB=${testDb} -DCOPY_DB=${copyDb}</argline>
@@ -112,17 +114,18 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.5.1</version>
+        <version>3.11.0</version>
         <configuration>
           <compilerArgs>
             <arg>-Xlint</arg>
           </compilerArgs>
+          <release>11</release>
           <failOnError>true</failOnError>
           <showDeprecation>true</showDeprecation>
           <debug>${compile.debug.symbols.flag}</debug>
           <fork>true</fork>
-          <source>1.7</source>
-          <target>1.7</target>
+          <source>11</source>
+          <target>11</target>
         </configuration>
       </plugin>
       <plugin>
@@ -232,6 +235,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.10.3</version>
         <configuration>
+          <source>8</source>
           <header>${productNameShort} ${versionString}</header>
           <author>false</author>
           <overview>${overviewFile}</overview>
@@ -454,22 +458,49 @@
         <dependency>
           <groupId>org.apache.jena</groupId>
           <artifactId>jena-arq</artifactId>
-          <version>2.13.0</version>
+          <version>${jenaVersion}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.jena</groupId>
           <artifactId>jena-core</artifactId>
-          <version>2.13.0</version>
+          <version>${jenaVersion}</version>
         </dependency>
         <dependency>
           <groupId>org.apache.jena</groupId>
           <artifactId>jena-iri</artifactId>
-          <version>1.1.2</version>
+          <version>${jenaVersion}</version>
         </dependency>
         <dependency>
-          <groupId>xml-apis</groupId>
-          <artifactId>xml-apis</artifactId>
-          <version>1.4.01</version>
+          <groupId>org.apache.jena</groupId>
+          <artifactId>jena-base</artifactId>
+          <version>${jenaVersion}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.jena</groupId>
+          <artifactId>jena-shaded-guava</artifactId>
+          <version>4.8.0</version>
+        </dependency>
+        <dependency>
+          <groupId>com.github.andrewoma.dexx</groupId>
+          <artifactId>collection</artifactId>
+          <version>0.7</version>
+          <scope>runtime</scope>
+        </dependency>
+        <dependency>
+          <groupId>com.github.ben-manes.caffeine</groupId>
+          <artifactId>caffeine</artifactId>
+          <version>3.1.6</version>
+          <scope>runtime</scope>
+        </dependency>
+        <dependency>
+          <groupId>jakarta.xml.ws</groupId>
+          <artifactId>jakarta.xml.ws-api</artifactId>
+          <version>4.0.0</version>
+        </dependency>
+        <dependency>
+          <groupId>com.sun.xml.ws</groupId>
+          <artifactId>jaxws-rt</artifactId>
+          <version>4.0.0</version>
         </dependency>
         <dependency>
           <groupId>com.thoughtworks.xstream</groupId>
@@ -700,22 +731,49 @@
     <dependency>
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-arq</artifactId>
-      <version>2.13.0</version>
+      <version>${jenaVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-core</artifactId>
-      <version>2.13.0</version>
+      <version>${jenaVersion}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.jena</groupId>
       <artifactId>jena-iri</artifactId>
-      <version>1.1.2</version>
+      <version>${jenaVersion}</version>
     </dependency>
     <dependency>
-      <groupId>xml-apis</groupId>
-      <artifactId>xml-apis</artifactId>
-      <version>1.4.01</version>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-base</artifactId>
+      <version>${jenaVersion}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.jena</groupId>
+      <artifactId>jena-shaded-guava</artifactId>
+      <version>4.8.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.andrewoma.dexx</groupId>
+      <artifactId>collection</artifactId>
+      <version>0.7</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>3.1.6</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.xml.ws</groupId>
+      <artifactId>jakarta.xml.ws-api</artifactId>
+      <version>4.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.xml.ws</groupId>
+      <artifactId>jaxws-rt</artifactId>
+      <version>4.0.0</version>
     </dependency>
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
@@ -740,7 +798,7 @@
     <dependency>
       <groupId>com.fasterxml.woodstox</groupId>
       <artifactId>woodstox-core</artifactId>
-      <version>6.4.0</version>
+      <version>6.5.1</version>
     </dependency>
     <dependency>
       <groupId>org.codehaus.woodstox</groupId>
