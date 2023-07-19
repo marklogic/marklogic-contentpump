@@ -15,72 +15,17 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Release Note
 
+
+### What's New in mlcp and Hadoop Connector 11.0.3
+- Removed an unused json dependency to mitigate security vulnerability.
+
 ### What's New in mlcp and Hadoop Connector 11.0.2
 - Upgrade libthrift from 0.14.0 to 0.17.0 to mitigate security vulnerability.
 
 ### What's New in mlcp and Hadoop Connector 11.0.0
 - Upgrade Hadoop Library to 3.3.4
-- Upgrade jackson-annotations, jackson-core, jackson-databind, Xerces, woodstox-core to mitigate security vulnerability.
+- Upgrade jackson-annotations, jackson-core, jackson-databind, xerces, woodstox-core to mitigate security vulnerability.
 - Bug fixes.
-
-### What's New in mlcp and Hadoop Connector 10.0.9.5
-- Upgrade Hadoop Library to 3.3.0
-- Upgrade Httpclient, Xstream, jackson-annotations, jackson-core, jackson-databind, logback-classic, commons-configuration2 to mitigate security vulnerability.
-- Bug fixes.
-
-### What's New in mlcp and Hadoop Connector 10.0.9.2
-- Upgrade guava from 25.0 to 31.1 to mitigate security vulnerability [CVE-2020-8908](https://nvd.nist.gov/vuln/detail/CVE-2020-8908)
-
-### What's New in mlcp and Hadoop Connector 10.0.9
-- Upgrade log4j from 2.17.0 to 2.17.1 to mitigate security vulnerability [CVE-2021-44832](https://nvd.nist.gov/vuln/detail/CVE-2021-44832).
-- Upgrade dependencies for fixing security vulnerabilities.
-- Bug fixes.
-
-### What's New in mlcp and Hadoop Connector 10.0.8.2
-- Upgrade log4j from 1.2.17 to 2.17.0 to mitigate security vulnerability [CVE-2019-17571](https://nvd.nist.gov/vuln/detail/CVE-2019-17571).
-
-### What's New in mlcp and Hadoop Connector 10.0.8
-- Bug fixes.
-
-### What's New in mlcp and Hadoop Connector 10.0.7
-- Upgrade Hadoop Library to 2.7.2.
-- Upgrade dependencies for fixing security vulnerabilities.
-- Bug fixes.
-
-### What's New in mlcp and Hadoop Connector 10.0.6
-- Add auto-scaling capability (scale-out/scale-in) for MLCP import to be leveraged by DHS.
-- Add new command line options: <code>-max\_thread\_percentage</code>, <code>-polling\_init\_delay</code>, <code>-polling_period</code>.
-- Bug fixes.
-
-### What's New in mlcp and Hadoop Connector 10.0.5
-- Enable MLCP retry inserting documents when commit fails to make mlcp more robust.
-- Support passing Java Keystore through mlcp command line for TLS Client Authentication connections.
-- Refactor mlcp repo to remove Hadoop Connector from a separate release.
-- Add initial server thread polling for mlcp import. 
-- Add a new command line option <code>-max_threads</code>.
-- Disable mlcp distributed mode.
-- Upgrade dependencies for fixing security vulnerabilities.
-- Bug fixes.
-
-### What's New in mlcp and Hadoop Connector 10.0.4
-
--  Bug fixes.
-
-### What's New in mlcp and Hadoop Connector 10.0.3
-
--	Bug fixes.
-
-
-### What's New in mlcp and Hadoop Connector 10.0.2
-
--	Bug fixes.
-
-### What's New in mlcp and Hadoop Connector 10.0.1
-
--  Library upgrade.
--	Bug fixes.
-
-
 
 ## Getting Started
 
@@ -111,13 +56,13 @@ $ cd marklogic-contentpump
 $ mvn clean package -DskipTests=true
 ```
 
-The build writes to the respective **deliverable** directory under under the root directory `marklogic-contentpump/`.
+The build writes to the respective **deliverable** directory under the root directory `marklogic-contentpump/`.
 
-For information on contributing to this project see [CONTRIBUTING.md](https://github.com/marklogic/marklogic-contentpump/blob/develop/CONTRIBUTING.md). For information on working on development of this project see [project wiki page](https://github.com/marklogic/marklogic-contentpump/wiki).
+For information on contributing to this project see [CONTRIBUTING.md](https://github.com/marklogic/marklogic-contentpump/blob/develop/CONTRIBUTING.md). For information on working on the development of this project see [project wiki page](https://github.com/marklogic/marklogic-contentpump/wiki).
 
 ## Tests
 
-The unit tests included in this repository are designed to provide illustrative examples of the APIs and to sanity check external contributions. MarkLogic Engineering runs a more comprehensive set of unit, integration, and performance tests internally. To run the unit tests, execute the following command from the `marklogic-contentpump/` root directory:
+The unit tests included in this repository are designed to provide illustrative examples of the APIs and to sanity-check external contributions. MarkLogic Engineering runs a more comprehensive set of unit, integration, and performance tests internally. To run the unit tests, execute the following command from the `marklogic-contentpump/` root directory:
 
 ``` bash
 $ mvn test
