@@ -37,7 +37,7 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
-import org.apache.hadoop.util.ReflectionUtils;=
+import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.jena.riot.lang.RiotParsers;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.system.*;
@@ -348,6 +348,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected void loadModel(final String fsname, final InputStream in) throws IOException {
         if (dataset == null) {
+            // Previously during parsing, we create a runnable thread for each file and run them everytime.
+            // It has been replaced by direct calls to the Jena parser because
+            // Asyncparser manages its parsing in seperate thread. 
             jenaStreamingParser = new RunnableParser(origFn, fsname, in, lang);
             jenaStreamingParser.run();
         } else {
@@ -644,9 +647,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 hasNext = false;
                 return false;
             }
-        }
-        catch (Exception ex){
-            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
                     + origFn + " " + ex.getMessage());
             return false;
         }
@@ -695,9 +697,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     return false;
                 }
             }
-        }
-        catch (Exception ex){
-            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
                     + origFn + " " + ex.getMessage());
             return false;
         }
@@ -736,9 +737,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     return false;
                 }
             }
-        }
-        catch (Exception ex){
-            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
                     + origFn + " " + ex.getMessage());
             return false;
         }
@@ -815,9 +815,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 max--;
             }
                 write("</sem:triples>\n");
-        }
-        catch (Exception ex){
-            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
                     + origFn + " " + ex.getMessage());
             return false;
         }
@@ -854,9 +853,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 max--;
             }
             write("</sem:triples>\n");
-        }
-        catch (Exception ex){
-            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
                     + origFn + " " + ex.getMessage());
             return false;
         }
@@ -915,8 +913,7 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     overflow = true;
                 }
             }
-        }
-        catch (Exception ex){
+        } catch (Exception ex){
             LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
                     + origFn + " " + ex.getMessage());
             return false;
@@ -1048,6 +1045,13 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
 
         public void run() {
+            // Our streamed RDF code flow is based on the parser output written and iterated via a stream. 
+            // So I chose to use the stream-based API calls.
+
+            // For Ntriples and Nquads, the different API calls were suggested by the Jena documentation. 
+            // For the Trig and else part, they are the same API calls but the difference is what they emit after parsing. 
+            // Trig file outputs are emitted as quads and everything else like ttl, json, RDFXML file outputs are emitted as triples. 
+            // Hence same API calls with different stream calls.
             try {
                 ErrorHandler handler =  ErrorHandlerFactory.errorHandlerStd(ErrorHandlerFactory.stdLogger);
                 ParserProfile prof = RiotLib.profile(lang, fsname, handler);
@@ -1055,16 +1059,16 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     rdfInputStream = AsyncParser.of(in, lang, fsname).streamQuads();
                     rdfIter = rdfInputStream.iterator();
                 } else if (lang == Lang.NTRIPLES) {
-                    rdfIter = RiotParsers.createIteratorNTriples(in,prof);
+                    rdfIter = RiotParsers.createIteratorNTriples(in, prof);
                 } else if (lang == Lang.NQUADS) {
-                    rdfIter = RiotParsers.createIteratorNQuads(in,prof);
+                    rdfIter = RiotParsers.createIteratorNQuads(in, prof);
                 }else {
                     rdfInputStream = AsyncParser.of(in, lang, fsname).streamTriples();
                     rdfIter = rdfInputStream.iterator();
                 }
             } catch (Exception ex) {
                 failed = true;
-                LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
+                LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
                     + origFn + " " + ex.getMessage());
             }
         }
