@@ -124,8 +124,8 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         throws IOException {
         if (dataset == null) {
             jenaStreamingParser = new RunnableParser(origFn, fsname, in, lang);
-            // Previously during parsing, we create a runnable thread for each file
-            // and submit it to a executor pool of size 1 for consecutive execution.
+            // Previously during parsing, we create a task for each file
+            // and submit it to a executor pool of size 1 for consecutive execution and performance.
             // It has been replaced by direct calls to the Jena parser because
             // Asyncparser manages its parsing in seperate thread. 
             jenaStreamingParser.run();
