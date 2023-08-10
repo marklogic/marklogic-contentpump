@@ -38,6 +38,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.jena.riot.RDFParserBuilder;
 import org.apache.jena.riot.lang.RiotParsers;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.system.*;
@@ -355,8 +356,10 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             jenaStreamingParser.run();
         } else {
             StreamRDF dest = StreamRDFLib.dataset(dataset.asDatasetGraph());
+            ErrorHandler handler = new ParserErrorHandler(fsname);
             try {
-                AsyncParser.asyncParse(in,lang,fsname,dest);
+                AsyncParser.of(RDFParserBuilder.create().source(in).lang(lang).errorHandler(handler).base(fsname)).asyncParseSources(dest);
+
             } catch (Throwable e) {
                 LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
                     + fsname + " " + e.getMessage());
@@ -1021,6 +1024,50 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
     }
 
+    protected class ParserErrorHandler implements ErrorHandler {
+        String inputfn = "";
+
+        public ParserErrorHandler(String inputfn) {
+            this.inputfn = inputfn;
+        }
+
+        private String formatMessage(String message, long line, long col) {
+            String msg = inputfn + ":";
+            if (line >= 0) {
+                msg += line;
+            }
+            if (line >= 0 && col >= 0) {
+                msg += ":" + col;
+            }
+            return msg += " " + message;
+        }
+
+        @Override
+        public void warning(String message, long line, long col) {
+            //For Bug 24519, to improve readability of logs, I have chose to log the warnings for IRI only in debug mode. 
+            if (message.contains("Bad IRI:") || message.contains("Illegal character in IRI")) {
+                LOG.debug(formatMessage(message, line, col));
+            } else {
+                LOG.warn(formatMessage(message, line, col));
+            }
+        }
+
+        @Override
+        public void error(String message, long line, long col) {
+            //For Bug 24519, to improve readability of logs, I have chose to log the error for IRI only in debug mode. 
+            if (message.contains("Bad character in IRI")) {
+                LOG.debug(formatMessage(message, line, col));
+            } else {
+                LOG.error(formatMessage(message, line, col));
+            }
+        }
+
+        @Override
+        public void fatal(String message, long line, long col) {
+            LOG.fatal(formatMessage(message, line, col));
+        }
+    }
+
     protected class RunnableParser {
         final String fsname;
         final InputStream in;
@@ -1053,17 +1100,17 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             // Trig file outputs are emitted as quads and everything else like ttl, json, RDFXML file outputs are emitted as triples. 
             // Hence same API calls with different stream calls.
             try {
-                ErrorHandler handler =  ErrorHandlerFactory.errorHandlerStd(ErrorHandlerFactory.stdLogger);
+                ErrorHandler handler = new ParserErrorHandler(fsname);
                 ParserProfile prof = RiotLib.profile(lang, fsname, handler);
                 if (lang == Lang.TRIG) {
-                    rdfInputStream = AsyncParser.of(in, lang, fsname).streamQuads();
+                    rdfInputStream = AsyncParser.of(RDFParserBuilder.create().source(in).lang(lang).errorHandler(handler).base(fsname)).streamQuads();
                     rdfIter = rdfInputStream.iterator();
                 } else if (lang == Lang.NTRIPLES) {
                     rdfIter = RiotParsers.createIteratorNTriples(in, prof);
                 } else if (lang == Lang.NQUADS) {
                     rdfIter = RiotParsers.createIteratorNQuads(in, prof);
                 }else {
-                    rdfInputStream = AsyncParser.of(in, lang, fsname).streamTriples();
+                    rdfInputStream = AsyncParser.of(RDFParserBuilder.create().source(in).lang(lang).errorHandler(handler).base(fsname)).streamTriples();
                     rdfIter = rdfInputStream.iterator();
                 }
             } catch (Exception ex) {
