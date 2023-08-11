@@ -17,7 +17,7 @@ package com.marklogic.mapreduce.test;
 
 import java.io.IOException;
 
-import javax.xml.soap.Node;
+import jakarta.xml.soap.Node;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
