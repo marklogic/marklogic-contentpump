@@ -116,7 +116,11 @@
         <include>org.apache.jena:jena-arq:jar:*</include>
         <include>org.apache.jena:jena-core:jar:*</include>
         <include>org.apache.jena:jena-iri:jar:*</include>
-        <include>xml-apis:xml-apis:jar:*</include>
+        <include>org.apache.jena:jena-base:jar:*</include>
+        <include>org.apache.jena:jena-shaded-guava:jar:*</include>
+        <include>org.apache.thrift:libthrift:jar:*</include>
+        <include>com.github.andrewoma.dexx:collection:jar:*</include>
+        <include>com.github.ben-manes.caffeine:caffeine:jar:*</include>
         <include>com.thoughtworks.xstream:xstream:jar:*</include>
         <include>junit:junit:jar:*</include>
         <include>com.fasterxml.woodstox:woodstox-core:jar:*</include>
