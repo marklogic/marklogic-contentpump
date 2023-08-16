@@ -19,8 +19,8 @@
   <properties>
     <versionString>12.0</versionString>
     <xccVersion>${versionString}</xccVersion>
-    <hadoopVersion>3.3.4</hadoopVersion>
-    <jacksonVersion>2.14.0-rc3</jacksonVersion>
+    <hadoopVersion>3.3.6</hadoopVersion>
+    <jacksonVersion>2.15.2</jacksonVersion>
     <jenaVersion>4.9.0</jenaVersion>
     <commonsCsvVersion>1.5.2-marklogic</commonsCsvVersion>
     <bundleArtifact>apache</bundleArtifact>
@@ -505,7 +505,7 @@
         <dependency>
           <groupId>com.thoughtworks.xstream</groupId>
           <artifactId>xstream</artifactId>
-          <version>1.4.19</version>
+          <version>1.4.20</version>
         </dependency>
         <dependency>
           <groupId>com.fasterxml.jackson.core</groupId>
@@ -586,7 +586,7 @@
         <dependency>
           <groupId>com.google.guava</groupId>
           <artifactId>guava</artifactId>
-          <version>31.1-jre</version>
+          <version>32.1.2-jre</version>
         </dependency>
         <dependency>
           <groupId>com.google.guava</groupId>
@@ -789,7 +789,7 @@
     <dependency>
       <groupId>com.thoughtworks.xstream</groupId>
       <artifactId>xstream</artifactId>
-      <version>1.4.19</version>
+      <version>1.4.20</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
@@ -885,7 +885,7 @@
     <dependency>
      <groupId>com.google.guava</groupId>
      <artifactId>guava</artifactId>
-      <version>31.1-jre</version>
+      <version>32.1.2-jre</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
