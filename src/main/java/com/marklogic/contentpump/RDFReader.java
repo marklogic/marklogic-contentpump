@@ -1044,8 +1044,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         @Override
         public void warning(String message, long line, long col) {
-            //For Bug 24519, to improve readability of logs, I have chose to log the warnings for IRI only in debug mode. 
-            if (message.contains("Bad IRI:") || message.contains("Illegal character in IRI")) {
+            //For Bug 24519, to improve readability of logs, I have chose to log the warnings for IRI only in debug mode.
+            if (message.contains("Bad IRI:") || message.contains("Illegal character in IRI") || message.contains("Not advised IRI")) {
                 LOG.debug(formatMessage(message, line, col));
             } else {
                 LOG.warn(formatMessage(message, line, col));
@@ -1054,8 +1054,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         @Override
         public void error(String message, long line, long col) {
-            //For Bug 24519, to improve readability of logs, I have chose to log the error for IRI only in debug mode. 
-            if (message.contains("Bad character in IRI")) {
+            //For Bug 24519, to improve readability of logs, I have chose to log the error for IRI only in debug mode.
+            if (message.contains("Bad character in IRI") || message.contains("Problem setting StAX property")) {
                 LOG.debug(formatMessage(message, line, col));
             } else {
                 LOG.error(formatMessage(message, line, col));
