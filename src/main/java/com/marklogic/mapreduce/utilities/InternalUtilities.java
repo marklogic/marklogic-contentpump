@@ -613,9 +613,10 @@ public class InternalUtilities implements MarkLogicConstants {
         String apiKey = conf.get(OUTPUT_API_KEY);
         String tokenEndpoint = conf.get(OUTPUT_TOKEN_ENDPOINT);
         String grantType = conf.get(OUTPUT_GRANT_TYPE);
+        String tokenDuration = conf.get(OUTPUT_TOKEN_DURATION, "0");
         if (apiKey != null) {
             return new Credentials(apiKey.toCharArray(), tokenEndpoint,
-                grantType);
+                grantType, Integer.parseInt(tokenDuration));
         } else {
             return new Credentials(user, password.toCharArray());
         }
@@ -627,9 +628,10 @@ public class InternalUtilities implements MarkLogicConstants {
         String apiKey = conf.get(INPUT_API_KEY);
         String tokenEndpoint = conf.get(INPUT_TOKEN_ENDPOINT);
         String grantType = conf.get(INPUT_GRANT_TYPE);
+        String tokenDuration = conf.get(OUTPUT_TOKEN_DURATION, "0");
         if (apiKey != null) {
             return new Credentials(apiKey.toCharArray(), tokenEndpoint,
-                grantType);
+                grantType, Integer.parseInt(tokenDuration));
         } else {
             return new Credentials(user, password.toCharArray());
         }
