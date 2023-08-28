@@ -905,6 +905,10 @@ public enum Command implements ConfigConstants {
                 String grantType = cmdline.getOptionValue(GRANT_TYPE);
                 conf.set(MarkLogicConstants.OUTPUT_GRANT_TYPE, grantType);
             }
+            if (cmdline.hasOption(TOKEN_DURATION)) {
+                String tokenDuration = cmdline.getOptionValue(TOKEN_DURATION);
+                conf.set(MarkLogicConstants.OUTPUT_TOKEN_DURATION, tokenDuration);
+            }
         }
 
         @Override
@@ -1207,6 +1211,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(GRANT_TYPE)) {
                 String grantType = cmdline.getOptionValue(GRANT_TYPE);
                 conf.set(MarkLogicConstants.INPUT_GRANT_TYPE, grantType);
+            }
+            if (cmdline.hasOption(TOKEN_DURATION)) {
+                String tokenDuration = cmdline.getOptionValue(TOKEN_DURATION);
+                conf.set(MarkLogicConstants.INPUT_TOKEN_DURATION, tokenDuration);
             }
         }
 
@@ -1628,6 +1636,10 @@ public enum Command implements ConfigConstants {
                 String outputGrantType = cmdline.getOptionValue(OUTPUT_GRANT_TYPE);
                 conf.set(MarkLogicConstants.OUTPUT_GRANT_TYPE, outputGrantType);
             }
+            if (cmdline.hasOption(OUTPUT_TOKEN_DURATION)) {
+                String outputTokenDuration = cmdline.getOptionValue(OUTPUT_TOKEN_DURATION);
+                conf.set(MarkLogicConstants.OUTPUT_TOKEN_DURATION, outputTokenDuration);
+            }
 
             if (cmdline.hasOption(INPUT_USERNAME)) {
                 String username = cmdline.getOptionValue(INPUT_USERNAME);
@@ -1730,6 +1742,10 @@ public enum Command implements ConfigConstants {
             if (cmdline.hasOption(INPUT_GRANT_TYPE)) {
                 String inputGrantType = cmdline.getOptionValue(INPUT_GRANT_TYPE);
                 conf.set(MarkLogicConstants.INPUT_GRANT_TYPE, inputGrantType);
+            }
+            if (cmdline.hasOption(INPUT_TOKEN_DURATION)) {
+                String inputTokenDuration = cmdline.getOptionValue(INPUT_TOKEN_DURATION);
+                conf.set(MarkLogicConstants.INPUT_TOKEN_DURATION, inputTokenDuration);
             }
 
             if (cmdline.hasOption(TEMPORAL_COLLECTION)) {
@@ -2356,9 +2372,16 @@ public enum Command implements ConfigConstants {
             .withArgName("string")
             .hasArg()
             .withDescription(
-                "Methods through which applications can gain access tokens")
+                "Methods through which applications can gain session tokens")
             .create(GRANT_TYPE);
         options.addOption(grantType);
+        Option tokenDuration = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "Lifetime (in minutes) of session tokens")
+            .create(TOKEN_DURATION);
+        options.addOption(tokenDuration);
     }
 
     static void configCopyMLCloudAuthOptions(Options options) {
@@ -2401,9 +2424,23 @@ public enum Command implements ConfigConstants {
             .withArgName("string")
             .hasArg()
             .withDescription(
-                "Output methods through which applications can gain access tokens")
+                "Output methods through which applications can gain session tokens")
             .create(OUTPUT_GRANT_TYPE);
         options.addOption(outputGrantType);
+        Option inputTokenDuration = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "Lifetime (in minutes) of input session tokens")
+            .create(INPUT_TOKEN_DURATION);
+        options.addOption(inputTokenDuration);
+        Option outputTokenDuration = OptionBuilder
+            .withArgName("string")
+            .hasArg()
+            .withDescription(
+                "Lifetime (in minutes) of output session tokens")
+            .create(OUTPUT_TOKEN_DURATION);
+        options.addOption(outputTokenDuration);
     }
     
     static void applyModuleConfigOptions(Configuration conf,
