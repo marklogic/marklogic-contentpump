@@ -544,7 +544,8 @@ implements MarkLogicConstants {
                         "RequestServerException: " + e.getMessage());
                 } else {
                     LOG.warn(getFormattedBatchId() + "Exception: " + e.getMessage());
-                    if (e.getMessage().contains("Module Not Found")) {
+                    if (e.getMessage() != null &&
+                        e.getMessage().contains("Module Not Found")) {
                         retryable = false;
                     }
                 }

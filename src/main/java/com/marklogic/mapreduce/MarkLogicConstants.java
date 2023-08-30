@@ -495,6 +495,15 @@ public interface MarkLogicConstants {
     static final String INPUT_GRANT_TYPE =
         "mapreduce.marklogic.input.grant.type";
 
+    /**
+     * Used when mlcp talks to MarkLogic Cloud. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the lifetime (in
+     * minutes) of the input session token. Optional.
+     */
+    static final String INPUT_TOKEN_DURATION =
+        "mapreduce.marklogic.input.token.duration";
+
+
 
     // output-related config property names
     /**
@@ -982,6 +991,14 @@ public interface MarkLogicConstants {
      */
     static final String OUTPUT_GRANT_TYPE =
         "mapreduce.marklogic.output.grant.type";
+
+    /**
+     * Used when mlcp talks to MarkLogic Cloud. The config property name
+     * (<code>{@value}</code>) which, if set, specifies the lifetime (in
+     * minutes) of the output session token. Optional.
+     */
+    static final String OUTPUT_TOKEN_DURATION =
+        "mapreduce.marklogic.output.token.duration";
 
     /**
      * The config property name (<code>{@value}</code>)

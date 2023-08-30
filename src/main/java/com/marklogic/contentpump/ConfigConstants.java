@@ -297,4 +297,7 @@ public interface ConfigConstants {
     static final String GRANT_TYPE = "grant_type";
     static final String INPUT_GRANT_TYPE = "input_grant_type";
     static final String OUTPUT_GRANT_TYPE = "output_grant_type";
+    static final String TOKEN_DURATION = "token_duration";
+    static final String INPUT_TOKEN_DURATION = "input_token_duration";
+    static final String OUTPUT_TOKEN_DURATION = "output_token_duration";
 }
