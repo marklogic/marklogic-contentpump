@@ -18,6 +18,9 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.Map;
 
+import com.marklogic.xcc.exceptions.QueryException;
+import com.marklogic.xcc.exceptions.RequestException;
+import com.marklogic.xcc.exceptions.XccConfigException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -116,9 +119,19 @@ public class DatabaseTransformWriter<VALUE> extends
                                 LOG.info(getFormattedBatchId() +
                                     "Retrying committing batch is successful");
                             }
+                        } catch (XccConfigException e) {
+                            LOG.error("XccConfigException:" + e);
+                            throw new IOException(e);
+                        } catch (QueryException e) {
+                            LOG.error("QueryException:" + e);
+                            throw new IOException(e);
                         } catch (Exception e) {
                             LOG.warn(getFormattedBatchId() +
                                 "Failed committing transaction: " + e.getMessage());
+                            if (e instanceof RequestException){
+                                if (!((RequestException)e).isRetryable())
+                                    throw new IOException(e);
+                            }
                             if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                                 LOG.warn(getFormattedBatchId() + "Failed during committing");
                                 handleCommitExceptions(sid);

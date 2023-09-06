@@ -288,6 +288,10 @@ public class DatabaseContentReader extends
             throw new IOException(e);
         } catch (Exception e) {
             LOG.error("Exception:" + e.getMessage());
+            if (e instanceof RequestException){
+                if (!((RequestException)e).isRetryable())
+                    throw new IOException(e);
+            }
             if (curForest != -1) {
                 if (++retry < maxRetries) {
                     // failover

@@ -26,6 +26,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.*;
 import org.apache.commons.cli.CommandLine;
 
+import java.beans.Visibility;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
@@ -124,10 +125,9 @@ public class ThreadManager implements ConfigConstants {
     /**
      * Query the server stack to get the maximum available thread count.
      * @param cs
-     * @throws IOException
+     * @throws RequestException
      */
-    public void queryServerMaxThreads(ContentSource cs)
-        throws IOException {
+    public void queryServerMaxThreads(ContentSource cs) throws RequestException {
         if (threadCount != 0) {
             newServerThreads = threadCount;
             return;
@@ -150,9 +150,6 @@ public class ThreadManager implements ConfigConstants {
                 throw new IllegalStateException(
                     "Failed to query server max threads");
             }
-        } catch (RequestException e) {
-            LOG.error(e.getMessage(), e);
-            throw new IOException(e);
         } finally {
             if (result != null) {
                 result.close();
@@ -548,6 +545,7 @@ public class ThreadManager implements ConfigConstants {
             if (!runAutoScaling()) return;
 
             boolean succeeded = false;
+            boolean isRetryable = false;
             pollingRetry = 0;
             pollingSleepTime = MIN_SLEEP_TIME;
             // Poll server max threads
@@ -570,19 +568,23 @@ public class ThreadManager implements ConfigConstants {
                         succeeded = true;
                         break;
                     } catch (Exception e) {
-                        if (e.getCause() instanceof ServerConnectionException) {
-                            LOG.warn("Unable to connect to " + host
-                                + " to query available server max threads.");
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(e);
+                        if (e instanceof RequestException) {
+                            isRetryable |= ((RequestException)e.getCause()).isRetryable();
+                            if (e instanceof ServerConnectionException) {
+                                LOG.warn("ServerConnectionException:" +
+                                    e.getMessage() + " .Unable to connect to " +
+                                    host + " to query available server max threads.");
+                            } else {
+                                LOG.warn("RequestException:" + e.getMessage());
                             }
                         } else {
-                            LOG.error(e.getMessage(), e);
+                            isRetryable = true;
+                            LOG.warn("Exception:" + e.getMessage());
                         }
                     }
                 }
                 if (succeeded) break;
-                if (++pollingRetry < MAX_RETRIES) {
+                if (++pollingRetry < MAX_RETRIES && isRetryable) {
                     sleep();
                 } else {
                     LOG.error("Exceed max querying retry. Unable to query" +

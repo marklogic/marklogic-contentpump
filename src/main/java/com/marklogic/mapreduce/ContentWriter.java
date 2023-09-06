@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
+import com.marklogic.xcc.exceptions.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -48,10 +49,6 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.impl.SessionImpl;
 import com.marklogic.xcc.Session.TransactionMode;
-import com.marklogic.xcc.exceptions.ContentInsertException;
-import com.marklogic.xcc.exceptions.QueryException;
-import com.marklogic.xcc.exceptions.RequestException;
-import com.marklogic.xcc.exceptions.RequestServerException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -533,21 +530,23 @@ implements MarkLogicConstants {
                 }
             } catch (Exception e) {
                 boolean retryable = true;
-                if (e instanceof QueryException) {
-                    LOG.warn(getFormattedBatchId() + "QueryException: " +
-                        ((QueryException)e).getFormatString());
-                    retryable = ((QueryException)e).isRetryable();
-                } else if (e instanceof RequestServerException) {
-                    // log error and continue on RequestServerException
-                    // not retryable so trying to connect to the replica
-                    LOG.warn(getFormattedBatchId() +
-                        "RequestServerException: " + e.getMessage());
-                } else {
-                    LOG.warn(getFormattedBatchId() + "Exception: " + e.getMessage());
-                    if (e.getMessage() != null &&
-                        e.getMessage().contains("Module Not Found")) {
-                        retryable = false;
+                if (e instanceof RequestException) {
+                    retryable = ((RequestException)e).isRetryable();
+                    if (e instanceof QueryException) {
+                        LOG.warn(getFormattedBatchId() + "QueryException:" +
+                            ((QueryException) e).getFormatString());
+                    } else if (e instanceof RequestServerException) {
+                        // log error and continue on RequestServerException
+                        // not retryable so trying to connect to the replica
+                        LOG.warn(getFormattedBatchId() +
+                            "RequestServerException:" + e.getMessage());
+                    } else {
+                        LOG.warn(getFormattedBatchId() + "RequestException:" +
+                            e.getMessage());
                     }
+                } else {
+                    LOG.warn(getFormattedBatchId() + "Exception:" +
+                        e.getMessage());
                 }
                 LOG.warn(getFormattedBatchId() + "Failed during inserting");
                 // necessary to roll back in certain scenarios.
@@ -597,9 +596,6 @@ implements MarkLogicConstants {
         } catch (Exception e) {
             LOG.warn(getFormattedBatchId() +
                 "Failed rolling back transaction: " + e.getMessage());
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(e);
-            }
         } finally {
             if (countBased) {
                 rollbackCount(id);
@@ -679,9 +675,19 @@ implements MarkLogicConstants {
                             LOG.info(getFormattedBatchId() +
                                 "Retrying committing batch is successful");
                         }
+                    } catch (XccConfigException e) {
+                        LOG.error("XccConfigException:" + e);
+                        throw new IOException(e);
+                    } catch (QueryException e) {
+                        LOG.error("QueryException:" + e);
+                        throw new IOException(e);
                     } catch (Exception e) {
                         LOG.warn(getFormattedBatchId() +
                             "Failed committing transaction: " + e.getMessage());
+                        if (e instanceof RequestException){
+                            if (!((RequestException)e).isRetryable())
+                                throw new IOException(e);
+                        }
                         if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
                             LOG.warn(getFormattedBatchId() + "Failed during committing");
                             handleCommitExceptions(sid);
@@ -901,9 +907,11 @@ implements MarkLogicConstants {
     }
 
     protected void handleCommitExceptions(int id) throws IOException {
-        rollback(id);
-        sessions[id].close();
-        sessions[id] = null;
+        if (sessions[id] != null) {
+            rollback(id);
+            sessions[id].close();
+            sessions[id] = null;
+        }
     }
 
     protected void closeSessions() {

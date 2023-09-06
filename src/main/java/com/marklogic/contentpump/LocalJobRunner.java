@@ -124,13 +124,8 @@ public class LocalJobRunner implements ConfigConstants {
             // Set newServerThreads and restrictHosts in ThreadManager for
             // initializing thread pool
             outputFormat.checkOutputSpecs(job);
-        } catch (Exception ex) {         
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Error checking output specification: ", ex);
-            } else {
-                LOG.error("Error checking output specification: ");
-                LOG.error(ex.getMessage());
-            }
+        } catch (Exception ex) {
+            LOG.error("Error checking output specification: " + ex.getMessage());
             job.setJobState(JobStatus.State.FAILED);
             return;
         }

@@ -404,7 +404,7 @@ implements MarkLogicConstants {
             throw new IOException(e);
         } catch (RequestException e) {
             LOG.error("RequestException:" + e.getMessage());
-            if (curForest != -1) {
+            if (curForest != -1 && e.isRetryable()) {
                 if (++retry < maxRetries) {
                     // failover
                     try {
