@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
   <artifactId>mlcp</artifactId>
-  <version>11.0</version>
+  <version>11.2</version>
   <name>MarkLogic Content Pump</name>
   <description>MarkLogic Content Pump</description>
   <url>https://github.com/marklogic/marklogic-contentpump</url>
@@ -17,7 +17,7 @@
   </licenses>
 
   <properties>
-    <versionString>11.1</versionString>
+    <versionString>11.2</versionString>
     <xccVersion>${versionString}</xccVersion>
     <hadoopVersion>3.3.6</hadoopVersion>
     <jacksonVersion>2.15.2</jacksonVersion>
