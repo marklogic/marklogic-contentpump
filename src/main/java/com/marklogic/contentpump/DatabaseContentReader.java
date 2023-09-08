@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import com.marklogic.xcc.exceptions.MLCloudRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -287,8 +288,14 @@ public class DatabaseContentReader extends
             LOG.debug("Query: " + queryText);
             throw new IOException(e);
         } catch (Exception e) {
-            LOG.error("Exception:" + e.getMessage());
-            if (curForest != -1) {
+            boolean isRetryable = true;
+            if (e instanceof MLCloudRequestException){
+                isRetryable = ((MLCloudRequestException)e).isRetryable();
+                LOG.error("MLCloudRequestException:" + e.getMessage());
+            } else {
+                LOG.error("Exception:" + e.getMessage());
+            }
+            if (isRetryable && curForest != -1) {
                 if (++retry < maxRetries) {
                     // failover
                     try {
