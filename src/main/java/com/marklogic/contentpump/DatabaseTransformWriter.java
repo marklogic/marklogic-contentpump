@@ -18,6 +18,7 @@ package com.marklogic.contentpump;
 import java.io.IOException;
 import java.util.Map;
 
+import com.marklogic.xcc.exceptions.MLCloudRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -117,9 +118,18 @@ public class DatabaseTransformWriter<VALUE> extends
                                     "Retrying committing batch is successful");
                             }
                         } catch (Exception e) {
-                            LOG.warn(getFormattedBatchId() +
-                                "Failed committing transaction: " + e.getMessage());
-                            if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                            boolean isRetryable = true;
+                            LOG.warn("Failed committing transaction.");
+                            if (e instanceof MLCloudRequestException){
+                                isRetryable = ((MLCloudRequestException)e).isRetryable();
+                                LOG.warn(getFormattedBatchId() +
+                                    "MLCloudRequestException:" + e.getMessage());
+                            } else {
+                                LOG.warn(getFormattedBatchId() +
+                                    "Exception:" + e.getMessage());
+                            }
+                            if (isRetryable && needCommitRetry() &&
+                                (++commitRetry < commitRetryLimit)) {
                                 LOG.warn(getFormattedBatchId() + "Failed during committing");
                                 handleCommitExceptions(sid);
                                 commitSleepTime = sleep(commitSleepTime);

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Collection;
 import java.util.Iterator;
 
+import com.marklogic.xcc.exceptions.MLCloudRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -403,8 +404,14 @@ implements MarkLogicConstants {
             LOG.error("QueryException:" + e);
             throw new IOException(e);
         } catch (RequestException e) {
-            LOG.error("RequestException:" + e.getMessage());
-            if (curForest != -1) {
+            boolean isRetryable = true;
+            if (e instanceof MLCloudRequestException){
+                isRetryable = ((MLCloudRequestException)e).isRetryable();
+                LOG.error("MLCloudRequestException:" + e.getMessage());
+            } else {
+                LOG.error("RequestException:" + e.getMessage());
+            }
+            if (isRetryable && curForest != -1) {
                 if (++retry < maxRetries) {
                     // failover
                     try {
