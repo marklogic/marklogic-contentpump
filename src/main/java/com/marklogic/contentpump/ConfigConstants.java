@@ -291,6 +291,7 @@ public interface ConfigConstants {
     static final String API_KEY = "api_key";
     static final String INPUT_API_KEY = "input_api_key";
     static final String OUTPUT_API_KEY = "output_api_key";
+    // Hidden parameters for MarkLogic Cloud
     static final String TOKEN_ENDPOINT = "token_endpoint";
     static final String INPUT_TOKEN_ENDPOINT = "input_token_endpoint";
     static final String OUTPUT_TOKEN_ENDPOINT = "output_token_endpoint";
