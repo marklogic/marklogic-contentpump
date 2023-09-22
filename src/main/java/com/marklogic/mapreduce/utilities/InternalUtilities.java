@@ -615,6 +615,7 @@ public class InternalUtilities implements MarkLogicConstants {
         String grantType = conf.get(OUTPUT_GRANT_TYPE);
         String tokenDuration = conf.get(OUTPUT_TOKEN_DURATION, "0");
         if (apiKey != null) {
+            // For MarkLogic Cloud
             return new Credentials(apiKey.toCharArray(), tokenEndpoint,
                 grantType, Integer.parseInt(tokenDuration));
         } else {
@@ -630,6 +631,7 @@ public class InternalUtilities implements MarkLogicConstants {
         String grantType = conf.get(INPUT_GRANT_TYPE);
         String tokenDuration = conf.get(OUTPUT_TOKEN_DURATION, "0");
         if (apiKey != null) {
+            // For MarkLogic Cloud
             return new Credentials(apiKey.toCharArray(), tokenEndpoint,
                 grantType, Integer.parseInt(tokenDuration));
         } else {
