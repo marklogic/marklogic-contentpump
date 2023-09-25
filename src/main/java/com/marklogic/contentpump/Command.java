@@ -897,6 +897,7 @@ public enum Command implements ConfigConstants {
                             " is not applicable for " + inputType); 
                 }
             }
+            // Hidden parameters for MarkLogic Cloud
             if (cmdline.hasOption(TOKEN_ENDPOINT)) {
                 String tokenEndpoint = cmdline.getOptionValue(TOKEN_ENDPOINT);
                 conf.set(MarkLogicConstants.OUTPUT_TOKEN_ENDPOINT, tokenEndpoint);
@@ -1204,6 +1205,7 @@ public enum Command implements ConfigConstants {
                 }
                 conf.set(MarkLogicConstants.OUTPUT_CONTENT_ENCODING, arg);
             }
+            // Hidden parameters for MarkLogic Cloud
             if (cmdline.hasOption(TOKEN_ENDPOINT)) {
                 String tokenEndpoint = cmdline.getOptionValue(TOKEN_ENDPOINT);
                 conf.set(MarkLogicConstants.INPUT_TOKEN_ENDPOINT, tokenEndpoint);
@@ -2361,6 +2363,7 @@ public enum Command implements ConfigConstants {
                 "A unique key assigned to a MarkLogic Cloud user")
             .create(API_KEY);
         options.addOption(apiKey);
+        // Hidden parameters for MarkLogic Cloud
         Option tokenEndpoint = OptionBuilder
             .withArgName("string")
             .hasArg()
@@ -2399,6 +2402,7 @@ public enum Command implements ConfigConstants {
                 "A unique key assigned to an output MarkLogic Cloud user")
             .create(OUTPUT_API_KEY);
         options.addOption(outputApiKey);
+        // Hidden parameters for MarkLogic Cloud
         Option inputTokenEndpoint = OptionBuilder
             .withArgName("string")
             .hasArg()
