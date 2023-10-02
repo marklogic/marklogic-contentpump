@@ -17,9 +17,9 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ### What's New in mlcp and Hadoop Connector 11.1.0
 - Now requires JRE 11 or later.
+- Added support for reverse proxy and connection to MarkLogic Cloud. 
 - Upgraded Jena libraries from 2.13.0 to 4.9.0 to mitigate security vulnerability.
 - Upgraded Jackson, Hadoop, Xstream, and Guava libraries to mitigate security vulnerabilities.
-- Added support for reverse proxy and connection to MarkLogic Cloud. 
 
 ### What's New in mlcp and Hadoop Connector 11.0.3
 - Removed an unused json dependency to mitigate security vulnerability.
