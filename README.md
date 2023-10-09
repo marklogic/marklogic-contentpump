@@ -30,6 +30,9 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 ### What's New in mlcp and Hadoop Connector 11.0.0
 - Upgraded Hadoop Library to 3.3.4
 - Upgraded jackson-annotations, jackson-core, jackson-databind, Xerces, woodstox-core to mitigate security vulnerability.
+
+
+
 - Bug fixes.
 
 ## Getting Started
