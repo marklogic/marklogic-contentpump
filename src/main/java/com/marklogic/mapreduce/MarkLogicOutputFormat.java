@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MarkLogic Corporation
+ * Copyright (c) 2023 MarkLogic Corporation
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -81,8 +81,7 @@ implements MarkLogicConstants, Configurable {
     protected Configuration conf;
 
     @Override
-    public void checkOutputSpecs(JobContext context) throws IOException,
-            InterruptedException {
+    public void checkOutputSpecs(JobContext context) throws IOException {
         String[] hosts = conf.getStrings(OUTPUT_HOST);
         if (hosts == null || hosts.length == 0) {
             throw new IllegalStateException(OUTPUT_HOST +
@@ -96,14 +95,12 @@ implements MarkLogicConstants, Configurable {
                 checkOutputSpecs(conf, cs, context);
                 return;
             } catch (Exception ex) {
-                if (ex.getCause() instanceof ServerConnectionException) {
-                    LOG.warn("Unable to connect to " + host
+                if (ex instanceof ServerConnectionException) {
+                    LOG.warn("ServerConnectionException:" + ex.getMessage() +
+                        " . Unable to connect to " + host
                         + " to query destination information");
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(ex);
-                    }
-                    continue;
                 } else {
+                    LOG.warn("Exception:" + ex.getMessage());
                     throw new IOException(ex);
                 }
             }

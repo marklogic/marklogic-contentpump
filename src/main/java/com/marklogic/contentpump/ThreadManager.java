@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 MarkLogic Corporation
+ * Copyright (c) 2023 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package com.marklogic.contentpump;
 
 import com.marklogic.xcc.*;
+import com.marklogic.xcc.exceptions.MLCloudRequestException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.ServerConnectionException;
 import com.marklogic.xcc.types.XSInteger;
@@ -124,10 +125,9 @@ public class ThreadManager implements ConfigConstants {
     /**
      * Query the server stack to get the maximum available thread count.
      * @param cs
-     * @throws IOException
+     * @throws RequestException
      */
-    public void queryServerMaxThreads(ContentSource cs)
-        throws IOException {
+    public void queryServerMaxThreads(ContentSource cs) throws RequestException {
         if (threadCount != 0) {
             newServerThreads = threadCount;
             return;
@@ -150,9 +150,6 @@ public class ThreadManager implements ConfigConstants {
                 throw new IllegalStateException(
                     "Failed to query server max threads");
             }
-        } catch (RequestException e) {
-            LOG.error(e.getMessage(), e);
-            throw new IOException(e);
         } finally {
             if (result != null) {
                 result.close();
@@ -548,6 +545,7 @@ public class ThreadManager implements ConfigConstants {
             if (!runAutoScaling()) return;
 
             boolean succeeded = false;
+            boolean isRetryable = false;
             pollingRetry = 0;
             pollingSleepTime = MIN_SLEEP_TIME;
             // Poll server max threads
@@ -570,19 +568,27 @@ public class ThreadManager implements ConfigConstants {
                         succeeded = true;
                         break;
                     } catch (Exception e) {
-                        if (e.getCause() instanceof ServerConnectionException) {
-                            LOG.warn("Unable to connect to " + host
-                                + " to query available server max threads.");
-                            if (LOG.isDebugEnabled()) {
-                                LOG.debug(e);
+                        if (e instanceof RequestException) {
+                            if (e instanceof ServerConnectionException) {
+                                isRetryable = true;
+                                LOG.warn("ServerConnectionException:" +
+                                    e.getMessage() + " . Unable to connect to " +
+                                    host + " to query available server max threads.");
+                            } else if (e instanceof MLCloudRequestException) {
+                                isRetryable |= ((MLCloudRequestException)e).isRetryable();
+                                LOG.warn("MLCloudRequestException:" + e.getMessage());
+                            } else {
+                                isRetryable = true;
+                                LOG.warn("RequestException:" + e.getMessage());
                             }
                         } else {
-                            LOG.error(e.getMessage(), e);
+                            isRetryable = true;
+                            LOG.warn("Exception:" + e.getMessage());
                         }
                     }
                 }
                 if (succeeded) break;
-                if (++pollingRetry < MAX_RETRIES) {
+                if (++pollingRetry < MAX_RETRIES && isRetryable) {
                     sleep();
                 } else {
                     LOG.error("Exceed max querying retry. Unable to query" +

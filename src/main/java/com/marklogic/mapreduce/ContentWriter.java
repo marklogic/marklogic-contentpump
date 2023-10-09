@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 MarkLogic Corporation
+ * Copyright (c) 2023 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipInputStream;
 
+import com.marklogic.xcc.exceptions.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -48,10 +49,6 @@ import com.marklogic.xcc.RequestOptions;
 import com.marklogic.xcc.Session;
 import com.marklogic.xcc.impl.SessionImpl;
 import com.marklogic.xcc.Session.TransactionMode;
-import com.marklogic.xcc.exceptions.ContentInsertException;
-import com.marklogic.xcc.exceptions.QueryException;
-import com.marklogic.xcc.exceptions.RequestException;
-import com.marklogic.xcc.exceptions.RequestServerException;
 
 /**
  * MarkLogicRecordWriter that inserts content to MarkLogicServer.
@@ -532,21 +529,32 @@ implements MarkLogicConstants {
                         "Retrying inserting batch is successful");
                 }
             } catch (Exception e) {
-                boolean retryable = true;
-                if (e instanceof QueryException) {
-                    LOG.warn(getFormattedBatchId() + "QueryException: " +
-                        ((QueryException)e).getFormatString());
-                    retryable = ((QueryException)e).isRetryable();
-                } else if (e instanceof RequestServerException) {
-                    // log error and continue on RequestServerException
-                    // not retryable so trying to connect to the replica
-                    LOG.warn(getFormattedBatchId() +
-                        "RequestServerException: " + e.getMessage());
-                } else {
-                    LOG.warn(getFormattedBatchId() + "Exception: " + e.getMessage());
-                    if (e.getMessage().contains("Module Not Found")) {
-                        retryable = false;
+                boolean isRetryable = true;
+                if (e instanceof RequestException) {
+                    if (e instanceof QueryException) {
+                        LOG.warn(getFormattedBatchId() + "QueryException:" +
+                            ((QueryException) e).getFormatString());
+                        isRetryable = ((RequestException)e).isRetryable();
+                    } else if (e instanceof MLCloudRequestException) {
+                        LOG.warn(getFormattedBatchId() +
+                            "MLCloudRequestException:" + e.getMessage());
+                        isRetryable = ((RequestException)e).isRetryable();
+                    } else if (e instanceof RequestServerException) {
+                        // log error and continue on RequestServerException
+                        // not retryable so trying to connect to the replica
+                        LOG.warn(getFormattedBatchId() +
+                            "RequestServerException:" + e.getMessage());
+                    } else {
+                        if (e.getMessage() != null &&
+                            e.getMessage().contains("Module Not Found")) {
+                            isRetryable = false;
+                        }
+                        LOG.warn(getFormattedBatchId() + "RequestException:" +
+                            e.getMessage());
                     }
+                } else {
+                    LOG.warn(getFormattedBatchId() +
+                        "Exception:" + e.getMessage());
                 }
                 LOG.warn(getFormattedBatchId() + "Failed during inserting");
                 // necessary to roll back in certain scenarios.
@@ -554,7 +562,7 @@ implements MarkLogicConstants {
                     rollback(id);
                 }
 
-                if (retryable && ++batchRetry < MAX_RETRIES) {
+                if (isRetryable && ++batchRetry < MAX_RETRIES) {
                     // necessary to close the session too.
                     sessions[id].close();
                     batchSleepTime = sleep(batchSleepTime);
@@ -562,7 +570,7 @@ implements MarkLogicConstants {
                     // because it could be "sync replicating" (bug:45785)
                     sessions[id] = getSession(id, true);
                     continue;
-                } else if (retryable) {
+                } else if (isRetryable) {
                     LOG.error(getFormattedBatchId() +
                         "Exceeded max batch retry, batch failed permanently");
                 }
@@ -596,9 +604,6 @@ implements MarkLogicConstants {
         } catch (Exception e) {
             LOG.warn(getFormattedBatchId() +
                 "Failed rolling back transaction: " + e.getMessage());
-            if (LOG.isDebugEnabled()) {
-                LOG.debug(e);
-            }
         } finally {
             if (countBased) {
                 rollbackCount(id);
@@ -679,9 +684,18 @@ implements MarkLogicConstants {
                                 "Retrying committing batch is successful");
                         }
                     } catch (Exception e) {
-                        LOG.warn(getFormattedBatchId() +
-                            "Failed committing transaction: " + e.getMessage());
-                        if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                        boolean isRetryable = true;
+                        LOG.warn("Failed committing transaction.");
+                        if (e instanceof MLCloudRequestException){
+                            isRetryable = ((MLCloudRequestException)e).isRetryable();
+                            LOG.warn(getFormattedBatchId() +
+                                "MLCloudRequestException:" + e.getMessage());
+                        } else {
+                            LOG.warn(getFormattedBatchId() +
+                                "Exception:" + e.getMessage());
+                        }
+                        if (isRetryable  && needCommitRetry() &&
+                            (++commitRetry < commitRetryLimit)) {
                             LOG.warn(getFormattedBatchId() + "Failed during committing");
                             handleCommitExceptions(sid);
                             commitSleepTime = sleep(commitSleepTime);
@@ -900,9 +914,11 @@ implements MarkLogicConstants {
     }
 
     protected void handleCommitExceptions(int id) throws IOException {
-        rollback(id);
-        sessions[id].close();
-        sessions[id] = null;
+        if (sessions[id] != null) {
+            rollback(id);
+            sessions[id].close();
+            sessions[id] = null;
+        }
     }
 
     protected void closeSessions() {

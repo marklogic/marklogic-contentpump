@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MarkLogic Corporation
+ * Copyright (c) 2023 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 import java.io.FileInputStream;
 
+import com.marklogic.xcc.impl.Credentials;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -52,6 +53,7 @@ import org.apache.hadoop.io.VLongWritable;
 import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.util.ReflectionUtils;
 
+import com.marklogic.contentpump.ConfigConstants;
 import com.marklogic.mapreduce.DocumentURI;
 import com.marklogic.mapreduce.MarkLogicConstants;
 import com.marklogic.mapreduce.DatabaseDocument;
@@ -122,19 +124,19 @@ public class InternalUtilities implements MarkLogicConstants {
      */
     public static ContentSource getInputContentSource(Configuration conf,
             String host) 
-    throws XccConfigException, IOException {      
-        String user = conf.get(INPUT_USERNAME, "");
-        String password = conf.get(INPUT_PASSWORD, "");
-        String port = conf.get(INPUT_PORT,"8000");
+    throws XccConfigException, IOException {
+        Credentials credentials = getInputCredentials(conf);
+        String port = conf.get(INPUT_PORT, ConfigConstants.DEFAULT_PORT);
         String db = conf.get(INPUT_DATABASE_NAME);
+        String basePath = conf.get(INPUT_BASE_PATH);
         int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(INPUT_USE_SSL, false);
         if (useSsl) {
-            return getSecureContentSource(host, portInt, user, password, 
-                        db, getInputSslOptions(conf));
+            return getSecureContentSource(host, portInt, credentials, db,
+                basePath, getInputSslOptions(conf));
         }
-        return ContentSourceFactory.newContentSource(host, portInt, 
-                user, password.toCharArray(), db);
+        return ContentSourceFactory.newContentSource(host, portInt, credentials,
+            db, basePath);
     }
     
     private static SslConfigOptions getInputSslOptions(Configuration conf) throws XccConfigException {
@@ -356,11 +358,8 @@ public class InternalUtilities implements MarkLogicConstants {
     }
 
     static ContentSource getSecureContentSource(String host, int port,
-            String user, String password, String db, 
-            SslConfigOptions sslOptions) 
-    throws XccConfigException {
-        ContentSource contentSource = null;
-      
+           Credentials credentials, String db, String basePath,
+           SslConfigOptions sslOptions) throws XccConfigException {
         // construct XCC SecurityOptions
         SecurityOptions options;
         try {
@@ -373,10 +372,8 @@ public class InternalUtilities implements MarkLogicConstants {
         options.setEnabledProtocols(sslOptions.getEnabledProtocols());
   
         // construct content source
-        contentSource = ContentSourceFactory.newContentSource(
-                host, port, user, password.toCharArray(), db, options);
- 
-        return contentSource;
+        return ContentSourceFactory.newContentSource(
+                host, port, credentials, db, basePath, options);
     }
     
     /**
@@ -461,18 +458,18 @@ public class InternalUtilities implements MarkLogicConstants {
     public static ContentSource getOutputContentSource(Configuration conf,
             String hostName) 
     throws XccConfigException, IOException {
-        String user = conf.get(OUTPUT_USERNAME, "");
-        String password = conf.get(OUTPUT_PASSWORD, "");
-        String port = conf.get(OUTPUT_PORT,"8000");
+        Credentials credentials = getOutputCredentials(conf);
+        String port = conf.get(OUTPUT_PORT, ConfigConstants.DEFAULT_PORT);
         String db = conf.get(OUTPUT_DATABASE_NAME);
+        String basePath = conf.get(OUTPUT_BASE_PATH);
         int portInt = Integer.parseInt(port);
         boolean useSsl = conf.getBoolean(OUTPUT_USE_SSL, false);
         if (useSsl) {
-            return getSecureContentSource(hostName, portInt, user, password,
-                        db, getOutputSslOptions(conf));
+            return getSecureContentSource(hostName, portInt, credentials, db,
+                basePath, getOutputSslOptions(conf));
         }
-        return ContentSourceFactory.newContentSource(hostName, portInt, 
-                user, password.toCharArray(), db);
+        return ContentSourceFactory.newContentSource(hostName, portInt,
+            credentials, db, basePath);
     }
     
     /**
@@ -607,6 +604,38 @@ public class InternalUtilities implements MarkLogicConstants {
                 Thread.sleep(millis);
                 millis = 0;
             }
+        }
+    }
+
+    private static Credentials getOutputCredentials(Configuration conf) {
+        String user = conf.get(OUTPUT_USERNAME, "");
+        String password = conf.get(OUTPUT_PASSWORD, "");
+        String apiKey = conf.get(OUTPUT_API_KEY);
+        String tokenEndpoint = conf.get(OUTPUT_TOKEN_ENDPOINT);
+        String grantType = conf.get(OUTPUT_GRANT_TYPE);
+        String tokenDuration = conf.get(OUTPUT_TOKEN_DURATION, "0");
+        if (apiKey != null) {
+            // For MarkLogic Cloud
+            return new Credentials(apiKey.toCharArray(), tokenEndpoint,
+                grantType, Integer.parseInt(tokenDuration));
+        } else {
+            return new Credentials(user, password.toCharArray());
+        }
+    }
+
+    private static Credentials getInputCredentials(Configuration conf) {
+        String user = conf.get(INPUT_USERNAME, "");
+        String password = conf.get(INPUT_PASSWORD, "");
+        String apiKey = conf.get(INPUT_API_KEY);
+        String tokenEndpoint = conf.get(INPUT_TOKEN_ENDPOINT);
+        String grantType = conf.get(INPUT_GRANT_TYPE);
+        String tokenDuration = conf.get(OUTPUT_TOKEN_DURATION, "0");
+        if (apiKey != null) {
+            // For MarkLogic Cloud
+            return new Credentials(apiKey.toCharArray(), tokenEndpoint,
+                grantType, Integer.parseInt(tokenDuration));
+        } else {
+            return new Credentials(user, password.toCharArray());
         }
     }
 }

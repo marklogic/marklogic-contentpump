@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MarkLogic Corporation
+ * Copyright (c) 2023 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -30,13 +28,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.mapreduce.InputSplit;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.lang.PipedQuadsStream;
-import org.apache.jena.riot.lang.PipedRDFIterator;
-import org.apache.jena.riot.lang.PipedTriplesStream;
-
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.core.Quad;
 import com.marklogic.mapreduce.CompressionCodec;
 import com.marklogic.mapreduce.LinkedMapWritable;
 
@@ -59,7 +50,6 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
     private InputStream zipIn;
     private ZipEntry currZipEntry;
     private CompressionCodec codec;
-    private ExecutorService pool;
     
     @Override
     public void close() throws IOException {
@@ -67,9 +57,6 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
         //close the zip
         if (zipIn != null) {
             zipIn.close();
-        }
-        if (pool != null) {
-            pool.shutdown();
         }
     }
 
@@ -136,23 +123,12 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
     protected void parse(String fsname, final InputStream in)
         throws IOException {
         if (dataset == null) {
-            if (lang == Lang.NQUADS || lang == Lang.TRIG) {
-                rdfIter = new PipedRDFIterator<Quad>();
-                @SuppressWarnings("unchecked")
-                PipedQuadsStream stream = new PipedQuadsStream(rdfIter);
-                rdfInputStream = stream;
-            } else {
-                rdfIter = new PipedRDFIterator<Triple>();
-                @SuppressWarnings("unchecked")
-                PipedTriplesStream stream = new PipedTriplesStream(rdfIter);
-                rdfInputStream = stream;
-            }
-
-            // Create a runnable for our parser thread
-            jenaStreamingParser = new RunnableParser(origFn, fsname, in);
-
-            // add it into pool
-            pool.submit(jenaStreamingParser);
+            jenaStreamingParser = new RunnableParser(origFn, fsname, in, lang);
+            // Previously during parsing, we create a task for each file
+            // and submit it to a executor pool of size 1 for consecutive execution and performance.
+            // It has been replaced by direct calls to the Jena parser because
+            // Asyncparser manages its parsing in seperate thread. 
+            jenaStreamingParser.run();
             // We don't know how many statements are in the model; we could
             // count them, but that's
             // possibly expensive. So we just say 0 until we're done.
@@ -217,8 +193,6 @@ public class CompressedRDFReader<VALUEIN> extends RDFReader<VALUEIN> {
     public CompressedRDFReader(String version, LinkedMapWritable roleMap) {
         super(version, roleMap);
         compressed = true;
-        //allocate a pool of size 1
-        pool = Executors.newFixedThreadPool(1);
     }
     
     @Override

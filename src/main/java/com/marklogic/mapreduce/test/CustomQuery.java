@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MarkLogic Corporation
+ * Copyright (c) 2023 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package com.marklogic.mapreduce.test;
 
 import java.io.IOException;
 
-import javax.xml.soap.Node;
+import jakarta.xml.soap.Node;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

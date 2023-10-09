@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MarkLogic Corporation
+ * Copyright (c) 2023 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Vector;
 
+import com.marklogic.xcc.exceptions.MLCloudRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -301,9 +302,18 @@ public class DatabaseContentWriter<VALUE> extends
                                 "Retrying committing batch is successful");
                         }
                     } catch (Exception e) {
-                        LOG.warn(getFormattedBatchId() +
-                            "Failed committing transaction: " + e.getMessage());
-                        if (needCommitRetry() && ++commitRetry < commitRetryLimit) {
+                        boolean isRetryable = true;
+                        LOG.warn("Failed committing transaction.");
+                        if (e instanceof MLCloudRequestException){
+                            isRetryable = ((MLCloudRequestException)e).isRetryable();
+                            LOG.warn(getFormattedBatchId() +
+                                "MLCloudRequestException:" + e.getMessage());
+                        } else {
+                            LOG.warn(getFormattedBatchId() +
+                                "Exception:" + e.getMessage());
+                        }
+                        if (isRetryable && needCommitRetry() &&
+                            (++commitRetry < commitRetryLimit)) {
                             LOG.warn(getFormattedBatchId() + "Failed during committing");
                             handleCommitExceptions(sid);
                             commitSleepTime = sleep(commitSleepTime);

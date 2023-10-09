@@ -149,11 +149,11 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedText() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -delimited_uri_id first"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
             + " -port " + Constants.port + " -database " + Constants.testDb;
@@ -187,11 +187,11 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedTextFileNameAsCollection() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -filename_as_collection true"
             + " -delimited_uri_id first"
             + " -thread_count 1"
@@ -274,14 +274,14 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedTextLanNs() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -delimited_uri_id first"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
             + " -output_language fr"
             + " -namespace test"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
@@ -813,12 +813,12 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedTextZip() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd =
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
             + " -delimited_uri_id first"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -input_compressed -input_compression_codec zip"
             + " -input_file_type delimited_text"

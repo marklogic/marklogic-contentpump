@@ -1,4 +1,4 @@
-# MarkLogic Content Pump and MarkLogic Connector for Hadoop
+# MarkLogic Content Pump
 
 MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest way to import, export, and copy data to or from MarkLogic databases. Core features of mlcp include:
 
@@ -13,18 +13,26 @@ You can run mlcp across many threads on a single machine or across many nodes in
 
 The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. From 10.0-5, Hadoop Connector is removed from a separate release, but mlcp still uses Hadoop Connector as an internal dependency.
 
-## Release Note
+## Release Notes
 
+### What's New in mlcp and Hadoop Connector 11.1.0
+- Now requires JRE 11 or later.
+- Added support for reverse proxy and connection to MarkLogic Cloud. 
+- Upgraded Jena libraries from 2.13.0 to 4.9.0 to mitigate security vulnerability.
+- Upgraded Jackson, Hadoop, Xstream, and Guava libraries to mitigate security vulnerabilities.
 
 ### What's New in mlcp and Hadoop Connector 11.0.3
 - Removed an unused json dependency to mitigate security vulnerability.
-
+  
 ### What's New in mlcp and Hadoop Connector 11.0.2
-- Upgrade libthrift from 0.14.0 to 0.17.0 to mitigate security vulnerability.
+- Upgraded libthrift from 0.14.0 to 0.17.0 to mitigate security vulnerability.
 
 ### What's New in mlcp and Hadoop Connector 11.0.0
-- Upgrade Hadoop Library to 3.3.4
-- Upgrade jackson-annotations, jackson-core, jackson-databind, xerces, woodstox-core to mitigate security vulnerability.
+- Upgraded Hadoop Library to 3.3.4
+- Upgraded jackson-annotations, jackson-core, jackson-databind, Xerces, woodstox-core to mitigate security vulnerability.
+
+
+
 - Bug fixes.
 
 ## Getting Started
