@@ -126,6 +126,7 @@
         <include>org.apache.hadoop:hadoop-client:jar:*</include>
         <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:*</include>
         <include>org.apache.hadoop.thirdparty:hadoop-shaded-protobuf_3_7:jar:*</include>
+        <include>org.apache.commons:commons-compress:jar:*</include>
       </includes>
     </dependencySet>
   </dependencySets>
