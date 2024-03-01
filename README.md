@@ -1,4 +1,4 @@
-# MarkLogic Content Pump and MarkLogic Connector for Hadoop
+# MarkLogic Content Pump
 
 MarkLogic Content Pump (mlcp) is a command-line tool that provides the fastest way to import, export, and copy data to or from MarkLogic databases. Core features of mlcp include:
 
@@ -13,30 +13,36 @@ You can run mlcp across many threads on a single machine or across many nodes in
 
 The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce framework that allows you to easily and efficiently communicate with a MarkLogic database from within a Hadoop job. From 10.0-5, Hadoop Connector is removed from a separate release, but mlcp still uses Hadoop Connector as an internal dependency.
 
-## Release Note
+## Release Notes
 
-### What's New in mlcp and Hadoop Connector 10.0.10
+### What's New in mlcp 10.0.11
+- Upgrade Hadoop Library to 3.3.6
+- Upgrade jackson-annotations, jackson-core, jackson-databind, Xstream, Guava, avro, commons-cli, commons-compress libraries to mitigate security vulnerability.
+- Remove logback-classic, bliki-core, htrace-core, zookeeper and json libraries to mitigate security vulnerability.
+- Bug fixes.
+
+### What's New in mlcp 10.0.10
 - Upgrade Hadoop Library to 3.3.4
 - Upgrade libthrift, jackson-annotations, jackson-core, jackson-databind, Xerces, woodstox-core to mitigate security vulnerability.
 - Bug fixes.
 
-### What's New in mlcp and Hadoop Connector 10.0.9.5
+### What's New in mlcp 10.0.9.5
 - Upgrade Hadoop Library to 3.3.0
 - Upgrade Httpclient, Xstream, jackson-annotations, jackson-core, jackson-databind, logback-classic, commons-configuration2 to mitigate security vulnerability.
 - Bug fixes.
 
-### What's New in mlcp and Hadoop Connector 10.0.9.2
+### What's New in mlcp 10.0.9.2
 - Upgrade guava from 25.0 to 31.1 to mitigate security vulnerability [CVE-2020-8908](https://nvd.nist.gov/vuln/detail/CVE-2020-8908)
 
-### What's New in mlcp and Hadoop Connector 10.0.9
+### What's New in mlcp 10.0.9
 - Upgrade log4j from 2.17.0 to 2.17.1 to mitigate security vulnerability [CVE-2021-44832](https://nvd.nist.gov/vuln/detail/CVE-2021-44832).
 - Upgrade dependencies for fixing security vulnerabilities.
 - Bug fixes.
 
-### What's New in mlcp and Hadoop Connector 10.0.8.2
+### What's New in mlcp 10.0.8.2
 - Upgrade log4j from 1.2.17 to 2.17.0 to mitigate security vulnerability [CVE-2019-17571](https://nvd.nist.gov/vuln/detail/CVE-2019-17571).
 
-### What's New in mlcp and Hadoop Connector 10.0.8
+### What's New in mlcp 10.0.8
 - Bug fixes.
 
 ### What's New in mlcp and Hadoop Connector 10.0.7
