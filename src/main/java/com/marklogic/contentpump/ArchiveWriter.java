@@ -34,7 +34,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.utilities.URIUtil;
 
 /**
- * RecordWriter that writes <DocumentURI, MarkLogicDocument> to zip files.
+ * RecordWriter that writes &lt;DocumentURI, MarkLogicDocument&gt; to zip files.
  * 
  * @author jchen
  */
