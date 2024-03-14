@@ -112,7 +112,6 @@ implements ConfigConstants {
      * @param col Column number in the source if applicable; -1 otherwise.
      * @param reason
      * 
-     * @return true if key indicates the record is to be skipped; false 
      * otherwise.
      */
     protected void setSkipKey(int line, int col, String reason) {

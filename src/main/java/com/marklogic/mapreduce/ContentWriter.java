@@ -150,7 +150,7 @@ implements MarkLogicConstants {
     
     protected boolean countBased;
     
-    /** role-id -> role-name mapping **/
+    /** role-id -&gt; role-name mapping **/
     protected LinkedMapWritable roleMap;
     
     protected HashMap<String,ContentPermission[]> permsMap;
