@@ -246,7 +246,7 @@ public interface ConfigConstants {
             "mapreduce.marklogic.input.modulesroot";
 
     /**
-     * <Role-name,Role-id> map for internal use
+     * &lt;Role-name,Role-id&gt; map for internal use
      */
     static final String CONF_ROLE_MAP = "mapreduce.marklogic.output.rolemap";
     

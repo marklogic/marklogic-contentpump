@@ -220,7 +220,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
+        <version>3.6.3</version>
         <configuration>
           <header>${productNameShort} ${versionString}</header>
           <author>false</author>
@@ -230,6 +230,7 @@
           <outputDirectory>${project.build.directory}/javadoc</outputDirectory>
           <reportOutputDirectory>${project.reporting.outputDirectory}/javadoc</reportOutputDirectory>
           <sourcePath>src</sourcePath>
+          <noindex>true</noindex>
           <bottom><![CDATA[
             <i>${javadocCopyrightMessage}</i>
             <p>Complete online documentation for MarkLogic Server,
