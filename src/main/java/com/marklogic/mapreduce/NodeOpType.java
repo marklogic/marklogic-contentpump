@@ -32,14 +32,14 @@ package com.marklogic.mapreduce;
  * </p>
  * <p>
  *  For more information, see the following built-in functions in the
- *  <em>XQuery & XSLT API Reference</em>:
+ *  <em>XQuery &amp; XSLT API Reference</em>:
  *  <ul>
  *   <li>xdmp:node-insert-before</li>
  *   <li>xdmp:node-insert-after</li>
  *   <li>xdmp:node-insert-child</li>
  *   <li>xdmp:node-insert-replace</li>
  *  </ul>
- * </p>
+ * 
  * 
  * @author jchen
  */
