@@ -85,10 +85,10 @@ public class DocumentImpl extends NodeImpl implements Document {
      * <p>
      * Text documents in MarkLogic cannot be cloned.
      * UnsupportedOperationException will be thrown if cloneNode is call on text
-     * document.
+     * document. </>
      * <p>
      * DocumentType node will not be cloned as it is not part of the Expanded
-     * Tree.
+     * Tree.</>
      * 
      * 
      */

@@ -42,7 +42,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.utilities.URIUtil;
 
 /**
- * RecordWriter for &lt;DocumentURI, MarkLogicDocument&gt; creating a single
+ * RecordWriter for <DocumentURI, MarkLogicDocument> creating a single
  * file.
  * 
  * @author jchen

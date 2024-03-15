@@ -33,11 +33,12 @@ import org.apache.hadoop.conf.Configuration;
  * </p>
  * <p>
  *  For more information, see the following built-in functions in the
- *  <em>XQuery &amp; XSLT API Reference</em>:
+ *  <em>XQuery & XSLT API Reference</em>:
  *  <ul>
  *   <li>xdmp:document-set-property</li>
  *   <li>xdmp:document-add-properties</li>
  *  </ul>
+ * </p>
  * 
  * @author jchen
  */
