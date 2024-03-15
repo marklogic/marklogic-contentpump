@@ -243,10 +243,6 @@
           <outputDirectory>${project.build.directory}/javadoc</outputDirectory>
           <reportOutputDirectory>${project.reporting.outputDirectory}/javadoc</reportOutputDirectory>
           <sourcePath>src</sourcePath>
-          <quiet>true</quiet>
-          <failOnError>false</failOnError>
-          <doclint>none</doclint>
-          <additionalparam>-Xdoclint:none</additionalparam>
           <noindex>true</noindex>
           <bottom><![CDATA[
             <i>${javadocCopyrightMessage}</i>
