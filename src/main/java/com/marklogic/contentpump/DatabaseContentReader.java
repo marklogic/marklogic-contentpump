@@ -57,7 +57,7 @@ import com.marklogic.xcc.types.XdmItem;
 
 /**
  * A MarkLogicRecordReader that fetches data from MarkLogic server and generates 
- * <DocumentURI, MarkLogicDocument> key value pairs.
+ * &lt;DocumentURI, MarkLogicDocument&gt; key value pairs.
  * 
  * @author ali
  * 
