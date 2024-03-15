@@ -19,7 +19,7 @@ import com.marklogic.mapreduce.StreamLocator;
 
 /**
  * Reader for compressed documents from file systems and produce
- * &lt;DocumentURI, Path&gt; pairs. 
+ * <DocumentURI, Path> pairs. 
  * 
  * @author jchen
  */
