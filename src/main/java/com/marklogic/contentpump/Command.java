@@ -1993,7 +1993,7 @@ public enum Command implements ConfigConstants {
      *            Hadoop configuration
      * @param cmdline command line options
      * @return a Hadoop job
-     * @throws Exception
+     * @throws IOException
      */
     public abstract Job createJob(Configuration conf, CommandLine cmdline)
                     throws IOException;

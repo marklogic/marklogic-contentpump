@@ -241,7 +241,7 @@ public interface MarkLogicConstants {
      *  to generate input splits. This property is required (and only 
      *  usable) in <code>advanced</code> mode; see the
      *  {@link #INPUT_MODE input.mode} property for details.
-     * </p>
+     * 
      * <p>
      *  The split query must return a sequence of (forest id, record 
      *  count, hostname) tuples. The host name and forest id identify
@@ -327,7 +327,7 @@ public interface MarkLogicConstants {
      *  records from MarkLogic Server. This property is required
      *  when <code>advanced</code> is specified in the
      *  {@link #INPUT_MODE input.mode} property.
-     * </p>
+     * 
      * 
      * <p>
      *  The value of this property must be a fully formed query,
@@ -345,7 +345,7 @@ public interface MarkLogicConstants {
      *  The config property name (<code>{@value}</code>)
      *  which, if set, specifies data retrieval from MarkLogic Server at the 
      *  specified timestamp. 
-     * </p>
+     * 
      */
     static final String INPUT_QUERY_TIMESTAMP = 
         "mapreduce.marklogic.input.querytimestamp";
