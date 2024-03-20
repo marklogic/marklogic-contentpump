@@ -131,6 +131,11 @@
         <include>org.apache.hadoop:hadoop-client:jar:*</include>
         <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:*</include>
         <include>org.apache.hadoop.thirdparty:hadoop-shaded-protobuf_3_21:jar:*</include>
+        <include>commons-logging:commons-logging:jar:*</include>
+        <include>xml-apis:ml-apis:jar:*</include>
+        <include>jakarta.xml.soap:jakarta.xml.soap-api:jar:*</include>
+        <include>org.slf4j:jcl-over-slf4j:jar:*</include>
+        <include>commons-logging:commons-logging-api:jar:*</include>
       </includes>
     </dependencySet>
   </dependencySets>
