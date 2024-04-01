@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MarkLogic Corporation
+ * Copyright (c) 2023 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package com.marklogic.contentpump;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -147,13 +148,14 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         }
 
         lineSeparator = retrieveLineSeparator(fileIn);
-        if (start != 0) {
-            // in case the cut point is \n, back off 1 char to create a partial
-            // line so that 1st line can be skipped
-            start--;
+        long adjustedStart = start;
+        try {
+            adjustedStart = adjustStartPos();
+        } catch (IllegalArgumentException e) {
+            LOG.error("File: " + file.toUri() + " may lose records, reason: "
+                    + e.getMessage());
         }
-
-        fileIn.seek(start);
+        fileIn.seek(adjustedStart);
 
         instream = new InputStreamReader(fileIn, encoding);
 
@@ -192,7 +194,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         // while parsing the first line in the split
         parser = new CSVParser(instream, CSVParserFormatter.
                 getFormat(delimiter, null, false,false),
-                start, 0L, encoding);
+                adjustedStart, 0L, encoding);
         parserIterator = parser.iterator();
 
         if (parserIterator.hasNext()) {
@@ -250,4 +252,79 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         return sb.toString();
     }
 
+    /*
+      Bug 55944: Adjust the starting position of a split based on encoding, in
+      case the split boundary is in the middle of a multibyte character.
+     */
+    private long adjustStartPos()
+            throws IllegalArgumentException, IOException {
+        if (start == 0) return start;
+        // Only support UTF-8 for now
+        if (encoding.equals("UTF-8")) return findStartPosUTF8();
+        else return start;
+    }
+
+    private long findStartPosUTF8()
+            throws IllegalArgumentException, IOException {
+        long curPos = start;
+        int numBytes = 4; // UTF-8 encoded characters have maximum 4 bytes
+        while (fileIn.available() > 0 && curPos > 0) {
+            // Unable to find byte 1 of a UTF-8 char within 4 moves
+            if ((start-curPos) >= numBytes)
+                throw new IllegalArgumentException("Invalid UTF-8 encoding");
+            fileIn.seek(curPos-1);
+            int prevByte = fileIn.read();
+            int curByte = fileIn.read();
+            if (checkFirstByteUTF8(curByte)) { // Byte 1 found
+                // Check for special case: the split boundary is right after
+                // the newline char or right before a delimiter
+                if (prevByte == (int)('\n') || prevByte == (int)('\r'))
+                    // Split boundary right after the newline char, backoff by
+                    // 1 byte to create a partial line
+                    return curPos-1;
+                else return curPos + delimiterOffsetUTF8(delimiter, curPos);
+            }
+            else curPos--;
+        }
+        return start;
+    }
+
+    private boolean checkFirstByteUTF8(int curByte)
+            throws IllegalArgumentException {
+        /*
+            UTF-8 encodes codepoints in 1 to 4 bytes
+            Byte 1: 0xxxxxxx, 110xxxxx, 1110xxxx, 11110xxx  --> 0-127, 192-247
+            Byte 2, 3, 4: 10xxxxxx --> 128-191
+         */
+        if (curByte >= 128 && curByte <= 191)
+            // Byte 2, 3, 4
+            return false;
+        else if ((curByte >= 0 && curByte <= 127) ||
+                (curByte >= 192 && curByte <= 247))
+            // Byte 1
+            return true;
+        else
+            throw new IllegalArgumentException("Invalid UTF-8 encoding");
+    }
+
+    /*
+        Check for special case: the split boundary is right before a delimiter,
+        move the starting position to after the delimiter
+     */
+    private int delimiterOffsetUTF8(char delimiter, long curPos)
+            throws IOException {
+        // The native Java charset is a 16-bit UTF-16 encoded unit, convert
+        // delimiter char to UTF-8 encoding
+        byte[] delimiterBytes =
+                String.valueOf(delimiter).getBytes(StandardCharsets.UTF_8);
+        fileIn.seek(curPos);
+        for (byte delimiterByte : delimiterBytes) {
+            if (fileIn.available() <= 0) return 0;
+            else {
+                int curByte = fileIn.read();
+                if (curByte != (int)delimiterByte) return 0;
+            }
+        }
+        return delimiterBytes.length;
+    }
 }

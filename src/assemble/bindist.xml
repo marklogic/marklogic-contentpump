@@ -77,7 +77,6 @@
         <include>org.apache.httpcomponents:httpclient:jar:*</include>
         <include>commons-io:commons-io:jar:*</include>
         <include>commons-modeler:commons-modeler:jar:*</include>
-        <include>org.apache.htrace:htrace-core:jar:*</include>
         <include>com.sun.jersey:jersey-core:jar:*</include>
         <include>com.sun.jersey:jersey-client:jar:*</include>
         <include>commons-collections:commons-collections:jar:*</include>
@@ -126,6 +125,9 @@
         <include>com.google.re2j:re2j:jar:*</include>
         <include>org.apache.commons:commons-compress:jar:*</include>
         <include>org.apache.hadoop:hadoop-hdfs-client:jar:*</include>
+        <include>org.apache.hadoop:hadoop-client:jar:*</include>
+        <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:*</include>
+        <include>org.apache.hadoop.thirdparty:hadoop-shaded-protobuf_3_7:jar:*</include>
       </includes>
     </dependencySet>
   </dependencySets>

@@ -191,7 +191,7 @@ public class TestCopy{
     
     @Test
     public void testCopyTransform() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = 
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
@@ -225,7 +225,7 @@ public class TestCopy{
             + " -output_uri_suffix .suffix"
             + " -output_uri_prefix prefix/ -output_collections copy"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -input_port " + Constants.port + " -input_database " + Constants.testDb
             + " -output_port " + Constants.port + " -output_database " + Constants.copyDst;
         args = cmd.split(" ");
@@ -251,7 +251,7 @@ public class TestCopy{
     
     @Test
     public void testCopyTransformFast() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = 
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
@@ -286,7 +286,7 @@ public class TestCopy{
             + " -output_uri_suffix .suffix"
             + " -output_uri_prefix prefix/ -output_collections copy"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -input_port " + Constants.port + " -input_database " + Constants.testDb
             + " -output_port " + Constants.port + " -output_database " + Constants.copyDst;
         args = cmd.split(" ");
