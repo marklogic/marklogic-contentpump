@@ -1,11 +1,8 @@
 package com.marklogic.contentpump;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.After;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 import com.marklogic.contentpump.utilities.OptionsFileUtil;
 import com.marklogic.mapreduce.utilities.AssignmentManager;
@@ -152,11 +149,11 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedText() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -delimited_uri_id first"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
             + " -port " + Constants.port + " -database " + Constants.testDb;
@@ -190,11 +187,11 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedTextFileNameAsCollection() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -transform_namespace http://marklogic.com/module_invoke"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -filename_as_collection true"
             + " -delimited_uri_id first"
             + " -thread_count 1"
@@ -277,14 +274,14 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedTextLanNs() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd = "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv"
             + " -delimited_uri_id first"
             + " -input_file_type delimited_text -input_file_pattern .*\\.csv"
             + " -output_language fr"
             + " -namespace test"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -port " + Constants.port + " -database " + Constants.testDb;
         String[] args = cmd.split(" ");
@@ -816,12 +813,12 @@ public class TestImportDelimitedText{
 
     @Test
     public void testImportTransformDelimitedTextZip() throws Exception {
-        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc.xqy");
+        Utils.prepareModule(Utils.getTestDbXccUri(), "/lc_test.xqy");
         String cmd =
             "IMPORT -host localhost -username admin -password admin"
             + " -input_file_path " + Constants.TEST_PATH.toUri() + "/csv2.zip"
             + " -delimited_uri_id first"
-            + " -transform_module /lc.xqy"
+            + " -transform_module /lc_test.xqy"
             + " -transform_namespace http://marklogic.com/module_invoke"
             + " -input_compressed -input_compression_codec zip"
             + " -input_file_type delimited_text"
@@ -1134,4 +1131,114 @@ public class TestImportDelimitedText{
         Utils.closeSession();
     }
 
+    @Test
+    public void testBug55944TwoBytesSmall() throws Exception {
+        String cmd =
+            "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri()
+                + "/delimitedText/55944_two_bytes_small.csv"
+                + " -input_file_type delimited_text -split_input true"
+                + " -max_split_size 1000 -uri_id id -output_uri_prefix .xml"
+                + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertNotEquals(0, args.length);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        ResultSequence result = Utils.runQuery(
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("4", result.next().asString());
+        Utils.closeSession();
+    }
+
+    @Test
+    public void testBug55944TwoBytes() throws Exception {
+        String cmd =
+            "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri()
+                + "/delimitedText/55944_two_bytes.csv"
+                + " -input_file_type delimited_text -split_input true"
+                + " -max_split_size 1000 -uri_id id -output_uri_prefix .xml"
+                + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertNotEquals(0, args.length);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        ResultSequence result = Utils.runQuery(
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("100000", result.next().asString());
+        Utils.closeSession();
+    }
+
+    @Test
+    public void testBug55944FourBytes() throws Exception {
+        String cmd =
+            "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri()
+                + "/delimitedText/55944_four_bytes.csv"
+                + " -input_file_type delimited_text -split_input true"
+                + " -max_split_size 1000 -uri_id id -output_uri_prefix .xml"
+                + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertNotEquals(0, args.length);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        ResultSequence result = Utils.runQuery(
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1000", result.next().asString());
+        Utils.closeSession();
+    }
+
+    @Test
+    public void testBug55944MixedBytes() throws Exception {
+        String cmd =
+            "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri()
+                + "/delimitedText/55944_mixed_bytes.csv"
+                + " -input_file_type delimited_text -split_input true"
+                + " -max_split_size 1000 -uri_id id -output_uri_prefix .xml"
+                + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertNotEquals(0, args.length);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        ResultSequence result = Utils.runQuery(
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("1000", result.next().asString());
+        Utils.closeSession();
+    }
+
+    @Test
+    // Test multi-byte delimiter
+    public void testBug55944Delimiter() throws Exception {
+        String cmd =
+            "IMPORT -host localhost -username admin -password admin"
+                + " -input_file_path " + Constants.TEST_PATH.toUri()
+                + "/delimitedText/55944_delimiter.csv -delimiter ，"
+                + " -input_file_type delimited_text -split_input true"
+                + " -max_split_size 1000 -uri_id id -output_uri_prefix .xml"
+                + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertNotEquals(0, args.length);
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+        ResultSequence result = Utils.runQuery(
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("10000", result.next().asString());
+        Utils.closeSession();
+    }
 }
