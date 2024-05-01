@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,12 +37,6 @@ import com.marklogic.xcc.ContentFactory;
  * representation of a document as stored in the expanded tree
  * cache of a forest on disk.
  * 
- * <p>
- * You cannot use this class to modify a document. However, you
- * can create a modifiable copy of the underlying document
- * using {@link com.marklogic.dom.DocumentImpl} on the 
- * document returned by {@link #getDocument}.
- * </p>
  * 
  * @author jchen
  *

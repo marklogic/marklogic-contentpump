@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import com.marklogic.mapreduce.MarkLogicDocument;
 import com.marklogic.mapreduce.utilities.URIUtil;
 
 /**
- * RecordWriter that writes <DocumentURI, MarkLogicDocument> to zip files.
+ * RecordWriter that writes &lt;DocumentURI, MarkLogicDocument&gt; to zip files.
  * 
  * @author jchen
  */

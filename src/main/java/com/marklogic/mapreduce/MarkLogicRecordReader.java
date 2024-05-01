@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,11 +44,12 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 /**
  * A RecordReader that fetches data from MarkLogic server and generates 
- * <K, V> key value pairs.
+ * &lt;K, V&gt; key value pairs.
  * 
  * @author jchen
  * 
- * @param <KEYIN, VALUEIN>
+ * @param <KEYIN>
+ * @param <VALUEIN>
  */
 public abstract class MarkLogicRecordReader<KEYIN, VALUEIN> 
 extends RecordReader<KEYIN, VALUEIN>

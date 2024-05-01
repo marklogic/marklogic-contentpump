@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,10 +85,10 @@ public class DocumentImpl extends NodeImpl implements Document {
      * <p>
      * Text documents in MarkLogic cannot be cloned.
      * UnsupportedOperationException will be thrown if cloneNode is call on text
-     * document. </>
+     * document.
      * <p>
      * DocumentType node will not be cloned as it is not part of the Expanded
-     * Tree.</>
+     * Tree.
      * 
      * 
      */

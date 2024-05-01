@@ -15,24 +15,29 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Release Notes
 
-### What's New in mlcp and Hadoop Connector 11.1.0
+### What's New in mlcp 11.2.0
+
+- Excluded all the transitive dependencies to improve security and maintenance. 
+- Upgraded Avro, Commons-cli, Commons-compress, Commons-io, Xml-apis, Jakarta.xml.soap-api, Jcl-over-slf4, and Commons-logging-api libraries to mitigate security vulnerabilities.
+- Removed Zookeeper, Bliki-core, Logback-classic, and Htrace-core libraries to mitigate security vulnerabilities.
+- Upgraded the Maven Javadoc plugin from 2.10.3 to 3.6.3 to mitigate security vulnerability.
+- Removed all dependencies and repository references related to deprecated mapr.
+
+### What's New in mlcp 11.1.0
 - Now requires JRE 11 or later.
 - Added support for reverse proxy and connection to MarkLogic Cloud. 
 - Upgraded Jena libraries from 2.13.0 to 4.9.0 to mitigate security vulnerability.
 - Upgraded Jackson, Hadoop, Xstream, and Guava libraries to mitigate security vulnerabilities.
 
-### What's New in mlcp and Hadoop Connector 11.0.3
+### What's New in mlcp 11.0.3
 - Removed an unused json dependency to mitigate security vulnerability.
   
-### What's New in mlcp and Hadoop Connector 11.0.2
+### What's New in mlcp 11.0.2
 - Upgraded libthrift from 0.14.0 to 0.17.0 to mitigate security vulnerability.
 
-### What's New in mlcp and Hadoop Connector 11.0.0
+### What's New in mlcp 11.0.0
 - Upgraded Hadoop Library to 3.3.4
 - Upgraded jackson-annotations, jackson-core, jackson-databind, Xerces, woodstox-core to mitigate security vulnerability.
-
-
-
 - Bug fixes.
 
 ## Getting Started

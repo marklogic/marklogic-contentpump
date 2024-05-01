@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -220,7 +220,6 @@ implements MarkLogicConstants {
      * @param col Column number in the source if applicable; -1 otherwise.
      * @param reason Reason for skipping.
      * 
-     * @return true if key indicates the record is to be skipped; false 
      * otherwise.
      */
     protected void setSkipKey(String sub, int line, int col, String reason) {

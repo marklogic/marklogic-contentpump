@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,7 +150,7 @@ implements MarkLogicConstants {
     
     protected boolean countBased;
     
-    /** role-id -> role-name mapping **/
+    /** role-id -&gt; role-name mapping **/
     protected LinkedMapWritable roleMap;
     
     protected HashMap<String,ContentPermission[]> permsMap;

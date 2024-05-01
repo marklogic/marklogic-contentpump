@@ -77,7 +77,6 @@
         <include>org.apache.httpcomponents:httpclient:jar:*</include>
         <include>commons-io:commons-io:jar:*</include>
         <include>commons-modeler:commons-modeler:jar:*</include>
-        <include>org.apache.htrace:htrace-core:jar:*</include>
         <include>com.sun.jersey:jersey-core:jar:*</include>
         <include>com.sun.jersey:jersey-client:jar:*</include>
         <include>commons-collections:commons-collections:jar:*</include>
@@ -133,6 +132,11 @@
         <include>org.apache.hadoop:hadoop-client:jar:*</include>
         <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:*</include>
         <include>org.apache.hadoop.thirdparty:hadoop-shaded-protobuf_3_7:jar:*</include>
+        <include>commons-logging:commons-logging:jar:*</include>
+        <include>xml-apis:ml-apis:jar:*</include>
+        <include>jakarta.xml.soap:jakarta.xml.soap-api:jar:*</include>
+        <include>org.slf4j:jcl-over-slf4j:jar:*</include>
+        <include>commons-logging:commons-logging-api:jar:*</include>
       </includes>
     </dependencySet>
   </dependencySets>
