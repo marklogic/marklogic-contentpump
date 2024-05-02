@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ import com.marklogic.xcc.types.XdmItem;
 
 /**
  * A MarkLogicRecordReader that fetches data from MarkLogic server and generates 
- * <DocumentURI, MarkLogicDocument> key value pairs.
+ * &lt;DocumentURI, MarkLogicDocument&gt; key value pairs.
  * 
  * @author ali
  * 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1993,7 +1993,7 @@ public enum Command implements ConfigConstants {
      *            Hadoop configuration
      * @param cmdline command line options
      * @return a Hadoop job
-     * @throws Exception
+     * @throws IOException
      */
     public abstract Job createJob(Configuration conf, CommandLine cmdline)
                     throws IOException;

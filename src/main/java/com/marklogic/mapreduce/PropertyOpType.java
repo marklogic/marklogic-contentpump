@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,11 @@ import org.apache.hadoop.conf.Configuration;
  * </p>
  * <p>
  *  For more information, see the following built-in functions in the
- *  <em>XQuery & XSLT API Reference</em>:
+ *  <em>XQuery &amp; XSLT API Reference</em>:
  *  <ul>
  *   <li>xdmp:document-set-property</li>
  *   <li>xdmp:document-add-properties</li>
  *  </ul>
- * </p>
  * 
  * @author jchen
  */

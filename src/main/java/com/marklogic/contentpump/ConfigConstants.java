@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 MarkLogic Corporation
+ * Copyright (c) 2024 MarkLogic Corporation
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -247,7 +247,7 @@ public interface ConfigConstants {
             "mapreduce.marklogic.input.modulesroot";
 
     /**
-     * <Role-name,Role-id> map for internal use
+     * &lt;Role-name,Role-id&gt; map for internal use
      */
     static final String CONF_ROLE_MAP = "mapreduce.marklogic.output.rolemap";
     
