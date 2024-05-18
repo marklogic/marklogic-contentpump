@@ -84,7 +84,6 @@
         <include>org.apache.avro:avro:jar:*</include>              
         <include>commons-cli:commons-cli:jar:*</include>
         <include>commons-codec:commons-codec:jar:*</include>
-        <include>org.apache.commons:commons-configuration2:jar:*</include>
         <include>org.apache.commons:commons-lang3:jar:*</include>
         <include>commons-lang:commons-lang:jar:*</include>
         <include>commons-logging:commons-logging:jar:*</include>
