@@ -20,7 +20,7 @@
     <versionString>12.0</versionString>
     <xccVersion>${versionString}</xccVersion>
     <hadoopVersion>3.3.6</hadoopVersion>
-    <jacksonVersion>2.15.2</jacksonVersion>
+    <jacksonVersion>2.17.1</jacksonVersion>
     <jenaVersion>4.9.0</jenaVersion>
     <commonsCsvVersion>1.5.2-marklogic</commonsCsvVersion>
     <bundleArtifact>apache</bundleArtifact>
@@ -937,7 +937,7 @@
     <dependency>
       <groupId>org.apache.htrace</groupId>
       <artifactId>htrace-core4</artifactId>
-      <version>4.1.0-incubating</version>
+      <version>4.2.0-incubating</version>
     </dependency>
     <dependency>
       <groupId>com.google.re2j</groupId>
@@ -947,7 +947,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.26.0</version>
+      <version>1.26.1</version>
     </dependency>
     <dependency>
       <groupId>com.sun.jersey</groupId>
@@ -1074,7 +1074,7 @@
     <dependency>
       <groupId>org.apache.hadoop.thirdparty</groupId>
       <artifactId>hadoop-shaded-guava</artifactId>
-      <version>1.1.1</version>
+      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.hadoop.thirdparty</groupId>
