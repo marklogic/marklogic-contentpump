@@ -935,11 +935,6 @@
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.apache.htrace</groupId>
-      <artifactId>htrace-core4</artifactId>
-      <version>4.2.0-incubating</version>
-    </dependency>
-    <dependency>
       <groupId>com.google.re2j</groupId>
       <artifactId>re2j</artifactId>
       <version>1.6</version>
