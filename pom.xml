@@ -19,7 +19,7 @@
   <properties>
     <versionString>11.3</versionString>
     <xccVersion>${versionString}</xccVersion>
-    <hadoopVersion>3.3.6</hadoopVersion>
+    <hadoopVersion>3.4.0</hadoopVersion>
     <jacksonVersion>2.17.1</jacksonVersion>
     <jenaVersion>4.9.0</jenaVersion>
     <commonsCsvVersion>1.5.2-marklogic</commonsCsvVersion>
