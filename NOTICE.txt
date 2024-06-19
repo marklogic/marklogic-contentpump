@@ -1,6 +1,6 @@
 ﻿MarkLogic® Content Pump 11.3
 
-Copyright © 2022-2024 MarkLogic Corporation.  MarkLogic and MarkLogic logo are trademarks or registered trademarks of MarkLogic Corporation in the United States and other countries.  All other trademarks are the property of their respective owners.
+Copyright © 2024 MarkLogic Corporation.  MarkLogic and MarkLogic logo are trademarks or registered trademarks of MarkLogic Corporation in the United States and other countries.  All other trademarks are the property of their respective owners.
  
 This project is licensed under the Apache License, Version 2.0 (the "License"); you may not use this project except in compliance with the License. You may obtain a copy of the License at
 
@@ -10,7 +10,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 To the extent required by the applicable open-source license, a complete machine-readable copy of the source code corresponding to such code is available upon request. This offer is valid to anyone in receipt of this information and shall expire three years following the date of the final distribution of this product version by MarkLogic Corporation. To obtain such source code, send an email to Legal-thirdpartyreview@progress.com. Please specify the product and version for which you are requesting source code.
 
-The following software may be included in this project (last updated June 14, 2024):
+The following software may be included in this project (last updated June 18, 2024):
 -------------------------------------------------------------------------
 
 Third Party Components
