@@ -84,7 +84,6 @@
         <include>org.apache.avro:avro:jar:*</include>              
         <include>commons-cli:commons-cli:jar:*</include>
         <include>commons-codec:commons-codec:jar:*</include>
-        <include>org.apache.commons:commons-configuration2:jar:*</include>
         <include>org.apache.commons:commons-lang3:jar:*</include>
         <include>commons-lang:commons-lang:jar:*</include>
         <include>commons-logging:commons-logging:jar:*</include>
@@ -125,13 +124,12 @@
         <include>com.fasterxml.woodstox:woodstox-core:jar:*</include>
         <include>org.codehaus.woodstox:stax2-api:jar:*</include>
         <include>org.apache.commons:commons-configuration2:jar:*</include>
-        <include>org.apache.htrace:htrace-core4:jar:*</include>
         <include>com.google.re2j:re2j:jar:*</include>
         <include>org.apache.commons:commons-compress:jar:*</include>
         <include>org.apache.hadoop:hadoop-hdfs-client:jar:*</include>
         <include>org.apache.hadoop:hadoop-client:jar:*</include>
         <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:*</include>
-        <include>org.apache.hadoop.thirdparty:hadoop-shaded-protobuf_3_7:jar:*</include>
+        <include>org.apache.hadoop.thirdparty:hadoop-shaded-protobuf_3_21:jar:*</include>
         <include>commons-logging:commons-logging:jar:*</include>
         <include>xml-apis:ml-apis:jar:*</include>
         <include>jakarta.xml.soap:jakarta.xml.soap-api:jar:*</include>

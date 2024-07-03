@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+  xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+  xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+  xmlns:dcterms="http://purl.org/dc/terms/">
+
+  <rdf:Description rdf:about="http://vocabulary.worldbank.org/taxonomy/451">
+    <rdf:type rdf:resource="http://www.w3.org/2004/02/skos/core#Concept"/>
+    <dcterms:creator>wb</dcterms:creator>
+    <dcterms:created rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2013-05-21T15:49:55Z</dcterms:created>
+    <dcterms:hasVersion rdf:datatype="http://www.w3.org/2001/XMLSchema#int">0</dcterms:hasVersion>
+    <skos:prefLabel xml:lang="en">Debt Management</skos:prefLabel>
+    <skos:broader rdf:resource="http://vocabulary.worldbank.org/taxonomy/450"/>
+    <skos:narrower rdf:resource="http://vocabulary.worldbank.org/taxonomy/1137"/>
+    <skos:narrower rdf:resource="http://vocabulary.worldbank.org/taxonomy/1107"/>
+  </rdf:Description>
+
+</rdf:RDF>
