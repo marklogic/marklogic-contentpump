@@ -223,7 +223,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.6.3</version>
+        <version>3.10.0</version>
         <configuration>
           <source>8</source>
           <header>${productNameShort} ${versionString}</header>
@@ -334,6 +334,10 @@
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -388,6 +392,10 @@
         <exclusion>
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -528,6 +536,10 @@
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -599,6 +611,10 @@
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -637,6 +653,10 @@
         <exclusion>
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -685,6 +705,10 @@
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -731,6 +755,10 @@
         <exclusion>
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -779,6 +807,10 @@
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -813,6 +845,10 @@
         <exclusion>
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -893,6 +929,10 @@
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -931,6 +971,10 @@
         <exclusion>
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -1324,6 +1368,10 @@
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -1347,6 +1395,10 @@
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
     <dependency>
@@ -1369,6 +1421,10 @@
         <exclusion>
           <groupId>commons-collections</groupId>
           <artifactId>commons-collections</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-codec-http</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
