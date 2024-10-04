@@ -37,12 +37,6 @@ import com.marklogic.xcc.ContentFactory;
  * representation of a document as stored in the expanded tree
  * cache of a forest on disk.
  * 
- * <p>
- * You cannot use this class to modify a document. However, you
- * can create a modifiable copy of the underlying document
- * using {@link com.marklogic.dom.DocumentImpl} on the 
- * document returned by {@link #getDocument}.
- * </p>
  * 
  * @author jchen
  *

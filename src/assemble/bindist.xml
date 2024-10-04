@@ -84,7 +84,6 @@
         <include>org.apache.avro:avro:jar:*</include>              
         <include>commons-cli:commons-cli:jar:*</include>
         <include>commons-codec:commons-codec:jar:*</include>
-        <include>org.apache.commons:commons-configuration2:jar:*</include>
         <include>org.apache.commons:commons-lang3:jar:*</include>
         <include>commons-lang:commons-lang:jar:*</include>
         <include>commons-logging:commons-logging:jar:*</include>
@@ -115,19 +114,27 @@
         <include>org.apache.jena:jena-arq:jar:*</include>
         <include>org.apache.jena:jena-core:jar:*</include>
         <include>org.apache.jena:jena-iri:jar:*</include>
-        <include>xml-apis:xml-apis:jar:*</include>
+        <include>org.apache.jena:jena-base:jar:*</include>
+        <include>org.apache.jena:jena-shaded-guava:jar:*</include>
+        <include>org.apache.thrift:libthrift:jar:*</include>
+        <include>com.github.andrewoma.dexx:collection:jar:*</include>
+        <include>com.github.ben-manes.caffeine:caffeine:jar:*</include>
         <include>com.thoughtworks.xstream:xstream:jar:*</include>
         <include>junit:junit:jar:*</include>
         <include>com.fasterxml.woodstox:woodstox-core:jar:*</include>
         <include>org.codehaus.woodstox:stax2-api:jar:*</include>
         <include>org.apache.commons:commons-configuration2:jar:*</include>
-        <include>org.apache.htrace:htrace-core4:jar:*</include>
         <include>com.google.re2j:re2j:jar:*</include>
         <include>org.apache.commons:commons-compress:jar:*</include>
         <include>org.apache.hadoop:hadoop-hdfs-client:jar:*</include>
         <include>org.apache.hadoop:hadoop-client:jar:*</include>
         <include>org.apache.hadoop.thirdparty:hadoop-shaded-guava:jar:*</include>
-        <include>org.apache.hadoop.thirdparty:hadoop-shaded-protobuf_3_7:jar:*</include>
+        <include>org.apache.hadoop.thirdparty:hadoop-shaded-protobuf_3_21:jar:*</include>
+        <include>commons-logging:commons-logging:jar:*</include>
+        <include>xml-apis:ml-apis:jar:*</include>
+        <include>jakarta.xml.soap:jakarta.xml.soap-api:jar:*</include>
+        <include>org.slf4j:jcl-over-slf4j:jar:*</include>
+        <include>commons-logging:commons-logging-api:jar:*</include>
       </includes>
     </dependencySet>
   </dependencySets>

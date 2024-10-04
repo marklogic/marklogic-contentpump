@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 package com.marklogic.contentpump;
-
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -28,6 +26,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,29 +38,21 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.util.ReflectionUtils;
+import org.apache.jena.riot.RDFParserBuilder;
+import org.apache.jena.riot.lang.RiotParsers;
 import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RiotReader;
-import org.apache.jena.riot.lang.LangRIOT;
-import org.apache.jena.riot.lang.PipedQuadsStream;
-import org.apache.jena.riot.lang.PipedRDFIterator;
-import org.apache.jena.riot.lang.PipedRDFStream;
-import org.apache.jena.riot.lang.PipedTriplesStream;
-import org.apache.jena.riot.system.ErrorHandler;
-import org.apache.jena.riot.system.ParserProfile;
-import org.apache.jena.riot.system.RiotLib;
-import org.apache.jena.riot.system.StreamRDF;
-import org.apache.jena.riot.system.StreamRDFLib;
+import org.apache.jena.riot.system.*;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.DatasetFactory;
-import com.hp.hpl.jena.rdf.model.Literal;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.Resource;
-import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
-import com.hp.hpl.jena.sparql.core.Quad;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.sparql.core.Quad;
 import com.marklogic.contentpump.utilities.FileIterator;
 import com.marklogic.contentpump.utilities.IdGenerator;
 import com.marklogic.contentpump.utilities.PermissionUtil;
@@ -105,9 +96,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     protected Iterator<String> graphNameIter = null;
     protected String collection = null;
     protected RunnableParser jenaStreamingParser = null;
-
-    protected PipedRDFIterator rdfIter;
-    protected PipedRDFStream rdfInputStream;
+    protected Iterator rdfIter;
+    protected Stream rdfInputStream;
     protected Lang lang;
 
     protected Hashtable<String, Vector> collectionHash =
@@ -170,8 +160,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
     public void close() throws IOException {
         //report total counts of triples on close
         LOG.info("Ingested " + ingestedTriples + " triples from " + origFn);
-        if(rdfIter!=null) {
-            rdfIter.close();
+        if(rdfInputStream!=null) {
+            rdfInputStream.close();
         }
         dataset = null;
         if(graphQry.length()==0) 
@@ -300,7 +290,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         start = 0;
         pos = 0;
         end = 1;
-
         jenaStreamingParser = null;
         dataset = null;
         statementIter = null;
@@ -344,8 +333,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
         synchronized (jenaLock) {
             if (size < INMEMORYTHRESHOLD) {
-                dataset = DatasetFactory.createMem();
-            } 
+                dataset = DatasetFactory.createTxnMem();
+            }
         }
     }
 
@@ -360,33 +349,19 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     protected void loadModel(final String fsname, final InputStream in) throws IOException {
         if (dataset == null) {
-            if (lang == Lang.NQUADS || lang == Lang.TRIG) {
-                rdfIter = new PipedRDFIterator<Quad>();
-                @SuppressWarnings("unchecked")
-                PipedQuadsStream stream = new PipedQuadsStream(rdfIter);
-                rdfInputStream = stream;
-            } else {
-                rdfIter = new PipedRDFIterator<Triple>();
-                @SuppressWarnings("unchecked")
-                PipedTriplesStream stream = new PipedTriplesStream(rdfIter);
-                rdfInputStream = stream;
-            }
-
-            // Create a runnable for our parser thread
-            jenaStreamingParser = new RunnableParser(origFn, fsname, in);
-
-            // Run it
-            new Thread(jenaStreamingParser).start();
+            // Previously during parsing, we create a runnable thread for each file and run them everytime.
+            // It has been replaced by direct calls to the Jena parser because
+            // Asyncparser manages its parsing in seperate thread. 
+            jenaStreamingParser = new RunnableParser(origFn, fsname, in, lang);
+            jenaStreamingParser.run();
         } else {
             StreamRDF dest = StreamRDFLib.dataset(dataset.asDatasetGraph());
-            LangRIOT parser = RiotReader.createParser(in, lang, fsname, dest);
             ErrorHandler handler = new ParserErrorHandler(fsname);
-            ParserProfile prof = RiotLib.profile(lang, fsname, handler);
-            parser.setProfile(prof);
             try {
-                parser.parse();
+                AsyncParser.of(RDFParserBuilder.create().source(in).lang(lang).errorHandler(handler).base(fsname)).asyncParseSources(dest);
+
             } catch (Throwable e) {
-                LOG.error("Parse error in RDF document(please check intactness and encoding); processing partial document:"
+                LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
                     + fsname + " " + e.getMessage());
             }
             in.close();
@@ -670,8 +645,14 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     public boolean nextInMemoryTripleKeyValue() throws IOException, InterruptedException {
         if(statementIter == null) return false;
-        if (!statementIter.hasNext()) {
-            hasNext = false;
+        try {
+            if (!statementIter.hasNext()) {
+                hasNext = false;
+                return false;
+            }
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
+                    + origFn + " " + ex.getMessage());
             return false;
         }
         setKey();
@@ -708,15 +689,21 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     public boolean nextInMemoryQuadKeyValueWithCollections() throws IOException, InterruptedException {
         if(statementIter == null) return false;
-        while (!statementIter.hasNext()) {
-            if (graphNameIter.hasNext()) {
-                collection = graphNameIter.next();
-                statementIter = dataset.getNamedModel(collection).listStatements();
-            } else {
-                hasNext = false;
-                collection = null;
-                return false;
+        try {
+            while (!statementIter.hasNext()) {
+                if (graphNameIter.hasNext()) {
+                    collection = graphNameIter.next();
+                    statementIter = dataset.getNamedModel(collection).listStatements();
+                } else {
+                    hasNext = false;
+                    collection = null;
+                    return false;
+                }
             }
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
+                    + origFn + " " + ex.getMessage());
+            return false;
         }
         setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
@@ -743,14 +730,20 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
     public boolean nextInMemoryQuadKeyValueIgnoreCollections() throws IOException, InterruptedException {
         if(statementIter == null) return false;
-        while (!statementIter.hasNext()) {
-            if (graphNameIter.hasNext()) {
-                collection = graphNameIter.next();
-                statementIter = dataset.getNamedModel(collection).listStatements();
-            } else {
-                hasNext = false;
-                return false;
+        try {
+            while (!statementIter.hasNext()) {
+                if (graphNameIter.hasNext()) {
+                    collection = graphNameIter.next();
+                    statementIter = dataset.getNamedModel(collection).listStatements();
+                } else {
+                    hasNext = false;
+                    return false;
+                }
             }
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
+                    + origFn + " " + ex.getMessage());
+            return false;
         }
         setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
@@ -801,7 +794,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                 }
             }
         }
-
         if (lang == Lang.NQUADS || lang == Lang.TRIG) {
             return nextStramingQuadKeyValue();
         } else {
@@ -814,18 +806,23 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
-        while (max > 0 && rdfIter.hasNext()) {
-            Triple triple = (Triple) rdfIter.next();
-            write("<sem:triple>");
-            write(subject(triple.getSubject()));
-            write(predicate(triple.getPredicate()));
-            write(object(triple.getObject()));
-            write("</sem:triple>");
-            notifyUser();
-            max--;
+        try {
+            while (max > 0 && rdfIter.hasNext()) {
+                Triple triple = (Triple) rdfIter.next();
+                write("<sem:triple>");
+                write(subject(triple.getSubject()));
+                write(predicate(triple.getPredicate()));
+                write(object(triple.getObject()));
+                write("</sem:triple>");
+                notifyUser();
+                max--;
+            }
+                write("</sem:triples>\n");
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
+                    + origFn + " " + ex.getMessage());
+            return false;
         }
-        write("</sem:triples>\n");
-
         if (!rdfIter.hasNext()) {
             pos = 1;
         }
@@ -847,18 +844,23 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         setKey();
         write("<sem:triples xmlns:sem='http://marklogic.com/semantics'>");
         int max = MAXTRIPLESPERDOCUMENT;
-        while (max > 0 && rdfIter.hasNext()) {
-            Quad quad = (Quad) rdfIter.next();
-            write("<sem:triple>");
-            write(subject(quad.getSubject()));
-            write(predicate(quad.getPredicate()));
-            write(object(quad.getObject()));
-            write("</sem:triple>");
-            notifyUser();
-            max--;
+        try {
+            while (max > 0 && rdfIter.hasNext()) {
+                Quad quad = (Quad) rdfIter.next();
+                write("<sem:triple>");
+                write(subject(quad.getSubject()));
+                write(predicate(quad.getPredicate()));
+                write(object(quad.getObject()));
+                write("</sem:triple>");
+                notifyUser();
+                max--;
+            }
+            write("</sem:triples>\n");
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
+                    + origFn + " " + ex.getMessage());
+            return false;
         }
-        write("</sem:triples>\n");
-
         if (!rdfIter.hasNext()) {
             pos = 1;
         }
@@ -876,43 +878,48 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         String collection = null;
         boolean overflow = false;
-        while (!overflow && rdfIter.hasNext()) {
-            Quad quad = (Quad) rdfIter.next();
+        try {
+            while (!overflow && rdfIter.hasNext()) {
+                Quad quad= (Quad) rdfIter.next();
+                Node graph = quad.getGraph();
+                if (graph == null) {
+                    collection = DEFAULT_GRAPH;
+                } else {
+                    collection = resource(quad.getGraph());
+                }
 
-            Node graph = quad.getGraph();
-            if (graph == null) {
-                collection = DEFAULT_GRAPH;
-            } else {
-                collection = resource(quad.getGraph());
+                String triple = subject(quad.getSubject())
+                        + predicate(quad.getPredicate())
+                        + object(quad.getObject());
+
+                if (!collectionHash.containsKey(collection)) {
+                    collectionHash.put(collection, new Vector<String>());
+                    collectionCount++;
+                    //System.err.println("Added " + collection + " (" + collectionHash.keySet().size() + ")");
+                } else {
+                    //System.err.println("      " + collection + " (" + collectionHash.get(collection).size() + ")");
+                }
+
+                @SuppressWarnings("unchecked")
+                Vector<String> triples = collectionHash.get(collection);
+
+                triples.add("<sem:triple>" + triple + "</sem:triple>");
+
+                //System.err.println(triple);
+
+                if (triples.size() == MAXTRIPLESPERDOCUMENT) {
+                    //System.err.println("Full doc " + collection + " (" + triples.size() + ")");
+                    overflow = true;
+                } else if (collectionCount > MAX_COLLECTIONS) {
+                    collection = largestCollection();
+                    //System.err.println("Full hsh " + collection + " (" + collectionHash.get(collection).size() + ")");
+                    overflow = true;
+                }
             }
-
-            String triple = subject(quad.getSubject())
-                    + predicate(quad.getPredicate())
-                    + object(quad.getObject());
-
-            if (!collectionHash.containsKey(collection)) {
-                collectionHash.put(collection, new Vector<String>());
-                collectionCount++;
-                //System.err.println("Added " + collection + " (" + collectionHash.keySet().size() + ")");
-            } else {
-                //System.err.println("      " + collection + " (" + collectionHash.get(collection).size() + ")");
-            }
-
-            @SuppressWarnings("unchecked")
-            Vector<String> triples = collectionHash.get(collection);
-
-            triples.add("<sem:triple>" + triple + "</sem:triple>");
-
-            //System.err.println(triple);
-
-            if (triples.size() == MAXTRIPLESPERDOCUMENT) {
-                //System.err.println("Full doc " + collection + " (" + triples.size() + ")");
-                overflow = true;
-            } else if (collectionCount > MAX_COLLECTIONS) {
-                collection = largestCollection();
-                //System.err.println("Full hsh " + collection + " (" + collectionHash.get(collection).size() + ")");
-                overflow = true;
-            }
+        } catch (Exception ex){
+            LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document:"
+                    + origFn + " " + ex.getMessage());
+            return false;
         }
 
         if (!overflow) {
@@ -993,7 +1000,6 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             ((Text)((ContentWithFileNameWritable<VALUEIN>)
                     value).getValue()).set(buffer.toString());
         }
-
         buffer.setLength(0);
     }
 
@@ -1038,7 +1044,8 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         @Override
         public void warning(String message, long line, long col) {
-            if (message.contains("Bad IRI:")) {
+            //For Bug 24519, to improve readability of logs, I have chose to log the warnings for IRI only in debug mode.
+            if (message.contains("Bad IRI:") || message.contains("Illegal character in IRI") || message.contains("Not advised IRI")) {
                 LOG.debug(formatMessage(message, line, col));
             } else {
                 LOG.warn(formatMessage(message, line, col));
@@ -1047,7 +1054,12 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
 
         @Override
         public void error(String message, long line, long col) {
-            LOG.error(formatMessage(message, line, col));
+            //For Bug 24519, to improve readability of logs, I have chose to log the error for IRI only in debug mode.
+            if (message.contains("Bad character in IRI") || message.contains("Problem setting StAX property")) {
+                LOG.debug(formatMessage(message, line, col));
+            } else {
+                LOG.error(formatMessage(message, line, col));
+            }
         }
 
         @Override
@@ -1055,18 +1067,21 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             LOG.fatal(formatMessage(message, line, col));
         }
     }
-    
-    protected class RunnableParser implements Runnable {
+
+    protected class RunnableParser {
         final String fsname;
         final InputStream in;
         final String origFn;
+        final Lang lang;
         private boolean failed = false;
         
-        public RunnableParser(String origFn, String fsname, InputStream in) {
+        public RunnableParser(String origFn, String fsname, InputStream in, Lang lang) {
             super();
             this.fsname = fsname;
             this.in = in;
             this.origFn = origFn;
+            this.lang = lang;
+
             if(LOG.isDebugEnabled())
                 LOG.debug("O:" + origFn + " : " + fsname);
         }
@@ -1075,29 +1090,32 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             return failed;
         }
 
-        @Override
-        public void run() {
-            LangRIOT parser;
-            try {
-                parser = RiotReader.createParser(in, lang, fsname, 
-                        rdfInputStream);
-            } catch (Exception ex) {
-                // Yikes something went horribly wrong, bad encoding maybe?
-                LOG.error("Failed to parse(please check intactness and encoding): " + origFn, ex);
 
-                byte[] b = new byte[0] ;
-                InputStream emptyBAIS = new ByteArrayInputStream(b) ;
-                parser = RiotReader.createParser(emptyBAIS, lang, fsname, 
-                        rdfInputStream);
-            }
+        public void run() {
+            // Our streamed RDF code flow is based on the parser output written and iterated via a stream. 
+            // So I chose to use the stream-based API calls.
+
+            // For Ntriples and Nquads, the different API calls were suggested by the Jena documentation. 
+            // For the Trig and else part, they are the same API calls but the difference is what they emit after parsing. 
+            // Trig file outputs are emitted as quads and everything else like ttl, json, RDFXML file outputs are emitted as triples. 
+            // Hence same API calls with different stream calls.
             try {
                 ErrorHandler handler = new ParserErrorHandler(fsname);
                 ParserProfile prof = RiotLib.profile(lang, fsname, handler);
-                parser.setProfile(prof);
-                parser.parse();
+                if (lang == Lang.TRIG) {
+                    rdfInputStream = AsyncParser.of(RDFParserBuilder.create().source(in).lang(lang).errorHandler(handler).base(fsname)).streamQuads();
+                    rdfIter = rdfInputStream.iterator();
+                } else if (lang == Lang.NTRIPLES) {
+                    rdfIter = RiotParsers.createIteratorNTriples(in, prof);
+                } else if (lang == Lang.NQUADS) {
+                    rdfIter = RiotParsers.createIteratorNQuads(in, prof);
+                }else {
+                    rdfInputStream = AsyncParser.of(RDFParserBuilder.create().source(in).lang(lang).errorHandler(handler).base(fsname)).streamTriples();
+                    rdfIter = rdfInputStream.iterator();
+                }
             } catch (Exception ex) {
                 failed = true;
-                LOG.error("Parse error in RDF document(please check intactness and encoding); processing partial document:"
+                LOG.error("Parse error in RDF document(please check intactness and encoding); skipping this document: "
                     + origFn + " " + ex.getMessage());
             }
         }

@@ -43,11 +43,12 @@ import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.XccConfigException;
 /**
  * A RecordReader that fetches data from MarkLogic server and generates 
- * <K, V> key value pairs.
+ * &lt;K, V&gt; key value pairs.
  * 
  * @author jchen
  * 
- * @param <KEYIN, VALUEIN>
+ * @param <KEYIN>
+ * @param <VALUEIN>
  */
 public abstract class MarkLogicRecordReader<KEYIN, VALUEIN> 
 extends RecordReader<KEYIN, VALUEIN>
