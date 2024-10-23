@@ -18,7 +18,6 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 ### What's New in mlcp 11.3.1
 
 - Upgraded Apache Avro, Hadoop shaded guava, and commons-collection libraries to mitigate security vulnerabilities.
-- Changed the scope of the commons-io to test, to mitigate security vulnerabilities.
 - Upgraded the Maven Javadoc plugin from 3.6.3 to 3.10.0 to mitigate security vulnerability.
 - Excluded a few transitive dependencies to improve security and maintenance.
 
