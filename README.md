@@ -64,7 +64,7 @@ Wiki pages of this project contain useful information when you work on developme
 ## Required Software
 
 - [Required Software for mlcp](http://docs.marklogic.com/guide/mlcp/install#id_44231)
-- [Apache Maven](https://maven.apache.org/) (version >= 3.0.3) is required to build mlcp and the Hadoop Connector.
+- [Apache Maven](https://maven.apache.org/) (version >= 3.6.3) is required to build mlcp and the Hadoop Connector.
 
 ## Build
 
