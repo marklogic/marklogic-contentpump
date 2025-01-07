@@ -22,27 +22,27 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 - Upgrade Hadoop Library to 3.4.0 to mitigate security vulnerabilities. 
 - Upgrade Jena Version to 4.9.0 to mitigate security vulnerabilities.
 - Upgrade commons-compress, woodstox-core, hadoop-shaded-guava, xstream, commons-logging,
-commons-io, xml-apis, avro, commons-collections and other related libraries to mitigate security vulnerabilities
-- Bug fixes
+commons-io, xml-apis, avro, commons-collections and other related libraries to mitigate security vulnerabilities.
+- Bug fixes.
 
 ### What's New in mlcp 10.0.11
-- Upgrade Hadoop Library to 3.3.6
+- Upgrade Hadoop Library to 3.3.6.
 - Upgrade jackson-annotations, jackson-core, jackson-databind, Xstream, Guava, avro, commons-cli, commons-compress libraries to mitigate security vulnerability.
 - Remove logback-classic, bliki-core, htrace-core, zookeeper and json libraries to mitigate security vulnerability.
 - Bug fixes.
 
 ### What's New in mlcp 10.0.10
-- Upgrade Hadoop Library to 3.3.4
+- Upgrade Hadoop Library to 3.3.4.
 - Upgrade libthrift, jackson-annotations, jackson-core, jackson-databind, Xerces, woodstox-core to mitigate security vulnerability.
 - Bug fixes.
 
 ### What's New in mlcp 10.0.9.5
-- Upgrade Hadoop Library to 3.3.0
+- Upgrade Hadoop Library to 3.3.0.
 - Upgrade Httpclient, Xstream, jackson-annotations, jackson-core, jackson-databind, logback-classic, commons-configuration2 to mitigate security vulnerability.
 - Bug fixes.
 
 ### What's New in mlcp 10.0.9.2
-- Upgrade guava from 25.0 to 31.1 to mitigate security vulnerability [CVE-2020-8908](https://nvd.nist.gov/vuln/detail/CVE-2020-8908)
+- Upgrade guava from 25.0 to 31.1 to mitigate security vulnerability [CVE-2020-8908](https://nvd.nist.gov/vuln/detail/CVE-2020-8908).
 
 ### What's New in mlcp 10.0.9
 - Upgrade log4j from 2.17.0 to 2.17.1 to mitigate security vulnerability [CVE-2021-44832](https://nvd.nist.gov/vuln/detail/CVE-2021-44832).
@@ -90,7 +90,7 @@ commons-io, xml-apis, avro, commons-collections and other related libraries to m
 
 ### What's New in mlcp and Hadoop Connector 10.0.1
 
--  Library upgrade.
+- Library upgrade.
 -	Bug fixes.
 
 
@@ -112,7 +112,7 @@ Wiki pages of this project contain useful information when you work on developme
 ## Required Software
 
 - [Required Software for mlcp](http://docs.marklogic.com/guide/mlcp/install#id_44231)
-- [Apache Maven](https://maven.apache.org/) (version >= 3.6.3) is required to build mlcp and the Hadoop Connector.
+- [Apache Maven](https://maven.apache.org/) (version >= 3.6.3) is required to build mlcp.
 
 ## Build
 
