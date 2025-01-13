@@ -2791,11 +2791,18 @@ public enum Command implements ConfigConstants {
                 conf.set(protocolName, "TLSv1.1");
             } else if ("TLSv1.2".equalsIgnoreCase(arg)) {
                 conf.set(protocolName, "TLSv1.2");
+            } else if ("TLSv1.3".equalsIgnoreCase(arg)) {
+                conf.set(protocolName, "TLSv1.3");
             } else {
                 throw new IllegalArgumentException(
                     "Unrecognized option argument for " + option
                         + ": " + arg);
             }
+            if(LOG.isDebugEnabled()) {
+                LOG.debug("Using SSL Protocol " + arg + " for " + protocolName);
+            }
+        } else if(LOG.isDebugEnabled()) {
+            LOG.debug("Using default SSL Protcol for " + protocolName);
         }
     }
 
