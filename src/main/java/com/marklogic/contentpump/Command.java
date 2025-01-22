@@ -2801,7 +2801,7 @@ public enum Command implements ConfigConstants {
             if(LOG.isDebugEnabled()) {
                 LOG.debug("Using SSL Protocol " + arg + " for " + protocolName);
             }
-        } else if(LOG.isDebugEnabled()) {
+        } else if(LOG.isDebugEnabled() && conf.getBoolean(MarkLogicConstants.OUTPUT_USE_SSL, false)) {
             LOG.debug("Using default SSL Protcol for " + protocolName);
         }
     }
