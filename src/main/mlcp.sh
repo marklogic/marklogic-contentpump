@@ -5,6 +5,7 @@ VMARGS="-Dfile.encoding=UTF-8"
 LIB_HOME=$DIR/lib
 BUNDLE_ARTIFACT="apache"
 
+passowrd="admin"
 if [ -f "$DIR/BUNDLE_ARTIFACT" ]
 then
   BUNDLE_ARTIFACT=$(cat "$DIR/BUNDLE_ARTIFACT")
