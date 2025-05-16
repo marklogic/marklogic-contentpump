@@ -1,0 +1,21 @@
+name: TruffleHog Secret Scan
+on:  
+  workflow_dispatch:  
+  pull_request:    
+    branches: 
+      - '*develop*'
+
+jobs:
+  TruffleHog:    
+    runs-on: ubuntu-latest    
+    steps:      
+      - name: Checkout code        
+        uses: actions/checkout@v4        
+        with:          
+          fetch-depth: 0
+
+      - name: TruffleHog Secret Scan        
+        uses: trufflesecurity/trufflehog@main        
+        with:          
+          path: ./        
+        continue-on-error: false
