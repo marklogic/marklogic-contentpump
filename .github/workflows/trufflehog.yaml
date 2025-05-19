@@ -4,7 +4,6 @@ on:
   pull_request:    
     branches: 
       - '*develop*'
-
 jobs:
   TruffleHog:    
     runs-on: ubuntu-latest    
@@ -12,11 +11,9 @@ jobs:
       - name: Checkout code        
         uses: actions/checkout@v4        
         with:          
-          base: ${{ github.event.pull_request.base.sha }}
-          head: ${{ github.event.pull_request.head.sha }}
-      
+          fetch-depth: 0
       - name: TruffleHog Secret Scan        
         uses: trufflesecurity/trufflehog@main        
         with:          
-          path: ./    
+          path: ./        
         continue-on-error: false
