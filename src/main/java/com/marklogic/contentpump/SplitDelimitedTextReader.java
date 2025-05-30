@@ -74,7 +74,7 @@ public class SplitDelimitedTextReader<VALUEIN> extends
                 return false;
             }
             CSVRecord record = getRecordLine();
-            if (record.getCharacterByte() >= end) {
+            if (record.getBytePosition() >= end) {
                 return false;
             }
             String[] values = getLine(record);
@@ -114,9 +114,9 @@ public class SplitDelimitedTextReader<VALUEIN> extends
             }
         } catch (RuntimeException ex) {
             if (ex.getMessage().contains(
-                "invalid char between encapsulated token and delimiter")) {
+                "Invalid character between encapsulated token and delimiter")) {
                 setSkipKey(0, 0,
-                        "invalid char between encapsulated token and delimiter");
+                        "Invalid character between encapsulated token and delimiter");
                 // hasNext() will always be true here since this exception is caught
                 if (parserIterator.hasNext()) {
                 	// consume the rest fields of this line
@@ -192,9 +192,14 @@ public class SplitDelimitedTextReader<VALUEIN> extends
         // do not skip empty line just in case the split boundary is \n.
         // Set encapsulator to null so that it will ignore quotes
         // while parsing the first line in the split
-        parser = new CSVParser(instream, CSVParserFormatter.
-                getFormat(delimiter, null, false,false),
-                adjustedStart, 0L, encoding);
+        parser = CSVParser.builder()
+                .setReader(instream)
+                .setFormat(CSVParserFormatter.getFormat(delimiter, null, false,false))
+                .setCharacterOffset(adjustedStart)
+                .setRecordNumber(0L)
+                .setCharset(encoding)
+                .setTrackBytes(true)
+                .get();
         parserIterator = parser.iterator();
 
         if (parserIterator.hasNext()) {
@@ -205,12 +210,17 @@ public class SplitDelimitedTextReader<VALUEIN> extends
             // which will be used to initialize the parser
             if (parserIterator.hasNext()) {
                 CSVRecord record = getRecordLine();
-                long pos = record.getCharacterByte();
+                long pos = record.getBytePosition();
                 fileIn.seek(pos);
                 instream = new InputStreamReader(fileIn, encoding);
-                parser = new CSVParser(instream, CSVParserFormatter.
-                        getFormat(delimiter, encapsulator, false,false),
-                        pos, 0L, encoding);
+                parser = CSVParser.builder()
+                        .setReader(instream)
+                        .setFormat(CSVParserFormatter.getFormat(delimiter, encapsulator, false,false))
+                        .setCharacterOffset(pos)
+                        .setRecordNumber(0L)
+                        .setCharset(encoding)
+                        .setTrackBytes(true)
+                        .get();
                 parserIterator = parser.iterator();
             }
 

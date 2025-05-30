@@ -274,9 +274,9 @@ public class DelimitedTextReader<VALUEIN> extends
             }
         } catch (RuntimeException ex) {
             if (ex.getMessage().contains(
-                "invalid char between encapsulated token and delimiter")) {
+                "Invalid character between encapsulated token and delimiter")) {
                 setSkipKey((int)parser.getCurrentLineNumber(), 0, 
-                        "invalid char between encapsulated token and delimiter");
+                        "Invalid character between encapsulated token and delimiter");
                 // hasNext() will always be true here since this exception is caught
                 if (parserIterator.hasNext()) {
                 	// consume the rest fields of this line
