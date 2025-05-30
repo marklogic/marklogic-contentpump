@@ -52,6 +52,7 @@ public class DelimitedTextReader<VALUEIN> extends
     ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(DelimitedTextReader.class);
     public static final char encapsulator = '"';
+    private static final String INVALID_TOKEN_DELIMITER_ERROR = "Invalid character between encapsulated token and delimiter";
     /**
      * header of delimited text
      */
@@ -273,10 +274,10 @@ public class DelimitedTextReader<VALUEIN> extends
                         value).getValue()).set(docBuilder.getDoc());
             }
         } catch (RuntimeException ex) {
-            if (ex.getMessage().contains(
-                "Invalid character between encapsulated token and delimiter")) {
+            String message = ex.getMessage();
+            if (message != null && message.contains(INVALID_TOKEN_DELIMITER_ERROR)) {
                 setSkipKey((int)parser.getCurrentLineNumber(), 0, 
-                        "Invalid character between encapsulated token and delimiter");
+                        INVALID_TOKEN_DELIMITER_ERROR);
                 // hasNext() will always be true here since this exception is caught
                 if (parserIterator.hasNext()) {
                 	// consume the rest fields of this line
