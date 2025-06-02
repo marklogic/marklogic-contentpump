@@ -45,7 +45,6 @@ public class SplitDelimitedTextReader<VALUEIN> extends
     DelimitedTextReader<VALUEIN> {
     public static final Log LOG = LogFactory
         .getLog(SplitDelimitedTextReader.class);
-    private static final String INVALID_TOKEN_DELIMITER_ERROR = "Invalid character between encapsulated token and delimiter";
     private long start;
     private long end;
     private String lineSeparator;
