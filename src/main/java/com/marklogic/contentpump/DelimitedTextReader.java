@@ -52,7 +52,7 @@ public class DelimitedTextReader<VALUEIN> extends
     ImportRecordReader<VALUEIN> {
     public static final Log LOG = LogFactory.getLog(DelimitedTextReader.class);
     public static final char encapsulator = '"';
-    protected String INVALID_TOKEN_DELIMITER_ERROR = "Invalid character between encapsulated token and delimiter";
+    protected static final String INVALID_TOKEN_DELIMITER_ERROR = "Invalid character between encapsulated token and delimiter";
     /**
      * header of delimited text
      */
