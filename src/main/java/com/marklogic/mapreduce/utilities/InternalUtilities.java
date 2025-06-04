@@ -89,8 +89,8 @@ public class InternalUtilities implements MarkLogicConstants {
         "\"http://marklogic.com/xdmp/hadoop\" at \"/MarkLogic/hadoop.xqy\";\n"+
         "hadoop:get-forest-host-map()";
 
-    private static SslConfigOptions inputSslOptions;
-    private static SslConfigOptions outputSslOptions;
+    private static volatile SslConfigOptions inputSslOptions;
+    private static volatile SslConfigOptions outputSslOptions;
 
     private static Object sslOptionsMutex = new Object();
     
