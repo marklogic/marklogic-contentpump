@@ -535,9 +535,9 @@ implements MarkLogicConstants {
                         LOG.warn(getFormattedBatchId() + "QueryException:" +
                             ((QueryException) e).getFormatString());
                         isRetryable = ((RequestException)e).isRetryable();
-                    } else if (e instanceof MLCloudRequestException) {
+                    } else if (e instanceof PDCloudRequestException) {
                         LOG.warn(getFormattedBatchId() +
-                            "MLCloudRequestException:" + e.getMessage());
+                            "PDCloudRequestException:" + e.getMessage());
                         isRetryable = ((RequestException)e).isRetryable();
                     } else if (e instanceof RequestServerException) {
                         // log error and continue on RequestServerException
@@ -686,10 +686,10 @@ implements MarkLogicConstants {
                     } catch (Exception e) {
                         boolean isRetryable = true;
                         LOG.warn("Failed committing transaction.");
-                        if (e instanceof MLCloudRequestException){
-                            isRetryable = ((MLCloudRequestException)e).isRetryable();
+                        if (e instanceof PDCloudRequestException){
+                            isRetryable = ((PDCloudRequestException)e).isRetryable();
                             LOG.warn(getFormattedBatchId() +
-                                "MLCloudRequestException:" + e.getMessage());
+                                "PDCloudRequestException:" + e.getMessage());
                         } else {
                             LOG.warn(getFormattedBatchId() +
                                 "Exception:" + e.getMessage());
