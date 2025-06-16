@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import com.marklogic.xcc.exceptions.MLCloudRequestException;
+import com.marklogic.xcc.exceptions.PDCloudRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -289,9 +289,9 @@ public class DatabaseContentReader extends
             throw new IOException(e);
         } catch (Exception e) {
             boolean isRetryable = true;
-            if (e instanceof MLCloudRequestException){
-                isRetryable = ((MLCloudRequestException)e).isRetryable();
-                LOG.error("MLCloudRequestException:" + e.getMessage());
+            if (e instanceof PDCloudRequestException){
+                isRetryable = ((PDCloudRequestException)e).isRetryable();
+                LOG.error("PDCloudRequestException:" + e.getMessage());
             } else {
                 LOG.error("Exception:" + e.getMessage());
             }
