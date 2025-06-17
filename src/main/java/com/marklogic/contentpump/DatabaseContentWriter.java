@@ -20,7 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Vector;
 
-import com.marklogic.xcc.exceptions.MLCloudRequestException;
+import com.marklogic.xcc.exceptions.PDCloudRequestException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -304,10 +304,10 @@ public class DatabaseContentWriter<VALUE> extends
                     } catch (Exception e) {
                         boolean isRetryable = true;
                         LOG.warn("Failed committing transaction.");
-                        if (e instanceof MLCloudRequestException){
-                            isRetryable = ((MLCloudRequestException)e).isRetryable();
+                        if (e instanceof PDCloudRequestException){
+                            isRetryable = ((PDCloudRequestException)e).isRetryable();
                             LOG.warn(getFormattedBatchId() +
-                                "MLCloudRequestException:" + e.getMessage());
+                                "PDCloudRequestException:" + e.getMessage());
                         } else {
                             LOG.warn(getFormattedBatchId() +
                                 "Exception:" + e.getMessage());
