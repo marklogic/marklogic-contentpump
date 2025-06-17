@@ -16,7 +16,7 @@
 package com.marklogic.contentpump;
 
 import com.marklogic.xcc.*;
-import com.marklogic.xcc.exceptions.MLCloudRequestException;
+import com.marklogic.xcc.exceptions.PDCloudRequestException;
 import com.marklogic.xcc.exceptions.RequestException;
 import com.marklogic.xcc.exceptions.ServerConnectionException;
 import com.marklogic.xcc.types.XSInteger;
@@ -574,9 +574,9 @@ public class ThreadManager implements ConfigConstants {
                                 LOG.warn("ServerConnectionException:" +
                                     e.getMessage() + " . Unable to connect to " +
                                     host + " to query available server max threads.");
-                            } else if (e instanceof MLCloudRequestException) {
-                                isRetryable |= ((MLCloudRequestException)e).isRetryable();
-                                LOG.warn("MLCloudRequestException:" + e.getMessage());
+                            } else if (e instanceof PDCloudRequestException) {
+                                isRetryable |= ((PDCloudRequestException)e).isRetryable();
+                                LOG.warn("PDCloudRequestException:" + e.getMessage());
                             } else {
                                 isRetryable = true;
                                 LOG.warn("RequestException:" + e.getMessage());
