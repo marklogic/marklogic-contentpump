@@ -1,0 +1,10 @@
+<people>
+    <person>
+        <first xmlns="http://marklogic.com/examples">George</first>
+        <last>Washington</last>
+    </person>
+    <person>
+        <first xmlns="http://marklogic.com/examples">Betsy</first>
+        <last>Ross</last>
+    </person>
+</people>
