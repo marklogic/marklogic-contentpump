@@ -304,7 +304,7 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace(nsDeclPrefix + ":" + nsDeclUri);
                     }
-                    if (DEFAULT_NS == nsDeclPrefix) {
+                    if (DEFAULT_NS == nsDeclPrefix || ("".equals(nsDeclPrefix))) {
                         sb.append(" xmlns=\"" + nsDeclUri + "\"");
                     } else {
                         sb.append(" xmlns:" + nsDeclPrefix + "=\"" + nsDeclUri
