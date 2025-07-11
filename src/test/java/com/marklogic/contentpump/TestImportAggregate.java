@@ -601,4 +601,28 @@ public class TestImportAggregate {
         assertEquals("2", result.next().asString());
         Utils.closeSession();
     }
+
+    @Test
+    public void testBug20182() throws Exception {
+        String cmd = "IMPORT -host localhost -username admin -password"
+            + " admin -input_file_path " + Constants.TEST_PATH.toUri()
+            + "/agg/20182.xml"
+            + " -thread_count 1"
+            + " -input_file_type aggregates"
+            + " -port " + Constants.port + " -database " + Constants.testDb;
+        String[] args = cmd.split(" ");
+        assertFalse(args.length == 0);
+
+        Utils.clearDB(Utils.getTestDbXccUri(), Constants.testDb);
+
+        String[] expandedArgs = null;
+        expandedArgs = OptionsFileUtil.expandArguments(args);
+        ContentPump.runCommand(expandedArgs);
+
+        ResultSequence result = Utils.runQuery(
+            Utils.getTestDbXccUri(), "fn:count(fn:collection())");
+        assertTrue(result.hasNext());
+        assertEquals("2", result.next().asString());
+        Utils.closeSession();
+    }
 }
