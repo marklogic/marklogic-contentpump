@@ -20,7 +20,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 - Replaced the commons-csv-marklogic library with the standard Apache Commons CSV library for improved compatibility and maintainability
 - Upgraded commons-csv and commons-io libraries to the latest stable versions.
 - Upgraded commons-beanutils, xstream and avro libraries to mitigate security vulnerabilities.
-- Removed unused dependencies: hadoop-shaded-protobuf_3_25 jena-shaded-guava
+- Removed unused dependencies: hadoop-shaded-protobuf_3_25, jena-shaded-guava.
 - Excluded a few transitive dependencies to improve security and maintenance.
 
 ## Getting Started
