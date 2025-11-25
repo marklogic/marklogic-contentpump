@@ -1,4 +1,4 @@
-﻿MarkLogic® Content Pump 12.0
+﻿Progress® MarkLogic® Content Pump 12.0.1
 
 Copyright © 2011-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
@@ -10,9 +10,9 @@ Unless required by applicable law or agreed to in writing, software distributed 
 
 To the extent required by the applicable open-source license, a complete machine-readable copy of the source code corresponding to such code is available upon request. This offer is valid to anyone in receipt of this information and shall expire three years following the date of the final distribution of this product version by Progress Software Corporation. To obtain such source code, send an email to Legal-thirdpartyreview@progress.com. Please specify the product and version for which you are requesting source code.
 
-The following software may be included in MarkLogic® Content Pump 12.0
-(last updated July 14, 2025):
 -------------------------------------------------------------------------
+
+The following software may be included in Progress® MarkLogic® Content Pump 12.0.1 (last updated November 24, 2025):
 
 Third Party Components
 
@@ -444,7 +444,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 Common Licenses
 
-This section shows the text of common third-party licenses used by MarkLogic® Content Pump v12.0:
+This section shows the text of common third-party licenses used by Progress® MarkLogic® Content Pump v12.0.1:
 
 Apache License 2.0 (Apache-2.0)
 https://spdx.org/licenses/Apache-2.0.html
