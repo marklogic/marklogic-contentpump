@@ -15,7 +15,11 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Release Notes
 
-### What's New in mlcp 12.0
+### What's New in mlcp 12.0.1
+
+- No new updates
+  
+### What's New in mlcp 12.0.0
 
 - Replaced the commons-csv-marklogic library with the standard Apache Commons CSV library for improved compatibility and maintainability
 - Upgraded commons-csv and commons-io libraries to the latest stable versions.
