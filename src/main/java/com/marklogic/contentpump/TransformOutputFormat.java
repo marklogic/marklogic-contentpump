@@ -75,6 +75,10 @@ public class TransformOutputFormat<VALUEOUT> extends
             return mimetypeMap;
         }
         String[] hosts = conf.getStrings(OUTPUT_HOST);
+        if (hosts == null || hosts.length == 0) {
+            throw new IllegalArgumentException(OUTPUT_HOST + 
+                    " is not specified.");
+        }
         Session session = null;
         ResultSequence result = null;
 

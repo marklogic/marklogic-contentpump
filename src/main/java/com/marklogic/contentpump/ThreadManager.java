@@ -548,6 +548,12 @@ public class ThreadManager implements ConfigConstants {
             boolean isRetryable = false;
             pollingRetry = 0;
             pollingSleepTime = MIN_SLEEP_TIME;
+            String[] hosts = conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
+            if (hosts == null || hosts.length == 0) {
+                LOG.error(MarkLogicConstants.OUTPUT_HOST + " is not specified.");
+                job.setJobState(JobStatus.State.FAILED);
+                return;
+            }
             // Poll server max threads
             while (pollingRetry < MAX_RETRIES) {
                 if (pollingRetry > 0) {
@@ -555,7 +561,6 @@ public class ThreadManager implements ConfigConstants {
                         LOG.debug("Retrying querying available server max threads.");
                     }
                 }
-                String[] hosts = conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
                 for (String host : hosts) {
                     try {
                         ContentSource cs = InternalUtilities.
