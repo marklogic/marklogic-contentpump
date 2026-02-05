@@ -556,6 +556,10 @@ public class ThreadManager implements ConfigConstants {
                     }
                 }
                 String[] hosts = conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
+                if (hosts == null || hosts.length == 0) {
+                    throw new IllegalArgumentException(MarkLogicConstants.OUTPUT_HOST + 
+                            " is not specified.");
+                }
                 for (String host : hosts) {
                     try {
                         ContentSource cs = InternalUtilities.

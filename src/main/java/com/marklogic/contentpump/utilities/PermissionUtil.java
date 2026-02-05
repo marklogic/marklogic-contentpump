@@ -79,8 +79,13 @@ public class PermissionUtil {
         ResultSequence result = null;
         ContentSource cs;
         try {
+            String[] hosts = conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
+            if (hosts == null || hosts.length == 0) {
+                throw new IllegalArgumentException(MarkLogicConstants.OUTPUT_HOST + 
+                        " is not specified.");
+            }
             cs = InternalUtilities.getOutputContentSource(conf,
-                conf.getStrings(MarkLogicConstants.OUTPUT_HOST)[0]);
+                hosts[0]);
 
             session = cs.newSession();
             RequestOptions options = new RequestOptions();
