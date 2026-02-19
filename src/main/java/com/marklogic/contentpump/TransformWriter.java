@@ -604,7 +604,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 LOG.warn(getFormattedBatchId() + "RequestServerException:" + e.getMessage());
             } else {
                 LOG.warn(getFormattedBatchId() + "Exception: " + e.getMessage());
-                if (e.getMessage().contains("Module Not Found")) {
+                String msg = e.getMessage();
+                if (msg != null && msg.contains("Module Not Found")) {
                     retryable = false;
                 }
             }
