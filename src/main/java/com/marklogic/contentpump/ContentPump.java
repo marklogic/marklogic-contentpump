@@ -333,7 +333,11 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
 
         // set lib jars
         StringBuilder jars = new StringBuilder();
-        for (File jar : cpHomeDir.listFiles(filter)) {
+        File[] libJars = cpHomeDir.listFiles(filter);
+        if (libJars == null) {
+            throw new RuntimeException("Unable to list library jars in directory: " + cpHomeDir.getAbsolutePath());
+        }
+        for (File jar : libJars) {
             if (jars.length() > 0) {
                 jars.append(',');
             }
