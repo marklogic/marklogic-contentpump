@@ -56,7 +56,8 @@ public abstract class CharacterDataImpl extends NodeImpl implements
 
     /** {@inheritDoc} */
     public int getLength() {
-        return getData().length();
+        String data = getData();
+        return data != null ? data.length() : 0;
     }
 
     /** {@inheritDoc} */
@@ -87,6 +88,9 @@ public abstract class CharacterDataImpl extends NodeImpl implements
             throw new DOMException(DOMException.INDEX_SIZE_ERR, null);
         }
         String data = getData();
+        if (data == null) {
+            throw new DOMException(DOMException.DOMSTRING_SIZE_ERR, null);
+        }
         if (offset > data.length()) {
             throw new DOMException(DOMException.INDEX_SIZE_ERR, null);
         }
