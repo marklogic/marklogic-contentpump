@@ -150,7 +150,11 @@ public class ContentReader {
         public RecordWriter<DocumentURI, DatabaseDocument> getRecordWriter(
                 TaskAttemptContext context)
                 throws IOException, InterruptedException {
-            return new CustomWriter(getOutputPath(context), 
+            Path outputPath = getOutputPath(context);
+            if (outputPath == null) {
+                throw new IOException("Output directory not set.");
+            }
+            return new CustomWriter(outputPath, 
                     context.getConfiguration());
         }
     }
