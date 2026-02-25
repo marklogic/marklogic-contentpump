@@ -249,6 +249,10 @@ public enum InputType implements ConfigConstants {
             ContentSource cs;
             String[] outputHosts =
                     conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
+            if (outputHosts == null || outputHosts.length == 0) {
+                throw new IllegalArgumentException(MarkLogicConstants.OUTPUT_HOST + 
+                        " is not specified.");
+            }
             int hostIdx = 0;
             while (hostIdx < outputHosts.length) {
                 try {

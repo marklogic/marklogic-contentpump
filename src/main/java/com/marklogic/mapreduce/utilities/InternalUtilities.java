@@ -104,13 +104,12 @@ public class InternalUtilities implements MarkLogicConstants {
      */
     public static ContentSource getInputContentSource(Configuration conf) 
     throws URISyntaxException, XccConfigException, IOException {
-        String host = conf.getStrings(INPUT_HOST)[0];
-        if (host == null || host.isEmpty()) {
+        String[] hosts = conf.getStrings(INPUT_HOST);
+        if (hosts == null || hosts.length == 0) {
             throw new IllegalArgumentException(INPUT_HOST + 
                     " is not specified.");
         }
-        
-        return getInputContentSource(conf, host);
+        return getInputContentSource(conf, hosts[0]);
     }
     
     /**

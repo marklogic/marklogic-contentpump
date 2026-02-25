@@ -224,6 +224,10 @@ public class ContentOutputFormat<VALUEOUT> extends
                 TextArrayWritable hostArray = null;
                 if (restrictHosts) {
                     String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+                    if (outputHosts == null || outputHosts.length == 0) {
+                        throw new IllegalArgumentException(OUTPUT_HOST + 
+                                " is not specified.");
+                    }
                     hostArray = new TextArrayWritable(outputHosts);
                 } else {
                     String outputHost = cs.getConnectionProvider().getHostName();
