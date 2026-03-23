@@ -263,8 +263,14 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
         String[] perms = conf.getStrings(MarkLogicConstants.OUTPUT_PERMISSION);
         if(perms!=null) {
-            defaultPerms = PermissionUtil.getPermissions(perms).toArray(
-                new ContentPermission[perms.length>>1]);
+            List<ContentPermission> permList = PermissionUtil.getPermissions(perms);
+            if (permList != null) {
+                defaultPerms = permList.toArray(new ContentPermission[perms.length>>1]);
+            } else {
+                List<ContentPermission> tmp = PermissionUtil.getDefaultPermissions(conf,roleMap);
+                if(tmp!=null)
+                    defaultPerms = tmp.toArray(new ContentPermission[tmp.size()]);
+            }
         } else {
             List<ContentPermission> tmp = PermissionUtil.getDefaultPermissions(conf,roleMap);
             if(tmp!=null)
@@ -570,6 +576,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             result = session.submitRequest(query);
             while (result.hasNext()) {
                 String uri = result.next().asString();
+                if (!result.hasNext()) {
+                    throw new IOException("Invalid role map");
+                }
                 String tmp = result.next().asString();
                 ArrayList<ContentPermission> perms = new ArrayList<>();
                 while(!tmp.equals("0")) {
@@ -582,6 +591,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     ContentCapability capability = PermissionUtil
                         .getCapbility(cap);
                     perms.add(new ContentPermission(capability, roleName));
+                    if (!result.hasNext()) {
+                        throw new IOException("Invalid role map");
+                    }
                     tmp = result.next().asString();
                 }
                 

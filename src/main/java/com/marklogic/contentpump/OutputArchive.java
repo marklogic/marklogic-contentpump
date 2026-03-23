@@ -91,7 +91,11 @@ public class OutputArchive implements InternalConstants {
         if (fs instanceof LocalFileSystem) {
             File f = new File(zpath.toUri().getPath());
             if (!f.exists()) {
-                f.getParentFile().mkdirs();
+                File parentFile = f.getParentFile();
+                if (parentFile == null) {
+                    throw new IOException("Unable to determine parent directory for: " + f);
+                }
+                parentFile.mkdirs();
                 f.createNewFile();
             }
             FileOutputStream fos = new FileOutputStream(f, false);

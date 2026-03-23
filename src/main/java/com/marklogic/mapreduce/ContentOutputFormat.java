@@ -406,13 +406,22 @@ public class ContentOutputFormat<VALUEOUT> extends
         }
         result = session.submitRequest(query);
 
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         ResultItem item = result.next();
         boolean httpForwardHeaderExists;
         boolean xdbcForwardHeaderExists;
         if (getForwardHeader) {
             httpForwardHeaderExists = item.asString().equals("true");
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
+            }
             item = result.next();
             xdbcForwardHeaderExists = item.asString().equals("true");
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
+            }
             item = result.next();
             if (httpForwardHeaderExists || xdbcForwardHeaderExists) {
                 restrictHosts = true;
@@ -433,10 +442,19 @@ public class ContentOutputFormat<VALUEOUT> extends
             }
         }
         initHostName = item.asString();
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         item = result.next();
         am.setEffectiveVersion(((XSInteger)item.getItem()).asLong());
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         item = result.next();
         failover = !restrictHosts && item.asString().equals("true");
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         item = result.next();
         supportSegment = item.asString().equals("true");
         if (result.hasNext()) {
@@ -444,6 +462,9 @@ public class ContentOutputFormat<VALUEOUT> extends
             String policyStr = item.asString();
             conf.set(ASSIGNMENT_POLICY, policyStr);
             policy = AssignmentPolicy.Kind.forName(policyStr);
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
+            }
             item = result.next();
             allowFastLoad = Boolean.parseBoolean(item.asString());
             if ((policy == AssignmentPolicy.Kind.STATISTICAL 

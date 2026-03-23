@@ -176,9 +176,10 @@ public class ExpandedTree implements Writable {
     	    StringBuilder buf = new StringBuilder();
     	    for (int i=textReps[index++]; i > 0; --i) {
     	        if (LOG.isTraceEnabled()) {
+    	            String atomStr = atomString(textReps[index]);
     	            LOG.trace("atom " + textReps[index] + " [" + 
-    	                atomString(textReps[index]) + "] length " + 
-    	                atomString(textReps[index]).length());
+    	                atomStr + "] length " + 
+    	                (atomStr != null ? atomStr.length() : "0"));
     	        }
     		buf.append(atomString(textReps[index++]));
     	    }

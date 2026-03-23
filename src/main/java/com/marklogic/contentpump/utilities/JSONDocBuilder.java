@@ -73,7 +73,7 @@ public class JSONDocBuilder extends DocBuilder {
                     + datatypeMap.get(key).name(), 0);
         } catch (Exception e) {
             String msg = e.getMessage();
-            if (!msg.contains("missing value")) {
+            if (msg != null && !msg.contains("missing value")) {
                 throw new Exception(msg);
             }
         }       

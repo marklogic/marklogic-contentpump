@@ -364,12 +364,14 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     @Override
     public String lookupNamespaceURI(String prefix) {
-        return getDocumentElement().lookupNamespaceURI(prefix);
+        Element e = getDocumentElement();
+        return e != null ? e.lookupNamespaceURI(prefix) : null;
     }
 
     @Override
     public String lookupPrefix(String namespaceURI) {
-        return getDocumentElement().lookupPrefix(namespaceURI);
+        Element e = getDocumentElement();
+        return e != null ? e.lookupPrefix(namespaceURI) : null;
     }
 
     /** Unsupported. */
