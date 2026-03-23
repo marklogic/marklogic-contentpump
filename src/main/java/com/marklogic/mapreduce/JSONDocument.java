@@ -20,6 +20,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.TransformerFactory;
 
 import org.apache.commons.logging.Log;
@@ -48,6 +49,12 @@ public class JSONDocument extends ForestDocument {
     private static synchronized TransformerFactory getTransformerFactory() {
         if (transformerFactory == null) {
             transformerFactory = TransformerFactory.newInstance();
+            try {
+                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Unable to set XXE safety attributes on TransformerFactory", e);
+            }
         }
 
         return transformerFactory;
