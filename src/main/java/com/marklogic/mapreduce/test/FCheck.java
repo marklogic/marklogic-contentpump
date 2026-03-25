@@ -788,6 +788,9 @@ public class FCheck {
 					+ (littleEndian ? "Little" : "Big") + " Endian)");
 		checkForestLabel(dir);
 		File files[] = dir.listFiles();
+		if (files == null) {
+			throw new IOException("Unable to list files in directory: " + dir.getAbsolutePath());
+		}
 		Arrays.sort(files);
 		for (File file : files) {
 			String filename = file.getName();
