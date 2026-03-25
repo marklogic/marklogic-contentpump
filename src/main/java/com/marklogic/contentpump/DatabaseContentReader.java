@@ -723,6 +723,9 @@ public class DatabaseContentReader extends
         buf.append(permString.substring(0, i));
         buf.append(permString.substring(j+16));
         Element permissionW3cElement = _permissionElement.asW3cElement();
+        if (permissionW3cElement == null) {
+            throw new Exception("Failed to parse permission element as W3C Element");
+        }
 
         NodeList capabilities = permissionW3cElement
             .getElementsByTagName("sec:capability");

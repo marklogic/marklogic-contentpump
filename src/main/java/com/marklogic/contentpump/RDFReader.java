@@ -263,8 +263,14 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         }
         String[] perms = conf.getStrings(MarkLogicConstants.OUTPUT_PERMISSION);
         if(perms!=null) {
-            defaultPerms = PermissionUtil.getPermissions(perms).toArray(
-                new ContentPermission[perms.length>>1]);
+            List<ContentPermission> permList = PermissionUtil.getPermissions(perms);
+            if (permList != null) {
+                defaultPerms = permList.toArray(new ContentPermission[perms.length>>1]);
+            } else {
+                List<ContentPermission> tmp = PermissionUtil.getDefaultPermissions(conf,roleMap);
+                if(tmp!=null)
+                    defaultPerms = tmp.toArray(new ContentPermission[tmp.size()]);
+            }
         } else {
             List<ContentPermission> tmp = PermissionUtil.getDefaultPermissions(conf,roleMap);
             if(tmp!=null)
