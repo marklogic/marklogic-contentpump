@@ -60,12 +60,20 @@ public class CommentImpl extends CharacterDataImpl implements Comment {
     /** {@inheritDoc} */
     @Override
     public String lookupPrefix(String namespaceURI) {
-    	return getParentNode().lookupPrefix(namespaceURI);
+    	Node parent = getParentNode();
+    	if (parent == null) {
+    	    return null;
+    	}
+    	return parent.lookupPrefix(namespaceURI);
     }
     
     /** {@inheritDoc} */
     @Override
     public String lookupNamespaceURI(String prefix) {
-    	return getParentNode().lookupNamespaceURI(prefix);
+    	Node parent = getParentNode();
+    	if (parent == null) {
+    	    return null;
+    	}
+    	return parent.lookupNamespaceURI(prefix);
     }
 }
