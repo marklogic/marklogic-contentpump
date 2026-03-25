@@ -565,6 +565,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
             result = session.submitRequest(query);
             while (result.hasNext()) {
                 String uri = result.next().asString();
+                if (!result.hasNext()) {
+                    throw new IOException("Invalid role map");
+                }
                 String tmp = result.next().asString();
                 ArrayList<ContentPermission> perms = new ArrayList<>();
                 while(!tmp.equals("0")) {
@@ -577,6 +580,9 @@ public class RDFReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
                     ContentCapability capability = PermissionUtil
                         .getCapbility(cap);
                     perms.add(new ContentPermission(capability, roleName));
+                    if (!result.hasNext()) {
+                        throw new IOException("Invalid role map");
+                    }
                     tmp = result.next().asString();
                 }
                 

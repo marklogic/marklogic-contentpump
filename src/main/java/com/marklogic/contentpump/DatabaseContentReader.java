@@ -438,24 +438,39 @@ public class DatabaseContentReader extends
      */
 
     private String parseMetadata(DocumentMetadata metadata) throws IOException {
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         ResultItem item = result.next();
         String uri = item.asString();
         if (uri == null) {
             throw new IOException("Missing document URI for metadata.");
+        }
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
         }
         item = result.next();
         //node-kind, must exist
         String nKind = item.asString();
         metadata.setFormat(nKind);
         
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         item = result.next();
         // handle collections, may not be present
         while (item != null && item.getItemType() == ValueType.XS_STRING) {
             if (!copyCollection) {
+                if (!result.hasNext()) {
+                    throw new IOException("Unexpected response");
+                }
                 item = result.next();
                 continue;
             }
             metadata.addCollection(item.asString());
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
+            }
             item = result.next();
         }
         
@@ -464,6 +479,9 @@ public class DatabaseContentReader extends
         buf.append("<perms>");
         while (item != null && ValueType.ELEMENT == item.getItemType()) {
             if (!copyPermission) {
+                if (!result.hasNext()) {
+                    throw new IOException("Unexpected response");
+                }
                 item = result.next();
                 continue;
             }
@@ -471,6 +489,9 @@ public class DatabaseContentReader extends
                 readPermission((XdmElement) item.getItem(), metadata, buf);
             } catch (Exception e) {
                 throw new IOException(e);
+            }
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
             }
             item = result.next();
         }
@@ -481,6 +502,9 @@ public class DatabaseContentReader extends
         metadata.setQuality((XSInteger) item.getItem());
         
         // handle metadata
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         item = result.next();
         if (copyMetadata) {
             XdmItem metaItem  = item.getItem();
@@ -493,6 +517,9 @@ public class DatabaseContentReader extends
                     JsonNode nodeVal = node.get(key);
                     metadata.meta.put(key, nodeVal.asText());
                 }
+                if (!result.hasNext()) {
+                    throw new IOException("Unexpected response");
+                }
                 item = result.next();
             }
         }
@@ -504,6 +531,9 @@ public class DatabaseContentReader extends
             String pString = item.asString();
             if (pString != null) {
                 metadata.setProperties(pString);
+            }
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
             }
             item = result.next();
         }
