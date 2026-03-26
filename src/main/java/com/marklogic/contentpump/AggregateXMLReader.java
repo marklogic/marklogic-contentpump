@@ -112,9 +112,13 @@ public class AggregateXMLReader<VALUEIN> extends ImportRecordReader<VALUEIN> {
         f = XMLInputFactory.newInstance();
         try {
             f.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Failed configuring XXE-prevention security property IS_SUPPORTING_EXTERNAL_ENTITIES on XMLInputFactory", e);
+        }
+        try {
             f.setProperty(XMLInputFactory.SUPPORT_DTD, false);
         } catch (IllegalArgumentException e) {
-            LOG.warn("Unable to set XXE safety properties on XMLInputFactory", e);
+            LOG.warn("Failed configuring XXE-prevention security property SUPPORT_DTD on XMLInputFactory", e);
         }
         setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());

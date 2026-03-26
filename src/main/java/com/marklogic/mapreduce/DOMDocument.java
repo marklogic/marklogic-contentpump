@@ -71,9 +71,13 @@ public class DOMDocument extends ForestDocument {
             transformerFactory = TransformerFactory.newInstance();
             try {
                 transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Failed configuring XXE-prevention security attribute ACCESS_EXTERNAL_DTD on TransformerFactory", e);
+            }
+            try {
                 transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
             } catch (IllegalArgumentException e) {
-                LOG.warn("Unable to set XXE safety attributes on TransformerFactory", e);
+                LOG.warn("Failed configuring XXE-prevention security attribute ACCESS_EXTERNAL_STYLESHEET on TransformerFactory", e);
             }
         }
 
