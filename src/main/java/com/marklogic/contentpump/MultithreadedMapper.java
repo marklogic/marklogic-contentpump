@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -57,6 +58,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
     private List<Future<?>> runnerFutureList = new ArrayList<>();
     private int threadCount = 0;
     private ThreadPoolExecutor threadPool;
+    private CountDownLatch runnersLatch;
 
     /**
      * Get thread count set for this mapper.
@@ -84,6 +86,10 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
 	 */
 	public void setThreadPool(ThreadPoolExecutor pool) {
 		this.threadPool = pool;
+	}
+
+	public void setRunnersLatch(CountDownLatch latch) {
+		this.runnersLatch = latch;
 	}
 
 	/**
@@ -174,7 +180,9 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
                     }
                 }
             }
-            threadPool.notify();
+            if (runnersLatch != null) {
+                runnersLatch.countDown();
+            }
         }
     }
 

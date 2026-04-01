@@ -458,10 +458,8 @@ public class ThreadManager implements ConfigConstants {
         }
         taskList.add(task);
         if (runtimeMapperClass == (Class)MultithreadedMapper.class) {
-            synchronized (pool) {
-                taskFutureList.add(pool.submit(task));
-                pool.wait();
-            }
+            taskFutureList.add(pool.submit(task));
+            task.getRunnersLatch().await();
         } else {
             pool.submit(task);
         }
