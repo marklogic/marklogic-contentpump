@@ -599,6 +599,7 @@ public class ThreadManager implements ConfigConstants {
             }
             // Collect active task counts and idle thread counts
             int activeTaskCounts = getActiveTaskCounts();
+            if (activeTaskCounts == 0) return;
             prepareRandomIndexes(activeTaskCounts);
             if (curServerThreads < newServerThreads) {
                 // Scale out
