@@ -261,7 +261,13 @@ public enum InputType implements ConfigConstants {
                     AdhocQuery query = session.newAdhocQuery(ROLE_QUERY);
                     query.setOptions(options);
                     result = session.submitRequest(query);
+                    if (!result.hasNext()) {
+                        throw new IOException("Invalid role map");
+                    }
                     Text version = new Text(result.next().asString());
+                    if (!result.hasNext()) {
+                        throw new IOException("Invalid role map");
+                    }
                     boolean hasFunc = Boolean.parseBoolean(result.next().asString());
                     LinkedMapWritable roleMap = new LinkedMapWritable();
                     if(hasFunc) {

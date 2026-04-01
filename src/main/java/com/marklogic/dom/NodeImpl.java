@@ -297,6 +297,9 @@ public abstract class NodeImpl implements Node {
             }
         }
         Node p = getParentNode();
+        if (p == null) {
+            return false;
+        }
         return p.isDefaultNamespace(namespaceURI);
     }
     
@@ -314,7 +317,7 @@ public abstract class NodeImpl implements Node {
     	if (other==null) return false;
         if (getNodeType() != other.getNodeType())
             return false;
-        if (!getLocalName().equals(other.getLocalName()))
+        if (notequals(getLocalName(),other.getLocalName()))
             return false;
         if (notequals(getNamespaceURI(),other.getNamespaceURI()))
             return false;

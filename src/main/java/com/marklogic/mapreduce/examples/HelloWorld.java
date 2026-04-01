@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -79,7 +80,8 @@ public class HelloWorld {
         		if (contentType == ContentType.XML) {
         			// grab the first word from the document text
                     Document doc = (Document)value.getContentAsMarkLogicNode().get();
-                    String text = doc.getDocumentElement().getTextContent();
+                    Element e = doc.getDocumentElement();
+                    String text = e != null ? e.getTextContent() : "";
                     firstWord.set(text.split(" ", 2)[0]);
                     context.write(one, firstWord);
         		}      		                

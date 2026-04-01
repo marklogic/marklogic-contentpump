@@ -178,13 +178,15 @@ public class AttrImpl extends NodeImpl implements Attr {
     /** {@inheritDoc} */
     @Override
     public String lookupNamespaceURI(String prefix) {
-        return getOwnerElement().lookupNamespaceURI(prefix);
+        Element owner = getOwnerElement();
+        return owner != null ? owner.lookupNamespaceURI(prefix) : null;
     }
 
     /** {@inheritDoc} */
     @Override
     public String lookupPrefix(String namespaceURI) {
-        return getOwnerElement().lookupPrefix(namespaceURI);
+        Element owner = getOwnerElement();
+        return owner != null ? owner.lookupPrefix(namespaceURI) : null;
     }
 
     /** Unsupported. */

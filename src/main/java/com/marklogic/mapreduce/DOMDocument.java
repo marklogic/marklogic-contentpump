@@ -135,7 +135,10 @@ public class DOMDocument extends ForestDocument {
         if (rootNodeKind == NodeKind.TEXT) {
             TextImpl textNode = (TextImpl) doc.getFirstChild();
             if (textNode != null) {
-                return textNode.getTextContent().getBytes();
+                String textContent = textNode.getTextContent();
+                if (textContent != null) {
+                    return textContent.getBytes();
+                }
             }          
         }
         try {

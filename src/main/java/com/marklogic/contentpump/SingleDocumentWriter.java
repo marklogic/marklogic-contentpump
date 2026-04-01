@@ -87,7 +87,11 @@ implements MarkLogicConstants, ConfigConstants, InternalConstants {
             if (fs instanceof LocalFileSystem) {
                 File f = new File(path.toUri().getPath());
                 if (!f.exists()) {
-                    f.getParentFile().mkdirs();
+                    File parentFile = f.getParentFile();
+                    if (parentFile == null) {
+                        throw new IOException("Unable to determine parent directory for: " + f);
+                    }
+                    parentFile.mkdirs();
                     f.createNewFile();
                 }
                 os = new BufferedOutputStream(new FileOutputStream(f, false));
