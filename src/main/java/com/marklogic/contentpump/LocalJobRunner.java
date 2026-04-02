@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -263,6 +264,7 @@ public class LocalJobRunner implements ConfigConstants {
         private Class<? extends Mapper<?,?,?,?>> mapperClass;
         private int threadCount = 0;
         private AtomicBoolean isTaskDone = new AtomicBoolean(false);
+        private CountDownLatch runnersLatch = new CountDownLatch(1);
         
         public LocalMapTask(InputFormat<INKEY, INVALUE> inputFormat, 
                 OutputFormat<OUTKEY, OUTVALUE> outputFormat, 
@@ -310,6 +312,10 @@ public class LocalJobRunner implements ConfigConstants {
             return isTaskDone.get();
         }
 
+        public CountDownLatch getRunnersLatch() {
+            return runnersLatch;
+        }
+
 		@SuppressWarnings("unchecked")
         @Override
         public Object call() {
@@ -339,6 +345,7 @@ public class LocalJobRunner implements ConfigConstants {
                 if (mapperClass == (Class)MultithreadedMapper.class) {
                 	((MultithreadedMapper)mapper).setThreadCount(threadCount);
                     ((MultithreadedMapper)mapper).setThreadPool(pool);
+                    ((MultithreadedMapper)mapper).setRunnersLatch(runnersLatch);
                 }
                 mapper.run(mapperContext);
             } catch (Throwable t) {
@@ -349,9 +356,7 @@ public class LocalJobRunner implements ConfigConstants {
                     LOG.error(t.getMessage());
                 }
                 try {
-                    synchronized(pool) {
-                        pool.notify();
-                    }
+                    runnersLatch.countDown();
                 } catch (Throwable t1) {
                     LOG.error(t1);
                 }

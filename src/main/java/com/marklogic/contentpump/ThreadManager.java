@@ -458,10 +458,8 @@ public class ThreadManager implements ConfigConstants {
         }
         taskList.add(task);
         if (runtimeMapperClass == (Class)MultithreadedMapper.class) {
-            synchronized (pool) {
-                taskFutureList.add(pool.submit(task));
-                pool.wait();
-            }
+            taskFutureList.add(pool.submit(task));
+            task.getRunnersLatch().await();
         } else {
             pool.submit(task);
         }
@@ -604,6 +602,7 @@ public class ThreadManager implements ConfigConstants {
             }
             // Collect active task counts and idle thread counts
             int activeTaskCounts = getActiveTaskCounts();
+            if (activeTaskCounts == 0) return;
             prepareRandomIndexes(activeTaskCounts);
             if (curServerThreads < newServerThreads) {
                 // Scale out
