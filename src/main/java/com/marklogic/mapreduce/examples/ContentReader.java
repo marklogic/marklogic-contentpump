@@ -97,21 +97,19 @@ public class ContentReader {
     static class SslOptions implements SslConfigOptions {
         @Override
         public String[] getEnabledCipherSuites() {
-            return new String[] { "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
-                    "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", 
-            "TLS_RSA_WITH_AES_256_CBC_SHA" };
+            return null;
         }
 
         @Override
         public String[] getEnabledProtocols() {
-            return new String[] { "TLSv1" };
+            return new String[] { "TLSv1.3" };
         }
         
         @Override
         public SSLContext getSslContext() {
             SSLContext sslContext = null;
             try {
-                sslContext = SSLContext.getInstance("TLSv1");
+                sslContext = SSLContext.getInstance("TLSv1.3");
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             }
