@@ -92,10 +92,12 @@ public class DatabaseTransformWriter<VALUE> extends
                 commitSleepTime = MIN_SLEEP_TIME;
                 while (commitRetry < commitRetryLimit) {
                     committed = false;
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(getFormattedBatchId() +
-                            "Retrying committing batch , attempts: " +
-                            commitRetry + "/" + MAX_RETRIES);
+                    if (commitRetry > 0) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(getFormattedBatchId() +
+                                "Retrying committing batch, attempts: " +
+                                commitRetry + "/" + MAX_RETRIES);
+                        }
                     }
                     queries[sid].setNewVariables(uriName, uris[sid]);
                     queries[sid].setNewVariables(contentName, values[sid]);
