@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -92,10 +92,12 @@ public class DatabaseTransformWriter<VALUE> extends
                 commitSleepTime = MIN_SLEEP_TIME;
                 while (commitRetry < commitRetryLimit) {
                     committed = false;
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(getFormattedBatchId() +
-                            "Retrying committing batch , attempts: " +
-                            commitRetry + "/" + MAX_RETRIES);
+                    if (commitRetry > 0) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(getFormattedBatchId() +
+                                "Retrying committing batch, attempts: " +
+                                commitRetry + "/" + MAX_RETRIES);
+                        }
                     }
                     queries[sid].setNewVariables(uriName, uris[sid]);
                     queries[sid].setNewVariables(contentName, values[sid]);
