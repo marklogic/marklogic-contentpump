@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -409,6 +409,7 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             try {
                 mapper.runThreadSafe(outer, subcontext, this);
             } catch (Throwable ie) {
+                throwable = ie;
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Error running task:" + ie);
                     ie.printStackTrace();
@@ -417,6 +418,9 @@ public class MultithreadedMapper<K1, V1, K2, V2> extends
             try {
                 writer.close(subcontext);
             } catch (Throwable t) {
+                if (throwable == null) {
+                    throwable = t;
+                }
                 LOG.error("Error closing writer: " + t.getMessage());
                 if (LOG.isDebugEnabled()) {
                     LOG.debug(t);

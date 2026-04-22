@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ public enum ColumnDataType {
     NUMBER {
         @Override
         public Object parse(String s) throws Exception {
-            s.trim();
+            s = s.trim();
             if ("".equals(s)) {
                 throw new Exception("missing value");
             }
@@ -46,14 +46,14 @@ public enum ColumnDataType {
     BOOLEAN {
         @Override
         public Object parse(String s) throws Exception {
-            s.trim();
+            s = s.trim();
             if ("".equals(s)) {
                 throw new Exception("missing value");
             } else if (!"true".equalsIgnoreCase(s) && 
                     !"false".equalsIgnoreCase(s)) {
                 throw new ParseException("", 0);
             }
-            return new Boolean(s);
+            return Boolean.valueOf(s);
         }
         
     };
