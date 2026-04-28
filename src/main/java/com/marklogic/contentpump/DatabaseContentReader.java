@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -736,7 +736,7 @@ public class DatabaseContentReader extends
         Node role;
         Node capability;
         Node id;
-        if (0 < roles.getLength() && 0 < capabilities.getLength()) {
+        if (0 < roles.getLength() && 0 < capabilities.getLength() && 0 < ids.getLength()) {
             role = roles.item(0);
             capability = capabilities.item(0);
             id = ids.item(0);
@@ -750,7 +750,7 @@ public class DatabaseContentReader extends
                 LOG.warn("input permission: " + permissionW3cElement + ": "
                     + capabilities.getLength() + " capabilities, using only 1");
             }
-            if (capabilities.getLength() > 1) {
+            if (ids.getLength() > 1) {
                 LOG.warn("input permission: " + permissionW3cElement + ": "
                     + ids.getLength() + " ids, using only 1");
             }
@@ -763,6 +763,10 @@ public class DatabaseContentReader extends
             if (capabilities.getLength() < 1) {
                 LOG.warn("skipping input permission: " + permissionW3cElement
                     + ": no capabilities");
+            }
+            if (ids.getLength() < 1) {
+                LOG.warn("skipping input permission: " + permissionW3cElement
+                    + ": no ids");
             }
         }
 
