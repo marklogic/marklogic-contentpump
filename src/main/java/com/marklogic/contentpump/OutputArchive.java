@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,8 +133,9 @@ public class OutputArchive implements InternalConstants {
             boolean isExportDoc) 
     throws IOException {
         ZipEntry entry = new ZipEntry(uri);
-        if (outputStream == null || 
-            (currentFileBytes + size > Integer.MAX_VALUE) &&
+        if (outputStream == null) {
+            newOutputStream();
+        } else if ((currentFileBytes + size > Integer.MAX_VALUE) &&
              currentFileBytes > 0) {
             if (currentEntries % 2 == 0 && !isExportDoc) {
                 //the file overflowed is metadata, create new zip
