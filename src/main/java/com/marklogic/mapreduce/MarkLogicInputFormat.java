@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -223,7 +223,9 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                 throw new IOException("Unexpected item " + item.getItemType().toString());
             }
             String itemStr = ((XSString)item.getItem()).asString();
-            ruleUris.add(itemStr);
+            if (ruleUris != null) {
+                ruleUris.add(itemStr);
+            }
         }
 
         // forest with failover hosts
