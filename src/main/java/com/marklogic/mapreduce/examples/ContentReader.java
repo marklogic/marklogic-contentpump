@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,9 @@ public class ContentReader {
     }
     
     static class SslOptions implements SslConfigOptions {
+        public static final Log LOG =
+            LogFactory.getLog(SslOptions.class);
+
         @Override
         public String[] getEnabledCipherSuites() {
             return null;
@@ -111,7 +114,7 @@ public class ContentReader {
             try {
                 sslContext = SSLContext.getInstance("TLSv1.3");
             } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
+                LOG.error("Error creating SSLContext", e);
             }
             TrustManager[] trustManagers = null;
             // Trust anyone.
@@ -135,7 +138,7 @@ public class ContentReader {
             try {
                 sslContext.init(keyManagers, trustManagers, null);
             } catch (KeyManagementException e) {
-                e.printStackTrace();
+                LOG.error("Error initializing SSLContext", e);
             }
             return sslContext;
         }

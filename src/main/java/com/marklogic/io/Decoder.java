@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -173,7 +173,11 @@ public class Decoder {
         long val = reg & ((nbits < 64) ? ((1L << nbits) - 1) : -1L);
         for (int i = 0; i < nbits; i += 4)
             val += (1L << i);
-        reg >>>= nbits;
+        if (nbits >= 64) {
+            reg = 0;
+        } else {
+            reg >>>= nbits;
+        }
         numBitsInReg -= nbits;
         return (int)(val & 0xffffffffL);
     }
@@ -182,7 +186,11 @@ public class Decoder {
         if (n > numBitsInReg)
             load();
         long v = reg & ((n < 64) ? ((1L << n) - 1) : -1L);
-        reg >>>= n;
+        if (n >= 64) {
+            reg = 0;
+        } else {
+            reg >>>= n;
+        }
         numBitsInReg -= n;
         return (int)(v & 0xffffffffL);
     }
