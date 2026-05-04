@@ -499,6 +499,9 @@ public class DatabaseContentReader extends
         metadata.setPermString(buf.toString());
         
         // handle quality, always present even if not requested (barrier)
+        if (item == null) {
+            throw new IOException("Unexpected null item when reading quality");
+        }
         metadata.setQuality((XSInteger) item.getItem());
         
         // handle metadata
@@ -625,7 +628,7 @@ public class DatabaseContentReader extends
                         queryNakedProperties();
                         int curCount = 0;
                         while (curCount < nakedCount) {
-                            if (result.hasNext()) {
+                            if (result != null && result.hasNext()) {
                                 result.next();
                                 curCount++;
                             } else { 
@@ -634,7 +637,7 @@ public class DatabaseContentReader extends
                         }
                     }
                
-                    if (result.hasNext()) {
+                    if (result != null && result.hasNext()) {
                         ResultItem currItem = null;
                         currItem = result.next();
 
