@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -260,6 +260,7 @@ public class ThreadManager implements ConfigConstants {
             pool.setCorePoolSize(newServerThreads);
         }
         // Assign new available threads to each task
+        int activeIdx = 0;
         for (int i = 0; i < taskList.size(); i++) {
             LocalMapTask task = taskList.get(i);
             if (task.getMapperClass() == (Class)MultithreadedMapper.class) {
@@ -272,13 +273,21 @@ public class ThreadManager implements ConfigConstants {
                     }
                     continue;
                 }
+                if (activeIdx >= randomIndexes.size()) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Reached end of active task snapshot; " +
+                            "remaining tasks will be considered in the " +
+                            "next polling cycle.");
+                    }
+                    break;
+                }
                 // In assignThreads, pass down a random index as splitIndex to
                 // make sure threads are more evenly assigned. The total delta
                 // threads in a scale-out event equals to the new available
                 // threads plus the idle threads that finish running other
                 // LocalMapTasks.
                 int deltaTaskThreads = assignThreads(
-                    randomIndexes.get(i), activeTaskCounts,
+                    randomIndexes.get(activeIdx++), activeTaskCounts,
                     (newServerThreads - curServerThreads + idleServerThreads),
                     false);
                 int newTaskThreads = deltaTaskThreads + task.getThreadCount();
@@ -313,6 +322,7 @@ public class ThreadManager implements ConfigConstants {
         LOG.info("Thread pool is scaling-in. New thread pool size: " +
             newServerThreads);
         // Deduct runners from each task
+        int activeIdx = 0;
         for (int i = 0; i < taskList.size(); i++) {
             LocalMapTask task = taskList.get(i);
             if (task.getMapperClass() == (Class)MultithreadedMapper.class) {
@@ -325,11 +335,19 @@ public class ThreadManager implements ConfigConstants {
                     }
                     continue;
                 }
+                if (activeIdx >= randomIndexes.size()) {
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Reached end of active task snapshot; " +
+                            "remaining tasks will be considered in the " +
+                            "next polling cycle.");
+                    }
+                    break;
+                }
                 //  The total delta threads in a scale-in event equals to the
                 //  unavailable threads minus the idle threads that finish
                 //  running other LocalMapTasks.
                 int deltaTaskThreads = assignThreads(
-                    randomIndexes.get(i), activeTaskCounts,
+                    randomIndexes.get(activeIdx++), activeTaskCounts,
                     (curServerThreads - newServerThreads - idleServerThreads),
                     false);
                 int newTaskThreads = task.getThreadCount() - deltaTaskThreads;
@@ -368,6 +386,7 @@ public class ThreadManager implements ConfigConstants {
             LOG.debug("Assigning idle threads to each LocalMapTask. Idle thread" +
                 "counts: " + idleServerThreads);
         }
+        int activeIdx = 0;
         for (int i = 0; i < taskList.size(); i++) {
             LocalMapTask task = taskList.get(i);
             if (task.isTaskDone()) {
@@ -378,7 +397,15 @@ public class ThreadManager implements ConfigConstants {
                 }
                 continue;
             }
-            int deltaTaskThreads = assignThreads(randomIndexes.get(i),
+            if (activeIdx >= randomIndexes.size()) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Reached end of active task snapshot; " +
+                        "remaining tasks will be considered in the " +
+                        "next polling cycle.");
+                }
+                break;
+            }
+            int deltaTaskThreads = assignThreads(randomIndexes.get(activeIdx++),
                 activeTaskCounts, idleServerThreads, false);
             if (task.getMapperClass() == (Class)MultithreadedMapper.class) {
                 int newTaskThreads = deltaTaskThreads + task.getThreadCount();
