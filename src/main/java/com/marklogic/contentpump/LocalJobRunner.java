@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -137,7 +137,6 @@ public class LocalJobRunner implements ConfigConstants {
         }
         // Initialize thread pool
         pool = threadManager.initThreadPool();
-        threadManager.runThreadPoller();
 
         progress = new AtomicInteger[splits.size()];
         for (int i = 0; i < splits.size(); i++) {
@@ -218,6 +217,12 @@ public class LocalJobRunner implements ConfigConstants {
                     }
                 }
             }
+        }
+        // Start thread poller after all tasks are submitted to avoid race
+        // condition where taskList grows between active count snapshot and
+        // scale method iteration.
+        if (pool != null) {
+            threadManager.runThreadPoller();
         }
         threadManager.shutdownThreadPool();
         job.setJobState(JobStatus.State.SUCCEEDED);

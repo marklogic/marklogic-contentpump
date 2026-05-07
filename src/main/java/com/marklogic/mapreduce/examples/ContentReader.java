@@ -95,9 +95,6 @@ public class ContentReader {
     }
     
     static class SslOptions implements SslConfigOptions {
-        public static final Log LOG =
-            LogFactory.getLog(SslOptions.class);
-
         @Override
         public String[] getEnabledCipherSuites() {
             return null;
@@ -109,13 +106,9 @@ public class ContentReader {
         }
         
         @Override
-        public SSLContext getSslContext() {
-            SSLContext sslContext = null;
-            try {
-                sslContext = SSLContext.getInstance("TLSv1.3");
-            } catch (NoSuchAlgorithmException e) {
-                LOG.error("Error creating SSLContext", e);
-            }
+        public SSLContext getSslContext()
+                throws NoSuchAlgorithmException, KeyManagementException {
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
             TrustManager[] trustManagers = null;
             // Trust anyone.
             trustManagers = new TrustManager[] { new X509TrustManager() {
@@ -133,13 +126,9 @@ public class ContentReader {
                     return null;
                 }
             } };
-           
+
             KeyManager[] keyManagers = null;
-            try {
-                sslContext.init(keyManagers, trustManagers, null);
-            } catch (KeyManagementException e) {
-                LOG.error("Error initializing SSLContext", e);
-            }
+            sslContext.init(keyManagers, trustManagers, null);
             return sslContext;
         }
     }
