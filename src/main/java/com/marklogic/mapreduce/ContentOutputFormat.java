@@ -128,13 +128,18 @@ public class ContentOutputFormat<VALUEOUT> extends
       + "return if (exists($f)) then $f() else ()";
     // For HTTP Server
     public static final String HEADER_QUERY =
-        "fn:exists(xdmp:get-request-header('x-forwarded-for'))";
+        "let $f := fn:function-lookup(xs:QName('xdmp:is-forwarded'),0)\n" +
+        "return if (exists($f)) then $f() " +
+        "else fn:exists(xdmp:get-request-header('x-forwarded-for'))";
     // For XDBC Server
     public static final String XDBC_HEADER_QUERY =
+        "let $f := fn:function-lookup(xs:QName('xdmp:is-forwarded'),0)\n" +
+        "return if (exists($f)) then $f() " +
+        "else (" +
         "let $xdbcHeaderf := " +
         "fn:function-lookup(xs:QName('xdmp:get-xdbc-request-header'),1)\n" +
         "return if (exists($xdbcHeaderf)) " +
-        "then fn:exists($xdbcHeaderf('x-forwarded-for')) else false()";
+        "then fn:exists($xdbcHeaderf('x-forwarded-for')) else false())";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;
