@@ -318,7 +318,8 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
             StringBuilder buf = new StringBuilder();
             buf.append("xquery version \"1.0-ml\";\n");
             if (getForwardHeader) {
-                buf.append("fn:exists(xdmp:get-request-header('x-forwarded-for'));\n");
+                buf.append(ContentOutputFormat.HEADER_QUERY).append(";\n");
+                buf.append(ContentOutputFormat.XDBC_HEADER_QUERY).append(";\n");
             }
             buf.append("import module namespace hadoop = ");
             buf.append("\"http://marklogic.com/xdmp/hadoop\" at ");
@@ -401,6 +402,8 @@ extends InputFormat<KEYIN, VALUEIN> implements MarkLogicConstants {
                     ResultItem item = result.next();
                     if (getForwardHeader) {
                         forwardHeaderExists = item.asString().equals("true");
+                        item = result.next();
+                        forwardHeaderExists |= item.asString().equals("true");
                         item = result.next();
                         if (forwardHeaderExists) {
                             restrictHosts = true;
