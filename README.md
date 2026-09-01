@@ -15,6 +15,14 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Release Notes
 
+### What's New in mlcp 12.1
+
+- Added support for isolated HTTP and XDBC requests. **Note:** as a result of this change, older versions of mlcp are no longer compatible with MarkLogic Server 12.1.0 and beyond; please refer to the release notes for details.
+- Upgraded Apache Avro to address a known security vulnerability
+- Strengthened TLS security by removing support for the outdated TLSv1 protocol
+- Fixed several security and stability issues, including XML external entity (XXE) protections and resource leaks
+- Various reliability and robustness improvements based on static code analysis
+
 ### What's New in mlcp 12.0
 
 - Replaced the commons-csv-marklogic library with the standard Apache Commons CSV library for improved compatibility and maintainability
