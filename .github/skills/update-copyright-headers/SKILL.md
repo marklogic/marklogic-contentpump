@@ -28,7 +28,7 @@ description: Check or update Progress Software copyright headers ("Copyright (c)
 
 ## The year rule
 
-For each file, `<endyear>` is the year of that file's most recent commit that changes something other than the copyright/license header itself: a pure "bump the year" or "reword the notice" commit doesn't count and is skipped when walking history. Renames and copies are followed correctly. A file with real uncommitted changes, or that's new/untracked, gets the current year. See the script's own docstring/`--help` for the exact algorithm.
+For each file, `<endyear>` is the year of that file's most recent commit that changes something other than the copyright/license header itself: a pure "bump the year" or "reword the notice" commit doesn't count and is skipped when walking history. Renames and copies are followed correctly. A file with real uncommitted changes, or that's new/untracked, gets the current year. When `<endyear>` equals `<startyear>` (2011), the header is a single year (`Copyright (c) 2011 ...`) rather than a redundant `2011-2011` range. See the script's own docstring/`--help` for the exact algorithm.
 
 ## Adjusting scope
 

@@ -7,6 +7,10 @@
 #   Copyright (c) <startyear>-<endyear> Progress Software Corporation and/or
 #   its subsidiaries or affiliates. All Rights Reserved.
 #
+# When <endyear> equals <startyear> the range collapses to a single year
+# ("Copyright (c) <startyear> Progress ...") rather than the redundant
+# "<startyear>-<startyear>".
+#
 # <startyear> is fixed at STARTYEAR below. <endyear> is computed per file as
 # the year of that file's last REAL commit: the most recent commit that
 # changed something other than the copyright line itself. Commits whose only
@@ -72,8 +76,10 @@ TEMPLATE_START="Copyright (c) "
 TEMPLATE_MID=" Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved."
 
 # Same sentence, matched against a lowercased line, tolerant of extra
-# internal whitespace. Group 1/2 are the two years.
-COPYRIGHT_RE='^copyright[[:space:]]*\(c\)[[:space:]]*([0-9]{4})-([0-9]{4})[[:space:]]*progress software corporation and/or its subsidiaries or affiliates\.[[:space:]]*all rights reserved\.$'
+# internal whitespace. Group 1 is the start year; group 2 is the optional
+# "-<endyear>" suffix (empty when the header is a single collapsed year),
+# and group 3 is that end year alone.
+COPYRIGHT_RE='^copyright[[:space:]]*\(c\)[[:space:]]*([0-9]{4})(-([0-9]{4}))?[[:space:]]*progress software corporation and/or its subsidiaries or affiliates\.[[:space:]]*all rights reserved\.$'
 # Leading comment decoration: *, #, /, whitespace, plus block openers
 # (<!-- for XML/HTML, (: for XQuery). Group 1 captures it, to restore as-is.
 LEADING_RE='^([[:space:]]*[*#/]*[[:space:]]*(<!--|\(:)?[[:space:]]*)'
@@ -422,9 +428,15 @@ find_header_line() {
     done
 }
 
-# Sets EXPECTED_SENTENCE for target year $1.
+# Sets EXPECTED_SENTENCE for target year $1. Collapses to a single year
+# (no "-<year>" range) when the target year equals STARTYEAR, since a
+# "<year>-<year>" range would be redundant.
 build_expected_sentence() {
-    EXPECTED_SENTENCE="${TEMPLATE_START}${STARTYEAR}-${1}${TEMPLATE_MID}"
+    if [[ "$1" == "$STARTYEAR" ]]; then
+        EXPECTED_SENTENCE="${TEMPLATE_START}${STARTYEAR}${TEMPLATE_MID}"
+    else
+        EXPECTED_SENTENCE="${TEMPLATE_START}${STARTYEAR}-${1}${TEMPLATE_MID}"
+    fi
 }
 
 # ---------------------------------------------------------------------------
@@ -438,6 +450,7 @@ build_expected_sentence() {
 check_file() {
     local repo_root="$1" relpath="$2" today_year="$3" force_scope="$4"
     local ext="" abspath cleaned lower_cleaned target_year year_reason
+    local match_end has_range expected_has_range
 
     case "$relpath" in
         *.*) ext=".${relpath##*.}" ;;
@@ -484,11 +497,16 @@ check_file() {
     cleaned="$CLEAN_LINE_RESULT"
     lower "$cleaned"
     lower_cleaned="$LOWER_RESULT"
-    if [[ "$lower_cleaned" =~ $COPYRIGHT_RE ]] \
-        && [[ "${BASH_REMATCH[1]}" == "$STARTYEAR" ]] \
-        && [[ "${BASH_REMATCH[2]}" == "$target_year" ]]; then
-        RESULT_STATUS="$OK"
-        return
+    if [[ "$lower_cleaned" =~ $COPYRIGHT_RE ]]; then
+        has_range=1; [[ -z "${BASH_REMATCH[2]}" ]] && has_range=0
+        match_end="${BASH_REMATCH[3]:-${BASH_REMATCH[1]}}"
+        expected_has_range=1; [[ "$target_year" == "$STARTYEAR" ]] && expected_has_range=0
+        if [[ "${BASH_REMATCH[1]}" == "$STARTYEAR" ]] \
+            && [[ "$match_end" == "$target_year" ]] \
+            && [[ "$has_range" == "$expected_has_range" ]]; then
+            RESULT_STATUS="$OK"
+            return
+        fi
     fi
 
     RESULT_STATUS="$NEEDS_UPDATE"; RESULT_LINE_INDEX="$HEADER_LINE_INDEX"
@@ -629,7 +647,9 @@ The year rule: for each file, <endyear> is the year of that file's most
 recent commit that changes something other than the copyright/license
 header itself; a pure "bump the year" or "reword the notice" commit doesn't
 count and is skipped when walking history. A file with real uncommitted
-changes, or that's new/untracked, gets the current year.
+changes, or that's new/untracked, gets the current year. When <endyear>
+equals <startyear> (2011), the header collapses to a single year instead of
+a redundant "2011-2011" range.
 EOF
 }
 
