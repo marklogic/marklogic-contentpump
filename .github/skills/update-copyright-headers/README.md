@@ -13,10 +13,10 @@ Copyright (c) 2011-<year> Progress Software Corporation and/or its subsidiaries 
 
 ## What it does
 
-1. Checks all tracked files plus changed/untracked files by default, computing each file's `<year>` from its own git history — a pure year-bump commit doesn't count.
-2. Shows every `NEEDS_UPDATE`/`MISSING` file with its current vs. expected header line, and waits for you to confirm.
-3. Updates headers only after you confirm — never stages, commits, or pushes on its own.
-4. Commits only if you ask.
+1. Checks all tracked files, plus changed and untracked files by default, and derives each file’s <year> from its Git history. Pure year-bump commits are ignored.
+2. Reports every `NEEDS_UPDATE` and `MISSING` file with its current and expected header line, giving you the full list before any confirmation prompt.
+3. Waits for confirmation in a subsequent turn before modifying any files. It never stages, commits, or pushes changes automatically.
+4. Commits changes only when explicitly requested.
 
 ## How to use
 
@@ -32,7 +32,6 @@ Ask Copilot in natural language. The skill activates on keywords like **"copyrig
 | Update and commit | *"Update copyright headers and commit as MLE-1234 for the 11.4.0 release"* |
 | Force the skill by name | *"Use the /update-copyright-headers skill to check headers"* |
 
-Skill not triggering? Run `/skills reload` (or restart the CLI), then `/skills info update-copyright-headers` to confirm it loaded.
 
 ## What's excluded
 
