@@ -13,7 +13,7 @@ Copyright (c) 2011-<year> Progress Software Corporation and/or its subsidiaries 
 
 ## What it does
 
-1. Checks all tracked files, plus changed and untracked files by default, and derives each file’s <year> from its Git history. Pure year-bump commits are ignored.
+1. Checks all tracked files, plus changed and untracked files by default, and derives each file’s `<year>` from its Git history. Pure year-bump commits are ignored.
 2. Reports every `NEEDS_UPDATE` and `MISSING` file with its current and expected header line, giving you the full list before any confirmation prompt.
 3. Waits for confirmation in a subsequent turn before modifying any files. It never stages, commits, or pushes changes automatically.
 4. Commits changes only when explicitly requested.
