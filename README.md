@@ -19,7 +19,7 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 - Added support for isolated HTTP and XDBC requests. **Note:** as a result of this change, older versions of mlcp are no longer compatible with MarkLogic Server 11.3.7 and beyond; please refer to the [release notes](https://docs.progress.com/bundle/marklogic-server-whats-new-11/page/topics/release-notes.html) for details.
 - Strengthened TLS security by removing support for the outdated TLSv1 protocol.
-- Fixed several security and stability issues, including XML external entity (XXE) protections and resource leaks.
+- Fixed several security and stability issues.
 - Various reliability and robustness improvements based on static code analysis.
 
 ### What's New in mlcp 11.3.4
