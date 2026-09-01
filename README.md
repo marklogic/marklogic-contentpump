@@ -15,6 +15,13 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 
 ## Release Notes
 
+### What's New in mlcp 11.3.7
+
+- Added support for isolated HTTP and XDBC requests. **Note:** as a result of this change, older versions of mlcp are no longer compatible with MarkLogic Server 11.3.7 and beyond; please refer to the [release notes](https://docs.progress.com/bundle/marklogic-server-whats-new-11/page/topics/release-notes.html) for details.
+- Strengthened TLS security by removing support for the outdated TLSv1 protocol.
+- Fixed several security and stability issues.
+- Various reliability and robustness improvements based on static code analysis.
+
 ### What's New in mlcp 11.3.4
 
 - Upgraded Apache Avro from 1.11.4 to 1.11.5 to address security vulnerabilities.
@@ -37,31 +44,6 @@ The MarkLogic Connector for Hadoop is an extension to Hadoop’s MapReduce frame
 - Upgraded Jackson, Commons-configuration2, Commons-compress, Hadoop-shaded-guava, and Hadoop-shaded-protobuf libraries to mitigate security vulnerabilities.
 - Removed Htrace-core4 libraries to mitigate security vulnerabilities.
 - Excluded transitive guava dependency from all the hadoop dependencies to improve security.
-
-### What's New in mlcp 11.2.0
-
-- Excluded all the transitive dependencies to improve security and maintenance. 
-- Upgraded Avro, Commons-cli, Commons-compress, Commons-io, Xml-apis, Jakarta.xml.soap-api, Jcl-over-slf4, and Commons-logging-api libraries to mitigate security vulnerabilities.
-- Removed Zookeeper, Bliki-core, Logback-classic, and Htrace-core libraries to mitigate security vulnerabilities.
-- Upgraded the Maven Javadoc plugin from 2.10.3 to 3.6.3 to mitigate security vulnerability.
-- Removed all dependencies and repository references related to deprecated mapr.
-
-### What's New in mlcp 11.1.0
-- Now requires JRE 11 or later.
-- Added support for reverse proxy and connection to MarkLogic Cloud. 
-- Upgraded Jena libraries from 2.13.0 to 4.9.0 to mitigate security vulnerability.
-- Upgraded Jackson, Hadoop, Xstream, and Guava libraries to mitigate security vulnerabilities.
-
-### What's New in mlcp 11.0.3
-- Removed an unused json dependency to mitigate security vulnerability.
-  
-### What's New in mlcp 11.0.2
-- Upgraded libthrift from 0.14.0 to 0.17.0 to mitigate security vulnerability.
-
-### What's New in mlcp 11.0.0
-- Upgraded Hadoop Library to 3.3.4
-- Upgraded jackson-annotations, jackson-core, jackson-databind, Xerces, woodstox-core to mitigate security vulnerability.
-- Bug fixes.
 
 ## Getting Started
 
