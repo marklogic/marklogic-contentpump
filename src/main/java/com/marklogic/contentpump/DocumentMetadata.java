@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2022 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,20 +222,21 @@ public class DocumentMetadata {
      * @param _format
      */
     public void setFormat(String _format) {
-        if (_format.equals(DocumentFormat.XML)
-                || _format.equals("element") || _format.equals("comment")
-                || _format.equals("processing-instruction")) {
+        if (DocumentFormat.XML.toString().equals(_format)
+                || "element".equals(_format) || "comment".equals(_format)
+                || "processing-instruction".equals(_format)) {
             setFormat(DocumentFormat.XML);
             return;
         }
 
-        if (_format.equals(DocumentFormat.TEXT)
-                || _format.equals(("text"))) {
+        if (DocumentFormat.TEXT.toString().equals(_format)
+                || "text".equals(_format)) {
             setFormat(DocumentFormat.TEXT);
             return;
         }
- 
-        if (_format.equals(DocumentFormat.BINARY)) {
+
+        if (DocumentFormat.BINARY.toString().equals(_format)
+                || "binary".equals(_format)) {
             setFormat(DocumentFormat.BINARY);
             return;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -604,7 +604,8 @@ public class TransformWriter<VALUEOUT> extends ContentWriter<VALUEOUT> {
                 LOG.warn(getFormattedBatchId() + "RequestServerException:" + e.getMessage());
             } else {
                 LOG.warn(getFormattedBatchId() + "Exception: " + e.getMessage());
-                if (e.getMessage().contains("Module Not Found")) {
+                String msg = e.getMessage();
+                if (msg != null && msg.contains("Module Not Found")) {
                     retryable = false;
                 }
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -249,6 +249,10 @@ public enum InputType implements ConfigConstants {
             ContentSource cs;
             String[] outputHosts =
                     conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
+            if (outputHosts == null || outputHosts.length == 0) {
+                throw new IllegalArgumentException(MarkLogicConstants.OUTPUT_HOST + 
+                        " is not specified.");
+            }
             int hostIdx = 0;
             while (hostIdx < outputHosts.length) {
                 try {
@@ -261,7 +265,13 @@ public enum InputType implements ConfigConstants {
                     AdhocQuery query = session.newAdhocQuery(ROLE_QUERY);
                     query.setOptions(options);
                     result = session.submitRequest(query);
+                    if (!result.hasNext()) {
+                        throw new IOException("Invalid role map");
+                    }
                     Text version = new Text(result.next().asString());
+                    if (!result.hasNext()) {
+                        throw new IOException("Invalid role map");
+                    }
                     boolean hasFunc = Boolean.parseBoolean(result.next().asString());
                     LinkedMapWritable roleMap = new LinkedMapWritable();
                     if(hasFunc) {

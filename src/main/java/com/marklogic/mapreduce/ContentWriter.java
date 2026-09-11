@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -198,11 +198,6 @@ implements MarkLogicConstants {
 
     protected final int MAX_SLEEP_TIME = 120000;
 
-    
-    public ContentWriter(Configuration conf, 
-        Map<String, ContentSource> hostSourceMap, boolean fastLoad) {
-        this(conf, hostSourceMap, fastLoad, null);
-    }
     
     public ContentWriter(Configuration conf,
         Map<String, ContentSource> hostSourceMap, boolean fastLoad,

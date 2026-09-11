@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,13 +128,18 @@ public class ContentOutputFormat<VALUEOUT> extends
       + "return if (exists($f)) then $f() else ()";
     // For HTTP Server
     public static final String HEADER_QUERY =
-        "fn:exists(xdmp:get-request-header('x-forwarded-for'))";
+        "let $f := fn:function-lookup(xs:QName('xdmp:request-forwarded'),0)\n" +
+        "return if (exists($f)) then $f() " +
+        "else fn:exists(xdmp:get-request-header('x-forwarded-for'))";
     // For XDBC Server
     public static final String XDBC_HEADER_QUERY =
+        "let $f := fn:function-lookup(xs:QName('xdmp:request-forwarded'),0)\n" +
+        "return if (exists($f)) then $f() " +
+        "else (" +
         "let $xdbcHeaderf := " +
         "fn:function-lookup(xs:QName('xdmp:get-xdbc-request-header'),1)\n" +
         "return if (exists($xdbcHeaderf)) " +
-        "then fn:exists($xdbcHeaderf('x-forwarded-for')) else false()";
+        "then fn:exists($xdbcHeaderf('x-forwarded-for')) else false())";
     
     protected AssignmentManager am = AssignmentManager.getInstance();
     protected boolean fastLoad;
@@ -224,6 +229,10 @@ public class ContentOutputFormat<VALUEOUT> extends
                 TextArrayWritable hostArray = null;
                 if (restrictHosts) {
                     String[] outputHosts = conf.getStrings(OUTPUT_HOST);
+                    if (outputHosts == null || outputHosts.length == 0) {
+                        throw new IllegalArgumentException(OUTPUT_HOST + 
+                                " is not specified.");
+                    }
                     hostArray = new TextArrayWritable(outputHosts);
                 } else {
                     String outputHost = cs.getConnectionProvider().getHostName();
@@ -400,93 +409,120 @@ public class ContentOutputFormat<VALUEOUT> extends
         if (LOG.isDebugEnabled()) {
             LOG.debug("init query: \n" + query.getQuery());
         }
-        result = session.submitRequest(query);
+        try {
+            result = session.submitRequest(query);
 
-        ResultItem item = result.next();
-        boolean httpForwardHeaderExists;
-        boolean xdbcForwardHeaderExists;
-        if (getForwardHeader) {
-            httpForwardHeaderExists = item.asString().equals("true");
-            item = result.next();
-            xdbcForwardHeaderExists = item.asString().equals("true");
-            item = result.next();
-            if (httpForwardHeaderExists || xdbcForwardHeaderExists) {
-                restrictHosts = true;
-                conf.setBoolean(OUTPUT_RESTRICT_HOSTS, true);
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("HTTP compliant mode enabled since x-forwarded-for exists");
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
+            }
+            ResultItem item = result.next();
+            boolean httpForwardHeaderExists;
+            boolean xdbcForwardHeaderExists;
+            if (getForwardHeader) {
+                httpForwardHeaderExists = item.asString().equals("true");
+                if (!result.hasNext()) {
+                    throw new IOException("Unexpected response");
                 }
-            } else {
-                // check if input needs to be in HTTP compliant mode
-                String inputRestrictHost = conf.getTrimmed(INPUT_RESTRICT_HOSTS);
-                if (inputRestrictHost == null || 
-                    inputRestrictHost.equalsIgnoreCase("false")) {
-                    HttpChannel.setUseHTTP(false);
+                item = result.next();
+                xdbcForwardHeaderExists = item.asString().equals("true");
+                if (!result.hasNext()) {
+                    throw new IOException("Unexpected response");
+                }
+                item = result.next();
+                if (httpForwardHeaderExists || xdbcForwardHeaderExists) {
+                    restrictHosts = true;
+                    conf.setBoolean(OUTPUT_RESTRICT_HOSTS, true);
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("HTTP compliant mode disabled since x-forwarded-for doesn't exist");
+                        LOG.debug("HTTP compliant mode enabled since x-forwarded-for exists");
+                    }
+                } else {
+                    // check if input needs to be in HTTP compliant mode
+                    String inputRestrictHost = conf.getTrimmed(INPUT_RESTRICT_HOSTS);
+                    if (inputRestrictHost == null || 
+                        inputRestrictHost.equalsIgnoreCase("false")) {
+                        HttpChannel.setUseHTTP(false);
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("HTTP compliant mode disabled since x-forwarded-for doesn't exist");
+                        }
                     }
                 }
             }
-        }
-        initHostName = item.asString();
-        item = result.next();
-        am.setEffectiveVersion(((XSInteger)item.getItem()).asLong());
-        item = result.next();
-        failover = !restrictHosts && item.asString().equals("true");
-        item = result.next();
-        supportSegment = item.asString().equals("true");
-        if (result.hasNext()) {
-            item = result.next();
-            String policyStr = item.asString();
-            conf.set(ASSIGNMENT_POLICY, policyStr);
-            policy = AssignmentPolicy.Kind.forName(policyStr);
-            item = result.next();
-            allowFastLoad = Boolean.parseBoolean(item.asString());
-            if ((policy == AssignmentPolicy.Kind.STATISTICAL 
-                || policy == AssignmentPolicy.Kind.RANGE
-                || policy == AssignmentPolicy.Kind.QUERY)
-                && !allowFastLoad && conf.getBoolean(OUTPUT_FAST_LOAD, false)) {
-                throw new IOException(
-                    "Fastload can't be used: rebalancer is on and "
-                        + "forests are imbalanced in a database with "
-                        + "statistics-based assignment policy");
+            initHostName = item.asString();
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
             }
-        } else {
-        	policy = AssignmentPolicy.Kind.LEGACY;
-        	legacy = true;
-        }
-        
-        // initialize fastload mode
-        if (conf.get(OUTPUT_FAST_LOAD) == null) {
-            // fastload not set
-            if (conf.get(OUTPUT_DIRECTORY) != null) {
-                // output_dir is set, attempt to do fastload
-                if(conf.get(OUTPUT_PARTITION) == null && 
-                   (policy == AssignmentPolicy.Kind.RANGE ||
-                    policy == AssignmentPolicy.Kind.QUERY)) {
-                    fastLoad = false;
-                } else if (policy == AssignmentPolicy.Kind.RANGE ||
-                           policy == AssignmentPolicy.Kind.QUERY ||
-                	   policy == AssignmentPolicy.Kind.STATISTICAL) {
-                    fastLoad = allowFastLoad;
-                } else {
-                	fastLoad = true;
+            item = result.next();
+            am.setEffectiveVersion(((XSInteger)item.getItem()).asLong());
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
+            }
+            item = result.next();
+            failover = !restrictHosts && item.asString().equals("true");
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
+            }
+            item = result.next();
+            supportSegment = item.asString().equals("true");
+            if (result.hasNext()) {
+                item = result.next();
+                String policyStr = item.asString();
+                conf.set(ASSIGNMENT_POLICY, policyStr);
+                policy = AssignmentPolicy.Kind.forName(policyStr);
+                if (!result.hasNext()) {
+                    throw new IOException("Unexpected response");
+                }
+                item = result.next();
+                allowFastLoad = Boolean.parseBoolean(item.asString());
+                if ((policy == AssignmentPolicy.Kind.STATISTICAL 
+                    || policy == AssignmentPolicy.Kind.RANGE
+                    || policy == AssignmentPolicy.Kind.QUERY)
+                    && !allowFastLoad && conf.getBoolean(OUTPUT_FAST_LOAD, false)) {
+                    throw new IOException(
+                        "Fastload can't be used: rebalancer is on and "
+                            + "forests are imbalanced in a database with "
+                            + "statistics-based assignment policy");
                 }
             } else {
-                //neither fastload nor output_dir is set
-                fastLoad = false;
+            	policy = AssignmentPolicy.Kind.LEGACY;
+            	legacy = true;
             }
-        } else {
-            fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false);
-            if (fastLoad && conf.get(OUTPUT_PARTITION) == null
-                && (policy == AssignmentPolicy.Kind.RANGE ||
-                    policy == AssignmentPolicy.Kind.QUERY)) {
-                throw new IllegalArgumentException(
-                    "output_partition is required for fastload mode.");
+            
+            // initialize fastload mode
+            if (conf.get(OUTPUT_FAST_LOAD) == null) {
+                // fastload not set
+                if (conf.get(OUTPUT_DIRECTORY) != null) {
+                    // output_dir is set, attempt to do fastload
+                    if(conf.get(OUTPUT_PARTITION) == null && 
+                       (policy == AssignmentPolicy.Kind.RANGE ||
+                        policy == AssignmentPolicy.Kind.QUERY)) {
+                        fastLoad = false;
+                    } else if (policy == AssignmentPolicy.Kind.RANGE ||
+                               policy == AssignmentPolicy.Kind.QUERY ||
+                    	   policy == AssignmentPolicy.Kind.STATISTICAL) {
+                        fastLoad = allowFastLoad;
+                    } else {
+                    	fastLoad = true;
+                    }
+                } else {
+                    //neither fastload nor output_dir is set
+                    fastLoad = false;
+                }
+            } else {
+                fastLoad = conf.getBoolean(OUTPUT_FAST_LOAD, false);
+                if (fastLoad && conf.get(OUTPUT_PARTITION) == null
+                    && (policy == AssignmentPolicy.Kind.RANGE ||
+                        policy == AssignmentPolicy.Kind.QUERY)) {
+                    throw new IllegalArgumentException(
+                        "output_partition is required for fastload mode.");
+                }
+            }
+            conf.setBoolean(OUTPUT_FAST_LOAD, fastLoad);
+            return restrictHosts;
+        } finally {
+            if (result != null) {
+                result.close();
             }
         }
-        conf.setBoolean(OUTPUT_FAST_LOAD, fastLoad);
-        return restrictHosts;
     }
 
     /**

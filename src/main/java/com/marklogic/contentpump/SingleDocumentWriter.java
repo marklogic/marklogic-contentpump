@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,7 +87,11 @@ implements MarkLogicConstants, ConfigConstants, InternalConstants {
             if (fs instanceof LocalFileSystem) {
                 File f = new File(path.toUri().getPath());
                 if (!f.exists()) {
-                    f.getParentFile().mkdirs();
+                    File parentFile = f.getParentFile();
+                    if (parentFile == null) {
+                        throw new IOException("Unable to determine parent directory for: " + f);
+                    }
+                    parentFile.mkdirs();
                     f.createNewFile();
                 }
                 os = new BufferedOutputStream(new FileOutputStream(f, false));

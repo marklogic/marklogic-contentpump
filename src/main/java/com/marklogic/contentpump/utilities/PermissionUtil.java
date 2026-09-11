@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,13 @@ public class PermissionUtil {
         ResultSequence result = null;
         ContentSource cs;
         try {
+            String[] hosts = conf.getStrings(MarkLogicConstants.OUTPUT_HOST);
+            if (hosts == null || hosts.length == 0) {
+                throw new IllegalArgumentException(MarkLogicConstants.OUTPUT_HOST + 
+                        " is not specified.");
+            }
             cs = InternalUtilities.getOutputContentSource(conf,
-                conf.getStrings(MarkLogicConstants.OUTPUT_HOST)[0]);
+                hosts[0]);
 
             session = cs.newSession();
             RequestOptions options = new RequestOptions();

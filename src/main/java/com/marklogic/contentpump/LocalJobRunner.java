@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2021 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -136,7 +137,6 @@ public class LocalJobRunner implements ConfigConstants {
         }
         // Initialize thread pool
         pool = threadManager.initThreadPool();
-        threadManager.runThreadPoller();
 
         progress = new AtomicInteger[splits.size()];
         for (int i = 0; i < splits.size(); i++) {
@@ -218,6 +218,12 @@ public class LocalJobRunner implements ConfigConstants {
                 }
             }
         }
+        // Start thread poller after all tasks are submitted to avoid race
+        // condition where taskList grows between active count snapshot and
+        // scale method iteration.
+        if (pool != null) {
+            threadManager.runThreadPoller();
+        }
         threadManager.shutdownThreadPool();
         job.setJobState(JobStatus.State.SUCCEEDED);
         monitor.interrupt();
@@ -263,6 +269,7 @@ public class LocalJobRunner implements ConfigConstants {
         private Class<? extends Mapper<?,?,?,?>> mapperClass;
         private int threadCount = 0;
         private AtomicBoolean isTaskDone = new AtomicBoolean(false);
+        private CountDownLatch runnersLatch = new CountDownLatch(1);
         
         public LocalMapTask(InputFormat<INKEY, INVALUE> inputFormat, 
                 OutputFormat<OUTKEY, OUTVALUE> outputFormat, 
@@ -310,6 +317,10 @@ public class LocalJobRunner implements ConfigConstants {
             return isTaskDone.get();
         }
 
+        public CountDownLatch getRunnersLatch() {
+            return runnersLatch;
+        }
+
 		@SuppressWarnings("unchecked")
         @Override
         public Object call() {
@@ -339,6 +350,7 @@ public class LocalJobRunner implements ConfigConstants {
                 if (mapperClass == (Class)MultithreadedMapper.class) {
                 	((MultithreadedMapper)mapper).setThreadCount(threadCount);
                     ((MultithreadedMapper)mapper).setThreadPool(pool);
+                    ((MultithreadedMapper)mapper).setRunnersLatch(runnersLatch);
                 }
                 mapper.run(mapperContext);
             } catch (Throwable t) {
@@ -349,9 +361,7 @@ public class LocalJobRunner implements ConfigConstants {
                     LOG.error(t.getMessage());
                 }
                 try {
-                    synchronized(pool) {
-                        pool.notify();
-                    }
+                    runnersLatch.countDown();
                 } catch (Throwable t1) {
                     LOG.error(t1);
                 }

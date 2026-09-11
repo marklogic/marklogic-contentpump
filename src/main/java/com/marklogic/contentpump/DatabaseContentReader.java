@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -438,24 +438,39 @@ public class DatabaseContentReader extends
      */
 
     private String parseMetadata(DocumentMetadata metadata) throws IOException {
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         ResultItem item = result.next();
         String uri = item.asString();
         if (uri == null) {
             throw new IOException("Missing document URI for metadata.");
+        }
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
         }
         item = result.next();
         //node-kind, must exist
         String nKind = item.asString();
         metadata.setFormat(nKind);
         
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         item = result.next();
         // handle collections, may not be present
         while (item != null && item.getItemType() == ValueType.XS_STRING) {
             if (!copyCollection) {
+                if (!result.hasNext()) {
+                    throw new IOException("Unexpected response");
+                }
                 item = result.next();
                 continue;
             }
             metadata.addCollection(item.asString());
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
+            }
             item = result.next();
         }
         
@@ -464,6 +479,9 @@ public class DatabaseContentReader extends
         buf.append("<perms>");
         while (item != null && ValueType.ELEMENT == item.getItemType()) {
             if (!copyPermission) {
+                if (!result.hasNext()) {
+                    throw new IOException("Unexpected response");
+                }
                 item = result.next();
                 continue;
             }
@@ -472,15 +490,24 @@ public class DatabaseContentReader extends
             } catch (Exception e) {
                 throw new IOException(e);
             }
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
+            }
             item = result.next();
         }
         buf.append("</perms>");
         metadata.setPermString(buf.toString());
         
         // handle quality, always present even if not requested (barrier)
+        if (item == null) {
+            throw new IOException("Unexpected null item when reading quality");
+        }
         metadata.setQuality((XSInteger) item.getItem());
         
         // handle metadata
+        if (!result.hasNext()) {
+            throw new IOException("Unexpected response");
+        }
         item = result.next();
         if (copyMetadata) {
             XdmItem metaItem  = item.getItem();
@@ -493,6 +520,9 @@ public class DatabaseContentReader extends
                     JsonNode nodeVal = node.get(key);
                     metadata.meta.put(key, nodeVal.asText());
                 }
+                if (!result.hasNext()) {
+                    throw new IOException("Unexpected response");
+                }
                 item = result.next();
             }
         }
@@ -504,6 +534,9 @@ public class DatabaseContentReader extends
             String pString = item.asString();
             if (pString != null) {
                 metadata.setProperties(pString);
+            }
+            if (!result.hasNext()) {
+                throw new IOException("Unexpected response");
             }
             item = result.next();
         }
@@ -595,7 +628,7 @@ public class DatabaseContentReader extends
                         queryNakedProperties();
                         int curCount = 0;
                         while (curCount < nakedCount) {
-                            if (result.hasNext()) {
+                            if (result != null && result.hasNext()) {
                                 result.next();
                                 curCount++;
                             } else { 
@@ -604,7 +637,7 @@ public class DatabaseContentReader extends
                         }
                     }
                
-                    if (result.hasNext()) {
+                    if (result != null && result.hasNext()) {
                         ResultItem currItem = null;
                         currItem = result.next();
 
@@ -693,6 +726,9 @@ public class DatabaseContentReader extends
         buf.append(permString.substring(0, i));
         buf.append(permString.substring(j+16));
         Element permissionW3cElement = _permissionElement.asW3cElement();
+        if (permissionW3cElement == null) {
+            throw new Exception("Failed to parse permission element as W3C Element");
+        }
 
         NodeList capabilities = permissionW3cElement
             .getElementsByTagName("sec:capability");
@@ -703,7 +739,7 @@ public class DatabaseContentReader extends
         Node role;
         Node capability;
         Node id;
-        if (0 < roles.getLength() && 0 < capabilities.getLength()) {
+        if (0 < roles.getLength() && 0 < capabilities.getLength() && 0 < ids.getLength()) {
             role = roles.item(0);
             capability = capabilities.item(0);
             id = ids.item(0);
@@ -717,7 +753,7 @@ public class DatabaseContentReader extends
                 LOG.warn("input permission: " + permissionW3cElement + ": "
                     + capabilities.getLength() + " capabilities, using only 1");
             }
-            if (capabilities.getLength() > 1) {
+            if (ids.getLength() > 1) {
                 LOG.warn("input permission: " + permissionW3cElement + ": "
                     + ids.getLength() + " ids, using only 1");
             }
@@ -730,6 +766,10 @@ public class DatabaseContentReader extends
             if (capabilities.getLength() < 1) {
                 LOG.warn("skipping input permission: " + permissionW3cElement
                     + ": no capabilities");
+            }
+            if (ids.getLength() < 1) {
+                LOG.warn("skipping input permission: " + permissionW3cElement
+                    + ": no ids");
             }
         }
 

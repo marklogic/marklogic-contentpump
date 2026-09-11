@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,6 +75,10 @@ public class TransformOutputFormat<VALUEOUT> extends
             return mimetypeMap;
         }
         String[] hosts = conf.getStrings(OUTPUT_HOST);
+        if (hosts == null || hosts.length == 0) {
+            throw new IllegalArgumentException(OUTPUT_HOST + 
+                    " is not specified.");
+        }
         Session session = null;
         ResultSequence result = null;
 

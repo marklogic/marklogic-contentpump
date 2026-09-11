@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -297,6 +297,9 @@ public abstract class NodeImpl implements Node {
             }
         }
         Node p = getParentNode();
+        if (p == null) {
+            return false;
+        }
         return p.isDefaultNamespace(namespaceURI);
     }
     
@@ -314,7 +317,7 @@ public abstract class NodeImpl implements Node {
     	if (other==null) return false;
         if (getNodeType() != other.getNodeType())
             return false;
-        if (!getLocalName().equals(other.getLocalName()))
+        if (notequals(getLocalName(),other.getLocalName()))
             return false;
         if (notequals(getNamespaceURI(),other.getNamespaceURI()))
             return false;
@@ -326,22 +329,22 @@ public abstract class NodeImpl implements Node {
             return false;
         if (hasAttributes() != other.hasAttributes())
             return false;
-        if (hasChildNodes()) {
+        if (hasAttributes()) {
             NamedNodeMap thisAttr = getAttributes();
             NamedNodeMap otherAttr = other.getAttributes();
             if (thisAttr.getLength() != otherAttr.getLength())
                 return false;
             for (int i = 0; i < thisAttr.getLength(); i++)
-                if (thisAttr.item(i).isEqualNode(otherAttr.item(i)))
+                if (!thisAttr.item(i).isEqualNode(otherAttr.item(i)))
                     return false;
         }
-        if (hasAttributes()) {
+        if (hasChildNodes()) {
             NodeList thisChild = getChildNodes();
             NodeList otherChild = other.getChildNodes();
             if (thisChild.getLength() != otherChild.getLength())
                 return false;
             for (int i = 0; i < thisChild.getLength(); i++)
-                if (thisChild.item(i).isEqualNode(otherChild.item(i)))
+                if (!thisChild.item(i).isEqualNode(otherChild.item(i)))
                     return false;
         }
         return true;

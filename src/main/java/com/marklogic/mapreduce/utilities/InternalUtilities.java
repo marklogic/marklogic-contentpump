@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2025 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,13 +104,12 @@ public class InternalUtilities implements MarkLogicConstants {
      */
     public static ContentSource getInputContentSource(Configuration conf) 
     throws URISyntaxException, XccConfigException, IOException {
-        String host = conf.getStrings(INPUT_HOST)[0];
-        if (host == null || host.isEmpty()) {
+        String[] hosts = conf.getStrings(INPUT_HOST);
+        if (hosts == null || hosts.length == 0) {
             throw new IllegalArgumentException(INPUT_HOST + 
                     " is not specified.");
         }
-        
-        return getInputContentSource(conf, host);
+        return getInputContentSource(conf, hosts[0]);
     }
     
     /**
@@ -365,6 +364,7 @@ public class InternalUtilities implements MarkLogicConstants {
         try {
             options = new SecurityOptions(sslOptions.getSslContext());
         } catch (KeyManagementException | NoSuchAlgorithmException e) {
+            LOG.error("Error constructing SecurityOptions", e);
             throw new XccConfigException("Error constructing SecurityOptions",
                     e);
         }

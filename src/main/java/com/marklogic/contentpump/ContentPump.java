@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -333,7 +333,11 @@ public class ContentPump implements MarkLogicConstants, ConfigConstants {
 
         // set lib jars
         StringBuilder jars = new StringBuilder();
-        for (File jar : cpHomeDir.listFiles(filter)) {
+        File[] libJars = cpHomeDir.listFiles(filter);
+        if (libJars == null) {
+            throw new RuntimeException("Unable to list library jars in directory: " + cpHomeDir.getAbsolutePath());
+        }
+        for (File jar : libJars) {
             if (jars.length() > 0) {
                 jars.append(',');
             }

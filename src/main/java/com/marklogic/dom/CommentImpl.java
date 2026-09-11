@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,12 +60,20 @@ public class CommentImpl extends CharacterDataImpl implements Comment {
     /** {@inheritDoc} */
     @Override
     public String lookupPrefix(String namespaceURI) {
-    	return getParentNode().lookupPrefix(namespaceURI);
+    	Node parent = getParentNode();
+    	if (parent == null) {
+    	    return null;
+    	}
+    	return parent.lookupPrefix(namespaceURI);
     }
     
     /** {@inheritDoc} */
     @Override
     public String lookupNamespaceURI(String prefix) {
-    	return getParentNode().lookupNamespaceURI(prefix);
+    	Node parent = getParentNode();
+    	if (parent == null) {
+    	    return null;
+    	}
+    	return parent.lookupNamespaceURI(prefix);
     }
 }

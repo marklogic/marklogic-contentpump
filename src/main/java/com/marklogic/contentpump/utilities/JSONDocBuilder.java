@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ public class JSONDocBuilder extends DocBuilder {
                     + datatypeMap.get(key).name(), 0);
         } catch (Exception e) {
             String msg = e.getMessage();
-            if (!msg.contains("missing value")) {
+            if (msg != null && !msg.contains("missing value")) {
                 throw new Exception(msg);
             }
         }       

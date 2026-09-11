@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,9 +176,10 @@ public class ExpandedTree implements Writable {
     	    StringBuilder buf = new StringBuilder();
     	    for (int i=textReps[index++]; i > 0; --i) {
     	        if (LOG.isTraceEnabled()) {
+    	            String atomStr = atomString(textReps[index]);
     	            LOG.trace("atom " + textReps[index] + " [" + 
-    	                atomString(textReps[index]) + "] length " + 
-    	                atomString(textReps[index]).length());
+    	                atomStr + "] length " + 
+    	                (atomStr != null ? atomStr.length() : "0"));
     	        }
     		buf.append(atomString(textReps[index++]));
     	    }

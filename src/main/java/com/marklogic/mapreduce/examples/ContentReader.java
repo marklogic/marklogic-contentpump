@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,24 +97,18 @@ public class ContentReader {
     static class SslOptions implements SslConfigOptions {
         @Override
         public String[] getEnabledCipherSuites() {
-            return new String[] { "TLS_DHE_RSA_WITH_AES_256_CBC_SHA",
-                    "TLS_DHE_DSS_WITH_AES_256_CBC_SHA", 
-            "TLS_RSA_WITH_AES_256_CBC_SHA" };
+            return null;
         }
 
         @Override
         public String[] getEnabledProtocols() {
-            return new String[] { "TLSv1" };
+            return new String[] { "TLSv1.3" };
         }
         
         @Override
-        public SSLContext getSslContext() {
-            SSLContext sslContext = null;
-            try {
-                sslContext = SSLContext.getInstance("TLSv1");
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            }
+        public SSLContext getSslContext()
+                throws NoSuchAlgorithmException, KeyManagementException {
+            SSLContext sslContext = SSLContext.getInstance("TLSv1.3");
             TrustManager[] trustManagers = null;
             // Trust anyone.
             trustManagers = new TrustManager[] { new X509TrustManager() {
@@ -132,13 +126,9 @@ public class ContentReader {
                     return null;
                 }
             } };
-           
+
             KeyManager[] keyManagers = null;
-            try {
-                sslContext.init(keyManagers, trustManagers, null);
-            } catch (KeyManagementException e) {
-                e.printStackTrace();
-            }
+            sslContext.init(keyManagers, trustManagers, null);
             return sslContext;
         }
     }
@@ -150,7 +140,11 @@ public class ContentReader {
         public RecordWriter<DocumentURI, DatabaseDocument> getRecordWriter(
                 TaskAttemptContext context)
                 throws IOException, InterruptedException {
-            return new CustomWriter(getOutputPath(context), 
+            Path outputPath = getOutputPath(context);
+            if (outputPath == null) {
+                throw new IOException("Output directory not set.");
+            }
+            return new CustomWriter(outputPath, 
                     context.getConfiguration());
         }
     }

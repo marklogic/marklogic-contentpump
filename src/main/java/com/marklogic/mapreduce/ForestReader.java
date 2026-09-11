@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,11 +119,15 @@ implements MarkLogicConstants {
         FileSystem fs = dataPath.getFileSystem(conf);
         dataIs = new BiendianDataInputStream(fs.open(dataPath));
         dataIs.skipBytes(this.split.getStart());
-        Path ordPath = new Path(dataPath.getParent(), "Ordinals");
+        Path parentPath = dataPath.getParent();
+        if (parentPath == null) {
+            throw new IOException("Unable to determine parent directory for: " + dataPath);
+        }
+        Path ordPath = new Path(parentPath, "Ordinals");
         ordIs = new BiendianDataInputStream(fs.open(ordPath));
-        Path qualPath = new Path(dataPath.getParent(), "Qualities");
+        Path qualPath = new Path(parentPath, "Qualities");
         qualIs = new BiendianDataInputStream(fs.open(qualPath));
-        Path tsPath = new Path(dataPath.getParent(), "Timestamps");
+        Path tsPath = new Path(parentPath, "Timestamps");
         tsIs = new BiendianDataInputStream(fs.open(tsPath));
         valueClass = conf.getClass(INPUT_VALUE_CLASS, ForestDocument.class, 
                                Writable.class);

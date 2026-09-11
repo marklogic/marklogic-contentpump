@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -364,12 +364,14 @@ public class DocumentImpl extends NodeImpl implements Document {
 
     @Override
     public String lookupNamespaceURI(String prefix) {
-        return getDocumentElement().lookupNamespaceURI(prefix);
+        Element e = getDocumentElement();
+        return e != null ? e.lookupNamespaceURI(prefix) : null;
     }
 
     @Override
     public String lookupPrefix(String namespaceURI) {
-        return getDocumentElement().lookupPrefix(namespaceURI);
+        Element e = getDocumentElement();
+        return e != null ? e.lookupPrefix(namespaceURI) : null;
     }
 
     /** Unsupported. */

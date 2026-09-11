@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,13 +75,17 @@ InternalConstants {
      */
     public byte[] getContentAsByteArray() {
         if (content == null) {
-            try {
-                content = IOHelper.byteArrayFromStream(is);
-            } catch (IOException e) {
-                throw new RuntimeException("IOException buffering binary data",
-                        e);
+            if (is != null) {
+                try {
+                    content = IOHelper.byteArrayFromStream(is);
+                } catch (IOException e) {
+                    throw new RuntimeException("IOException buffering binary data",
+                            e);
+                }
+                is = null;
+            } else {
+                content = new byte[0];
             }
-            is = null;
         }
         return content;
     }

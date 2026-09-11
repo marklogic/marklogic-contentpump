@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2024 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.TransformerFactory;
 
 import org.apache.commons.logging.Log;
@@ -48,6 +49,16 @@ public class JSONDocument extends ForestDocument {
     private static synchronized TransformerFactory getTransformerFactory() {
         if (transformerFactory == null) {
             transformerFactory = TransformerFactory.newInstance();
+            try {
+                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Failed configuring XXE-prevention security attribute ACCESS_EXTERNAL_DTD on TransformerFactory", e);
+            }
+            try {
+                transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+            } catch (IllegalArgumentException e) {
+                LOG.warn("Failed configuring XXE-prevention security attribute ACCESS_EXTERNAL_STYLESHEET on TransformerFactory", e);
+            }
         }
 
         return transformerFactory;

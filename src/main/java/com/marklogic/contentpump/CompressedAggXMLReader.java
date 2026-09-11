@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011-2020 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
+ * Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,6 +69,16 @@ public class CompressedAggXMLReader<VALUEIN> extends
         initConfig(context);
         initAggConf(context);
         f = XMLInputFactory.newInstance();
+        try {
+            f.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Failed configuring XXE-prevention security property IS_SUPPORTING_EXTERNAL_ENTITIES on XMLInputFactory", e);
+        }
+        try {
+            f.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Failed configuring XXE-prevention security property SUPPORT_DTD on XMLInputFactory", e);
+        }
         setFile(((FileSplit) inSplit).getPath());
         fs = file.getFileSystem(context.getConfiguration());
 
