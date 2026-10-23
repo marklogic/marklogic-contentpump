@@ -179,6 +179,18 @@
                     <exclude name="*apidocs.zip" />
                   </fileset>
                 </copy>
+                <copy file="SBOM.spdx.json"
+                      tofile="deliverable/mlcp-${project.version}.spdx.json"
+                      overwrite="true" />
+                <copy file="NOTICE.txt"
+                      tofile="deliverable/Legal_Notice_File_for_Progress_MarkLogic_Content_Pump_${project.version}.txt"
+                      overwrite="true" />
+                <chmod perm="644">
+                  <fileset dir="deliverable">
+                    <include name="mlcp-${project.version}.spdx.json" />
+                    <include name="Legal_Notice_File_for_Progress_MarkLogic_Content_Pump_${project.version}.txt" />
+                  </fileset>
+                </chmod>
               </target>
             </configuration>
             <goals>
