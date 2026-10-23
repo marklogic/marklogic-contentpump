@@ -1,0 +1,2901 @@
+{
+    "SPDXID": "SPDXRef-DOCUMENT",
+    "spdxVersion": "SPDX-2.3",
+    "creationInfo": {
+        "created": "2026-09-04T10:54:30Z",
+        "creators": [
+            "Organization: Progress Software Corporation",
+            "Tool: Black Duck Hub - 2026.7.0"
+        ],
+        "licenseListVersion": "3.28"
+    },
+    "name": "MarkLogic-mlcp-12.1.0",
+    "dataLicense": "CC0-1.0",
+    "hasExtractedLicensingInfos": [
+        {
+            "licenseId": "LicenseRef-97ce7e1f-d11c-4fdb-b0de-502288e897c1",
+            "extractedText": "See Progress License",
+            "name": "PSC Product License"
+        },
+        {
+            "licenseId": "LicenseRef-d26bcb7d-5bc8-4f05-8942-a3a42728a2e4",
+            "extractedText": "Public domain code is not subject to any license.",
+            "name": "Public Domain"
+        },
+        {
+            "licenseId": "LicenseRef-f6eccc87-62ff-4ffd-9fa7-763d1a436125",
+            "extractedText": "Eclipse Distribution License - v 1.0\n====================================\n\nCopyright (c) 2007, Eclipse Foundation, Inc. and its licensors.\n\nAll rights reserved.\n\nRedistribution and use in source and binary forms, with or without modification,\nare permitted provided that the following conditions are met:\n\n  * Redistributions of source code must retain the above copyright notice, this\n    list of conditions and the following disclaimer.\n\n  * Redistributions in binary form must reproduce the above copyright notice,\n    this list of conditions and the following disclaimer in the documentation\n    and/or other materials provided with the distribution.\n\n  * Neither the name of the Eclipse Foundation, Inc. nor the names of its\n    contributors may be used to endorse or promote products derived from this\n    software without specific prior written permission.\n\nTHIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND\nANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED\nWARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE\nDISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR\nANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES\n(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS\nOF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY\nTHEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING\nNEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN\nIF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.",
+            "name": "Eclipse Distribution License - v 1.0"
+        }
+    ],
+    "documentNamespace": "https://blackducksoftware.github.io/spdx/MarkLogic-Platform-Server-mlcp-b4cfe0c1-3ccf-45bd-9e14-5794ad6f420d",
+    "packages": [
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "7e497887-1188-45df-a64e-926c44bed901",
+                    "referenceType": "BlackDuck-Version"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "NOASSERTION",
+            "licenseDeclared": "NOASSERTION",
+            "name": "MarkLogic-Platform-Server-mlcp",
+            "originator": "Organization: MarkLogic-Platform-Server-mlcp",
+            "supplier": "Organization: MarkLogic-Platform-Server-mlcp",
+            "versionInfo": "develop"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---03f2151f-7822-4d06-bd0b-b5bb64d789de",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.jena/jena-core@4.9.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "03f2151f-7822-4d06-bd0b-b5bb64d789de",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "b3fe7578-e29c-4759-881f-005ad0980537",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e61ddaf6-f3bf-43fb-a4d1-ac8336b86bb2",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.jena\\:jena-core:4.9.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:jena_fuseki:4.9.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.jena\\:jena:4.9.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:jena:4.9.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Jena",
+            "originator": "Organization: maven",
+            "supplier": "Organization: maven",
+            "versionInfo": "4.9.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---050e1887-519f-4634-845a-97ca7169b3b7",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.commons\\:commons-lang3:3.5:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.commons\\:commons-lang3:3.5.0:redhat1:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_lang:3.5:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "050e1887-519f-4634-845a-97ca7169b3b7",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "9c0920e4-104a-448e-8192-866544b75890",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.commons/commons-lang3@3.5",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "3cda1a92-f6c8-4380-8fbd-68a2234373e1",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:redhat_package:commons-lang3:3.5.0:redhat1:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:redhat_package:commons-lang3:3.5.0.redhat:1.None:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons Lang",
+            "originator": "Organization: org.apache.commons",
+            "supplier": "Organization: org.apache.commons",
+            "versionInfo": "3.5"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---08ca7332-776a-4c83-a48e-78cce48c872b",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:redhat_package:jackson-core:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:com.fasterxml.jackson.core\\:jackson-core:2.17.1:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:fasterxml:jackson_core:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.17.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:com.fasterxml.jackson.core\\:jackson-core:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:fasterxml:jackson_core:2.17.1:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ea2ad4aa-8df2-4684-80c2-e7d2aef30f0e",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "08ca7332-776a-4c83-a48e-78cce48c872b",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "4c08d575-40e5-4778-acd6-b76230f3a895",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "jackson-core",
+            "originator": "Organization: com.fasterxml.jackson.core",
+            "supplier": "Organization: com.fasterxml.jackson.core",
+            "versionInfo": "2.17.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---0f058d2d-fc36-4262-8cf6-93d959630273",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "0f058d2d-fc36-4262-8cf6-93d959630273",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ce7ad18a-6e02-4565-a51c-4fc2c5bc7c47",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:fastxml:jackson-databind:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:fasterxml:jackson-databind:2.17.1:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:com.fasterxml.jackson.core\\:jackson-databind:2.17.1:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:com.fasterxml.jackson.core\\:jackson-databind:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:fasterxml:jackson-databind:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.17.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "591d6d8a-0d5f-4317-b1d1-a7869d073772",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "jackson-databind",
+            "originator": "Organization: com.fasterxml.jackson.core",
+            "supplier": "Organization: com.fasterxml.jackson.core",
+            "versionInfo": "2.17.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---1028eb41-0eaf-4769-85ee-4ca09704b0af",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/commons-modeler/commons-modeler@2.0.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "77300b51-ca54-47b0-98a5-2bc6764a37d1",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "1028eb41-0eaf-4769-85ee-4ca09704b0af",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "5132a8ac-9e05-47ee-a6dc-e89bdabdf568",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons Modeler",
+            "originator": "Organization: commons-modeler",
+            "supplier": "Organization: commons-modeler",
+            "versionInfo": "2.0.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---10a4c829-0445-4e59-be71-dd9f616c37a5",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "03d12a48-5e60-401d-8860-4ba22f06b4b1",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "10a4c829-0445-4e59-be71-dd9f616c37a5",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.slf4j/jcl-over-slf4j@2.0.12",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "abc0a614-e914-4c38-8ae2-b95360614f93",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "JCL 1.2 Implemented Over SLF4J",
+            "originator": "Organization: org.slf4j",
+            "supplier": "Organization: org.slf4j",
+            "versionInfo": "2.0.12"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---13684460-9b63-445d-9e4e-c028a05522b0",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "13684460-9b63-445d-9e4e-c028a05522b0",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "27abed2e-e4d1-4088-90e7-299dff16a4a1",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.logging.log4j/log4j-1.2-api@2.17.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "91de01f7-e832-40b0-aca6-d8b0f8fa31d7",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:org_apache_logging_log4j:log4j_1.2_api:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:log4j_1-2_api:2.17.1:redhat00002:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:log4j_1-2_api:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.logging.log4j\\:log4j-1.2-api:2.17.1:redhat00002:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.logging.log4j\\:log4j-1.2-api:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Log4J Compatibility API",
+            "originator": "Organization: org.apache.logging.log4j",
+            "supplier": "Organization: org.apache.logging.log4j",
+            "versionInfo": "2.17.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---15b63df3-ea25-4a53-8feb-e239002bd278",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.thrift/libthrift@0.17.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e524208a-aacf-4121-912d-00afc2986297",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:thrift:0.17.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "15b63df3-ea25-4a53-8feb-e239002bd278",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e5353fc8-4793-4463-b134-a1007e138157",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:crates_package:thrift:0.17.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:thrift_service:0.17.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:golang_package:github.com\\/apache\\/thrift:0.17.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:github_package:apache\\/thrift:0.17.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Thrift",
+            "originator": "Organization: org.apache.thrift",
+            "supplier": "Organization: org.apache.thrift",
+            "versionInfo": "0.17.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---17731e09-b663-4f27-abb5-468bb8876b5d",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "2bfcd787-b14f-41ec-a468-68d65e3209d9",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "b9e89f35-5235-49cc-9067-fa99ba949c5d",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "17731e09-b663-4f27-abb5-468bb8876b5d",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop.thirdparty/hadoop-shaded-guava@1.2.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Hadoop shaded Guava",
+            "originator": "Organization: org.apache.hadoop.thirdparty",
+            "supplier": "Organization: org.apache.hadoop.thirdparty",
+            "versionInfo": "1.2.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---17b666a3-7685-458d-91b0-d23cbbdb5696",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:nuget_package:Apache.Avro:1.11.5:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.avro\\:avro:1.11.5:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:avro:1.11.5:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.avro/avro@1.11.5",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.avro\\:avro:1.11.5:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:avro:1.11.5:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "170eb253-ec36-4b12-9db6-8fe4cae67d34",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "17b666a3-7685-458d-91b0-d23cbbdb5696",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e83a5bc1-2e1d-4b6c-a8ef-7b15cb1eddd9",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Avro",
+            "originator": "Organization: org.apache.avro",
+            "supplier": "Organization: org.apache.avro",
+            "versionInfo": "1.11.5"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---19ce70d0-d6c4-4080-ad6b-f276e93b834d",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.github.jsonld-java/jsonld-java@0.13.6",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "029e1b0f-a13d-4dee-ae6a-ca5777a3321a",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "19ce70d0-d6c4-4080-ad6b-f276e93b834d",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "7bb6ea26-9e42-49cf-9251-d3ee0703afe1",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "BSD-3-Clause",
+            "licenseDeclared": "BSD-3-Clause",
+            "name": "JSONLD Java :: Core",
+            "originator": "Organization: com.github.jsonld-java",
+            "supplier": "Organization: com.github.jsonld-java",
+            "versionInfo": "0.13.6"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---20585559-fe5a-4783-901b-a8fd51100427",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "a136f90b-95e7-4c88-9e42-70ccd7797b5c",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_compress:1.26.1:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_compress:1.26.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons-compress:1.26.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.commons/commons-compress@1.26.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons-compress:1.26.1:redhat00003:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons-compress:1.26.1:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "9968f00f-506b-4fd3-b803-31361065e03c",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "20585559-fe5a-4783-901b-a8fd51100427",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons Compress",
+            "originator": "Organization: org.apache.commons",
+            "supplier": "Organization: org.apache.commons",
+            "versionInfo": "1.26.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---22a228fd-8cb9-401f-8fe1-003809493340",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:github/marklogic/marklogic-contentpump@v12.1.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "7cc66489-bd35-4354-bdd5-3ba9607fb54a",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "22a228fd-8cb9-401f-8fe1-003809493340",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "d85cbf3e-7550-412c-949b-3818882ce59e",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "marklogic/marklogic-contentpump",
+            "originator": "Organization: marklogic",
+            "supplier": "Organization: marklogic",
+            "versionInfo": "v12.1.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---238aea49-3ffa-4e4d-b97b-eadc235b7669",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-mapreduce-client-core@3.4.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "107b42d1-9f34-44eb-8820-0d76eb4821eb",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "238aea49-3ffa-4e4d-b97b-eadc235b7669",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "a91d5910-e300-4302-ba7b-6f56477acebd",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "hadoop-mapreduce-client-core",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---2aedbf84-11fc-4c95-81f0-7a4cca9c9a1f",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f02ad3f7-ecef-4585-815e-98391a3e210e",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "2aedbf84-11fc-4c95-81f0-7a4cca9c9a1f",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/jakarta.xml.ws/jakarta.xml.ws-api@4.0.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "d5b74d5f-72f4-47d3-bcac-e9b90720d3ff",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "BSD-3-Clause",
+            "licenseDeclared": "BSD-3-Clause",
+            "name": "Java API for XML Web Services",
+            "originator": "Organization: jakarta.xml.ws",
+            "supplier": "Organization: jakarta.xml.ws",
+            "versionInfo": "4.0.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---2b15ab84-da43-4a36-b427-75122febf33f",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "2a7c6bb3-66c5-4394-9bb2-16aeb245ea11",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "2b15ab84-da43-4a36-b427-75122febf33f",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-auth@3.4.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "9d886368-b410-46ae-a572-89c10e3f3266",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Hadoop Auth",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---2c1de207-999c-4dd2-80f5-1a30afc74b0b",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.jena/jena-iri@4.9.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "2c1de207-999c-4dd2-80f5-1a30afc74b0b",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "49b4939b-de57-4386-91cf-27b8bac59e23",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "a08e0f38-238c-4796-9ed3-c2f5edf02f4a",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "IRI",
+            "originator": "Organization: maven",
+            "supplier": "Organization: maven",
+            "versionInfo": "4.9.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---2fcf1560-08b0-4379-b9f8-af8dce4f7100",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "0809ed8e-b96d-4026-9c4d-a2721cdf7d1b",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "2fcf1560-08b0-4379-b9f8-af8dce4f7100",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ace7af9b-7132-4b24-81ac-4cf0924661d0",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "LicenseRef-d26bcb7d-5bc8-4f05-8942-a3a42728a2e4",
+            "licenseDeclared": "(LicenseRef-d26bcb7d-5bc8-4f05-8942-a3a42728a2e4)",
+            "name": "XPP3",
+            "originator": "Organization: maven",
+            "supplier": "Organization: maven",
+            "versionInfo": "1.1.4c"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---3828c32d-5097-4c22-86a8-7838c149ba8d",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "925f23a2-2f52-4adb-a1cc-637d8424dff2",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:org_apache_logging_log4j:log4j_slf4j_impl:2.17.1:redhat00002:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:org_apache_logging_log4j:log4j_slf4j_impl:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "3828c32d-5097-4c22-86a8-7838c149ba8d",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.logging.log4j/log4j-slf4j-impl@2.17.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "74dcc2eb-b76f-4153-bfb6-942df7f874cd",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Log4j SLF4J Binding",
+            "originator": "Organization: org.apache.logging.log4j",
+            "supplier": "Organization: org.apache.logging.log4j",
+            "versionInfo": "2.17.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---3f719465-8745-4428-becd-eafa37102d02",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.hadoop\\:hadoop-client:3.4.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-client@3.4.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "3b51c001-8448-4865-98bd-c6aba7fccdea",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "3f719465-8745-4428-becd-eafa37102d02",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "c7b2390b-c6c7-4339-81bd-cfd3e7400998",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Hadoop Client",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---421c7f2e-5c9f-468f-b67d-7fd4ca308f4e",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "421c7f2e-5c9f-468f-b67d-7fd4ca308f4e",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "a4d2db8f-601b-4362-b210-b70a9eeedd2d",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/jakarta.xml.soap/jakarta.xml.soap-api@3.0.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "5e9f677a-9545-4e59-9e31-6e19ae18e5fd",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "LicenseRef-f6eccc87-62ff-4ffd-9fa7-763d1a436125",
+            "licenseDeclared": "LicenseRef-f6eccc87-62ff-4ffd-9fa7-763d1a436125",
+            "name": "jakarta.xml.soap API",
+            "originator": "Organization: jakarta.xml.soap",
+            "supplier": "Organization: jakarta.xml.soap",
+            "versionInfo": "3.0.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---437bdab7-ecee-49eb-81f5-26f65e3bd306",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "30384c6f-d3ec-44e3-8423-4c5ddba1c272",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "9865cda5-07f0-4f29-beba-13e82a6ee86e",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "437bdab7-ecee-49eb-81f5-26f65e3bd306",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-mapreduce-client-common@3.4.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "hadoop-mapreduce-client-common",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---4920b44d-d9ff-43e2-887b-e427e9dcf1cc",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "4920b44d-d9ff-43e2-887b-e427e9dcf1cc",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "1c0c8dcc-0b53-4106-b763-95c3111e09f1",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ed9a70dc-b8c4-4c66-ad74-504b0695ff4d",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "LicenseRef-97ce7e1f-d11c-4fdb-b0de-502288e897c1",
+            "licenseDeclared": "(LicenseRef-97ce7e1f-d11c-4fdb-b0de-502288e897c1)",
+            "name": "MarkLogic XCC",
+            "originator": "Organization: maven",
+            "supplier": "Organization: maven",
+            "versionInfo": "12.1.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---4f1ea26b-c50f-401b-ade0-0d41e9d6917b",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "4f1ea26b-c50f-401b-ade0-0d41e9d6917b",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "d33694b6-73e4-41e5-82c6-6e4ddd0cd4fc",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/xml-apis/xml-apis@1.0.b2",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "77fef344-82a5-48fc-ad45-9e05a8d2d872",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-1.1",
+            "licenseDeclared": "Apache-1.1",
+            "name": "xml-apis:xml-apis",
+            "originator": "Organization: xml-apis",
+            "supplier": "Organization: xml-apis",
+            "versionInfo": "1.0.b2"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---5062ec07-d6d1-444a-b3da-8f6a2665c440",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.google.re2j/re2j@1.6",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ddc5680f-6e5c-479a-9022-98086831c545",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "9f3c18c0-1a20-4550-8600-79cc233766fe",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "5062ec07-d6d1-444a-b3da-8f6a2665c440",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "BSD-3-Clause",
+            "licenseDeclared": "BSD-3-Clause",
+            "name": "re2j",
+            "originator": "Organization: com.google.re2j",
+            "supplier": "Organization: com.google.re2j",
+            "versionInfo": "1.6"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---52a366c5-1348-4beb-8bbd-8b8fe16e4cc7",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "8b8fa08a-712c-4772-969c-d8dd22b32e0d",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "52a366c5-1348-4beb-8bbd-8b8fe16e4cc7",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.github.andrewoma.dexx/collection@0.7",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "b4e09818-775b-4abb-a8bb-93b93c2af20e",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "MIT",
+            "licenseDeclared": "MIT",
+            "name": "dexx",
+            "originator": "Organization: com.github.andrewoma.dexx",
+            "supplier": "Organization: com.github.andrewoma.dexx",
+            "versionInfo": "0.7"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---569fd9c0-89bf-4f5f-9ef6-0492c1d9454a",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "569fd9c0-89bf-4f5f-9ef6-0492c1d9454a",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "58c08ffd-a3c5-425b-91d5-1d93f40db5a7",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:fasterxml:woodstox:6.5.1:redhat00006:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:fasterxml:woodstox:6.5.1:redhat00005:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:com.fasterxml.woodstox\\:woodstox-core:6.5.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:fasterxml:woodstox:6.5.1:redhat00007:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.fasterxml.woodstox/woodstox-core@6.5.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "05567cac-7e62-4ee7-b737-090a4bdff76c",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:fasterxml:woodstox:6.5.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Woodstox",
+            "originator": "Organization: com.fasterxml.woodstox",
+            "supplier": "Organization: com.fasterxml.woodstox",
+            "versionInfo": "6.5.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---68460abc-6d6d-4d2c-b3c9-e2668462f06c",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-hdfs-client@3.4.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "617bb6a0-bc09-4d27-a6ab-6ac6d7963615",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "0eed0c92-5daa-479f-a568-8e5fabe07c32",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "68460abc-6d6d-4d2c-b3c9-e2668462f06c",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Hadoop HDFS Client",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---69624cfa-4d47-4dd6-bff3-deb5869d8145",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "fbe4eb3b-31be-43de-aba5-d1362bf0cde7",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "69624cfa-4d47-4dd6-bff3-deb5869d8145",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/commons-io/commons-io@2.17.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "96dc9f7b-73e3-4dc2-b0bb-b6bba56b535d",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_io:2.17.0:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_io:2.17.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:commons-io\\:commons-io:2.17.0:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:commons-io\\:commons-io:2.17.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons IO",
+            "originator": "Organization: commons-io",
+            "supplier": "Organization: commons-io",
+            "versionInfo": "2.17.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---720af18a-70d8-436a-9568-2eb46f8c2095",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "720af18a-70d8-436a-9568-2eb46f8c2095",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "746a6e08-e467-488f-910a-4a0d266b207b",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-yarn-api@3.4.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "12f7401c-a1fa-4cc2-b5fe-f5b39e3474cf",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "hadoop-yarn-api",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---736b6816-9916-4554-ba1c-edecfa2b8906",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "736b6816-9916-4554-ba1c-edecfa2b8906",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "0c1aa87d-a46f-44eb-bc28-0706fd38257d",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-mapreduce-client-jobclient@3.4.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "63d446cb-83a6-476b-9bcb-318cae6589e4",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "hadoop-mapreduce-client-jobclient",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---744e2e66-0d7a-4054-ac19-a85bfa1e07a3",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.thoughtworks.xstream/xstream@1.4.21",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "eec2c613-1058-44f5-8abb-9f13694d4996",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:com.thoughtworks.xstream\\:xstream:1.4.21:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:com.thoughtworks.xstream\\:xstream:1.4.21:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "744e2e66-0d7a-4054-ac19-a85bfa1e07a3",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f8c25f33-8c23-4fec-8c9b-39b218b0bd98",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:xstream:xstream:1.4.21:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:x-stream:xstream:1.4.21:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:x-stream:xstream:1.4.21:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "BSD-3-Clause",
+            "licenseDeclared": "BSD-3-Clause",
+            "name": "XStream",
+            "originator": "Organization: com.thoughtworks.xstream",
+            "supplier": "Organization: com.thoughtworks.xstream",
+            "versionInfo": "1.4.21"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---7488dc3f-e736-4da4-953a-2fd01b2637d0",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.codehaus.woodstox/stax2-api@4.2.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "2b1aa006-8dc8-4f3c-90c9-4a17ce6873a3",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "7488dc3f-e736-4da4-953a-2fd01b2637d0",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "aff94cc6-8686-4a15-88ec-fa74a623c384",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "BSD-2-Clause",
+            "licenseDeclared": "BSD-2-Clause",
+            "name": "stax2-api",
+            "originator": "Organization: org.codehaus.woodstox",
+            "supplier": "Organization: org.codehaus.woodstox",
+            "versionInfo": "4.2.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---773079f3-e46d-46bc-8940-502180df47af",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.jena/jena-arq@4.9.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "5d06e760-2578-4d3d-a27f-c3ee131084f3",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "773079f3-e46d-46bc-8940-502180df47af",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "c9713671-f952-4fcb-b71b-5ec8f560ac18",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "ARQ",
+            "originator": "Organization: maven",
+            "supplier": "Organization: maven",
+            "versionInfo": "4.9.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---79725068-a804-463c-a744-d561d4b6fc67",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.jena/jena-base@4.9.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "79725068-a804-463c-a744-d561d4b6fc67",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "80d83ae1-621d-4416-9070-26f2442083c0",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "fefaa86e-1361-49ea-b360-ff29fa66f65b",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Jena - Base Common Environment",
+            "originator": "Organization: maven",
+            "supplier": "Organization: maven",
+            "versionInfo": "4.9.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---7e51b795-43b9-4eaa-9d52-2fd322dddb31",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons-httpclient:4.5.13:redhat00003:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons-httpclient:4.5.13:redhat00002:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons-httpclient:4.5.13:redhat00004:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.httpcomponents/httpclient@4.5.13",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "c809f8cd-cfb2-447e-be1c-38474957c221",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons-httpclient:4.5.13:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons-httpclient:4.5.13:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f624d758-10d3-449d-96d2-d4fc12499fda",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "7e51b795-43b9-4eaa-9d52-2fd322dddb31",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache HttpClient",
+            "originator": "Organization: org.apache.httpcomponents",
+            "supplier": "Organization: org.apache.httpcomponents",
+            "versionInfo": "4.5.13"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---7f6ef99f-3381-491a-9b29-9cbd9349fc06",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "7f6ef99f-3381-491a-9b29-9cbd9349fc06",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ac5887f5-75c5-41e3-a171-57e43fb5161b",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.commons\\:commons-configuration2:2.10.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_configuration:2.10.1:redhat00002:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.commons\\:commons-configuration2:2.10.1:redhat00002:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "700ef9f6-bd88-43f4-ac2c-f1618801e09c",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_configuration:2.10.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.commons/commons-configuration2@2.10.1",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons Configuration",
+            "originator": "Organization: org.apache.commons",
+            "supplier": "Organization: org.apache.commons",
+            "versionInfo": "2.10.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---80d83ae1-621d-4416-9070-26f2442083c0",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "fefaa86e-1361-49ea-b360-ff29fa66f65b",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "80d83ae1-621d-4416-9070-26f2442083c0",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Jena - Base Common Environment",
+            "originator": "Organization: unknown",
+            "supplier": "Organization: unknown",
+            "versionInfo": "4.9.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---87b54cc4-f37f-42fd-abf2-985872b8fdee",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f2b667e7-7ee9-4bca-9bdd-ac6661b852b1",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "87b54cc4-f37f-42fd-abf2-985872b8fdee",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.google.guava/failureaccess@1.0.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "71ba0e56-32eb-4c4e-9cdc-c68e4b809911",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Guava InternalFutureFailureAccess and InternalFutures",
+            "originator": "Organization: com.google.guava",
+            "supplier": "Organization: com.google.guava",
+            "versionInfo": "1.0.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---89275cdd-f16c-4065-a826-267b508508ba",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "8fb8f92e-6b47-4443-8583-dd6e172be823",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "bbd39d66-48a8-43d2-bb91-347f4b6aec46",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "89275cdd-f16c-4065-a826-267b508508ba",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Hadoop HDFS",
+            "originator": "Organization: maven",
+            "supplier": "Organization: maven",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---92e6a657-e1b5-46de-9997-80de83e5ca2c",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:com.sun.jersey\\:jersey-core:1.19.3:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "29b05335-a571-422b-b2f5-85a5e9748540",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "6c203444-cf97-4dea-b62e-dc152b959f66",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "92e6a657-e1b5-46de-9997-80de83e5ca2c",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "CDDL-1.1",
+            "licenseDeclared": "(CDDL-1.1)",
+            "name": "Jersey",
+            "originator": "Organization: maven",
+            "supplier": "Organization: maven",
+            "versionInfo": "1.19.3"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---9563bf8f-5213-49d7-9971-8652632ca51d",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "74f28041-7aeb-4a1e-8945-7c34af9fc929",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "75b6adaa-1ae4-4b34-99ed-85d39dd410a1",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "9563bf8f-5213-49d7-9971-8652632ca51d",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-yarn-common@3.4.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "hadoop-yarn-common",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---96580f7b-3e84-4e5d-b434-93337de9177f",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.logging.log4j\\:log4j-api:2.17.1:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.logging.log4j\\:log4j-api:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.logging.log4j\\:log4j-api:2.17.1:redhat00002:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "96580f7b-3e84-4e5d-b434-93337de9177f",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "44d8c92a-f682-4904-b571-c83f83ae1a91",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.logging.log4j/log4j-api@2.17.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "608affc6-88ff-463e-b5ec-8dad25ed5bda",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Log4J API",
+            "originator": "Organization: org.apache.logging.log4j",
+            "supplier": "Organization: org.apache.logging.log4j",
+            "versionInfo": "2.17.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---989cb45f-f4f2-48d4-b64c-a685c693da4e",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.commons/commons-collections4@4.5.0-M2",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "4c3e0084-8c7f-4641-8345-f40084e8b0aa",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.commons\\:commons-collections4:4.5.0:m2:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_collections:4.5.0:m2:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "989cb45f-f4f2-48d4-b64c-a685c693da4e",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "87ac8642-f639-46fe-ab2b-66e89cca0130",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons Collections",
+            "originator": "Organization: org.apache.commons",
+            "supplier": "Organization: org.apache.commons",
+            "versionInfo": "4.5.0-M2"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---a08e0f38-238c-4796-9ed3-c2f5edf02f4a",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "a08e0f38-238c-4796-9ed3-c2f5edf02f4a",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "49b4939b-de57-4386-91cf-27b8bac59e23",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "IRI",
+            "originator": "Organization: unknown",
+            "supplier": "Organization: unknown",
+            "versionInfo": "4.9.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---abc6227e-8220-40d6-a0fd-1a7d6b5e4f07",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "abc6227e-8220-40d6-a0fd-1a7d6b5e4f07",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "b75f622a-30da-46e4-a9c9-56f4ab75e22e",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:commons-beanutils\\:commons-beanutils:1.11.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_beanutils:1.11.0:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:commons-beanutils\\:commons-beanutils:1.11.0:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "30616e58-b497-40f9-8320-bee18e11722b",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_beanutils:1.11.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/commons-beanutils/commons-beanutils@1.11.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons BeanUtils",
+            "originator": "Organization: commons-beanutils",
+            "supplier": "Organization: commons-beanutils",
+            "versionInfo": "1.11.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---b3fe7578-e29c-4759-881f-005ad0980537",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.jena\\:jena:4.9.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.jena\\:jena-core:4.9.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "b3fe7578-e29c-4759-881f-005ad0980537",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e61ddaf6-f3bf-43fb-a4d1-ac8336b86bb2",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:jena_fuseki:4.9.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:jena:4.9.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Jena",
+            "originator": "Organization: unknown",
+            "supplier": "Organization: unknown",
+            "versionInfo": "4.9.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---c9713671-f952-4fcb-b71b-5ec8f560ac18",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "c9713671-f952-4fcb-b71b-5ec8f560ac18",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "5d06e760-2578-4d3d-a27f-c3ee131084f3",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "ARQ",
+            "originator": "Organization: unknown",
+            "supplier": "Organization: unknown",
+            "versionInfo": "4.9.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---c9ad64ea-ffdf-45bb-95f2-1be198b16f46",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-yarn-client@3.4.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "61fc5c0f-7752-4b05-9d09-6cd1f2505b2b",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "32c386ab-0493-431e-a395-b8ba87831872",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "c9ad64ea-ffdf-45bb-95f2-1be198b16f46",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "hadoop-yarn-client",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---d4491227-d05c-4119-bd8b-1221fc2dee16",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/commons-logging/commons-logging@1.3.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "788f8776-53d9-4bc8-b302-8482d90cf9ec",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "d4491227-d05c-4119-bd8b-1221fc2dee16",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e2c69634-de94-4eb3-a2c8-67ab59272e53",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons Logging",
+            "originator": "Organization: commons-logging",
+            "supplier": "Organization: commons-logging",
+            "versionInfo": "1.3.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---d4d44346-303a-45fa-a2d7-1e39037d4558",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.github.ben-manes.caffeine/caffeine@3.1.6",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "6019b6da-4c73-4661-9c38-38813e13015a",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "6d89f955-b3a9-4826-8930-9261f601c7ce",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "d4d44346-303a-45fa-a2d7-1e39037d4558",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Caffeine cache",
+            "originator": "Organization: com.github.ben-manes.caffeine",
+            "supplier": "Organization: com.github.ben-manes.caffeine",
+            "versionInfo": "3.1.6"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---df9b9f71-75a3-49ba-9026-59777cfbacd9",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.lucee/commons-logging-api@1.1.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "665eda13-b56d-4874-94b8-de215ed7ce00",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "cdf83aa3-8baa-4dba-bb0a-89b5f5fa123d",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "df9b9f71-75a3-49ba-9026-59777cfbacd9",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Commons Logging API",
+            "originator": "Organization: org.lucee",
+            "supplier": "Organization: org.lucee",
+            "versionInfo": "1.1.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e1bb79cc-bb3c-42ce-93e4-ad0fabe1a670",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "67f04f16-f8e2-4b21-8c6a-d94c2a5d304f",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e1bb79cc-bb3c-42ce-93e4-ad0fabe1a670",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/commons-codec/commons-codec@1.16.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "932a1ab1-4722-4bbd-9f5d-d6cd2aa1c7e7",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_codec:1.16.1:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_codec:1.16.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_codec:1.16.1:redhat00007:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_codec:1.16.1:redhat00006:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons Codec",
+            "originator": "Organization: commons-codec",
+            "supplier": "Organization: commons-codec",
+            "versionInfo": "1.16.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e2990b74-2f54-4dc0-a5a8-087d906ac7d5",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/commons-cli/commons-cli@1.6.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "9730880e-f16a-4a58-9b8e-adac365dcaf9",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_cli:1.6.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e2990b74-2f54-4dc0-a5a8-087d906ac7d5",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "db59e2b1-0f14-4912-92bb-6a41dfd5f6e0",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "commons-cli",
+            "originator": "Organization: commons-cli",
+            "supplier": "Organization: commons-cli",
+            "versionInfo": "1.6.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e3ffd95e-2263-4196-8f7d-564109a44620",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "b634dd37-ca1a-4ffc-b522-fd3fbf3728ad",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e3ffd95e-2263-4196-8f7d-564109a44620",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_csv:1.13.0:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.commons/commons-csv@1.13.0",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "4597ae78-7af5-4bed-b688-0eabc0f3b969",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "commons-csv",
+            "originator": "Organization: org.apache.commons",
+            "supplier": "Organization: org.apache.commons",
+            "versionInfo": "1.13.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e5489238-0624-4721-a6e2-5de929a35df9",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e5489238-0624-4721-a6e2-5de929a35df9",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f5365836-edf5-49ab-919f-f059af3332ca",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/net.sf.saxon/Saxon-HE@9.7.0-7",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "43662f25-6db4-4bc4-9225-0b02077d094a",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "MPL-2.0",
+            "licenseDeclared": "MPL-2.0",
+            "name": "Saxon XSLT and XQuery Processor",
+            "originator": "Organization: net.sf.saxon",
+            "supplier": "Organization: net.sf.saxon",
+            "versionInfo": "9.7.0-7"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e54c973f-4850-4e05-967b-524c016dfbbf",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.logging.log4j/log4j-core@2.17.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e7dfd8d1-b342-407a-8cc8-36eddaa5b6d3",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:log4j:2.17.1:-:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:log4j:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "e54c973f-4850-4e05-967b-524c016dfbbf",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "7460c937-f013-4c3a-bdf3-ace04cfd0304",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:org.apache.logging.log4j\\:log4j-core:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:log4j:2.17.1:redhat00002:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:log4j:2.17.1:redhat00001:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Log4j",
+            "originator": "Organization: org.apache.logging.log4j",
+            "supplier": "Organization: org.apache.logging.log4j",
+            "versionInfo": "2.17.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---ece6ff39-e46e-4344-a400-4d52245746c8",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "cb61df61-ca9c-406c-8bcd-88a72fe1481e",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "daec74e7-6070-42aa-bf7f-eb3c7f228249",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ece6ff39-e46e-4344-a400-4d52245746c8",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.hadoop/hadoop-annotations@3.4.0",
+                    "referenceType": "purl"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Hadoop Annotations",
+            "originator": "Organization: org.apache.hadoop",
+            "supplier": "Organization: org.apache.hadoop",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---f3a0b942-bf89-449e-9871-552288dec794",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:xerces\\:xercesImpl:2.12.2:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:xerces2_java:2.12.2:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f3a0b942-bf89-449e-9871-552288dec794",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f207d817-fee2-4074-a8df-dbdde941632c",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/xerces/xercesImpl@2.12.2",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "59588d61-fda8-4bb9-a0b7-2e6efbf647ce",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Xerces2 J",
+            "originator": "Organization: xerces",
+            "supplier": "Organization: xerces",
+            "versionInfo": "2.12.2"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---f3cac925-5d70-459a-a24c-1bb7cfcd6e78",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f3cac925-5d70-459a-a24c-1bb7cfcd6e78",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ca782761-ef54-4eb6-b7f0-b9fbb15a0698",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.slf4j/slf4j-api@1.7.32",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "5dc3ad0a-dc8f-4cd5-8486-6982a294d61a",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "MIT",
+            "licenseDeclared": "MIT",
+            "name": "SLF4J API Module",
+            "originator": "Organization: org.slf4j",
+            "supplier": "Organization: org.slf4j",
+            "versionInfo": "1.7.32"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---f88dda72-75a2-4ec5-844b-8517dd43310c",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f88dda72-75a2-4ec5-844b-8517dd43310c",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "bfeb40ba-2a92-42bd-954d-518bd9bbb0ef",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "5e68f3f0-04d3-4b7f-8d3d-05b6914ff582",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Hadoop Common",
+            "originator": "Organization: maven",
+            "supplier": "Organization: maven",
+            "versionInfo": "3.4.0"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---f89ce4a2-4c52-4dd6-823a-e2896ad849d5",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "f89ce4a2-4c52-4dd6-823a-e2896ad849d5",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "d5b90213-52f8-4429-b3c7-ed582af929d2",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.17.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ab7a1a2c-03d6-43c9-a94c-a959f86b49b7",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "jackson-annotations",
+            "originator": "Organization: com.fasterxml.jackson.core",
+            "supplier": "Organization: com.fasterxml.jackson.core",
+            "versionInfo": "2.17.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---ffe00ba1-0ed3-4f8e-9834-128ba65e2666",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/org.apache.logging.log4j/log4j-jcl@2.17.1",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "0eefbcb1-a61d-4a1a-9660-6a607593abaf",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:org_apache_logging_log4j:log4j_jcl:2.17.1:redhat00002:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:org_apache_logging_log4j:log4j_jcl:2.17.1:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "ffe00ba1-0ed3-4f8e-9834-128ba65e2666",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "49903db1-49a3-4670-b893-4a3502a0ab5f",
+                    "referenceType": "BlackDuck-Component"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Log4J Commons Logging Bridge",
+            "originator": "Organization: org.apache.logging.log4j",
+            "supplier": "Organization: org.apache.logging.log4j",
+            "versionInfo": "2.17.1"
+        },
+        {
+            "SPDXID": "SPDXRef-package-abc6227e-8220-40d6-a0fd-1a7d6b5e4f07---fa88fda6-ca2a-435f-8e62-ce2aa54a90ce",
+            "downloadLocation": "NOASSERTION",
+            "externalRefs": [
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_collections:3.2.2:redhat1:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_collections:3.2.2:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "fa88fda6-ca2a-435f-8e62-ce2aa54a90ce",
+                    "referenceType": "BlackDuck-ComponentVersion"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "87ac8642-f639-46fe-ab2b-66e89cca0130",
+                    "referenceType": "BlackDuck-Component"
+                },
+                {
+                    "referenceCategory": "PACKAGE-MANAGER",
+                    "referenceLocator": "pkg:maven/commons-collections/commons-collections@3.2.2",
+                    "referenceType": "purl"
+                },
+                {
+                    "referenceCategory": "OTHER",
+                    "referenceLocator": "015678e0-2eda-42da-a773-2f1bf099a59e",
+                    "referenceType": "BlackDuck-ComponentOrigin"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:commons-collections\\:commons-collections:3.2.2:redhat1:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:maven_package:commons-collections\\:commons-collections:3.2.2:*:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                },
+                {
+                    "referenceCategory": "SECURITY",
+                    "referenceLocator": "cpe:2.3:a:apache:commons_collections:3.2.2:redhat2:*:*:*:*:*:*",
+                    "referenceType": "cpe23Type"
+                }
+            ],
+            "filesAnalyzed": false,
+            "licenseConcluded": "Apache-2.0",
+            "licenseDeclared": "Apache-2.0",
+            "name": "Apache Commons Collections",
+            "originator": "Organization: commons-collections",
+            "supplier": "Organization: commons-collections",
+            "versionInfo": "3.2.2"
+        }
+    ],
+    "relationships": [
+        {
+            "spdxElementId": "SPDXRef-DOCUMENT",
+            "relationshipType": "DESCRIBES",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---050e1887-519f-4634-845a-97ca7169b3b7"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---08ca7332-776a-4c83-a48e-78cce48c872b"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---0f058d2d-fc36-4262-8cf6-93d959630273"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---1028eb41-0eaf-4769-85ee-4ca09704b0af"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---10a4c829-0445-4e59-be71-dd9f616c37a5"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---13684460-9b63-445d-9e4e-c028a05522b0"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---15b63df3-ea25-4a53-8feb-e239002bd278"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---17731e09-b663-4f27-abb5-468bb8876b5d"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---17b666a3-7685-458d-91b0-d23cbbdb5696"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---19ce70d0-d6c4-4080-ad6b-f276e93b834d"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---20585559-fe5a-4783-901b-a8fd51100427"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---22a228fd-8cb9-401f-8fe1-003809493340"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---238aea49-3ffa-4e4d-b97b-eadc235b7669"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---2aedbf84-11fc-4c95-81f0-7a4cca9c9a1f"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "CONTAINS",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---2b15ab84-da43-4a36-b427-75122febf33f"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---2fcf1560-08b0-4379-b9f8-af8dce4f7100"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---3828c32d-5097-4c22-86a8-7838c149ba8d"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "CONTAINS",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---3f719465-8745-4428-becd-eafa37102d02"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---421c7f2e-5c9f-468f-b67d-7fd4ca308f4e"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---437bdab7-ecee-49eb-81f5-26f65e3bd306"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---4920b44d-d9ff-43e2-887b-e427e9dcf1cc"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---4f1ea26b-c50f-401b-ade0-0d41e9d6917b"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---5062ec07-d6d1-444a-b3da-8f6a2665c440"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---52a366c5-1348-4beb-8bbd-8b8fe16e4cc7"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---569fd9c0-89bf-4f5f-9ef6-0492c1d9454a"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "CONTAINS",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---68460abc-6d6d-4d2c-b3c9-e2668462f06c"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---69624cfa-4d47-4dd6-bff3-deb5869d8145"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---720af18a-70d8-436a-9568-2eb46f8c2095"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---736b6816-9916-4554-ba1c-edecfa2b8906"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---744e2e66-0d7a-4054-ac19-a85bfa1e07a3"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---7488dc3f-e736-4da4-953a-2fd01b2637d0"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---7e51b795-43b9-4eaa-9d52-2fd322dddb31"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---7f6ef99f-3381-491a-9b29-9cbd9349fc06"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---80d83ae1-621d-4416-9070-26f2442083c0"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---87b54cc4-f37f-42fd-abf2-985872b8fdee"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---89275cdd-f16c-4065-a826-267b508508ba"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---92e6a657-e1b5-46de-9997-80de83e5ca2c"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---9563bf8f-5213-49d7-9971-8652632ca51d"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---96580f7b-3e84-4e5d-b434-93337de9177f"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---989cb45f-f4f2-48d4-b64c-a685c693da4e"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---a08e0f38-238c-4796-9ed3-c2f5edf02f4a"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---abc6227e-8220-40d6-a0fd-1a7d6b5e4f07"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---b3fe7578-e29c-4759-881f-005ad0980537"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---c9713671-f952-4fcb-b71b-5ec8f560ac18"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---c9ad64ea-ffdf-45bb-95f2-1be198b16f46"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---d4491227-d05c-4119-bd8b-1221fc2dee16"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---d4d44346-303a-45fa-a2d7-1e39037d4558"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---df9b9f71-75a3-49ba-9026-59777cfbacd9"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e1bb79cc-bb3c-42ce-93e4-ad0fabe1a670"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e2990b74-2f54-4dc0-a5a8-087d906ac7d5"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e3ffd95e-2263-4196-8f7d-564109a44620"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e5489238-0624-4721-a6e2-5de929a35df9"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---e54c973f-4850-4e05-967b-524c016dfbbf"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "CONTAINS",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---ece6ff39-e46e-4344-a400-4d52245746c8"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---f3a0b942-bf89-449e-9871-552288dec794"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---f3cac925-5d70-459a-a24c-1bb7cfcd6e78"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---f88dda72-75a2-4ec5-844b-8517dd43310c"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---f89ce4a2-4c52-4dd6-823a-e2896ad849d5"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---ffe00ba1-0ed3-4f8e-9834-128ba65e2666"
+        },
+        {
+            "spdxElementId": "SPDXRef-package-7e497887-1188-45df-a64e-926c44bed901---abc6227e-8220-40d6-a0fd-1a7d6b5e4f07",
+            "relationshipType": "DYNAMIC_LINK",
+            "relatedSpdxElement": "SPDXRef-package-abc6227e-8220-40d6-a0fd-1a7d6b5e4f07---fa88fda6-ca2a-435f-8e62-ce2aa54a90ce"
+        }
+    ]
+}

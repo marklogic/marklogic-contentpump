@@ -29,6 +29,10 @@
         <outputDirectory>${file.separator}</outputDirectory>
       </file>
       <file>
+        <source>SBOM.spdx.json</source>
+        <outputDirectory>${file.separator}</outputDirectory>
+      </file>
+      <file>
         <source>pom.xml</source>
         <outputDirectory>${file.separator}</outputDirectory>
       </file>
