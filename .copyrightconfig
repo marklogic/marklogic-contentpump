@@ -11,4 +11,4 @@ startyear: 2011
 #   - Dotfiles already skipped automatically
 # Enable by removing the leading '# ' from the next line and editing values.
 # filesexcluded: third_party/*, docs/generated/*.md, assets/*.png, scripts/temp_*.py, vendor/lib.js
-filesexcluded: .github/*, README.md
+filesexcluded: .github/*, README.md, SBOM.spdx.json

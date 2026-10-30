@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (c) 2011-2026 Progress Software Corporation and/or its subsidiaries or affiliates. All Rights Reserved. -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.marklogic</groupId>
@@ -179,6 +180,18 @@
                     <exclude name="*apidocs.zip" />
                   </fileset>
                 </copy>
+                <copy file="SBOM.spdx.json"
+                      tofile="deliverable/mlcp-${project.version}.spdx.json"
+                      overwrite="true" />
+                <copy file="NOTICE.txt"
+                      tofile="deliverable/Legal_Notice_File_for_Progress_MarkLogic_Content_Pump_${project.version}.txt"
+                      overwrite="true" />
+                <chmod perm="644">
+                  <fileset dir="deliverable">
+                    <include name="mlcp-${project.version}.spdx.json" />
+                    <include name="Legal_Notice_File_for_Progress_MarkLogic_Content_Pump_${project.version}.txt" />
+                  </fileset>
+                </chmod>
               </target>
             </configuration>
             <goals>
